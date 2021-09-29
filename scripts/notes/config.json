@@ -1,0 +1,16 @@
+{
+  "repos": [
+    {
+      "name": "duos-ui",
+      "tag_pattern": "production_"
+    },
+    {
+      "name": "consent",
+      "tag_pattern": "refs/tags/RC_"
+    },
+    {
+      "name": "consent-ontology",
+      "tag_pattern": "refs/tags/RC_"
+    }
+  ]
+}

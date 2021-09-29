@@ -1,24 +1,20 @@
 use std::path::Path;
 use std::string::String;
+use std::fs;
+
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
 
 mod git;
 mod jira;
 
-// TODOs:
-// 1. Do this as via configuration options
-// 2. Add docs everywhere
-
 fn main() {
-    checkout_and_log_repo("duos-ui".to_string(), Some("production_".to_string()), None, None);
-    checkout_and_log_repo("consent".to_string(), None, None, None);
-    checkout_and_log_repo("consent-ontology".to_string(), None, None, None);
+    let config: Result<Config> = parse_config();
+    for repo in config.unwrap().repos {
+        checkout_and_log_repo(repo.name, repo.tag_pattern.clone(), repo.from_commit.clone(), repo.to_commit.clone());
+    }
 }
 
-// For each repo ...
-// 1. check out
-// 2. get array of RC/pattern tags (default is "refs/tags/RC_")
-// 3. generate formatted messages from_commit (default is previous release tag) -> to_commit (default HEAD)
-// 4. delete checked out repo
 fn checkout_and_log_repo(directory: String, tag_pattern: Option<String>, from_commit: Option<String>, to_commit: Option<String>) {
     let exists: bool = Path::new(directory.clone().as_str()).is_dir();
     if !exists {
@@ -31,4 +27,23 @@ fn checkout_and_log_repo(directory: String, tag_pattern: Option<String>, from_co
     let linked_messages: Vec<String> = jira::update_with_jira_link(messages);
     print!("\n\n{}\n", directory.clone());
     for s in linked_messages { println!("{}", s); }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Config {
+    repos: Vec<Repo>
+}
+
+#[derive(Serialize, Deserialize)]
+struct Repo {
+    name: String,
+    tag_pattern: Option<String>,
+    from_commit: Option<String>,
+    to_commit: Option<String>,
+}
+
+fn parse_config() -> Result<Config> {
+    let data: String = fs::read_to_string("./config.json").unwrap();
+    let c: Config = serde_json::from_str(data.as_str())?;
+    Ok(c)
 }
