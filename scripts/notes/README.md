@@ -1,7 +1,9 @@
 ## Release Note Generation
 
-This utility iterates over tags in the relevant repositories and generates 
-formatted commit messages for each one.
+This utility generates formatted commit messages for each
+configured github repository. By default, this assumes all
+repos exist in https://github.com/DataBiosphere and that
+all linkable jira tickets exist in https://broadworkbench.atlassian.net
 
 Requires Rust
 * https://rustup.rs/
@@ -20,4 +22,36 @@ find all commits from that tag to HEAD. This behavior can be changed
 by updating `config.json`. Add a `from_commit` and/or a `to_commit` 
 to each repo that requires customized log generation. Commits 
 specified in this way can be either tags or hashes as it relies 
-on the underlying command line `git` implementation.
+on the underlying command line `git` installation.
+
+### Configuration
+
+Configurations are defined in [config.json](config.json)
+
+* `name` is always required.
+* `tag_pattern` is optional, defaults to `refs/tags/RC_`
+* `from_commit` is optional, defaults to the most recent release tag
+* `to_commit` is optional, defaults to the short hash of `HEAD`
+
+```json
+{
+  "repos": [
+    {
+      "name": "duos-ui",
+      "tag_pattern": "production_"
+    },
+    {
+      "name": "consent",
+      "tag_pattern": "refs/tags/RC_",
+      "from_commit": "refs/tags/RC_Monolith-2021-09-27",
+      "to_commit": "109abf7"
+    },
+    {
+      "name": "consent-ontology",
+      "tag_pattern": "refs/tags/RC_",
+      "from_commit": "refs/tags/RC_Virgo-2021-09-07",
+      "to_commit": "refs/tags/RC_Monolith-2021-09-27"
+    }
+  ]
+}
+```
