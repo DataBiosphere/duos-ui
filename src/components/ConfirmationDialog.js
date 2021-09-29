@@ -1,8 +1,8 @@
-import _ from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import { Component } from 'react';
 import { button, div, h, h2, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import { Alert } from '../components/Alert';
+import { Alert } from './Alert';
 import CloseIconComponent from '../components/CloseIconComponent';
 import './ConfirmationDialog.css';
 
@@ -56,7 +56,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
         isOpen: this.props.showModal,
         onAfterOpen: this.props.afterOpenModal,
         onRequestClose: this.props.onRequestClose,
-        style: _.mergeAll([customStyles, this.props.style]),
+        style: mergeAll([customStyles, this.props.style]),
         contentLabel: "Modal"
       }, [
         div({ className: "dialog-header" }, [
@@ -72,8 +72,8 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
         ]),
 
         div({ className: "dialog-footer row no-margin" }, [
-          button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.props.action.handler(false), disabled: disableNoBtn }, ["No"]),
-          button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
+          button({ "data-value": false, isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.props.action.handler(false), disabled: disableNoBtn }, ["No"]),
+          button({ "data-value": true, id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
         ])
       ])
     );
