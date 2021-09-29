@@ -96,4 +96,3 @@ pub fn checkout_repo(repo: String) {
         repo.clone().as_str(),
     ).expect(format!("failed to clone repository: {}", repo.clone()).as_str());
 }
-
