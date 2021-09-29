@@ -594,3 +594,14 @@ export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFil
   setFilteredList(filteredList);
 };
 
+export const getBooleanFromEventHtmlDataValue = (e) => {
+  if (!isNil(e)) {
+    if (!isNil(e.target)) {
+      const dataValue = e.target.getAttribute("data-value");
+      if (!isNil(dataValue)) {
+        return dataValue.toLowerCase() === 'true';
+      }
+    }
+  }
+  return false;
+};
