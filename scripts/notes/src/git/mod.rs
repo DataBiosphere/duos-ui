@@ -3,6 +3,7 @@ use std::process::{Command, Output};
 use git2::*;
 use regex::Regex;
 
+/// Get the url for the repo
 pub fn get_remote_origin_url(dir: String) -> String {
     // git -C consent config --get remote.origin.url
     let command: Output = Command::new("git")
@@ -22,6 +23,7 @@ pub fn get_remote_origin_url(dir: String) -> String {
     return origin;
 }
 
+/// Get formatted commit messages between from and to commits
 pub fn get_commit_messages(dir: String, from: String, to: String) -> Vec<String> {
     let origin_url: String = get_remote_origin_url(dir.clone());
     // git -C consent --no-pager log --reverse "--pretty={url}/commit/%h - %s (%an)" {from}..{to}
@@ -43,6 +45,7 @@ pub fn get_commit_messages(dir: String, from: String, to: String) -> Vec<String>
     return messages;
 }
 
+/// Get 8 character hash for HEAD
 pub fn get_head_commit(dir: String) -> String {
     // git -C consent rev-parse --short=8 HEAD
     let command: Output = Command::new("git")
@@ -62,6 +65,8 @@ pub fn get_head_commit(dir: String) -> String {
     return hash;
 }
 
+/// List all repo tags matching a provided pattern.
+/// Typically used to find all tags of a "Release" type.
 pub fn list_tags(dir: String, tag_pattern: String) -> Vec<String> {
     let tag_regex: Regex = Regex::new(tag_pattern.as_str()).unwrap();
     let leading: Regex = Regex::new("^'").unwrap();
@@ -90,6 +95,7 @@ pub fn list_tags(dir: String, tag_pattern: String) -> Vec<String> {
     return tags;
 }
 
+/// Clone repo into directory of the same name.
 pub fn checkout_repo(repo: String) {
     Repository::clone(
         format!("https://github.com/DataBiosphere/{}", repo.clone()).as_str(),

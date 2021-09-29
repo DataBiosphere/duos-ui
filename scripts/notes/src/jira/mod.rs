@@ -5,6 +5,8 @@ use regex::{Captures, Regex};
 const JIRA_URL: &str = "https://broadworkbench.atlassian.net/browse/";
 const REGEX_STR: &str = "(DUOS-[0-9]+)";
 
+/// For each message passed in, update the line with a link to a jira
+/// ticket if one can be found in the message text.
 pub fn update_with_jira_link(messages: Vec<String>) -> Vec<String> {
     let new_messages: Vec<String> = messages.clone().iter()
         .map(|m| update_line(m.to_string()))
@@ -12,6 +14,8 @@ pub fn update_with_jira_link(messages: Vec<String>) -> Vec<String> {
     return new_messages;
 }
 
+/// Update the line with a link to a jira ticket if one can be found in
+/// the message text.
 fn update_line(line: String) -> String {
     let ticket_regex: Regex = Regex::new(REGEX_STR).unwrap();
     return if ticket_regex.is_match(line.as_str()) {
