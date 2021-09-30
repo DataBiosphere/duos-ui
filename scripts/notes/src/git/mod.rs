@@ -102,3 +102,27 @@ pub fn checkout_repo(repo: String) {
         repo.clone().as_str(),
     ).expect(format!("failed to clone repository: {}", repo.clone()).as_str());
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::Path;
+
+    use super::*;
+
+    #[test]
+    fn test_checkout_repo_and_list_tags() {
+        let directory = "consent";
+        let exists: bool = Path::new(directory.clone()).is_dir();
+        if exists {
+            fs::remove_dir_all("consent").unwrap_or_else(|why| {
+                println!("Error: {:?}", why.kind())
+            });
+        }
+        checkout_repo(directory.to_string());
+        let exists: bool = Path::new(directory.clone()).is_dir();
+        assert!(exists);
+        let tags: Vec<String> = list_tags(directory.clone().to_string(), "RC_".to_string());
+        assert!(tags.len() > 0);
+    }
+}

@@ -57,3 +57,7 @@ Configurations are defined in [config.json](config.json)
   ]
 }
 ```
+
+### Testing
+
+Run `cargo test` to run all tests
