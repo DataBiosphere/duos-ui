@@ -4,17 +4,17 @@ use std::string::String;
 use std::sync::{Arc, Mutex};
 
 use rayon::prelude::*;
-use serde_json::Result;
 use titlecase::titlecase;
 
 use config::Config;
+use std::error::Error;
 
 mod config;
 mod git;
 mod jira;
 
 fn main() {
-    let config: Result<Config> = config::parse_config("./config.json");
+    let config: Result<Config, Box<dyn Error>> = config::parse_config("./config.json");
 
     // Store repo->commit messages in alpha order
     // See https://stackoverflow.com/questions/30559073/cannot-borrow-captured-outer-variable-in-an-fn-closure-as-mutable
