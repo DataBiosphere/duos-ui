@@ -22,6 +22,24 @@ fn main() {
     }
 }
 
+/// Generates a list of commit messages from the provided DataBiosphere repo
+///
+/// * Checks out DataBiosphere repository defined in `directory`
+/// * Optionally looks for a history of git tags matching pattern `tag_pattern`.
+///   * Unnecessary if both `from_commit` and `to_commit` are defined.
+/// * Optionally looks for a from commit in `from_commit`. If not defined,
+/// assign `from_commit` to the most recent tag in the list of tags generated from
+/// `tag_pattern`
+/// * Optionally look for a to commit in `to_commit`. If not defined, assign
+/// the hash of `HEAD` to `to_commit`
+///
+/// # Examples
+///
+/// Basic usage:
+///
+/// ```
+/// let messages = checkout_and_generate_log_messages("consent", "RC_", None, None);
+/// ```
 fn checkout_and_generate_log_messages(directory: String, tag_pattern: Option<String>, from_commit: Option<String>, to_commit: Option<String>) -> Vec<String> {
     let exists: bool = Path::new(directory.clone().as_str()).is_dir();
     if !exists {
