@@ -2,6 +2,7 @@
   "repos": [
     {
       "name": "duos-ui",
+      "title": "DUOS",
       "tag_pattern": "production_"
     },
     {

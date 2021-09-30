@@ -30,6 +30,7 @@ Configurations are defined in [config.json](config.json)
 
 * `name` is always required.
   * Name refers to the github repository name
+* `title` is optional, defaults to title-cased `name` 
 * `tag_pattern` is optional, defaults to `refs/tags/RC_`. 
   * Tag pattern is used to determine which tags are release tags. With an ordered array of these, we can navigate back to any release we might need to.
 * `from_commit` is optional, defaults to the most recent release tag.
@@ -40,6 +41,7 @@ Configurations are defined in [config.json](config.json)
   "repos": [
     {
       "name": "duos-ui",
+      "title": "DUOS",
       "tag_pattern": "production_"
     },
     {

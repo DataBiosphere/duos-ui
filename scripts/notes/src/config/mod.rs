@@ -11,6 +11,7 @@ pub struct Config {
 #[derive(Serialize, Deserialize)]
 pub struct Repo {
     pub name: String,
+    pub title: Option<String>,
     pub tag_pattern: Option<String>,
     pub from_commit: Option<String>,
     pub to_commit: Option<String>,

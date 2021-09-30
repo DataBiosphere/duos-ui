@@ -13,8 +13,9 @@ fn main() {
     let config: Result<Config> = config::parse_config("./config.json");
     // TODO: Parallelize
     for repo in config.unwrap().repos {
-        let header: Vec<String> = vec![format!("\n\n{}:", titlecase(repo.name.clone().as_str()))];
-        let messages: Vec<String> = checkout_and_generate_log_messages(repo.name, repo.tag_pattern.clone(), repo.from_commit.clone(), repo.to_commit.clone());
+        let title: String = repo.title.clone().unwrap_or(titlecase(repo.name.clone().as_str()));
+        let header: Vec<String> = vec![format!("\n\n{}:", title)];
+        let messages: Vec<String> = checkout_and_generate_log_messages(repo.name.clone(), repo.tag_pattern.clone(), repo.from_commit.clone(), repo.to_commit.clone());
         for m in [header, messages].concat() {
             println!("{}", m);
         }
