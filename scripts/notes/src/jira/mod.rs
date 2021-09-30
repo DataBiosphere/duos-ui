@@ -26,3 +26,26 @@ fn update_line(line: String) -> String {
         line
     };
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::jira::JIRA_URL;
+    use crate::jira::update_line;
+
+    #[test]
+    fn test_update_line_with_match() {
+        let pattern = "DUOS-12345678910";
+        let line = format!("random {}", pattern);
+        let updated_line = update_line(line.to_string());
+        assert!(updated_line.contains(JIRA_URL));
+        assert!(updated_line.contains(pattern));
+        assert!(updated_line.contains(&[JIRA_URL, pattern].join("")));
+    }
+
+    #[test]
+    fn test_update_line_without_match() {
+        let line = "random string";
+        let updated_line = update_line(line.to_string());
+        assert!(!updated_line.contains(JIRA_URL));
+    }
+}
