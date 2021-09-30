@@ -1,10 +1,13 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::string::String;
-use rayon::prelude::*;
+use std::sync::{Arc, Mutex};
 
-use config::Config;
+use rayon::prelude::*;
 use serde_json::Result;
 use titlecase::titlecase;
+
+use config::Config;
 
 mod config;
 mod git;
@@ -12,13 +15,20 @@ mod jira;
 
 fn main() {
     let config: Result<Config> = config::parse_config("./config.json");
-    config.unwrap().repos.into_par_iter().for_each(|repo| {
+
+    // Store repo->commit messages in alpha order
+    // See https://stackoverflow.com/questions/30559073/cannot-borrow-captured-outer-variable-in-an-fn-closure-as-mutable
+    // for why we need to wrap the map in Arc<Mutex<>>. ~TLDR, we need to synchronize on the map
+    let message_map: Arc<Mutex<BTreeMap<String, Vec<String>>>> = Arc::new(Mutex::new(BTreeMap::new()));
+    config.unwrap().repos.par_iter().for_each(|repo| {
         let title: String = repo.title.clone().unwrap_or(titlecase(repo.name.clone().as_str()));
         let header: Vec<String> = vec![format!("\n\n{}:", title)];
         let messages: Vec<String> = checkout_and_generate_log_messages(repo.name.clone(), repo.tag_pattern.clone(), repo.from_commit.clone(), repo.to_commit.clone());
-        for m in [header, messages].concat() {
-            println!("{}", m);
-        }
+        message_map.lock().unwrap().insert(title.clone(), [header, messages].concat());
+    });
+
+    message_map.lock().unwrap().iter().for_each(|entries| {
+        entries.1.iter().for_each(|m| println!("{}", m));
     });
 }
 
