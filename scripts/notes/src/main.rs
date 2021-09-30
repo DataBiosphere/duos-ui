@@ -1,16 +1,16 @@
-use std::fs;
 use std::path::Path;
 use std::string::String;
 
-use serde::{Deserialize, Serialize};
+use config::Config;
 use serde_json::Result;
 use titlecase::titlecase;
 
+mod config;
 mod git;
 mod jira;
 
 fn main() {
-    let config: Result<Config> = parse_config();
+    let config: Result<Config> = config::parse_config("./config.json");
     // TODO: Parallelize
     for repo in config.unwrap().repos {
         let header: Vec<String> = vec![format!("\n\n{}:", titlecase(repo.name.clone().as_str()))];
@@ -31,23 +31,4 @@ fn checkout_and_generate_log_messages(directory: String, tag_pattern: Option<Str
     let to: String = to_commit.unwrap_or(git::get_head_commit(directory.clone()));
     let messages: Vec<String> = git::get_commit_messages(directory.clone(), from, to);
     return jira::update_with_jira_link(messages);
-}
-
-#[derive(Serialize, Deserialize)]
-struct Config {
-    repos: Vec<Repo>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Repo {
-    name: String,
-    tag_pattern: Option<String>,
-    from_commit: Option<String>,
-    to_commit: Option<String>,
-}
-
-fn parse_config() -> Result<Config> {
-    let data: String = fs::read_to_string("./config.json").unwrap();
-    let c: Config = serde_json::from_str(data.as_str())?;
-    Ok(c)
 }
