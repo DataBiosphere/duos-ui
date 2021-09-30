@@ -107,22 +107,59 @@ pub fn checkout_repo(repo: String) {
 mod tests {
     use std::fs;
     use std::path::Path;
+    use std::sync::Once;
 
     use super::*;
 
+    static INIT: Once = Once::new();
+    static DIR: &str = "consent";
+
+    pub fn initialize() {
+        INIT.call_once(|| {
+            println!("Initializing...");
+            let exists: bool = Path::new(DIR.clone()).is_dir();
+            if exists {
+                println!("Removing existing repo ... ");
+                fs::remove_dir_all(DIR).unwrap_or_else(|why| {
+                    println!("Error: {:?}", why.kind())
+                });
+            }
+            checkout_repo(DIR.to_string());
+            println!("Done.");
+        });
+    }
+
     #[test]
-    fn test_checkout_repo_and_list_tags() {
-        let directory = "consent";
-        let exists: bool = Path::new(directory.clone()).is_dir();
-        if exists {
-            fs::remove_dir_all("consent").unwrap_or_else(|why| {
-                println!("Error: {:?}", why.kind())
-            });
-        }
-        checkout_repo(directory.to_string());
-        let exists: bool = Path::new(directory.clone()).is_dir();
+    fn test_list_tags() {
+        initialize();
+        let exists: bool = Path::new(DIR.clone()).is_dir();
         assert!(exists);
-        let tags: Vec<String> = list_tags(directory.clone().to_string(), "RC_".to_string());
+        let tags: Vec<String> = list_tags(DIR.clone().to_string(), "RC_".to_string());
         assert!(tags.len() > 0);
+    }
+
+    #[test]
+    fn test_get_head_commit() {
+        initialize();
+        let head = get_head_commit(DIR.to_string());
+        assert!(head.len() > 0);
+    }
+
+    #[test]
+    fn test_get_remote_origin_url() {
+        initialize();
+        let url = get_remote_origin_url(DIR.to_string());
+        assert!(url.len() > 0);
+    }
+
+    #[test]
+    fn test_get_commit_messages() {
+        initialize();
+        let tags: Vec<String> = list_tags(DIR.clone().to_string(), "RC_".to_string());
+        let messages = get_commit_messages(
+            DIR.to_string(),
+            tags.clone().get(tags.len() - 1).unwrap().clone(),
+            get_head_commit(DIR.to_string()));
+        assert!(messages.len() > 0);
     }
 }
