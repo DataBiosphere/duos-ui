@@ -29,7 +29,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState(prev => {
       prev.notificationData = notificationData;
       prev.currentUser = Storage.getCurrentUser();
-      prev.isResearcher = Storage.getCurrentUser().isResearcher;
       return prev;
     });
   }
@@ -467,8 +466,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const countryNames = this.generateCountryNames();
     const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
-    const { showValidationMessages } = this.state;
+    const { currentUser, institutionId, showValidationMessages } = this.state;
     const libraryCards = get(this.state.currentUser, 'libraryCards', []);
+    let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
 
     return (
 
@@ -480,7 +480,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               id: 'researcherProfile',
               color: 'common',
               title: 'Your Profile',
-              description: this.state.isResearcher ? 'Please complete the following information to be able to request access to dataset(s)' : ''
+              description: 'Please complete the following information to be able to request access to dataset(s)'
             }),
             hr({ className: 'section-separator' })
           ]),
@@ -627,7 +627,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     'Institution Name* ',
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                      "data-tip": "If your preferred institution cannot be found, please submit a ticket to have it added.",
+                      "data-tip": (isSigningOfficial && !isNil(institutionId)) ?
+                        "As a 'Signing Official', your institution cannot be changed here. Please submit a ticket to have it changed." :
+                        "If your preferred institution cannot be found, please submit a ticket to have it added.",
                       'data-for': 'tip_profileState',
                     })
                   ]),
