@@ -39,7 +39,7 @@ export default function BackgroundSignIn(props) {
       Storage.setGoogleData({ accessToken: accessToken });
       getUser().then(
         user => {
-          user = Object.assign(user, setUserRoleStatuses(user));
+          user = Object.assign(user, setUserRoleStatuses(user, Storage));
           setIsLogged();
           setLoading(false);
           redirect(user);
@@ -56,7 +56,7 @@ export default function BackgroundSignIn(props) {
               // If the user exists, just log them in.
               getUser().then(
                 user => {
-                  user = Object.assign(user, setUserRoleStatuses(user));
+                  user = Object.assign(user, setUserRoleStatuses(user, Storage));
                   setIsLogged();
                   redirect(user);
                   setLoading(false);
