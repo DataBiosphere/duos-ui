@@ -1,7 +1,7 @@
 import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { div, form, input, label, textarea, br, h } from 'react-hyperscript-helpers';
-import { Navigation, USER_ROLES } from '../libs/utils';
+import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { SpinnerComponent } from '../components/SpinnerComponent';
@@ -28,18 +28,6 @@ export default function BackgroundSignIn(props) {
       Navigation.back(user, history);
       if (onSignIn)
         onSignIn();
-    };
-
-    const setUserRoleStatuses = (user) => {
-      const currentUserRoles = user.roles.map(roles => roles.name);
-      user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-      user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-      user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-      user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-      user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
-      user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-      Storage.setCurrentUser(user);
-      return user;
     };
 
     const setIsLogged = () => {
