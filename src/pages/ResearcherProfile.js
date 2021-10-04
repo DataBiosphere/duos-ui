@@ -2,20 +2,7 @@ import {Component} from 'react';
 import {getNames} from 'country-list';
 import {cloneDeep, find, get, isEmpty, isNil, omit, omitBy, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
-import {
-  button,
-  div,
-  form,
-  h,
-  hh,
-  hr,
-  input,
-  label,
-  option,
-  select,
-  span,
-  textarea,
-} from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import {eRACommons} from '../components/eRACommons';
@@ -26,11 +13,7 @@ import {SearchSelect} from '../components/SearchSelect';
 import {Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {
-  getPropertyValuesFromUser,
-  setUserRoleStatuses,
-  USER_ROLES,
-} from '../libs/utils';
+import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
