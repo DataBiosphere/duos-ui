@@ -690,8 +690,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
                       "data-tip": (isSigningOfficial && !isNil(institutionId)) ?
-                        "As a 'Signing Official', your institution cannot be changed here. Please submit a ticket to have it changed." :
-                        "If your preferred institution cannot be found, please submit a ticket to have it added.",
+                        "As a 'Signing Official', your institution cannot be changed here. Please submit a support request via the 'Contact Us' form to have it changed." :
+                        "If your preferred institution cannot be found, please submit a support request via the 'Contact Us' form to have it added.",
                       'data-for': 'tip_profileState',
                     })
                   ]),
