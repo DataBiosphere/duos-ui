@@ -183,6 +183,7 @@ export const DAR = {
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
 
+    //NOTE: rewrite this, the dar should have the details needed on it (or the response) itself
     let darInfo = Models.dar;
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;
