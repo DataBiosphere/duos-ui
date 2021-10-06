@@ -1568,7 +1568,7 @@ input:-webkit-autofill {
 
 .table-scroll-admin {
   overflow-x: scroll;
-  margin: 0 25px 5px 140px !important;
+  margin: 0 25px 5px 60px !important;
   overflow-y: visible;
 }
 
@@ -1603,17 +1603,6 @@ input:-webkit-autofill {
 td:first-child {
   position: absolute;
   margin-left: -40px;
-}
-
-.table-scroll-admin td:first-child {
-  position: absolute;
-  left: 60px !important;
-}
-
-.table-scroll-admin td:first-child+.fixed-col {
-  position: absolute;
-  padding: 8px 8px 8px 10px !important;
-  left: 50px !important;
 }
 
 td:first-child .checkbox {
