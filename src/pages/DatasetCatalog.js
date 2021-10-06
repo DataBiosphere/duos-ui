@@ -444,11 +444,9 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
+                              isRendered: currentUser.isAdmin,
                               id: trIndex + '_btnConnect', name: 'btn_connect',
                               onClick: () => openConnectDataset(dataset),
-                              // Only admins should be able to link datasets at this point.
-                              // Future functionality will remove the need for this altogether.
-                              disabled: !currentUser.isAdmin
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
