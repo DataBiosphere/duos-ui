@@ -1,19 +1,19 @@
-import { Component } from 'react';
-import { getNames } from "country-list";
-import { omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
-import ReactTooltip from "react-tooltip";
-import { button, div, form, h, hh, hr, input, label, option, select, span, textarea } from 'react-hyperscript-helpers';
-import { LibraryCards } from '../components/LibraryCards';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { eRACommons } from '../components/eRACommons';
-import { PageHeading } from '../components/PageHeading';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Notification } from '../components/Notification';
-import { SearchSelect } from '../components/SearchSelect';
-import { Researcher, User, Institution } from '../libs/ajax';
-import { NotificationService } from '../libs/notificationService';
-import { Storage } from '../libs/storage';
-import { USER_ROLES, getPropertyValuesFromUser, setUserRoleStatuses } from '../libs/utils';
+import {Component} from 'react';
+import {getNames} from 'country-list';
+import {cloneDeep, find, get, isEmpty, isNil, omit, omitBy, trim} from 'lodash';
+import ReactTooltip from 'react-tooltip';
+import {button, div, form, h, hh, hr, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
+import {LibraryCards} from '../components/LibraryCards';
+import {ConfirmationDialog} from '../components/ConfirmationDialog';
+import {eRACommons} from '../components/eRACommons';
+import {PageHeading} from '../components/PageHeading';
+import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
+import {Notification} from '../components/Notification';
+import {SearchSelect} from '../components/SearchSelect';
+import {Institution, Researcher, User} from '../libs/ajax';
+import {NotificationService} from '../libs/notificationService';
+import {Storage} from '../libs/storage';
+import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -29,7 +29,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState(prev => {
       prev.notificationData = notificationData;
       prev.currentUser = Storage.getCurrentUser();
-      prev.isResearcher = Storage.getCurrentUser().isResearcher;
       return prev;
     });
   }
@@ -463,12 +462,75 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return stateNames;
   };
 
+  generateInstitutionSelectionDisplay = () => {
+    // If the user is not an SO, or does not have an existing institution,
+    // allow the user to select an institution from the available list.
+    // If the user is an SO and has an assigned institution, prevent the
+    // selection of a new institution as that will result in an error.
+    const { currentUser, institutionId, institutionList } = this.state;
+    let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
+
+    if (isNil(institutionId) || !isSigningOfficial) {
+      const { invalidFields, showValidationMessages, validateFields } = this.state;
+      return div({},
+        [
+          h(SearchSelect, {
+            id: 'Institution',
+            label: 'institution',
+            onSelection: (selection) => {
+              this.setState(prev => {
+                prev.institutionId = selection;
+                return prev;
+              }, () => {
+                if (validateFields) {
+                  this.validateUserFields();
+                }
+              });
+            },
+            options: institutionList.map(institution => {
+              return {
+                key: institution.id,
+                displayText: institution.name,
+              };
+            }),
+            placeholder: 'Please Select an Institution',
+            searchPlaceholder: 'Search for Institution...',
+            value: this.state.institutionId,
+            className: (invalidFields.institution && showValidationMessages) ?
+              'form-control required-field-error' :
+              'form-control',
+            required: true,
+          }),
+          span({
+            className: 'cancel-color required-field-error-span',
+            isRendered: invalidFields.institution && showValidationMessages,
+          }, ['Institution Name is required']),
+        ]);
+    } else {
+      let institution = find(institutionList,{id: institutionId});
+      return div({
+        className: 'col-xs-12',
+        style: {padding: 0},
+      }, [
+        input({
+          id: 'profileInstitution',
+          name: 'institution',
+          type: 'text',
+          disabled: true,
+          className: 'form-control',
+          value: (isNil(institution) ? '' : institution.name),
+        }),
+      ]);
+    }
+  };
+
   render() {
     const countryNames = this.generateCountryNames();
     const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
-    const { showValidationMessages } = this.state;
+    const { currentUser, institutionId, showValidationMessages } = this.state;
     const libraryCards = get(this.state.currentUser, 'libraryCards', []);
+    let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
 
     return (
 
@@ -480,7 +542,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               id: 'researcherProfile',
               color: 'common',
               title: 'Your Profile',
-              description: this.state.isResearcher ? 'Please complete the following information to be able to request access to dataset(s)' : ''
+              description: 'Please complete the following information to be able to request access to dataset(s)'
             }),
             hr({ className: 'section-separator' })
           ]),
@@ -627,41 +689,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     'Institution Name* ',
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                      "data-tip": "If your preferred institution cannot be found, please submit a ticket to have it added.",
+                      "data-tip": (isSigningOfficial && !isNil(institutionId)) ?
+                        "As a 'Signing Official', your institution cannot be changed here. Please submit a support request via the 'Contact Us' form to have it changed." :
+                        "If your preferred institution cannot be found, please submit a support request via the 'Contact Us' form to have it added.",
                       'data-for': 'tip_profileState',
                     })
                   ]),
-                  h(SearchSelect, {
-                    id: 'Institution',
-                    label: 'institution',
-                    onSelection: (selection) => {
-                      this.setState(prev => {
-                        prev.institutionId = selection;
-                        return prev;
-                      }, () => {
-                        if (this.state.validateFields) {
-                          this.validateUserFields();
-                        }
-                      });
-                    },
-                    options: this.state.institutionList.map(institution => {
-                      return {
-                        key: institution.id,
-                        displayText: institution.name
-                      };
-                    }),
-                    placeholder: 'Please Select an Institution',
-                    searchPlaceholder: 'Search for Institution...',
-                    value: this.state.institutionId,
-                    className: (this.state.invalidFields.institution && showValidationMessages) ?
-                      'form-control required-field-error' :
-                      'form-control',
-                    required: true
-                  }),
-                  span({
-                    className: 'cancel-color required-field-error-span',
-                    isRendered: this.state.invalidFields.institution && showValidationMessages
-                  }, ['Institution Name is required'])
+                  this.generateInstitutionSelectionDisplay()
                 ]),
 
                 div({ className: 'col-xs-12 no-padding' }, [
