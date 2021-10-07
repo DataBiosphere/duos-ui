@@ -333,7 +333,7 @@ export default function DatasetCatalog(props) {
             ]),
             button({
               id: 'btn_addDataset',
-              isRendered: currentUser.isAdmin,
+              isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
               className: 'f-right btn-primary dataset-background search-wrapper',
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
