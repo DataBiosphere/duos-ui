@@ -12,7 +12,7 @@ import {DAC, DAR, DataSet, Files} from '../libs/ajax';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
-import {getBooleanFromEventHtmlDataValue} from '../libs/utils';
+import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -308,7 +308,7 @@ export default function DatasetCatalog(props) {
     // Chairpersons can only edit datasets they have direct access to via their DACs
     if (currentUser.isChairPerson) {
       return flow(
-        filter({name: `Chairperson`}),
+        filter({name: USER_ROLES.chairperson}),
         map('dacId'),
         includes(dataset.dacId)
       )(currentUser.roles);
