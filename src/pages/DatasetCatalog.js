@@ -1,4 +1,4 @@
-import {filter, find, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
+import {filter, find, flow, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -307,7 +307,11 @@ export default function DatasetCatalog(props) {
     }
     // Chairpersons can only edit datasets they have direct access to via their DACs
     if (currentUser.isChairPerson) {
-      return includes(dataset.dacId)(map('dacId')(filter({name: 'Chairperson'})(currentUser.roles)));
+      return flow(
+        filter({name: `Chairperson`}),
+        map('dacId'),
+        includes(dataset.dacId)
+      )(currentUser.roles);
     }
     return false;
   };
