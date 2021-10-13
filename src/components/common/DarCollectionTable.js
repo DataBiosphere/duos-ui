@@ -1,10 +1,19 @@
-import { useState, useEffect, Fragment, useRef, useCallback } from 'react';
+import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { Styles, Theme } from '../../libs/theme';
-import SearchBar from '../SearchBar';
+import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
-import { tableSearchHandler, searchOnFilteredList } from '../../libs/utils';
-import { Notifications } from '../../libs/utils';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import { tableSearchHandler, formatDate } from '../../libs/utils';
+import { Notifications, recalculateVisibleTable } from '../../libs/utils';
+import { isNil, isEmpty } from 'lodash';
+import SimpleTable from '../SimpleTable';
+
+const getProjectTitle = ((collection) => {
+  if(!isNil(collection) && !isEmpty(collection.dars) && !isEmpty(collection.dars[0].data)) {
+    return collection.dars[0].data.projectTitle;
+  }
+});
 
 const styles = {
   baseStyle: {
@@ -28,12 +37,54 @@ const styles = {
   }
 };
 
+
 const columnHeaderFormat = {
   darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.email}},
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
   status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
   actions: {labels: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
+};
+
+const columnHeaderData = () => {
+  const {darCode, name, submissionDate, status, actions} = columnHeaderFormat;
+  return [darCode, name, submissionDate, status, actions];
+};
+
+const projectTitleCellData = ({projectTitle = '- -', id, style = {}, label = 'project-title'}) => {
+  return {
+    data: projectTitle,
+    id,
+    style,
+    label
+  };
+};
+
+const darCodeCellData = ({darCode = '- -', id, style = {}, label = 'dar-code'}) => {
+  return {
+    data: darCode,
+    id,
+    style,
+    label
+  };
+};
+
+const submissionDateCellData = ({submissionDate, id, style = {}, label = 'submission-date'}) => {
+  return {
+    data: isEmpty(submissionDate) ? '- - ' : formatDate(submissionDate),
+    id,
+    style,
+    label
+  };
+};
+
+const statusCellData = ({status = '- -', id, style = {}, label = 'status'}) => {
+  return {
+    data: status,
+    id,
+    style,
+    label
+  };
 };
 
 const CancelCollectionButton = (props) => {
@@ -44,25 +95,69 @@ const CancelCollectionButton = (props) => {
     additionalStyle: {
       width: '30%',
       padding: '2%',
-      fontSize: '1.45rem'
+      fontSize: '1.45rem',
     },
-    onClick: () => props.showConfirmationModal(props.collection)
+    onClick: () => props.showConfirmationModal(props.collection),
   });
 };
 
+const actionsCellData = ({collection, showConfirmationModal}) => {
+  const { id } = collection;
+  const cancelButtonTemplate = h(CancelCollectionButton, {
+    collection,
+    showConfirmationModal
+  });
+
+  return {
+    isComponent: true,
+    id,
+    label: 'cancel-button',
+    data: div(
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'left'
+        },
+        key: `cancel-collection-cell-${id}`
+      },
+      [cancelButtonTemplate]
+    )
+  };
+};
+
+const processCollectionRowData = (collection, showConfirmationModal) => {
+  return collection.map((collection) => {
+    const {id, darCode, submissionDate, status} = collection;
+    const projectTitle = getProjectTitle(collection);
+    return [
+      darCodeCellData({id, darCode}),
+      projectTitleCellData({id, projectTitle}),
+      submissionDateCellData({id, submissionDate}),
+      statusCellData({id, status}),
+      actionsCellData({collection, showConfirmationModal})
+    ];
+  });
+};
 
 export default function DARCollectionTable(props) {
   const [collections, setCollections] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
+  const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [tableSize, setTableSize] = useState(10);
-  const [showModal, setShowModal] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState();
   // const searchRef = useRef(''); //May not need this, could just pass in the value from the parent
 
   //Ajax fetch should be passed into component due to it being a token based response or not
   const { fetchCollections, isLoading } = props;
+
+  const changeTableSize = useCallback((value) => {
+    if (value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  }, []);
 
   //Helper function, defines the term matching function
   const handleSearchChange = tableSearchHandler(
@@ -71,8 +166,6 @@ export default function DARCollectionTable(props) {
     setCurrentPage,
     'darCollections'
   );
-
-  const getCurrentList = () => {};
 
   useEffect(() => {
     const init = async () => {
@@ -90,15 +183,24 @@ export default function DARCollectionTable(props) {
   }, [fetchCollections]);
 
   useEffect(() => {
+    recalculateVisibleTable({
+      tableSize,
+      pageCount,
+      filteredList: filteredCollections,
+      currentPage,
+      setPageCount,
+      setCurrentPage,
+      setVisibleList: setVisibleCollections
+    });
+  }, [tableSize, currentPage, filteredCollections, pageCount]);
+
+  useEffect(() => {
     handleSearchChange(props.searchTerms);
   }, [handleSearchChange, props.searchTerms]);
 
-  //NOTE: create useEffect function to update table on page change, tableSize change
-  useEffect(() => {}, [tableSize, currentPage]);
-
   const showConfirmationModal = (collection) => {
     setSelectedCollection(collection);
-    setShowModal(true);
+    setShowConfirmation(true);
   };
 
   //Helper function to update page
@@ -110,21 +212,29 @@ export default function DARCollectionTable(props) {
   );
 
   return h(Fragment, {}, [
-    div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end ',
-        },
-      },
-      [
-        div({ style: Styles.LEFT_HEADER_SECTION }, [
-          //need to figure out what to do here, can't have awkward empty space
-          //NOTE: should I pass tab control from the parent (where it is defined) to be rendered here?
-        ]),
-        h(SearchBar, { handleSearchChange, searchRef }),
-      ]
-    ),
+    h(SimpleTable, {
+      isLoading,
+      rowData: processCollectionRowData(visibleCollection),
+      columnHeaders: columnHeaderData(),
+      styles,
+      tableSize,
+      paginationBar: h(PaginationBar, {
+        pageCount,
+        currentPage,
+        tableSize,
+        goToPage,
+        changeTableSize
+      })
+    }),
+    h(ConfirmationModal, {
+      showConfirmation,
+      closeConfirmation: () => setShowConfirmation(false),
+      title: 'Cancel DAR Collection',
+      message: 'Confirm DAR Collection Cancellation',
+      header: `${selectedCollection.darCode} - ${getProjectTitle(selectedCollection)}`,
+      onConfirm: () => {
+        cancelDarCollection(selectedCollection.id); //NOTE: implement this function
+      }
+    })
   ]);
 }
