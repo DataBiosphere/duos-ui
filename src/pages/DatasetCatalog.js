@@ -1,4 +1,4 @@
-import {find, getOr, isEmpty, isNil, map} from 'lodash/fp';
+import {filter, find, flow, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -12,7 +12,7 @@ import {DAC, DAR, DataSet, Files} from '../libs/ajax';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
-import {getBooleanFromEventHtmlDataValue} from '../libs/utils';
+import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -301,6 +301,21 @@ export default function DatasetCatalog(props) {
     }
   };
 
+  const isEditDatasetEnabled = (dataset) => {
+    if (currentUser.isAdmin) {
+      return true;
+    }
+    // Chairpersons can only edit datasets they have direct access to via their DACs
+    if (currentUser.isChairPerson) {
+      return flow(
+        filter({name: USER_ROLES.chairperson}),
+        map('dacId'),
+        includes(dataset.dacId)
+      )(currentUser.roles);
+    }
+    return false;
+  };
+
   return (
     h(Fragment, {}, [
       div({ className: 'container container-wide' }, [
@@ -322,7 +337,7 @@ export default function DatasetCatalog(props) {
             ]),
             button({
               id: 'btn_addDataset',
-              isRendered: currentUser.isAdmin,
+              isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
               className: 'f-right btn-primary dataset-background search-wrapper',
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
@@ -340,12 +355,12 @@ export default function DatasetCatalog(props) {
             ]),
           ]),
 
-          div({ className: currentUser.isAdmin && !currentUser.isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
+          div({ className: currentUser.isAdmin ? 'table-scroll-admin' : 'table-scroll' }, [
             table({ className: 'table' }, [
               thead({}, [
                 tr({}, [
                   th(),
-                  th({ isRendered: currentUser.isAdmin, className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
+                  th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
                   th({ className: 'cell-size' }, ['Dataset ID']),
                   th({ className: 'cell-size' }, ['Dataset Name']),
                   th({ className: 'cell-size' }, ['Data Access Committee']),
@@ -388,11 +403,11 @@ export default function DatasetCatalog(props) {
                           ])
                         ]),
 
-                        td({ isRendered: currentUser.isAdmin, style: { minWidth: '14rem' } }, [
+                        td({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), style: { minWidth: '14rem' } }, [
                           div({ className: 'dataset-actions' }, [
                             a({
                               id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataset.dataSetId),
-                              disabled: !dataset.deletable
+                              disabled: (!dataset.deletable || !isEditDatasetEnabled(dataset))
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataset.deletable ? 'default-color' : ''),
@@ -402,6 +417,7 @@ export default function DatasetCatalog(props) {
 
                             a({
                               id: trIndex + '_btnEdit', name: 'btn_edit', onClick: openEdit(dataset.dataSetId),
+                              disabled: !isEditDatasetEnabled(dataset)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-pencil caret-margin dataset-color', 'aria-hidden': 'true',
@@ -411,7 +427,8 @@ export default function DatasetCatalog(props) {
 
                             a({
                               id: trIndex + '_btnDisable', name: 'btn_disable', isRendered: dataset.active,
-                              onClick: openDisable(dataset.dataSetId)
+                              onClick: openDisable(dataset.dataSetId),
+                              disabled: !isEditDatasetEnabled(dataset)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color', 'aria-hidden': 'true',
@@ -421,7 +438,8 @@ export default function DatasetCatalog(props) {
 
                             a({
                               id: trIndex + '_btnEnable', name: 'btn_enable', isRendered: !dataset.active,
-                              onClick: openEnable(dataset.dataSetId)
+                              onClick: openEnable(dataset.dataSetId),
+                              disabled: !isEditDatasetEnabled(dataset)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color', 'aria-hidden': 'true',
@@ -430,7 +448,9 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
-                              id: trIndex + '_btnConnect', name: 'btn_connect', onClick: () => openConnectDataset(dataset)
+                              isRendered: currentUser.isAdmin,
+                              id: trIndex + '_btnConnect', name: 'btn_connect',
+                              onClick: () => openConnectDataset(dataset),
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
