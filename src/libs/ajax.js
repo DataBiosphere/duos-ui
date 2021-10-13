@@ -170,7 +170,14 @@ export const DAC = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.status;
   }
+};
 
+export const Collections = {
+  getCollectionsForResearcher: async () => {
+    const url = `${await Config.getApiUrl()}/api/collections`;
+    const res = axios.get(url, Config.authOpts);
+    return res.data;
+  }
 };
 
 export const DAR = {

@@ -33,6 +33,12 @@ export const UserProperties = {
   ZIPCODE: "zipcode"
 };
 
+export const goToPage = (value, pageCount, setCurrentPage) => {
+  if(value >= 1 && value <= pageCount) {
+    setCurrentPage(value);
+  }
+};
+
 export const findPropertyValue = (propName, researcher) => {
   const prop = isNil(researcher.researcherProperties) ?
     null
@@ -450,6 +456,17 @@ export const getSearchFilterFunctions = () => {
         }, false);
 
       return includesRoles || includesBaseAttributes;
+    })(targetList),
+    darCollections: (term, targetList) => filter(collection => {
+      const { darCode } = collection;
+      const referenceDar = collection.dars.get(0);
+      const { submission_date, data } = referenceDar;
+      const { projectTitle } = data;
+      const submitted = isNil(collection.elections) || collection.elections.length < 1;
+      const matched = find((phrase) =>
+        includes(term, toLower(phrase))
+      )([darCode, submission_date, projectTitle]);
+      return !isNil(matched) || submitted;
     })(targetList)
   };
 };
