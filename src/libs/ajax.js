@@ -177,6 +177,11 @@ export const Collections = {
     const url = `${await Config.getApiUrl()}/api/collections`;
     const res = axios.get(url, Config.authOpts);
     return res.data;
+  },
+  cancelCollection: async(id) => {
+    const url = `${await Config.getApirIrl()}/api/collections/${id}/cancel`;
+    const res = axios.put(url, Config.authOpts);
+    return res.data;
   }
 };
 

@@ -1,12 +1,12 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
+import { isNil, isEmpty, cloneDeep, every, toLower } from 'lodash/fp';
 import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import { tableSearchHandler, formatDate } from '../../libs/utils';
-import { Notifications, recalculateVisibleTable } from '../../libs/utils';
-import { isNil, isEmpty } from 'lodash';
+import { tableSearchHandler, formatDate, Notifications, recalculateVisibleTable } from '../../libs/utils';
+import { Collections } from '../../libs/ajax';
 import SimpleTable from '../SimpleTable';
 
 const getProjectTitle = ((collection) => {
@@ -125,21 +125,30 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
   };
 };
 
+
 const processCollectionRowData = (collection, showConfirmationModal) => {
   return collection.map((collection) => {
-    const {id, darCode, submissionDate, status} = collection;
+    const { id, darCode, submissionDate, dars = [], elections } = collection;
+    const isCollectionCancelled = every(
+      (dar) => toLower(dar.status) === 'canceled'
+    )(dars);
+    /*I want the election-dependent status to be explicit so that the
+    researcher knows why they can't cancel the collection*/
+    const status = !isEmpty(elections) ?
+      'Under Election' :
+      isCollectionCancelled ? 'Canceled' : 'Submitted';
     const projectTitle = getProjectTitle(collection);
     return [
-      darCodeCellData({id, darCode}),
-      projectTitleCellData({id, projectTitle}),
-      submissionDateCellData({id, submissionDate}),
-      statusCellData({id, status}),
-      actionsCellData({collection, showConfirmationModal})
+      darCodeCellData({ id, darCode }),
+      projectTitleCellData({ id, projectTitle }),
+      submissionDateCellData({ id, submissionDate }),
+      statusCellData({ id, status }),
+      actionsCellData({ collection, showConfirmationModal }),
     ];
   });
 };
 
-export default function DARCollectionTable(props) {
+export default function DarCollectionTable(props) {
   const [collections, setCollections] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
   const [visibleCollection, setVisibleCollections] = useState([]);
@@ -148,10 +157,15 @@ export default function DARCollectionTable(props) {
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState();
+  const [isLoading, setIsLoading] = useState(true);
   // const searchRef = useRef(''); //May not need this, could just pass in the value from the parent
 
-  //Ajax fetch should be passed into component due to it being a token based response or not
-  const { fetchCollections, isLoading } = props;
+  /*
+    NOTE: This component will most likely be used in muliple consoles
+    Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
+    This will be updated to account for token based requests when that feature is implemented
+  */
+  const { fetchCollections } = props;
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -183,6 +197,7 @@ export default function DARCollectionTable(props) {
   }, [fetchCollections]);
 
   useEffect(() => {
+    setIsLoading(true);
     recalculateVisibleTable({
       tableSize,
       pageCount,
@@ -192,15 +207,33 @@ export default function DARCollectionTable(props) {
       setCurrentPage,
       setVisibleList: setVisibleCollections
     });
+    setIsLoading(false);
   }, [tableSize, currentPage, filteredCollections, pageCount]);
 
   useEffect(() => {
     handleSearchChange(props.searchTerms);
-  }, [handleSearchChange, props.searchTerms]);
+  }, [handleSearchChange, props.searchTerms, collections]);
 
   const showConfirmationModal = (collection) => {
     setSelectedCollection(collection);
     setShowConfirmation(true);
+  };
+
+  const cancelCollection = async (collectionId) => {
+    try {
+      const cancelledCollection = await Collections.cancelCollection(collectionId);
+      const targetIndex = collections.findIndex((collection) => {
+        collection.id === collectionId;
+      });
+      if(targetIndex < 0) {
+        throw new Error();
+      }
+      const clonedCollections = cloneDeep(collections);
+      clonedCollections[targetIndex] = cancelledCollection;
+      setCollections(cancelledCollection);
+    } catch(error) {
+      Notifications.showError({text: 'Error: Could not find target collection'});
+    }
   };
 
   //Helper function to update page
@@ -214,7 +247,7 @@ export default function DARCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      rowData: processCollectionRowData(visibleCollection),
+      rowData: processCollectionRowData(visibleCollection, showConfirmationModal),
       columnHeaders: columnHeaderData(),
       styles,
       tableSize,
@@ -230,11 +263,9 @@ export default function DARCollectionTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Cancel DAR Collection',
-      message: 'Confirm DAR Collection Cancellation',
+      message: 'Confirm DAR Collection Cancellation', //NOTE: come up with a better message
       header: `${selectedCollection.darCode} - ${getProjectTitle(selectedCollection)}`,
-      onConfirm: () => {
-        cancelDarCollection(selectedCollection.id); //NOTE: implement this function
-      }
+      onConfirm: () => cancelCollection(selectedCollection.id) //NOTE: implement this function
     })
   ]);
 }
