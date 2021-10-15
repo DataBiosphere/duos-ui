@@ -62,7 +62,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "6.1.0",
     "eslint-plugin-react": "7.26.1",
-    "google-auth-library": "7.10.0",
+    "google-auth-library": "7.10.1",
     "html-webpack-plugin": "4.5.2",
     "react-scripts": "4.0.3",
     "start-server-and-test": "1.14.0"
