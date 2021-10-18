@@ -29,6 +29,7 @@ import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
+import NewResearcherConsole from './components/researcher_console/NewResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
@@ -72,6 +73,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/summary_votes" component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path="/new_researcher_console" component={NewResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
     <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />

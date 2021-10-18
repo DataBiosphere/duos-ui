@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq} from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every} from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -31,6 +31,18 @@ export const UserProperties = {
   SCIENTIFIC_URL: "scientificURL",
   STATE: "state",
   ZIPCODE: "zipcode"
+};
+
+export const determineCollectionStatus = (collection) => {
+  const { elections } = collection;
+  return isEmpty(elections) ?
+    'Under Election' :
+    isCollectionCanceled(collection) ? 'Canceled' : 'Submitted';
+};
+
+export const isCollectionCanceled = (collection) => {
+  const { dars } = collection;
+  return every((dar) => toLower(dar.status) === 'canceled')(dars);
 };
 
 export const goToPage = (value, pageCount, setCurrentPage) => {
@@ -459,14 +471,14 @@ export const getSearchFilterFunctions = () => {
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
       const { darCode } = collection;
-      const referenceDar = collection.dars.get(0);
-      const { submission_date, data } = referenceDar;
+      const referenceDar = collection.dars[0];
+      const { createDate, data } = referenceDar;
       const { projectTitle } = data;
-      const submitted = isNil(collection.elections) || collection.elections.length < 1;
+      const status = determineCollectionStatus(collection);
       const matched = find((phrase) =>
         includes(term, toLower(phrase))
-      )([darCode, submission_date, projectTitle]);
-      return !isNil(matched) || submitted;
+      )([darCode, formatDate(createDate), projectTitle, status]);
+      return !isNil(matched);
     })(targetList)
   };
 };

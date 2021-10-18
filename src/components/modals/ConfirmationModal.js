@@ -4,16 +4,17 @@ import Modal from "react-modal";
 import CloseIconComponent from '../CloseIconComponent';
 
 const ConfirmationModal = (props) => {
-  const {showConfirmation, closeConfirmation, title, message, header, onConfirm} = props;
+  const {showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {}} = props;
   const closeFn = () => closeConfirmation();
 
   const confirmButton = button({className: "cell-button hover-color", onClick: onConfirm}, ["Confirm"]);
+  const computedStyle = Object.assign({}, Styles.MODAL.CONFIRMATION, styleOverride);
 
   return h(Modal, {
     isOpen: showConfirmation,
     shouldCloseOnOverlayClick: true,
     style: {
-      content: Styles.MODAL.CONFIRMATION
+      content: computedStyle
     }
   }, [
     div({style: Styles.MODAL.CONFIRMATION}, [

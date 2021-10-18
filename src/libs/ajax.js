@@ -175,12 +175,12 @@ export const DAC = {
 export const Collections = {
   getCollectionsForResearcher: async () => {
     const url = `${await Config.getApiUrl()}/api/collections`;
-    const res = axios.get(url, Config.authOpts);
+    const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
   cancelCollection: async(id) => {
-    const url = `${await Config.getApirIrl()}/api/collections/${id}/cancel`;
-    const res = axios.put(url, Config.authOpts);
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`;
+    const res = axios.put(url, Config.authOpts());
     return res.data;
   }
 };
