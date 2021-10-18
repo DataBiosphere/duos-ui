@@ -5,7 +5,7 @@ import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import { formatDate, recalculateVisibleTable, goToPage as updatePage, determineCollectionStatus, cancellableCollectionStatuses } from '../../libs/utils';
+import { formatDate, recalculateVisibleTable, goToPage as updatePage, determineCollectionStatus, nonCancellableCollectionStatuses } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 
 const getProjectTitle = ((collection) => {
@@ -86,17 +86,18 @@ const statusCellData = ({status = '- -', darCollectionId, style = {}, label = 's
 };
 
 const CancelCollectionButton = (props) => {
+  const { collection } = props;
   return h(SimpleButton, {
-    keyProp: `cancel-collection-${props.collection}`,
+    keyProp: `cancel-collection-${collection}`,
     label: 'Cancel',
-    disabled: !includes(determineCollectionStatus)(cancellableCollectionStatuses),
+    disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
     baseColor: Theme.palette.primary,
     additionalStyle: {
       width: '30%',
       padding: '2%',
       fontSize: '1.45rem',
     },
-    onClick: () => props.showConfirmationModal(props.collection)
+    onClick: () => props.showConfirmationModal(collection)
   });
 };
 
@@ -198,6 +199,11 @@ export default function DarCollectionTable(props) {
     return '';
   };
 
+  const cancelOnClick = async() => {
+    await cancelCollection(selectedCollection.darCollectionId);
+    setShowConfirmation(false);
+  };
+
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
@@ -220,7 +226,7 @@ export default function DarCollectionTable(props) {
       title: 'Cancel DAR Collection',
       message: `Are you sure you want to cancel ${selectedCollection.darCode}?`,
       header: getModalHeader(selectedCollection),
-      onConfirm: () => cancelCollection(selectedCollection.id)
+      onConfirm: cancelOnClick
     })
   ]);
 }

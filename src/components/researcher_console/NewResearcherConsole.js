@@ -23,21 +23,20 @@ export default function NewResearcherConsole() {
   const filterFn = getSearchFilterFunctions().darCollections;
   const handleSearchChange = () => searchOnFilteredList(searchRef.current.value, researcherCollections, filterFn, setFilteredResearcherCollections);
 
-  const cancelCollection = async (collectionId) => {
+  const cancelCollection = async (darCollectionId) => {
     try {
-      const cancelledCollection = await Collections.cancelCollection(collectionId);
-      const targetIndex = researcherCollections.findIndex((collection) => {
-        collection.id === collectionId;
-      });
+      const canceledCollection = await Collections.cancelCollection(darCollectionId);
+      const targetIndex = researcherCollections.findIndex((collection) =>
+        collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
         throw new Error("Error: Could not find target collection");
       }
       const clonedCollections = cloneDeep(researcherCollections);
-      clonedCollections[targetIndex] = cancelledCollection;
-      setResearcherCollections(cancelledCollection);
+      clonedCollections[targetIndex] = canceledCollection;
+      setResearcherCollections(clonedCollections);
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot cancel target election'
+        text: 'Error: Cannot cancel target collection'
       });
     }
   };
@@ -55,6 +54,15 @@ export default function NewResearcherConsole() {
       Notifications.showError({text: 'Failed to fetch DAR Collections'});
     }
   }, []);
+
+  useEffect(() => {
+    searchOnFilteredList(
+      searchRef.current.value,
+      researcherCollections,
+      filterFn,
+      setFilteredResearcherCollections
+    );
+  }, [researcherCollections, filterFn]);
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between' } }, [

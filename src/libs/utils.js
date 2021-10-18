@@ -33,18 +33,18 @@ export const UserProperties = {
   ZIPCODE: "zipcode"
 };
 
-export const cancellableCollectionStatuses = ['Canceled', 'Submitted'];
+export const nonCancellableCollectionStatuses = ['Canceled', 'Under Election'];
 
 export const determineCollectionStatus = (collection) => {
-  const { elections } = collection;
-  return isEmpty(elections) ?
+  const { electionMap } = collection;
+  return !isEmpty(electionMap) ?
     'Under Election' :
     isCollectionCanceled(collection) ? 'Canceled' : 'Submitted';
 };
 
 export const isCollectionCanceled = (collection) => {
   const { dars } = collection;
-  return every((dar) => toLower(dar.status) === 'canceled')(dars);
+  return every((dar) => toLower(dar.data.status) === 'canceled')(dars);
 };
 
 export const goToPage = (value, pageCount, setCurrentPage) => {
@@ -618,10 +618,11 @@ export const recalculateVisibleTable = async ({
 };
 
 export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
-  let filteredList = originalList;
+  let searchList = originalList;
   if(!isEmpty(searchTerms)) {
-    filteredList = filterFn(searchTerms, originalList);
+    const terms = searchTerms.split(' ');
+    terms.forEach((term => searchList = filterFn(term, searchList)));
   }
-  setFilteredList(filteredList);
+  setFilteredList(searchList);
 };
 
