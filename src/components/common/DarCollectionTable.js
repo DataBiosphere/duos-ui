@@ -1,11 +1,11 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty } from 'lodash/fp';
+import { isNil, isEmpty, includes } from 'lodash/fp';
 import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import { formatDate, recalculateVisibleTable, goToPage as updatePage, determineCollectionStatus } from '../../libs/utils';
+import { formatDate, recalculateVisibleTable, goToPage as updatePage, determineCollectionStatus, cancellableCollectionStatuses } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 
 const getProjectTitle = ((collection) => {
@@ -89,6 +89,7 @@ const CancelCollectionButton = (props) => {
   return h(SimpleButton, {
     keyProp: `cancel-collection-${props.collection}`,
     label: 'Cancel',
+    disabled: !includes(determineCollectionStatus)(cancellableCollectionStatuses),
     baseColor: Theme.palette.primary,
     additionalStyle: {
       width: '30%',

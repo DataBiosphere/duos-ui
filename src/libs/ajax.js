@@ -180,7 +180,7 @@ export const Collections = {
   },
   cancelCollection: async(id) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`;
-    const res = axios.put(url, Config.authOpts());
+    const res = await axios.put(url, {}, Config.authOpts());
     return res.data;
   }
 };

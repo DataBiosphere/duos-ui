@@ -33,6 +33,7 @@ export const UserProperties = {
   ZIPCODE: "zipcode"
 };
 
+export const cancellableCollectionStatuses = ['Canceled', 'Submitted'];
 export const determineCollectionStatus = (collection) => {
   const { elections } = collection;
   return isEmpty(elections) ?

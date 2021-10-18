@@ -29,14 +29,14 @@ export default function NewResearcherConsole() {
         collection.id === collectionId;
       });
       if (targetIndex < 0) {
-        throw new Error();
+        throw new Error("Error: Could not find target collection");
       }
       const clonedCollections = cloneDeep(researcherCollections);
       clonedCollections[targetIndex] = cancelledCollection;
       setResearcherCollections(cancelledCollection);
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Could not find target collection',
+        text: 'Error: Cannot cancel target election'
       });
     }
   };
