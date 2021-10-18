@@ -34,6 +34,7 @@ export const UserProperties = {
 };
 
 export const cancellableCollectionStatuses = ['Canceled', 'Submitted'];
+
 export const determineCollectionStatus = (collection) => {
   const { elections } = collection;
   return isEmpty(elections) ?

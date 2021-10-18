@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, img } from 'react-hyperscript-helpers';
 import { cloneDeep, map } from 'lodash/fp';
 import TabControl from '../TabControl';
 import { Styles } from '../../libs/theme';
 import { Collections } from '../../libs/ajax';
 import DarCollectionTable from '../common/DarCollectionTable';
+import accessIcon from '../../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../../libs/utils';
 import SearchBar from '../SearchBar';
 
@@ -15,7 +16,7 @@ export default function NewResearcherConsole() {
   const [filteredResearcherCollections, setFilteredResearcherCollections] = useState([]);
   const searchRef = useRef('');
   const tabNames = {
-    darCollections:'DAR Collections',
+    darCollections: 'DAR Collections',
     darDrafts: 'DAR Drafts'
   };
 
@@ -55,22 +56,49 @@ export default function NewResearcherConsole() {
     }
   }, []);
 
-  return (
-    div({ style: Styles.PAGE }, [
-      div({ className: 'researcher-console-header', style: { display: 'flex', justifyContent: 'space-between' }}, [
-        div({ className: 'tab-control', style: Styles.LEFT_HEADER_SECTION }, [
-          h(TabControl, { labels: map(label => label)(tabNames), selectedTab, setSelectedTab })
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
+      div({ className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION }, [
+        div({ style: Styles.ICON_CONTAINER }, [
+          img({
+            id: 'access-icon',
+            src: accessIcon,
+            style: Styles.HEADER_IMG,
+          }),
         ]),
-        h(SearchBar, { handleSearchChange, searchRef })
+        div({ style: Styles.HEADER_CONTAINER }, [
+          div({ style: Styles.TITLE }, ['Researcher Console']),
+          div(
+            {
+              style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+                fontSize: '18px',
+              }),
+            },
+            [`Select and manage ${selectedTab} below`]
+          ),
+        ]),
       ]),
-      div({ className: 'table-container'}, [
-        DarCollectionTable({
-          isRendered: tabNames.darCollections,
-          collections: filteredResearcherCollections,
-          isLoading,
-          cancelCollection,
-        })
-      ])
-    ])
-  );
+    ]),
+    div({
+      className: 'researcher-console-table-header',
+      style: { display: 'flex', justifyContent: 'space-between' },
+    },[
+      div({ className: 'tab-control', style: Styles.LEFT_HEADER_SECTION }, [
+        h(TabControl, {
+          labels: map((label) => label)(tabNames),
+          selectedTab,
+          setSelectedTab,
+        }),
+      ]),
+      h(SearchBar, { handleSearchChange, searchRef })
+    ]),
+    div({ className: 'table-container' }, [
+      h(DarCollectionTable, {
+        isRendered: selectedTab === tabNames.darCollections,
+        collections: filteredResearcherCollections,
+        isLoading,
+        cancelCollection,
+      }),
+    ]),
+  ]);
 }

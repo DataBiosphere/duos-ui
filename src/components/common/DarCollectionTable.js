@@ -41,7 +41,7 @@ const columnHeaderFormat = {
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
   status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
-  actions: {labels: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
+  actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
 };
 
 const columnHeaderData = () => {
