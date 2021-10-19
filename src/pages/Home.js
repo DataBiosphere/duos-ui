@@ -156,7 +156,7 @@ class Home extends Component {
                 div({className: 'col-md-5', style: {display: 'flex', justifyContent: 'center'}}, [
                   button({className: 'btn-primary', style: buttonStyle}, [
                     a({
-                      href: 'https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo',
+                      href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4404601291163-Registering-a-Dataset-in-DUOS',
                       style: { color: '#fff' },
                       target: "_blank"
                     }, ['Register a dataset in DUOS'])
