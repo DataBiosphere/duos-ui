@@ -126,7 +126,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
     return (
       div({ className: this.props.className }, [
-        label({ className: 'control-label' }, ['NIH eRA Commons ID*']),
+        label({ className: 'control-label' }, ['NIH eRA Commons ID ', span({ className: 'italic display-inline' }, ['(Required for DARs)'])]),
         div({
           isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
         }, [

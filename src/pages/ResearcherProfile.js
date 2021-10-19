@@ -177,7 +177,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       isThePI = false,
       piEmail = false,
       piName = false,
-      showValidationMessages = false;
+      showValidationMessages = true;
 
     if (!this.isValid(this.state.profile.profileName)) {
       profileName = true;
@@ -622,7 +622,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               div({ className: 'form-group' }, [
                 div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
                   label({ className: 'control-label rp-title-question default-color' }, [
-                    'Researcher Identification*',
+                    'Researcher Identification',
                     span({}, ['Please authenticate your eRA Commons account to submit Data Access Requests. Other profiles are optional:'])
                   ])
                 ]),
@@ -1006,7 +1006,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-lg-8 col-xs-6' }, [
-                  button({ id: 'btn_submit', isRendered: completed === true, onClick: this.submit, className: 'f-right btn-primary common-background' }, [
+                  button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
                     'Submit'
                   ]),
                   ConfirmationDialog({
@@ -1017,7 +1017,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
                   button({
-                    id: 'btn_continueLater', isRendered: completed !== true, onClick: this.saveProfile,
+                    id: 'btn_continueLater', onClick: this.saveProfile,
                     className: 'f-right btn-secondary common-color'
                   }, ['Continue later']),
 
