@@ -100,7 +100,6 @@ export default function DataCustodianFormModal(props) {
 
   //boolean function, used to determine if submit button should be disabled
   const isConfirmDisabled = (user) => {
-    debugger; // eslint-disable-line
     return isNil(user) || isNil(user.email);
   };
 
