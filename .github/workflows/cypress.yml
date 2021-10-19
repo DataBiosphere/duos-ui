@@ -18,11 +18,11 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
-          CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN }}
-          CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR }}
-          CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER }}
-          CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER }}
-          CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL }}
+          CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
+          CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
+          CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
+          CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
+          CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
