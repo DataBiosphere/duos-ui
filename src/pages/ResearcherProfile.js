@@ -177,7 +177,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       isThePI = false,
       piEmail = false,
       piName = false,
-      showValidationMessages = true;
+      showValidationMessages = false;
 
     if (!this.isValid(this.state.profile.profileName)) {
       profileName = true;
