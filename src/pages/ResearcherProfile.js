@@ -102,7 +102,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.additionalEmail = isNil(user.additionalEmail) ? '' : user.additionalEmail;
       prev.institutionId = user.institutionId;
       prev.institutionList = institutionList;
-      prev.profile.academicEmail = researcherProps.academicEmail;
+      prev.profile.academicEmail = researcherProps.academicEmail || user.email;
       prev.profile.address1 = researcherProps.address1;
       prev.profile.address2 = researcherProps.address2;
       prev.profile.checkNotifications = (researcherProps.checkNotifications === 'true');
@@ -390,7 +390,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   updateResearcher = async (profile) => {
     const profileClone = this.cloneProfile(profile);
-    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
+    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
     await this.saveUser();
     this.setState({ showDialogSubmit: false });
     this.props.history.push({ pathname: 'dataset_catalog' });
@@ -1006,7 +1006,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-lg-8 col-xs-6' }, [
-                  button({ id: 'btn_submit', isRendered: completed === true, onClick: this.submit, className: 'f-right btn-primary common-background' }, [
+                  button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
                     'Submit'
                   ]),
                   ConfirmationDialog({
