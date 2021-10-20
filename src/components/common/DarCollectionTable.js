@@ -5,9 +5,10 @@ import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import { formatDate, recalculateVisibleTable, goToPage as updatePage, determineCollectionStatus, nonCancellableCollectionStatuses } from '../../libs/utils';
+import { formatDate, recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 
+const { determineCollectionStatus, nonCancellableCollectionStatuses } = darCollectionUtils;
 const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars) && !isEmpty(collection.dars[0].data)) {
     return collection.dars[0].data.projectTitle;

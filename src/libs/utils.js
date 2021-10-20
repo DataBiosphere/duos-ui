@@ -33,19 +33,27 @@ export const UserProperties = {
   ZIPCODE: "zipcode"
 };
 
-export const nonCancellableCollectionStatuses = ['Canceled', 'Under Election'];
-
-export const determineCollectionStatus = (collection) => {
-  const { electionMap } = collection;
-  return !isEmpty(electionMap) ?
-    'Under Election' :
-    isCollectionCanceled(collection) ? 'Canceled' : 'Submitted';
-};
-
+///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
 export const isCollectionCanceled = (collection) => {
   const { dars } = collection;
   return every((dar) => toLower(dar.data.status) === 'canceled')(dars);
 };
+
+export const darCollectionUtils = {
+  nonCancellableCollectionStatuses: ['Canceled', 'Under Election'],
+  //this needs to be defined outside of the object, keys can't reference other key/value pairs on object initialization,
+  //determineCollectionStatus uses this function so its definition/reference needs to exist
+  isCollectionCanceled,
+  determineCollectionStatus: (collection) => {
+    const { electionMap } = collection;
+    return !isEmpty(electionMap)
+      ? 'Under Election'
+      : isCollectionCanceled(collection)
+        ? 'Canceled'
+        : 'Submitted';
+  }
+};
+///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
 
 export const goToPage = (value, pageCount, setCurrentPage) => {
   if(value >= 1 && value <= pageCount) {
@@ -476,7 +484,7 @@ export const getSearchFilterFunctions = () => {
       const referenceDar = collection.dars[0];
       const { createDate, data } = referenceDar;
       const { projectTitle } = data;
-      const status = determineCollectionStatus(collection);
+      const status = darCollectionUtils.determineCollectionStatus(collection);
       const matched = find((phrase) =>
         includes(term, toLower(phrase))
       )([darCode, formatDate(createDate), projectTitle, status]);
