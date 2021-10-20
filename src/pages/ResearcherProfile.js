@@ -431,6 +431,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       profile.completed = false;
       const profileClone = this.cloneProfile(profile);
       await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
+      await this.saveUser();
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
@@ -531,6 +532,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const { currentUser, institutionId, showValidationMessages } = this.state;
     const libraryCards = get(this.state.currentUser, 'libraryCards', []);
     let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
+    const userEmail = get(currentUser, 'email');
 
     return (
 
@@ -574,15 +576,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   label({
                     id: 'lbl_profileAcademicEmail',
                     className: 'control-label'
-                  }, ['Academic/Business Email Address*']),
+                  }, ['Academic/Business Email Address']),
                   input({
                     id: 'profileAcademicEmail',
                     name: 'academicEmail',
                     type: 'email',
-                    value: isNil(this.state.profile.academicEmail) ? '' : this.state.profile.academicEmail,
-                    className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ?
-                      'form-control required-field-error' :
-                      'form-control',
+                    value: userEmail,
+                    className: 'form-control',
                     disabled: true
                   })
                 ]),
@@ -1017,7 +1017,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
                   button({
-                    id: 'btn_continueLater', isRendered: completed !== true, onClick: this.saveProfile,
+                    id: 'btn_continueLater', onClick: this.saveProfile,
                     className: 'f-right btn-secondary common-color'
                   }, ['Continue later']),
 
