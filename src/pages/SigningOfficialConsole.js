@@ -17,8 +17,8 @@ import DataCustodianTable from "../components/data_custodian_table/DataCustodian
 import { Config } from "../libs/config";
 
 const tabs = {
-  custodian: 'custodian',
-  researcher: 'researchers'
+  custodian: 'Data Custodian',
+  researcher: 'Researchers'
 };
 
 export default function SigningOfficialConsole(props) {
@@ -97,18 +97,12 @@ export default function SigningOfficialConsole(props) {
         //NOTE: placeholder styling for now, can come up with more definitive designs later
         div({style: {display: 'flex'}, class: 'tab-selection-container', isRendered: env !== 'production'}, [
           h(SelectableText, {
-            label: 'Data Custodian',
-            color: 'red',
-            fontSize: `1.8rem`,
-            componentType: tabs.custodian,
+            label: tabs.custodian,
             setSelected: setSelectedTag,
             selectedType: selectedTag
           }),
           h(SelectableText, {
-            label: 'Researchers',
-            color: 'blue',
-            fontSize: '1.8rem',
-            componentType: tabs.researcher,
+            label: tabs.researcher,
             setSelected: setSelectedTag,
             selectedType: selectedTag
           })

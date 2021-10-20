@@ -170,7 +170,19 @@ export const DAC = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.status;
   }
+};
 
+export const Collections = {
+  getCollectionsForResearcher: async () => {
+    const url = `${await Config.getApiUrl()}/api/collections`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  cancelCollection: async(id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`;
+    const res = await axios.put(url, {}, Config.authOpts());
+    return res.data;
+  }
 };
 
 export const DAR = {
@@ -183,6 +195,7 @@ export const DAR = {
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
 
+    //NOTE: rewrite this, the dar should have the details needed on it (or the response) itself
     let darInfo = Models.dar;
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;

@@ -72,5 +72,9 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "volta": {
+    "node": "16.6.2",
+    "npm": "8.0.0"
+  }
 }

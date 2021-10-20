@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq} from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every} from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -31,6 +31,34 @@ export const UserProperties = {
   SCIENTIFIC_URL: "scientificURL",
   STATE: "state",
   ZIPCODE: "zipcode"
+};
+
+///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
+export const isCollectionCanceled = (collection) => {
+  const { dars } = collection;
+  return every((dar) => toLower(dar.data.status) === 'canceled')(dars);
+};
+
+export const darCollectionUtils = {
+  nonCancellableCollectionStatuses: ['Canceled', 'Under Election'],
+  //this needs to be defined outside of the object, keys can't reference other key/value pairs on object initialization,
+  //determineCollectionStatus uses this function so its definition/reference needs to exist
+  isCollectionCanceled,
+  determineCollectionStatus: (collection) => {
+    const { electionMap } = collection;
+    return !isEmpty(electionMap)
+      ? 'Under Election'
+      : isCollectionCanceled(collection)
+        ? 'Canceled'
+        : 'Submitted';
+  }
+};
+///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
+
+export const goToPage = (value, pageCount, setCurrentPage) => {
+  if(value >= 1 && value <= pageCount) {
+    setCurrentPage(value);
+  }
 };
 
 export const findPropertyValue = (propName, researcher) => {
@@ -450,6 +478,17 @@ export const getSearchFilterFunctions = () => {
         }, false);
 
       return includesRoles || includesBaseAttributes;
+    })(targetList),
+    darCollections: (term, targetList) => filter(collection => {
+      const { darCode } = collection;
+      const referenceDar = collection.dars[0];
+      const { createDate, data } = referenceDar;
+      const { projectTitle } = data;
+      const status = darCollectionUtils.determineCollectionStatus(collection);
+      const matched = find((phrase) =>
+        includes(term, toLower(phrase))
+      )([darCode, formatDate(createDate), projectTitle, status]);
+      return !isNil(matched);
     })(targetList)
   };
 };
@@ -587,11 +626,12 @@ export const recalculateVisibleTable = async ({
 };
 
 export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
-  let filteredList = originalList;
+  let searchList = originalList;
   if(!isEmpty(searchTerms)) {
-    filteredList = filterFn(searchTerms, originalList);
+    const terms = searchTerms.split(' ');
+    terms.forEach((term => searchList = filterFn(term, searchList)));
   }
-  setFilteredList(filteredList);
+  setFilteredList(searchList);
 };
 
 export const getBooleanFromEventHtmlDataValue = (e) => {

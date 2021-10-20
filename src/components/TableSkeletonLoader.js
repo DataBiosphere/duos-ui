@@ -18,12 +18,12 @@ export default function TableSkeletonLoader(props) {
     const end = 10;
 
     const template = [div({
-      style: Styles.TABLE.HEADER_ROW
+      style: Styles.TABLE.HEADER_ROW,
     }, tableHeaderTemplate)];
 
     while(start <= end) {
       const targetStyle = start > 1 ? modifiedTableRowStyle : tableRowStyle;
-      const rowTemplate = div({style: targetStyle}, tableRowLoadingTemplate);
+      const rowTemplate = div({style: targetStyle, key: `row-loader-${start}`}, tableRowLoadingTemplate);
       template.push(rowTemplate);
       start++;
     }
