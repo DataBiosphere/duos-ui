@@ -208,7 +208,7 @@ export default function ResearcherProfile(props) {
         showValidationMessages = true;
       }
     }
-
+    
     if (profile.isThePI === 'false' && profile.havePI === '') {
       invalidFields.havePI = true;
       showValidationMessages = true;
@@ -244,16 +244,6 @@ export default function ResearcherProfile(props) {
     return !inUS;
   }
 
-  submit = (event) => {
-    setValidateFields(true);
-    event.preventDefault();
-    const errorsShowed = validateUserFields();
-    if (!errorsShowed) {
-      setShowDialogSubmit(true);
-      setShowValidationMessages(true);
-    }
-  };
-
   handleRadioChange = (event, field, value) => {
     profile[field] = value;
     setProfile(profile);
@@ -268,6 +258,16 @@ export default function ResearcherProfile(props) {
     if (validateFields) {
       validateUserFields();
     }
+  };
+
+  handleCheckboxChange = (event) => {
+    profile.checkNotifications = event.target.checked;
+    setProfile(profile);
+  };
+
+  handleAdditionalEmailChange = (event) => {
+    profile.additionalEmail = event.target.value;
+    setProfile(profile);
   };
 
   clearNotRelatedPIFields = () => {
@@ -293,84 +293,14 @@ export default function ResearcherProfile(props) {
     setProfile(profile);
   };
 
-  saveProfile = (event) => {
+  submitForm = (event) => {
     event.preventDefault();
-    setShowDialogSave(true);
+    // not implemented yet
   };
 
   cleanObject = (obj) => {
     // Removes any zero length properties from a copy of the object
     return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
-  };
-
-  saveProperties = async (profile) => {
-    await Researcher.createProperties(profile);
-    await saveUser();
-    setShowDialogSubmit(false);
-    props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-// ASK ABOUT
-  dialogHandlerSubmit = (answer) => async () => {
-    if (answer === true) {
-      let profile = this.state.profile;
-      profile = this.cleanObject(profile);
-      profile.completed = true;
-      if (this.state.profile.completed === undefined) {
-        await this.saveProperties(profile);
-      } else {
-        await this.updateResearcher(profile);
-      }
-
-    } else {
-      this.setState({ showDialogSubmit: false });
-    }
-  };
-
-  updateResearcher = async (profile) => {
-    const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
-    await saveUser();
-    setShowDialogSubmit(false);
-    props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-// ASK ABOUT
-  saveUser = async () => {
-    const currentUserUpdate = Storage.getCurrentUser();
-    delete currentUserUpdate.email;
-    currentUserUpdate.displayName = this.state.profile.profileName;
-    currentUserUpdate.additionalEmail = this.state.additionalEmail;
-    currentUserUpdate.roles = this.state.roles;
-    currentUserUpdate.institutionId = this.state.institutionId;
-    const payload = { updatedUser: currentUserUpdate };
-    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
-    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
-    return updatedUser;
-  };
-
-  handleCheckboxChange = (event) => {
-    profile.checkNotifications = event.target.checked;
-    setProfile(profile);
-  };
-
-  handleAdditionalEmailChange = (event) => {
-    profile.additionalEmail = event.target.value;
-    setProfile(profile);
-  };
-
-// ASK ABOUT
-  dialogHandlerSave = (answer) => async () => {
-    if (answer === true) {
-      let profile = this.state.profile;
-      profile.completed = false;
-      const profileClone = this.cloneProfile(profile);
-      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
-      await this.saveUser();
-      this.props.history.push({ pathname: 'dataset_catalog' });
-    }
-
-    this.setState({ showDialogSave: false });
   };
 
   // When posting a user's researcher properties, library cards and entries are
@@ -398,7 +328,6 @@ export default function ResearcherProfile(props) {
     return stateNames;
   };
 
-// ASK ABOUT
   generateInstitutionSelectionDisplay = () => {
     // If the user is not an SO, or does not have an existing institution,
     // allow the user to select an institution from the available list.
@@ -494,16 +423,9 @@ export default function ResearcherProfile(props) {
                     name: 'profileName',
                     type: 'text',
                     onChange: handleChange,
-                    className: (invalidFields.profileName && showValidationMessages) ?
-                      'form-control required-field-error' :
-                      'form-control',
+                    className: 'form-control',
                     value: isNil(profile.profileName) ? '' : profile.profileName,
-                    required: true
                   }),
-                  span({
-                    className: 'cancel-color required-field-error-span',
-                    isRendered: invalidFields.profileName && showValidationMessages
-                  }, ['Full Name is required'])
                 ]),
 
                 div({ className: 'col-xs-12' }, [
@@ -640,17 +562,10 @@ export default function ResearcherProfile(props) {
                         id: 'profileDepartment',
                         name: 'department',
                         type: 'text',
-                        className: (invalidFields.department && showValidationMessages) ?
-                          'form-control required-field-error' :
-                          'form-control',
+                        className: 'form-control',
                         onChange: handleChange,
                         value: isNil(profile.department) ? '' : profile.department,
-                        required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: invalidFields.department && showValidationMessages
-                      }, ['Department is required'])
+                      })
                     ]),
                     div({ className: 'col-xs-6' }, [
                       label({
@@ -677,17 +592,10 @@ export default function ResearcherProfile(props) {
                         id: 'profileAddress1',
                         name: 'address1',
                         type: 'text',
-                        className: ((profile.address1 === '' || invalidFields.address1) && showValidationMessages) ?
-                          'form-control required-field-error' :
-                          'form-control',
+                        className: 'form-control',
                         onChange: handleChange,
                         value: isNil(profile.address1) ? '' : profile.address1,
-                        required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: (profile.address1 === '' || invalidFields.address1) && showValidationMessages
-                      }, ['Street Address is required'])
+                      })
                     ]),
                     div({ className: 'col-xs-6' }, [
                       label({
@@ -714,15 +622,11 @@ export default function ResearcherProfile(props) {
                         id: 'profileCity',
                         name: 'city',
                         type: 'text',
-                        className: (invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        className: 'form-control',
                         onChange: handleChange,
                         value: isNil(profile.city) ? '' : profile.city,
                         required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: this.state.invalidFields.city && showValidationMessages
-                      }, ['City is required'])
+                      })
                     ]),
 
                     div({ className: 'col-xs-6' }, [
@@ -738,14 +642,9 @@ export default function ResearcherProfile(props) {
                         name: 'state',
                         onChange: handleChange,
                         value: profile.state,
-                        className: (invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
-                        required: true,
+                        className: 'form-control',
                         disabled: (profile.country !== '' && profile.country !== 'United States of America')
                       }, stateNames ),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: invalidFields.state && showValidationMessages
-                      }, ['State is required if you live in the United States'])
                     ])
                   ])
                 ]),
@@ -758,17 +657,10 @@ export default function ResearcherProfile(props) {
                         id: 'profileZip',
                         name: 'zipcode',
                         type: 'text',
-                        className: (invalidFields.zipcode && showValidationMessages) ?
-                          'form-control required-field-error' :
-                          'form-control',
+                        className: 'form-control',
                         onChange: handleChange,
                         value: isNil(profile.zipcode) ? '' : profile.zipcode,
-                        required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: invalidFields.zipcode && showValidationMessages
-                      }, ['Zip/Postal Code is required'])
+                      })
                     ]),
 
                     div({ className: 'col-xs-6 rp-group' }, [
@@ -778,15 +670,8 @@ export default function ResearcherProfile(props) {
                         name: 'country',
                         onChange: handleChange,
                         value: profile.country,
-                        className: (invalidFields.country && showValidationMessages) ?
-                          'form-control required-field-error' :
-                          'form-control',
-                        required: true
-                      }, countryNames ),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: invalidFields.country && showValidationMessages
-                      }, ['Country is required'])
+                        className: 'form-control',
+                      }, countryNames )
                     ])
                   ])
                 ])
@@ -940,7 +825,7 @@ export default function ResearcherProfile(props) {
                 ]),
 
                 div({ className: 'col-lg-8 col-xs-6' }, [
-                  button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
+                  button({ id: 'btn_submit', onClick: submitForm, className: 'f-right btn-primary common-background' }, [
                     'Submit'
                   ]),
                   ConfirmationDialog({
