@@ -15,124 +15,115 @@ import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
 import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
 
-export const ResearcherProfile = hh(class ResearcherProfile extends Component {
+export default function ResearcherProfile(props) {
 
-  constructor(props) {
-    super(props);
-    this.state = this.initialState();
-  }
+  const [isLoading, setIsLoading] = useState(true);
+  const [fieldStatus, setFieldStatus] = useState({});
+  const [showDialogSubmit, setShowDialogSubmit] = useState(false);
+  const [showDialogSave, setShowDialogSave] = useState(false);
+  const [additionalEmail, setAdditionalEmail] = useState('');
+  const [institutionId, setInstitutionId] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [profile, setProfile] = useState({
+    academicEmail: '',
+    address1: '',
+    address2: '',
+    checkNotifications: false,
+    city: '',
+    completed: undefined,
+    country: '',
+    department: '',
+    division: '',
+    eRACommonsID: '',
+    havePI: null,
+    isThePI: null,
+    linkedIn: '',
+    orcid: '',
+    piEmail: '',
+    piName: '',
+    profileName: '',
+    pubmedID: '',
+    researcherGate: '',
+    scientificURL: '',
+    state: undefined,
+    zipcode: ''
+  });
+  const [showRequired, setShowRequired] = useState(false);
+  const [invalidFields, setInvalidFields] = useState({
+    profileName: false,
+    academicEmail: false,
+    department: false,
+    address1: false,
+    city: false,
+    state: false,
+    country: false,
+    zipcode: false,
+    havePI: false,
+    isThePI: false,
+    piName: false,
+    piEmail: false,
+    institution: false
+  });
+  const [showValidationMessages, setShowValidationMessages] = useState(false);
+  const [validateFields, setValidateFields] = useState(false);
+  const [institutionList, setInstitutionList] = useState([]);
+  const [notificationData, setNotificationData] = useState();
+  const [currentUser, setCurrentUser] = useState();
 
-  async componentDidMount() {
-    await this.getResearcherProfile();
-    this.props.history.push('profile');
-    const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
-    this.setState(prev => {
-      prev.notificationData = notificationData;
-      prev.currentUser = Storage.getCurrentUser();
-      return prev;
-    });
-  }
-
-  initialState() {
-    return {
-      loading: true,
-      fieldStatus: {},
-      showDialogSubmit: false,
-      showDialogSave: false,
-      additionalEmail: '',
-      institutionId: null,
-      roles: [],
-      profile: {
-        academicEmail: '',
-        address1: '',
-        address2: '',
-        checkNotifications: false,
-        city: '',
-        completed: undefined,
-        country: '',
-        department: '',
-        division: '',
-        eRACommonsID: '',
-        havePI: null,
-        isThePI: null,
-        linkedIn: '',
-        orcid: '',
-        piEmail: '',
-        piName: '',
-        profileName: '',
-        pubmedID: '',
-        researcherGate: '',
-        scientificURL: '',
-        state: undefined,
-        zipcode: ''
-      },
-      showRequired: false,
-      invalidFields: {
-        profileName: false,
-        academicEmail: false,
-        department: false,
-        address1: false,
-        city: false,
-        state: false,
-        country: false,
-        zipcode: false,
-        havePI: false,
-        isThePI: false,
-        piName: false,
-        piEmail: false,
-        institution: false
-      },
-      showValidationMessages: false,
-      validateFields: false,
-      institutionList: []
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        await getResearcherProfile();
+        props.history.push('profile');
+        notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+        setNotificationData(notificationData);
+        setCurrentUser(Storage.getCurrentUser());
+        setIsLoading(false);
+      } catch (error) {
+        Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }
+  }, []);
 
   getResearcherProfile = async () => {
     const user = await User.getMe();
     const researcherProps = getPropertyValuesFromUser(user);
     const institutionList = await Institution.list();
 
-    this.setState(prev => {
-      if (isEmpty(user.roles)) {
-        prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
-      } else {
-        prev.roles = user.roles;
-      }
-      prev.additionalEmail = isNil(user.additionalEmail) ? '' : user.additionalEmail;
-      prev.institutionId = user.institutionId;
-      prev.institutionList = institutionList;
-      prev.profile.academicEmail = researcherProps.academicEmail || user.email;
-      prev.profile.address1 = researcherProps.address1;
-      prev.profile.address2 = researcherProps.address2;
-      prev.profile.checkNotifications = (researcherProps.checkNotifications === 'true');
-      prev.profile.city = researcherProps.city;
-      prev.profile.completed = researcherProps.completed;
-      prev.profile.country = researcherProps.country;
-      prev.profile.department = researcherProps.department;
-      prev.profile.division = researcherProps.division;
-      prev.profile.eRACommonsID = researcherProps.eraCommonsId;
-      prev.profile.havePI = researcherProps.havePI;
-      prev.profile.isThePI = researcherProps.isThePI;
-      prev.profile.linkedIn = researcherProps.linkedIn;
-      prev.profile.orcid = researcherProps.orcid;
-      prev.profile.piEmail = researcherProps.piEmail;
-      prev.profile.piName = researcherProps.piName;
-      prev.profile.profileName = user.displayName;
-      prev.profile.pubmedID = researcherProps.pubmedID;
-      prev.profile.researcherGate = researcherProps.researcherGate;
-      prev.profile.scientificURL = researcherProps.scientificURL;
-      prev.profile.state = researcherProps.state;
-      prev.profile.zipcode = researcherProps.zipcode;
-      return prev;
-    }, () => {
-      if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {
-        this.setState(prev => {
-          prev.profile.completed = JSON.parse(this.state.profile.completed);
-          return prev;
-        });
-      }
-    });
+    if (isEmpty(user.roles)) {
+      setRoles([{ 'roleId': 5, 'name': USER_ROLES.researcher }]);
+    } else {
+      setRoles(user.roles);
+    }
+    setAdditionalEmail(isNil(user.additionalEmail) ? '' : user.additionalEmail);
+    setInstitutionId(user.institutionId);
+    setInstitutionList(institutionList);
+    profile.academicEmail = researcherProps.academicEmail || user.email;
+    profile.address1 = researcherProps.address1;
+    profile.address2 = researcherProps.address2;
+    profile.checkNotifications = (researcherProps.checkNotifications === 'true');
+    profile.city = researcherProps.city;
+    profile.completed = researcherProps.completed;
+    profile.country = researcherProps.country;
+    profile.department = researcherProps.department;
+    profile.division = researcherProps.division;
+    profile.eRACommonsID = researcherProps.eraCommonsId;
+    profile.havePI = researcherProps.havePI;
+    profile.isThePI = researcherProps.isThePI;
+    profile.linkedIn = researcherProps.linkedIn;
+    profile.orcid = researcherProps.orcid;
+    profile.piEmail = researcherProps.piEmail;
+    profile.piName = researcherProps.piName;
+    profile.profileName = user.displayName;
+    profile.pubmedID = researcherProps.pubmedID;
+    profile.researcherGate = researcherProps.researcherGate;
+    profile.scientificURL = researcherProps.scientificURL;
+    profile.state = researcherProps.state;
+    profile.zipcode = researcherProps.zipcode;
+    setProfile(profile);
   };
 
   handleChange = (event) => {
