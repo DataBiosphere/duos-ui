@@ -127,133 +127,95 @@ export default function ResearcherProfile(props) {
   };
 
   handleChange = (event) => {
-    let field = event.target.name;
-    let value = event.target.value;
+    const field = event.target.name;
+    const value = event.target.value;
 
-    this.setState(prev => {
-      prev.profile[field] = value;
-      return prev;
-    }, () => {
-      if (this.state.validateFields) {
-        this.validateUserFields();
-      }
-    });
-    //clear out state field if the user selects
-    //another country or clears out the country field
+    profile[field] = value;
+    setProfile(profile);
+    if (validateFields) {
+      validateUserFields();
+    }
+
     if (field === "country") {
       if (value !== "United States of America") {
-        this.setState(prev => {
-          prev.profile.state = "";
-          return prev;
-        }, () => {
-          if (this.state.validateFields) {
-            this.validateUserFields();
-          }
-        });
+        profile.setState("");
+        setProfile(profile);
+        if (validateFields) {
+          validateUserFields();
+        }
       }
     }
   };
 
   validateUserFields() {
-    let profileName = false,
-      academicEmail = false,
-      institution = false,
-      department = false,
-      address1 = false,
-      city = false,
-      state = false,
-      country = false,
-      zipcode = false,
-      havePI = false,
-      isThePI = false,
-      piEmail = false,
-      piName = false,
-      showValidationMessages = false;
-
-    if (!this.isValid(this.state.profile.profileName)) {
-      profileName = true;
+    if (!isValid(profile.profileName)) {
+      invalidFields.profileName = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.academicEmail) || this.state.profile.academicEmail.indexOf('@') === -1) {
-      academicEmail = true;
+    if (!isValid(profile.academicEmail) || profile.academicEmail.indexOf('@') === -1) {
+      invalidFields.academicEmail = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValidNumber(this.state.institutionId)) {
-      institution = true;
+    if (!isValidNumber(institutionId)) {
+      invalidFields.institution = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.department)) {
-      department = true;
+    if (!isValid(profile.department)) {
+      invalidFields.department = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.address1)) {
-      address1 = true;
+    if (!isValid(profile.address1)) {
+      invalidFields.address1 = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.city)) {
-      city = true;
+    if (!isValid(profile.city)) {
+      invalidFields.city = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValidState(this.state.profile.state)) {
-      state = true;
+    if (!isValidState(profile.state)) {
+      invalidFields.state = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.country)) {
-      country = true;
+    if (!isValid(profile.country)) {
+      invalidFields.country = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.zipcode)) {
-      zipcode = true;
+    if (!isValid(profile.zipcode)) {
+      invalidFields.zipcode = true;
       showValidationMessages = true;
     }
 
-    if (this.state.profile.isThePI === null) {
-      isThePI = true;
+    if (profile.isThePI === null) {
+      invalidFields.isThePI = true;
       showValidationMessages = true;
     }
 
-    if (this.state.profile.isThePI === 'false' && this.state.profile.havePI === 'true') {
-      if (!this.isValid(this.state.profile.piEmail) || this.state.profile.piEmail.indexOf('@') === -1) {
-        piEmail = true;
+    if (profile.isThePI === 'false' && profile.havePI === 'true') {
+      if (!isValid(profile.piEmail) || profile.piEmail.indexOf('@') === -1) {
+        invalidFields.piEmail = true;
         showValidationMessages = true;
       }
-      if (!this.isValid(this.state.profile.piName)) {
-        piName = true;
+      if (!isValid(profile.piName)) {
+        invalidFields.piName = true;
         showValidationMessages = true;
       }
     }
 
-    if (this.state.profile.isThePI === 'false' && this.state.profile.havePI === '') {
-      havePI = true;
+    if (profile.isThePI === 'false' && profile.havePI === '') {
+      invalidFields.havePI = true;
       showValidationMessages = true;
     }
 
-    this.setState(prev => {
-      prev.invalidFields.profileName = profileName;
-      prev.invalidFields.academicEmail = academicEmail;
-      prev.invalidFields.address1 = address1;
-      prev.invalidFields.institution = institution;
-      prev.invalidFields.department = department;
-      prev.invalidFields.city = city;
-      prev.invalidFields.state = state;
-      prev.invalidFields.zipcode = zipcode;
-      prev.invalidFields.havePI = havePI;
-      prev.invalidFields.isThePI = isThePI;
-      prev.invalidFields.country = country;
-      prev.invalidFields.piName = piName;
-      prev.invalidFields.piEmail = piEmail;
-      prev.invalidFields.havePI = havePI;
-      prev.showValidationMessages = showValidationMessages;
-      return prev;
-    });
+    setInvalidFields(invalidFields);
+    setShowValidationMessages(showValidationMessages);
     return showValidationMessages;
   }
 
@@ -275,7 +237,7 @@ export default function ResearcherProfile(props) {
 
   isValidState(value) {
     const stateSelected = (!isNil(value) && !isEmpty(value));
-    const inUS = (this.state.profile.country === "United States of America" || this.state.profile.country === "");
+    const inUS = (profile.country === "United States of America" || profile.country === "");
     if (inUS && stateSelected) {
       return true;
     }
@@ -283,72 +245,57 @@ export default function ResearcherProfile(props) {
   }
 
   submit = (event) => {
-    this.setState({ validateFields: true });
+    setValidateFields(true);
     event.preventDefault();
-    const errorsShowed = this.validateUserFields();
-    if (errorsShowed === false) {
-      this.setState(prev => {
-        prev.showDialogSubmit = true;
-        prev.showValidationMessages = false;
-        return prev;
-      });
+    const errorsShowed = validateUserFields();
+    if (!errorsShowed) {
+      setShowDialogSubmit(true);
+      setShowValidationMessages(true);
     }
   };
 
   handleRadioChange = (e, field, value) => {
-
-    this.setState(prev => {
-      prev.profile[field] = value;
-      return prev;
-    },
-    () => {
-      if (field === 'isThePI') {
-        this.clearNotRelatedPIFields();
-      }
-      if (field === 'havePI' && (value === true || value === 'true')) {
-        this.clearCommonsFields();
-      } else if (field === 'havePI' && (value === false || value === 'false')) {
-        this.clearNoHasPIFields();
-      }
-      if (this.state.validateFields) {
-        this.validateUserFields();
-      }
-    });
+    profile[field] = value;
+    setProfile(profile);
+    if (field === 'isThePI') {
+      clearNotRelatedPIFields();
+    }
+    if (field === 'havePI' && (value === true || value === 'true')) {
+      clearCommonsFields();
+    } else if (field === 'havePI' && (value === false || value === 'false')) {
+      clearNoHasPIFields();
+    }
+    if (validateFields) {
+      validateUserFields();
+    }
   };
 
   clearNotRelatedPIFields = () => {
-    this.clearCommonsFields();
-    this.setState(prev => {
-      prev.profile.havePI = '';
-      return prev;
-    }, () => {
-      this.clearPIData();
-    });
+    clearCommonsFields();
+    profile.havePI = '';
+    setProfile(profile);
+    clearPIData();
   };
 
   clearNoHasPIFields = () => {
-    this.clearPIData();
-    this.clearCommonsFields();
+    clearPIData();
+    clearCommonsFields();
   };
 
   clearCommonsFields = () => {
-    this.setState(prev => {
-      prev.profile.eRACommonsID = '';
-      return prev;
-    });
+    profile.eRACommonsID = '';
+    setProfile(profile);
   };
 
   clearPIData = () => {
-    this.setState(prev => {
-      prev.profile.piName = '';
-      prev.profile.piEmail = '';
-      return prev;
-    });
+    profile.piName = '';
+    profile.piEmail = '';
+    setProfile(profile);
   };
 
   saveProfile = (event) => {
     event.preventDefault();
-    this.setState({ showDialogSave: true });
+    setShowDialogSave(true);
   };
 
   cleanObject = (obj) => {
