@@ -136,9 +136,9 @@ export default function ResearcherProfile(props) {
       validateUserFields();
     }
 
-    if (field === "country") {
-      if (value !== "United States of America") {
-        profile.setState("");
+    if (field === 'country') {
+      if (value !== 'United States of America') {
+        profile.setState('');
         setProfile(profile);
         if (validateFields) {
           validateUserFields();
@@ -237,7 +237,7 @@ export default function ResearcherProfile(props) {
 
   isValidState(value) {
     const stateSelected = (!isNil(value) && !isEmpty(value));
-    const inUS = (profile.country === "United States of America" || profile.country === "");
+    const inUS = (profile.country === 'United States of America' || profile.country === '');
     if (inUS && stateSelected) {
       return true;
     }
@@ -254,7 +254,7 @@ export default function ResearcherProfile(props) {
     }
   };
 
-  handleRadioChange = (e, field, value) => {
+  handleRadioChange = (event, field, value) => {
     profile[field] = value;
     setProfile(profile);
     if (field === 'isThePI') {
@@ -305,11 +305,12 @@ export default function ResearcherProfile(props) {
 
   saveProperties = async (profile) => {
     await Researcher.createProperties(profile);
-    await this.saveUser();
-    this.setState({ showDialogSubmit: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
+    await saveUser();
+    setShowDialogSubmit(false);
+    props.history.push({ pathname: 'dataset_catalog' });
   };
 
+// ASK ABOUT
   dialogHandlerSubmit = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
@@ -327,13 +328,14 @@ export default function ResearcherProfile(props) {
   };
 
   updateResearcher = async (profile) => {
-    const profileClone = this.cloneProfile(profile);
+    const profileClone = cloneProfile(profile);
     await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
-    await this.saveUser();
-    this.setState({ showDialogSubmit: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
+    await saveUser();
+    setShowDialogSubmit(false);
+    props.history.push({ pathname: 'dataset_catalog' });
   };
 
+// ASK ABOUT
   saveUser = async () => {
     const currentUserUpdate = Storage.getCurrentUser();
     delete currentUserUpdate.email;
@@ -347,22 +349,17 @@ export default function ResearcherProfile(props) {
     return updatedUser;
   };
 
-  handleCheckboxChange = (e) => {
-    const value = e.target.checked;
-    this.setState(prev => {
-      prev.profile.checkNotifications = value;
-      return prev;
-    });
+  handleCheckboxChange = (event) => {
+    profile.checkNotifications = event.target.checked;
+    setProfile(profile);
   };
 
-  handleAdditionalEmailChange = (e) => {
-    const value = e.target.value;
-    this.setState(prev => {
-      prev.additionalEmail = value;
-      return prev;
-    });
+  handleAdditionalEmailChange = (event) => {
+    profile.additionalEmail = event.target.value;
+    setProfile(profile);
   };
 
+// ASK ABOUT
   dialogHandlerSave = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
@@ -383,8 +380,8 @@ export default function ResearcherProfile(props) {
   };
 
   generateCountryNames = () => {
-    const USA = option({ value: "United States of America"}, ["United States of America"]);
-    const empty = option({ value: ""}, [""]);
+    const USA = option({ value: 'United States of America'}, ['United States of America']);
+    const empty = option({ value: ''}, ['']);
     const countryNames = getNames().map((name) => option({value: name}, [name]));
     const index = countryNames.indexOf(USA);
     countryNames.splice(index, 1);
@@ -394,13 +391,14 @@ export default function ResearcherProfile(props) {
   };
 
   generateStateNames = () => {
-    const empty = option({ value: ""}, [""]);
+    const empty = option({ value: ''}, ['']);
     const UsaStates = require('usa-states').UsaStates;
-    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    const stateNames = (new UsaStates().arrayOf('names')).map((name) => option({value: name}, [name]));
     stateNames.splice(0, 0, empty);
     return stateNames;
   };
 
+// ASK ABOUT
   generateInstitutionSelectionDisplay = () => {
     // If the user is not an SO, or does not have an existing institution,
     // allow the user to select an institution from the available list.
@@ -464,11 +462,9 @@ export default function ResearcherProfile(props) {
   };
 
   render() {
-    const countryNames = this.generateCountryNames();
-    const stateNames = this.generateStateNames();
-    let completed = this.state.profile.completed;
-    const { currentUser, institutionId, showValidationMessages } = this.state;
-    const libraryCards = get(this.state.currentUser, 'libraryCards', []);
+    const countryNames = generateCountryNames();
+    const stateNames = generateStateNames();
+    const libraryCards = get(currentUser, 'libraryCards', []);
     let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
     const userEmail = get(currentUser, 'email');
 
@@ -477,7 +473,7 @@ export default function ResearcherProfile(props) {
       div({ className: 'container' }, [
         div({ className: 'row no-margin' }, [
           div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-            Notification({notificationData: this.state.notificationData}),
+            Notification({notificationData}),
             PageHeading({
               id: 'researcherProfile',
               color: 'common',
@@ -497,16 +493,16 @@ export default function ResearcherProfile(props) {
                     id: 'profileName',
                     name: 'profileName',
                     type: 'text',
-                    onChange: this.handleChange,
-                    className: (this.state.invalidFields.profileName && showValidationMessages) ?
+                    onChange: handleChange,
+                    className: (invalidFields.profileName && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
-                    value: isNil(this.state.profile.profileName) ? '' : this.state.profile.profileName,
+                    value: isNil(profile.profileName) ? '' : profile.profileName,
                     required: true
                   }),
                   span({
                     className: 'cancel-color required-field-error-span',
-                    isRendered: this.state.invalidFields.profileName && showValidationMessages
+                    isRendered: invalidFields.profileName && showValidationMessages
                   }, ['Full Name is required'])
                 ]),
 
@@ -531,8 +527,8 @@ export default function ResearcherProfile(props) {
                     id: 'chk_sendNotificationsAcademicEmail',
                     name: 'checkNotifications',
                     className: 'checkbox-inline rp-checkbox',
-                    checked: isNil(this.state.profile.checkNotifications) ? false : this.state.profile.checkNotifications,
-                    onChange: this.handleCheckboxChange
+                    checked: isNil(profile.checkNotifications) ? false : profile.checkNotifications,
+                    onChange: handleCheckboxChange
                   }),
                   label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
                     ['Send Notifications to my Academic/Business Email Address'])
@@ -546,13 +542,13 @@ export default function ResearcherProfile(props) {
                     id: 'additionalEmail',
                     name: 'additionalEmail',
                     type: 'text',
-                    onChange: this.handleAdditionalEmailChange,
+                    onChange: handleAdditionalEmailChange,
                     className: 'form-control',
-                    value: isNil(this.state.additionalEmail) ? '' : this.state.additionalEmail
+                    value: isNil(additionalEmail) ? '' : additionalEmail
                   }),
                   span({
                     className: 'cancel-color required-field-error-span',
-                    isRendered: (this.state.additionalEmail.indexOf('@') === -1) && showValidationMessages
+                    isRendered: (additionalEmail.indexOf('@') === -1) && showValidationMessages
                   }, ['Email Address is empty or has invalid format'])
                 ])
               ]),
@@ -571,7 +567,7 @@ export default function ResearcherProfile(props) {
                       className: 'col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
                       onNihStatusUpdate: () => {},
-                      location: this.props.location
+                      location: props.location
                     }),
                     div({ className: '' }, [
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
@@ -593,8 +589,8 @@ export default function ResearcherProfile(props) {
                         name: 'linkedIn',
                         type: 'text',
                         className: 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.linkedIn) ? '' : this.state.profile.linkedIn
+                        onChange: handleChange,
+                        value: isNil(profile.linkedIn) ? '' : profile.linkedIn
                       })
                     ]),
                     div({ className: 'col-sm-4 col-xs-12' }, [
@@ -604,8 +600,8 @@ export default function ResearcherProfile(props) {
                         name: 'orcid',
                         type: 'text',
                         className: 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.orcid) ? '' : this.state.profile.orcid
+                        onChange: handleChange,
+                        value: isNil(profile.orcid) ? '' : profile.orcid
                       })
                     ]),
                     div({ className: 'col-sm-4 col-xs-12' }, [
@@ -615,8 +611,8 @@ export default function ResearcherProfile(props) {
                         name: 'researcherGate',
                         type: 'text',
                         className: 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.researcherGate) ? '' : this.state.profile.researcherGate,
+                        onChange: handleChange,
+                        value: isNil(profile.researcherGate) ? '' : profile.researcherGate,
                       })
                     ])
                   ])
@@ -627,13 +623,13 @@ export default function ResearcherProfile(props) {
                     'Institution Name* ',
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                      "data-tip": (isSigningOfficial && !isNil(institutionId)) ?
-                        "As a 'Signing Official', your institution cannot be changed here. Please submit a support request via the 'Contact Us' form to have it changed." :
-                        "If your preferred institution cannot be found, please submit a support request via the 'Contact Us' form to have it added.",
+                      'data-tip': (isSigningOfficial && !isNil(institutionId)) ?
+                        'As a 'Signing Official', your institution cannot be changed here. Please submit a support request via the 'Contact Us' form to have it changed.' :
+                        'If your preferred institution cannot be found, please submit a support request via the 'Contact Us' form to have it added.',
                       'data-for': 'tip_profileState',
                     })
                   ]),
-                  this.generateInstitutionSelectionDisplay()
+                  generateInstitutionSelectionDisplay()
                 ]),
 
                 div({ className: 'col-xs-12 no-padding' }, [
@@ -644,16 +640,16 @@ export default function ResearcherProfile(props) {
                         id: 'profileDepartment',
                         name: 'department',
                         type: 'text',
-                        className: (this.state.invalidFields.department && showValidationMessages) ?
+                        className: (invalidFields.department && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.department) ? '' : this.state.profile.department,
+                        onChange: handleChange,
+                        value: isNil(profile.department) ? '' : profile.department,
                         required: true
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: this.state.invalidFields.department && showValidationMessages
+                        isRendered: invalidFields.department && showValidationMessages
                       }, ['Department is required'])
                     ]),
                     div({ className: 'col-xs-6' }, [
@@ -666,8 +662,8 @@ export default function ResearcherProfile(props) {
                         name: 'division',
                         type: 'text',
                         className: 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.division) ? '' : this.state.profile.division
+                        onChange: handleChange,
+                        value: isNil(profile.division) ? '' : profile.division
                       })
                     ])
                   ])
@@ -681,16 +677,16 @@ export default function ResearcherProfile(props) {
                         id: 'profileAddress1',
                         name: 'address1',
                         type: 'text',
-                        className: ((this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ?
+                        className: ((profile.address1 === '' || invalidFields.address1) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.address1) ? '' : this.state.profile.address1,
+                        onChange: handleChange,
+                        value: isNil(profile.address1) ? '' : profile.address1,
                         required: true
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: (this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages
+                        isRendered: (profile.address1 === '' || invalidFields.address1) && showValidationMessages
                       }, ['Street Address is required'])
                     ]),
                     div({ className: 'col-xs-6' }, [
@@ -703,8 +699,8 @@ export default function ResearcherProfile(props) {
                         name: 'address2',
                         type: 'text',
                         className: 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.address2) ? '' : this.state.profile.address2
+                        onChange: handleChange,
+                        value: isNil(profile.address2) ? '' : profile.address2
                       })
                     ])
                   ])
@@ -718,9 +714,9 @@ export default function ResearcherProfile(props) {
                         id: 'profileCity',
                         name: 'city',
                         type: 'text',
-                        className: (this.state.invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.city) ? '' : this.state.profile.city,
+                        className: (invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        onChange: handleChange,
+                        value: isNil(profile.city) ? '' : profile.city,
                         required: true
                       }),
                       span({
@@ -733,22 +729,22 @@ export default function ResearcherProfile(props) {
                       label({ id: 'lbl_profileState', className: 'control-label'}, ['State* ',
                         span({
                           className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                          "data-tip": "State cannot be selected if a non-US Country is selected.",
+                          'data-tip': 'State cannot be selected if a non-US Country is selected.',
                           'data-for': 'tip_profileState',
                         })
                       ]),
                       select({
                         id: 'profileState',
                         name: 'state',
-                        onChange: this.handleChange,
-                        value: this.state.profile.state,
-                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        onChange: handleChange,
+                        value: profile.state,
+                        className: (invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true,
-                        disabled: (this.state.profile.country !== "" && this.state.profile.country !== "United States of America")
+                        disabled: (profile.country !== '' && profile.country !== 'United States of America')
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: this.state.invalidFields.state && showValidationMessages
+                        isRendered: invalidFields.state && showValidationMessages
                       }, ['State is required if you live in the United States'])
                     ])
                   ])
@@ -762,16 +758,16 @@ export default function ResearcherProfile(props) {
                         id: 'profileZip',
                         name: 'zipcode',
                         type: 'text',
-                        className: (this.state.invalidFields.zipcode && showValidationMessages) ?
+                        className: (invalidFields.zipcode && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
-                        onChange: this.handleChange,
-                        value: isNil(this.state.profile.zipcode) ? '' : this.state.profile.zipcode,
+                        onChange: handleChange,
+                        value: isNil(profile.zipcode) ? '' : profile.zipcode,
                         required: true
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: this.state.invalidFields.zipcode && showValidationMessages
+                        isRendered: invalidFields.zipcode && showValidationMessages
                       }, ['Zip/Postal Code is required'])
                     ]),
 
@@ -780,16 +776,16 @@ export default function ResearcherProfile(props) {
                       select({
                         id: 'profileCountry',
                         name: 'country',
-                        onChange: this.handleChange,
-                        value: this.state.profile.country,
-                        className: (this.state.invalidFields.country && showValidationMessages) ?
+                        onChange: handleChange,
+                        value: profile.country,
+                        className: (invalidFields.country && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
                         required: true
                       }, countryNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: this.state.invalidFields.country && showValidationMessages
+                        isRendered: invalidFields.country && showValidationMessages
                       }, ['Country is required'])
                     ])
                   ])
@@ -813,8 +809,8 @@ export default function ResearcherProfile(props) {
 
                 div({ className: 'col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.profile.isThePI,
-                    onChange: this.handleRadioChange,
+                    value: profile.isThePI,
+                    onChange: handleRadioChange,
                     id: 'rad_isThePI',
                     name: 'isThePI',
                     required: true
@@ -823,11 +819,11 @@ export default function ResearcherProfile(props) {
                 span({
                   className: 'cancel-color required-field-error-span',
                   style: { 'marginLeft': '15px' },
-                  isRendered: (this.state.profile.isThePI === null || this.state.invalidFields.isThePI) && showValidationMessages
+                  isRendered: (profile.isThePI === null || invalidFields.isThePI) && showValidationMessages
                 }, ['Required field'])
               ]),
 
-              div({ isRendered: this.state.profile.isThePI === 'false', className: 'form-group' }, [
+              div({ isRendered: profile.isThePI === 'false', className: 'form-group' }, [
 
                 div({ className: 'col-xs-12' }, [
                   label({
@@ -837,8 +833,8 @@ export default function ResearcherProfile(props) {
 
                 div({ className: 'col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.profile.havePI,
-                    onChange: this.handleRadioChange,
+                    value: profile.havePI,
+                    onChange: handleRadioChange,
                     id: 'rad_havePI',
                     name: 'havePI',
                     required: true
@@ -847,10 +843,10 @@ export default function ResearcherProfile(props) {
                 span({
                   className: 'cancel-color required-field-error-span',
                   style: { 'marginLeft': '15px' },
-                  isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
+                  isRendered: (invalidFields.havePI === 'true' || invalidFields.havePI) && showValidationMessages
                 }, ['Required field']),
 
-                div({ isRendered: this.state.profile.havePI === true || this.state.profile.havePI === 'true', className: 'form-group' }, [
+                div({ isRendered: profile.havePI === true || profile.havePI === 'true', className: 'form-group' }, [
                   div({ className: 'col-xs-12' }, [
                     label({ id: 'lbl_profilePIName', className: 'control-label' }, ['Principal Investigator Name*']),
                     input({
@@ -858,13 +854,13 @@ export default function ResearcherProfile(props) {
                       name: 'piName',
                       type: 'text',
                       className: 'form-control ',
-                      onChange: this.handleChange,
-                      value: isNil(this.state.profile.zipcode) ? '' : this.state.profile.piName,
-                      required: this.state.profile.havePI === true
+                      onChange: handleChange,
+                      value: isNil(profile.zipcode) ? '' : profile.piName,
+                      required: profile.havePI === true
                     }),
                     span({
                       className: 'cancel-color required-field-error-span',
-                      isRendered: (this.state.profile.piName === '' || this.state.invalidFields.piName) && showValidationMessages
+                      isRendered: (profile.piName === '' || invalidFields.piName) && showValidationMessages
                     }, ['Principal Investigator is required'])
                   ]),
 
@@ -878,13 +874,13 @@ export default function ResearcherProfile(props) {
                       name: 'piEmail',
                       type: 'email',
                       className: 'form-control ',
-                      onChange: this.handleChange,
-                      value: isNil(this.state.profile.piEmail) ? '' : this.state.profile.piEmail,
-                      required: this.state.profile.havePI === true
+                      onChange: handleChange,
+                      value: isNil(profile.piEmail) ? '' : profile.piEmail,
+                      required: profile.havePI === true
                     }),
                     span({
                       className: 'cancel-color required-field-error-span',
-                      isRendered: (this.state.invalidFields.piEmail && this.state.profile.piEmail.indexOf('@') === -1) && showValidationMessages
+                      isRendered: (invalidFields.piEmail && profile.piEmail.indexOf('@') === -1) && showValidationMessages
                     }, ['Email Address is empty or has invalid format'])
                   ]),
 
@@ -898,8 +894,8 @@ export default function ResearcherProfile(props) {
                       name: 'eRACommonsID',
                       type: 'text',
                       className: 'form-control',
-                      onChange: this.handleChange,
-                      value: isNil(this.state.profile.eRACommonsID) ? '' : this.state.profile.eRACommonsID
+                      onChange: handleChange,
+                      value: isNil(profile.eRACommonsID) ? '' : profile.eRACommonsID
                     })
                   ])
                 ])
@@ -916,8 +912,8 @@ export default function ResearcherProfile(props) {
                     name: 'pubmedID',
                     type: 'text',
                     className: 'form-control',
-                    onChange: this.handleChange,
-                    value: isNil(this.state.profile.pubmedID) ? '' : this.state.profile.pubmedID
+                    onChange: handleChange,
+                    value: isNil(profile.pubmedID) ? '' : profile.pubmedID
                   })
                 ]),
 
@@ -932,8 +928,8 @@ export default function ResearcherProfile(props) {
                     className: 'form-control',
                     maxLength: '512',
                     rows: '3',
-                    onChange: this.handleChange,
-                    value: this.state.profile.scientificURL
+                    onChange: handleChange,
+                    value: profile.scientificURL
                   })
                 ])
               ]),
@@ -950,33 +946,33 @@ export default function ResearcherProfile(props) {
                   ConfirmationDialog({
                     title: 'Submit Profile',
                     color: 'common',
-                    showModal: this.state.showDialogSubmit,
-                    action: { label: 'Yes', handler: this.dialogHandlerSubmit }
+                    showModal: showDialogSubmit,
+                    action: { label: 'Yes', handler: dialogHandlerSubmit }
                   }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
                   button({
-                    id: 'btn_continueLater', onClick: this.saveProfile,
+                    id: 'btn_continueLater', isRendered: profile.completed !== true, onClick: saveProfile,
                     className: 'f-right btn-secondary common-color'
                   }, ['Continue later']),
 
                   ConfirmationDialog({
                     title: 'Continue later',
                     color: 'common',
-                    showModal: this.state.showDialogSave,
-                    action: { label: 'Yes', handler: this.dialogHandlerSave }
+                    showModal: showDialogSave,
+                    action: { label: 'Yes', handler: dialogHandlerSave }
                   }, [
                     div({ className: 'dialog-description' },
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
                   ]),
                   h(ReactTooltip, {
-                    id: "tip_profileState",
+                    id: 'tip_profileState',
                     place: 'left',
                     effect: 'solid',
                     multiline: true,
                     className: 'tooltip-wrapper'
                   }),
                   h(ReactTooltip, {
-                    id: "tip_isThePI",
+                    id: 'tip_isThePI',
                     place: 'left',
                     effect: 'solid',
                     multiline: true,
