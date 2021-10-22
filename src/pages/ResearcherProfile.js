@@ -333,25 +333,20 @@ export default function ResearcherProfile(props) {
     // allow the user to select an institution from the available list.
     // If the user is an SO and has an assigned institution, prevent the
     // selection of a new institution as that will result in an error.
-    const { currentUser, institutionId, institutionList } = this.state;
     let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
 
     if (isNil(institutionId) || !isSigningOfficial) {
-      const { invalidFields, showValidationMessages, validateFields } = this.state;
       return div({},
         [
           h(SearchSelect, {
             id: 'Institution',
             label: 'institution',
             onSelection: (selection) => {
-              this.setState(prev => {
-                prev.institutionId = selection;
-                return prev;
-              }, () => {
+              setInstitutionId(selection), () => {
                 if (validateFields) {
-                  this.validateUserFields();
+                  validateUserFields();
                 }
-              });
+              };
             },
             options: institutionList.map(institution => {
               return {
@@ -361,7 +356,7 @@ export default function ResearcherProfile(props) {
             }),
             placeholder: 'Please Select an Institution',
             searchPlaceholder: 'Search for Institution...',
-            value: this.state.institutionId,
+            value: institutionId,
             className: (invalidFields.institution && showValidationMessages) ?
               'form-control required-field-error' :
               'form-control',
@@ -684,7 +679,7 @@ export default function ResearcherProfile(props) {
                   'Are you the Principal Investigator?* ',
                   span({
                     className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                    'data-tip': 'This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.',
+                    'data-tip': 'This information is required in order to classify users as bona fide researchers as part of the process of Data Access approvals.',
                     'data-for': 'tip_isThePI'
                   })
                 ])
