@@ -17,6 +17,92 @@ import {Storage} from '../libs/storage';
 import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
+  // form vars
+  const [profileName, setProfileName] = useState('');
+  const [academicEmail, setAcademicEmail] = useState('');
+  const [checkNotifications, setCheckNotifications] = useState(false);
+  const [additionalEmail, setAdditionalEmail] = useState('');
+  const [linkedIn, setLinkedIn] = useState('');
+  const [orcid, setOrcid] = useState('');
+  const [researchGate, setResearchGate] = useState('');
+  const [institutionId, setInstitutionId] = useState('');
+  const [department, setDepartment] = useState('');
+  const [division, setDivision] = useState('');
+  const [address1, setAddress1] = useState('');
+  const [address2, setAddress2] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState();
+  const [zipCode, setZipCode] = useState('');
+  const [country, setCountry] = useState('');
+  const [isThePI, setIsThePI] = useState(null);
+  const [havePI, setHavePI] = useState(null);
+  const [piName, setPIName] = useState('');
+  const [piEmail, setPIEmail] = useState('');
+  const [eRACommonsID, setERACommonsID] = useState('');
+  const [pubmedID, setPubmedID] = useState('');
+  const [scientificURL, setScientificURL] = useState('');
+  
+  // other vars
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState();
+  const [userRoles, setUserRoles] = useState([]);
+  let [institutionList, setInstitutionList] = useState([]); //temp fix
+  const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
+  const [completed, setCompleted] = useState();
+  
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        await getResearcherProfile();
+        institutionList = await Institution.list();
+        setInstitutionList(institutionList);
+        props.history.push('profile');
+        // notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+        // setNotificationData(notificationData);
+        setCurrentUser(Storage.getCurrentUser());
+        setIsLoading(false);
+      } catch (error) {
+        Notification.showError({text: 'Error: Unable to retrieve user data from server'});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  }, []);
+  
+  const getResearcherProfile = async () => {
+    const user = await User.getMe();
+    const userProps = getPropertyValuesFromUser(user);
+    
+    setUserRoles(user.roles);
+    setAdditionalEmail(isNil(user.additionalEmail) ? '' : user.additionalEmail);
+    setInstitutionId(user.institutionId);
+    setAcademicEmail(userProps.academicEmail || user.email);
+    setAddress1(userProps.address1);
+    setAddress2(userProps.address2);
+    setCheckNotifications(userProps.checkNotifications === "true");
+    setCity(userProps.city);
+    setCompleted(userProps.completed);
+    setCountry(userProps.country);
+    setDepartment(userProps.department);
+    setDivision(userProps.division);
+    setERACommonsID(userProps.eRACommonsId);
+    setHavePI(userProps.havePI);
+    setIsThePI(userProps.isThePI);
+    setLinkedIn(userProps.linkedIn);
+    setOrcid(userProps.orcid);
+    setPIEmail(userProps.piEmail);
+    setPIName(userProps.piName);
+    setProfileName(user.displayName);
+    setPubmedID(userProps.pubmedID);
+    setResearchGate(userProps.researcherGate);
+    setScientificURL(userProps.scientificURL);
+    setState(userProps.state);
+    setZipCode(userProps.zipcode);
+    if(completed !== undefined && completed !== '') {
+      setCompleted(JSON.parse(completed));
+    }
+  };
   
   // temporary empty definitions
   const stateNames = [];
@@ -34,7 +120,7 @@ export default function ResearcherProfile(props) {
         ['will go here']
       ])
     ])
-  }
+  };
   
   return (
     div({ className: 'container' }, [
@@ -60,8 +146,7 @@ export default function ResearcherProfile(props) {
                   id: 'profileName',
                   name: 'profileName',
                   type: 'text',
-                  className: 'form-control',
-                  value: '',
+                  className: 'form-control'
                 }),
               ]),
 
@@ -74,7 +159,6 @@ export default function ResearcherProfile(props) {
                   id: 'profileAcademicEmail',
                   name: 'academicEmail',
                   type: 'email',
-                  value: '',
                   className: 'form-control',
                   disabled: true
                 })
@@ -100,8 +184,7 @@ export default function ResearcherProfile(props) {
                   id: 'additionalEmail',
                   name: 'additionalEmail',
                   type: 'text',
-                  className: 'form-control',
-                  value: ''
+                  className: 'form-control'
                 }),
                 // span({
                   // className: 'cancel-color required-field-error-span',
@@ -145,8 +228,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileLinkedIn',
                       name: 'linkedIn',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ]),
                   div({ className: 'col-sm-4 col-xs-12' }, [
@@ -155,8 +237,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileOrcid',
                       name: 'orcid',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ]),
                   div({ className: 'col-sm-4 col-xs-12' }, [
@@ -165,8 +246,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileResearcherGate',
                       name: 'researcherGate',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ])
                 ])
@@ -194,8 +274,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileDepartment',
                       name: 'department',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ]),
                   div({ className: 'col-xs-6' }, [
@@ -207,8 +286,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileDivision',
                       name: 'division',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ])
                 ])
@@ -222,8 +300,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileAddress1',
                       name: 'address1',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ]),
                   div({ className: 'col-xs-6' }, [
@@ -235,8 +312,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileAddress2',
                       name: 'address2',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ])
                 ])
@@ -250,8 +326,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileCity',
                       name: 'city',
                       type: 'text',
-                      className: 'form-control',
-                      value: ''
+                      className: 'form-control'
                     })
                   ]),
 
@@ -266,7 +341,6 @@ export default function ResearcherProfile(props) {
                     select({
                       id: 'profileState',
                       name: 'state',
-                      value: '',
                       className: 'form-control',
                       // disabled: (profile.country !== '' && profile.country !== 'United States of America')
                     }, stateNames )
@@ -282,8 +356,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileZip',
                       name: 'zipcode',
                       type: 'text',
-                      className: 'form-control',
-                      value: '',
+                      className: 'form-control'
                     })
                   ]),
 
@@ -292,7 +365,6 @@ export default function ResearcherProfile(props) {
                     select({
                       id: 'profileCountry',
                       name: 'country',
-                      value: '',
                       className: 'form-control',
                     }, countryNames )
                   ])
@@ -317,7 +389,6 @@ export default function ResearcherProfile(props) {
 
               div({ className: 'col-xs-12 rp-group' }, [
                 YesNoRadioGroup({
-                  value: '',
                   id: 'rad_isThePI',
                   name: 'isThePI'
                 })
@@ -337,7 +408,6 @@ export default function ResearcherProfile(props) {
 
               div({ className: 'col-xs-12 rp-group' }, [
                 YesNoRadioGroup({
-                  value: '',
                   id: 'rad_havePI',
                   name: 'havePI',
                 })
@@ -353,8 +423,7 @@ export default function ResearcherProfile(props) {
                     id: 'profilePIName',
                     name: 'piName',
                     type: 'text',
-                    className: 'form-control ',
-                    value: '',
+                    className: 'form-control '
                   }),
                 ]),
 
@@ -367,8 +436,7 @@ export default function ResearcherProfile(props) {
                     id: 'profilePIEmail',
                     name: 'piEmail',
                     type: 'email',
-                    className: 'form-control ',
-                    value: ''
+                    className: 'form-control '
                   })
                 ]),
 
@@ -381,8 +449,7 @@ export default function ResearcherProfile(props) {
                     id: 'profileEraCommons',
                     name: 'eRACommonsID',
                     type: 'text',
-                    className: 'form-control',
-                    value: ''
+                    className: 'form-control'
                   })
                 ])
               ])
@@ -398,8 +465,7 @@ export default function ResearcherProfile(props) {
                   id: 'profilePubmedID',
                   name: 'pubmedID',
                   type: 'text',
-                  className: 'form-control',
-                  value: ''
+                  className: 'form-control'
                 })
               ]),
 
@@ -413,8 +479,7 @@ export default function ResearcherProfile(props) {
                   name: 'scientificURL',
                   className: 'form-control',
                   maxLength: '512',
-                  rows: '3',
-                  value: ''
+                  rows: '3'
                 })
               ])
             ]),
