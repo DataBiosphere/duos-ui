@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
 import {cloneDeep, find, get, isEmpty, isNil, omit, omitBy, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
-import {button, div, form, h, hh, hr, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import {eRACommons} from '../components/eRACommons';
@@ -12,390 +12,35 @@ import {Notification} from '../components/Notification';
 import {SearchSelect} from '../components/SearchSelect';
 import {Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
+import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
 import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [fieldStatus, setFieldStatus] = useState({});
-  const [showDialogSubmit, setShowDialogSubmit] = useState(false);
-  const [showDialogSave, setShowDialogSave] = useState(false);
-  const [additionalEmail, setAdditionalEmail] = useState('');
-  const [institutionId, setInstitutionId] = useState(null);
-  const [roles, setRoles] = useState([]);
-  const [profile, setProfile] = useState({
-    academicEmail: '',
-    address1: '',
-    address2: '',
-    checkNotifications: false,
-    city: '',
-    completed: undefined,
-    country: '',
-    department: '',
-    division: '',
-    eRACommonsID: '',
-    havePI: null,
-    isThePI: null,
-    linkedIn: '',
-    orcid: '',
-    piEmail: '',
-    piName: '',
-    profileName: '',
-    pubmedID: '',
-    researcherGate: '',
-    scientificURL: '',
-    state: undefined,
-    zipcode: ''
-  });
-  const [showRequired, setShowRequired] = useState(false);
-  const [invalidFields, setInvalidFields] = useState({
-    profileName: false,
-    academicEmail: false,
-    department: false,
-    address1: false,
-    city: false,
-    state: false,
-    country: false,
-    zipcode: false,
-    havePI: false,
-    isThePI: false,
-    piName: false,
-    piEmail: false,
-    institution: false
-  });
-  let [showValidationMessages, setShowValidationMessages] = useState(false); //temp fix
-  const [validateFields, setValidateFields] = useState(false);
-  const [institutionList, setInstitutionList] = useState([]);
-  let [notificationData, setNotificationData] = useState(); //temp fix
-  const [currentUser, setCurrentUser] = useState();
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setIsLoading(true);
-        await getResearcherProfile();
-        props.history.push('profile');
-        notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
-        setNotificationData(notificationData);
-        setCurrentUser(Storage.getCurrentUser());
-        setIsLoading(false);
-      } catch (error) {
-        Notification.showError({text: 'Error: Unable to retrieve user data from server'});
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  }, []);
-
-  const getResearcherProfile = async () => {
-    const user = await User.getMe();
-    const researcherProps = getPropertyValuesFromUser(user);
-    const institutionList = await Institution.list();
-
-    if (isEmpty(user.roles)) {
-      setRoles([{ 'roleId': 5, 'name': USER_ROLES.researcher }]);
-    } else {
-      setRoles(user.roles);
-    }
-    setAdditionalEmail(isNil(user.additionalEmail) ? '' : user.additionalEmail);
-    setInstitutionId(user.institutionId);
-    setInstitutionList(institutionList);
-    profile.academicEmail = researcherProps.academicEmail || user.email;
-    profile.address1 = researcherProps.address1;
-    profile.address2 = researcherProps.address2;
-    profile.checkNotifications = (researcherProps.checkNotifications === 'true');
-    profile.city = researcherProps.city;
-    profile.completed = researcherProps.completed;
-    profile.country = researcherProps.country;
-    profile.department = researcherProps.department;
-    profile.division = researcherProps.division;
-    profile.eRACommonsID = researcherProps.eraCommonsId;
-    profile.havePI = researcherProps.havePI;
-    profile.isThePI = researcherProps.isThePI;
-    profile.linkedIn = researcherProps.linkedIn;
-    profile.orcid = researcherProps.orcid;
-    profile.piEmail = researcherProps.piEmail;
-    profile.piName = researcherProps.piName;
-    profile.profileName = user.displayName;
-    profile.pubmedID = researcherProps.pubmedID;
-    profile.researcherGate = researcherProps.researcherGate;
-    profile.scientificURL = researcherProps.scientificURL;
-    profile.state = researcherProps.state;
-    profile.zipcode = researcherProps.zipcode;
-    setProfile(profile);
-  };
-
-  const handleChange = (event) => {
-    const field = event.target.name;
-    const value = event.target.value;
-
-    profile[field] = value;
-    setProfile(profile);
-    if (validateFields) {
-      validateUserFields();
-    }
-
-    if (field === 'country') {
-      if (value !== 'United States of America') {
-        profile.setState('');
-        setProfile(profile);
-        if (validateFields) {
-          validateUserFields();
-        }
-      }
-    }
-  };
-
-  const validateUserFields = () => {
-    if (!isValid(profile.profileName)) {
-      invalidFields.profileName = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.academicEmail) || profile.academicEmail.indexOf('@') === -1) {
-      invalidFields.academicEmail = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValidNumber(institutionId)) {
-      invalidFields.institution = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.department)) {
-      invalidFields.department = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.address1)) {
-      invalidFields.address1 = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.city)) {
-      invalidFields.city = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValidState(profile.state)) {
-      invalidFields.state = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.country)) {
-      invalidFields.country = true;
-      showValidationMessages = true;
-    }
-
-    if (!isValid(profile.zipcode)) {
-      invalidFields.zipcode = true;
-      showValidationMessages = true;
-    }
-
-    if (profile.isThePI === null) {
-      invalidFields.isThePI = true;
-      showValidationMessages = true;
-    }
-
-    if (profile.isThePI === 'false' && profile.havePI === 'true') {
-      if (!isValid(profile.piEmail) || profile.piEmail.indexOf('@') === -1) {
-        invalidFields.piEmail = true;
-        showValidationMessages = true;
-      }
-      if (!isValid(profile.piName)) {
-        invalidFields.piName = true;
-        showValidationMessages = true;
-      }
-    }
-    
-    if (profile.isThePI === 'false' && profile.havePI === '') {
-      invalidFields.havePI = true;
-      showValidationMessages = true;
-    }
-
-    setInvalidFields(invalidFields);
-    setShowValidationMessages(showValidationMessages);
-    return showValidationMessages;
+  
+  // temporary empty definitions
+  const stateNames = [];
+  const countryNames = [];
+  
+  const showIncompleteFields = () => {
+    return ul({}, [
+      li({}, [
+        ['List of']
+      ]),
+      li({}, [
+        ['invalid fields']
+      ]),
+      li({}, [
+        ['will go here']
+      ])
+    ])
   }
-
-  const isValid = (value) => {
-    let isValid = false;
-    if (value !== '' && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  }
-
-  const isValidNumber = (value) => {
-    let isValid = false;
-    if (value !== 0 && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  }
-
-  const isValidState = (value) => {
-    const stateSelected = (!isNil(value) && !isEmpty(value));
-    const inUS = (profile.country === 'United States of America' || profile.country === '');
-    if (inUS && stateSelected) {
-      return true;
-    }
-    return !inUS;
-  }
-
-  const handleRadioChange = (event, field, value) => {
-    profile[field] = value;
-    setProfile(profile);
-    if (field === 'isThePI') {
-      clearNotRelatedPIFields();
-    }
-    if (field === 'havePI' && (value === true || value === 'true')) {
-      clearCommonsFields();
-    } else if (field === 'havePI' && (value === false || value === 'false')) {
-      clearNoHasPIFields();
-    }
-    if (validateFields) {
-      validateUserFields();
-    }
-  };
-
-  const handleCheckboxChange = (event) => {
-    profile.checkNotifications = event.target.checked;
-    setProfile(profile);
-  };
-
-  const handleAdditionalEmailChange = (event) => {
-    profile.additionalEmail = event.target.value;
-    setProfile(profile);
-  };
-
-  const clearNotRelatedPIFields = () => {
-    clearCommonsFields();
-    profile.havePI = '';
-    setProfile(profile);
-    clearPIData();
-  };
-
-  const clearNoHasPIFields = () => {
-    clearPIData();
-    clearCommonsFields();
-  };
-
-  const clearCommonsFields = () => {
-    profile.eRACommonsID = '';
-    setProfile(profile);
-  };
-
-  const clearPIData = () => {
-    profile.piName = '';
-    profile.piEmail = '';
-    setProfile(profile);
-  };
-
-  const submitForm = (event) => {
-    event.preventDefault();
-    // not implemented yet
-  };
-
-  const cleanObject = (obj) => {
-    // Removes any zero length properties from a copy of the object
-    return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
-  };
-
-  // When posting a user's researcher properties, library cards and entries are
-  // not valid properties for update.
-  const cloneProfile = (profile) => {
-    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
-  };
-
-  const generateCountryNames = () => {
-    const USA = option({ value: 'United States of America'}, ['United States of America']);
-    const empty = option({ value: ''}, ['']);
-    const countryNames = getNames().map((name) => option({value: name}, [name]));
-    const index = countryNames.indexOf(USA);
-    countryNames.splice(index, 1);
-    countryNames.splice(0, 0, USA);
-    countryNames.splice(0, 0, empty);
-    return countryNames;
-  };
-
-  const generateStateNames = () => {
-    const empty = option({ value: ''}, ['']);
-    const UsaStates = require('usa-states').UsaStates;
-    const stateNames = (new UsaStates().arrayOf('names')).map((name) => option({value: name}, [name]));
-    stateNames.splice(0, 0, empty);
-    return stateNames;
-  };
-
-  const generateInstitutionSelectionDisplay = () => {
-    // If the user is not an SO, or does not have an existing institution,
-    // allow the user to select an institution from the available list.
-    // If the user is an SO and has an assigned institution, prevent the
-    // selection of a new institution as that will result in an error.
-    let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
-
-    if (isNil(institutionId) || !isSigningOfficial) {
-      return div({},
-        [
-          h(SearchSelect, {
-            id: 'Institution',
-            label: 'institution',
-            onSelection: (selection) => {
-              setInstitutionId(selection), () => {
-                if (validateFields) {
-                  validateUserFields();
-                }
-              };
-            },
-            options: institutionList.map(institution => {
-              return {
-                key: institution.id,
-                displayText: institution.name,
-              };
-            }),
-            placeholder: 'Please Select an Institution',
-            searchPlaceholder: 'Search for Institution...',
-            value: institutionId,
-            className: (invalidFields.institution && showValidationMessages) ?
-              'form-control required-field-error' :
-              'form-control',
-            required: true,
-          }),
-          span({
-            className: 'cancel-color required-field-error-span',
-            isRendered: invalidFields.institution && showValidationMessages,
-          }, ['Institution Name is required']),
-        ]);
-    } else {
-      let institution = find(institutionList,{id: institutionId});
-      return div({
-        className: 'col-xs-12',
-        style: {padding: 0},
-      }, [
-        input({
-          id: 'profileInstitution',
-          name: 'institution',
-          type: 'text',
-          disabled: true,
-          className: 'form-control',
-          value: (isNil(institution) ? '' : institution.name),
-        }),
-      ]);
-    }
-  };
-
-  const countryNames = generateCountryNames();
-  const stateNames = generateStateNames();
-  const libraryCards = get(currentUser, 'libraryCards', []);
-  let isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
-  const userEmail = get(currentUser, 'email');
-
+  
   return (
     div({ className: 'container' }, [
       div({ className: 'row no-margin' }, [
         div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-          Notification({notificationData}),
+          // Notification({notificationData}),
           PageHeading({
             id: 'researcherProfile',
             color: 'common',
@@ -415,9 +60,8 @@ export default function ResearcherProfile(props) {
                   id: 'profileName',
                   name: 'profileName',
                   type: 'text',
-                  onChange: handleChange,
                   className: 'form-control',
-                  value: isNil(profile.profileName) ? '' : profile.profileName,
+                  value: '',
                 }),
               ]),
 
@@ -430,7 +74,7 @@ export default function ResearcherProfile(props) {
                   id: 'profileAcademicEmail',
                   name: 'academicEmail',
                   type: 'email',
-                  value: userEmail,
+                  value: '',
                   className: 'form-control',
                   disabled: true
                 })
@@ -442,8 +86,7 @@ export default function ResearcherProfile(props) {
                   id: 'chk_sendNotificationsAcademicEmail',
                   name: 'checkNotifications',
                   className: 'checkbox-inline rp-checkbox',
-                  checked: isNil(profile.checkNotifications) ? false : profile.checkNotifications,
-                  onChange: handleCheckboxChange
+                  checked: ''
                 }),
                 label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
                   ['Send Notifications to my Academic/Business Email Address'])
@@ -457,14 +100,13 @@ export default function ResearcherProfile(props) {
                   id: 'additionalEmail',
                   name: 'additionalEmail',
                   type: 'text',
-                  onChange: handleAdditionalEmailChange,
                   className: 'form-control',
-                  value: isNil(additionalEmail) ? '' : additionalEmail
+                  value: ''
                 }),
-                span({
-                  className: 'cancel-color required-field-error-span',
-                  isRendered: (additionalEmail.indexOf('@') === -1) && showValidationMessages
-                }, ['Email Address is empty or has invalid format'])
+                // span({
+                  // className: 'cancel-color required-field-error-span',
+                  // isRendered: (additionalEmail.indexOf('@') === -1) && showValidationMessages
+                // }, ['Email Address is empty or has invalid format'])
               ])
             ]),
 
@@ -486,11 +128,11 @@ export default function ResearcherProfile(props) {
                   }),
                   div({ className: '' }, [
                     label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
-                    LibraryCards({
-                      style: { display: 'flex', flexFlow: 'row wrap' },
-                      isRendered: !isNil(libraryCards),
-                      libraryCards: libraryCards
-                    })
+                    // LibraryCards({
+                      // style: { display: 'flex', flexFlow: 'row wrap' },
+                      // isRendered: !isNil(libraryCards),
+                      // libraryCards: libraryCards
+                    // })
                   ])
                 ])
               ]),
@@ -504,8 +146,7 @@ export default function ResearcherProfile(props) {
                       name: 'linkedIn',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.linkedIn) ? '' : profile.linkedIn
+                      value: ''
                     })
                   ]),
                   div({ className: 'col-sm-4 col-xs-12' }, [
@@ -515,8 +156,7 @@ export default function ResearcherProfile(props) {
                       name: 'orcid',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.orcid) ? '' : profile.orcid
+                      value: ''
                     })
                   ]),
                   div({ className: 'col-sm-4 col-xs-12' }, [
@@ -526,8 +166,7 @@ export default function ResearcherProfile(props) {
                       name: 'researcherGate',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.researcherGate) ? '' : profile.researcherGate,
+                      value: ''
                     })
                   ])
                 ])
@@ -536,15 +175,15 @@ export default function ResearcherProfile(props) {
               div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
                 label({ id: 'lbl_profileInstitution', className: 'control-label' }, [
                   'Institution Name* ',
-                  span({
-                    className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                    'data-tip': (isSigningOfficial && !isNil(institutionId)) ?
-                      'As a "Signing Official", your institution cannot be changed here. Please submit a support request via the "Contact Us" form to have it changed.' :
-                      'If your preferred institution cannot be found, please submit a support request via the "Contact Us" form to have it added.',
-                    'data-for': 'tip_profileState',
-                  })
+                  // span({
+                    // className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                    // 'data-tip': (isSigningOfficial && !isNil(institutionId)) ?
+                      // 'As a "Signing Official", your institution cannot be changed here. Please submit a support request via the "Contact Us" form to have it changed.' :
+                      // 'If your preferred institution cannot be found, please submit a support request via the "Contact Us" form to have it added.',
+                    // 'data-for': 'tip_profileState',
+                  // })
                 ]),
-                generateInstitutionSelectionDisplay()
+                // generateInstitutionSelectionDisplay()
               ]),
 
               div({ className: 'col-xs-12 no-padding' }, [
@@ -556,8 +195,7 @@ export default function ResearcherProfile(props) {
                       name: 'department',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.department) ? '' : profile.department,
+                      value: ''
                     })
                   ]),
                   div({ className: 'col-xs-6' }, [
@@ -570,8 +208,7 @@ export default function ResearcherProfile(props) {
                       name: 'division',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.division) ? '' : profile.division
+                      value: ''
                     })
                   ])
                 ])
@@ -586,8 +223,7 @@ export default function ResearcherProfile(props) {
                       name: 'address1',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.address1) ? '' : profile.address1,
+                      value: ''
                     })
                   ]),
                   div({ className: 'col-xs-6' }, [
@@ -600,8 +236,7 @@ export default function ResearcherProfile(props) {
                       name: 'address2',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.address2) ? '' : profile.address2
+                      value: ''
                     })
                   ])
                 ])
@@ -616,9 +251,7 @@ export default function ResearcherProfile(props) {
                       name: 'city',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.city) ? '' : profile.city,
-                      required: true
+                      value: ''
                     })
                   ]),
 
@@ -633,11 +266,10 @@ export default function ResearcherProfile(props) {
                     select({
                       id: 'profileState',
                       name: 'state',
-                      onChange: handleChange,
-                      value: profile.state,
+                      value: '',
                       className: 'form-control',
-                      disabled: (profile.country !== '' && profile.country !== 'United States of America')
-                    }, stateNames ),
+                      // disabled: (profile.country !== '' && profile.country !== 'United States of America')
+                    }, stateNames )
                   ])
                 ])
               ]),
@@ -651,8 +283,7 @@ export default function ResearcherProfile(props) {
                       name: 'zipcode',
                       type: 'text',
                       className: 'form-control',
-                      onChange: handleChange,
-                      value: isNil(profile.zipcode) ? '' : profile.zipcode,
+                      value: '',
                     })
                   ]),
 
@@ -661,8 +292,7 @@ export default function ResearcherProfile(props) {
                     select({
                       id: 'profileCountry',
                       name: 'country',
-                      onChange: handleChange,
-                      value: profile.country,
+                      value: '',
                       className: 'form-control',
                     }, countryNames )
                   ])
@@ -687,16 +317,17 @@ export default function ResearcherProfile(props) {
 
               div({ className: 'col-xs-12 rp-group' }, [
                 YesNoRadioGroup({
-                  value: profile.isThePI,
-                  onChange: handleRadioChange,
+                  value: '',
                   id: 'rad_isThePI',
-                  name: 'isThePI',
-                  required: true
+                  name: 'isThePI'
                 })
               ])
             ]),
 
-            div({ isRendered: profile.isThePI === 'false', className: 'form-group' }, [
+            div({
+              // isRendered: profile.isThePI === 'false',
+              className: 'form-group'
+            }, [
 
               div({ className: 'col-xs-12' }, [
                 label({
@@ -706,14 +337,16 @@ export default function ResearcherProfile(props) {
 
               div({ className: 'col-xs-12 rp-group' }, [
                 YesNoRadioGroup({
-                  value: profile.havePI,
-                  onChange: handleRadioChange,
+                  value: '',
                   id: 'rad_havePI',
                   name: 'havePI',
                 })
               ]),
 
-              div({ isRendered: profile.havePI === true || profile.havePI === 'true', className: 'form-group' }, [
+              div({
+                // isRendered: profile.havePI === true || profile.havePI === 'true',
+                className: 'form-group'
+              }, [
                 div({ className: 'col-xs-12' }, [
                   label({ id: 'lbl_profilePIName', className: 'control-label' }, ['Principal Investigator Name*']),
                   input({
@@ -721,8 +354,7 @@ export default function ResearcherProfile(props) {
                     name: 'piName',
                     type: 'text',
                     className: 'form-control ',
-                    onChange: handleChange,
-                    value: isNil(profile.zipcode) ? '' : profile.piName,
+                    value: '',
                   }),
                 ]),
 
@@ -736,9 +368,7 @@ export default function ResearcherProfile(props) {
                     name: 'piEmail',
                     type: 'email',
                     className: 'form-control ',
-                    onChange: handleChange,
-                    value: isNil(profile.piEmail) ? '' : profile.piEmail,
-                    required: profile.havePI === true
+                    value: ''
                   })
                 ]),
 
@@ -752,8 +382,7 @@ export default function ResearcherProfile(props) {
                     name: 'eRACommonsID',
                     type: 'text',
                     className: 'form-control',
-                    onChange: handleChange,
-                    value: isNil(profile.eRACommonsID) ? '' : profile.eRACommonsID
+                    value: ''
                   })
                 ])
               ])
@@ -770,8 +399,7 @@ export default function ResearcherProfile(props) {
                   name: 'pubmedID',
                   type: 'text',
                   className: 'form-control',
-                  onChange: handleChange,
-                  value: isNil(profile.pubmedID) ? '' : profile.pubmedID
+                  value: ''
                 })
               ]),
 
@@ -786,19 +414,36 @@ export default function ResearcherProfile(props) {
                   className: 'form-control',
                   maxLength: '512',
                   rows: '3',
-                  onChange: handleChange,
-                  value: profile.scientificURL
+                  value: ''
                 })
               ])
             ]),
-
+            
+            div ({ className: 'row no-margin' }, [
+              div ({
+                // isRendered: showValidationMessages,
+                className: 'col-xs-12'
+              },[
+                Alert({
+                  id: 'researcherIncompleteFields',
+                  type: 'info', 
+                  title: 'Researchers: Please complete the following required fields before submitting Data Access Requests',
+                  description: showIncompleteFields()
+                })
+              ])
+            ]),
+            
             div({ className: 'row margin-top-20' }, [
               div({ className: 'col-lg-4 col-xs-6' }, [
                 div({ className: 'italic default-color' }, ['*Required field'])
               ]),
 
               div({ className: 'col-lg-8 col-xs-6' }, [
-                button({ id: 'btn_submit', onClick: submitForm, className: 'f-right btn-primary common-background' }, [
+                button({
+                  id: 'btn_submit',
+                  // onClick: submitForm,
+                  className: 'f-right btn-primary common-background'
+                }, [
                   'Submit'
                 ]),
                 h(ReactTooltip, {
@@ -822,4 +467,4 @@ export default function ResearcherProfile(props) {
       ])
     ])
   );
-};
+}
