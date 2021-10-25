@@ -89,7 +89,7 @@ const statusCellData = ({status = '- -', darCollectionId, style = {}, label = 's
 const CancelCollectionButton = (props) => {
   const { collection } = props;
   return h(SimpleButton, {
-    keyProp: `cancel-collection-${collection}`,
+    keyProp: `cancel-collection-${collection.id}`,
     label: 'Cancel',
     disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
     baseColor: Theme.palette.primary,
@@ -153,7 +153,6 @@ export default function DarCollectionTable(props) {
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
-  // const searchRef = useRef(''); //May not need this, could just pass in the value from the parent
 
   const { collections, isLoading, cancelCollection } = props;
   /*

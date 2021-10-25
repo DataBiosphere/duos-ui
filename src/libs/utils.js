@@ -621,7 +621,7 @@ export const recalculateVisibleTable = async ({
     );
     setVisibleList(visibleList);
   } catch (error) {
-    Notifications.showError({ text: 'Error updating Library Card table' });
+    Notifications.showError({ text: 'Error updating table' });
   }
 };
 
