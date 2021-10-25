@@ -1,7 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {find, getOr, cloneDeep, unset, flow} from 'lodash/fp';
-import {isNil} from 'lodash';
+import {cloneDeep, find, flow, getOr, isNil, unset} from 'lodash/fp';
 import {Config} from './config';
 import {Models} from './models';
 import {spinnerService} from './spinner-service';
@@ -24,8 +23,9 @@ axios.interceptors.response.use(function (response) {
     window.location.href = '/home';
   }
 
-  if (status >= 500) {
-    reportError(error.response.config.url, status);
+  const reportUrl = getOr(null)('response.config.url')(error);
+  if (!isNil(reportUrl) && status >= 500) {
+    reportError(reportUrl, status);
   }
 
   return Promise.reject(error);
@@ -255,7 +255,7 @@ export const DAR = {
     const dataUseModel = fp.keys(darInfo.dataUse);
     dataUseModel.forEach(key => {
       const value = rawDar[key];
-      if (!fp.isNil(value)) {
+      if (!isNil(value)) {
         darInfo.dataUse[key] = value;
       }
     });
