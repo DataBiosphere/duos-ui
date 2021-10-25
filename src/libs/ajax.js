@@ -17,13 +17,15 @@ import {isFileEmpty} from './utils';
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if (error.response.status === 401) {
+  // Default to a 502 when we can't get a real response object.
+  const status = getOr(502)('response.status')(error);
+  if (status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
 
-  if (error.response.status >= 500) {
-    reportError(error.response.config.url, error.response.status);
+  if (status >= 500) {
+    reportError(error.response.config.url, status);
   }
 
   return Promise.reject(error);
