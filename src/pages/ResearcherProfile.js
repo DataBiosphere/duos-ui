@@ -38,7 +38,7 @@ export default function ResearcherProfile(props) {
     havePI: null,
     piName: '',
     piEmail: '',
-    eRACommonsID: '',
+    piERACommonsID: '',
     pubmedID: '',
     scientificURL: '',
     completed: undefined
@@ -47,21 +47,33 @@ export default function ResearcherProfile(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState();
   const [userRoles, setUserRoles] = useState([]);
-  let [institutionList, setInstitutionList] = useState([]); //temp fix
+  const [stateNames, setStateNames] = useState([]);
+  const [countryNames, setCountryNames] = useState([]);
   const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
+  
+  let [institutionList, setInstitutionList] = useState([]); //temp fix
+  let [notificationData, setNotificationData] = useState(); //temp fix
+  const libraryCards = get(currentUser, 'libraryCards', []);
+  const isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
   
   useEffect(() => {
     const init = async () => {
       try {
         setIsLoading(true);
         await getResearcherProfile();
+        
         institutionList = await Institution.list();
         setInstitutionList(institutionList);
+        generateCountryNames();
+        generateStateNames();
+        
         props.history.push('profile');
-        // notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
-        // setNotificationData(notificationData);
+        notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+        setNotificationData(notificationData);
+        
         setCurrentUser(Storage.getCurrentUser());
+        validateFields();
         setIsLoading(false);
       } catch (error) {
         Notification.showError({text: 'Error: Unable to retrieve user data from server'});
@@ -89,7 +101,7 @@ export default function ResearcherProfile(props) {
     profile.country = userProps.country;
     profile.department = userProps.department;
     profile.division = userProps.division;
-    profile.eRACommonsID = userProps.eraCommonsId;
+    profile.piERACommonsID = ''; //temp fix
     profile.havePI = userProps.havePI;
     profile.isThePI = userProps.isThePI;
     profile.linkedIn = userProps.linkedIn;
@@ -108,10 +120,6 @@ export default function ResearcherProfile(props) {
     setProfile(profile);
   };
   
-  // temporary empty definitions
-  const stateNames = [];
-  const countryNames = [];
-  
   const handleChange = (event) => {
     let field = event.target.name;
     let value = event.target.value;
@@ -127,7 +135,28 @@ export default function ResearcherProfile(props) {
     }
     
     validateFields();
-  }
+  };
+  
+  const handleCheckboxChange = (event) => {
+    profile.checkNotifications = event.target.checked;
+    setProfile(profile);
+  };
+  
+  const handleRadioChange = (event, field, value) => {
+    profile[field] = value;
+    setProfile(profile);
+    if (profile.isThePI === true || profile.isThePI === 'true') {
+      profile.havePI = '';
+      setProfile(profile);
+    }
+    if (profile.havePI === false || profile.havePI === 'false' || profile.havePI === '') {
+      profile.piName = '';
+      profile.piEmail = '';
+      profile.piERACommonsID = '';
+      setProfile(profile);
+    }
+    validateFields();
+  };
   
   const validateFields = () => {
     let incompletes = [];
@@ -183,6 +212,8 @@ export default function ResearcherProfile(props) {
     
     setIncompleteFields(incompletes);
     setResearcherFieldsComplete(incompletes.length === 0);
+    profile.completed = researcherFieldsComplete;
+    setProfile(profile);
   }
   
   const isValid = (value) => {
@@ -210,18 +241,84 @@ export default function ResearcherProfile(props) {
     return !inUS;
   }
   
+  const generateCountryNames = () => {
+    const USA = option({ value: "United States of America"}, ["United States of America"]);
+    const empty = option({ value: ""}, [""]);
+    const countryNames = getNames().map((name) => option({value: name}, [name]));
+    const index = countryNames.indexOf(USA);
+    countryNames.splice(index, 1);
+    countryNames.splice(0, 0, USA);
+    countryNames.splice(0, 0, empty);
+    setCountryNames(countryNames);
+  };
+
+  const generateStateNames = () => {
+    const empty = option({ value: ""}, [""]);
+    const UsaStates = require('usa-states').UsaStates;
+    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    stateNames.splice(0, 0, empty);
+    setStateNames(stateNames);
+  };
+  
   const showIncompleteFields = () => {
     const listIncompleteFields = incompleteFields.map((field) => 
-      li({}, [field])
+      li({ key: field }, [field])
     );
     return ul({}, [listIncompleteFields])
+  };
+  
+  const generateInstitutionSelectionDisplay = () => {
+    // If the user is not an SO, or does not have an existing institution,
+    // allow the user to select an institution from the available list.
+    // If the user is an SO and has an assigned institution, prevent the
+    // selection of a new institution as that will result in an error.
+
+    if (isNil(profile.institutionId) || !isSigningOfficial) {
+      return div({},
+        [
+          h(SearchSelect, {
+            id: 'Institution',
+            label: 'institution',
+            onSelection: (selection) => {
+              profile.institutionId = selection;
+              setProfile(profile);
+              validateFields();
+            },
+            options: institutionList.map(institution => {
+              return {
+                key: institution.id,
+                displayText: institution.name,
+              };
+            }),
+            placeholder: 'Please Select an Institution',
+            searchPlaceholder: 'Search for Institution...',
+            value: profile.institutionId,
+            className: 'form-control'
+          })
+        ]);
+    } else {
+      let institution = find(institutionList, {id: profile.institutionId});
+      return div({
+        className: 'col-xs-12',
+        style: {padding: 0},
+      }, [
+        input({
+          id: 'profileInstitution',
+          name: 'institution',
+          type: 'text',
+          disabled: true,
+          className: 'form-control',
+          value: (isNil(institution) ? '' : institution.name),
+        }),
+      ]);
+    }
   };
   
   return (
     div({ className: 'container' }, [
       div({ className: 'row no-margin' }, [
         div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-          // Notification({notificationData}),
+          Notification({notificationData}),
           PageHeading({
             id: 'researcherProfile',
             color: 'common',
@@ -269,7 +366,8 @@ export default function ResearcherProfile(props) {
                   id: 'chk_sendNotificationsAcademicEmail',
                   name: 'checkNotifications',
                   className: 'checkbox-inline rp-checkbox',
-                  defaultChecked:  isNil(profile.checkNotifications) ? false : profile.checkNotifications
+                  defaultChecked:  isNil(profile.checkNotifications) ? false : profile.checkNotifications,
+                  onChange: handleCheckboxChange
                 }),
                 label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
                   ['Send Notifications to my Academic/Business Email Address'])
@@ -287,10 +385,10 @@ export default function ResearcherProfile(props) {
                   defaultValue: profile.additionalEmail,
                   onBlur: handleChange
                 }),
-                // span({
-                  // className: 'cancel-color required-field-error-span',
-                  // isRendered: (additionalEmail.indexOf('@') === -1) && showValidationMessages
-                // }, ['Email Address is empty or has invalid format'])
+                span({
+                  className: 'cancel-color required-field-error-span',
+                  isRendered: (profile.additionalEmail !== "" && profile.additionalEmail.indexOf('@') === -1)
+                }, ['Email Address has invalid format'])
               ])
             ]),
 
@@ -312,11 +410,11 @@ export default function ResearcherProfile(props) {
                   }),
                   div({ className: '' }, [
                     label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
-                    // LibraryCards({
-                      // style: { display: 'flex', flexFlow: 'row wrap' },
-                      // isRendered: !isNil(libraryCards),
-                      // libraryCards: libraryCards
-                    // })
+                    LibraryCards({
+                      style: { display: 'flex', flexFlow: 'row wrap' },
+                      isRendered: !isNil(libraryCards),
+                      libraryCards: libraryCards
+                    })
                   ])
                 ])
               ]),
@@ -362,15 +460,15 @@ export default function ResearcherProfile(props) {
               div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
                 label({ id: 'lbl_profileInstitution', className: 'control-label' }, [
                   'Institution Name* ',
-                  // span({
-                    // className: 'glyphicon glyphicon-question-sign tooltip-icon',
-                    // 'data-tip': (isSigningOfficial && !isNil(institutionId)) ?
-                      // 'As a "Signing Official", your institution cannot be changed here. Please submit a support request via the "Contact Us" form to have it changed.' :
-                      // 'If your preferred institution cannot be found, please submit a support request via the "Contact Us" form to have it added.',
-                    // 'data-for': 'tip_profileState',
-                  // })
+                  span({
+                    className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                    'data-tip': (isSigningOfficial && !isNil(profile.institutionId)) ?
+                      'As a "Signing Official", your institution cannot be changed here. Please submit a support request via the "Contact Us" form to have it changed.' :
+                      'If your preferred institution cannot be found, please submit a support request via the "Contact Us" form to have it added.',
+                    'data-for': 'tip_profileState',
+                  })
                 ]),
-                // generateInstitutionSelectionDisplay()
+                generateInstitutionSelectionDisplay()
               ]),
 
               div({ className: 'col-xs-12 no-padding' }, [
@@ -453,7 +551,8 @@ export default function ResearcherProfile(props) {
                       id: 'profileState',
                       name: 'state',
                       className: 'form-control',
-                      disabled: (profile.country !== '' && profile.country !== 'United States of America')
+                      disabled: (profile.country !== '' && profile.country !== 'United States of America'),
+                      onChange: handleChange
                     }, stateNames )
                   ])
                 ])
@@ -479,6 +578,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileCountry',
                       name: 'country',
                       className: 'form-control',
+                      onChange: handleChange
                     }, countryNames )
                   ])
                 ])
@@ -503,13 +603,15 @@ export default function ResearcherProfile(props) {
               div({ className: 'col-xs-12 rp-group' }, [
                 YesNoRadioGroup({
                   id: 'rad_isThePI',
-                  name: 'isThePI'
+                  name: 'isThePI',
+                  value: profile.isThePI,
+                  onChange: handleRadioChange
                 })
               ])
             ]),
 
             div({
-              // isRendered: profile.isThePI === 'false',
+              isRendered: profile.isThePI === 'false',
               className: 'form-group'
             }, [
 
@@ -523,11 +625,13 @@ export default function ResearcherProfile(props) {
                 YesNoRadioGroup({
                   id: 'rad_havePI',
                   name: 'havePI',
+                  value: profile.havePI,
+                  onChange: handleRadioChange
                 })
               ]),
 
               div({
-                // isRendered: profile.havePI === true || profile.havePI === 'true',
+                isRendered: profile.havePI === true || profile.havePI === 'true',
                 className: 'form-group'
               }, [
                 div({ className: 'col-xs-12' }, [
@@ -561,13 +665,13 @@ export default function ResearcherProfile(props) {
                   label({
                     id: 'lbl_profileEraCommons',
                     className: 'control-label'
-                  }, ['eRA Commons ID ', span({ className: 'italic' }, ['(optional)'])]),
+                  }, ['Principal Investigator eRA Commons ID ', span({ className: 'italic' }, ['(optional)'])]),
                   input({
                     id: 'profileEraCommons',
-                    name: 'eRACommonsID',
+                    name: 'piERACommonsID',
                     type: 'text',
                     className: 'form-control',
-                    defaultValue: profile.eRACommonsID,
+                    defaultValue: profile.piERACommonsID,
                     onBlur: handleChange
                   })
                 ])
@@ -615,7 +719,7 @@ export default function ResearcherProfile(props) {
                 Alert({
                   id: 'researcherIncompleteFields',
                   type: 'info', 
-                  title: 'Researchers: Please complete the following required fields before submitting Data Access Requests',
+                  title: 'Researchers: Please complete the following required fields before submitting Data Access Requests.',
                   description: showIncompleteFields()
                 })
               ])
