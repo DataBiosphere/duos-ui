@@ -2,9 +2,8 @@ import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
 import {cloneDeep, find, get, isEmpty, isNil, omit, omitBy, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
-import {button, div, form, h, hh, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
+import {button, div, form, h, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
-import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import {eRACommons} from '../components/eRACommons';
 import {PageHeading} from '../components/PageHeading';
 import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
@@ -43,7 +42,7 @@ export default function ResearcherProfile(props) {
     scientificURL: '',
     completed: undefined
   });
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState();
   const [userRoles, setUserRoles] = useState([]);
@@ -51,25 +50,26 @@ export default function ResearcherProfile(props) {
   const [countryNames, setCountryNames] = useState([]);
   const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
-  
+  const [isNewProfile, setIsNewProfile] = useState(false);
+
   const [institutionList, setInstitutionList] = useState([]);
   const [notificationData, setNotificationData] = useState();
   const libraryCards = get(currentUser, 'libraryCards', []);
   const isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
-  
+
   useEffect(() => {
     const init = async () => {
       try {
         setIsLoading(true);
         await getResearcherProfile();
-        
+
         setInstitutionList(await Institution.list());
         generateCountryNames();
         generateStateNames();
-        
+
         props.history.push('profile');
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
-        
+
         setCurrentUser(Storage.getCurrentUser());
         setIsLoading(false);
       } catch (error) {
@@ -78,29 +78,110 @@ export default function ResearcherProfile(props) {
         setIsLoading(false);
       }
     };
-    
+
     init();
   }, [props.history]);
-  
+
   useEffect(() => {
-    validateFields();
-  }, [profile, validateFields]);
-  
+    const isValid = (value) => {
+      let isValid = false;
+      if (value !== '' && value !== null && value !== undefined) {
+        isValid = true;
+      }
+      return isValid;
+    };
+
+    const isValidNumber = (value) => {
+      let isValid = false;
+      if (value !== 0 && value !== null && value !== undefined) {
+        isValid = true;
+      }
+      return isValid;
+    };
+
+    const isValidState = (value) => {
+      const stateSelected = (!isNil(value) && !isEmpty(value));
+      const inUS = (profile.country === "United States of America" || profile.country === "");
+      if (inUS && stateSelected) {
+        return true;
+      }
+      return !inUS;
+    };
+
+    let incompletes = [];
+
+    if (!isValid(profile.profileName)) {
+      incompletes.push('Name');
+    }
+
+    if (!isValid(profile.academicEmail || profile.academicEmail.indexOf('@') === -1)) {
+      incompletes.push('Email Address');
+    }
+
+    if (!isValidNumber(profile.institutionId)) {
+      incompletes.push('Institution');
+    }
+
+    if (!isValid(profile.department)) {
+      incompletes.push('Department');
+    }
+
+    if (!isValid(profile.address1)) {
+      incompletes.push('Address');
+    }
+
+    if (!isValid(profile.city)) {
+      incompletes.push('City');
+    }
+
+    if (!isValidState(profile.state)) {
+      incompletes.push('State');
+    }
+
+    if (!isValid(profile.country)) {
+      incompletes.push('Country');
+    }
+
+    if (!isValid(profile.zipcode)) {
+      incompletes.push('Zip/Postal Code');
+    }
+
+    if (profile.isThePI === null || profile.isThePI === '' || (profile.isThePI === 'false' && profile.havePI === '')) {
+      incompletes.push('Principal Investigator Information');
+    }
+
+    if (profile.isThePI === 'false' && profile.havePI === 'true') {
+      if (!isValid(profile.piName)) {
+        incompletes.push('Principal Investigator Name');
+      }
+      if (!isValid(profile.piEmail) || profile.piEmail.indexOf('@') === -1) {
+        incompletes.push('Principal Investigator Email');
+      }
+    }
+
+    setIncompleteFields(incompletes);
+    setResearcherFieldsComplete(incompletes.length === 0);
+  }, [profile]);
+
   const getResearcherProfile = async () => {
     const user = await User.getMe();
     const userProps = getPropertyValuesFromUser(user);
-    
+
     if (isEmpty(user.roles)) {
       setUserRoles([{ 'roleId': 5, 'name': USER_ROLES.researcher }]);
     } else {
       setUserRoles(user.roles);
     }
-    
+
+    if (userProps.completed === undefined) {
+      setIsNewProfile(true);
+    }
+
     let tempCompleted = false;
     if(userProps.completed !== undefined && userProps.completed !== '') {
       tempCompleted = JSON.parse(userProps.completed);
     }
-    
+
     setProfile({
       additionalEmail: isNil(user.additionalEmail) ? '' : user.additionalEmail,
       institutionId: user.institutionId,
@@ -127,35 +208,33 @@ export default function ResearcherProfile(props) {
       state: userProps.state,
       zipcode: userProps.zipcode
     });
-    
-    
   };
-  
+
   const handleChange = (event) => {
     let field = event.target.name;
     let value = event.target.value;
-    
+
     setProfile(Object.assign({}, profile, {[field]: value}));
-    
+
     if (field === 'country') {
       if (value !== 'United States of America') {
         setProfile(Object.assign({}, profile, {state: ''}));
       }
     }
   };
-  
+
   const handleCheckboxChange = (event) => {
-    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
+    setProfile(Object.assign(profile, {checkNotifications: event.target.checked}));
   };
-  
+
   const handleRadioChange = (event, field, value) => {
     let newFields = {
       isThePI: profile.isThePI,
       havePI: profile.havePI
     };
-    
+
     newFields[field] = value;
-    
+
     if (profile.isThePI === true || profile.isThePI === 'true') {
       newFields.havePI = '';
     }
@@ -164,119 +243,35 @@ export default function ResearcherProfile(props) {
       newFields.piEmail = '';
       newFields.piERACommonsID = '';
     }
-    
+
     setProfile(Object.assign({}, profile, newFields));
   };
-  
-  const validateFields = () => {
-    let incompletes = [];
-    
-    if (!isValid(profile.profileName)) {
-      incompletes.push('Name');
-    }
-    
-    if (!isValid(profile.academicEmail || profile.academicEmail.indexOf('@') === -1)) {
-      incompletes.push('Email Address');
-    }
-    
-    if (!isValidNumber(profile.institutionId)) {
-      incompletes.push('Institution');
-    }
-    
-    if (!isValid(profile.department)) {
-      incompletes.push('Department');
-    }
-    
-    if (!isValid(profile.address1)) {
-      incompletes.push('Address');
-    }
-    
-    if (!isValid(profile.city)) {
-      incompletes.push('City');
-    }
-    
-    if (!isValidState(profile.state)) {
-      incompletes.push('State');
-    }
-    
-    if (!isValid(profile.country)) {
-      incompletes.push('Country');
-    }
-    
-    if (!isValid(profile.zipcode)) {
-      incompletes.push('Zip/Postal Code');
-    }
-    
-    if (profile.isThePI === null || profile.isThePI === '' || (profile.isThePI === 'false' && profile.havePI === '')) {
-      incompletes.push('Principal Investigator Information');
-    }
-    
-    if (profile.isThePI === 'false' && profile.havePI === 'true') {
-      if (!isValid(profile.piName)) {
-        incompletes.push('Principal Investigator Name');
-      }
-      if (!isValid(profile.piEmail) || profile.piEmail.indexOf('@') === -1) {
-        incompletes.push('Principal Investigator Email');
-      }
-    }
-    
-    setIncompleteFields(incompletes);
-    setResearcherFieldsComplete(incompletes.length === 0);
-  };
-  
-  const isValid = (value) => {
-    let isValid = false;
-    if (value !== '' && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  };
-  
-  const isValidNumber = (value) => {
-    let isValid = false;
-    if (value !== 0 && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  };
-  
-  const isValidState = (value) => {
-    const stateSelected = (!isNil(value) && !isEmpty(value));
-    const inUS = (profile.country === "United States of America" || profile.country === "");
-    if (inUS && stateSelected) {
-      return true;
-    }
-    return !inUS;
-  };
-  
+
   const submitForm = async (event) => {
     event.preventDefault();
+    setProfile(Object.assign(profile, {completed: researcherFieldsComplete}));
     setProfile(cleanObject(profile));
-    
-    if (profile.completed === undefined) {
+
+    if (isNewProfile) {
       await createResearcher(profile);
     } else {
       await updateResearcher(profile);
     }
   };
-  
+
   const createResearcher = async (profile) => {
-    setProfile(Object.assign({}, profile, {completed: researcherFieldsComplete}));
-    
     await Researcher.createProperties(profile);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
-  
+
   const updateResearcher = async (profile) => {
-    setProfile(Object.assign({}, profile, {completed : researcherFieldsComplete}));
-    
     const profileClone = cloneProfile(profile);
     await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
-  
+
   const updateUser = async () => {
     const currentUserUpdate = Storage.getCurrentUser();
     delete currentUserUpdate.email;
@@ -289,15 +284,15 @@ export default function ResearcherProfile(props) {
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
   };
-  
+
   const cleanObject = (obj) => {
     return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
   };
-  
+
   const cloneProfile = (profile) => {
     return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
   };
-  
+
   const generateCountryNames = () => {
     const USA = option({ value: "United States of America"}, ["United States of America"]);
     const empty = option({ value: ""}, [""]);
@@ -316,14 +311,14 @@ export default function ResearcherProfile(props) {
     stateNames.splice(0, 0, empty);
     setStateNames(stateNames);
   };
-  
+
   const showIncompleteFields = () => {
-    const listIncompleteFields = incompleteFields.map((field) => 
+    const listIncompleteFields = incompleteFields.map((field) =>
       li({ key: field }, [field])
     );
-    return ul({}, [listIncompleteFields])
+    return ul({}, [listIncompleteFields]);
   };
-  
+
   const generateInstitutionSelectionDisplay = () => {
     // If the user is not an SO, or does not have an existing institution,
     // allow the user to select an institution from the available list.
@@ -368,7 +363,7 @@ export default function ResearcherProfile(props) {
       ]);
     }
   };
-  
+
   return (
     div({ className: 'container' }, [
       div({ className: 'row no-margin' }, [
@@ -442,7 +437,7 @@ export default function ResearcherProfile(props) {
                 }),
                 span({
                   className: 'cancel-color required-field-error-span',
-                  isRendered: (profile.additionalEmail !== "" && profile.additionalEmail.indexOf('@') === -1)
+                  isRendered: (!isNil(profile.additionalEmail) && profile.additionalEmail !== "" && profile.additionalEmail.indexOf('@') === -1)
                 }, ['Email Address has invalid format'])
               ])
             ]),
@@ -767,7 +762,7 @@ export default function ResearcherProfile(props) {
                 })
               ])
             ]),
-            
+
             div ({ className: 'row no-margin' }, [
               div ({
                 isRendered: !researcherFieldsComplete,
@@ -775,13 +770,13 @@ export default function ResearcherProfile(props) {
               },[
                 Alert({
                   id: 'researcherIncompleteFields',
-                  type: 'info', 
+                  type: 'info',
                   title: 'Researchers: Please complete the following required fields before submitting Data Access Requests.',
                   description: showIncompleteFields()
                 })
               ])
             ]),
-            
+
             div({ className: 'row margin-top-20' }, [
               div({ className: 'col-lg-4 col-xs-6' }, [
                 div({ className: 'italic default-color' }, ['*Required field'])
