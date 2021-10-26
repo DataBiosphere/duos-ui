@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import { cloneDeep, map } from 'lodash/fp';
+import { cloneDeep, map, find, isEmpty } from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -8,7 +8,6 @@ import DarCollectionTable from '../components/dar_collection_table/DarCollection
 import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
-import { isEmpty } from 'lodash';
 
 export default function NewResearcherConsole(props) {
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +68,28 @@ export default function NewResearcherConsole(props) {
       Notifications.showError({
         text: 'Error: Cannot cancel target collection'
       });
+    }
+  };
+
+  //Draft delete function to be passed down to child component
+  const deleteDraft = async ({ id, identifier, drafts, setDrafts }) => {
+    try {
+      await DAR.deleteDar(id);
+    } catch (error) {
+      Notifications.showError({
+        text: `Failed to delete DAR Draft ${identifier}`,
+      });
+    }
+
+    const draftsClone = cloneDeep(drafts);
+    const targetIndex = find((draft) => {
+      return draft.id === id;
+    })(draftsClone);
+    if(targetIndex === -1) {
+      Notifications.showError({text: 'Error processing delete request'});
+    } else {
+      draftsClone.splice(targetIndex, 1);
+      setDrafts(draftsClone);
     }
   };
 
