@@ -132,7 +132,9 @@ export default function ResearcherProfile(props) {
     let field = event.target.name;
     let value = event.target.value;
     
-    setProfile(Object.assign({}, profile, {field: value}));
+    profile[field] = value;
+    setProfile(profile);
+    // setProfile(Object.assign({}, profile, {field: value}));
     
     if (field === 'country') {
       if (value !== 'United States of America') {
@@ -144,11 +146,15 @@ export default function ResearcherProfile(props) {
   };
   
   const handleCheckboxChange = (event) => {
-    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
+    profile.checkNotifications = event.target.checked;
+    setProfile(profile);
+    // setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
   };
   
   const handleRadioChange = (event, field, value) => {
-    setProfile(Object.assign({}, profile, {field: value}));
+    profile[field] = value;
+    setProfile(profile);
+    // setProfile(Object.assign({}, profile, {field: value}));
     
     if (profile.isThePI === true || profile.isThePI === 'true') {
       setProfile(Object.assign({}, profile, {havePI: ''}));
@@ -333,7 +339,9 @@ export default function ResearcherProfile(props) {
             id: 'Institution',
             label: 'institution',
             onSelection: (selection) => {
-              setProfile(Object.assign({}, profile, {institutionId: selection}));
+              profile.institutionId = selection;
+              setProfile(profile);
+              // setProfile(Object.assign({}, profile, {institutionId: selection}));
               validateFields();
             },
             options: institutionList.map(institution => {
