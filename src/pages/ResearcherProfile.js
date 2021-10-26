@@ -32,7 +32,7 @@ export default function ResearcherProfile(props) {
     address2: '',
     city: '',
     state: undefined,
-    zipCode: '',
+    zipcode: '',
     country: '',
     isThePI: null,
     havePI: null,
@@ -125,7 +125,7 @@ export default function ResearcherProfile(props) {
       researcherGate: userProps.researcherGate,
       scientificURL: userProps.scientificURL,
       state: userProps.state,
-      zipCode: userProps.zipcode
+      zipcode: userProps.zipcode
     });
     
     
@@ -203,7 +203,7 @@ export default function ResearcherProfile(props) {
       incompletes.push('Country');
     }
     
-    if (!isValid(profile.zipCode)) {
+    if (!isValid(profile.zipcode)) {
       incompletes.push('Zip/Postal Code');
     }
     
@@ -606,6 +606,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileState',
                       name: 'state',
                       className: 'form-control',
+                      value: profile.state,
                       disabled: (profile.country !== '' && profile.country !== 'United States of America'),
                       onChange: handleChange
                     }, stateNames )
@@ -619,10 +620,10 @@ export default function ResearcherProfile(props) {
                     label({ id: 'lbl_profileZip', className: 'control-label' }, ['Zip/Postal Code*']),
                     input({
                       id: 'profileZip',
-                      name: 'zipCode',
+                      name: 'zipcode',
                       type: 'text',
                       className: 'form-control',
-                      defaultValue: profile.zipCode,
+                      defaultValue: profile.zipcode,
                       onBlur: handleChange
                     })
                   ]),
@@ -633,6 +634,7 @@ export default function ResearcherProfile(props) {
                       id: 'profileCountry',
                       name: 'country',
                       className: 'form-control',
+                      value: profile.country,
                       onChange: handleChange
                     }, countryNames )
                   ])
