@@ -132,14 +132,11 @@ export default function ResearcherProfile(props) {
     let field = event.target.name;
     let value = event.target.value;
     
-    profile[field] = value;
-    setProfile(profile);
+    setProfile(Object.assign({}, profile, {field: value}));
     
     if (field === 'country') {
       if (value !== 'United States of America') {
-        setProfile({
-          state: ''
-        });
+        setProfile(Object.assign({}, profile, {state: ''}));
       }
     }
     
@@ -147,26 +144,23 @@ export default function ResearcherProfile(props) {
   };
   
   const handleCheckboxChange = (event) => {
-    setProfile({
-      checkNotifications: event.target.checked
-    });
+    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
   };
   
   const handleRadioChange = (event, field, value) => {
-    profile[field] = value;
-    setProfile(profile);
+    setProfile(Object.assign({}, profile, {field: value}));
+    
     if (profile.isThePI === true || profile.isThePI === 'true') {
-      setProfile({
-        havePI: ''
-      });
+      setProfile(Object.assign({}, profile, {havePI: ''}));
     }
     if (profile.havePI === false || profile.havePI === 'false' || profile.havePI === '') {
-      setProfile({
+      setProfile(Object.assign({}, profile, {
         piName: '',
         piEmail: '',
         piERACommonsID: ''
-      });
+      }));
     }
+    
     validateFields();
   };
   
@@ -263,9 +257,7 @@ export default function ResearcherProfile(props) {
   };
   
   const createResearcher = async (profile) => {
-    setProfile({
-      completed: researcherFieldsComplete
-    });
+    setProfile(Object.assign({}, profile, {completed: researcherFieldsComplete}));
     
     await Researcher.createProperties(profile);
     await updateUser();
@@ -273,9 +265,7 @@ export default function ResearcherProfile(props) {
   };
   
   const updateResearcher = async (profile) => {
-    setProfile({
-      completed : researcherFieldsComplete
-    });
+    setProfile(Object.assign({}, profile, {completed : researcherFieldsComplete}));
     
     const profileClone = cloneProfile(profile);
     await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
@@ -343,9 +333,7 @@ export default function ResearcherProfile(props) {
             id: 'Institution',
             label: 'institution',
             onSelection: (selection) => {
-              setProfile({
-                institutionId: selection
-              });
+              setProfile(Object.assign({}, profile, {institutionId: selection}));
               validateFields();
             },
             options: institutionList.map(institution => {
