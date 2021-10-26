@@ -132,9 +132,7 @@ export default function ResearcherProfile(props) {
     let field = event.target.name;
     let value = event.target.value;
     
-    profile[field] = value;
-    setProfile(profile);
-    // setProfile(Object.assign({}, profile, {field: value}));
+    setProfile(Object.assign({}, profile, {[field]: value}));
     
     if (field === 'country') {
       if (value !== 'United States of America') {
@@ -146,27 +144,27 @@ export default function ResearcherProfile(props) {
   };
   
   const handleCheckboxChange = (event) => {
-    profile.checkNotifications = event.target.checked;
-    setProfile(profile);
-    // setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
+    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
   };
   
   const handleRadioChange = (event, field, value) => {
-    profile[field] = value;
-    setProfile(profile);
-    // setProfile(Object.assign({}, profile, {field: value}));
+    let newFields = {
+      isThePI: profile.isThePI,
+      havePI: profile.havePI
+    };
+    
+    newFields[field] = value;
     
     if (profile.isThePI === true || profile.isThePI === 'true') {
-      setProfile(Object.assign({}, profile, {havePI: ''}));
+      newFields.havePI = '';
     }
     if (profile.havePI === false || profile.havePI === 'false' || profile.havePI === '') {
-      setProfile(Object.assign({}, profile, {
-        piName: '',
-        piEmail: '',
-        piERACommonsID: ''
-      }));
+      newFields.piName = '';
+      newFields.piEmail = '';
+      newFields.piERACommonsID = '';
     }
     
+    setProfile(Object.assign({}, profile, newFields));
     validateFields();
   };
   
@@ -209,7 +207,7 @@ export default function ResearcherProfile(props) {
       incompletes.push('Zip/Postal Code');
     }
     
-    if (profile.isThePI === null || (profile.isThePI === 'false' && profile.havePI === '')) {
+    if (profile.isThePI === null || profile.isThePI === '' || (profile.isThePI === 'false' && profile.havePI === '')) {
       incompletes.push('Principal Investigator Information');
     }
     
@@ -339,9 +337,7 @@ export default function ResearcherProfile(props) {
             id: 'Institution',
             label: 'institution',
             onSelection: (selection) => {
-              profile.institutionId = selection;
-              setProfile(profile);
-              // setProfile(Object.assign({}, profile, {institutionId: selection}));
+              setProfile(Object.assign({}, profile, {institutionId: selection}));
               validateFields();
             },
             options: institutionList.map(institution => {
