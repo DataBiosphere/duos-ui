@@ -212,9 +212,7 @@ export default function ResearcherProfile(props) {
     
     setIncompleteFields(incompletes);
     setResearcherFieldsComplete(incompletes.length === 0);
-    profile.completed = researcherFieldsComplete;
-    setProfile(profile);
-  }
+  };
   
   const isValid = (value) => {
     let isValid = false;
@@ -222,7 +220,7 @@ export default function ResearcherProfile(props) {
       isValid = true;
     }
     return isValid;
-  }
+  };
   
   const isValidNumber = (value) => {
     let isValid = false;
@@ -230,7 +228,7 @@ export default function ResearcherProfile(props) {
       isValid = true;
     }
     return isValid;
-  }
+  };
   
   const isValidState = (value) => {
     const stateSelected = (!isNil(value) && !isEmpty(value));
@@ -239,7 +237,59 @@ export default function ResearcherProfile(props) {
       return true;
     }
     return !inUS;
-  }
+  };
+  
+  const submitForm = (event) => {
+    event.preventDefault();
+    profile = cleanObject(profile);
+    setProfile(profile);
+    
+    if (profile.completed === undefined) {
+      await createResearcher(profile);
+    } else {
+      await updateResearcher(profile);
+    }
+  };
+  
+  const createResearcher = async (profile) => {
+    profile.completed = researcherFieldsComplete;
+    setProfile(profile);
+    
+    await Researcher.createProperties(profile);
+    await updateUser();
+    props.history.push({ pathname: 'dataset_catalog' });
+  };
+  
+  const updateResearcher = async (profile) => {
+    profile.completed = researcherFieldsComplete;
+    setProfile(profile);
+    
+    const profileClone = cloneProfile(profile);
+    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
+    await updateUser();
+    props.history.push({ pathname: 'dataset_catalog' });
+  };
+  
+  const updateUser = async () => {
+    const currentUserUpdate = Storage.getCurrentUser();
+    delete currentUserUpdate.email;
+    currentUserUpdate.displayName = profile.profileName;
+    currentUserUpdate.additionalEmail = profile.additionalEmail;
+    currentUserUpdate.roles = userRoles;
+    currentUserUpdate.institutionId = profile.institutionId;
+    const payload = { updatedUser: currentUserUpdate };
+    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
+    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
+    return updatedUser;
+  };
+  
+  const cleanObject = (obj) => {
+    return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
+  };
+  
+  const cloneProfile = (profile) => {
+    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+  };
   
   const generateCountryNames = () => {
     const USA = option({ value: "United States of America"}, ["United States of America"]);
@@ -733,11 +783,9 @@ export default function ResearcherProfile(props) {
               div({ className: 'col-lg-8 col-xs-6' }, [
                 button({
                   id: 'btn_submit',
-                  // onClick: submitForm,
+                  onClick: submitForm,
                   className: 'f-right btn-primary common-background'
-                }, [
-                  'Submit'
-                ]),
+                }, ['Save']),
                 h(ReactTooltip, {
                   id: 'tip_profileState',
                   place: 'left',
