@@ -52,8 +52,8 @@ export default function ResearcherProfile(props) {
   const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
   
-  let [institutionList, setInstitutionList] = useState([]); //temp fix
-  let [notificationData, setNotificationData] = useState(); //temp fix
+  const [institutionList, setInstitutionList] = useState([]);
+  const [notificationData, setNotificationData] = useState();
   const libraryCards = get(currentUser, 'libraryCards', []);
   const isSigningOfficial = get(currentUser, 'isSigningOfficial', false);
   
@@ -63,14 +63,12 @@ export default function ResearcherProfile(props) {
         setIsLoading(true);
         await getResearcherProfile();
         
-        institutionList = await Institution.list();
-        setInstitutionList(institutionList);
+        setInstitutionList(await Institution.list());
         generateCountryNames();
         generateStateNames();
         
         props.history.push('profile');
-        notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
-        setNotificationData(notificationData);
+        setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
         
         setCurrentUser(Storage.getCurrentUser());
         validateFields();
@@ -89,35 +87,45 @@ export default function ResearcherProfile(props) {
     const user = await User.getMe();
     const userProps = getPropertyValuesFromUser(user);
     
-    setUserRoles(user.roles);
-    profile.additionalEmail = isNil(user.additionalEmail) ? '' : user.additionalEmail;
-    profile.institutionId = user.institutionId;
-    profile.academicEmail = userProps.academicEmail || user.email;
-    profile.address1 = userProps.address1;
-    profile.address2 = userProps.address2;
-    profile.checkNotifications = (userProps.checkNotifications === 'true');
-    profile.city = userProps.city;
-    profile.completed = userProps.completed;
-    profile.country = userProps.country;
-    profile.department = userProps.department;
-    profile.division = userProps.division;
-    profile.piERACommonsID = ''; //temp fix
-    profile.havePI = userProps.havePI;
-    profile.isThePI = userProps.isThePI;
-    profile.linkedIn = userProps.linkedIn;
-    profile.orcid = userProps.orcid;
-    profile.piEmail = userProps.piEmail;
-    profile.piName = userProps.piName;
-    profile.profileName = user.displayName;
-    profile.pubmedID = userProps.pubmedID;
-    profile.researcherGate = userProps.researcherGate;
-    profile.scientificURL = userProps.scientificURL;
-    profile.state = userProps.state;
-    profile.zipcode = userProps.zipcode;
-    if(profile.completed !== undefined && profile.completed !== '') {
-      profile.completed = JSON.parse(profile.completed);
+    if (isEmpty(user.roles)) {
+      setUserRoles([{ 'roleId': 5, 'name': USER_ROLES.researcher }]);
+    } else {
+      setUserRoles(user.roles);
     }
-    setProfile(profile);
+    
+    let tempCompleted = false;
+    if(userProps.completed !== undefined && userProps.completed !== '') {
+      tempCompleted = JSON.parse(userProps.completed);
+    }
+    
+    setProfile({
+      additionalEmail: isNil(user.additionalEmail) ? '' : user.additionalEmail,
+      institutionId: user.institutionId,
+      academicEmail: userProps.academicEmail || user.email,
+      address1: userProps.address1,
+      address2: userProps.address2,
+      checkNotifications: (userProps.checkNotifications === 'true'),
+      city: userProps.city,
+      completed: tempCompleted || userProps.completed,
+      country: userProps.country,
+      department: userProps.department,
+      division: userProps.division,
+      piERACommonsID: userProps.piERACommonsID,
+      havePI: userProps.havePI,
+      isThePI: userProps.isThePI,
+      linkedIn: userProps.linkedIn,
+      orcid: userProps.orcid,
+      piEmail: userProps.piEmail,
+      piName: userProps.piName,
+      profileName: user.displayName,
+      pubmedID: userProps.pubmedID,
+      researcherGate: userProps.researcherGate,
+      scientificURL: userProps.scientificURL,
+      state: userProps.state,
+      zipcode: userProps.zipcode
+    });
+    
+    
   };
   
   const handleChange = (event) => {
@@ -129,8 +137,9 @@ export default function ResearcherProfile(props) {
     
     if (field === 'country') {
       if (value !== 'United States of America') {
-        profile.state = '';
-        setProfile(profile);
+        setProfile({
+          state: ''
+        });
       }
     }
     
@@ -138,22 +147,25 @@ export default function ResearcherProfile(props) {
   };
   
   const handleCheckboxChange = (event) => {
-    profile.checkNotifications = event.target.checked;
-    setProfile(profile);
+    setProfile({
+      checkNotifications: event.target.checked
+    });
   };
   
   const handleRadioChange = (event, field, value) => {
     profile[field] = value;
     setProfile(profile);
     if (profile.isThePI === true || profile.isThePI === 'true') {
-      profile.havePI = '';
-      setProfile(profile);
+      setProfile({
+        havePI: ''
+      });
     }
     if (profile.havePI === false || profile.havePI === 'false' || profile.havePI === '') {
-      profile.piName = '';
-      profile.piEmail = '';
-      profile.piERACommonsID = '';
-      setProfile(profile);
+      setProfile({
+        piName: '',
+        piEmail: '',
+        piERACommonsID: ''
+      });
     }
     validateFields();
   };
@@ -239,10 +251,9 @@ export default function ResearcherProfile(props) {
     return !inUS;
   };
   
-  const submitForm = (event) => {
+  const submitForm = async (event) => {
     event.preventDefault();
-    profile = cleanObject(profile);
-    setProfile(profile);
+    setProfile(cleanObject(profile));
     
     if (profile.completed === undefined) {
       await createResearcher(profile);
@@ -252,8 +263,9 @@ export default function ResearcherProfile(props) {
   };
   
   const createResearcher = async (profile) => {
-    profile.completed = researcherFieldsComplete;
-    setProfile(profile);
+    setProfile({
+      completed: researcherFieldsComplete
+    });
     
     await Researcher.createProperties(profile);
     await updateUser();
@@ -261,8 +273,9 @@ export default function ResearcherProfile(props) {
   };
   
   const updateResearcher = async (profile) => {
-    profile.completed = researcherFieldsComplete;
-    setProfile(profile);
+    setProfile({
+      completed : researcherFieldsComplete
+    });
     
     const profileClone = cloneProfile(profile);
     await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
@@ -330,8 +343,9 @@ export default function ResearcherProfile(props) {
             id: 'Institution',
             label: 'institution',
             onSelection: (selection) => {
-              profile.institutionId = selection;
-              setProfile(profile);
+              setProfile({
+                institutionId: selection
+              });
               validateFields();
             },
             options: institutionList.map(institution => {
