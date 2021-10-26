@@ -25,7 +25,7 @@ export default function ResearcherProfile(props) {
     linkedIn: '',
     orcid: '',
     researcherGate: '',
-    institutionId: '',
+    institutionId: undefined,
     department: '',
     division: '',
     address1: '',
@@ -71,7 +71,6 @@ export default function ResearcherProfile(props) {
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
         
         setCurrentUser(Storage.getCurrentUser());
-        validateFields();
         setIsLoading(false);
       } catch (error) {
         Notification.showError({text: 'Error: Unable to retrieve user data from server'});
@@ -81,7 +80,11 @@ export default function ResearcherProfile(props) {
     };
     
     init();
-  }, []);
+  }, [props.history]);
+  
+  useEffect(() => {
+    validateFields();
+  }, [profile, validateFields]);
   
   const getResearcherProfile = async () => {
     const user = await User.getMe();
@@ -122,7 +125,7 @@ export default function ResearcherProfile(props) {
       researcherGate: userProps.researcherGate,
       scientificURL: userProps.scientificURL,
       state: userProps.state,
-      zipcode: userProps.zipcode
+      zipCode: userProps.zipcode
     });
     
     
@@ -139,8 +142,6 @@ export default function ResearcherProfile(props) {
         setProfile(Object.assign({}, profile, {state: ''}));
       }
     }
-    
-    validateFields();
   };
   
   const handleCheckboxChange = (event) => {
@@ -165,7 +166,6 @@ export default function ResearcherProfile(props) {
     }
     
     setProfile(Object.assign({}, profile, newFields));
-    validateFields();
   };
   
   const validateFields = () => {
@@ -338,7 +338,6 @@ export default function ResearcherProfile(props) {
             label: 'institution',
             onSelection: (selection) => {
               setProfile(Object.assign({}, profile, {institutionId: selection}));
-              validateFields();
             },
             options: institutionList.map(institution => {
               return {
