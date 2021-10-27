@@ -254,14 +254,12 @@ export default function ResearcherProfile(props) {
   const submitForm = async (event) => {
     event.preventDefault();
 
-    let newProfile = cleanObject(Object.assign({}, profile, {completed: researcherFieldsComplete}));
-    setProfile(newProfile);
-    console.log(newProfile.completed + " " + profile.completed); // to find where value is getting lost
+    const newProfile = cleanObject(Object.assign({}, profile, {completed: researcherFieldsComplete}));
 
     if (isNewProfile) {
-      await createResearcher(profile);
+      await createResearcher(newProfile);
     } else {
-      await updateResearcher(profile);
+      await updateResearcher(newProfile);
     }
   };
 
@@ -273,7 +271,7 @@ export default function ResearcherProfile(props) {
 
   const updateResearcher = async (profile) => {
     const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone);
+    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, researcherFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
