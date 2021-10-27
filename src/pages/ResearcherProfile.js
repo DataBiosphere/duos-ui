@@ -21,6 +21,7 @@ export default function ResearcherProfile(props) {
     academicEmail: '',
     checkNotifications: false,
     additionalEmail: '',
+    eRACommonsID: '',
     linkedIn: '',
     orcid: '',
     researcherGate: '',
@@ -194,6 +195,7 @@ export default function ResearcherProfile(props) {
       country: userProps.country,
       department: userProps.department,
       division: userProps.division,
+      eRACommonsID: userProps.eraCommonsId,
       piERACommonsID: userProps.piERACommonsID,
       havePI: userProps.havePI,
       isThePI: userProps.isThePI,
@@ -214,17 +216,19 @@ export default function ResearcherProfile(props) {
     let field = event.target.name;
     let value = event.target.value;
 
-    setProfile(Object.assign({}, profile, {[field]: value}));
+    let newProfile = Object.assign({}, profile, {[field]: value});
 
     if (field === 'country') {
       if (value !== 'United States of America') {
-        setProfile(Object.assign({}, profile, {state: ''}));
+        newProfile.state = '';
       }
     }
+
+    setProfile(newProfile);
   };
 
   const handleCheckboxChange = (event) => {
-    setProfile(Object.assign(profile, {checkNotifications: event.target.checked}));
+    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
   };
 
   const handleRadioChange = (event, field, value) => {
@@ -249,8 +253,10 @@ export default function ResearcherProfile(props) {
 
   const submitForm = async (event) => {
     event.preventDefault();
-    setProfile(Object.assign(profile, {completed: researcherFieldsComplete}));
-    setProfile(cleanObject(profile));
+
+    let newProfile = cleanObject(Object.assign({}, profile, {completed: researcherFieldsComplete}));
+    setProfile(newProfile);
+    console.log(newProfile.completed + " " + profile.completed); // to find where value is getting lost
 
     if (isNewProfile) {
       await createResearcher(profile);
