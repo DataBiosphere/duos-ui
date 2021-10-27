@@ -489,6 +489,14 @@ export const getSearchFilterFunctions = () => {
         includes(term, toLower(phrase))
       )([darCode, formatDate(createDate), projectTitle, status]);
       return !isNil(matched);
+    })(targetList),
+    darDrafts: (term, targetList) => filter(draftRecord => {
+      const { data, draft, createDate, updateDate } = draftRecord;
+      const { partialDarCode, projectTitle } = data;
+      const matched = find((phrase) =>
+        includes(term, toLower(phrase))
+      )([partialDarCode, projectTitle, (updateDate || createDate)]);
+      return !isNil(matched) && (draft !== false || draft !== 'false');
     })(targetList)
   };
 };

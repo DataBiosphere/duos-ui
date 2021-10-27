@@ -111,7 +111,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
 
   return {
     isComponent: true,
-    // darCollectionId, //NOTE: is this even needed? Need to make sure
+    id: darCollectionId,
     label: 'cancel-button',
     data: div(
       {

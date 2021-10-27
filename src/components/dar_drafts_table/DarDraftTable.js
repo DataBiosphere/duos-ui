@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
@@ -8,13 +8,9 @@ import ConfirmationModal from '../modals/ConfirmationModal';
 import {
   formatDate,
   recalculateVisibleTable,
-  goToPage as updatePage,
-  Notifications,
-  // darCollectionUtils,
+  goToPage as updatePage
 } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import { DAR } from '../../libs/ajax';
-import { data } from 'jquery';
 
 const styles = {
   baseStyle: {
@@ -39,8 +35,8 @@ const styles = {
 
 const columnHeaderFormat = {
   partialDarCode: {label: 'Partial DAR Code', cellStyle: { width: styles.cellWidth.partialDarCode}},
-  proejctTitle: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
-  updateDate: {label: 'Last Updated', cellStyle: {width: styles.cellWidth.lastUpdated}},
+  projectTitle: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
+  updateDate: {label: 'Last Updated', cellStyle: {width: styles.cellWidth.updateDate}},
   actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
 };
 
@@ -49,28 +45,28 @@ const columnHeaderData = () => {
   return [partialDarCode, projectTitle, updateDate, actions];
 };
 
-const partialDarCodeCell = ({partialDarCode = '- -', draftId, style = {}, label = 'partial-dar-code'}) => {
+const partialDarCodeCell = ({partialDarCode = '- -', id, style = {}, label = 'partial-dar-code'}) => {
   return {
     data: partialDarCode,
-    id: draftId,
+    id,
     style,
     label
   };
 };
 
-const projectTitleCell = ({projectTitle = '- -', draftId, style = {}, label = 'draft-project-title' }) => {
+const projectTitleCell = ({projectTitle = '- -', id, style = {}, label = 'draft-project-title' }) => {
   return {
     data: projectTitle,
-    id: draftId,
+    id,
     style,
     label
   };
 };
 
-const updateDateCell = ({updateDate, draftId, style = {}, label = 'draft-update-date'}) => {
+const updateDateCell = ({updateDate, id, style = {}, label = 'draft-update-date'}) => {
   return {
     data: formatDate(updateDate),
-    id: draftId,
+    id,
     style,
     label
   };
@@ -94,7 +90,7 @@ const ResumeDraftButton = (props) => {
 
 const getIdentifier = ({id, data}) => {
   return !isEmpty(data) ? (data.projectTitle || data.tempDarCode) : id;
-}
+};
 
 const DeleteDraftButton = (props) => {
   const { targetDraft, showConfirmationModal } = props;
@@ -160,19 +156,15 @@ const processDraftsRowData = ({visibleDrafts, showConfirmationModal, history}) =
   }
 };
 
-// const actionsCellData = (draft, showConfirmationModal)
-
 export default function DarDraftTable(props) {
-  const [drafts, setDrafts] = useState(props.drafts);
   const [visibleDrafts, setVisibleDrafts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [tableSize, setTableSize] = useState(10);
-  const [showConfirmation, setShowConfirmation] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState({});
 
-  const { history, deleteDraft, isLoading } = props;
-
+  const { history, deleteDraft, isLoading, drafts } = props;
   useEffect(() => {
     recalculateVisibleTable({
       tableSize,
@@ -206,14 +198,21 @@ export default function DarDraftTable(props) {
   const getModalHeader = () => {
     if(!isEmpty(selectedDraft)) {
       const { data, id } = selectedDraft;
-      return getIdentifier(id, data);
+      return getIdentifier({id, data});
     }
+  };
+
+  const deleteOnClick = async() => {
+    const {id, data, referenceId} = selectedDraft;
+    const identifier = getIdentifier({id: id || referenceId, data});
+    await deleteDraft({ referenceId, identifier, });
+    setShowConfirmation(false);
   };
 
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      rowData: processDraftsRowData(visibleDrafts, showConfirmationModal, history),
+      rowData: processDraftsRowData({visibleDrafts, showConfirmationModal, history}),
       columnHeaders: columnHeaderData(),
       styles,
       tableSize,
@@ -230,8 +229,9 @@ export default function DarDraftTable(props) {
       styleOverrise: { height: '35%' },
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Delete Draft DAR',
-      message: `Are you sure you want to delete DAR draft ${getIdentifier(selectedDraft.id, selectedDraft.data)}`,
-      header: getModalHeader()
+      message: `Are you sure you want to delete DAR draft ${getIdentifier({id: selectedDraft.id, data: selectedDraft.data})}`,
+      header: getModalHeader(),
+      onConfirm: deleteOnClick
     })
   ]);
 }
