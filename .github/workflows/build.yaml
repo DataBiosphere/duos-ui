@@ -30,7 +30,7 @@ jobs:
       with:
         version: '270.0.0'
         service_account_email: ${{ secrets.GCR_PUBLISH_EMAIL }}
-        service_account_key: ${{ secrets.GCR_PUBLISH_KEY }}
+        service_account_key: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
     - name: Auth Docker for GCR
       run: gcloud auth configure-docker --quiet
     - name: Construct tags
@@ -62,7 +62,7 @@ jobs:
       if: github.event_name == 'push'
       uses: broadinstitute/repository-dispatch@master
       with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        token: ${{ secrets.BROADBOT_TOKEN }}
         repository: broadinstitute/terra-helmfile
         event-type: update-service
         client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
