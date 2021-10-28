@@ -33,6 +33,7 @@ const styles = {
   },
 };
 
+//data struct to outline column widths and header labels
 const columnHeaderFormat = {
   partialDarCode: {label: 'Partial DAR Code', cellStyle: { width: styles.cellWidth.partialDarCode}},
   projectTitle: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
@@ -40,11 +41,13 @@ const columnHeaderFormat = {
   actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
 };
 
+//basic helper function to format above keys in fixed order array
 const columnHeaderData = () => {
   const { partialDarCode, projectTitle, updateDate, actions } = columnHeaderFormat;
   return [partialDarCode, projectTitle, updateDate, actions];
 };
 
+//helper function to create table metadata for dar code cell data format
 const partialDarCodeCell = ({partialDarCode = '- -', id, style = {}, label = 'partial-dar-code'}) => {
   return {
     data: partialDarCode,
@@ -54,6 +57,7 @@ const partialDarCodeCell = ({partialDarCode = '- -', id, style = {}, label = 'pa
   };
 };
 
+//helper function to create table metadata for projectTitle cell data format
 const projectTitleCell = ({projectTitle = '- -', id, style = {}, label = 'draft-project-title' }) => {
   return {
     data: projectTitle,
@@ -63,6 +67,7 @@ const projectTitleCell = ({projectTitle = '- -', id, style = {}, label = 'draft-
   };
 };
 
+//helper function to create table metadata for update date cell metadata
 const updateDateCell = ({updateDate, id, style = {}, label = 'draft-update-date'}) => {
   return {
     data: formatDate(updateDate),
@@ -72,11 +77,12 @@ const updateDateCell = ({updateDate, id, style = {}, label = 'draft-update-date'
   };
 };
 
+//sub-component that redirects user to draft applictaion page
 const ResumeDraftButton = (props) => {
   const { draft, history } = props;
   const { referenceId } = draft;
   return h(SimpleButton, {
-    keyProp: `resume-draft-${referenceId}`, //NOTE: make sure this works
+    keyProp: `resume-draft-${referenceId}`,
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
@@ -89,10 +95,12 @@ const ResumeDraftButton = (props) => {
   });
 };
 
+//helper function to create id string for error messages
 const getIdentifier = ({id, data}) => {
   return !isEmpty(data) ? (data.projectTitle || data.tempDarCode) : id;
 };
 
+//sub-component that renders draft delete button
 const DeleteDraftButton = (props) => {
   const { targetDraft, showConfirmationModal } = props;
   const { id, data } = targetDraft;
@@ -110,6 +118,7 @@ const DeleteDraftButton = (props) => {
   });
 };
 
+//helper function that formats table metadata and components for draft action buttons
 const actionCellData = ({
   targetDraft,
   showConfirmationModal,
@@ -125,7 +134,6 @@ const actionCellData = ({
     history,
   });
 
-  //NOTE: make sure the buttons render correctly
   return {
     isComponent: true,
     label: 'draft-buttons',
@@ -142,6 +150,7 @@ const actionCellData = ({
   };
 };
 
+//helper function that foramts table metadata for cells row by row, returns an array of arrays
 const processDraftsRowData = ({visibleDrafts, showConfirmationModal, history}) => {
   if(!isEmpty(visibleDrafts)) {
     return visibleDrafts.map((draft) => {
@@ -166,6 +175,8 @@ export default function DarDraftTable(props) {
   const [selectedDraft, setSelectedDraft] = useState({});
 
   const { history, deleteDraft, isLoading, drafts } = props;
+
+  //sequence of events that fires when table either changes its visible window (data updates, page change, table size change, etc)
   useEffect(() => {
     recalculateVisibleTable({
       tableSize,
@@ -178,17 +189,20 @@ export default function DarDraftTable(props) {
     });
   }, [tableSize, pageCount, currentPage, drafts]);
 
+  //callback function to change tableSize, passed to pagination bar
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
       setTableSize(value);
     }
   }, []);
 
+  //function that fires on delete button press, makes confirmation modal visible and selectes target draft
   const showConfirmationModal = (draft) => {
     setSelectedDraft(draft);
     setShowConfirmation(true);
   };
 
+  //function that fires when user updates current page (buttons, manual input), passed to pagination bar
   const goToPage = useCallback(
     (value) => {
       updatePage(value, pageCount, setCurrentPage);
@@ -196,6 +210,7 @@ export default function DarDraftTable(props) {
     [pageCount]
   );
 
+  //helper function that formats string for modal header
   const getModalHeader = () => {
     if(!isEmpty(selectedDraft)) {
       const { data, id } = selectedDraft;
@@ -203,6 +218,7 @@ export default function DarDraftTable(props) {
     }
   };
 
+  //delete function that fires on modal confirmation, removes draft from listing via prop delete function
   const deleteOnClick = async() => {
     const {id, data, referenceId} = selectedDraft;
     const identifier = getIdentifier({id: id || referenceId, data});

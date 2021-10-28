@@ -9,13 +9,22 @@ import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import DarDraftTable from '../components/dar_drafts_table/DarDraftTable';
+import { isNil } from 'lodash';
+
+//helper function with a built in delay to allow skeleton loader to show when data is loading or when the user switch tabs
+//primarily done to make the tab switching more obvious
+const delayedLoadingUpdate = async ({setIsLoading}) => {
+  return await Promise.resolve(
+    setTimeout(() => setIsLoading(false), [400])
+  );
+};
 
 export default function NewResearcherConsole(props) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('DAR Collections');
-  const [researcherCollections, setResearcherCollections] = useState([]);
-  const [researcherDrafts, setResearcherDrafts] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
+  const [researcherCollections, setResearcherCollections] = useState();
+  const [researcherDrafts, setResearcherDrafts] = useState();
+  const [filteredList, setFilteredList] = useState();
   const searchRef = useRef('');
 
   const { history } = props;
@@ -25,6 +34,8 @@ export default function NewResearcherConsole(props) {
     darDrafts: 'DAR Drafts'
   };
 
+  //memoized references for tab-specific data and filter function
+  //keys correspond with tab constants that are used to designated the selected tab
   const dataStructs = useMemo(() => ({
     [tabNames.darCollections]: {
       filterFn: getSearchFilterFunctions().darCollections,
@@ -36,6 +47,7 @@ export default function NewResearcherConsole(props) {
     }
   }), [researcherCollections, researcherDrafts, tabNames.darCollections, tabNames.darDrafts]);
 
+  //basic helper to process promises for collections and drafts in init
   const handlePromise = (promise, setValue, errorMsg, newError) => {
     if(promise.status === 'rejected') {
       errorMsg += newError;
@@ -44,9 +56,7 @@ export default function NewResearcherConsole(props) {
     }
   };
 
-  // const collectionFilterFn = getSearchFilterFunctions().darCollections;
-  // const draftFilterFn = getSearchFilterFunctions().darDrafts; //NOTE: create function
-
+  //callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
     searchRef.current.value,
     dataStructs[selectedTab].data,
@@ -55,7 +65,7 @@ export default function NewResearcherConsole(props) {
   ), [selectedTab, dataStructs]);
 
 
-  //NOTE: updated useEffect flow, test that it works as expected
+  //sequence of init events on component load
   useEffect(() => {
     const init = async () => {
       let errorMsg = '';
@@ -64,10 +74,10 @@ export default function NewResearcherConsole(props) {
         DAR.getDraftDarRequestList()
       ]);
       const [fetchedCollections, fetchedDraftsPayload] = promiseReturns;
-      //Need some extra formatting steps for drafts
+      //Need some extra formatting steps for drafts due to different payload format
       const fetchedDrafts = {
         status: fetchedDraftsPayload.status,
-        value: fetchedDraftsPayload.value.map((draftPayload) => draftPayload.dar)
+        value: (fetchedDraftsPayload.value || []).map((draftPayload) => draftPayload.dar)
       };
       handlePromise(
         fetchedCollections,
@@ -89,18 +99,14 @@ export default function NewResearcherConsole(props) {
     init();
   }, []);
 
-  // useEffect(() => {
-  //   searchRef.current.value = '';
-  //   setIsLoading(true);
-  //   setFilteredList(dataStructs[selectedTab].data);
-  // }, [selectedTab, dataStructs]);
-
+  //sequence of events when user switches tab (reset search bar and filteredList)
   useEffect(() => {
     setIsLoading(true);
     searchRef.current.value = '';
     setFilteredList(dataStructs[selectedTab].data);
   }, [dataStructs, selectedTab]);
 
+  //sequence of events when user switches tab or data is updated (perform new filter based on search query)
   useEffect(() => {
     const { data, filterFn } = dataStructs[selectedTab];
     searchOnFilteredList(
@@ -109,14 +115,15 @@ export default function NewResearcherConsole(props) {
       filterFn,
       setFilteredList
     );
+    if(!isNil(researcherCollections) && !isNil(researcherDrafts)) {
+      delayedLoadingUpdate({ setIsLoading });
+    }
   }, [researcherCollections, researcherDrafts, dataStructs, selectedTab]);
 
-  useEffect(() => {
-    setIsLoading(false);
-  }, [filteredList]);
-
-  const cancelCollection = async (darCollectionId) => {
+  //cancel collection function, passed to collections table to be used in buttons
+  const cancelCollection = async (darCollection) => {
     try {
+      const { darCollectionId, darCode } = darCollection;
       const canceledCollection = await Collections.cancelCollection(darCollectionId);
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
@@ -126,6 +133,7 @@ export default function NewResearcherConsole(props) {
       const clonedCollections = cloneDeep(researcherCollections);
       clonedCollections[targetIndex] = canceledCollection;
       setResearcherCollections(clonedCollections);
+      Notifications.showSuccess({text: `Deleted collection ${darCode}`});
     } catch (error) {
       Notifications.showError({
         text: 'Error: Cannot cancel target collection'
@@ -133,7 +141,7 @@ export default function NewResearcherConsole(props) {
     }
   };
 
-  //Draft delete function to be passed down to child component
+  //Draft delete, passed down to draft table to be used with delete button
   const deleteDraft = async ({ referenceId, identifier }) => {
     try {
       await DAR.deleteDar(referenceId);
@@ -146,6 +154,7 @@ export default function NewResearcherConsole(props) {
       } else {
         draftsClone.splice(targetIndex, 1);
         setResearcherDrafts(draftsClone);
+        Notifications.showSuccess({text: `Deleted DAR Draft ${identifier}`});
       }
     } catch (error) {
       Notifications.showError({
@@ -199,13 +208,13 @@ export default function NewResearcherConsole(props) {
     ),
     div({ className: 'table-container' }, [
       h(DarCollectionTable, {
-        isRendered: selectedTab === tabNames.darCollections && !isLoading, //NOTE: figure ot a better way to trigger the loader
+        isRendered: selectedTab === tabNames.darCollections,
         collections: filteredList,
         isLoading,
         cancelCollection
       }),
       h(DarDraftTable, {
-        isRendered: selectedTab === tabNames.darDrafts && !isLoading, //NOTE: figure ot a better way to trigger the loader
+        isRendered: selectedTab === tabNames.darDrafts,
         drafts: filteredList,
         isLoading,
         history,

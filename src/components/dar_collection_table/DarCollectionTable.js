@@ -30,10 +30,10 @@ const styles = {
   }),
   cellWidth: {
     darCode: '15%',
-    projectTitle: '30%',
+    projectTitle: '25%',
     submissionDate: '15%',
     status: '15%',
-    actions: '25%'
+    actions: '20%'
   }
 };
 
@@ -200,7 +200,7 @@ export default function DarCollectionTable(props) {
   };
 
   const cancelOnClick = async() => {
-    await cancelCollection(selectedCollection.darCollectionId);
+    await cancelCollection(selectedCollection);
     setShowConfirmation(false);
   };
 
