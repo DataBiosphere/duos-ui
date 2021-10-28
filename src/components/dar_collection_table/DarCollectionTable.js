@@ -18,7 +18,7 @@ const getProjectTitle = ((collection) => {
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
-    fontSize: '14px',
+    fontSize: '1.6rem',
     fontWeight: 400,
     display: 'flex',
     padding: '1rem 2%',
@@ -92,7 +92,7 @@ const CancelCollectionButton = (props) => {
     keyProp: `cancel-collection-${collection.id}`,
     label: 'Cancel',
     disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
-    baseColor: Theme.palette.primary,
+    baseColor: Theme.palette.secondary,
     additionalStyle: {
       width: '30%',
       padding: '2%',

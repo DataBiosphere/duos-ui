@@ -15,7 +15,7 @@ import SimpleTable from '../SimpleTable';
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
-    fontSize: '14px',
+    fontSize: '1.6rem',
     fontWeight: 400,
     display: 'flex',
     padding: '1rem 2%',
@@ -78,10 +78,11 @@ const ResumeDraftButton = (props) => {
   return h(SimpleButton, {
     keyProp: `resume-draft-${referenceId}`, //NOTE: make sure this works
     label: 'Resume',
-    baseColor: Theme.palette.primary,
+    baseColor: Theme.palette.secondary,
     additionalStyle: {
       width: '30%',
       padding: '2%',
+      marginRight: '2%',
       fontSize: '1.45rem'
     },
     onClick: () => history.push(`/dar_application/${referenceId}`)
