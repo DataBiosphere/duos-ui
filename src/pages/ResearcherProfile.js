@@ -9,7 +9,7 @@ import {PageHeading} from '../components/PageHeading';
 import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
 import {Notification} from '../components/Notification';
 import {SearchSelect} from '../components/SearchSelect';
-import {Institution, Researcher, User} from '../libs/ajax';
+import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
@@ -21,7 +21,7 @@ export default function ResearcherProfile(props) {
     academicEmail: '',
     checkNotifications: false,
     additionalEmail: '',
-    eRACommonsID: '',
+    eraCommonsId: '',
     linkedIn: '',
     orcid: '',
     researcherGate: '',
@@ -195,13 +195,13 @@ export default function ResearcherProfile(props) {
       country: userProps.country,
       department: userProps.department,
       division: userProps.division,
-      eRACommonsID: userProps.eraCommonsId,
-      piERACommonsID: userProps.piERACommonsID,
+      eraCommonsId: userProps.eraCommonsId,
       havePI: userProps.havePI,
       isThePI: userProps.isThePI,
       linkedIn: userProps.linkedIn,
       orcid: userProps.orcid,
       piEmail: userProps.piEmail,
+      piERACommonsID: userProps.piERACommonsID,
       piName: userProps.piName,
       profileName: user.displayName,
       pubmedID: userProps.pubmedID,
@@ -251,10 +251,23 @@ export default function ResearcherProfile(props) {
     setProfile(Object.assign({}, profile, newFields));
   };
 
+  const eraValidate = async () => {
+    const user = await User.getMe();
+    const userProps = getPropertyValuesFromUser(user);
+    const expirationCount = isNil(userProps.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(userProps.eraExpiration);
+
+    return (!isNil(userProps.eraCommonsId) && userProps.eraAuthorized === 'true' && expirationCount >= 0);
+
+    // Temporary fix until eRACommons.js is updated to share re-render info.
+  };
+
   const submitForm = async (event) => {
     event.preventDefault();
 
-    const newProfile = cleanObject(Object.assign({}, profile, {completed: researcherFieldsComplete}));
+    const eraValid = await eraValidate();
+    const profileCompleted = researcherFieldsComplete && eraValid;
+
+    const newProfile = cleanObject(Object.assign({}, profile, {completed: profileCompleted}));
 
     if (isNewProfile) {
       await createResearcher(newProfile);
@@ -462,11 +475,10 @@ export default function ResearcherProfile(props) {
                     onNihStatusUpdate: () => {},
                     location: props.location
                   }),
-                  div({ className: '' }, [
+                  div({}, [
                     label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                     LibraryCards({
                       style: { display: 'flex', flexFlow: 'row wrap' },
-                      isRendered: !isNil(libraryCards),
                       libraryCards: libraryCards
                     })
                   ])
@@ -719,11 +731,11 @@ export default function ResearcherProfile(props) {
 
                 div({ className: 'col-xs-12' }, [
                   label({
-                    id: 'lbl_profileEraCommons',
+                    id: 'lbl_profilePIEraCommons',
                     className: 'control-label'
                   }, ['Principal Investigator eRA Commons ID ', span({ className: 'italic' }, ['(optional)'])]),
                   input({
-                    id: 'profileEraCommons',
+                    id: 'profilePIEraCommons',
                     name: 'piERACommonsID',
                     type: 'text',
                     className: 'form-control',
