@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
-import {cloneDeep, find, get, isEmpty, isNil, omit, omitBy, trim} from 'lodash';
+import {cloneDeep, find, get, isEmpty, isNil, omit, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import {button, div, form, h, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
@@ -86,7 +86,7 @@ export default function ResearcherProfile(props) {
   useEffect(() => {
     const isValid = (value) => {
       let isValid = false;
-      if (value !== '' && value !== null && value !== undefined) {
+      if (trim(value.toString()) !== '' && value !== null && value !== undefined) {
         isValid = true;
       }
       return isValid;
@@ -267,7 +267,7 @@ export default function ResearcherProfile(props) {
     const eraValid = await eraValidate();
     const profileCompleted = researcherFieldsComplete && eraValid;
 
-    const newProfile = cleanObject(Object.assign({}, profile, {completed: profileCompleted}));
+    const newProfile = Object.assign({}, profile, {completed: profileCompleted});
 
     if (isNewProfile) {
       await createResearcher(newProfile);
@@ -300,10 +300,6 @@ export default function ResearcherProfile(props) {
     let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
-  };
-
-  const cleanObject = (obj) => {
-    return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
   };
 
   const cloneProfile = (profile) => {
