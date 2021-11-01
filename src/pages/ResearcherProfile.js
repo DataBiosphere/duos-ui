@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
-import {cloneDeep, find, get, isEmpty, isNil, omit, trim} from 'lodash';
+import {cloneDeep, find, get, isEmpty, isNil, isNumber, omit, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import {button, div, form, h, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
@@ -44,7 +44,6 @@ export default function ResearcherProfile(props) {
     completed: undefined
   });
 
-  const [isLoading, setIsLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState();
   const [userRoles, setUserRoles] = useState([]);
   const [stateNames, setStateNames] = useState([]);
@@ -61,7 +60,6 @@ export default function ResearcherProfile(props) {
   useEffect(() => {
     const init = async () => {
       try {
-        setIsLoading(true);
         await getResearcherProfile();
 
         setInstitutionList(await Institution.list());
@@ -72,11 +70,8 @@ export default function ResearcherProfile(props) {
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
 
         setCurrentUser(Storage.getCurrentUser());
-        setIsLoading(false);
       } catch (error) {
         Notification.showError({text: 'Error: Unable to retrieve user data from server'});
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -84,22 +79,6 @@ export default function ResearcherProfile(props) {
   }, [props.history]);
 
   useEffect(() => {
-    const isValid = (value) => {
-      let isValid = false;
-      if (trim(value.toString()) !== '' && value !== null && value !== undefined) {
-        isValid = true;
-      }
-      return isValid;
-    };
-
-    const isValidNumber = (value) => {
-      let isValid = false;
-      if (value !== 0 && value !== null && value !== undefined) {
-        isValid = true;
-      }
-      return isValid;
-    };
-
     const isValidState = (value) => {
       const stateSelected = (!isNil(value) && !isEmpty(value));
       const inUS = (profile.country === "United States of America" || profile.country === "");
@@ -119,12 +98,8 @@ export default function ResearcherProfile(props) {
       incompletes.push('Email Address');
     }
 
-    if (!isValidNumber(profile.institutionId)) {
+    if (!isNumber(profile.institutionId) || profile.institutionId === 0) {
       incompletes.push('Institution');
-    }
-
-    if (!isValid(profile.department)) {
-      incompletes.push('Department');
     }
 
     if (!isValid(profile.address1)) {
@@ -163,6 +138,10 @@ export default function ResearcherProfile(props) {
     setIncompleteFields(incompletes);
     setResearcherFieldsComplete(incompletes.length === 0);
   }, [profile]);
+
+  const isValid = (value) => {
+    return !isEmpty(trim(value.toString()));
+  };
 
   const getResearcherProfile = async () => {
     const user = await User.getMe();
@@ -252,13 +231,13 @@ export default function ResearcherProfile(props) {
   };
 
   const eraValidate = async () => {
+    // Temporary fix until eRACommons.js is updated to share re-render info.
+
     const user = await User.getMe();
     const userProps = getPropertyValuesFromUser(user);
     const expirationCount = isNil(userProps.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(userProps.eraExpiration);
 
     return (!isNil(userProps.eraCommonsId) && userProps.eraAuthorized === 'true' && expirationCount >= 0);
-
-    // Temporary fix until eRACommons.js is updated to share re-render info.
   };
 
   const submitForm = async (event) => {
@@ -270,19 +249,19 @@ export default function ResearcherProfile(props) {
     const newProfile = Object.assign({}, profile, {completed: profileCompleted});
 
     if (isNewProfile) {
-      await createResearcher(newProfile);
+      await createUserProperties(newProfile);
     } else {
-      await updateResearcher(newProfile);
+      await updateUserProperties(newProfile);
     }
   };
 
-  const createResearcher = async (profile) => {
+  const createUserProperties = async (profile) => {
     await Researcher.createProperties(profile);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
 
-  const updateResearcher = async (profile) => {
+  const updateUserProperties = async (profile) => {
     const profileClone = cloneProfile(profile);
     await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, researcherFieldsComplete, profileClone);
     await updateUser();
@@ -536,7 +515,7 @@ export default function ResearcherProfile(props) {
               div({ className: 'col-xs-12 no-padding' }, [
                 div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                   div({ className: 'col-xs-6' }, [
-                    label({ id: 'lbl_profileDepartment', className: 'control-label' }, ['Department*']),
+                    label({ id: 'lbl_profileDepartment', className: 'control-label' }, ['Department']),
                     input({
                       id: 'profileDepartment',
                       name: 'department',
