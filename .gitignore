@@ -32,3 +32,4 @@ yarn-error.log*
 public/config.json
 /cypress/videos/
 /cypress/fixtures/duos-automation*.json
+/cypress/screenshots

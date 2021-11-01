@@ -1,7 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {find, getOr, cloneDeep, unset, flow} from 'lodash/fp';
-import {isNil} from 'lodash';
+import {cloneDeep, find, flow, getOr, isNil, unset} from 'lodash/fp';
 import {Config} from './config';
 import {Models} from './models';
 import {spinnerService} from './spinner-service';
@@ -17,13 +16,16 @@ import {isFileEmpty} from './utils';
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if (error.response.status === 401) {
+  // Default to a 502 when we can't get a real response object.
+  const status = getOr(502)('response.status')(error);
+  if (status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
 
-  if (error.response.status >= 500) {
-    reportError(error.response.config.url, error.response.status);
+  const reportUrl = getOr(null)('response.config.url')(error);
+  if (!isNil(reportUrl) && status >= 500) {
+    reportError(reportUrl, status);
   }
 
   return Promise.reject(error);
@@ -170,7 +172,19 @@ export const DAC = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.status;
   }
+};
 
+export const Collections = {
+  getCollectionsForResearcher: async () => {
+    const url = `${await Config.getApiUrl()}/api/collections`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  cancelCollection: async(id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`;
+    const res = await axios.put(url, {}, Config.authOpts());
+    return res.data;
+  }
 };
 
 export const DAR = {
@@ -183,6 +197,7 @@ export const DAR = {
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
 
+    //NOTE: rewrite this, the dar should have the details needed on it (or the response) itself
     let darInfo = Models.dar;
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;
@@ -240,7 +255,7 @@ export const DAR = {
     const dataUseModel = fp.keys(darInfo.dataUse);
     dataUseModel.forEach(key => {
       const value = rawDar[key];
-      if (!fp.isNil(value)) {
+      if (!isNil(value)) {
         darInfo.dataUse[key] = value;
       }
     });
