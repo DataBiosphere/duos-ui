@@ -29,12 +29,8 @@ import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
-<<<<<<< HEAD
-import { ResearcherProfile } from './pages/ResearcherProfile';
-=======
 import NewResearcherConsole from './components/researcher_console/NewResearcherConsole';
-import { ResearcherProfile } from './pages/ResearcherProfile';
->>>>>>> a72df067e956614fe13f059c605c002fc4c046c9
+import ResearcherProfile from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
