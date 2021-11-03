@@ -25,6 +25,9 @@
 .env.test.local
 .env.production.local
 
+#npm package-lock (keep to one lockfile)
+package-lock.json
+
 #Yarn Zero-install configs
 .pnp.cjs
 .pnp.loader.mjs
