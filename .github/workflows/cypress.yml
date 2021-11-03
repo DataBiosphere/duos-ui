@@ -9,8 +9,8 @@ jobs:
         run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v2
-      - name: NPM Install
-        run: yarn install --frozen-lockfile
+      - name: Yarn Install
+        run: yarn install
       - name: Copy Configs
         run: cp config/dev.json public/config.json
       - name: Yarn build

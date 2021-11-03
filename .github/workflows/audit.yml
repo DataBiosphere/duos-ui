@@ -1,5 +1,5 @@
 on: [pull_request]
-name: npm audit
+name: yarn npm audit
 jobs:
   scan:
     name: yarn npm audit
@@ -7,6 +7,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install
       - name: yarn npm audit
         run: yarn npm audit --environment production
