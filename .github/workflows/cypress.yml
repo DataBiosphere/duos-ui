@@ -24,7 +24,6 @@ jobs:
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
-          working-directory: cypress
           build: yarn run build
           start: yarn run start
           wait-on: 'http://localhost:3000'
