@@ -1725,9 +1725,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cypress/react@npm:5.10.2":
-  version: 5.10.2
-  resolution: "@cypress/react@npm:5.10.2"
+"@cypress/react@npm:5.10.3":
+  version: 5.10.3
+  resolution: "@cypress/react@npm:5.10.3"
   dependencies:
     "@cypress/mount-utils": 1.0.2
     debug: 4.3.2
@@ -1759,7 +1759,7 @@ __metadata:
       optional: true
     webpack:
       optional: true
-  checksum: 55daa56b15568062cf302071f812f4e2009ea62f9a9eb31278499bd1bcc67dc4c3cb6805627b08b459c9f7b5573092c3b323a4711214b512baa8babfde622468
+  checksum: 4424b790d891ca3fa3e22381f9f67dce003d53fe9731cbf62d0aaab535f39ef1feefc78d157587edf717139783d6e5a2c555a59b50eb45e5c0f58fc32a0458bb
   languageName: node
   linkType: hard
 
@@ -6780,7 +6780,7 @@ __metadata:
     "@babel/plugin-syntax-jsx": ^7.16.0
     "@babel/preset-react": 7.16.0
     "@babel/runtime": ^7.16.0
-    "@cypress/react": 5.10.2
+    "@cypress/react": 5.10.3
     "@cypress/webpack-dev-server": 1.7.0
     "@material-ui/core": 4.12.3
     "@material-ui/icons": 4.11.2
@@ -6819,7 +6819,7 @@ __metadata:
     react-router-bootstrap: 0.25.0
     react-router-dom: 5.3.0
     react-scripts: ^4.0.3
-    react-select: 5.1.0
+    react-select: 5.2.0
     react-tooltip: 4.2.21
     source-map-explorer: 2.5.2
     stackdriver-errors-js: 0.12.0
@@ -14977,9 +14977,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-select@npm:5.1.0":
-  version: 5.1.0
-  resolution: "react-select@npm:5.1.0"
+"react-select@npm:5.2.0":
+  version: 5.2.0
+  resolution: "react-select@npm:5.2.0"
   dependencies:
     "@babel/runtime": ^7.12.0
     "@emotion/cache": ^11.4.0
@@ -14991,7 +14991,7 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
     react-dom: ^16.8.0 || ^17.0.0
-  checksum: b811ec246dc68b2615ed623170ed52c035e239a2c90fdf742c18bed1d1bb1cb4098af1fde0d18ac8d73abaf9126f4030cb0a0f3e96c1c6f998820af5e681b3b5
+  checksum: 49666e8b73f721813bfef49d2ccd7fbf8d32d9b7c9d6723b53d5567d28dccb7374aa2ea209dda321bcac57c63184f3bb679ad91bb23ca7912358eb1c7fb29fe2
   languageName: node
   linkType: hard
 
