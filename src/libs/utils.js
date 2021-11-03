@@ -140,6 +140,11 @@ export const isFileEmpty = (file) => {
   return isNil(file) || file.size < 1 || file.length < 1;
 };
 
+export const isEmailAddress = (email) => {
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  return re.test(email);
+};
+
 export const USER_ROLES = {
   admin: 'Admin',
   chairperson: 'Chairperson',

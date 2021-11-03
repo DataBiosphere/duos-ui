@@ -13,7 +13,7 @@ import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES,} from '../libs/utils';
+import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -94,7 +94,7 @@ export default function ResearcherProfile(props) {
       incompletes.push('Name');
     }
 
-    if (!isValid(profile.academicEmail || profile.academicEmail.indexOf('@') === -1)) {
+    if (!isValid(profile.academicEmail) || !isEmailAddress(profile.academicEmail)) {
       incompletes.push('Email Address');
     }
 
@@ -130,7 +130,7 @@ export default function ResearcherProfile(props) {
       if (!isValid(profile.piName)) {
         incompletes.push('Principal Investigator Name');
       }
-      if (!isValid(profile.piEmail) || profile.piEmail.indexOf('@') === -1) {
+      if (!isValid(profile.piEmail) || !isEmailAddress(profile.piEmail)) {
         incompletes.push('Principal Investigator Email');
       }
     }
@@ -429,7 +429,7 @@ export default function ResearcherProfile(props) {
                 }),
                 span({
                   className: 'cancel-color required-field-error-span',
-                  isRendered: (!isNil(profile.additionalEmail) && profile.additionalEmail !== "" && profile.additionalEmail.indexOf('@') === -1)
+                  isRendered: (!isNil(profile.additionalEmail) && profile.additionalEmail !== "" && !isEmailAddress(profile.additionalEmail))
                 }, ['Email Address has invalid format'])
               ])
             ]),
