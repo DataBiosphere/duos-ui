@@ -13,8 +13,8 @@ jobs:
         run: yarn install
       - name: Copy Configs
         run: cp config/dev.json public/config.json
-      - name: Yarn build
-        run: CI=false yarn run build --silent
+      # - name: Yarn build
+      #   run: CI=false yarn run build --silent
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
@@ -24,6 +24,8 @@ jobs:
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
+          working-directory: cypress
+          build: yarn run build
           start: yarn run start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
