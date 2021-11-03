@@ -9,8 +9,6 @@ jobs:
         run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v2
-      - name: yarn version check
-        run: yarn --version
       - name: Yarn Install
         run: yarn install
       - name: Copy Configs
@@ -26,7 +24,7 @@ jobs:
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
-          build: yarn run build CI=false
+          build: CI=false yarn run build
           start: yarn run start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
