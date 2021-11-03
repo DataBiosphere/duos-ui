@@ -10,11 +10,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: NPM Install
-        run: npm ci
+        run: yarn install --frozen-lockfile
       - name: Copy Configs
         run: cp config/dev.json public/config.json
-      - name: NPM Build
-        run: CI=false npm run build --silent
+      - name: Yarn build
+        run: CI=false yarn run build --silent
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
@@ -24,6 +24,6 @@ jobs:
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
-          start: npm start
+          start: yarn run start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120

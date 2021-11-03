@@ -25,6 +25,12 @@
 .env.test.local
 .env.production.local
 
+#Yarn Zero-install configs
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/
+
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
