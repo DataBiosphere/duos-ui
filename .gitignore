@@ -31,7 +31,6 @@ package-lock.json
 #Yarn Zero-install configs
 .pnp.cjs
 .pnp.loader.mjs
-.yarn/cache
 .yarn/unplugged
 
 #Yarn optimmization files

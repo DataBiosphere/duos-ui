@@ -44,8 +44,8 @@
   },
   "scripts": {
     "analyze": "yarn run build; source-map-explorer build/static/js/main.*",
-    "start": "react-scripts start DISABLE_ESLINT_PLUGIN=true",
-    "build": "react-scripts build DISABLE_ESLINT_PLUGIN=true",
+    "start": "DISABLE_ESLINT_PLUGIN=true react-scripts start",
+    "build": " DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "eject": "react-scripts eject",
     "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
     "start:ci": "BROWSER=none react-scripts start",

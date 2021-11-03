@@ -25,6 +25,6 @@ jobs:
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
           command-prefix: yarn dlx
-          start: yarn run start DISABLE_ESLINT_PLUGIN=true
+          start: yarn start
           wait-on: 'http://localhost:3000'
-          wait-on-timeout: 200
+          wait-on-timeout: 120
