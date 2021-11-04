@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Yarn Install
-        run: NODELINKER="node-modules" yarn install --immutable --immutable-cache
+        run: NODELINKER="node-modules" yarn install
       - name: Copy Configs
         run: cp config/dev.json public/config.json
       - name: Yarn build
