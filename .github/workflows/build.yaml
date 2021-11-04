@@ -4,14 +4,9 @@ on:
   push:
     branches:
     - develop
-    paths-ignore:
-    - 'README.md'
-    - '.github/**'
   pull_request:
     branches:
     - develop
-    paths-ignore:
-    - 'README.md'
 env:
   REGISTRY_HOST: gcr.io
   GOOGLE_PROJECT: broad-dsp-gcr-public
