@@ -6779,7 +6779,7 @@ __metadata:
     eslint: 7.32.0
     eslint-plugin-flowtype: 7.0.0
     eslint-plugin-react: 7.26.1
-    google-auth-library: 7.10.1
+    google-auth-library: 7.10.2
     jquery: 3.6.0
     js-file-download: 0.4.12
     lodash: 4.17.21
@@ -8659,9 +8659,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-auth-library@npm:7.10.1":
-  version: 7.10.1
-  resolution: "google-auth-library@npm:7.10.1"
+"google-auth-library@npm:7.10.2":
+  version: 7.10.2
+  resolution: "google-auth-library@npm:7.10.2"
   dependencies:
     arrify: ^2.0.0
     base64-js: ^1.3.0
@@ -8672,7 +8672,7 @@ __metadata:
     gtoken: ^5.0.4
     jws: ^4.0.0
     lru-cache: ^6.0.0
-  checksum: b5f55d4db005dfe9419f413689b0d3ff2847cb52c8ccd0b50036f524f72314eab4465f46c5268f52525d268df82327c9fc1cf0f365e90c734e4056de29f414ac
+  checksum: d1ecb7e21b518c99f08f8ff65951a1b34589b749bb8b7896e7dcb5c28bf511c40ee96515dd9eef0494102ba3abd979076019c674f1c3b458c91db263d40d317d
   languageName: node
   linkType: hard
 
