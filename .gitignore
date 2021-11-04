@@ -29,9 +29,13 @@
 package-lock.json
 
 #Yarn Zero-install configs
-.pnp.cjs
-.pnp.loader.mjs
-.yarn/unplugged
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 #Yarn optimmization files
 .yarn/install-state.gz
