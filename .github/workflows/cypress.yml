@@ -23,8 +23,9 @@ jobs:
           CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
+          CI: false
         with:
-          build: CI=false yarn run build --silent
+          build: yarn run build --silent
           install-command: yarn install --immutable --immutable-cache
           command-prefix: yarn dlx
           start: yarn start
