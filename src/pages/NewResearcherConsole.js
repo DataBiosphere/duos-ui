@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import { cloneDeep, map, find, isEmpty } from 'lodash/fp';
+import { cloneDeep, map, findIndex, isEmpty } from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -146,7 +146,7 @@ export default function NewResearcherConsole(props) {
     try {
       await DAR.deleteDar(referenceId);
       const draftsClone = cloneDeep(researcherDrafts);
-      const targetIndex = find((draft) => {
+      const targetIndex = findIndex((draft) => {
         return draft.referenceId === referenceId;
       })(draftsClone);
       if (targetIndex === -1) {
