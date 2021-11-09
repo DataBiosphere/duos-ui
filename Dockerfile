@@ -19,7 +19,7 @@ RUN yarn set version berry
 # sets yarn version to latest major (non-breaking), update as breaking version updates are tested and approved
 RUN yarn set version 3.x
 # Note timeout -> material-ui/icons is incredibly large, timeout adjustment often recommended
-RUN yarn install --network-timeout 500000 --silent
+RUN yarn install --immutable --immutable-cache --check-cache --network-timeout 500000 --silent
 #ESLint plugin can cause slowdowns for yarn, no need to enable it on deployment
 RUN yarn run build DISABLE_ESLINT_PLUGIN=true --silent
 
