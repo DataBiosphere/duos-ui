@@ -30,7 +30,7 @@ import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
 import NewResearcherConsole from './pages/NewResearcherConsole';
-import { ResearcherProfile } from './pages/ResearcherProfile';
+import ResearcherProfile from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
