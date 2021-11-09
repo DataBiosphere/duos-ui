@@ -18,7 +18,7 @@ const getProjectTitle = ((collection) => {
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
-    fontSize: '14px',
+    fontSize: '1.6rem',
     fontWeight: 400,
     display: 'flex',
     padding: '1rem 2%',
@@ -30,10 +30,10 @@ const styles = {
   }),
   cellWidth: {
     darCode: '15%',
-    projectTitle: '30%',
+    projectTitle: '25%',
     submissionDate: '15%',
     status: '15%',
-    actions: '25%'
+    actions: '20%'
   }
 };
 
@@ -89,10 +89,10 @@ const statusCellData = ({status = '- -', darCollectionId, style = {}, label = 's
 const CancelCollectionButton = (props) => {
   const { collection } = props;
   return h(SimpleButton, {
-    keyProp: `cancel-collection-${collection}`,
+    keyProp: `cancel-collection-${collection.id}`,
     label: 'Cancel',
     disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
-    baseColor: Theme.palette.primary,
+    baseColor: Theme.palette.secondary,
     additionalStyle: {
       width: '30%',
       padding: '2%',
@@ -111,7 +111,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
 
   return {
     isComponent: true,
-    darCollectionId,
+    id: darCollectionId,
     label: 'cancel-button',
     data: div(
       {
@@ -153,7 +153,6 @@ export default function DarCollectionTable(props) {
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
-  // const searchRef = useRef(''); //May not need this, could just pass in the value from the parent
 
   const { collections, isLoading, cancelCollection } = props;
   /*
@@ -201,7 +200,7 @@ export default function DarCollectionTable(props) {
   };
 
   const cancelOnClick = async() => {
-    await cancelCollection(selectedCollection.darCollectionId);
+    await cancelCollection(selectedCollection);
     setShowConfirmation(false);
   };
 
