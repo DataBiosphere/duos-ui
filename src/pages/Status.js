@@ -22,7 +22,7 @@ export const Status = hh(class Status extends Component {
   };
 
   isOntologyHealthy = (elements) => {
-    let ok = getOr(undefined)('ok')(elements);
+    const ok = getOr(undefined)('ok')(elements);
     if (!isNil(ok)) {
       // return the OK status from ontology if it exists
       return ok;
