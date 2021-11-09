@@ -12,8 +12,7 @@ export const Status = hh(class Status extends Component {
     super(props);
     this.state = {
       consentStatus: {},
-      ontologyStatus: {},
-      fireCloudStatus: {}
+      ontologyStatus: {}
     };
   }
 
