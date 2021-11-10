@@ -15,6 +15,8 @@ jobs:
         run: cp config/dev.json public/config.json
       - name: Yarn build
         run: CI=false yarn run build --silent
+      - name: Yarn start
+        run: yarn start & npx wait-on http://localhost:3000 --timeout 120000
       - name: Cypress run
         run: cypress run
         env:
@@ -23,8 +25,9 @@ jobs:
           CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
           CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
-        with:
-          command-prefix: yarn dlx
-          start: yarn start
-          wait-on: 'http://localhost:3000'
-          wait-on-timeout: 180
+          CI: false
+        # with:
+        #   command-prefix: yarn dlx
+        #   start: yarn start
+        #   wait-on: 'http://localhost:3000'
+        #   wait-on-timeout: 180
