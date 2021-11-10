@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { div, form, input, label, textarea, hh, h, select, span, option, section, button, p } from 'react-hyperscript-helpers';
 import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
-import { Notifications } from '../../libs/utils';
+import { Notifications, isEmailAddress } from '../../libs/utils';
 import { PageSubHeading } from '../PageSubHeading';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -159,7 +159,7 @@ export const SupportRequestModal = hh(
       let emailText = e.target.value;
       this.setState(prev => {
         prev.email = emailText;
-        prev.valid = /.+@.+\.[A-Za-z]+$/.test(emailText) ? true : false;
+        prev.valid = isEmailAddress(emailText);
         return prev;
       });
     };
