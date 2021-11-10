@@ -1,4 +1,4 @@
-import { get, map, uniq } from 'lodash/fp';
+import { getOr, isNil, map, uniq } from 'lodash/fp';
 import React, { Component } from 'react';
 import { a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
 import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
@@ -12,19 +12,24 @@ export const Status = hh(class Status extends Component {
     super(props);
     this.state = {
       consentStatus: {},
-      ontologyStatus: {},
-      fireCloudStatus: {}
+      ontologyStatus: {}
     };
   }
 
   isConsentHealthy = (elements) => {
-    return get('ok')(elements);
+    return getOr(false)('ok')(elements);
   };
 
   isOntologyHealthy = (elements) => {
-    // find all values of "healthy" and ensure that they are all true
-    const bools = uniq(map('healthy')(elements));
-    return bools.length === 1 && bools[0];
+    const ok = getOr(undefined)('ok')(elements);
+    if (!isNil(ok)) {
+      // return the OK status from ontology if it exists
+      return ok;
+    } else {
+      // find all values of "healthy" and ensure that they are all true
+      const bools = uniq(map('healthy')(elements));
+      return bools.length === 1 && bools[0];
+    }
   };
 
   async componentDidMount() {
