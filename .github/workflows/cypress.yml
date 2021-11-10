@@ -16,9 +16,9 @@ jobs:
       - name: Yarn build
         run: CI=false yarn run build --silent
       - name: Yarn start
-        run: yarn start & npx wait-on http://localhost:3000 --timeout 120000
+        run: yarn start & npx wait-on http://localhost:3000 --timeout 180000
       - name: Cypress run
-        run: cypress run
+        run: yarn dlx cypress run
         env:
           CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
           CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
