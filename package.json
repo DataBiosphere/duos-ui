@@ -61,7 +61,7 @@
     "cypress": "9.0.0",
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "7.0.0",
-    "eslint-plugin-react": "7.26.1",
+    "eslint-plugin-react": "7.27.0",
     "google-auth-library": "7.10.2",
     "html-webpack-plugin": "4.5.2",
     "react-scripts": "4.0.3",
