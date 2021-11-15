@@ -4,7 +4,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
-import {Notifications as NotyUtil } from '../libs/utils';
+import {completedResearcherInfoCheck, Notifications as NotyUtil } from '../libs/utils';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
@@ -234,7 +234,7 @@ class DataAccessRequestApplication extends Component {
     if (!fp.isNil(formData.darCode)) {
       completed = '';
     } else if (rpProperties.completed !== '') {
-      completed = rpProperties.completed;
+      completed = completedResearcherInfoCheck(rpProperties);
     }
     this.setState(prev => {
       prev.completed = completed;
