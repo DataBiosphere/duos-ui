@@ -45,13 +45,13 @@ const columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
   name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
-  institution: {label: 'Custodian Status', cellStyle: {width: styles.cellWidths.institution}}
+  institution: {label: 'Submitter Status', cellStyle: {width: styles.cellWidths.institution}}
 };
 
 const RemoveDataCustodianButton = (props) => {
   const { researcher = {}, showConfirmationModal } = props;
-  const message = 'Are you sure you want to remove this Data Custodian?';
-  const title = 'Remove Data Custodian';
+  const message = 'Are you sure you want to remove this Data Submitter?';
+  const title = 'Remove Data Submitter';
   return h(SimpleButton, {
     keyProp: `remove-custodian-${researcher.id}`,
     label: 'Remove',
@@ -68,8 +68,8 @@ const RemoveDataCustodianButton = (props) => {
 
 const IssueDataCustodianButton = (props) => {
   const { researcher, showConfirmationModal } = props;
-  const message = 'Are you sure you want to make this person a Data Custodian?';
-  const title = 'Issue Data Custodian';
+  const message = 'Are you sure you want to make this person a Data Submitter?';
+  const title = 'Issue Data Submitter';
   return h(SimpleButton, {
     keyProp: `issue-card-${researcher.userEmail}`,
     label: 'Issue',
@@ -300,11 +300,11 @@ export default function DataCustodianTable(props) {
       setShowConfirmation(false);
       setShowModal(false);
       Notifications.showSuccess({
-        text: `Issued ${messageName} as Data Custodian`,
+        text: `Issued ${messageName} as Data Submitter`,
       });
     } catch (error) {
       Notifications.showError({
-        text: `Error issuing ${messageName} as Data Custodian`,
+        text: `Error issuing ${messageName} as Data Submitter`,
       });
     }
   };
@@ -329,11 +329,11 @@ export default function DataCustodianTable(props) {
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({
-        text: `Removed ${messageName} as a Data Custodian`,
+        text: `Removed ${messageName} as a Data Submitter`,
       });
     } catch (error) {
       Notifications.showError({
-        text: `Error removing ${messageName} as a Data Custodian`,
+        text: `Error removing ${messageName} as a Data Submitter`,
       });
     }
   };
@@ -357,7 +357,7 @@ export default function DataCustodianTable(props) {
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
             div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, [
-              'Data Custodians',
+              'Data Submitters',
             ]),
             div(
               {
@@ -366,7 +366,7 @@ export default function DataCustodianTable(props) {
                 }),
               },
               [
-                "Your Institution's Data Custodians. Issue or Remove Data Custodian privileges below.",
+                "Your Institution's Data Submitters. Issue or remove Data Submitter privileges below.",
               ]
             ),
           ]),
@@ -376,7 +376,7 @@ export default function DataCustodianTable(props) {
           h(SimpleButton, {
             onClick: () => showModalOnClick(),
             baseColor: Theme.palette.secondary,
-            label: 'Add New Data Custodian',
+            label: 'Add New Data Submitter',
             additionalStyle: {
               width: '20rem',
             },

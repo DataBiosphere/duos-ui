@@ -119,7 +119,7 @@ export default function DataCustodianFormModal(props) {
     [
       div({ style: Styles.MODAL.CONTENT }, [
         h(CloseIconComponent, { closeFn: closeModal }),
-        div({ style: Styles.MODAL.TITLE_HEADER }, ['Add Data Custodian']),
+        div({ style: Styles.MODAL.TITLE_HEADER }, ['Add Data Submitter']),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         //users dropdown
         h(FormFieldRow, {

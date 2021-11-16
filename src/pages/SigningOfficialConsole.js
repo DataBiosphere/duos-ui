@@ -17,7 +17,7 @@ import DataCustodianTable from "../components/data_custodian_table/DataCustodian
 import { Config } from "../libs/config";
 
 const tabs = {
-  custodian: 'Data Custodian',
+  custodian: 'Data Submitter',
   researcher: 'Researchers'
 };
 
