@@ -42,7 +42,7 @@ class AccessReview extends React.PureComponent {
         const accessElectionReview = await Election.findDataAccessElectionReview(accessElection.electionId);
         const rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId);
         const rpElection = isNil(rpElectionReview) ? null : rpElectionReview.election;
-        return {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection};
+        return {accessElectionReview, accessElection, rpElectionReview, rpElection};
       } catch(error) {
         Notifications.showError({text: 'Error initializing Election Data'});
         return Promise.reject(error);
@@ -55,7 +55,7 @@ class AccessReview extends React.PureComponent {
     ]);
 
     const {datasets, darInfo, consent, researcherProfile} = darData;
-    const {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
+    const {accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
 
     let allVotes = [];
     if (!isNil(accessElection)) {
@@ -66,7 +66,7 @@ class AccessReview extends React.PureComponent {
       allVotes = allVotes.concat(rpVotes);
     }
 
-    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
+    this.setState({ allVotes, darId, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
   }
 
   render() {
