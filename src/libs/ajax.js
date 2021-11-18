@@ -187,7 +187,7 @@ export const Collections = {
   },
   getCollectionById: async(id) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}`;
-    const res = await axios.get(url, {}, Config.authOpts());
+    const res = await axios.get(url, Config.authOpts());
     return res.data;
   }
 };
