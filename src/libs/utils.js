@@ -1,11 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach } from 'lodash';
+import { forEach, get } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
-import _ from 'lodash';
 import {User} from "./ajax";
 
 export const UserProperties = {
@@ -595,8 +594,8 @@ export const getColumnSort = (getList, callback) => {
         return 0;
       }
 
-      const aVal = getValue ? getValue(a) : _.get(a, sortKey);
-      const bVal = getValue ? getValue(b) : _.get(b, sortKey);
+      const aVal = getValue ? getValue(a) : get(a, sortKey);
+      const bVal = getValue ? getValue(b) : get(b, sortKey);
       if (isNil(aVal) || isNil(bVal)) {
         return 0;
       }
