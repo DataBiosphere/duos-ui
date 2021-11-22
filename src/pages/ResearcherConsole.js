@@ -220,8 +220,8 @@ class ResearcherConsole extends Component {
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((darInfo, idx) => {
                 const opened = !isNil(darInfo.election);
                 // Look for any FINAL votes with a `true` value. Legacy default
-                // value was finalAccessVoteValue, so fall back to that if we
-                // don't have any votes.
+                // value was `election.finalAccessVote`, so fall back to that if
+                // we don't have any votes.
                 const finalAccessVoteValue = getOr(false)('finalAccessVote')(darInfo.election);
                 // This uses the same logic we use in the chair/admin console
                 const finalVote = isNil(darInfo.votes) ? null : find(wasFinalVoteTrue)(darInfo.votes);
