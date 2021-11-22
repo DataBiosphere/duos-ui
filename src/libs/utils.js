@@ -1,8 +1,7 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach } from 'lodash';
-import { get } from 'lodash/fp';
+import { forEach, get } from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -102,9 +101,9 @@ export const getPropertyValuesFromUser = (user) => {
 };
 
 export const applyHoverEffects = (e, style) => {
-  forEach(style, (value, key) => {
+  forEach((key, value) => {
     e.target.style[key] = value;
-  });
+  })(style);
 };
 
 export const highlightExactMatches = (highlightedWords, content) => {
