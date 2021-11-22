@@ -1,7 +1,8 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach, get } from 'lodash';
+import { forEach } from 'lodash';
+import { get } from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -594,8 +595,8 @@ export const getColumnSort = (getList, callback) => {
         return 0;
       }
 
-      const aVal = getValue ? getValue(a) : get(a, sortKey);
-      const bVal = getValue ? getValue(b) : get(b, sortKey);
+      const aVal = getValue ? getValue(a) : get(sortKey)(a);
+      const bVal = getValue ? getValue(b) : get(sortKey)(b);
       if (isNil(aVal) || isNil(bVal)) {
         return 0;
       }
