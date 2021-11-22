@@ -226,6 +226,8 @@ class ResearcherConsole extends Component {
                 // This uses the same logic we use in the chair/admin console
                 const finalVote = isNil(darInfo.votes) ? null : find(wasFinalVoteTrue)(darInfo.votes);
                 const finalVoteValue = isNil(finalVote) ? finalAccessVoteValue : finalVote.vote;
+                //if the dar was canceled by an admin or chair the canceled status will be on the election
+                //if the researcher canceled the dar the canceled status will be on the dar data
                 const canceled =
                 !isNil(darInfo.dar.data.status) ?
                   darInfo.dar.data.status === 'Canceled'
