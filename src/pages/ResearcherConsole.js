@@ -10,8 +10,8 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
 import accessIcon from "../images/icon_access.png";
-import { isNil } from 'lodash/fp';
-import {USER_ROLES} from "../libs/utils";
+import {find, getOr, isNil} from 'lodash/fp';
+import {USER_ROLES, wasFinalVoteTrue} from '../libs/utils';
 
 class ResearcherConsole extends Component {
 
@@ -219,8 +219,12 @@ class ResearcherConsole extends Component {
 
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((darInfo, idx) => {
                 const opened = !isNil(darInfo.election);
-                //if the dar was canceled by an admin or chair the canceled status will be on the election
-                //if the researcher canceled the dar the canceled status will be on the dar data
+                // Look for any FINAL votes with a `true` value.
+                // Legacy default value was finalAccessVoteValue, so fall back
+                // to that if we don't have any votes.
+                const finalAccessVoteValue = getOr(false)('finalAccessVote')(darInfo.election);
+                const finalVote = isNil(darInfo.votes) ? null : find(wasFinalVoteTrue)(darInfo.votes);
+                const finalVoteValue = isNil(finalVote) ? finalAccessVoteValue : finalVote.vote;
                 const canceled =
                 !isNil(darInfo.dar.data.status) ?
                   darInfo.dar.data.status === 'Canceled'
@@ -236,8 +240,8 @@ class ResearcherConsole extends Component {
                       span({ isRendered: !opened && !canceled}, ["Submitted"]),
                       span({ isRendered: opened && !canceled ? darInfo.election.status === 'Open' || darInfo.election.status === 'Final' || darInfo.election.status === 'PendingApproval' : false}, ["In review"]),
                       span({ isRendered: canceled }, ["Canceled"]),
-                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false : false}, ["Denied"]),
-                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true : false}, ["Approved"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && finalVoteValue === false : false}, ["Denied"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && finalVoteValue === true : false}, ["Approved"]),
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
