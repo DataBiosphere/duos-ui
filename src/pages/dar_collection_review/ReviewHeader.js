@@ -1,4 +1,5 @@
-import { div, span } from 'react-hyperscript-helpers';
+import { Fragment } from 'react';
+import { h, div, span } from 'react-hyperscript-helpers';
 
 const styles = {
   header: {
@@ -38,25 +39,41 @@ const styles = {
   }
 };
 
+const appliedPrimaryHeaderStyle = Object.assign({}, styles.containerRow, styles.primaryHeaderRow);
+
 export default function ReviewHeader(props) {
   const {
     darCode,
     projectTitle,
     downloadLink,
-    redirectLink
+    redirectLink,
+    isLoading
   } = props;
   return (
-    div({className: 'header-container'},[
-      div({className: 'primary-header-row', style: Object.assign({}, styles.containerRow, styles.primaryHeaderRow)}, [
-        span({style: styles.header}, ["Data Access Request Review"]),
-        redirectLink
+    h(Fragment, {}, [
+      div({className: 'header-container', isRendered: !isLoading}, [
+        div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
+          span({style: styles.header}, ["Data Access Request Review"]),
+          redirectLink
+        ]),
+        div({className: 'secondary-header-row', style: styles.containerRow}, [
+          span({style: styles.secondaryHeader}, [darCode]),
+          downloadLink
+        ]),
+        div({style: styles.containerRow}, [
+          div({className: 'collection-project-title', style: styles.title}, [projectTitle])
+        ])
       ]),
-      div({className: 'secondary-header-row', style: styles.containerRow}, [
-        span({style: styles.secondaryHeader}, [darCode]),
-        downloadLink
-      ]),
-      div({style: styles.containerRow}, [
-        div({className: 'collection-project-title', style: styles.title}, [projectTitle])
+      div({className: 'header-skeleton-loader', isRendered: isLoading}, [
+        div({className: 'primary-header-skeleton', style: appliedPrimaryHeaderStyle}, [
+          div({className: 'text-placeholder', style: { width: '30%', height: '2.2rem'}}),
+        ]),
+        div({className: 'secondary-header-skeleton', style: styles.containerRow}, [
+          div({className: 'text-placeholder', style: {width: '15%', height: '2.5rem'}})
+        ]),
+        div({style: styles.containerRow}, [
+          div({className: 'text-placeholder', style: {width: '40%', height: '5rem', marginBottom: styles.title.marginBottom}})
+        ])
       ])
     ])
   );

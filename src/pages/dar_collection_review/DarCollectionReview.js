@@ -31,8 +31,6 @@ export default function DarCollectionReview(props) {
   //NOTE: update isLoading flow if needed. Will create skeleton loaders for individual pieces later
   useEffect(() => {
     const init = async () => {
-
-      setIsLoading(true);
       //NOTE: backend is a bit restrictive, collections by id are currently not visible to anyone other than the creator
       //Endpoint needs to be adjusted, for now just remove the check on a local instance
       const [collection, user] = await Promise.all([
@@ -45,10 +43,14 @@ export default function DarCollectionReview(props) {
       setCurrentUser(user);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
-      setIsLoading(false);
+      const timeout = setTimeout(() => {
+        setIsLoading(false);
+        clearTimeout(timeout);
+      }, 500);
     };
 
     try {
+      setIsLoading(true);
       init();
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
@@ -57,7 +59,7 @@ export default function DarCollectionReview(props) {
 
   return (
     div({style: Styles.PAGE}, [
-      div({ isRendered: !isLoading && !isEmpty(darInfo)}, [
+      div({}, [
         h(ReviewHeader, {
           darCode: collection.darCode || '- -',
           projectTitle: darInfo.projectTitle || '- -',
@@ -66,13 +68,15 @@ export default function DarCollectionReview(props) {
             researcherProfile,
             datasets: collection.datasets || []
           }),
+          isLoading,
           redirectLink: h(RedirectLink, {user: currentUser, history: props.history})
         }),
         h(TabControl, {
           //don't use lodash map, iteration order isn't guaranteed
           labels: [tabs.applicationInformation, tabs.researchProposal],
           selectedTab,
-          setSelectedTab
+          setSelectedTab,
+          isLoading
         })
       ])
     ])
