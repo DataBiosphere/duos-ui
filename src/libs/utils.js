@@ -664,7 +664,7 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
 
 export const evaluateTrueString = (boolString) => {
   return !isEmpty(boolString) && toLower(boolString) === "true";
-}
+};
 
 //helper method for ResearcherInfo component in DAR application page
 export const completedResearcherInfoCheck = (properties) => {
@@ -681,13 +681,13 @@ export const completedResearcherInfoCheck = (properties) => {
     //if all are true, value returned MUST be false, since pi portion of the form is incomplete
     const isThePIFalse = !evaluateTrueString(isThePI);
     const havePITrue = evaluateTrueString(havePI);
-    const piAttrEmpty = isEmpty(piName) || isEmpty(piEmail)  
-    return !(isThePIFalse && havePITrue && piAttrEmpty)
-  }
+    const piAttrEmpty = isEmpty(piName) || isEmpty(piEmail);
+    return !(isThePIFalse && havePITrue && piAttrEmpty);
+  };
 
   const stringAttrs = pick(['displayName', 'address1', 'city', 'state', 'zipCode', 'country'])(properties);
   const stringAttrsCompleted = every((string) => !isEmpty(string))(stringAttrs);
   const institutionPresent = !isNil(institutionId);
   const piValid = piCheck({isThePI, havePI, piEmail, piName});
   return piValid && stringAttrsCompleted && institutionPresent;
-}
+};

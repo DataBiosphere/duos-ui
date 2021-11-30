@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Styles, Theme } from '../../libs/theme';
+import { Styles } from '../../libs/theme';
 import { div, h } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
-import { isEmpty, isNil } from 'lodash';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
-
-//NOTE: may not need this
-const isValidCollection = (collection) => {
-  return !isEmpty(collection.dars) && !isNil(collection.dars[0].data);
-};
 
 export default function DarCollectionReview(props) {
   const tabs = {
@@ -28,7 +22,6 @@ export default function DarCollectionReview(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
 
-  //NOTE: update isLoading flow if needed. Will create skeleton loaders for individual pieces later
   useEffect(() => {
     const init = async () => {
       //NOTE: backend is a bit restrictive, collections by id are currently not visible to anyone other than the creator
@@ -43,6 +36,7 @@ export default function DarCollectionReview(props) {
       setCurrentUser(user);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
+      //setTimeout used to render skeleton loader while sub-components are initializing data for render
       const timeout = setTimeout(() => {
         setIsLoading(false);
         clearTimeout(timeout);
@@ -72,7 +66,6 @@ export default function DarCollectionReview(props) {
           redirectLink: h(RedirectLink, {user: currentUser, history: props.history})
         }),
         h(TabControl, {
-          //don't use lodash map, iteration order isn't guaranteed
           labels: [tabs.applicationInformation, tabs.researchProposal],
           selectedTab,
           setSelectedTab,

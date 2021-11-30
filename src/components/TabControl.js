@@ -11,7 +11,7 @@ const tabTemplates = (labels, selectedTab, setSelectedTab, isLoading) => {
         componentType: label,
         setSelected: setSelectedTab,
         selectedType: selectedTab
-      }) : 
+      }) :
       div({
         className: 'text-placeholder',
         style: {
