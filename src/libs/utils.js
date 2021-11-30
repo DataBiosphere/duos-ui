@@ -1,11 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach } from 'lodash';
+import { forEach, get } from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
-import _ from 'lodash';
 import {User} from "./ajax";
 
 export const UserProperties = {
@@ -102,9 +101,9 @@ export const getPropertyValuesFromUser = (user) => {
 };
 
 export const applyHoverEffects = (e, style) => {
-  forEach(style, (value, key) => {
+  forEach((key, value) => {
     e.target.style[key] = value;
-  });
+  })(style);
 };
 
 export const highlightExactMatches = (highlightedWords, content) => {
@@ -595,8 +594,8 @@ export const getColumnSort = (getList, callback) => {
         return 0;
       }
 
-      const aVal = getValue ? getValue(a) : _.get(a, sortKey);
-      const bVal = getValue ? getValue(b) : _.get(b, sortKey);
+      const aVal = getValue ? getValue(a) : get(sortKey)(a);
+      const bVal = getValue ? getValue(b) : get(sortKey)(b);
       if (isNil(aVal) || isNil(bVal)) {
         return 0;
       }
@@ -664,7 +663,7 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
 
 export const evaluateTrueString = (boolString) => {
   return !isEmpty(boolString) && toLower(boolString) === "true";
-}
+};
 
 //helper method for ResearcherInfo component in DAR application page
 export const completedResearcherInfoCheck = (properties) => {
@@ -681,13 +680,13 @@ export const completedResearcherInfoCheck = (properties) => {
     //if all are true, value returned MUST be false, since pi portion of the form is incomplete
     const isThePIFalse = !evaluateTrueString(isThePI);
     const havePITrue = evaluateTrueString(havePI);
-    const piAttrEmpty = isEmpty(piName) || isEmpty(piEmail)  
-    return !(isThePIFalse && havePITrue && piAttrEmpty)
-  }
+    const piAttrEmpty = isEmpty(piName) || isEmpty(piEmail);
+    return !(isThePIFalse && havePITrue && piAttrEmpty);
+  };
 
   const stringAttrs = pick(['displayName', 'address1', 'city', 'state', 'zipCode', 'country'])(properties);
   const stringAttrsCompleted = every((string) => !isEmpty(string))(stringAttrs);
   const institutionPresent = !isNil(institutionId);
   const piValid = piCheck({isThePI, havePI, piEmail, piName});
   return piValid && stringAttrsCompleted && institutionPresent;
-}
+};
