@@ -631,7 +631,7 @@ export const Files = {
 
 export const Summary = {
   getFile: async (fileName) => {
-    const URI = `/api/consent/cases/summary/file?fileType=${fileName}`;
+    const URI = `/api/consent/cases/summary/file?type=${fileName}`;
     const url = `${await Config.getApiUrl()}/${URI}`;
     if (fileName === 'TranslateDUL') {
       return await getFile(url, 'DUL_summary.tsv');
