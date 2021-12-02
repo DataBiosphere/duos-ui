@@ -12,7 +12,7 @@ jobs:
       - name: NPM Install
         run: npm ci
       - name: Copy Configs
-        run: cp config/dev.json public/config.json
+        run: cp config/perf.json public/config.json
       - name: NPM Build
         run: CI=false npm run build --silent
       - name: Cypress run

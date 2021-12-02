@@ -1,17 +1,18 @@
 {
   "Comments": "The values in this configuration are all publicly accessible values from the deployed application.",
-  "env": "dev",
-  "tag": "dev",
-  "hash": "dev",
-  "apiUrl": "https://consent.dsde-dev.broadinstitute.org",
-  "ontologyApiUrl": "https://consent-ontology.dsde-dev.broadinstitute.org/",
-  "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
-  "errorApiKey": "1234567890abcdefghijklmnop",
-  "gaId": "",
+  "env": "perf",
+  "tag": "perf",
+  "hash": "perf",
+  "apiUrl": "https://consent.dsde-perf.broadinstitute.org",
+  "ontologyApiUrl": "https://consent-ontology.dsde-perf.broadinstitute.org/",
+  "clientId": "635957978953-tklh1h40e25juilm8j77uujsnucp4sk5.apps.googleusercontent.com",
+  "errorApiKey": "AIzaSyBco85O4pQmjCxkeV4jFJ8XIKsTW8anp74",
+  "firecloudUrl": "https://firecloud-orchestration.dsde-perf.broadinstitute.org/",
   "gwasUrl": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
   "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
   "powerBiUrl": "https://app.powerbi.com/view?r=eyJrIjoiMjI2YjdmZGEtMmRiNC00YjVjLWJjNjktNmI4NmNlYjAxOGY3IiwidCI6IjBjYjdhNjQwLTQ1YTItNGVkNi1iZTlmLTYzNTE5Zjg2ZTA0YiIsImMiOjN9&pageName=ReportSectionc1c4107ccd69e2852e18",
+  "gaId": "UA-159441671-1",
   "features": {
     "newChairConsole": true
   }
