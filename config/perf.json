@@ -7,11 +7,11 @@
   "ontologyApiUrl": "https://consent-ontology.dsde-perf.broadinstitute.org/",
   "clientId": "635957978953-tklh1h40e25juilm8j77uujsnucp4sk5.apps.googleusercontent.com",
   "errorApiKey": "AIzaSyBco85O4pQmjCxkeV4jFJ8XIKsTW8anp74",
+  "gaId": "",
   "gwasUrl": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
   "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
   "powerBiUrl": "https://app.powerbi.com/view?r=eyJrIjoiMjI2YjdmZGEtMmRiNC00YjVjLWJjNjktNmI4NmNlYjAxOGY3IiwidCI6IjBjYjdhNjQwLTQ1YTItNGVkNi1iZTlmLTYzNTE5Zjg2ZTA0YiIsImMiOjN9&pageName=ReportSectionc1c4107ccd69e2852e18",
-  "gaId": "",
   "features": {
     "newChairConsole": true
   }
