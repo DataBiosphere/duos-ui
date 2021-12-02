@@ -1,4 +1,4 @@
-import _ from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
@@ -44,12 +44,13 @@ import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from "./pages/DatasetStatistics";
+import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
 
 const Routes = (props) => (
   <Switch>
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
-    <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
+    <Route exact path="/status" render={(routeProps) => Status(mergeAll([routeProps, props]))} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
         props.env
@@ -75,6 +76,10 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     {
       props.env === 'dev' ? <AuthenticatedRoute path="/new_researcher_console" component={NewResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+        : ''
+    }
+    {
+      props.env === 'dev' ? <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
         : ''
     }
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />

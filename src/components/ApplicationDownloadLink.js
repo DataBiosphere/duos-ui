@@ -123,9 +123,15 @@ export default function ApplicationDownloadLink(props) {
   const {darInfo, researcherProfile} = props;
   const {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription} = darInfo;
   const datasets = props.datasets.map((dataset) => {
-    const namePropertyObj = dataset.properties.find((property) => property.propertyName === "Dataset Name");
-    //using {description: value} so it can be listed via LabelListComponent
-    return {description: namePropertyObj.propertyValue};
+    if(!isNil(dataset.properties)) {
+      const namePropertyObj = dataset.properties.find(
+        (property) => property.propertyName === 'Dataset Name'
+      );
+      //using {description: value} so it can be listed via LabelListComponent
+      return { description: namePropertyObj.propertyValue };
+    } else {
+      return { description: dataset.name};
+    }
   });
   const translatedSRPs = DataUseTranslation.translateDarInfo(darInfo);
 
