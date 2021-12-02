@@ -248,10 +248,13 @@ class ResearcherConsole extends Component {
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
-                        id: darInfo.dar.data.darCode + "_btnCancel", name: "btn_cancel", isRendered: isNil(darInfo.election), className: "cell-button cancel-color",
-                        onClick: this.cancelDar, value: darInfo.dar.referenceId
-                      }, ["Cancel"]),
-                      button({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Canceled' , className: "disabled" }, ["Canceled"]),
+                        isRendered: !opened && !canceled,
+                        id: darInfo.dar.data.darCode + "_btnCancel",
+                        name: "btn_cancel",
+                        className: "cell-button cancel-color",
+                        onClick: this.cancelDar,
+                        value: darInfo.dar.referenceId
+                      }, ["Cancel"])
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
