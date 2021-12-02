@@ -248,7 +248,7 @@ class ResearcherConsole extends Component {
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
-                        isRendered: isNil(darInfo.election) && !canceled,
+                        isRendered: !opened && !canceled,
                         id: darInfo.dar.data.darCode + "_btnCancel",
                         name: "btn_cancel",
                         className: "cell-button cancel-color",
