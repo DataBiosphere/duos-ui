@@ -3,7 +3,7 @@ We use [Cypress](https://docs.cypress.io/) for testing.
 
 Update an environment config file to test against:
 ```
-cp config/dev.json public/config.json
+cp config/perf.json public/config.json
 ``` 
 
 ## Run All Tests

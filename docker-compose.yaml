@@ -15,5 +15,5 @@ services:
     ports:
       - 3000:8080
     volumes:
-      - ./config/dev.json:/usr/share/nginx/html/config.json
+      - ./config/perf.json:/usr/share/nginx/html/config.json
     command: ["nginx", "-g", "daemon off;"]

@@ -37,10 +37,10 @@ npm install -g npm@7
 ```
 npm install
 ```
-4. Install configs for an environment:
+4. Install configs for an environment. This is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of [dev, staging, perf, alpha, prod] 
 
 ```
-cp config/dev.json public/config.json
+cp config/perf.json public/config.json
 ```
 5. Start development server:
 
