@@ -157,7 +157,7 @@ const emailCell = (email, id) => {
 
 const displayNameCell = (displayName, id) => {
   return {
-    data: displayName || '- -',
+    data: displayName || 'Invite sent, pending registration',
     id,
     style: {},
     label: 'display-name'
