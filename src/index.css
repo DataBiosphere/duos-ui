@@ -708,43 +708,44 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
 
 @keyframes shine {
   0% {
-    background-position: -100px;
+    background-position: 0% 0%;
   }
-  40%, 100% {
-    background-position: 200px;
+  100% {
+    background-position: -135% 0%;
   }
 }
 
 @-webkit-keyframes shine {
-  0% {
-    background-position: -100px;
+   0% {
+    background-position: 0% 0%;
   }
-  40%, 100% {
-    background-position: 400px;
+  100% {
+    background-position: -135% 0%;
   }
 }
 
 @-moz-keyframes shine {
-  0% {
-    background-position: -100px;
+   0% {
+    background-position: 0% 0%;
   }
-  40%, 100% {
-    background-position: 200px;
+  100% {
+    background-position: -135% 0%;
   }
 }
 
 @-o-keyframes shine {
   0% {
-    background-position: -100px;
+    background-position: 0% 0%;
   }
-  40%, 100% {
-    background-position: 200px;
+  100% {
+    background-position: -135% 0%;
   }
 }
 
 .text-placeholder {
-  background-image: linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px);
-  animation: shine 3s infinite linear;
+  background-image: linear-gradient(-90deg, rgb(209, 207, 207) 0%, #ebe7e7 50%, rgb(209, 207, 207) 100%);
+  animation: shine 2s infinite ease-in-out;
+  background-size: 400% 400%;
 }
 
 /***************************************************Buttons, Radios & Checkboxes*/

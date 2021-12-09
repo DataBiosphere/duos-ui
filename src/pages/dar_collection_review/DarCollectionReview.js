@@ -19,6 +19,7 @@ export default function DarCollectionReview(props) {
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
@@ -36,7 +37,6 @@ export default function DarCollectionReview(props) {
       setCollection(collection);
       setCurrentUser(user);
       setDarInfo(darInfo);
-      debugger; // eslint-disable-line
       setResearcherProfile(researcherProfile);
       //setTimeout used to render skeleton loader while sub-components are initializing data for render
       const timeout = setTimeout(() => {
@@ -52,6 +52,19 @@ export default function DarCollectionReview(props) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
   }, [collectionId]);
+
+  useEffect(() => {
+    setSubcomponentLoading(true);
+  }, [selectedTab]);
+
+  useEffect(() => {
+    if(subcomponentLoading && !isLoading) {
+      const timeout = setTimeout(() => {
+        setSubcomponentLoading(false);
+        clearTimeout(timeout);
+      }, 500);
+    }
+  }, [subcomponentLoading, isLoading]);
 
   return (
     div({style: Styles.PAGE}, [
@@ -84,7 +97,7 @@ export default function DarCollectionReview(props) {
           country: darInfo.country,
           nonTechSummary: darInfo.nonTechRus,
           department: darInfo.department,
-          isLoading
+          isLoading: subcomponentLoading
         })
       ])
     ])

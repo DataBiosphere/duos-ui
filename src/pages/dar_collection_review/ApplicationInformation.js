@@ -47,7 +47,7 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
       label({ className: `${key}-label`, style: styles.label}, [labelValue]),
       span({ className: `${key}-span`, style: styles.value }, [spanValue]),
     ] : [
-      div({className: 'text-placeholder', key:`${label}-label-placeholder`, style: {width: '30%', height: '2rem', marginBottom: '1.5rem'}}),
+      div({className: 'text-placeholder', key:`${label}-label-placeholder`, style: {width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}),
       div({className: 'text-placeholder', key:`${label}-text-placeholder`, style: {width: '70%', height: '3.2rem'}}),
     ]
   );
@@ -70,7 +70,8 @@ export default function ApplicationInformation(props) {
 
   return (
     div({className: 'application-information-page', style: {marginTop: '4rem'}}, [
-      div({className: 'application-information-title', style: styles.title}, ['Application Information']), //NOTE: need to make style for this
+      !isLoading ? div({className: 'application-information-title', style: styles.title}, ['Application Information'])
+        : div({className: 'text-placeholder', key: 'application-information-title-placeholder', style: {height: '5rem', width: '20%', marginBottom: '2rem'}}),
       div({className: 'application-information-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
@@ -87,12 +88,12 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading)
         ])
       ]),
-      div({className: 'non-technical-summary-subheader', style: styles.title}, ["Non-Technical Summary"]), //NOTE: figure out style here
+      !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.title}, ["Non-Technical Summary"])
+        : div({className: 'text-placeholder', key: 'non-technical-summary-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
       div({className: 'non-technical-summary-container'}, [
-        !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.nonTechSummaryText}, [nonTechSummary]) //NOTE: add styling to this textbox as well
+        !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.nonTechSummaryText}, [nonTechSummary])
           : div({className: 'text-placeholder', key: 'non-technical-summary-placeholder', style: { height: '18rem',
             width: '100%',
-            backgroundImage: 'linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px)'
           }})
       ])
     ])
