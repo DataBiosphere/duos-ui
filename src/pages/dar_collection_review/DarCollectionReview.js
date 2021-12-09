@@ -7,6 +7,7 @@ import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
+import ApplicationInformation from './ApplicationInformation';
 
 export default function DarCollectionReview(props) {
   const tabs = {
@@ -35,6 +36,7 @@ export default function DarCollectionReview(props) {
       setCollection(collection);
       setCurrentUser(user);
       setDarInfo(darInfo);
+      debugger; // eslint-disable-line
       setResearcherProfile(researcherProfile);
       //setTimeout used to render skeleton loader while sub-components are initializing data for render
       const timeout = setTimeout(() => {
@@ -69,6 +71,19 @@ export default function DarCollectionReview(props) {
           labels: [tabs.applicationInformation, tabs.researchProposal],
           selectedTab,
           setSelectedTab,
+          isLoading
+        }),
+        h(ApplicationInformation, {
+          isRendered: selectedTab === tabs.applicationInformation,
+          pi: darInfo.isThePi ? darInfo.researcher : darInfo.investigator,
+          institution: darInfo.institution,
+          researcher: darInfo.researcher,
+          email: darInfo.academicEmail,
+          piEmail: darInfo.piEmail,
+          city: `${darInfo.city}${!darInfo.state ? '' : ', ' + darInfo.state}`,
+          country: darInfo.country,
+          nonTechSummary: darInfo.nonTechRus,
+          department: darInfo.department,
           isLoading
         })
       ])
