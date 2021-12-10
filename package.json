@@ -9,7 +9,7 @@
     "axios": "^0.24.0",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
-    "dompurify": "2.3.3",
+    "dompurify": "2.3.4",
     "jquery": "3.6.0",
     "js-file-download": "0.4.12",
     "lodash": "4.17.21",
@@ -61,7 +61,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "7.0.0",
     "eslint-plugin-react": "7.27.1",
-    "google-auth-library": "7.10.2",
+    "google-auth-library": "7.10.3",
     "html-webpack-plugin": "4.5.2",
     "react-scripts": "4.0.3",
     "start-server-and-test": "1.14.0"
