@@ -8,6 +8,7 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
+import { map } from 'lodash/fp';
 
 export default function DarCollectionReview(props) {
   const tabs = {
@@ -32,7 +33,7 @@ export default function DarCollectionReview(props) {
         Collections.getCollectionById(collectionId),
         User.getMe()
       ]);
-      const darInfo = collection.dars[0].data;
+      const darInfo = map((d) => d.data)(collection.dars)[0];
       const researcherProfile =  await User.getById(collection.createUserId);
       setCollection(collection);
       setCurrentUser(user);
