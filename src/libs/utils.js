@@ -49,7 +49,6 @@ export const darCollectionUtils = {
       flow([
         map((dar) => values(dar.elections)),
         flatten,
-        filter((election) => election.electionType === 'DataAccess')
       ])(collection.dars)
       : [];
     return !isEmpty(elections)
