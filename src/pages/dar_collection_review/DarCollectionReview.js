@@ -7,6 +7,9 @@ import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
+import ApplicationInformation from './ApplicationInformation';
+import { find } from 'lodash/fp';
+import { isEmpty } from 'lodash';
 
 export default function DarCollectionReview(props) {
   const tabs = {
@@ -18,6 +21,7 @@ export default function DarCollectionReview(props) {
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
@@ -30,7 +34,7 @@ export default function DarCollectionReview(props) {
         Collections.getCollectionById(collectionId),
         User.getMe()
       ]);
-      const darInfo = collection.dars[0].data;
+      const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const researcherProfile =  await User.getById(collection.createUserId);
       setCollection(collection);
       setCurrentUser(user);
@@ -51,6 +55,19 @@ export default function DarCollectionReview(props) {
     }
   }, [collectionId]);
 
+  useEffect(() => {
+    setSubcomponentLoading(true);
+  }, [selectedTab]);
+
+  useEffect(() => {
+    if(subcomponentLoading && !isLoading) {
+      const timeout = setTimeout(() => {
+        setSubcomponentLoading(false);
+        clearTimeout(timeout);
+      }, 500);
+    }
+  }, [subcomponentLoading, isLoading]);
+
   return (
     div({style: Styles.PAGE}, [
       div({}, [
@@ -70,6 +87,19 @@ export default function DarCollectionReview(props) {
           selectedTab,
           setSelectedTab,
           isLoading
+        }),
+        h(ApplicationInformation, {
+          isRendered: selectedTab === tabs.applicationInformation,
+          pi: darInfo.isThePi ? darInfo.researcher : darInfo.investigator,
+          institution: darInfo.institution,
+          researcher: darInfo.researcher,
+          email: darInfo.academicEmail,
+          piEmail: darInfo.piEmail,
+          city: `${darInfo.city}${!darInfo.state ? '' : ', ' + darInfo.state}`,
+          country: darInfo.country,
+          nonTechSummary: darInfo.nonTechRus,
+          department: darInfo.department,
+          isLoading: subcomponentLoading
         })
       ])
     ])
