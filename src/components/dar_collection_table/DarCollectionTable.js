@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty, includes } from 'lodash/fp';
+import { isNil, isEmpty, includes, find } from 'lodash/fp';
 import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SimpleButton from '../SimpleButton';
@@ -10,8 +10,9 @@ import SimpleTable from '../SimpleTable';
 
 const { determineCollectionStatus, nonCancellableCollectionStatuses } = darCollectionUtils;
 const getProjectTitle = ((collection) => {
-  if(!isNil(collection) && !isEmpty(collection.dars) && !isEmpty(collection.dars[0].data)) {
-    return collection.dars[0].data.projectTitle;
+  if(!isNil(collection) && !isEmpty(collection.dars)) {
+    const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
+    return darData.projectTitle;
   }
 });
 
