@@ -695,3 +695,8 @@ export const completedResearcherInfoCheck = (properties) => {
   const piValid = piCheck({isThePI, havePI, piEmail, piName});
   return piValid && stringAttrsCompleted && institutionPresent;
 };
+
+export const hasCompletedProfile = (user) => {
+  const props = getPropertyValuesFromUser(user);
+  return completedResearcherInfoCheck(props);
+}
