@@ -1,7 +1,7 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach, get } from 'lodash/fp';
+import { flatten, flow, forEach, get, values } from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -45,13 +45,18 @@ export const darCollectionUtils = {
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
   determineCollectionStatus: (collection) => {
-    const { electionMap } = collection;
-    return !isEmpty(electionMap)
+    const elections = !isEmpty(collection.dars) ?
+      flow([
+        map((dar) => values(dar.elections)),
+        flatten,
+      ])(collection.dars)
+      : [];
+    return !isEmpty(elections)
       ? 'Under Election'
       : isCollectionCanceled(collection)
         ? 'Canceled'
         : 'Submitted';
-  }
+  },
 };
 ///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
 
@@ -488,7 +493,7 @@ export const getSearchFilterFunctions = () => {
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
       const { darCode } = collection;
-      const referenceDar = collection.dars[0];
+      const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
       const { createDate, data } = referenceDar;
       const { projectTitle } = data;
       const status = darCollectionUtils.determineCollectionStatus(collection);
