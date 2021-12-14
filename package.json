@@ -54,7 +54,7 @@
     "@babel/eslint-parser": "7.16.5",
     "@babel/eslint-plugin": "7.16.5",
     "@babel/plugin-proposal-class-properties": "7.16.0",
-    "@babel/preset-react": "7.16.0",
+    "@babel/preset-react": "7.16.5",
     "@cypress/react": "5.10.3",
     "@cypress/webpack-dev-server": "1.7.0",
     "cypress": "9.1.1",
