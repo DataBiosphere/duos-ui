@@ -63,7 +63,7 @@
     "eslint-plugin-react": "7.27.1",
     "google-auth-library": "7.10.4",
     "html-webpack-plugin": "4.5.2",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.0",
     "start-server-and-test": "1.14.0"
   },
   "browserslist": [
