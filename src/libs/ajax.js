@@ -885,11 +885,10 @@ export const User = {
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/dacuser/${userId}`;
-    // We should not be updating the user's create date, associated institution, or library cards
+    // We should not be updating the user's create date or library cards
     let filteredUser = flow(
       cloneDeep,
       unset('updatedUser.createDate'),
-      unset('updatedUser.institution'),
       unset('updatedUser.libraryCards')
     )(user);
     try {

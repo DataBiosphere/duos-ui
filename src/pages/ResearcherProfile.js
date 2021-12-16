@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
-import {cloneDeep, find, get, isEmpty, isNil, isNumber, omit, trim} from 'lodash';
+import {find, get, isEmpty, isNil, isNumber, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import {button, div, form, h, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
@@ -40,8 +40,7 @@ export default function ResearcherProfile(props) {
     piEmail: '',
     piERACommonsID: '',
     pubmedID: '',
-    scientificURL: '',
-    completed: undefined
+    scientificURL: ''
   });
 
   const [currentUser, setCurrentUser] = useState();
@@ -50,7 +49,6 @@ export default function ResearcherProfile(props) {
   const [countryNames, setCountryNames] = useState([]);
   const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
-  const [isNewProfile, setIsNewProfile] = useState(false);
 
   const [institutionList, setInstitutionList] = useState([]);
   const [notificationData, setNotificationData] = useState();
@@ -153,15 +151,6 @@ export default function ResearcherProfile(props) {
       setUserRoles(user.roles);
     }
 
-    if (userProps.completed === undefined) {
-      setIsNewProfile(true);
-    }
-
-    let tempCompleted = false;
-    if(userProps.completed !== undefined && userProps.completed !== '') {
-      tempCompleted = JSON.parse(userProps.completed);
-    }
-
     setProfile({
       additionalEmail: isNil(user.additionalEmail) ? '' : user.additionalEmail,
       institutionId: user.institutionId,
@@ -170,7 +159,6 @@ export default function ResearcherProfile(props) {
       address2: userProps.address2,
       checkNotifications: (userProps.checkNotifications === 'true'),
       city: userProps.city,
-      completed: tempCompleted || userProps.completed,
       country: userProps.country,
       department: userProps.department,
       division: userProps.division,
@@ -230,40 +218,8 @@ export default function ResearcherProfile(props) {
     setProfile(Object.assign({}, profile, newFields));
   };
 
-  const eraValidate = async () => {
-    // Temporary fix until eRACommons.js is updated to share re-render info.
-
-    const user = await User.getMe();
-    const userProps = getPropertyValuesFromUser(user);
-    const expirationCount = isNil(userProps.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(userProps.eraExpiration);
-
-    return (!isNil(userProps.eraCommonsId) && userProps.eraAuthorized === 'true' && expirationCount >= 0);
-  };
-
   const submitForm = async (event) => {
     event.preventDefault();
-
-    const eraValid = await eraValidate();
-    const profileCompleted = researcherFieldsComplete && eraValid;
-
-    const newProfile = Object.assign({}, profile, {completed: profileCompleted});
-
-    if (isNewProfile) {
-      await createUserProperties(newProfile);
-    } else {
-      await updateUserProperties(newProfile);
-    }
-  };
-
-  const createUserProperties = async (profile) => {
-    await Researcher.createProperties(profile);
-    await updateUser();
-    props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-  const updateUserProperties = async (profile) => {
-    const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, researcherFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
@@ -276,13 +232,7 @@ export default function ResearcherProfile(props) {
     currentUserUpdate.roles = userRoles;
     currentUserUpdate.institutionId = profile.institutionId;
     const payload = { updatedUser: currentUserUpdate };
-    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
-    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
-    return updatedUser;
-  };
-
-  const cloneProfile = (profile) => {
-    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+    await User.update(payload, currentUserUpdate.dacUserId);
   };
 
   const generateCountryNames = () => {
