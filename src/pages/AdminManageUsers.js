@@ -36,6 +36,7 @@ class AdminManageUsers extends Component {
       user.roles.forEach(role => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
           user.researcher = true;
+          user.hasProfileCompleted = hasCompletedProfile(user);
         }
       });
       user.key = user.id;
@@ -198,13 +199,13 @@ class AdminManageUsers extends Component {
 
                     a({
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
-                      isRendered: user.researcher !== false && hasCompletedProfile(user) === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                      isRendered: user.researcher !== false && user.profileCompleted === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
                       div({
                         className:
-                            ((user.researcher === true && hasCompletedProfile(user) === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                              : user.researcher === true && hasCompletedProfile(user) === true && user.status !== 'pending' ? 'editable'
-                                : user.researcher === false || !hasCompletedProfile(user) ? 'disabled' : ''
+                            ((user.researcher === true && user.hasProfileCompleted === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.hasProfileCompleted === true && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.hasProfileCompleted ? 'disabled' : ''
                       }, ["Review"]),
                     ]),
 
