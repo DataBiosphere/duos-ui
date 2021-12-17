@@ -697,4 +697,4 @@ export const completedResearcherInfoCheck = (properties) => {
 export const hasCompletedProfile = (user) => {
   const props = getPropertyValuesFromUser(user);
   return completedResearcherInfoCheck(props);
-}
+};

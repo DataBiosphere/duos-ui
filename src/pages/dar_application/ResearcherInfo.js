@@ -1,13 +1,11 @@
-import {useEffect, useState} from 'react';
-import {Alert} from '../../components/Alert';
-import {Link} from 'react-router-dom';
-import {a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
-import {eRACommons} from '../../components/eRACommons';
+import { useState, useEffect} from 'react';
+import { Alert } from '../../components/Alert';
+import { Link } from 'react-router-dom';
+import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
+import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
-import {isEmpty, isNil} from 'lodash/fp';
+import { isEmpty, isNil } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
-import {hasCompletedProfile} from "../../libs/utils";
-import {User} from "../../libs/ajax";
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
@@ -32,6 +30,7 @@ export default function ResearcherInfo(props) {
     onNihStatusUpdate,
     orcid,
     partialSave,
+    profileCompleted,
     researcher,
     researcherGate,
     showValidationMessages,
@@ -110,10 +109,10 @@ export default function ResearcherInfo(props) {
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        div({ isRendered: !hasCompletedProfile(User.getMe()), className: 'rp-alert' }, [
+        div({ isRendered: profileCompleted === false, className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
-        div({ isRendered: hasCompletedProfile(User.getMe()), className: 'rp-alert' }, [
+        div({ isRendered: profileCompleted === true, className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 

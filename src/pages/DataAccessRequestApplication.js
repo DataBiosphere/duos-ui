@@ -4,7 +4,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
-import {Notifications as NotyUtil } from '../libs/utils';
+import { completedResearcherInfoCheck, Notifications as NotyUtil } from '../libs/utils';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
@@ -30,6 +30,7 @@ class DataAccessRequestApplication extends Component {
       file: {
         name: ''
       },
+      profileCompleted: '',
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
@@ -229,7 +230,14 @@ class DataAccessRequestApplication extends Component {
     formData.scientificUrl = rpProperties.scientificURL;
     formData.userId = researcher.dacUserId;
 
+    let profileCompleted = false;
+    if (!fp.isNil(formData.darCode)) {
+      profileCompleted = '';
+    } else {
+      profileCompleted = completedResearcherInfoCheck(rpProperties);
+    }
     this.setState(prev => {
+      prev.profileCompleted = profileCompleted;
       prev.formData = fp.merge(prev.formData, formData);
       return prev;
     });
@@ -1021,6 +1029,7 @@ class DataAccessRequestApplication extends Component {
                 labCollaborators,
                 externalCollaborators,
                 partialSave: this.partialSave,
+                profileCompleted: this.state.profileCompleted,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
