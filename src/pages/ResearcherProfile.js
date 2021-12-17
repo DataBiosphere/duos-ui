@@ -9,11 +9,11 @@ import {PageHeading} from '../components/PageHeading';
 import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
 import {Notification} from '../components/Notification';
 import {SearchSelect} from '../components/SearchSelect';
-import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
+import {AuthenticateNIH, Institution, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress} from '../libs/utils';
+import {getPropertyValuesFromUser, USER_ROLES, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -216,6 +216,17 @@ export default function ResearcherProfile(props) {
     }
 
     setProfile(Object.assign({}, profile, newFields));
+  };
+
+  const eraValidate = async () => {
+    // This function is currently unused but can check if a user's eRA Commons ID is in date.
+    // It will be used to update the researcherIncompleteFields component when eRACommons.js shares re-render info.
+
+    const user = await User.getMe();
+    const userProps = getPropertyValuesFromUser(user);
+    const expirationCount = isNil(userProps.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(userProps.eraExpiration);
+
+    return (!isNil(userProps.eraCommonsId) && userProps.eraAuthorized === 'true' && expirationCount >= 0);
   };
 
   const submitForm = async (event) => {
