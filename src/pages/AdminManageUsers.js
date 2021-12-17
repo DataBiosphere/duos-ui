@@ -33,12 +33,15 @@ class AdminManageUsers extends Component {
     const users = await User.list(USER_ROLES.admin);
     let userList = users.map(user => {
       user.researcher = false;
-      user.roles.forEach(role => {
-        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.researcher = true;
-          user.hasProfileCompleted = hasCompletedProfile(user);
-        }
-      });
+      user.hasCompletedProfile = false;
+      if (user.roles != null) {
+        user.roles.forEach(role => {
+          if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
+            user.researcher = true;
+            user.hasCompletedProfile = hasCompletedProfile(user);
+          }
+        });
+      }
       user.key = user.id;
       return user;
     });
@@ -203,24 +206,24 @@ class AdminManageUsers extends Component {
                     }, [
                       div({
                         className:
-                            ((user.researcher === true && user.hasProfileCompleted === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                              : user.researcher === true && user.hasProfileCompleted === true && user.status !== 'pending' ? 'editable'
-                                : user.researcher === false || !user.hasProfileCompleted ? 'disabled' : ''
+                            ((user.researcher === true && user.hasCompletedProfile && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.hasCompletedProfile && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.hasCompletedProfile ? 'disabled' : ''
                       }, ["Review"]),
                     ]),
 
-                    a({ isRendered: user.researcher === "false" || !hasCompletedProfile(user), className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                    a({ isRendered: user.researcher === "false" || !user.hasCompletedProfile, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
                     ]),
 
                     div({ id: user.dacUserId + "_flagBonafide", name: "flag_bonafide", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && hasCompletedProfile(user), "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
+                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.hasCompletedProfile, "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
 
-                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && hasCompletedProfile(user), "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
+                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.hasCompletedProfile, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && hasCompletedProfile(user), "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
+                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && user.hasCompletedProfile, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(hasCompletedProfile(user)) || (user.researcher === false), disabled: "disabled" }, []),
+                      span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.hasCompletedProfile) || (user.researcher === false), disabled: "disabled" }, []),
                     ]),
 
                   ]),
