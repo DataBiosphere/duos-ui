@@ -9,6 +9,7 @@ import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from "../images/icon_manage_users.png";
 import {USER_ROLES} from "../libs/utils";
+import { isNil } from 'lodash/fp'
 
 class AdminManageUsers extends Component {
 
@@ -33,12 +34,14 @@ class AdminManageUsers extends Component {
     const users = await User.list(USER_ROLES.admin);
     let userList = users.map(user => {
       user.researcher = false;
-      user.roles.forEach(role => {
-        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.completed = user.profileCompleted;
-          user.researcher = true;
-        }
-      });
+      if (!isNil(user.roles)) {
+        user.roles.forEach(role => {
+          if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
+            user.completed = user.profileCompleted;
+            user.researcher = true;
+          }
+        });
+      }
       user.key = user.id;
       return user;
     });
