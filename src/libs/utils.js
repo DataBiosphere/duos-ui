@@ -65,10 +65,9 @@ export const goToPage = (value, pageCount, setCurrentPage) => {
   }
 };
 
-export const findPropertyValue = (propName, researcher) => {
-  const prop = isNil(researcher.researcherProperties) ?
-    null
-    : find({ propertyKey: propName })(researcher.researcherProperties);
+export const findPropertyValue = (propName, user) => {
+  const properties = !isNil(user.properties) ? user.properties : user.researcherProperties;
+  const prop = find({ propertyKey: propName })(properties);
   return isNil(prop) ? "" : prop.propertyValue;
 };
 
