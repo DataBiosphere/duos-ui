@@ -9,7 +9,7 @@ import {PageHeading} from '../components/PageHeading';
 import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
 import {Notification} from '../components/Notification';
 import {SearchSelect} from '../components/SearchSelect';
-import {AuthenticateNIH, Institution, User, Researcher} from '../libs/ajax';
+import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
