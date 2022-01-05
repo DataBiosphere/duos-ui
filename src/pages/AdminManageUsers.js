@@ -29,6 +29,10 @@ class AdminManageUsers extends Component {
     this.getUsers();
   }
 
+  componentDidUpdate() {
+    ReactTooltip.rebuild();
+  }
+
   async getUsers() {
     const users = await User.list(USER_ROLES.admin);
     let userList = users.map(user => {

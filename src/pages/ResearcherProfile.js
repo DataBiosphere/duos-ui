@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {getNames} from 'country-list';
-import {find, get, isEmpty, isNil, isNumber, trim} from 'lodash';
+import {cloneDeep, find, get, isEmpty, isNil, isNumber, omit, trim} from 'lodash';
 import ReactTooltip from 'react-tooltip';
 import {button, div, form, h, hr, ul, li, input, label, option, select, span, textarea,} from 'react-hyperscript-helpers';
 import {LibraryCards} from '../components/LibraryCards';
@@ -9,11 +9,11 @@ import {PageHeading} from '../components/PageHeading';
 import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
 import {Notification} from '../components/Notification';
 import {SearchSelect} from '../components/SearchSelect';
-import {AuthenticateNIH, Institution, User} from '../libs/ajax';
+import {AuthenticateNIH, Institution, User, Researcher} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, USER_ROLES, isEmailAddress} from '../libs/utils';
+import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress, hasCompletedProfile} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -219,8 +219,7 @@ export default function ResearcherProfile(props) {
   };
 
   const eraValidate = async () => {
-    // This function is currently unused but can check if a user's eRA Commons ID is in date.
-    // It will be used to update the researcherIncompleteFields component when eRACommons.js shares re-render info.
+    // Temporary fix until eRACommons.js is updated to share re-render info.
 
     const user = await User.getMe();
     const userProps = getPropertyValuesFromUser(user);
@@ -231,6 +230,29 @@ export default function ResearcherProfile(props) {
 
   const submitForm = async (event) => {
     event.preventDefault();
+
+    const eraValid = await eraValidate();
+    const allFieldsComplete = researcherFieldsComplete && eraValid;
+
+    const newProfile = Object.assign({}, profile);
+    if (!hasCompletedProfile(currentUser)) {
+      await createUserProperties(newProfile);
+    } else {
+      await updateUserProperties(newProfile, allFieldsComplete);
+    }
+
+    props.history.push({ pathname: 'dataset_catalog' });
+  };
+
+  const createUserProperties = async (profile) => {
+    await Researcher.createProperties(profile);
+    await updateUser();
+    props.history.push({ pathname: 'dataset_catalog' });
+  };
+
+  const updateUserProperties = async (profile, allFieldsComplete) => {
+    const profileClone = cloneProfile(profile);
+    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, allFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
@@ -243,7 +265,13 @@ export default function ResearcherProfile(props) {
     currentUserUpdate.roles = userRoles;
     currentUserUpdate.institutionId = profile.institutionId;
     const payload = { updatedUser: currentUserUpdate };
-    await User.update(payload, currentUserUpdate.dacUserId);
+    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
+    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
+    return updatedUser;
+  };
+
+  const cloneProfile = (profile) => {
+    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
   };
 
   const generateCountryNames = () => {
