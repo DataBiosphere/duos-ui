@@ -7,14 +7,14 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DataSet} from '../libs/ajax';
+import { DAC, DataSet, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
-import {searchOntologies} from "../libs/utils";
+import {hasCompletedProfile, searchOntologies} from '../libs/utils';
 import {searchOntology} from "../libs/ontologyService";
 
 class DatasetRegistration extends Component {
@@ -68,6 +68,7 @@ class DatasetRegistration extends Component {
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
+      profileCompleted: true, // Default to true so the alert doesn't display unless necessary
       submissionSuccess: false,
       errorMessage: ''
     };
@@ -127,6 +128,10 @@ class DatasetRegistration extends Component {
         }
       });
     }
+    const user = await User.getMe();
+    this.setState(prev => {
+      prev.profileCompleted = hasCompletedProfile(user);
+    });
   }
 
   // fill out the form fields with old dataset properties if they already exist
