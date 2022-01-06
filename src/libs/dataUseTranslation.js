@@ -2,7 +2,7 @@ import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp
 import { searchOntology } from './ontologyService';
 import { Notifications } from './utils';
 
-const srpTranslations = {
+export const srpTranslations = {
   hmb: {
     code: "HMB",
     description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
@@ -110,7 +110,7 @@ const srpTranslations = {
   }
 };
 
-const consentTranslations = {
+export const consentTranslations = {
   generalUse: {
     code: 'GRU',
     description: 'Use is permitted for any research purpose'
@@ -124,6 +124,7 @@ const consentTranslations = {
     const restrictionList = restrictions.join(', ');
     return {
       code: 'DS',
+      alternateLabel: `DS ${restrictions.join('-')}`,
       description: `Use is permitted for the specified disease(s): ${restrictionList}`
     };
   },
@@ -164,6 +165,107 @@ const consentTranslations = {
 const getOntologyName = async(obolibraryURL) => {
   const ontology = await searchOntology(obolibraryURL);
   return ontology.label;
+};
+
+export const processRestrictionStatements = async (key, dataUse) => {
+  let resp;
+  let value = dataUse[key];
+  /*
+    Due to language used with Data Use Limitations, the description for 'commercialUse' describes non-profit status
+    whereas the actual value represent for-profit status. As such, commercialUse value must be inverted when processing statement
+    in order to accurately reflect description
+  */
+  if (key === 'commercialUse' && !isNil(value)) {
+    value = !value;
+  }
+  if (!isNil(value) && value) {
+    if (key === 'diseaseRestrictions') {
+      let resolvedLabels = [];
+      if (!isNil(head(value)) && !isNil(value[0].label)) {
+        resolvedLabels = value.map((ont) => ont.label);
+      } else {
+        try {
+          const ontologyPromises = value.map((ontologyId) => {
+            return getOntologyName(ontologyId);
+          });
+          resolvedLabels = await Promise.all(ontologyPromises);
+        } catch (error) {
+          Notifications.showError({ text: 'Ontology API Request Error' });
+        }
+      }
+      if (!isNil(head(resolvedLabels))) {
+        resp = consentTranslations.diseaseRestrictions(resolvedLabels);
+      }
+    } else {
+      resp = processDefinedLimitations(key, dataUse, consentTranslations);
+    }
+  }
+  return resp;
+};
+
+export const processDefinedLimitations = (
+  key,
+  dataUse,
+  consentTranslations
+) => {
+  const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
+  const isHMBActive =
+    dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
+  const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
+  const isPOAActive =
+    !isGeneralUseActive && !isHMBActive && isEmpty(dataUse.diseaseRestrictions);
+  let statement;
+  if (
+    !targetKeys.includes(key) ||
+    (key === 'hmbResearch' && isHMBActive) ||
+    (key === 'populationOriginsAncestry' && isPOAActive) ||
+    (key === 'generalUse' && !isHMBActive)
+  ) {
+    statement = consentTranslations[key];
+  }
+  return statement;
+};
+
+const processOtherInDataUse = (dataUse, restrictionStatements) => {
+  if (!isNil(dataUse.other)) {
+    restrictionStatements.concat({
+      code: 'OTH',
+      description: dataUse.other,
+    });
+  }
+  if (!isNil(dataUse.secondaryOther)) {
+    restrictionStatements.concat({
+      code: 'OTH2',
+      description: dataUse.secondaryOther,
+    });
+  }
+  return restrictionStatements;
+};
+
+const translateDataUseRestrictions = async (dataUse) => {
+  if(!dataUse) {return [];}
+  let restrictionStatements = [];
+  const targetKeys = Object.keys(consentTranslations);
+  const processingPromises = targetKeys.map((key) => {
+    return processRestrictionStatements(key, dataUse);
+  });
+  restrictionStatements = await Promise.all(processingPromises);
+  restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
+  restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements);
+
+  return restrictionStatements;
+};
+
+export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
+  const targetKeys = Object.keys(consentTranslations);
+  try {
+    const translationPromises = dataUses.map((dataUse) =>
+      targetKeys.map((key) => Promise.all(processRestrictionStatements(key, dataUse)))
+    );
+    return Promise.all(translationPromises);
+  } catch(error) {
+    throw new Error('Failed to translate Data Use Restrictions from list');
+  }
 };
 
 
@@ -341,75 +443,5 @@ export const DataUseTranslation = {
 
     return dataUseSummary;
   },
-
-  translateDataUseRestrictions: async (dataUse) => {
-    const processDefinedLimitations = (key, dataUse, consentTranslations) => {
-      const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
-      const isHMBActive = dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
-      const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
-      const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty(dataUse.diseaseRestrictions);
-      let statement;
-      if(
-        !targetKeys.includes(key) ||
-        (key === 'hmbResearch' && isHMBActive) ||
-        (key === 'populationOriginsAncestry' && isPOAActive) ||
-        (key === 'generalUse' && !isHMBActive)
-      ) {
-        statement = consentTranslations[key];
-      }
-      return statement;
-    };
-
-    const processRestrictionStatements = async(key, dataUse) => {
-      let resp;
-      let value = dataUse[key];
-      /*
-        Due to language used with Data Use Limitations, the description for 'commercialUse' describes non-profit status
-        whereas the actual value represent for-profit status. As such, commercialUse value must be inverted when processing statement
-        in order to accurately reflect description
-      */
-      if(key === 'commercialUse' && !isNil(value)) { value = !value; }
-      if (!isNil(value) && value) {
-        if (key === 'diseaseRestrictions') {
-          let resolvedLabels = [];
-          if (!isNil(head(value)) && !isNil(value[0].label)) {
-            resolvedLabels = value.map((ont) => ont.label);
-          } else {
-            try {
-              const ontologyPromises = value.map(ontologyId => {
-                return getOntologyName(ontologyId);
-              });
-              resolvedLabels = await Promise.all(ontologyPromises);
-            } catch (error) {
-              Notifications.showError({text: 'Ontology API Request Error'});
-            }
-          }
-          if (!isNil(head(resolvedLabels))) {
-            resp = consentTranslations.diseaseRestrictions(resolvedLabels);
-          }
-        } else {
-          resp = processDefinedLimitations(key, dataUse, consentTranslations);
-        }
-      }
-      return resp;
-    };
-
-    if(!dataUse) {return [];}
-    let restrictionStatements = [];
-    let targetKeys = Object.keys(consentTranslations);
-    const processingPromises = targetKeys.map((key) => {
-      return processRestrictionStatements(key, dataUse);
-    });
-    restrictionStatements = await Promise.all(processingPromises);
-    restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
-    if (!isNil(dataUse.other)) {
-      restrictionStatements = restrictionStatements.concat(
-        { code: "OTH", description: dataUse.other });
-    }
-    if (!isNil(dataUse.secondaryOther)) {
-      restrictionStatements = restrictionStatements.concat(
-        { code: "OTH2", description: dataUse.secondaryOther });
-    }
-    return restrictionStatements;
-  }
+  translateDataUseRestrictions
 };
