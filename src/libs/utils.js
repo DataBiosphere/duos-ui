@@ -67,7 +67,10 @@ export const goToPage = (value, pageCount, setCurrentPage) => {
 };
 
 export const findPropertyValue = (propName, user) => {
-  const properties = !isNil(user.properties) ? user.properties : user.researcherProperties;
+  // There is currently an inconsistency in how user props are returned. Newer
+  // api calls refer to `researcherProperties`, but some older ones refer to
+  // `properties`
+  const properties = !isNil(user.researcherProperties) ? user.researcherProperties : user.properties;
   const prop = find({ propertyKey: propName })(properties);
   return isNil(prop) ? "" : prop.propertyValue;
 };
