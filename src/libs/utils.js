@@ -691,7 +691,7 @@ export const completedResearcherInfoCheck = (properties) => {
     return !(isThePIFalse && havePITrue && piAttrEmpty);
   };
 
-  const stringAttrs = pick(['displayName', 'address1', 'city', 'state', 'zipCode', 'country'])(properties);
+  const stringAttrs = pick(['profileName', 'address1', 'city', 'state', 'zipCode', 'country'])(properties);
   const stringAttrsCompleted = every((string) => !isEmpty(string))(stringAttrs);
   const institutionPresent = !isNil(institutionId);
   const piValid = piCheck({isThePI, havePI, piEmail, piName});
