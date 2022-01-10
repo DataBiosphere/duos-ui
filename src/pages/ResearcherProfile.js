@@ -13,7 +13,7 @@ import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress, hasCompletedProfile} from '../libs/utils';
+import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -40,7 +40,8 @@ export default function ResearcherProfile(props) {
     piEmail: '',
     piERACommonsID: '',
     pubmedID: '',
-    scientificURL: ''
+    scientificURL: '',
+    completed: undefined
   });
 
   const [currentUser, setCurrentUser] = useState();
@@ -49,6 +50,7 @@ export default function ResearcherProfile(props) {
   const [countryNames, setCountryNames] = useState([]);
   const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
   const [incompleteFields, setIncompleteFields] = useState([]);
+  const [isNewProfile, setIsNewProfile] = useState(false);
 
   const [institutionList, setInstitutionList] = useState([]);
   const [notificationData, setNotificationData] = useState();
@@ -151,6 +153,15 @@ export default function ResearcherProfile(props) {
       setUserRoles(user.roles);
     }
 
+    if (userProps.completed === undefined) {
+      setIsNewProfile(true);
+    }
+
+    let tempCompleted = false;
+    if(userProps.completed !== undefined && userProps.completed !== '') {
+      tempCompleted = JSON.parse(userProps.completed);
+    }
+
     setProfile({
       additionalEmail: isNil(user.additionalEmail) ? '' : user.additionalEmail,
       institutionId: user.institutionId,
@@ -159,6 +170,7 @@ export default function ResearcherProfile(props) {
       address2: userProps.address2,
       checkNotifications: (userProps.checkNotifications === 'true'),
       city: userProps.city,
+      completed: tempCompleted || userProps.completed,
       country: userProps.country,
       department: userProps.department,
       division: userProps.division,
@@ -232,16 +244,15 @@ export default function ResearcherProfile(props) {
     event.preventDefault();
 
     const eraValid = await eraValidate();
-    const allFieldsComplete = researcherFieldsComplete && eraValid;
+    const profileCompleted = researcherFieldsComplete && eraValid;
 
-    const newProfile = Object.assign({}, profile);
-    if (!hasCompletedProfile(currentUser)) {
+    const newProfile = Object.assign({}, profile, {completed: profileCompleted});
+
+    if (isNewProfile) {
       await createUserProperties(newProfile);
     } else {
-      await updateUserProperties(newProfile, allFieldsComplete);
+      await updateUserProperties(newProfile);
     }
-
-    props.history.push({ pathname: 'dataset_catalog' });
   };
 
   const createUserProperties = async (profile) => {
@@ -250,9 +261,9 @@ export default function ResearcherProfile(props) {
     props.history.push({ pathname: 'dataset_catalog' });
   };
 
-  const updateUserProperties = async (profile, allFieldsComplete) => {
+  const updateUserProperties = async (profile) => {
     const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, allFieldsComplete, profileClone);
+    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, researcherFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };

@@ -14,6 +14,7 @@ const profileSubmitted = span(["Please make sure ", profileLink, " is updated as
 export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
+    completed,
     darCode,
     cloudProviderDescription,
     eRACommonsDestination,
@@ -30,7 +31,6 @@ export default function ResearcherInfo(props) {
     onNihStatusUpdate,
     orcid,
     partialSave,
-    profileCompleted,
     researcher,
     researcherGate,
     showValidationMessages,
@@ -109,10 +109,10 @@ export default function ResearcherInfo(props) {
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        div({ isRendered: profileCompleted === false, className: 'rp-alert' }, [
+        div({ isRendered: completed === false, className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
-        div({ isRendered: profileCompleted === true, className: 'rp-alert' }, [
+        div({ isRendered: completed === true, className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 

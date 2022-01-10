@@ -4,7 +4,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
-import { completedResearcherInfoCheck, Notifications as NotyUtil } from '../libs/utils';
+import {completedResearcherInfoCheck, Notifications as NotyUtil } from '../libs/utils';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
@@ -30,7 +30,7 @@ class DataAccessRequestApplication extends Component {
       file: {
         name: ''
       },
-      profileCompleted: '',
+      completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
@@ -230,14 +230,14 @@ class DataAccessRequestApplication extends Component {
     formData.scientificUrl = rpProperties.scientificURL;
     formData.userId = researcher.dacUserId;
 
-    let profileCompleted = false;
+    let completed = false;
     if (!fp.isNil(formData.darCode)) {
-      profileCompleted = '';
-    } else {
-      profileCompleted = completedResearcherInfoCheck(rpProperties);
+      completed = '';
+    } else if (rpProperties.completed !== '') {
+      completed = completedResearcherInfoCheck(rpProperties);
     }
     this.setState(prev => {
-      prev.profileCompleted = profileCompleted;
+      prev.completed = completed;
       prev.formData = fp.merge(prev.formData, formData);
       return prev;
     });
@@ -1014,6 +1014,7 @@ class DataAccessRequestApplication extends Component {
             div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
+                completed: this.state.completed,
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
                 formFieldChange: this.formFieldChange,
@@ -1029,7 +1030,6 @@ class DataAccessRequestApplication extends Component {
                 labCollaborators,
                 externalCollaborators,
                 partialSave: this.partialSave,
-                profileCompleted: this.state.profileCompleted,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,

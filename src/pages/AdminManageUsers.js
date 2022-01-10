@@ -8,7 +8,8 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from "../images/icon_manage_users.png";
-import {hasCompletedProfile, USER_ROLES} from "../libs/utils";
+import {USER_ROLES} from "../libs/utils";
+import { isNil } from 'lodash/fp'
 
 class AdminManageUsers extends Component {
 
@@ -29,22 +30,19 @@ class AdminManageUsers extends Component {
     this.getUsers();
   }
 
-  componentDidUpdate() {
-    ReactTooltip.rebuild();
-  }
-
   async getUsers() {
     const users = await User.list(USER_ROLES.admin);
     let userList = users.map(user => {
-      user.hasCompletedProfile = false;
-      if (user.roles != null) {
+      user.researcher = false;
+      if (!isNil(user.roles)) {
         user.roles.forEach(role => {
           if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
+            user.completed = user.profileCompleted;
             user.researcher = true;
-            user.hasCompletedProfile = hasCompletedProfile(user);
           }
         });
-      }      user.key = user.id;
+      }
+      user.key = user.id;
       return user;
     });
 
@@ -204,28 +202,28 @@ class AdminManageUsers extends Component {
 
                     a({
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
-                      isRendered: user.researcher !== false && user.hasCompletedProfile, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                      isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
                       div({
                         className:
-                            ((user.researcher === true && user.hasCompletedProfile && user.status === 'pending') || user.status === null) ? 'enabled'
-                              : user.researcher === true && user.hasCompletedProfile && user.status !== 'pending' ? 'editable'
-                                : user.researcher === false || !user.hasCompletedProfile ? 'disabled' : ''
+                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.completed ? 'disabled' : ''
                       }, ["Review"]),
                     ]),
 
-                    a({ isRendered: user.researcher === "false" || !user.hasCompletedProfile, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                    a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
                     ]),
 
                     div({ id: user.dacUserId + "_flagBonafide", name: "flag_bonafide", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.hasCompletedProfile, "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
+                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
 
-                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.hasCompletedProfile, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
+                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && user.hasCompletedProfile, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
+                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && user.completed, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.hasCompletedProfile) || (user.researcher === false), disabled: "disabled" }, []),
+                      span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                     ]),
 
                   ]),
