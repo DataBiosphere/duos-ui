@@ -43,7 +43,6 @@ export default function DarCollectionReview(props) {
         generatePreProcessedBucketData,
         processDataUseBuckets
       ])({dars, datasets});
-      debugger; // eslint-disable-line
       setDataUseBuckets(processedBuckets);
       setCollection(collection);
       setCurrentUser(user);
