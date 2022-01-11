@@ -1,3 +1,4 @@
+import { map } from 'lodash';
 import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
 import { searchOntology } from './ontologyService';
 import { Notifications } from './utils';
@@ -167,7 +168,7 @@ const getOntologyName = async(obolibraryURL) => {
   return ontology.label;
 };
 
-export const processRestrictionStatements = async (key, dataUse) => {
+export const processRestrictionStatements = async (key, dataUse, ontologyMap = {}) => {
   let resp;
   let value = dataUse[key];
   /*
@@ -180,21 +181,22 @@ export const processRestrictionStatements = async (key, dataUse) => {
   }
   if (!isNil(value) && value) {
     if (key === 'diseaseRestrictions') {
-      let resolvedLabels = [];
       if (!isNil(head(value)) && !isNil(value[0].label)) {
-        resolvedLabels = value.map((ont) => ont.label);
+        resp = value.map((ont) => ont.label);
       } else {
         try {
           const ontologyPromises = value.map((ontologyId) => {
-            return getOntologyName(ontologyId);
+            if(isEmpty(ontologyMap[ontologyId])) {
+              ontologyMap[ontologyId] = getOntologyName(ontologyId);
+            }
+            return ontologyMap[ontologyId];
           });
-          resolvedLabels = await Promise.all(ontologyPromises);
+          resp = Promise.all(ontologyPromises).then((ontologies) =>
+            consentTranslations.diseaseRestrictions(ontologies)
+          );
         } catch (error) {
           Notifications.showError({ text: 'Ontology API Request Error' });
         }
-      }
-      if (!isNil(head(resolvedLabels))) {
-        resp = consentTranslations.diseaseRestrictions(resolvedLabels);
       }
     } else {
       resp = processDefinedLimitations(key, dataUse, consentTranslations);
@@ -242,27 +244,36 @@ const processOtherInDataUse = (dataUse, restrictionStatements) => {
   return restrictionStatements;
 };
 
+//NOTE: check to see if this function still works, made some changes that may not have been needed
+//Other option is to update the current processRestrictionStatements to just handle arrays from the get go
+//Would have to update old function calls, but would make the function more flexible
 const translateDataUseRestrictions = async (dataUse) => {
   if(!dataUse) {return [];}
   let restrictionStatements = [];
   const targetKeys = Object.keys(consentTranslations);
-  const processingPromises = targetKeys.map((key) => {
-    return processRestrictionStatements(key, dataUse);
-  });
-  restrictionStatements = await Promise.all(processingPromises);
+  //NOTE: changed the below function return (added await), need to test to see if it had adverse effects
+  restrictionStatements = targetKeys.map(async(key) =>
+    await processRestrictionStatements(key, dataUse));
   restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements);
 
   return restrictionStatements;
 };
 
+//should design this to ensure as many parallel requests as possible
+//old logic was made for a single dataUse, it won't be optimized for multiples
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
   const targetKeys = Object.keys(consentTranslations);
+  const ontologyMap = {};
   try {
     const translationPromises = dataUses.map((dataUse) =>
-      targetKeys.map((key) => Promise.all(processRestrictionStatements(key, dataUse)))
+      Promise.all(
+        targetKeys.map((key) => processRestrictionStatements(key, dataUse, ontologyMap))
+      )
     );
-    return Promise.all(translationPromises);
+    return filter(
+      (restriction) => !isEmpty(restriction)
+    ) (await Promise.all(translationPromises));
   } catch(error) {
     throw new Error('Failed to translate Data Use Restrictions from list');
   }

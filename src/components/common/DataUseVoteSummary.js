@@ -1,6 +1,5 @@
 import { h, div, span } from 'react-hyperscript-helpers'
-import { flow, isEmpty, every, any, chunk, map } from 'lodash/fp';
-import { calcDataUseBuckets, processDataUseBuckets } from '../../utils/DarCollectionUtils';
+import { isEmpty, every, any, chunk, map } from 'lodash/fp';
 import { CheckCircleOutlined, CancelOutlined, AutorenewOutlined, CompareArrowsOutlined } from '@material-ui/icons';
 import { blue, green, red, yellow } from '@material-ui/core/colors';
 
@@ -78,7 +77,8 @@ const VoteResultIcon = ({result, propKey}) => {
   }, output);
 };
 
-const VoteResultContainer = ({result, propKey, width}) => {
+const VoteResultContainer = ({finalVotes, propKey, width}) => {
+  const result = determineUnanimousVoteResult(finalVotes);
   return div({
     style: {
       flexDirection: 'column',
@@ -104,13 +104,10 @@ const determineUnanimousVoteResult = (votes) => {
   return every({'vote': voteStandard})(votes) ? voteStandard : 'mixed';
 };
 
-export default function DataUseVoteSummary({propDars}) {
-  const elementCap = 10;
-  const bucketChunks = flow([
-    calcDataUseBuckets,
-    processDataUseBuckets,
-    chunk(elementCap)
-  ])(propDars.buckets);
+
+export default function DataUseVoteSummary({dataUseBuckets}) {
+  const rowElementMaxCount = 10;
+  const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
 
   //NOTE: Unreasonbale to expect summary to display vote results on a single bar
   //Upper bound on number of buckets is theoretically infinite, can't contain on a row of fixed display width
@@ -127,6 +124,6 @@ export default function DataUseVoteSummary({propDars}) {
   );
 
   return div({style: { flexDirection: 'column', justifyContent: 'space-around' }}, [
-    rowTemplate(bucketChunks)
+    rowTemplate(chunkedBuckets)
   ]);
 }

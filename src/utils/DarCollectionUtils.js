@@ -1,7 +1,8 @@
-import { flow, isEmpty, flatMap, map } from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
-export const generateDataUseBucketData = async (dars, datasets) => {
+//Initial step, organizes raw data for further processing in later function/steps
+export const generatePreProcessedBucketData = async ({dars, datasets}) => {
   const dataUses = [];
   const buckets = {};
   const datasetBucketMap = {};
@@ -17,13 +18,18 @@ export const generateDataUseBucketData = async (dars, datasets) => {
   }
 
   dataUseProcessedRestrictions.forEach((restrictions, index) => {
-    const dataUseLabel = restrictions.map((restriction) => restriction.alternateLabel || restriction.code).join(', ');
+    const dataUseLabel = flow([
+      filter((restriction) => !isEmpty(restriction)),
+      map((restriction) => restriction.alternateLabel || restriction.code),
+      join(', ')
+    ])(restrictions);
+
     const dataset = datasets[index];
     const { dataSetId } = dataset;
     if(isEmpty(buckets[dataUseLabel])) {
       buckets[dataUseLabel] = {
         dars: [],
-        dataset: [],
+        datasets: [],
         dataUse: restrictions
       };
     }
@@ -31,59 +37,64 @@ export const generateDataUseBucketData = async (dars, datasets) => {
     datasetBucketMap[dataSetId] = buckets[dataUseLabel];
   });
 
-  dars.forEach((dar) => {
+  forEach((dar) => {
     const darDatasetId = dar.data.datasetIds[0];
     const targetBucket = datasetBucketMap[darDatasetId];
     targetBucket.dars.push(dar);
-  });
-
+  })(dars);
   return buckets;
 };
 
-export const processDataUseBucketData = (buckets) => {
-  const processedBuckets = buckets.map((bucket, key) => {
+//Helper function for processDataUseBuckets, essentilly organizes votes in a dar's elections by type
+const processVotesForBucket = (darElections) => {
+  let finalVotes =  [];
+  let rpVotes = [];
+  let memberVotes = [];
+  let chairpersonVote;
+
+  darElections.forEach((election) => {
+    const votes = election.votes || [];
+    if(election.type === 'RP') {
+      rpVotes = votes;
+    } else {
+      forEach((vote) => {
+        switch (vote.type) {
+          case 'FINAL':
+            finalVotes.push(vote);
+            break;
+          case 'Chairperson':
+            if(!isEmpty(vote.vote)) {
+              chairpersonVote = vote;
+            }
+            break;
+          case 'DAC':
+            memberVotes.push(vote);
+            break;
+          default:
+            break;
+        }
+      })(votes);
+    }
+  });
+  return { finalVotes, rpVotes, memberVotes, chairpersonVote };
+};
+
+//Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
+export const processDataUseBuckets = async(buckets) => {
+  buckets = await buckets;
+  const processedBuckets = map((bucket, key) => {
     const { dars } = bucket;
     const elections = flow([
-      map((dar) => dar.elections),
-      flatMap((electionArray) => electionArray)
+      map((dar) => Object.values(dar.elections)),
     ])(dars);
-    const votes = flow([
-      map((election) => election.votes),
-      flatMap((voteArray) => voteArray)
-    ])(elections);
-
-    let finalVotes = [];
-    let rpVotes = [];
-    let memberVotes = [];
-    let chairpersonVote;
-
-    votes.forEach(({type, vote}) => {
-      switch (type) {
-        case 'FINAL':
-          finalVotes.push(vote);
-          break;
-        case 'RP':
-          rpVotes.push(vote);
-          break;
-        case 'Chairperson':
-          if(!isEmpty(vote.vote)) {
-            chairpersonVote = vote;
-          }
-          break;
-        case 'DAC':
-          memberVotes.push(vote);
-          break;
-        default:
-          break;
-      }
-    });
-
-    return { key, dars, elections, finalVotes, rpVotes, memberVotes, chairpersonVote };
-  });
+    //NOTE: votes indexing lines up with election indexing, which lines up with dar indexing
+    const votes = map(processVotesForBucket)(elections);
+    return Object.assign({key, dars, elections, votes});
+  })(buckets);
   return processedBuckets;
 };
 
 export default {
-  generateDataUseBucketData,
-  processDataUseBucketData
+  generatePreProcessedBucketData,
+  processDataUseBuckets
 };
