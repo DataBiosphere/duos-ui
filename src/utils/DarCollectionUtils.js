@@ -7,12 +7,11 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
   const buckets = {};
   const datasetBucketMap = {};
   let dataUseProcessedRestrictions;
-
   try {
     datasets.forEach((dataset) => {
       dataUses.push(dataset.dataUse);
     });
-    dataUseProcessedRestrictions = await translateDataUseRestrictionsFromDataUseArray(dataUses);
+    dataUseProcessedRestrictions = await (await translateDataUseRestrictionsFromDataUseArray(dataUses));
   } catch(error) {
     throw new Error('Failed to generate data use translations');
   }
@@ -82,14 +81,14 @@ const processVotesForBucket = (darElections) => {
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
 export const processDataUseBuckets = async(buckets) => {
   buckets = await buckets;
-  const processedBuckets = map((bucket, key) => {
+  const processedBuckets = map.convert({cap:false})((bucket, key) => {
     const { dars } = bucket;
     const elections = flow([
       map((dar) => Object.values(dar.elections)),
     ])(dars);
-    //NOTE: votes indexing lines up with election indexing, which lines up with dar indexing
+    //votes indexing lines up with dar indexing
     const votes = map(processVotesForBucket)(elections);
-    return Object.assign({key, dars, elections, votes});
+    return { key, dars, elections, votes };
   })(buckets);
   return processedBuckets;
 };

@@ -1,5 +1,5 @@
-import { h, div, span } from 'react-hyperscript-helpers'
-import { isEmpty, every, any, chunk, map } from 'lodash/fp';
+import { h, div, span } from 'react-hyperscript-helpers';
+import { isEmpty, every, any, chunk, map, flow, flatMap } from 'lodash/fp';
 import { CheckCircleOutlined, CancelOutlined, AutorenewOutlined, CompareArrowsOutlined } from '@material-ui/icons';
 import { blue, green, red, yellow } from '@material-ui/core/colors';
 
@@ -26,7 +26,11 @@ const labelFontStyle = {
   display: 'flex'
 };
 
-const VoteResultLabel = (propKey) => {
+const convertLabelToKey = (label) => {
+  return label.split(' ').join('-');
+};
+
+const VoteResultLabel = ({propKey}) => {
   return div({
     style: labelFontStyle,
     className: `vote-result-label-text-${propKey}`,
@@ -77,7 +81,8 @@ const VoteResultIcon = ({result, propKey}) => {
   }, output);
 };
 
-const VoteResultContainer = ({finalVotes, propKey, width}) => {
+const VoteResultContainer = ({finalVotes = [], label, width}) => {
+  const hyphenatedKey = convertLabelToKey(label);
   const result = determineUnanimousVoteResult(finalVotes);
   return div({
     style: {
@@ -85,10 +90,10 @@ const VoteResultContainer = ({finalVotes, propKey, width}) => {
       justifyContent: 'space-evenly',
       width
     },
-    key: propKey
+    key: hyphenatedKey
   }, [
-    h(VoteResultLabel, {propKey}),
-    h(VoteResultIcon, {result, propKey})
+    h(VoteResultLabel, {propKey: hyphenatedKey}),
+    h(VoteResultIcon, {result, propKey: hyphenatedKey})
   ]);
 };
 
@@ -114,16 +119,21 @@ export default function DataUseVoteSummary({dataUseBuckets}) {
   //Need to set bounds on the number of divs/cards/whatever per row
   //Styling doesn't need to change, you just need to have multiple rows
 
+  //Need to do some additional processing here
   const elementTemplate = map((bucket) => {
-    const { finalVotes, key } = bucket;
-    return h(VoteResultContainer, { propKey: key, finalVotes }, []);
+    const { key, votes = []} = bucket;
+    const finalVotes = flow([
+      map((votes) => votes.finalVotes),
+      flatMap((finalVotes) => finalVotes),
+    ])(votes);
+    return h(VoteResultContainer, { label: key, finalVotes }, []);
   });
 
   const rowTemplate = map((row) =>
     div({ style: { display: 'flex', justifyContent: 'space-around' } }, elementTemplate(row))
   );
 
-  return div({style: { flexDirection: 'column', justifyContent: 'space-around' }}, [
+  return div({style: { flexDirection: 'column', justifyContent: 'space-around' }},
     rowTemplate(chunkedBuckets)
-  ]);
+  );
 }

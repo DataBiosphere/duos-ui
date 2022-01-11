@@ -42,7 +42,7 @@ export default function DarCollectionReview(props) {
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
         processDataUseBuckets
-      ])({dars, datasets});
+      ])({ dars, datasets });
       setDataUseBuckets(processedBuckets);
       setCollection(collection);
       setCurrentUser(user);
