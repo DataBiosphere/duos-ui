@@ -11,15 +11,18 @@ import { blue, green, red, yellow } from '@material-ui/core/colors';
 //Is the font good for use? Would be nice to have an font standard going forward for code and mockups
 const iconFontStyle = {
   fontFamily: 'Arial',
-  fontSize: 18,
+  fontSize: 20,
   fontWeight: 600,
+  flex: 1,
   color: 'white',
-  flex: 1
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
 };
 
 const labelFontStyle = {
   fontFamily: 'Arial',
-  fontSize: 14,
+  fontSize: 17,
   fontWeight: 600,
   flex: 1,
   justifyContent: 'space-around',
@@ -30,21 +33,23 @@ const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
 
-const VoteResultLabel = ({propKey}) => {
+const VoteResultLabel = ({propKey, label}) => {
   return div({
     style: labelFontStyle,
     className: `vote-result-label-text-${propKey}`,
     key: `vote-result-label-${propKey}`
-  }, [propKey]);
+  }, [label]);
 };
 
 //Possible icons should be Yes, No, Mixed, In Progress
 const VoteResultIcon = ({result, propKey}) => {
+  const iconSize = 50;
+  const margin = '2%';
   const templates = {
     true: [
       h(CheckCircleOutlined, {
         className: `vote-result-yes-icon-${propKey}`,
-        style: { color: green[500], flex: 1 }
+        style: { color: green[500], flex: 1, }
       }),
       span({ className: `vote-result-yes-text-${propKey}`, style: iconFontStyle }, ['Yes'])
     ],
@@ -62,21 +67,25 @@ const VoteResultIcon = ({result, propKey}) => {
       }),
       span({ className: `vote-result-in-progress-${propKey}`, span: iconFontStyle }, ['In Progress'])
     ],
-    mixed: [
-      h(CompareArrowsOutlined, {
-        className: `vote-result-mixed-${propKey}`,
-        style: { color: yellow[500], flex: 1}
-      }),
-      span({ className: `vote-result-in-progress-${propKey}`, span: iconFontStyle }, ['Mixed'])
-    ]
+    mixed: {
+      output: [
+        h(CompareArrowsOutlined, {
+          className: `vote-result-mixed-${propKey}`,
+          style: {fontSize: iconSize, margin, flex:1}
+          // style: { color: 'white', flex: 1, fontSize: 40, backgroundColor: yellow[500], borderRadius: '2px'}
+        }),
+        div({ className: `vote-mixed-${propKey}`, style: iconFontStyle}, ['Mixed'])
+      ],
+      colorStyle: {
+        backgroundColor: yellow[500],
+        color: 'white'
+      }
+    }
   };
 
-  const output = templates[result];
+  const {output, colorStyle} = templates[result];
   return div({
-    style: {
-      display: 'flex',
-      justifyContent: 'space-between'
-    },
+    style: Object.assign({}, colorStyle, iconFontStyle),
     key: `vote-result-box-${propKey}`
   }, output);
 };
@@ -92,7 +101,7 @@ const VoteResultContainer = ({finalVotes = [], label, width}) => {
     },
     key: hyphenatedKey
   }, [
-    h(VoteResultLabel, {propKey: hyphenatedKey}),
+    h(VoteResultLabel, {propKey: hyphenatedKey, label}),
     h(VoteResultIcon, {result, propKey: hyphenatedKey})
   ]);
 };
