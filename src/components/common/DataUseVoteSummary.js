@@ -116,6 +116,12 @@ const VoteResultIcon = ({result, propKey}) => {
         color: 'white',
       },
     },
+    legacy: {
+      output: [
+        div({className: `vote-legacy-${propKey}`, style: Object.assign({}, modifiedTextStyle, {color: 'black'})}, ['N/A (Legacy)'])
+      ],
+      colorStyle: {}
+    }
   };
   const {output, colorStyle} = templates[result];
   return div({
@@ -124,7 +130,7 @@ const VoteResultIcon = ({result, propKey}) => {
   }, output);
 };
 
-const VoteResultContainer = ({finalVotes = [], label, additionalLabelStyle = {}}) => {
+const VoteResultContainer = ({finalVotes = [], label, additionalLabelStyle = {}, legacyFlag = false}) => {
   const baseContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
@@ -132,7 +138,7 @@ const VoteResultContainer = ({finalVotes = [], label, additionalLabelStyle = {}}
     width: '8%',
   };
   const hyphenatedKey = convertLabelToKey(label);
-  const result = determineUnanimousVoteResult(finalVotes);
+  const result = (legacyFlag && finalVotes.length > 1) ? 'legacy' : determineUnanimousVoteResult(finalVotes);
   return div({
     style: baseContainerStyle,
     key: hyphenatedKey,
@@ -143,7 +149,10 @@ const VoteResultContainer = ({finalVotes = [], label, additionalLabelStyle = {}}
   ]);
 };
 
-const determineUnanimousVoteResult = (votes = []) => {
+const determineUnanimousVoteResult = (votes = [], rpLegacyFlag = false) => {
+  if(rpLegacyFlag) {
+    return 'legacy';
+  }
   const voteCount = votes.length;
   if(isEmpty(votes) || voteCount < 1) {
     return 'underReview';
@@ -168,10 +177,20 @@ const determineUnanimousVoteResult = (votes = []) => {
   }
 };
 
-
 export default function DataUseVoteSummary({dataUseBuckets}) {
+  const rpVotes = flow([
+    flatMap((dataUse) => dataUse.votes),
+    flatMap((votes) => votes.rpVotes),
+  ])(dataUseBuckets);
+  const rpVoteData = {
+    key: 'RP Vote',
+    votes: {finalVotes: rpVotes},
+    legacyFlag: true
+  };
+  const clonedBuckets = dataUseBuckets.slice(0);
+  clonedBuckets.unshift(rpVoteData);
   const rowElementMaxCount = 11;
-  const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
+  const chunkedBuckets = chunk(rowElementMaxCount)(clonedBuckets);
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
@@ -201,12 +220,9 @@ export default function DataUseVoteSummary({dataUseBuckets}) {
     return map.convert({cap: false})((bucket, index) => {
       const additionalLabelStyle = index === 0 ? startElementStyle :
         index === elementLength - 1 ? endElementStyle : middleElementStyle;
-      const { key, votes = []} = bucket;
-      const finalVotes = flow([
-        map((votes) => votes.finalVotes),
-        flatMap((finalVotes) => finalVotes),
-      ])(votes);
-      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle }, []);
+      const { key, votes = [], legacyFlag } = bucket;
+      const finalVotes = flatMap(votingDataObj => votingDataObj.finalVotes)(votes);
+      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, legacyFlag }, []);
     })(row);
   };
 
