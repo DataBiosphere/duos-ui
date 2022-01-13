@@ -54,8 +54,8 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
 
     //uncap map to keep track of index for styling
     return map.convert({cap: false})((bucket, index) => {
-      const additionalLabelStyle = index === 0 ? startElementStyle :
-        index === elementLength - 1 ? endElementStyle : middleElementStyle;
+      const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
+        index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
       const { key, votes = [], legacyFlag } = bucket;
       const finalVotes = flatMap(votingDataObj => votingDataObj.finalVotes)(votes);
       return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, legacyFlag }, []);

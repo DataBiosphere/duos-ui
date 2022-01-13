@@ -15,7 +15,7 @@ jobs:
         run: cp config/perf.json public/config.json
       - name: NPM Build
         run: CI=false npm run build --silent
-      - name: Cypress run
+      - name: Cypress run integration tests
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
@@ -27,3 +27,6 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
+      - name : Cypress run component tests
+        uses: cypress-io/github-action@v2
+        run: npx cypress run-ct
