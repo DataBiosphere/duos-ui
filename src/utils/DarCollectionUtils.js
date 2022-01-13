@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, join, filter, forEach } from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, find, isNil } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -53,14 +53,19 @@ const processVotesForBucket = (darElections) => {
 
   darElections.forEach((election) => {
     const votes = election.votes || [];
+    const filteredFinalVotes = filter((vote) => vote.type === 'FINAL')(votes);
+    const castedFinalVote = find((vote) => !isNil(vote.vote))(filteredFinalVotes);
+
+    if(isEmpty(castedFinalVote)) {
+      finalVotes.concat(filteredFinalVotes).flat(1);
+    } else {
+      finalVotes.push(castedFinalVote);
+    }
     if(election.type === 'RP') {
       rpVotes = votes;
     } else {
       forEach((vote) => {
         switch (vote.type) {
-          case 'FINAL':
-            finalVotes.push(vote);
-            break;
           case 'Chairperson':
             if(!isEmpty(vote.vote)) {
               chairpersonVote = vote;

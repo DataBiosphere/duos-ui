@@ -64,13 +64,13 @@ export default function VoteResultIcon({ result, propKey }) {
     underReview: {
       output: [
         h(AutorenewOutlined, {
-          className: `vote-result-in-progress-${propKey}`,
+          className: `vote-result-under-review-${propKey}`,
           style: { fontSize: iconSize, margin, flex: 1 },
         }),
         div(
           {
-            className: `vote-result-in-progress-${propKey}`,
-            style: Object.assign(modifiedTextStyle, { fontSize: '1.7rem' }),
+            className: `vote-result-under-review-${propKey}`,
+            style: Object.assign({}, modifiedTextStyle, { fontSize: '1.5rem' }),
           },
           ['Under Review']
         ),

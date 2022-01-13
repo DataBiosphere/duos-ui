@@ -9,7 +9,6 @@ import ReactTooltip from 'react-tooltip';
 //Is the font good now? Would be nice to have an font standard going forward for code and mockups
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
-
   useEffect(() => {
     ReactTooltip.rebuild();
   });

@@ -17,8 +17,8 @@ const determineUnanimousVoteResult = (votes = []) => {
     false: 0,
   };
 
-  votes.forEach((vote) => {
-    voteTally[vote] += 1;
+  votes.forEach((vote = {}) => {
+    voteTally[vote.vote] += 1;
   });
 
   if (voteTally.true === voteCount) {
