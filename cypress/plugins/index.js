@@ -16,9 +16,10 @@
  * @type {Cypress.PluginConfig}
  */
 
-const injectDevServer = require('@cypress/react/plugins/react-scripts');
-
 module.exports = (on, config) => {
-  injectDevServer(on, config);
+  if (config.testingType === 'component') {
+    require('@cypress/react/plugins/react-scripts')(on, config);
+  }
+
   return config;
 };
