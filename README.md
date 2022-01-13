@@ -20,29 +20,24 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 
 ### Developers
 
-Deployments are currently run in CircleCI.
-
-1. We use node@16 On Darwin with Homebrew:
+1. We use [node@16](https://github.com/nvm-sh/nvm#installing-and-updating):
 
 ```
-brew install node@16
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+nvm install 16
 ```
-2. Update npm:
-
-```
-npm install -g npm@7
-```
-3. Install deps:
+2. Install deps:
 
 ```
 npm install
 ```
-4. Install configs for an environment. This is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of [dev, staging, perf, alpha, prod] 
+
+3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `perf`, `alpha`, or `prod` 
 
 ```
 cp config/perf.json public/config.json
 ```
-5. Start development server:
+4. Start development server:
 
 ```
 npm start
