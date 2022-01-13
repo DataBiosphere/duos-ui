@@ -10,7 +10,7 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import { find, isEmpty, flow } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
-import DataUseVoteSummary from '../../components/common/DataUseVoteSummary';
+import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 
 export default function DarCollectionReview(props) {
   const tabs = {
@@ -90,7 +90,7 @@ export default function DarCollectionReview(props) {
           isLoading,
           redirectLink: h(RedirectLink, {user: currentUser, history: props.history})
         }),
-        h(DataUseVoteSummary, {dataUseBuckets}),
+        h(DataUseVoteSummary, {dataUseBuckets, isLoading}),
         h(TabControl, {
           labels: [tabs.applicationInformation, tabs.researchProposal],
           selectedTab,
