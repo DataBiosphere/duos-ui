@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, join, filter, forEach, find, isNil } from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, find, isNil, sortBy, lowerCase } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -53,32 +53,33 @@ const processVotesForBucket = (darElections) => {
 
   darElections.forEach((election) => {
     const votes = election.votes || [];
-    const filteredFinalVotes = filter((vote) => vote.type === 'FINAL')(votes);
+    const targetType = election.electionType === 'RP' ? 'chairperson' : 'final';
+    const targetArray = election.electionType === 'RP' ? rpVotes : finalVotes;
+    const filteredFinalVotes = flow([
+      sortBy((vote) => vote.createdate),
+      filter((vote) => lowerCase(vote.type) === targetType)
+    ])(votes);
     const castedFinalVote = find((vote) => !isNil(vote.vote))(filteredFinalVotes);
 
     if(isEmpty(castedFinalVote)) {
-      finalVotes.concat(filteredFinalVotes).flat(1);
+      targetArray.concat(filteredFinalVotes).flat(1);
     } else {
-      finalVotes.push(castedFinalVote);
+      targetArray.push(castedFinalVote);
     }
-    if(election.type === 'RP') {
-      rpVotes = votes;
-    } else {
-      forEach((vote) => {
-        switch (vote.type) {
-          case 'Chairperson':
-            if(!isEmpty(vote.vote)) {
-              chairpersonVote = vote;
-            }
-            break;
-          case 'DAC':
-            memberVotes.push(vote);
-            break;
-          default:
-            break;
-        }
-      })(votes);
-    }
+    forEach((vote) => {
+      switch (vote.type) {
+        case 'Chairperson':
+          if(!isEmpty(vote.vote)) {
+            chairpersonVote = vote;
+          }
+          break;
+        case 'DAC':
+          memberVotes.push(vote);
+          break;
+        default:
+          break;
+      }
+    })(votes);
   });
   return { finalVotes, rpVotes, memberVotes, chairpersonVote };
 };

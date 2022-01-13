@@ -19,7 +19,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   ])(dataUseBuckets);
   const rpVoteData = {
     key: 'RP Vote',
-    votes: {finalVotes: rpVotes},
+    votes: [{finalVotes: rpVotes}],
     legacyFlag: true
   };
 
