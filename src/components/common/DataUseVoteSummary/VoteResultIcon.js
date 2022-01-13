@@ -114,7 +114,7 @@ export default function VoteResultIcon({ result, propKey }) {
       colorStyle: {},
     },
   };
-  const { output, colorStyle } = templates['legacy'];
+  const { output, colorStyle } = templates[result];
   return div(
     {
       style: Object.assign({ borderRadius: '4%' }, colorStyle, iconFontStyle),
