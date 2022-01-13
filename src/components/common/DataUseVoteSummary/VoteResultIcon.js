@@ -64,12 +64,12 @@ export default function VoteResultIcon({ result, propKey }) {
     underReview: {
       output: [
         h(AutorenewOutlined, {
-          className: `vote-result-under-review-${propKey}`,
+          className: `vote-result-under-review-icon-${propKey}`,
           style: { fontSize: iconSize, margin, flex: 1 },
         }),
         div(
           {
-            className: `vote-result-under-review-${propKey}`,
+            className: `vote-result-under-review-text-${propKey}`,
             style: Object.assign({}, modifiedTextStyle, { fontSize: '1.5rem' }),
           },
           ['Under Review']
@@ -83,10 +83,10 @@ export default function VoteResultIcon({ result, propKey }) {
     mixed: {
       output: [
         h(CompareArrowsOutlined, {
-          className: `vote-result-mixed-${propKey}`,
+          className: `vote-result-mixed-icon-${propKey}`,
           style: { fontSize: iconSize, margin, flex: 1 },
         }),
-        div({ className: `vote-mixed-${propKey}`, style: modifiedTextStyle }, [
+        div({ className: `vote-result-mixed-text-${propKey}`, style: modifiedTextStyle }, [
           'Mixed',
         ]),
       ],
@@ -99,7 +99,7 @@ export default function VoteResultIcon({ result, propKey }) {
       output: [
         div(
           {
-            className: `vote-legacy-${propKey}`,
+            className: `vote-result-legacy-text-${propKey}`,
             style: Object.assign({}, modifiedTextStyle, {
               color: 'black',
               justifyContent: 'center',
@@ -119,6 +119,7 @@ export default function VoteResultIcon({ result, propKey }) {
     {
       style: Object.assign({ borderRadius: '4%' }, colorStyle, iconFontStyle),
       key: `vote-result-box-${propKey}`,
+      className: `vote-result-box-${propKey}`
     },
     output
   );
