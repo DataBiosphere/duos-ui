@@ -29,4 +29,6 @@ jobs:
           wait-on-timeout: 120
       - name : Cypress run component tests
         uses: cypress-io/github-action@v2
-        run: npx cypress run-ct
+        with: 
+          install: false
+          command: npx cypress run-ct
