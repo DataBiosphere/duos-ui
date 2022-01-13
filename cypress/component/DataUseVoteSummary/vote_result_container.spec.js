@@ -10,7 +10,7 @@ const propKey = 'Test-Label';
 const additionalLabelStyle = {};
 const legacyFlag = false;
 
-describe('VoteResultLabel - Tests', function () {
+describe('VoteResultContainer - Tests', function () {
   context('Legacy Flag', function() {
     it('Renders a Legacy result if the flag is true and multiple votes were submitted', function () {
       mount(
