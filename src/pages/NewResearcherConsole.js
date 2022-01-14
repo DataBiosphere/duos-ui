@@ -141,6 +141,27 @@ export default function NewResearcherConsole(props) {
     }
   };
 
+  //resubmit collection function, passed to collections table to be used in buttons
+  const resubmitCollection = async (darCollection) => {
+    try {
+      const { darCollectionId, darCode } = darCollection;
+      const resubmittedCollection = await Collections.resubmitCollection(darCollectionId);
+      const targetIndex = researcherCollections.findIndex((collection) =>
+        collection.darCollectionId === darCollectionId);
+      if (targetIndex < 0) {
+        throw new Error("Error: Could not find target collection");
+      }
+      const clonedCollections = cloneDeep(researcherCollections);
+      clonedCollections[targetIndex] = resubmittedCollection;
+      setResearcherCollections(clonedCollections);
+      Notifications.showSuccess({text: `Revising collection ${darCode}`});
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error: Cannot revise target collection'
+      });
+    }
+  };
+
   //Draft delete, passed down to draft table to be used with delete button
   const deleteDraft = async ({ referenceId, identifier }) => {
     try {
@@ -211,7 +232,8 @@ export default function NewResearcherConsole(props) {
         isRendered: selectedTab === tabNames.darCollections,
         collections: filteredList,
         isLoading,
-        cancelCollection
+        cancelCollection,
+        resubmitCollection
       }),
       h(DarDraftTable, {
         isRendered: selectedTab === tabNames.darDrafts,

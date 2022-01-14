@@ -185,6 +185,11 @@ export const Collections = {
     const res = await axios.put(url, {}, Config.authOpts());
     return res.data;
   },
+  resubmitCollection: async(id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/resubmit`;
+    const res = await axios.put(url, {}, Config.authOpts());
+    return res.data;
+  },
   getCollectionById: async(id) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}`;
     const res = await axios.get(url, Config.authOpts());

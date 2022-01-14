@@ -8,7 +8,7 @@ import ConfirmationModal from '../modals/ConfirmationModal';
 import { formatDate, recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 
-const { determineCollectionStatus, nonCancellableCollectionStatuses } = darCollectionUtils;
+const { determineCollectionStatus, nonCancellableCollectionStatuses, isCollectionCanceled } = darCollectionUtils;
 const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
@@ -103,28 +103,67 @@ const CancelCollectionButton = (props) => {
   });
 };
 
+const ResubmitCollectionButton = (props) => {
+  const { collection } = props;
+  return h(SimpleButton, {
+    keyProp: `resubmit-collection-${collection.id}`,
+    label: 'Revise',
+    //todo: should we filter out any statuses that could be resubmitted? is this the correct place for such logic?
+    //disabled: includes(determineCollectionStatus(collection))(['Under Election']),
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      width: '30%',
+      padding: '2%',
+      fontSize: '1.45rem',
+    },
+    onClick: () => props.showConfirmationModal(collection)
+  });
+};
+
 const actionsCellData = ({collection, showConfirmationModal}) => {
   const { darCollectionId } = collection;
   const cancelButtonTemplate = h(CancelCollectionButton, {
     collection,
     showConfirmationModal
   });
-
-  return {
-    isComponent: true,
-    id: darCollectionId,
-    label: 'cancel-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
+  const resubmitButtonTemplate = h(ResubmitCollectionButton, {
+    collection,
+    showConfirmationModal
+  });
+  if(isCollectionCanceled(collection) === true)
+  {
+    return {
+      isComponent: true,
+      id: darCollectionId,
+      label: 'resubmit-button',
+      data: div(
+        {
+          style: {
+            display: 'flex',
+            justifyContent: 'left'
+          },
+          key: `resubmit-collection-cell-${darCollectionId}`
         },
-        key: `cancel-collection-cell-${darCollectionId}`
-      },
-      [cancelButtonTemplate]
-    )
-  };
+        [resubmitButtonTemplate]
+      )
+    };
+  } else {
+    return {
+      isComponent: true,
+      id: darCollectionId,
+      label: 'cancel-button',
+      data: div(
+        {
+          style: {
+            display: 'flex',
+            justifyContent: 'left'
+          },
+          key: `cancel-collection-cell-${darCollectionId}`
+        },
+        [cancelButtonTemplate]
+      )
+    };
+  }
 };
 
 
@@ -155,7 +194,7 @@ export default function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
-  const { collections, isLoading, cancelCollection } = props;
+  const { collections, isLoading, cancelCollection, resubmitCollection } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -205,14 +244,49 @@ export default function DarCollectionTable(props) {
     setShowConfirmation(false);
   };
 
+  const resubmitOnClick = async() => {
+    await resubmitCollection(selectedCollection);
+    setShowConfirmation(false);
+  };
+
+  const cancelModal = (collection) =>
+    h(ConfirmationModal, {
+      showConfirmation,
+      styleOverride: {height: '35%'},
+      closeConfirmation: () => setShowConfirmation(false),
+      title: 'Cancel DAR Collection',
+      message: `Are you sure you want to cancel ${collection.darCode}?`,
+      header: getModalHeader(collection),
+      onConfirm: cancelOnClick
+    });
+
+  const resubmitModal = (collection) =>
+    h(ConfirmationModal, {
+      showConfirmation,
+      styleOverride: {height: '35%'},
+      closeConfirmation: () => setShowConfirmation(false),
+      title: 'Resubmit DAR Collection',
+      message: `Are you sure you want to resubmit ${collection.darCode}?`,
+      header: getModalHeader(collection),
+      onConfirm: resubmitOnClick
+    });
+
+  const confirmationModal = (collection) => {
+    if(isCollectionCanceled(collection) === true) {
+      return resubmitModal(collection);
+    } else {
+      return cancelModal(collection);
+    }
+  };
+
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      rowData: processCollectionRowData(visibleCollection, showConfirmationModal),
-      columnHeaders: columnHeaderData(),
+      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal),
+      "columnHeaders": columnHeaderData(),
       styles,
-      tableSize,
-      paginationBar: h(PaginationBar, {
+      tableSize: tableSize,
+      "paginationBar": h(PaginationBar, {
         pageCount,
         currentPage,
         tableSize,
@@ -220,14 +294,6 @@ export default function DarCollectionTable(props) {
         changeTableSize
       })
     }),
-    h(ConfirmationModal, {
-      showConfirmation,
-      styleOverride: {height: '35%'},
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Cancel DAR Collection',
-      message: `Are you sure you want to cancel ${selectedCollection.darCode}?`,
-      header: getModalHeader(selectedCollection),
-      onConfirm: cancelOnClick
-    })
+    confirmationModal(selectedCollection)
   ]);
 }

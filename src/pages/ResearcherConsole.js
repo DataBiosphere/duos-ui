@@ -4,7 +4,7 @@ import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-import { DAR } from '../libs/ajax';
+import { DAR, Collections } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
@@ -31,6 +31,7 @@ class ResearcherConsole extends Component {
       currentDarPage: 1,
       currentPartialDarPage: 1,
       showDialogCancelDAR: false,
+      showDialogReviseDAR: false,
       showDialogDeletePDAR: false,
       alertTitle: undefined
     };
@@ -85,6 +86,11 @@ class ResearcherConsole extends Component {
     this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
   };
 
+  reviseDar = (e) => {
+    const darCollectionId = e.target.getAttribute('value');
+    this.setState({ showDialogReviseDAR: true, darCollectionId: darCollectionId, alertTitle: undefined });
+  };
+
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
@@ -101,6 +107,19 @@ class ResearcherConsole extends Component {
       });
     } else {
       this.setState({ showDialogCancelDAR: false, buttonDisabled: false, alertTitle: undefined });
+    }
+  };
+
+  dialogHandlerReviseDAR = (answer) => () => {
+    this.setState({ buttonDisabled: true });
+    if (answer === true) {
+      Collections.resubmitCollection(this.state.darCollectionId).then(() => {
+        this.init();
+      }).catch(() => {
+        this.setState({ alertTitle: 'Sorry, something went wrong when trying to revise the request. Please try again.', buttonDisabled: false });
+      });
+    } else {
+      this.setState({ showDialogReviseDAR: false, buttonDisabled: false, alertTitle: undefined });
     }
   };
 
@@ -132,6 +151,7 @@ class ResearcherConsole extends Component {
           showDialogDeletePDAR: false,
           buttonDisabled: false,
           showDialogCancelDAR: false,
+          showDialogReviseDAR: false,
           alertTitle: undefined
         });
       }
@@ -144,6 +164,7 @@ class ResearcherConsole extends Component {
           showDialogDeletePDAR: false,
           buttonDisabled: false,
           showDialogCancelDAR: false,
+          showDialogReviseDAR: false,
           alertTitle: undefined
         });
       }
@@ -212,7 +233,7 @@ class ResearcherConsole extends Component {
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
                 div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color"}, ["Status"]),
-                div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
+                div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Revise"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
               hr({ className: "table-head-separator" }),
@@ -254,14 +275,15 @@ class ResearcherConsole extends Component {
                         className: "cell-button cancel-color",
                         onClick: this.cancelDar,
                         value: darInfo.dar.referenceId
-                      }, ["Cancel"])
-                    ]),
-                    div({ className: "col-xs-1 cell-body f-center" }, [
+                      }, ["Cancel"]),
                       button({
-                        id: darInfo.dar.data.darCode + "_btnReview", name: "btn_review", className: "cell-button hover-color"
-                      }, [h(Link, {
-                        to: 'dar_application/' + darInfo.dar.referenceId,
-                      }, ['Review'])]),
+                        isRendered: !opened && canceled,
+                        id: darInfo.dar.data.darCode + "_btnRevise",
+                        name: "btn_revise",
+                        className: "cell-button hover-color",
+                        onClick: this.reviseDar,
+                        value: darInfo.dar.data.darCollectionId
+                      }, ['Revise'])
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
@@ -363,6 +385,14 @@ class ResearcherConsole extends Component {
           disableOkBtn: this.state.buttonDisabled,
           action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
         }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
+
+        ConfirmationDialog({
+          title: 'Revise saved Request?',
+          color: 'review',
+          isRendered: this.state.showDialogReviseDAR,
+          showModal: this.state.showDialogReviseDAR,
+          action: { label: "Yes", handler: this.dialogHandlerReviseDAR }
+        }, [div({ className: "dialog-description" }, ["Are you sure you want to revise this Data Access Request?"]),]),
 
         ConfirmationDialog({
           title: 'Delete saved Request?',
