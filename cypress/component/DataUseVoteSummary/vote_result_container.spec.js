@@ -3,12 +3,10 @@ import React from 'react';
 import { mount } from '@cypress/react';
 import VoteResultContainer from '../../../src/components/common/DataUseVoteSummary/VoteResultContainer';
 
-const finalVotes = [{vote: true}];
 const rpVotes = [{vote: true}, {vote: false}];
 const label = "Test Label";
 const propKey = 'Test-Label';
 const additionalLabelStyle = {};
-const legacyFlag = false;
 
 describe('VoteResultContainer - Tests', function () {
   context('Legacy Flag', function() {
@@ -18,7 +16,7 @@ describe('VoteResultContainer - Tests', function () {
           finalVotes={rpVotes}
           label={label}
           additionalLabelStyle={additionalLabelStyle}
-          legacyFlag={true}
+          isRP={true}
         />
       );
       const container = cy.get('.vote-summary-container');
@@ -33,7 +31,7 @@ describe('VoteResultContainer - Tests', function () {
           finalVotes={rpVotes}
           label={label}
           additionalLabelStyle={additionalLabelStyle}
-          legacyFlag={true}
+          isRP={true}
         />
       );
       const container = cy.get('.vote-summary-container');

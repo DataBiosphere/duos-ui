@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, join, filter, forEach, find, isNil, sortBy, lowerCase } from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -46,42 +46,42 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
 
 //Helper function for processDataUseBuckets, essentilly organizes votes in a dar's elections by type
 const processVotesForBucket = (darElections) => {
-  let finalVotes =  [];
-  let rpVotes = [];
-  let memberVotes = [];
-  let chairpersonVote;
+  const rp =  {
+    chairpersonVotes: [],
+    memberVotes : [],
+    finalVotes: []
+  };
+  const dataAccess = {
+    finalVotes: [],
+    memberVotes: [],
+    chairpersonVotes: []
+  };
 
   darElections.forEach((election) => {
-    const votes = election.votes || [];
-    const targetType = election.electionType === 'RP' ? 'chairperson' : 'final';
-    const targetArray = election.electionType === 'RP' ? rpVotes : finalVotes;
-    const filteredFinalVotes = flow([
-      sortBy((vote) => vote.createdate),
-      filter((vote) => lowerCase(vote.type) === targetType)
-    ])(votes);
-    const castedFinalVote = find((vote) => !isNil(vote.vote))(filteredFinalVotes);
-
-    if(isEmpty(castedFinalVote)) {
-      targetArray.concat(filteredFinalVotes).flat(1);
+    const {electionType, votes = []} = election;
+    let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
+    let targetFinal, targetChair, targetMember, targetFinalType;
+    if(electionType === 'RP') {
+      targetFinalType = 'chairperson';
+      targetMember = rp.memberVotes;
+      targetChair = rp.chairpersonVotes;
+      targetFinal = rp.finalVotes;
     } else {
-      targetArray.push(castedFinalVote);
+      targetFinalType = 'final';
+      targetMember = dataAccess.memberVotes;
+      targetChair = dataAccess.chairpersonVotes;
+      targetFinal = dataAccess.finalVotes;
     }
-    forEach((vote) => {
-      switch (vote.type) {
-        case 'Chairperson':
-          if(!isEmpty(vote.vote)) {
-            chairpersonVote = vote;
-          }
-          break;
-        case 'DAC':
-          memberVotes.push(vote);
-          break;
-        default:
-          break;
+    forEach(vote => {
+      const lowerCaseType = toLower(vote.type);
+      if(lowerCaseType === targetFinalType && !isNil(vote.vote)) {
+        targetFinal.push(vote);
       }
-    })(votes);
+      const targetArray = lowerCaseType === 'chairperson' ? targetChair : targetMember;
+      targetArray.push(vote);
+    })(dateSortedVotes);
   });
-  return { finalVotes, rpVotes, memberVotes, chairpersonVote };
+  return { rp, dataAccess };
 };
 
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
@@ -96,6 +96,27 @@ export const processDataUseBuckets = async(buckets) => {
     const votes = map(processVotesForBucket)(elections);
     return { key, dars, elections, votes };
   })(buckets);
+
+  //Process custom RP Vote bucket for VoteSummary
+  const rpVotes = flow([
+    flatMap((bucket) => bucket.votes),
+    map((votes) => votes.rp)
+  ])(processedBuckets);
+  const finalRPVotes = flatMap((votes) => votes.finalVotes)(rpVotes);
+  const chairRPVotes = flatMap((votes) => votes.chairpersonVotes)(rpVotes);
+  const memberRPVotes = flatMap((votes) => votes.memberVotes)(rpVotes);
+  const rpVoteData = {
+    key: 'RP Vote',
+    votes: [{
+      rp: {
+        finalVotes: finalRPVotes,
+        chairpersonVotes: chairRPVotes,
+        memberVotes: memberRPVotes
+      }
+    }],
+    isRP: true,
+  };
+  processedBuckets.unshift(rpVoteData);
   return processedBuckets;
 };
 

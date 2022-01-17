@@ -2,12 +2,13 @@ import VoteResultIcon from './VoteResultIcon';
 import VoteResultLabel from './VoteResultLabel';
 import { isEmpty } from 'lodash/fp';
 import { h, div } from 'react-hyperscript-helpers';
+import { find } from 'lodash';
 
 const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
 
-const determineUnanimousVoteResult = (votes = []) => {
+const determineUnanimousVoteResult = ({votes = [], isRP = false}) => {
   const voteCount = votes.length;
   if (isEmpty(votes) || voteCount < 1) {
     return 'underReview';
@@ -26,7 +27,7 @@ const determineUnanimousVoteResult = (votes = []) => {
   } else if (voteTally.false === voteCount) {
     return false;
   } else if (voteTally.true + voteTally.false === voteCount) {
-    return 'mixed';
+    return isRP ? 'legacy' : 'mixed';
   } else {
     return 'underReview';
   }
@@ -36,7 +37,7 @@ export default function VoteResultContainer({
   finalVotes = [],
   label,
   additionalLabelStyle = {},
-  legacyFlag = false,
+  isRP = false,
 }) {
   const baseContainerStyle = {
     display: 'flex',
@@ -45,10 +46,18 @@ export default function VoteResultContainer({
     width: '10%',
   };
   const hyphenatedKey = convertLabelToKey(label);
-  const result =
-    legacyFlag && finalVotes.length > 1
-      ? 'legacy'
-      : determineUnanimousVoteResult(finalVotes);
+  //QUESTION: How will RP votes work from here on out
+  //Currently there is an RP election for each DAR (so by extension one for each dataset)
+  //Therefore there are technically X amount of RP elections, all of which are decided independenly for each other
+  //With the multi-dataset vote feature, will there only be one RP election across the election?
+  //Or will it be the same as before except now we just update all of the RP elections at once on vote submission?
+
+  const result = determineUnanimousVoteResult({votes: finalVotes, isRP});
+
+  // const result =
+  //   legacyFlag && finalVotes.length > 1
+  //     ? 'legacy'
+  //     : determineUnanimousVoteResult({finalVotes});
   return div(
     {
       style: baseContainerStyle,

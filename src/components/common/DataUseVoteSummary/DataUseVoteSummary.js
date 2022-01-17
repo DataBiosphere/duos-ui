@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import { chunk, map, flow, flatMap } from 'lodash/fp';
+import { chunk, map, flatMap } from 'lodash/fp';
 import VoteResultContainer from './VoteResultContainer';
 import ReactTooltip from 'react-tooltip';
+import { isEmpty } from 'lodash';
 
 //NOTE: mockups seem to use Montserrat (or a font very similar to it)
 //We used to use it until UX advised us not to (around a year ago?)
@@ -13,20 +14,8 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     ReactTooltip.rebuild();
   });
 
-  const rpVotes = flow([
-    flatMap((dataUse) => dataUse.votes),
-    flatMap((votes) => votes.rpVotes),
-  ])(dataUseBuckets);
-  const rpVoteData = {
-    key: 'RP Vote',
-    votes: [{finalVotes: rpVotes}],
-    legacyFlag: true
-  };
-
-  const clonedBuckets = dataUseBuckets.slice(0);
-  clonedBuckets.unshift(rpVoteData);
   const rowElementMaxCount = 11;
-  const chunkedBuckets = chunk(rowElementMaxCount)(clonedBuckets);
+  const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
@@ -56,9 +45,12 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     return map.convert({cap: false})((bucket, index) => {
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
-      const { key, votes = [], legacyFlag } = bucket;
-      const finalVotes = flatMap(votingDataObj => votingDataObj.finalVotes)(votes);
-      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, legacyFlag }, []);
+      const { key, votes = {}, isRP } = bucket;
+      const targetAttr = isRP ? 'rp' : 'dataAccess';
+      const finalVotes = flatMap((voteObj) => {
+        return !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []}
+      )(votes);
+      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, isRP }, []);
     })(row);
   };
 
