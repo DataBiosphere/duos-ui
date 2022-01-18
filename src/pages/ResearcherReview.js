@@ -2,7 +2,6 @@ import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { User } from "../libs/ajax";
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
 import { isEmpty } from 'lodash';
@@ -91,11 +90,6 @@ class ResearcherReview extends Component {
     ).catch(() => {
       this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
     });
-  };
-
-  confirmationHandlerOK = () => () => {
-    this.setState({ showConfirmationDialogOK: false });
-    this.props.history.goBack();
   };
 
   render() {
@@ -271,14 +265,6 @@ class ResearcherReview extends Component {
             ])
           ])
         ]),
-        ConfirmationDialog({
-          isRendered: this.state.showConfirmationDialogOK,
-          title: "Vote confirmation",
-          color: "common",
-          type: "informative",
-          showModal: true,
-          action: { label: "Ok", handler: this.confirmationHandlerOK }
-        }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
       ])
     );
   }
