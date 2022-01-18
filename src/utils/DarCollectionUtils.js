@@ -15,7 +15,7 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
   } catch(error) {
     throw new Error('Failed to generate data use translations');
   }
-
+  //using restriction names, generate label for bucket
   dataUseProcessedRestrictions.forEach((restrictions, index) => {
     const dataUseLabel = flow([
       filter((restriction) => !isEmpty(restriction)),
@@ -23,6 +23,8 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
       join(', ')
     ])(restrictions);
 
+    //check if label already exists in map. If so, add current element to said collection
+    //otherwise generate new bucket for map and add element afterwards
     const dataset = datasets[index];
     const { dataSetId } = dataset;
     if(isEmpty(buckets[dataUseLabel])) {
