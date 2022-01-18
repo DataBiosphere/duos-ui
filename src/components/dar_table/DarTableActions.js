@@ -29,22 +29,18 @@ export default function DarTableActions(props) {
     chair: {
       showVote: true,
       showCancelIcon: true,
-      showResearcher: false
     },
     member: {
       showVote: true,
       showCancelIcon: false,
-      showResearcher: false,
     },
     manageAccess: {
       showVote: false,
       showCancelIcon: false,
-      showResearcher: true
     },
     signingOfficial: {
       showVote: false,
       showCancelIcon: false,
-      showResearcher: false
     }
   };
 
