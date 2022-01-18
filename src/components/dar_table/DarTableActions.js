@@ -1,5 +1,5 @@
 import { isEmpty, filter, isNil, find } from 'lodash/fp';
-import { h, div, span, a } from 'react-hyperscript-helpers';
+import { h, div } from 'react-hyperscript-helpers';
 import { Storage } from '../../libs/storage';
 import DarTableVoteButton from './DarTableVoteButton';
 import DarTableOpenButton from './DarTableOpenButton';
@@ -14,7 +14,7 @@ export const consoleTypes = {
 
 export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
-  const { election, dar, votes, researcher = {}, dac = {} } = electionInfo;
+  const { election, dar, votes, dac = {} } = electionInfo;
   const currentUser = Storage.getCurrentUser();
   const currentUserId = currentUser.dacUserId;
   const currentUserRoles = currentUser.roles;
@@ -22,8 +22,8 @@ export default function DarTableActions(props) {
   const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isNil(chairVote);
   //template type is used to initialize general visibility options for buttons
   //extraOptions is an object that contains boolean values for more granular control. Will be applied after template
-  //EXAMPLE: You want to use the chair setup but would like to see researcher buttons.
-  //extraOptions.showResearcher = true will activate that feature
+  //EXAMPLE: You want to use the member setup but would like to see vote buttons.
+  //extraOptions.showVote = true will activate that feature
   //Both are intended to control button visibility for non-guaranteed features (ex: Vote)
   const templates = {
     chair: {
@@ -54,9 +54,6 @@ export default function DarTableActions(props) {
     return !isNil(election) && election.status === 'Open';
   };
 
-  const goToResearcherReview = (history, id) => {
-    history.push(`researcher_review/${id}`);
-  };
 
   const template = (election, dar, votes, history, index, visibilityOptions, baseStyle, currentUserId) => {
     const darReferenceId = dar.referenceId;
