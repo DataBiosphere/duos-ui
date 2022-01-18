@@ -61,49 +61,6 @@ export default function DarTableActions(props) {
   const goToResearcherReview = (history, id) => {
     history.push(`researcher_review/${id}`);
   };
-  //NOTE: template is pretty much lifted from the old ManageAccess page
-  //only difference is it's being generated in function form
-  const createResearcherButtons = (dar, showResearcher, history, researcher = {}) => {
-    const referenceId = dar.referenceId;
-    return div({
-      key: `researcher-buttons-${referenceId}`,
-      style: {margin: "0 15px 8px"},
-      className: "bonafide-icon" ,
-      isRendered: showResearcher
-    }, [
-      //data-tip allows ReactTooltip to render a tooltip on the specified element
-      a({
-        id: dar.referenceId + "_flagBonafide",
-        key: dar.referenceId + "_flagBonafide",
-        name: "flag_bonafide",
-        onClick: () => goToResearcherReview(history,dar.userId)
-      }, [
-        span({
-          className: "glyphicon glyphicon-thumbs-up dataset-color",
-          key: `tip-bonafide-${referenceId}`,
-          isRendered: !isEmpty(researcher) && researcher.status === 'approved',
-          "data-tip": "Bonafide researcher"
-        }),
-        span({
-          key: `tip-non-bonafide-${referenceId}`,
-          className: "glyphicon glyphicon-thumbs-down cancel-color",
-          isRendered: !isEmpty(researcher) && researcher.status === 'rejected',
-          "data-tip": "Non-Bonafide researcher"
-        }),
-        span({
-          key: `tip-pending-review-${referenceId}`,
-          className: "glyphicon glyphicon-hand-right hover-color",
-          isRendered: !isEmpty(researcher) && researcher.status === 'pending',
-          "data-tip": "Researcher review pending"
-        }),
-        span({
-          key: `dismiss-${referenceId}`,
-          className: "glyphicon glyphicon-hand-right dismiss-color",
-          isRendered: !isEmpty(researcher) && researcher.status === null
-        }),
-      ])
-    ]);
-  };
 
   const template = (election, dar, votes, history, index, visibilityOptions, baseStyle, currentUserId) => {
     const darReferenceId = dar.referenceId;
@@ -145,7 +102,6 @@ export default function DarTableActions(props) {
           disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS,
           addBaseStyle: addStyle
         }),
-        createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
       ])
     ]);
   };
