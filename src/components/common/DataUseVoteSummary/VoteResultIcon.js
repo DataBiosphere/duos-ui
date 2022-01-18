@@ -86,7 +86,13 @@ export default function VoteResultIcon({ result, propKey }) {
           className: `vote-result-mixed-icon-${propKey}`,
           style: { fontSize: iconSize, margin, flex: 1 },
         }),
-        div({ className: `vote-result-mixed-text-${propKey}`, style: modifiedTextStyle }, [
+        div({
+          className: `vote-result-mixed-text-${propKey}`,
+          style: modifiedTextStyle,
+          'data-tip':
+            'Mixed outcome stems from varying election results within this Data Use categorization.',
+          'data-for': 'tip_mixed_result'
+        }, [
           'Mixed',
         ]),
       ],
@@ -94,25 +100,7 @@ export default function VoteResultIcon({ result, propKey }) {
         backgroundColor: yellow[500],
         color: 'white',
       },
-    },
-    legacy: {
-      output: [
-        div(
-          {
-            className: `vote-result-legacy-text-${propKey}`,
-            style: Object.assign({}, modifiedTextStyle, {
-              color: 'black',
-              justifyContent: 'center',
-            }),
-            'data-tip':
-              'RP Vote cannot be determined from legacy DARs in this collection',
-            'data-for': 'tip_legacy_result',
-          },
-          ['N/A (Legacy)']
-        ),
-      ],
-      colorStyle: {},
-    },
+    }
   };
   const { output, colorStyle } = templates[result];
   return div(

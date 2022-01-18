@@ -102,20 +102,12 @@ export const processDataUseBuckets = async(buckets) => {
   //Process custom RP Vote bucket for VoteSummary
   const rpVotes = flow([
     flatMap((bucket) => bucket.votes),
-    map((votes) => votes.rp)
+    map((votes) => ({rp:votes.rp}))
   ])(processedBuckets);
-  const finalRPVotes = flatMap((votes) => votes.finalVotes)(rpVotes);
-  const chairRPVotes = flatMap((votes) => votes.chairpersonVotes)(rpVotes);
-  const memberRPVotes = flatMap((votes) => votes.memberVotes)(rpVotes);
+
   const rpVoteData = {
     key: 'RP Vote',
-    votes: [{
-      rp: {
-        finalVotes: finalRPVotes,
-        chairpersonVotes: chairRPVotes,
-        memberVotes: memberRPVotes
-      }
-    }],
+    votes: rpVotes,
     isRP: true,
   };
   processedBuckets.unshift(rpVoteData);

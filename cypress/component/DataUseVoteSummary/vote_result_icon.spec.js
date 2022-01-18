@@ -35,10 +35,4 @@ describe('VoteResultIcon - Tests', function () {
       'Mixed'
     );
   });
-  it('Shows a Legacy Result if the result is "legacy"', function () {
-    mount(<VoteResultIcon result="legacy" propKey={propKeyString} />);
-    cy.get(`.vote-result-box-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-legacy-text-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-legacy-text-${propKeyString}`).contains('N/A (Legacy)');
-  });
 });

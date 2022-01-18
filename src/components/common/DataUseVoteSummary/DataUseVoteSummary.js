@@ -9,7 +9,6 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
     ReactTooltip.rebuild();
   });
-
   const rowElementMaxCount = 11;
   const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
   //first element -> left corners rounded, no right border
@@ -46,7 +45,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
       const finalVotes = flatMap((voteObj) =>
         !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
       )(votes);
-      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, isRP }, []);
+      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle }, []);
     })(row);
   };
 
@@ -61,7 +60,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   }, [
     rowTemplate(chunkedBuckets),
     h(ReactTooltip, {
-      id: 'tip_legacy_result',
+      id: 'tip_mixed_result',
       place: 'left',
       effect: 'solid',
       multiline: true,

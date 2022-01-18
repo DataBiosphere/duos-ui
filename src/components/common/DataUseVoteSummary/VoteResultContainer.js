@@ -7,7 +7,7 @@ const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
 
-const determineUnanimousVoteResult = ({votes = [], isRP = false}) => {
+const determineUnanimousVoteResult = ({votes = []}) => {
   const voteCount = votes.length;
   if (isEmpty(votes) || voteCount < 1) {
     return 'underReview';
@@ -26,7 +26,7 @@ const determineUnanimousVoteResult = ({votes = [], isRP = false}) => {
   } else if (voteTally.false === voteCount) {
     return false;
   } else if (voteTally.true + voteTally.false === voteCount) {
-    return isRP ? 'legacy' : 'mixed';
+    return 'mixed';
   } else {
     return 'underReview';
   }
@@ -36,7 +36,6 @@ export default function VoteResultContainer({
   finalVotes = [],
   label,
   additionalLabelStyle = {},
-  isRP = false,
 }) {
   const baseContainerStyle = {
     display: 'flex',
@@ -45,13 +44,8 @@ export default function VoteResultContainer({
     width: '10%',
   };
   const hyphenatedKey = convertLabelToKey(label);
-  //QUESTION: How will RP votes work from here on out
-  //Currently there is an RP election for each DAR (so by extension one for each dataset)
-  //Therefore there are technically X amount of RP elections, all of which are decided independenly for each other
-  //With the multi-dataset vote feature, will there only be one RP election across the election?
-  //Or will it be the same as before except now we just update all of the RP elections at once on vote submission?
 
-  const result = determineUnanimousVoteResult({votes: finalVotes, isRP});
+  const result = determineUnanimousVoteResult({votes: finalVotes});
   return div(
     {
       style: baseContainerStyle,
