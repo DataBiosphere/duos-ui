@@ -1,4 +1,3 @@
-import { map } from 'lodash';
 import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
 import { searchOntology } from './ontologyService';
 import { Notifications } from './utils';
