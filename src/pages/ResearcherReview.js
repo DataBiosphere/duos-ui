@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
@@ -101,32 +100,15 @@ class ResearcherReview extends Component {
 
   render() {
 
-    const { formData, rationale, voteStatus, user, institution } = this.state;
+    const { formData, user, institution } = this.state;
 
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review" }),
           hr({ className: "section-separator" })
         ]),
 
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-          div({ className: "jumbotron box-vote" }, [
-
-            SubmitVoteBox({
-              id: "researcherReview",
-              color: "common",
-              title: "Your Vote",
-              isDisabled: false,
-              voteStatus: voteStatus,
-              rationale: rationale,
-              showAlert: false,
-              alertMessage: "something!",
-              action: { label: "Vote", handler: this.submitVote },
-              key: this.state.voteId
-            })
-          ])
-        ]),
 
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
@@ -297,7 +279,6 @@ class ResearcherReview extends Component {
           showModal: true,
           action: { label: "Ok", handler: this.confirmationHandlerOK }
         }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
-
       ])
     );
   }
