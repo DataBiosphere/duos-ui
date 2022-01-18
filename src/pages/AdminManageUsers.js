@@ -9,11 +9,9 @@ import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from "../images/icon_manage_users.png";
 import {USER_ROLES} from "../libs/utils";
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash/fp';
 
 class AdminManageUsers extends Component {
-
-  // limit = 5;
 
   constructor(props) {
     super(props);
@@ -124,7 +122,7 @@ class AdminManageUsers extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
