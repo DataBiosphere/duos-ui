@@ -75,22 +75,6 @@ class ResearcherReview extends Component {
     });
   }
 
-  submitVote = (voteStatus, rationale) => {
-    let status = "pending";
-    if (voteStatus === true || voteStatus === "true") {
-      status = "approved";
-    } else if (voteStatus === "false") {
-      status = "rejected";
-    }
-    let userStatus = { status: status, rationale: rationale, roleId: 5 };
-    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
-      () => {
-        this.setState({ showConfirmationDialogOK: true });
-      }
-    ).catch(() => {
-      this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-    });
-  };
 
   render() {
 
