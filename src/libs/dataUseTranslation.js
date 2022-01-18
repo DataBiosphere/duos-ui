@@ -185,8 +185,10 @@ export const processRestrictionStatements = async (key, dataUse, ontologyMap = {
         resp = value.map((ont) => ont.label);
       } else {
         try {
+          //map async ontology requests to map
+          //this way you can avoid making repeated requests
           const ontologyPromises = value.map((ontologyId) => {
-            if(isEmpty(ontologyMap[ontologyId])) {
+            if (isEmpty(ontologyMap[ontologyId])) {
               ontologyMap[ontologyId] = getOntologyName(ontologyId);
             }
             return ontologyMap[ontologyId];
@@ -244,14 +246,10 @@ const processOtherInDataUse = (dataUse, restrictionStatements) => {
   return restrictionStatements;
 };
 
-//NOTE: check to see if this function still works, made some changes that may not have been needed
-//Other option is to update the current processRestrictionStatements to just handle arrays from the get go
-//Would have to update old function calls, but would make the function more flexible
 const translateDataUseRestrictions = async (dataUse) => {
   if(!dataUse) {return [];}
   let restrictionStatements = [];
   const targetKeys = Object.keys(consentTranslations);
-  //NOTE: changed the below function return (added await), need to test to see if it had adverse effects
   restrictionStatements = targetKeys.map(async(key) =>
     await processRestrictionStatements(key, dataUse));
   restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
@@ -260,8 +258,6 @@ const translateDataUseRestrictions = async (dataUse) => {
   return restrictionStatements;
 };
 
-//should design this to ensure as many parallel requests as possible
-//old logic was made for a single dataUse, it won't be optimized for multiples
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
   const targetKeys = Object.keys(consentTranslations);
   const ontologyMap = {};

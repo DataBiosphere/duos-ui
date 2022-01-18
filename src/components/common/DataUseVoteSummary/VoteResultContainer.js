@@ -2,7 +2,6 @@ import VoteResultIcon from './VoteResultIcon';
 import VoteResultLabel from './VoteResultLabel';
 import { isEmpty } from 'lodash/fp';
 import { h, div } from 'react-hyperscript-helpers';
-import { find } from 'lodash';
 
 const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
@@ -53,11 +52,6 @@ export default function VoteResultContainer({
   //Or will it be the same as before except now we just update all of the RP elections at once on vote submission?
 
   const result = determineUnanimousVoteResult({votes: finalVotes, isRP});
-
-  // const result =
-  //   legacyFlag && finalVotes.length > 1
-  //     ? 'legacy'
-  //     : determineUnanimousVoteResult({finalVotes});
   return div(
     {
       style: baseContainerStyle,

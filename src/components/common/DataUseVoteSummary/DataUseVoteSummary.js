@@ -5,10 +5,6 @@ import VoteResultContainer from './VoteResultContainer';
 import ReactTooltip from 'react-tooltip';
 import { isEmpty } from 'lodash';
 
-//NOTE: mockups seem to use Montserrat (or a font very similar to it)
-//We used to use it until UX advised us not to (around a year ago?)
-//Is the font good now? Would be nice to have an font standard going forward for code and mockups
-
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
     ReactTooltip.rebuild();
@@ -47,8 +43,8 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
       const { key, votes = {}, isRP } = bucket;
       const targetAttr = isRP ? 'rp' : 'dataAccess';
-      const finalVotes = flatMap((voteObj) => {
-        return !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []}
+      const finalVotes = flatMap((voteObj) =>
+        !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
       )(votes);
       return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle, isRP }, []);
     })(row);
@@ -59,8 +55,9 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   );
 
   return div({
+    className: 'vote-summary-header-component',
     isRendered: !isLoading,
-    style: {margin: '1% 0'}, className: 'vote-summary-header-component'
+    style: {margin: '1% 0'},
   }, [
     rowTemplate(chunkedBuckets),
     h(ReactTooltip, {
