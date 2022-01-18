@@ -11,12 +11,7 @@ class ResearcherReview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showConfirmationDialogOK: false,
-      alertMessage: "Your vote has been successfully logged!",
       value: '',
-      rationale: '',
-      enableVoteButton: false,
-      voteStatus: '',
       user: {},
       institution: {},
       formData: {
@@ -68,7 +63,6 @@ class ResearcherReview extends Component {
         prev.institution = user.institution;
       }
       prev.formData = researcherProps;
-      prev.rationale = user.rationale;
       prev.voteStatus = status;
       prev.voteId = this.props.match.params.dacUserId;
       return prev;
