@@ -1,9 +1,7 @@
 import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User } from "../libs/ajax";
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
 import { isEmpty } from 'lodash';
@@ -13,12 +11,7 @@ class ResearcherReview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showConfirmationDialogOK: false,
-      alertMessage: "Your vote has been successfully logged!",
       value: '',
-      rationale: '',
-      enableVoteButton: false,
-      voteStatus: '',
       user: {},
       institution: {},
       formData: {
@@ -70,63 +63,24 @@ class ResearcherReview extends Component {
         prev.institution = user.institution;
       }
       prev.formData = researcherProps;
-      prev.rationale = user.rationale;
       prev.voteStatus = status;
       prev.voteId = this.props.match.params.dacUserId;
       return prev;
     });
   }
 
-  submitVote = (voteStatus, rationale) => {
-    let status = "pending";
-    if (voteStatus === true || voteStatus === "true") {
-      status = "approved";
-    } else if (voteStatus === "false") {
-      status = "rejected";
-    }
-    let userStatus = { status: status, rationale: rationale, roleId: 5 };
-    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
-      () => {
-        this.setState({ showConfirmationDialogOK: true });
-      }
-    ).catch(() => {
-      this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-    });
-  };
-
-  confirmationHandlerOK = () => () => {
-    this.setState({ showConfirmationDialogOK: false });
-    this.props.history.goBack();
-  };
 
   render() {
 
-    const { formData, rationale, voteStatus, user, institution } = this.state;
+    const { formData, user, institution } = this.state;
 
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review" }),
           hr({ className: "section-separator" })
         ]),
 
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-          div({ className: "jumbotron box-vote" }, [
-
-            SubmitVoteBox({
-              id: "researcherReview",
-              color: "common",
-              title: "Your Vote",
-              isDisabled: false,
-              voteStatus: voteStatus,
-              rationale: rationale,
-              showAlert: false,
-              alertMessage: "something!",
-              action: { label: "Vote", handler: this.submitVote },
-              key: this.state.voteId
-            })
-          ])
-        ]),
 
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
@@ -289,15 +243,6 @@ class ResearcherReview extends Component {
             ])
           ])
         ]),
-        ConfirmationDialog({
-          isRendered: this.state.showConfirmationDialogOK,
-          title: "Vote confirmation",
-          color: "common",
-          type: "informative",
-          showModal: true,
-          action: { label: "Ok", handler: this.confirmationHandlerOK }
-        }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
-
       ])
     );
   }
