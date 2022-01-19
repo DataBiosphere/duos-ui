@@ -280,7 +280,7 @@ class ResearcherConsole extends Component {
                         isRendered: !opened && canceled,
                         id: darInfo.dar.data.darCode + "_btnRevise",
                         name: "btn_revise",
-                        className: "cell-button hover-color",
+                        className: "cell-button common-color",
                         onClick: this.reviseDar,
                         value: darInfo.dar.data.darCollectionId
                       }, ['Revise'])
@@ -388,7 +388,7 @@ class ResearcherConsole extends Component {
 
         ConfirmationDialog({
           title: 'Revise saved Request?',
-          color: 'review',
+          color: 'common',
           isRendered: this.state.showDialogReviseDAR,
           showModal: this.state.showDialogReviseDAR,
           action: { label: "Yes", handler: this.dialogHandlerReviseDAR }

@@ -108,8 +108,6 @@ const ResubmitCollectionButton = (props) => {
   return h(SimpleButton, {
     keyProp: `resubmit-collection-${collection.id}`,
     label: 'Revise',
-    //todo: should we filter out any statuses that could be resubmitted? is this the correct place for such logic?
-    //disabled: includes(determineCollectionStatus(collection))(['Under Election']),
     baseColor: Theme.palette.secondary,
     additionalStyle: {
       width: '30%',
@@ -122,48 +120,37 @@ const ResubmitCollectionButton = (props) => {
 
 const actionsCellData = ({collection, showConfirmationModal}) => {
   const { darCollectionId } = collection;
-  const cancelButtonTemplate = h(CancelCollectionButton, {
-    collection,
-    showConfirmationModal
-  });
-  const resubmitButtonTemplate = h(ResubmitCollectionButton, {
-    collection,
-    showConfirmationModal
-  });
-  if(isCollectionCanceled(collection) === true)
-  {
-    return {
-      isComponent: true,
-      id: darCollectionId,
-      label: 'resubmit-button',
-      data: div(
-        {
-          style: {
-            display: 'flex',
-            justifyContent: 'left'
-          },
-          key: `resubmit-collection-cell-${darCollectionId}`
+  const cancel = {
+    isComponent: true,
+    id: darCollectionId,
+    label: 'cancel-button',
+    data: div(
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'left'
         },
-        [resubmitButtonTemplate]
-      )
-    };
-  } else {
-    return {
-      isComponent: true,
-      id: darCollectionId,
-      label: 'cancel-button',
-      data: div(
-        {
-          style: {
-            display: 'flex',
-            justifyContent: 'left'
-          },
-          key: `cancel-collection-cell-${darCollectionId}`
+        key: `cancel-collection-cell-${darCollectionId}`
+      },
+      [h(CancelCollectionButton, {collection, showConfirmationModal})]
+    )};
+  const revise = {
+    isComponent: true,
+    id: darCollectionId,
+    label: 'resubmit-button',
+    data: div(
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'left'
         },
-        [cancelButtonTemplate]
-      )
-    };
-  }
+        key: `resubmit-collection-cell-${darCollectionId}`
+      },
+      [h(ResubmitCollectionButton, {collection, showConfirmationModal})]
+    )
+  };
+
+  return isCollectionCanceled(collection) ? revise : cancel;
 };
 
 
