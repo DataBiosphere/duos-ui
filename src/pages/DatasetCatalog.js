@@ -331,7 +331,7 @@ export default function DatasetCatalog(props) {
               description: "Search and select datasets then click 'Apply for Access' to request access"
             }),
           ]),
-          div({ className: 'right', isRendered: (currentUser.isAdmin || currentUser.isChairPerson) }, [
+          div({ className: 'right'}, [
             div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
               h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' })
             ]),
