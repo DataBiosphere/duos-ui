@@ -12,6 +12,26 @@ import { find, isEmpty, flow } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 
+const tabStyleOverride = {
+  baseStyle: {
+    fontFamily: 'Arial',
+    fontSize: '1.2rem',
+    width: '12%',
+    border: '0px !important'
+  },
+  tabSelected: {
+    backgroundColor: 'white',
+    color: 'rgb(113, 154, 164)',
+    border: '0px !important'
+  },
+  tabUnselected: {
+    backgroundColor: 'rgb(113, 154, 164)',
+    color: 'white',
+    border: '0px !important'
+  },
+  tabHover: { all: 'inherit' }
+};
+
 export default function DarCollectionReview(props) {
   const tabs = {
     applicationInformation: 'Application Information',
@@ -76,26 +96,30 @@ export default function DarCollectionReview(props) {
     }
   }, [subcomponentLoading, isLoading]);
 
-  return (
-    div({style: Styles.PAGE}, [
-      div({}, [
-        h(ReviewHeader, {
-          darCode: collection.darCode || '- -',
-          projectTitle: darInfo.projectTitle || '- -',
-          downloadLink: h(ApplicationDownloadLink, {
-            darInfo,
-            researcherProfile,
-            datasets: collection.datasets || []
-          }),
-          isLoading,
-          redirectLink: h(RedirectLink, {user: currentUser, history: props.history})
+  return div({ style: Styles.PAGE }, [
+    div({}, [
+      h(ReviewHeader, {
+        darCode: collection.darCode || '- -',
+        projectTitle: darInfo.projectTitle || '- -',
+        downloadLink: h(ApplicationDownloadLink, {
+          darInfo,
+          researcherProfile,
+          datasets: collection.datasets || [],
         }),
-        h(DataUseVoteSummary, {dataUseBuckets, isLoading}),
+        isLoading,
+        redirectLink: h(RedirectLink, {
+          user: currentUser,
+          history: props.history,
+        }),
+      }),
+      h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
+      div({ className: 'review-page-body' }, [
         h(TabControl, {
           labels: [tabs.applicationInformation, tabs.researchProposal],
           selectedTab,
           setSelectedTab,
-          isLoading
+          isLoading,
+          styleOverride: tabStyleOverride
         }),
         h(ApplicationInformation, {
           isRendered: selectedTab === tabs.applicationInformation,
@@ -108,9 +132,9 @@ export default function DarCollectionReview(props) {
           country: darInfo.country,
           nonTechSummary: darInfo.nonTechRus,
           department: darInfo.department,
-          isLoading: subcomponentLoading
-        })
-      ])
-    ])
-  );
+          isLoading: subcomponentLoading,
+        }),
+      ]),
+    ]),
+  ]);
 }

@@ -1,7 +1,7 @@
 import { div, h } from 'react-hyperscript-helpers';
 import SelectableText from './SelectableText';
 
-const tabTemplates = (labels, selectedTab, setSelectedTab, isLoading) => {
+const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOverride}) => {
   return labels.map((label) =>
     !isLoading ?
       h(SelectableText, {
@@ -10,7 +10,8 @@ const tabTemplates = (labels, selectedTab, setSelectedTab, isLoading) => {
         fontSize: '1.8rem',
         componentType: label,
         setSelected: setSelectedTab,
-        selectedType: selectedTab
+        selectedType: selectedTab,
+        styleOverride
       }) :
       div({
         className: 'text-placeholder',
@@ -25,13 +26,17 @@ const tabTemplates = (labels, selectedTab, setSelectedTab, isLoading) => {
 };
 
 export default function TabControl(props) {
-  const {labels, selectedTab, setSelectedTab, isLoading = false} = props;
+  //style override will need to include three styles
+  //  1) Style on select
+  //  2) Style for unselected
+  //  3) Style for hover (if you don't want to change styles on hover just simply inherit )
+  const { labels, selectedTab, setSelectedTab, isLoading = false, styleOverride } = props;
   return (
     div({
       style: {display: 'flex', backgroundColor: 'white', border: '0px'},
       className: 'tab-list',
     }, [
-      tabTemplates(labels, selectedTab, setSelectedTab, isLoading)
+      tabTemplates({labels, selectedTab, setSelectedTab, isLoading, styleOverride})
     ])
   );
 }
