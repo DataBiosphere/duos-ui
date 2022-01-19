@@ -136,4 +136,4 @@ The Requestor agrees to indemnify and hold harmless Broad and each Data Provider
 
 22. ***Entire Agreement***. This Agreement and the DARs constitute the entire agreement of the parties with respect to the subject matter hereof and thereof and supersedes all prior oral or written agreements, arrangements or understandings between them relating to such subject matter; provided that neither this Agreement nor any DAR will supersede or replace any agreements between the parties in effect at the time of execution of this Agreement that provide access to particular Data through DUOS. 
 
-Rev. 2020-04-14 
+Rev. 2020-04-14
