@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import { cloneDeep, isObject, includes, isNil, isEmpty } from 'lodash/fp';
-import { h, div, label } from 'react-hyperscript-helpers';
-import { Styles } from '../../libs/theme';
+import React, {useEffect, useState} from 'react';
+import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
+import {div, h, label} from 'react-hyperscript-helpers';
+import {Styles, Theme} from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
-import { SearchSelect } from '../SearchSelect';
+import {SearchSelect} from '../SearchSelect';
 import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
-import { Theme } from '../../libs/theme';
+import LcaMarkdown from '../../assets/LCA.md';
+import ReactMd from 'react-md-file';
+import DOMPurify from 'dompurify';
 
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
@@ -79,6 +81,8 @@ const FormFieldRow = (props) => {
   return div({display: 'flex'}, [template]);
 };
 
+const lcaContent = <ReactMd fileName={DOMPurify.sanitize(LcaMarkdown, null)}/>;
+
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
   const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
@@ -143,6 +147,8 @@ export default function LibraryCardFormModal(props) {
         div({ style: Styles.MODAL.TITLE_HEADER }, [
           modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
         ]),
+        // LCA
+        div({style: { maxWidth: 700, maxHeight: 200, overflow: 'auto' }}, [lcaContent]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         //users dropdown
         h(FormFieldRow, {
