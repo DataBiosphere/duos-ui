@@ -37,13 +37,6 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
             label({ className: 'control-label no-padding' }, ['Status: ']),
             span({ id: 'lbl_researcherStatus', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.status])
           ]),
-          div({ isRendered: darInfo.hasAdminComment, className: 'row no-margin' }, [
-            span({}, [
-              label({ className: 'control-label no-padding' }, ['Comments: ']),
-              span({ id: 'lbl_adminComment', className: 'response-label', style: { 'paddingLeft': '5px' } },
-                [darInfo.adminComment])
-            ])
-          ]),
           div({ isRendered: !ld.isEmpty(libraryCards), className: 'row no-margin' }, [
             label({ className: 'control-label no-padding' }, ['Library Cards: ']),
             LibraryCards({

@@ -238,8 +238,6 @@ export const DAR = {
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
     darInfo.restrictions = rawDar.restrictions;
-    darInfo.hasAdminComment = researcher.rationale != null;
-    darInfo.adminComment = researcher.rationale;
     const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
     const researchType = DataUseTranslation.generateResearchTypes(darInfo);
     darInfo.hasPurposeStatements = purposeStatements && purposeStatements.length > 0;
