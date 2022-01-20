@@ -18,7 +18,7 @@ const defaultSelectedStyle = {
   color: '#837f7f',
 };
 
-const defaultHoverStyle = {fontWeight: 600, cursor: 'default'};
+const defaultHoverStyle = {fontWeight: 600, cursor: 'pointer'};
 
 export default function SelectableText({label, setSelected, selectedType, styleOverride = {}}) {
 
@@ -27,15 +27,14 @@ export default function SelectableText({label, setSelected, selectedType, styleO
 
 
   const utilizedUnselectedStyle = useMemo(() => {
-    return Object.assign({}, defaultUnselectedStyle, tabUnselected, baseStyle);
+    return Object.assign({}, tabUnselected || defaultUnselectedStyle, baseStyle);
   }, [tabUnselected, baseStyle]);
   const utilizedHoverStyle = useMemo(() => {
-    return Object.assign({}, style, defaultHoverStyle, tabHover, baseStyle);
+    return Object.assign({}, style, tabHover || defaultHoverStyle, baseStyle);
   }, [tabHover, baseStyle, style]);
   const utilizedSelectedStyle = useMemo(() => {
-    return Object.assign({}, defaultSelectedStyle, tabSelected, baseStyle);
+    return Object.assign({}, tabSelected || defaultSelectedStyle, baseStyle);
   }, [tabSelected, baseStyle]);
-
 
   useEffect(() => {
     setStyle(

@@ -15,21 +15,21 @@ import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataU
 const tabStyleOverride = {
   baseStyle: {
     fontFamily: 'Arial',
-    fontSize: '1.2rem',
-    width: '12%',
-    border: '0px !important'
+    fontSize: '2.2rem',
+    width: '16%',
+    fontWeight: 600,
+    border: '0px'
   },
   tabSelected: {
     backgroundColor: 'white',
     color: 'rgb(113, 154, 164)',
-    border: '0px !important'
+    border: '0px black solid !important'
   },
   tabUnselected: {
     backgroundColor: 'rgb(113, 154, 164)',
     color: 'white',
     border: '0px !important'
-  },
-  tabHover: { all: 'inherit' }
+  }
 };
 
 export default function DarCollectionReview(props) {
