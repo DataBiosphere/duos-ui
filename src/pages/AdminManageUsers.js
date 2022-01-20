@@ -200,7 +200,7 @@ class AdminManageUsers extends Component {
 
                     a({
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
-                      isRendered: true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                      className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
                       div({ className: 'enabled' }, ["Review"]),
                     ]),
