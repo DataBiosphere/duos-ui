@@ -89,6 +89,7 @@ const processVotesForBucket = (darElections) => {
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
 export const processDataUseBuckets = async(buckets) => {
   buckets = await buckets;
+  //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
     const { dars } = bucket;
     const elections = flow([

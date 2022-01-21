@@ -10,7 +10,10 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     ReactTooltip.rebuild();
   });
   const rowElementMaxCount = 11;
+  //chunking elements subdivides the entire bucket list to rows of max rowElementMaxCount size
+  //Needed to provide predictable design, can't have a flexbox row of n elements with infinitesimal width
   const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
+
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
@@ -35,8 +38,10 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
 
   const elementTemplate = (row = []) => {
     const elementLength = row.length;
-
-    //uncap map to keep track of index for styling
+    //lodash-fp caps its normal lodash definitions to one argument (value)
+    //if you need to access key/index, you'll need to convert the function to it's uncapped form
+    //Below the code used convert to access index, which is needed to determine if an element is positioned at the ends of a row
+    //Above fact is needed to determine proper styling of element.
     return map.convert({cap: false})((bucket, index) => {
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
@@ -49,6 +54,8 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     })(row);
   };
 
+  //convert is once again used here to provide unique key identifier for the row
+  //necessary for React when rendering elements provided by an array
   const rowTemplate = map.convert({cap:false})((row, index) =>
     div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
   );

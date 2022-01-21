@@ -3,6 +3,7 @@ import VoteResultLabel from './VoteResultLabel';
 import { isEmpty } from 'lodash/fp';
 import { h, div } from 'react-hyperscript-helpers';
 
+//helper function to generate keys for rendered elements
 const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
@@ -20,6 +21,7 @@ const determineUnanimousVoteResult = ({votes = []}) => {
   votes.forEach((vote = {}) => {
     voteTally[vote.vote] += 1;
   });
+
 
   if (voteTally.true === voteCount) {
     return true;
