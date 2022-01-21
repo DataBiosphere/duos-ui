@@ -3,6 +3,7 @@ import VoteResultLabel from './VoteResultLabel';
 import { isEmpty } from 'lodash/fp';
 import { h, div } from 'react-hyperscript-helpers';
 
+//helper function to generate keys for rendered elements
 const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };

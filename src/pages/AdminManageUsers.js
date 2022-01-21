@@ -9,11 +9,9 @@ import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from "../images/icon_manage_users.png";
 import {USER_ROLES} from "../libs/utils";
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash/fp';
 
 class AdminManageUsers extends Component {
-
-  // limit = 5;
 
   constructor(props) {
     super(props);
@@ -124,7 +122,7 @@ class AdminManageUsers extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -202,28 +200,9 @@ class AdminManageUsers extends Component {
 
                     a({
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
-                      isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                      className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
-                      div({
-                        className:
-                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
-                                : user.researcher === false || !user.completed ? 'disabled' : ''
-                      }, ["Review"]),
-                    ]),
-
-                    a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                      div({ className: "disabled" }, ["Review"]),
-                    ]),
-
-                    div({ id: user.dacUserId + "_flagBonafide", name: "flag_bonafide", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
-
-                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
-
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && user.completed, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
-
-                      span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
+                      div({ className: 'enabled' }, ["Review"]),
                     ]),
 
                   ]),
@@ -241,27 +220,7 @@ class AdminManageUsers extends Component {
             onPageChange: this.handlePageChange,
             changeHandler: this.handleSizeChange,
           }),
-          h(ReactTooltip, {
-            id: "tip_bonafide",
-            place: 'right',
-            effect: 'solid',
-            multiline: true,
-            className: 'tooltip-wrapper',
-          }),
-          h(ReactTooltip, {
-            id: "tip_nonBonafide",
-            place: 'right',
-            effect: 'solid',
-            multiline: true,
-            className: 'tooltip-wrapper'
-          }),
-          h(ReactTooltip, {
-            id: "tip_pendingReview",
-            place: 'right',
-            effect: 'solid',
-            multiline: true,
-            className: 'tooltip-wrapper'
-          }),
+
         ])
       ])
     );

@@ -185,6 +185,11 @@ export const Collections = {
     const res = await axios.put(url, {}, Config.authOpts());
     return res.data;
   },
+  resubmitCollection: async(id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/resubmit`;
+    const res = await axios.put(url, {}, Config.authOpts());
+    return res.data;
+  },
   getCollectionById: async(id) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}`;
     const res = await axios.get(url, Config.authOpts());
@@ -233,8 +238,6 @@ export const DAR = {
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
     darInfo.restrictions = rawDar.restrictions;
-    darInfo.hasAdminComment = researcher.rationale != null;
-    darInfo.adminComment = researcher.rationale;
     const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
     const researchType = DataUseTranslation.generateResearchTypes(darInfo);
     darInfo.hasPurposeStatements = purposeStatements && purposeStatements.length > 0;
@@ -905,12 +908,6 @@ export const User = {
   registerUser: async () => {
     const url = `${await Config.getApiUrl()}/api/user`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return res.json();
-  },
-
-  registerStatus: async (userRoleStatus, userId) => {
-    const url = `${await Config.getApiUrl()}/api/dacuser/status/${userId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
   },
 
