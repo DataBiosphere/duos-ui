@@ -1,4 +1,11 @@
 {
   "baseUrl": "http://localhost:3000/",
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "component": {
+    "testFiles": "**/*.spec.js",
+    "src": [
+      "./src/components/common", 
+      "./cypress/component/"
+    ]
+  }
 }

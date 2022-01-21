@@ -50,21 +50,12 @@ class ResearcherReview extends Component {
     const user = await User.getById(this.props.match.params.dacUserId);
     let researcherProps = getPropertyValuesFromUser(user);
 
-    let status = null;
-    if (user.status === 'approved') {
-      status = true;
-    } else if (user.status === 'rejected') {
-      status = false;
-    }
-
     this.setState(prev => {
       prev.user = user;
       if(!isEmpty(user.institution)) {
         prev.institution = user.institution;
       }
       prev.formData = researcherProps;
-      prev.voteStatus = status;
-      prev.voteId = this.props.match.params.dacUserId;
       return prev;
     });
   }
