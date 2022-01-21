@@ -105,9 +105,8 @@ export default function DarCollectionReview(props) {
     }
   }, [subcomponentLoading, isLoading]);
 
-  //PAGE -> {width: 90%, margin: 0 auto}
-  return div({className: 'collection-review-page'}, [ //TODO: remove this styling from this container
-    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto' }}, [ //TODO: make this the parent container of reviewheader and votesummary, apply the page margin style here
+  return div({className: 'collection-review-page'}, [
+    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto' }}, [
       h(ReviewHeader, {
         darCode: collection.darCode || '- -',
         projectTitle: darInfo.projectTitle || '- -',
@@ -145,7 +144,6 @@ export default function DarCollectionReview(props) {
         department: darInfo.department,
         isLoading: subcomponentLoading,
       }),
-    ]),
-    // ]),
+    ])
   ]);
 }

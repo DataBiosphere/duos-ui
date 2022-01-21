@@ -16,7 +16,7 @@ const styles = {
   value: {
     fontWeight: 400,
     flex: 2,
-    fontSize: '2.4rem',
+    fontSize: '2rem',
   },
   row: {
     width: '80%',
@@ -26,7 +26,7 @@ const styles = {
   },
   title: {
     fontWeight: 800,
-    fontSize: '3.2rem',
+    fontSize: '2.7rem',
   },
   subheader: {
     fontWeight: 800,
