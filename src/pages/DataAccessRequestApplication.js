@@ -931,7 +931,7 @@ class DataAccessRequestApplication extends Component {
       className: 'dialog-description'
     }, ['Are you sure you want to send this Data Access Request Application?'])]);
     return (
-      div({ className: 'container' }, [
+      div({ className: 'container', style: {paddingBottom: '2%'} }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
             Notification({notificationData: this.state.notificationData}),

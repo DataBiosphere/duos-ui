@@ -56,7 +56,8 @@ export default function SelectableText({label, setSelected, selectedType, styleO
       style,
       onMouseEnter: addHoverEffect,
       onMouseLeave: removeHoverEffect,
-      onClick: () => setSelected(label)
+      onClick: () => setSelected(label),
+      className: `tab-selection-${label}`
     }, [label])
   );
 }

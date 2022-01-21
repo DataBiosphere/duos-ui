@@ -26,7 +26,7 @@ const styles = {
   },
   title: {
     fontWeight: 800,
-    fontSize: '3rem',
+    fontSize: '3.2rem',
   },
   subheader: {
     fontWeight: 800,
@@ -65,11 +65,11 @@ export default function ApplicationInformation(props) {
     pi = '- -',
     piEmail = '- -',
     nonTechSummary,
-    isLoading = false
+    isLoading = false,
   } = props;
 
   return (
-    div({className: 'application-information-page', style: {marginTop: '4rem'}}, [
+    div({className: 'application-information-page', style: {padding: '3%', backgroundColor: 'white'}}, [
       !isLoading ? div({className: 'application-information-title', style: styles.title}, ['Application Information'])
         : div({className: 'text-placeholder', key: 'application-information-title-placeholder', style: {height: '5rem', width: '20%', marginBottom: '2rem'}}),
       div({className: 'application-information-container', style: { margin: '2.5rem 0'}}, [
@@ -85,7 +85,8 @@ export default function ApplicationInformation(props) {
         ]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Principal Investgator', 'principal-investigator', pi, isLoading),
-          generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading)
+          generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading),
+          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
         ])
       ]),
       !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.title}, ["Non-Technical Summary"])
