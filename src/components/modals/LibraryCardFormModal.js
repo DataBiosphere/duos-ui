@@ -140,11 +140,11 @@ export default function LibraryCardFormModal(props) {
       div({ style: Styles.MODAL.CONTENT }, [
         h(CloseIconComponent, { closeFn: closeModal }),
         div({ style: Styles.MODAL.TITLE_HEADER }, [
-          modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
+          modalType === 'add' ? 'Add Library Card' : 'Update Library Card',
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
-        // LCA
-        isEmpty(lcaContent) ? div() : div({style: { maxWidth: 700, maxHeight: 200, overflow: 'auto' }}, [lcaContent]),
+        // Library Card Agreement Text
+        isEmpty(lcaContent) ? div() : div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]),
         //users dropdown
         h(FormFieldRow, {
           card,

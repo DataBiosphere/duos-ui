@@ -424,13 +424,17 @@ export default function SigningOfficialTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      styleOverride: {minWidth: 700, minHeight: 300},
-      message: div({}, [div({style: { maxWidth: 700, maxHeight: 200, overflow: 'auto' }}, [lcaContent]), confirmationModalMsg]),
+      styleOverride: {minWidth: '700px', minHeight: '450px'},
+      message:
+        confirmType === 'delete'
+          ? div({}, [confirmationModalMsg])
+          // Library Card Agreement Text
+          : div({}, [div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]), confirmationModalMsg]),
       header: `${selectedCard.userName || selectedCard.userEmail} - ${
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,
       onConfirm: () =>
-        confirmType == 'delete'
+        confirmType === 'delete'
           ? deactivateLibraryCard(selectedCard, researchers)
           : issueLibraryCard(selectedCard, researchers)
     }),
