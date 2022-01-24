@@ -67,12 +67,6 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
 
     return (
       div({ className: "container " }, [
-        div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review" }),
-          hr({ className: "section-separator" })
-        ]),
-
-
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row form-group margin-top-20" }, [
