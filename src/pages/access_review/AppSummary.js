@@ -54,7 +54,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
 
   generateRestrictions = async(dataUse) => {
-    const translatedRestrictions = (await DataUseTranslation.translateDataUseRestrictions(dataUse)).filter((value) => !isEmpty(value));
+    const translatedRestrictions = await DataUseTranslation.translateDataUseRestrictions(dataUse);
     this.setState(prev => {
       prev.translatedRestrictions = translatedRestrictions;
       return prev;

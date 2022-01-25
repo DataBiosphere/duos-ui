@@ -233,19 +233,25 @@ export const processDefinedLimitations = (
 };
 
 const processOtherInDataUse = (dataUse, restrictionStatements) => {
+  //Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
+  const promiseArray = [];
   if (!isNil(dataUse.other)) {
-    restrictionStatements.concat({
-      code: 'OTH',
-      description: dataUse.other,
-    });
+    promiseArray.push(
+      Promise.resolve({
+        code: 'OTH',
+        description: dataUse.other,
+      })
+    );
   }
   if (!isNil(dataUse.secondaryOther)) {
-    restrictionStatements.concat({
-      code: 'OTH2',
-      description: dataUse.secondaryOther,
-    });
+    promiseArray.push(
+      Promise.resolve({
+        code: 'OTH2',
+        description: dataUse.secondaryOther,
+      })
+    );
   }
-  return restrictionStatements;
+  return restrictionStatements.concat(promiseArray);
 };
 
 const translateDataUseRestrictions = async (dataUse) => {
@@ -256,7 +262,7 @@ const translateDataUseRestrictions = async (dataUse) => {
     await processRestrictionStatements(key, dataUse));
   restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements);
-  return Promise.all(restrictionStatements);
+  return (await Promise.all(restrictionStatements)).filter((value) => !isEmpty(value));
 };
 
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {

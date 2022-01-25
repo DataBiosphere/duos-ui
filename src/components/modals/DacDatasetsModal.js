@@ -47,7 +47,6 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
   getStructuredUseRestrictionLink = (index) => {
     if(this.state.translatedDatasetRestrictions && this.state.translatedDatasetRestrictions[index]) {
       const translatedUseRestrictions = this.state.translatedDatasetRestrictions[index]
-        .filter((value) => !isEmpty(value))
         .map((translations) => translations.description)
         .join('\n');
       if (isEmpty(translatedUseRestrictions)) {

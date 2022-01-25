@@ -51,7 +51,7 @@ export default function DataSharingLanguageTool() {
     if (other) {
       sdsl.push(otherText);
     }
-    let translatedDataUse = (await DataUseTranslation.translateDataUseRestrictions(dataUse)).filter((value) => !isEmpty(value));
+    let translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse);
     translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
         sdsl.push(" " + sentence.description)

@@ -11,7 +11,7 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
     datasets.forEach((dataset) => {
       dataUses.push(dataset.dataUse);
     });
-    dataUseProcessedRestrictions = await (await translateDataUseRestrictionsFromDataUseArray(dataUses));
+    dataUseProcessedRestrictions = await translateDataUseRestrictionsFromDataUseArray(dataUses);
   } catch(error) {
     throw new Error('Failed to generate data use translations');
   }
