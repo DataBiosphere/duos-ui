@@ -39,10 +39,10 @@ describe('SigningOfficialTable - Tests', function() {
       ]}
       unregisteredResearchers={[]}
     />);
-    // const button = cy.contains('Add New Researcher');
-    // expect(button).to.exist;
-    // button.click();
-    // const lcaHeader = cy.contains(lcaHeaderText);
-    // expect(lcaHeader).to.exist;
+    const button = cy.get('button').last();
+    expect(button).to.exist;
+    button.click();
+    const lcaHeader = cy.contains(lcaHeaderText);
+    expect(lcaHeader).to.exist;
   });
 });
