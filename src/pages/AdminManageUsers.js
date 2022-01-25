@@ -170,7 +170,6 @@ class AdminManageUsers extends Component {
             div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header common-color" }, ["Google account id"]),
             div({ className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-header common-color" }, ["User Role"]),
             div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-header common-color f-center" }, ["Edit User"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header common-color f-center" }, ["Researcher Review"]),
           ]),
 
           hr({ className: "table-head-separator" }),
@@ -194,21 +193,6 @@ class AdminManageUsers extends Component {
                     onClick: this.editUser(user)
                   }, ["Edit"]),
                 ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                  div({ className: "row no-margin" }, [
-
-
-                    a({
-                      id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
-                      className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
-                    }, [
-                      div({ className: 'enabled' }, ["Review"]),
-                    ]),
-
-                  ]),
-
-                ]),
-
               ]),
               hr({ className: "table-body-separator" })
             ]);

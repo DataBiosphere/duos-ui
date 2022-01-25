@@ -1,12 +1,11 @@
 import { Component } from 'react';
-import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
+import { div, hh, label, form, textarea } from 'react-hyperscript-helpers';
 import { User } from "../libs/ajax";
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
 import { isEmpty } from 'lodash';
 
-class ResearcherReview extends Component {
+export const ResearcherReview = hh(class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
@@ -47,7 +46,7 @@ class ResearcherReview extends Component {
 
   async findResearcherInfo() {
 
-    const user = await User.getById(this.props.match.params.dacUserId);
+    const user = await User.getById(this.props.userId);
     let researcherProps = getPropertyValuesFromUser(user);
 
     this.setState(prev => {
@@ -67,12 +66,6 @@ class ResearcherReview extends Component {
 
     return (
       div({ className: "container " }, [
-        div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review" }),
-          hr({ className: "section-separator" })
-        ]),
-
-
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row form-group margin-top-20" }, [
@@ -237,6 +230,6 @@ class ResearcherReview extends Component {
       ])
     );
   }
-}
+});
 
 export default ResearcherReview;

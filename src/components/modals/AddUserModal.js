@@ -5,6 +5,7 @@ import { User } from '../../libs/ajax';
 import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
+import { ResearcherReview } from '../../pages/ResearcherReview';
 import addUserIcon from '../../images/icon_add_user.png';
 import editUserIcon from '../../images/icon_edit_user.png';
 
@@ -173,6 +174,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   render() {
     const { displayName, email, displayNameValid, emailValid } = this.state;
     const validForm = displayNameValid && emailValid;
+    const { user } = this.props;
     return (
       BaseModal({
         id: 'addUserModal',
@@ -259,8 +261,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                 label({ className: 'regular-checkbox rp-choice-questions bold', htmlFor: 'chk_emailPreference' },
                   ['Disable Admin email notifications'])
               ])
-            ])
+            ]),
           ])
+        ]),
+        div({ isRendered: _.has(user, "dacUserId") }, [
+          ResearcherReview({userId: _.get(user, "dacUserId")})
         ]),
 
         div({ isRendered: this.state.emailValid === false && this.state.submitted === true }, [
@@ -279,9 +284,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             );
           })
         ]),
-        div({ isRendered: false }, [
-          Alert({ id: 'modal', type: 'danger', title: alert.title, description: alert.msg })
-        ])
       ])
     );
   }
