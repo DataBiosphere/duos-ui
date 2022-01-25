@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import { div, hr, hh, label, form, textarea } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
+import { div, hh, label, form, textarea } from 'react-hyperscript-helpers';
 import { User } from "../libs/ajax";
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
