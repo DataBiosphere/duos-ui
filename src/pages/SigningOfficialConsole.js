@@ -10,7 +10,7 @@ import DarTable from "../components/dar_table/DarTable";
 import lockIcon from "../images/lock-icon.png";
 import SearchBar from "../components/SearchBar";
 import {darSearchHandler, processElectionStatus, getElectionDate, updateLists as updateListsInit} from "../libs/utils";
-import {User, DAR} from "../libs/ajax";
+import {User, DAR, Collections} from "../libs/ajax";
 import {consoleTypes} from "../components/dar_table/DarTableActions";
 import { USER_ROLES } from "../libs/utils";
 import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
@@ -18,7 +18,8 @@ import { Config } from "../libs/config";
 
 const tabs = {
   custodian: 'Data Submitter',
-  researcher: 'Researchers'
+  researcher: 'Researchers',
+  collections: 'DAR Collections'
 };
 
 export default function SigningOfficialConsole(props) {
@@ -31,8 +32,9 @@ export default function SigningOfficialConsole(props) {
   const [filteredDarList, setFilteredDarList] = useState();
   const [currentDarPage, setCurrentDarPage] = useState(1);
   const [darPageSize, setDarPageSize] = useState(10);
-  const [selectedTag, setSelectedTag] = useState(tabs.researcher);
+  const [selectedTag, setSelectedTag] = useState(tabs.collections);
   const [descendantOrderDars, setDescendantOrderDars] = useState(false);
+  const [collectionList, setCollectionList] = useState([]);
 
   //states to be added and used for manage researcher component
   const [isLoading, setIsLoading] = useState(true);
@@ -48,15 +50,18 @@ export default function SigningOfficialConsole(props) {
         const soPromises = await Promise.all([
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers(),
-          DAR.getDataAccessManageV2(USER_ROLES.signingOfficial)
+          DAR.getDataAccessManageV2(USER_ROLES.signingOfficial),
+          Collections.getCollectionByRoleName(USER_ROLES.signingOfficial)
         ]);
         const researcherList = soPromises[0];
         const unregisteredResearchers = soPromises[1];
         const darList = soPromises[2];
+        const collectionList = soPromises[3];
         setUnregisteredResearchers(unregisteredResearchers);
         setResearchers(researcherList);
         setSiginingOfficial(soUser);
         setDarList(darList);
+        setCollectionList(collectionList);
         setFilteredDarList(darList);
         setEnv(envValue);
         setIsLoading(false);
@@ -103,6 +108,11 @@ export default function SigningOfficialConsole(props) {
           }),
           h(SelectableText, {
             label: tabs.researcher,
+            setSelected: setSelectedTag,
+            selectedType: selectedTag
+          }),
+          h(SelectableText, {
+            label: tabs.collections,
             setSelected: setSelectedTag,
             selectedType: selectedTag
           })
