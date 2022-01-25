@@ -180,9 +180,12 @@ export const processRestrictionStatements = async (key, dataUse, ontologyMap = {
   }
   if (!isNil(value) && value) {
     if (key === 'diseaseRestrictions') {
+      //condition for datasets that have ontology labels contained within the dataUse object
       if (!isNil(head(value)) && !isNil(value[0].label)) {
-        resp = value.map((ont) => ont.label);
+        const labels = value.map((ont) => ont.label);
+        resp = consentTranslations.diseaseRestrictions(labels);
       } else {
+        //condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
         try {
           //map async ontology requests to map
           //this way you can avoid making repeated requests
@@ -253,8 +256,7 @@ const translateDataUseRestrictions = async (dataUse) => {
     await processRestrictionStatements(key, dataUse));
   restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
   restrictionStatements = processOtherInDataUse(dataUse, restrictionStatements);
-
-  return restrictionStatements;
+  return Promise.all(restrictionStatements);
 };
 
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {

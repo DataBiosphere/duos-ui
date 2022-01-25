@@ -47,13 +47,11 @@ export default function DataSharingLanguageTool() {
       publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
       geographicalRestrictions: gs
     };
-    let translatedDataUse;
     let sdsl = [];
     if (other) {
       sdsl.push(otherText);
     }
-    await DataUseTranslation.translateDataUseRestrictions(dataUse)
-      .then((resp) => { translatedDataUse = resp; });
+    let translatedDataUse = (await DataUseTranslation.translateDataUseRestrictions(dataUse)).filter((value) => !isEmpty(value));
     translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
         sdsl.push(" " + sentence.description)
