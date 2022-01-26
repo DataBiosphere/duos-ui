@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import { chunk, map, flatMap } from 'lodash/fp';
+import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
 import VoteResultContainer from './VoteResultContainer';
 import ReactTooltip from 'react-tooltip';
-import { isEmpty } from 'lodash';
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
@@ -60,19 +59,37 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
   );
 
-  return div({
-    className: 'vote-summary-header-component',
-    isRendered: !isLoading,
-    style: {margin: '1% 0'},
-  }, [
-    rowTemplate(chunkedBuckets),
-    h(ReactTooltip, {
-      id: 'tip_mixed_result',
-      place: 'left',
-      effect: 'solid',
-      multiline: true,
-      className: 'tooltip-wrapper'
+  const loadingTemplate = div({
+    className: 'vote-summary-loading-placeholder',
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      marginBottom: '2%'
+    }
+  }, map((value) =>
+    div({
+      className: 'text-placeholder',
+      key: `vote-result-${value}-placeholder`,
+      style: {
+        height: '10rem',
+        width: '8.5%'
+      }
     })
-  ]);
+  )(range(0, rowElementMaxCount)));
 
+  return !isLoading ?
+    div({
+      className: 'vote-summary-header-component',
+      style: {margin: '1% 0'},
+    }, [
+      rowTemplate(chunkedBuckets),
+      h(ReactTooltip, {
+        id: 'tip_mixed_result',
+        place: 'left',
+        effect: 'solid',
+        multiline: true,
+        className: 'tooltip-wrapper'
+      })
+    ]) :
+    loadingTemplate;
 }

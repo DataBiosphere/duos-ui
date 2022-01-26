@@ -22,7 +22,6 @@ const determineUnanimousVoteResult = ({votes = []}) => {
     voteTally[vote.vote] += 1;
   });
 
-
   if (voteTally.true === voteCount) {
     return true;
   } else if (voteTally.false === voteCount) {

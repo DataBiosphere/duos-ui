@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Styles } from '../../libs/theme';
 import { div, h } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
@@ -12,10 +11,40 @@ import { find, isEmpty, flow } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 
+const tabContainerColor = 'rgb(115,154,164)';
+
+const tabStyleOverride = {
+  baseStyle: {
+    fontFamily: 'Arial',
+    fontSize: '2rem',
+    width: '16%',
+    fontWeight: 600,
+    border: '0px',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '0.5%',
+  },
+  tabSelected: {
+    backgroundColor: 'white',
+    color: tabContainerColor,
+    border: '0px black solid !important',
+    borderRadius: '5px 5px 0px 0px'
+  },
+  tabUnselected: {
+    backgroundColor: tabContainerColor,
+    color: 'white',
+    border: '0px !important',
+  },
+  tabContainer: {
+    backgroundColor: tabContainerColor,
+    display: 'flex',
+    border: '0px'
+  },
+};
+
 export default function DarCollectionReview(props) {
   const tabs = {
-    applicationInformation: 'Application Information',
-    researchProposal: 'Research Proposal'
+    applicationInformation: 'Application Information'
   };
 
   const collectionId = props.match.params.collectionId;
@@ -27,6 +56,7 @@ export default function DarCollectionReview(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
+  const [researcherProperties, setResearcherProperties] = useState({});
 
   useEffect(() => {
     const init = async () => {
@@ -39,10 +69,16 @@ export default function DarCollectionReview(props) {
       const {dars, datasets} = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const researcherProfile =  await User.getById(collection.createUserId);
+      const researcherProperties = {};
+      researcherProfile.researcherProperties.forEach((property) => {
+        const { propertyKey, propertyValue } = property;
+        researcherProperties[propertyKey] = propertyValue;
+      });
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
         processDataUseBuckets
       ])({ dars, datasets });
+      setResearcherProperties(researcherProperties);
       setDataUseBuckets(processedBuckets);
       setCollection(collection);
       setCurrentUser(user);
@@ -76,41 +112,45 @@ export default function DarCollectionReview(props) {
     }
   }, [subcomponentLoading, isLoading]);
 
-  return (
-    div({style: Styles.PAGE}, [
-      div({}, [
-        h(ReviewHeader, {
-          darCode: collection.darCode || '- -',
-          projectTitle: darInfo.projectTitle || '- -',
-          downloadLink: h(ApplicationDownloadLink, {
-            darInfo,
-            researcherProfile,
-            datasets: collection.datasets || []
-          }),
-          isLoading,
-          redirectLink: h(RedirectLink, {user: currentUser, history: props.history})
+  return div({className: 'collection-review-page'}, [
+    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto' }}, [
+      h(ReviewHeader, {
+        darCode: collection.darCode || '- -',
+        projectTitle: darInfo.projectTitle || '- -',
+        downloadLink: h(ApplicationDownloadLink, {
+          darInfo,
+          researcherProfile,
+          datasets: collection.datasets || [],
         }),
-        h(DataUseVoteSummary, {dataUseBuckets, isLoading}),
-        h(TabControl, {
-          labels: [tabs.applicationInformation, tabs.researchProposal],
-          selectedTab,
-          setSelectedTab,
-          isLoading
+        isLoading,
+        redirectLink: h(RedirectLink, {
+          user: currentUser,
+          history: props.history,
         }),
-        h(ApplicationInformation, {
-          isRendered: selectedTab === tabs.applicationInformation,
-          pi: darInfo.isThePi ? darInfo.researcher : darInfo.investigator,
-          institution: darInfo.institution,
-          researcher: darInfo.researcher,
-          email: darInfo.academicEmail,
-          piEmail: darInfo.piEmail,
-          city: `${darInfo.city}${!darInfo.state ? '' : ', ' + darInfo.state}`,
-          country: darInfo.country,
-          nonTechSummary: darInfo.nonTechRus,
-          department: darInfo.department,
-          isLoading: subcomponentLoading
-        })
-      ])
+      }),
+      h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
+    ]),
+    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 10%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
+      h(TabControl, {
+        labels: Object.values(tabs),
+        selectedTab,
+        setSelectedTab,
+        isLoading,
+        styleOverride: tabStyleOverride
+      }),
+      h(ApplicationInformation, {
+        isRendered: selectedTab === tabs.applicationInformation,
+        pi: researcherProperties.isThePI ? researcherProperties.profileName : researcherProperties.piName,
+        institution: researcherProperties.institution,
+        researcher: researcherProperties.profileName,
+        email: researcherProperties.academicEmail,
+        piEmail: researcherProperties.isThePI ? researcherProperties.academicEmail : researcherProperties.piEmail,
+        city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
+        country: researcherProperties.country,
+        nonTechSummary: darInfo.nonTechRus,
+        department: researcherProperties.department,
+        isLoading: subcomponentLoading,
+      }),
     ])
-  );
+  ]);
 }

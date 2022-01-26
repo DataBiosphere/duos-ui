@@ -5,14 +5,12 @@ function DuosFooter() {
 
   const footerStyle = {
     position: 'relative',
-    marginTop: '-100px',
     clear: 'both',
     backgroundColor: '#000000',
     minHeight: '64px'
   };
 
   const mainFooterStyle = {
-    margin: '36px 0 0 0',
     display: 'block',
     width: '100%',
     padding: '0 20px'
