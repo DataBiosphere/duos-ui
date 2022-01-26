@@ -120,7 +120,13 @@ export default function SigningOfficialConsole(props) {
         ]),
         h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
         h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian && env !== 'production', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
-        h(DarCollectionTable, {isRendered: selectedTag === tabs.collections, collections: collectionList, isLoading }, [])
+        h(DarCollectionTable, {
+          isRendered: selectedTag === tabs.collections,
+          collections: collectionList,
+          isLoading,
+          cancelCollection: Collections.cancelCollection, //replace with function that makes API call with DarCollectionID
+          resubmitCollection: Collections.resubmitCollection //replace
+        }, [])
       ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
