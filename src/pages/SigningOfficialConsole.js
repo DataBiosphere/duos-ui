@@ -124,8 +124,8 @@ export default function SigningOfficialConsole(props) {
           isRendered: selectedTag === tabs.collections,
           collections: collectionList,
           isLoading,
-          cancelCollection: Collections.cancelCollection, //replace with function that makes API call with DarCollectionID
-          resubmitCollection: Collections.resubmitCollection //replace
+          cancelCollection: null,
+          resubmitCollection: null
         }, [])
       ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [

@@ -154,7 +154,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
 };
 
 
-const processCollectionRowData = (collections, showConfirmationModal) => {
+const processCollectionRowData = (collections, showConfirmationModal, cancelCollection, resubmitCollection) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate } = collection;
@@ -162,12 +162,15 @@ const processCollectionRowData = (collections, showConfirmationModal) => {
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
+      const actionsButton = (isNil(cancelCollection) || isNil(resubmitCollection))
+        ? div()
+        : actionsCellData({ collection, showConfirmationModal });
       return [
         darCodeCellData({ darCollectionId, darCode }),
         projectTitleCellData({ darCollectionId, projectTitle }),
         submissionDateCellData({ darCollectionId, createDate }),
         statusCellData({ darCollectionId, status }),
-        actionsCellData({ collection, showConfirmationModal }),
+        actionsButton,
       ];
     });
   }
@@ -269,7 +272,7 @@ export default function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal),
+      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, cancelCollection, resubmitCollection),
       "columnHeaders": columnHeaderData(),
       styles,
       tableSize: tableSize,
