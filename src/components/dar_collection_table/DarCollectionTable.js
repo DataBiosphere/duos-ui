@@ -32,9 +32,10 @@ const styles = {
   cellWidth: {
     darCode: '12.5%',
     projectTitle: '25%',
-    submissionDate: '12.5%',
+    submissionDate: '10%',
+    institution: '5%',
     datasetCount: '10',
-    status: '12.5%',
+    status: '10%',
     actions: '17.5%'
   }
 };
@@ -43,14 +44,15 @@ const columnHeaderFormat = {
   darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode}},
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
+  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution}},
   datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount}},
   status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
-  actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
+  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions}}
 };
 
 const columnHeaderData = () => {
-  const {darCode, name, submissionDate, datasetCount, status, actions} = columnHeaderFormat;
-  return [darCode, name, submissionDate, datasetCount, status, actions];
+  const {darCode, name, submissionDate, institution, datasetCount, status, actions} = columnHeaderFormat;
+  return [darCode, name, submissionDate, institution, datasetCount, status, actions];
 };
 
 const projectTitleCellData = ({projectTitle = '- -', darCollectionId, style = {}, label = 'project-title'}) => {
@@ -74,6 +76,15 @@ const darCodeCellData = ({darCode = '- -', darCollectionId, style = {}, label = 
 const submissionDateCellData = ({createDate, darCollectionId, style = {}, label = 'submission-date'}) => {
   return {
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
+    id: darCollectionId,
+    style,
+    label
+  };
+};
+
+const institutionCellData = ({darCollectionId, institution, style = {}, label = 'institution'}) => {
+  return {
+    data: '--',
     id: darCollectionId,
     style,
     label
@@ -176,10 +187,12 @@ const processCollectionRowData = (collections, showConfirmationModal, cancelColl
       const actionsButton = (isNil(cancelCollection) || isNil(resubmitCollection))
         ? div()
         : actionsCellData({ collection, showConfirmationModal });
+      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return [
         darCodeCellData({ darCollectionId, darCode }),
         projectTitleCellData({ darCollectionId, projectTitle }),
         submissionDateCellData({ darCollectionId, createDate }),
+        institutionCellData({darCollectionId}),
         datasetCountCellData({ darCollectionId, datasets }),
         statusCellData({ darCollectionId, status }),
         actionsButton,
