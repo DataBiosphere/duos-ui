@@ -30,7 +30,7 @@ const styles = {
     justifyContent: 'space-between',
     color: '#7B7B7B',
     fontFamily: 'Montserrat',
-    fontSize: '12px',
+    fontSize: '1.2rem',
     fontWeight: 'bold',
     letterSpacing: '0.2px',
     textTransform: 'uppercase'
@@ -44,18 +44,38 @@ const styles = {
     datasetCount: '10%',
     status: '10%',
     actions: '10%'
-  }
+  },
+  color: {
+    darCode: '#000000',
+    projectTitle: '#000000',
+    submissionDate: '#000000',
+    pi: '#000000',
+    institution: '#354052',
+    datasetCount: '#354052',
+    status: '#000000',
+    actions: '#000000',
+  },
+  fontSize: {
+    darCode: '1.6rem',
+    projectTitle: '1.4rem',
+    submissionDate: '1.4rem',
+    pi: '1.4rem',
+    institution: '1.4rem',
+    datasetCount: '2.0rem',
+    status: '1.6rem',
+    actions: '1.6rem'
+  },
 };
 
 const columnHeaderFormat = {
-  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode}},
-  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
-  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
-  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi}},
-  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution}},
-  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount}},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
-  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions}}
+  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }},
+  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }},
+  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }},
+  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }},
+  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }},
+  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }},
+  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }},
+  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }}
 };
 
 const columnHeaderData = () => {
@@ -63,65 +83,86 @@ const columnHeaderData = () => {
   return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
 };
 
-const projectTitleCellData = ({projectTitle = '- -', darCollectionId, style = {}, label = 'project-title'}) => {
+const projectTitleCellData = ({projectTitle = '- -', darCollectionId, label = 'project-title'}) => {
   return {
     data: projectTitle,
     id: darCollectionId,
-    style,
+    style : {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.projectTitle
+    },
     label
   };
 };
 
-const darCodeCellData = ({darCode = '- -', darCollectionId, style = {}, label = 'dar-code'}) => {
+const darCodeCellData = ({darCode = '- -', darCollectionId, label = 'dar-code'}) => {
   return {
     data: darCode,
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.darCode
+    },
     label
   };
 };
 
-const submissionDateCellData = ({createDate, darCollectionId, style = {}, label = 'submission-date'}) => {
+const submissionDateCellData = ({createDate, darCollectionId, label = 'submission-date'}) => {
   return {
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.submissionDate
+    },
     label
   };
 };
 
-const piCellData =  ({darCollectionId, pi, style = {}, label = 'pi'}) => {
+const piCellData =  ({darCollectionId, pi, label = 'pi'}) => {
   return {
     data: '--',
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.pi
+    },
     label
   };
 };
 
-const institutionCellData = ({darCollectionId, institution, style = {}, label = 'institution'}) => {
+const institutionCellData = ({darCollectionId, institution, label = 'institution'}) => {
   return {
     data: '--',
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.institution,
+      fontSize: styles.fontSize.institution
+    },
     label
   };
 };
 
-const datasetCountCellData = ({darCollectionId, datasets, style = {}, label = 'datasets'}) => {
+const datasetCountCellData = ({darCollectionId, datasets, label = 'datasets'}) => {
   return {
     data: datasets.length,
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.institution,
+      fontSize: styles.fontSize.datasetCount
+    },
     label
   };
 };
 
-const statusCellData = ({status = '- -', darCollectionId, style = {}, label = 'status'}) => {
+const statusCellData = ({status = '- -', darCollectionId, label = 'status'}) => {
   return {
     data: status,
     id: darCollectionId,
-    style,
+    style: {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.status
+    },
     label
   };
 };
@@ -162,6 +203,10 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
   const cancel = {
     isComponent: true,
     id: darCollectionId,
+    style: {
+      color: styles.color.darCode,
+      fontSize: styles.fontSize.actions
+    },
     label: 'cancel-button',
     data: div(
       {
