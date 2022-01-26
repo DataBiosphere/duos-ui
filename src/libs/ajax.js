@@ -195,7 +195,7 @@ export const Collections = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
-  getCollectionByRoleName: async(roleName) => {
+  getCollectionsByRoleName: async(roleName) => {
     const url = `${await Config.getApiUrl()}/api/collections/role/${roleName}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;

@@ -52,7 +52,7 @@ export default function SigningOfficialConsole(props) {
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers(),
           DAR.getDataAccessManageV2(USER_ROLES.signingOfficial),
-          Collections.getCollectionByRoleName(USER_ROLES.signingOfficial)
+          Collections.getCollectionsByRoleName(USER_ROLES.signingOfficial)
         ]);
         const researcherList = soPromises[0];
         const unregisteredResearchers = soPromises[1];
