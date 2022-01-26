@@ -56,6 +56,7 @@ export default function DarCollectionReview(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
+  const [researcherProperties, setResearcherProperties] = useState({});
 
   useEffect(() => {
     const init = async () => {
@@ -68,10 +69,16 @@ export default function DarCollectionReview(props) {
       const {dars, datasets} = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const researcherProfile =  await User.getById(collection.createUserId);
+      const researcherProperties = {};
+      researcherProfile.researcherProperties.forEach((property) => {
+        const { propertyKey, propertyValue } = property;
+        researcherProperties[propertyKey] = propertyValue;
+      });
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
         processDataUseBuckets
       ])({ dars, datasets });
+      setResearcherProperties(researcherProperties);
       setDataUseBuckets(processedBuckets);
       setCollection(collection);
       setCurrentUser(user);
@@ -133,15 +140,15 @@ export default function DarCollectionReview(props) {
       }),
       h(ApplicationInformation, {
         isRendered: selectedTab === tabs.applicationInformation,
-        pi: darInfo.isThePi ? darInfo.researcher : darInfo.investigator,
-        institution: darInfo.institution,
-        researcher: darInfo.researcher,
-        email: darInfo.academicEmail,
-        piEmail: darInfo.piEmail,
-        city: `${darInfo.city}${!darInfo.state ? '' : ', ' + darInfo.state}`,
-        country: darInfo.country,
+        pi: researcherProperties.isThePI ? researcherProperties.profileName : researcherProperties.piName,
+        institution: researcherProperties.institution,
+        researcher: researcherProperties.profileName,
+        email: researcherProperties.academicEmail,
+        piEmail: researcherProperties.isThePI ? researcherProperties.academicEmail : researcherProperties.piEmail,
+        city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
+        country: researcherProperties.country,
         nonTechSummary: darInfo.nonTechRus,
-        department: darInfo.department,
+        department: researcherProperties.department,
         isLoading: subcomponentLoading,
       }),
     ])
