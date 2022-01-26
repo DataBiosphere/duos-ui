@@ -39,11 +39,11 @@ const styles = {
     darCode: '15%',
     projectTitle: '25%',
     submissionDate: '10%',
-    pi: '10%',
+    pi: '5%',
     institution: '10%',
-    datasetCount: '10%',
-    status: '10%',
-    actions: '10%'
+    datasetCount: '7.5%',
+    status: '7.5%',
+    actions: '7.5%'
   },
   color: {
     darCode: '#000000',
@@ -88,7 +88,7 @@ const projectTitleCellData = ({projectTitle = '- -', darCollectionId, label = 'p
     data: projectTitle,
     id: darCollectionId,
     style : {
-      color: styles.color.darCode,
+      color: styles.color.projectTitle,
       fontSize: styles.fontSize.projectTitle
     },
     label
@@ -101,7 +101,8 @@ const darCodeCellData = ({darCode = '- -', darCollectionId, label = 'dar-code'})
     id: darCollectionId,
     style: {
       color: styles.color.darCode,
-      fontSize: styles.fontSize.darCode
+      fontSize: styles.fontSize.darCode,
+      fontWeight: '500'
     },
     label
   };
@@ -112,7 +113,7 @@ const submissionDateCellData = ({createDate, darCollectionId, label = 'submissio
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
     id: darCollectionId,
     style: {
-      color: styles.color.darCode,
+      color: styles.color.submissionDate,
       fontSize: styles.fontSize.submissionDate
     },
     label
@@ -124,7 +125,7 @@ const piCellData =  ({darCollectionId, pi, label = 'pi'}) => {
     data: '--',
     id: darCollectionId,
     style: {
-      color: styles.color.darCode,
+      color: styles.color.pi,
       fontSize: styles.fontSize.pi
     },
     label
@@ -148,7 +149,7 @@ const datasetCountCellData = ({darCollectionId, datasets, label = 'datasets'}) =
     data: datasets.length,
     id: darCollectionId,
     style: {
-      color: styles.color.institution,
+      color: styles.color.datasetCount,
       fontSize: styles.fontSize.datasetCount
     },
     label
@@ -160,7 +161,7 @@ const statusCellData = ({status = '- -', darCollectionId, label = 'status'}) => 
     data: status,
     id: darCollectionId,
     style: {
-      color: styles.color.darCode,
+      color: styles.color.status,
       fontSize: styles.fontSize.status
     },
     label
@@ -204,7 +205,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
     isComponent: true,
     id: darCollectionId,
     style: {
-      color: styles.color.darCode,
+      color: styles.color.actions,
       fontSize: styles.fontSize.actions
     },
     label: 'cancel-button',
