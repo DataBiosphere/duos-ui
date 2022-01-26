@@ -15,6 +15,7 @@ import {consoleTypes} from "../components/dar_table/DarTableActions";
 import { USER_ROLES } from "../libs/utils";
 import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
 import { Config } from "../libs/config";
+import DarCollectionTable from "../components/dar_collection_table/DarCollectionTable";
 
 const tabs = {
   custodian: 'Data Submitter',
@@ -118,7 +119,8 @@ export default function SigningOfficialConsole(props) {
           })
         ]),
         h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
-        h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian && env !== 'production', researchers, signingOfficial, unregisteredResearchers, isLoading}, [])
+        h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian && env !== 'production', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(DarCollectionTable, {isRendered: selectedTag === tabs.collections, collections: collectionList, isLoading }, [])
       ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
