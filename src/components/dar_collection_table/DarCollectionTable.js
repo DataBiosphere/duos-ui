@@ -49,8 +49,8 @@ const columnHeaderFormat = {
 };
 
 const columnHeaderData = () => {
-  const {darCode, name, submissionDate, status, actions} = columnHeaderFormat;
-  return [darCode, name, submissionDate, status, actions];
+  const {darCode, name, submissionDate, datasetCount, status, actions} = columnHeaderFormat;
+  return [darCode, name, submissionDate, datasetCount, status, actions];
 };
 
 const projectTitleCellData = ({projectTitle = '- -', darCollectionId, style = {}, label = 'project-title'}) => {
