@@ -30,11 +30,12 @@ const styles = {
     justifyContent: 'space-between'
   }),
   cellWidth: {
-    darCode: '15%',
+    darCode: '12.5%',
     projectTitle: '25%',
-    submissionDate: '15%',
-    status: '15%',
-    actions: '20%'
+    submissionDate: '12.5%',
+    datasetCount: '10',
+    status: '12.5%',
+    actions: '17.5%'
   }
 };
 
@@ -42,6 +43,7 @@ const columnHeaderFormat = {
   darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode}},
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
+  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount}},
   status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
   actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
 };
@@ -72,6 +74,15 @@ const darCodeCellData = ({darCode = '- -', darCollectionId, style = {}, label = 
 const submissionDateCellData = ({createDate, darCollectionId, style = {}, label = 'submission-date'}) => {
   return {
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
+    id: darCollectionId,
+    style,
+    label
+  };
+};
+
+const datasetCountCellData = ({darCollectionId, datasets, style = {}, label = 'datasets'}) => {
+  return {
+    data: datasets.length,
     id: darCollectionId,
     style,
     label
@@ -157,7 +168,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
 const processCollectionRowData = (collections, showConfirmationModal, cancelCollection, resubmitCollection) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
-      const { darCollectionId, darCode, createDate } = collection;
+      const { darCollectionId, darCode, createDate, datasets } = collection;
       /*I want the election-dependent status to be explicit so that the
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
@@ -169,6 +180,7 @@ const processCollectionRowData = (collections, showConfirmationModal, cancelColl
         darCodeCellData({ darCollectionId, darCode }),
         projectTitleCellData({ darCollectionId, projectTitle }),
         submissionDateCellData({ darCollectionId, createDate }),
+        datasetCountCellData({ darCollectionId, datasets }),
         statusCellData({ darCollectionId, status }),
         actionsButton,
       ];
