@@ -30,13 +30,14 @@ const styles = {
     justifyContent: 'space-between'
   }),
   cellWidth: {
-    darCode: '12.5%',
+    darCode: '15%',
     projectTitle: '25%',
     submissionDate: '10%',
-    institution: '5%',
+    pi: '10',
+    institution: '10%',
     datasetCount: '10',
     status: '10%',
-    actions: '17.5%'
+    actions: '10%'
   }
 };
 
@@ -44,6 +45,7 @@ const columnHeaderFormat = {
   darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode}},
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
+  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi}},
   institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution}},
   datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount}},
   status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
@@ -51,8 +53,8 @@ const columnHeaderFormat = {
 };
 
 const columnHeaderData = () => {
-  const {darCode, name, submissionDate, institution, datasetCount, status, actions} = columnHeaderFormat;
-  return [darCode, name, submissionDate, institution, datasetCount, status, actions];
+  const {darCode, name, submissionDate, pi, institution, datasetCount, status, actions} = columnHeaderFormat;
+  return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
 };
 
 const projectTitleCellData = ({projectTitle = '- -', darCollectionId, style = {}, label = 'project-title'}) => {
@@ -76,6 +78,15 @@ const darCodeCellData = ({darCode = '- -', darCollectionId, style = {}, label = 
 const submissionDateCellData = ({createDate, darCollectionId, style = {}, label = 'submission-date'}) => {
   return {
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
+    id: darCollectionId,
+    style,
+    label
+  };
+};
+
+const piCellData =  ({darCollectionId, pi, style = {}, label = 'pi'}) => {
+  return {
+    data: '--',
     id: darCollectionId,
     style,
     label
@@ -192,7 +203,8 @@ const processCollectionRowData = (collections, showConfirmationModal, cancelColl
         darCodeCellData({ darCollectionId, darCode }),
         projectTitleCellData({ darCollectionId, projectTitle }),
         submissionDateCellData({ darCollectionId, createDate }),
-        institutionCellData({darCollectionId}),
+        piCellData({ darCollectionId }),
+        institutionCellData({ darCollectionId }),
         datasetCountCellData({ darCollectionId, datasets }),
         statusCellData({ darCollectionId, status }),
         actionsButton,
