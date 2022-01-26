@@ -405,6 +405,7 @@ export default function LibraryCardTable(props) {
       users,
       card: currentCard,
       modalType,
+      lcaContent: ''
     }),
     h(ConfirmationModal, {
       showConfirmation,

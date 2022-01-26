@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from "react";
+import React, { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
 import { h, div, img } from "react-hyperscript-helpers";
 import userIcon from '../../images/icon_manage_users.png';
@@ -17,6 +17,9 @@ import {
 import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
 import { LibraryCard } from "../../libs/ajax";
+import ReactMarkdown from 'react-markdown';
+import DOMPurify from 'dompurify';
+import LcaMarkdown from '../../assets/LCA.md';
 
 //Styles specific to this table
 const styles = {
@@ -173,6 +176,12 @@ const displayNameCell = (displayName, id) => {
 //   };
 // };
 
+const generateLcaText = (text) => {
+  return <ReactMarkdown components={{a: (props) => <a target={'_blank'} {...props}/>}}>
+    {DOMPurify.sanitize(text, null)}
+  </ReactMarkdown>;
+};
+
 export default function SigningOfficialTable(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
   const [tableSize, setTableSize] = useState(10);
@@ -188,6 +197,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState('delete');
   const { signingOfficial, unregisteredResearchers, isLoading } = props;
+  const [lcaText, setLcaText] = useState("");
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = tableSearchHandler(
@@ -204,6 +214,19 @@ export default function SigningOfficialTable(props) {
     setConfirmationTitle(title);
     setConfirmType(confirmType);
   };
+
+  // Hook to initialize the LCA markdown content
+  // Should not update once loaded.
+  useEffect(() => {
+    const init = async () => {
+      fetch(LcaMarkdown)
+        .then((res) => res.text())
+        .then((md) => {
+          setLcaText(md);
+        });
+    };
+    init();
+  }, []);
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -346,6 +369,8 @@ export default function SigningOfficialTable(props) {
     }
   };
 
+  const lcaContent = generateLcaText(lcaText);
+
   return h(Fragment, {}, [
     div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'} }, [
       div({ style: Styles.LEFT_HEADER_SECTION }, [
@@ -393,17 +418,23 @@ export default function SigningOfficialTable(props) {
       users: unregisteredResearchers,
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
+      lcaContent: lcaContent
     }),
     h(ConfirmationModal, {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      message: confirmationModalMsg,
+      styleOverride: {minWidth: '700px', minHeight: '450px'},
+      message:
+        confirmType === 'delete'
+          ? div({}, [confirmationModalMsg])
+          // Library Card Agreement Text
+          : div({}, [div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]), confirmationModalMsg]),
       header: `${selectedCard.userName || selectedCard.userEmail} - ${
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,
       onConfirm: () =>
-        confirmType == 'delete'
+        confirmType === 'delete'
           ? deactivateLibraryCard(selectedCard, researchers)
           : issueLibraryCard(selectedCard, researchers)
     }),
