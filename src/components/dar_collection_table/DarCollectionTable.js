@@ -18,7 +18,7 @@ const getProjectTitle = ((collection) => {
 
 const styles = {
   baseStyle: {
-    fontFamily: 'Arial',
+    fontFamily: 'Montserrat',
     fontSize: '1.6rem',
     fontWeight: 400,
     display: 'flex',
@@ -27,15 +27,21 @@ const styles = {
     alignItems: 'center'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    color: '#7B7B7B',
+    fontFamily: 'Montserrat',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    letterSpacing: '0.2px',
+    textTransform: 'uppercase'
   }),
   cellWidth: {
     darCode: '15%',
     projectTitle: '25%',
     submissionDate: '10%',
-    pi: '10',
+    pi: '10%',
     institution: '10%',
-    datasetCount: '10',
+    datasetCount: '10%',
     status: '10%',
     actions: '10%'
   }
