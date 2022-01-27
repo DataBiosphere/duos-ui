@@ -72,7 +72,11 @@ export default function ApplicationInformation(props) {
     div({className: 'application-information-page', style: {padding: '3%', backgroundColor: 'white'}}, [
       !isLoading ? div({className: 'application-information-title', style: styles.title}, ['Application Information'])
         : div({className: 'text-placeholder', key: 'application-information-title-placeholder', style: {height: '5rem', width: '20%', marginBottom: '2rem'}}),
-      div({className: 'application-information-container', style: { margin: '2.5rem 0'}}, [
+      //todo: At a Glance table
+      div({className: 'at-a-glance-subheader', style: styles.title}, ["At a glance"]),
+      //todo: Applicant Information
+      div({className: 'applicant-information-container', style: { margin: '2.5rem 0'}}, [
+        div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
@@ -96,7 +100,22 @@ export default function ApplicationInformation(props) {
           : div({className: 'text-placeholder', key: 'non-technical-summary-placeholder', style: { height: '18rem',
             width: '100%',
           }})
-      ])
+      ]),
+       //todo: Application Details
+      div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
+        div({className: 'applicant-details-subheader', style: styles.title}, ["Application Details"]),
+        div({className: 'information-row', style: styles.row}, [
+          generateLabelSpanContents('External Collaborators', 'external-collaborators', researcher, isLoading),
+          generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', researcher, isLoading)
+        ]),
+        div({className: 'information-row', style: styles.row}, [
+
+        ]),
+        div({className: 'information-row', style: styles.row}, [
+
+          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
+        ])
+      ]),
     ])
   );
 }
