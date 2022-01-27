@@ -134,7 +134,7 @@ const piCellData =  ({darCollectionId, pi, label = 'pi'}) => {
 
 const institutionCellData = ({darCollectionId, institution, label = 'institution'}) => {
   return {
-    data: '--',
+    data: institution,
     id: darCollectionId,
     style: {
       color: styles.color.institution,
@@ -243,6 +243,7 @@ const processCollectionRowData = (collections, showConfirmationModal, actionsFla
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets } = collection;
+      const institution = collection.createUser.institution.name;
       /*I want the election-dependent status to be explicit so that the
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
@@ -255,7 +256,7 @@ const processCollectionRowData = (collections, showConfirmationModal, actionsFla
         projectTitleCellData({ darCollectionId, projectTitle }),
         submissionDateCellData({ darCollectionId, createDate }),
         piCellData({ darCollectionId }),
-        institutionCellData({ darCollectionId }),
+        institutionCellData({ darCollectionId, institution }),
         datasetCountCellData({ darCollectionId, datasets }),
         statusCellData({ darCollectionId, status }),
         actionsButton,
