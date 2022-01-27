@@ -133,14 +133,3 @@ export function actionsCellData({collection, showConfirmationModal}) {
 
   return isCollectionCanceled(collection) ? revise : cancel;
 }
-
-export default {
-  projectTitleCellData,
-  darCodeCellData,
-  submissionDateCellData,
-  piCellData,
-  institutionCellData,
-  datasetCountCellData,
-  statusCellData,
-  actionsCellData
-};
