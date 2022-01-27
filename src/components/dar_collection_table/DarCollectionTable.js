@@ -239,7 +239,7 @@ const actionsCellData = ({collection, showConfirmationModal}) => {
 };
 
 
-const processCollectionRowData = (collections, showConfirmationModal, cancelCollection, resubmitCollection) => {
+const processCollectionRowData = (collections, showConfirmationModal, actionsFlag) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets } = collection;
@@ -247,9 +247,8 @@ const processCollectionRowData = (collections, showConfirmationModal, cancelColl
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
-      const actionsButton = (isNil(cancelCollection) || isNil(resubmitCollection))
-        ? div()
-        : actionsCellData({ collection, showConfirmationModal });
+      const actionsButton = actionsFlag ? actionsCellData({ collection, showConfirmationModal }) : div();
+
       // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return [
         darCodeCellData({ darCollectionId, darCode }),
@@ -273,7 +272,7 @@ export default function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
-  const { collections, isLoading, cancelCollection, resubmitCollection } = props;
+  const { collections, isLoading, cancelCollection, resubmitCollection, actionsFlag } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -361,7 +360,7 @@ export default function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, cancelCollection, resubmitCollection),
+      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, actionsFlag),
       "columnHeaders": columnHeaderData(),
       styles,
       tableSize: tableSize,
