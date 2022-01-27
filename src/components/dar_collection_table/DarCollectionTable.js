@@ -7,8 +7,10 @@ import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { formatDate, recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
+import CancelCollectionButton from './DarCollectionTableCancelButton';
+import ResubmitCollectionButton from "./DarCollectionTableResubmitButton";
 
-const { determineCollectionStatus, nonCancellableCollectionStatuses, isCollectionCanceled } = darCollectionUtils;
+const { determineCollectionStatus, isCollectionCanceled } = darCollectionUtils;
 const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
@@ -168,36 +170,6 @@ const statusCellData = ({status = '- -', darCollectionId, label = 'status'}) => 
   };
 };
 
-const CancelCollectionButton = (props) => {
-  const { collection } = props;
-  return h(SimpleButton, {
-    keyProp: `cancel-collection-${collection.id}`,
-    label: 'Cancel',
-    disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () => props.showConfirmationModal(collection)
-  });
-};
-
-const ResubmitCollectionButton = (props) => {
-  const { collection } = props;
-  return h(SimpleButton, {
-    keyProp: `resubmit-collection-${collection.id}`,
-    label: 'Revise',
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () => props.showConfirmationModal(collection)
-  });
-};
 
 const actionsCellData = ({collection, showConfirmationModal}) => {
   const { darCollectionId } = collection;
