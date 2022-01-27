@@ -3,15 +3,14 @@ import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isEmpty, find } from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
-import ConfirmationModal from '../modals/ConfirmationModal';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import {darCodeCellData, projectTitleCellData, submissionDateCellData, piCellData, institutionCellData,
-  datasetCountCellData, statusCellData, actionsCellData} from './DarCollectionTableCellData';
+import cellData from './DarCollectionTableCellData';
+import CollectionConfirmationModal from "./CollectionConfirmationModal";
 
 
-const { determineCollectionStatus, isCollectionCanceled } = darCollectionUtils;
-const getProjectTitle = ((collection) => {
+const { determineCollectionStatus } = darCollectionUtils;
+export const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
     return darData.projectTitle;
@@ -95,17 +94,19 @@ const processCollectionRowData = (collections, showConfirmationModal, actionsFla
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
-      const actionsButton = actionsFlag ? actionsCellData({ collection, showConfirmationModal }) : div();
+      const actionsButton = actionsFlag
+        ? cellData.actionsCellData({ collection, showConfirmationModal })
+        : div();
 
       // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return [
-        darCodeCellData({ darCollectionId, darCode }),
-        projectTitleCellData({ darCollectionId, projectTitle }),
-        submissionDateCellData({ darCollectionId, createDate }),
-        piCellData({ darCollectionId }),
-        institutionCellData({ darCollectionId, institution }),
-        datasetCountCellData({ darCollectionId, datasets }),
-        statusCellData({ darCollectionId, status }),
+        cellData.darCodeCellData({ darCollectionId, darCode }),
+        cellData.projectTitleCellData({ darCollectionId, projectTitle }),
+        cellData.submissionDateCellData({ darCollectionId, createDate }),
+        cellData.piCellData({ darCollectionId }),
+        cellData.institutionCellData({ darCollectionId, institution }),
+        cellData.datasetCountCellData({ darCollectionId, datasets }),
+        cellData.statusCellData({ darCollectionId, status }),
         actionsButton,
       ];
     });
@@ -158,53 +159,6 @@ export default function DarCollectionTable(props) {
     [pageCount]
   );
 
-  const getModalHeader = (collection) => {
-    if(!isNil(collection)) {
-      return `${selectedCollection.darCode} - ${getProjectTitle(selectedCollection)}`;
-    }
-    return '';
-  };
-
-  const cancelOnClick = async() => {
-    await cancelCollection(selectedCollection);
-    setShowConfirmation(false);
-  };
-
-  const resubmitOnClick = async() => {
-    await resubmitCollection(selectedCollection);
-    setShowConfirmation(false);
-  };
-
-  const cancelModal = (collection) =>
-    h(ConfirmationModal, {
-      showConfirmation,
-      styleOverride: {height: '35%'},
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Cancel DAR Collection',
-      message: `Are you sure you want to cancel ${collection.darCode}?`,
-      header: getModalHeader(collection),
-      onConfirm: cancelOnClick
-    });
-
-  const resubmitModal = (collection) =>
-    h(ConfirmationModal, {
-      showConfirmation,
-      styleOverride: {height: '35%'},
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Resubmit DAR Collection',
-      message: `Are you sure you want to resubmit ${collection.darCode}?`,
-      header: getModalHeader(collection),
-      onConfirm: resubmitOnClick
-    });
-
-  const confirmationModal = (collection) => {
-    if(isCollectionCanceled(collection) === true) {
-      return resubmitModal(collection);
-    } else {
-      return cancelModal(collection);
-    }
-  };
-
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
@@ -220,6 +174,11 @@ export default function DarCollectionTable(props) {
         changeTableSize
       })
     }),
-    confirmationModal(selectedCollection)
+    CollectionConfirmationModal({
+      collection: selectedCollection,
+      showConfirmation,
+      setShowConfirmation,
+      cancelCollection,
+      resubmitCollection})
   ]);
 }
