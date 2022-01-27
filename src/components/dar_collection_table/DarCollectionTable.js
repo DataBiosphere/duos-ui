@@ -1,14 +1,14 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty, includes, find } from 'lodash/fp';
-import { Styles, Theme } from '../../libs/theme';
+import { isNil, isEmpty, find } from 'lodash/fp';
+import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
-import SimpleButton from '../SimpleButton';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import { formatDate, recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
+import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import CancelCollectionButton from './DarCollectionTableCancelButton';
-import ResubmitCollectionButton from "./DarCollectionTableResubmitButton";
+import {darCodeCellData, projectTitleCellData, submissionDateCellData, piCellData, institutionCellData,
+  datasetCountCellData, statusCellData, actionsCellData} from './DarCollectionTableCellData';
+
 
 const { determineCollectionStatus, isCollectionCanceled } = darCollectionUtils;
 const getProjectTitle = ((collection) => {
@@ -18,7 +18,7 @@ const getProjectTitle = ((collection) => {
   }
 });
 
-const styles = {
+export const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',
@@ -83,131 +83,6 @@ const columnHeaderFormat = {
 const columnHeaderData = () => {
   const {darCode, name, submissionDate, pi, institution, datasetCount, status, actions} = columnHeaderFormat;
   return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
-};
-
-const projectTitleCellData = ({projectTitle = '- -', darCollectionId, label = 'project-title'}) => {
-  return {
-    data: projectTitle,
-    id: darCollectionId,
-    style : {
-      color: styles.color.projectTitle,
-      fontSize: styles.fontSize.projectTitle
-    },
-    label
-  };
-};
-
-const darCodeCellData = ({darCode = '- -', darCollectionId, label = 'dar-code'}) => {
-  return {
-    data: darCode,
-    id: darCollectionId,
-    style: {
-      color: styles.color.darCode,
-      fontSize: styles.fontSize.darCode,
-      fontWeight: '500'
-    },
-    label
-  };
-};
-
-const submissionDateCellData = ({createDate, darCollectionId, label = 'submission-date'}) => {
-  return {
-    data: isNil(createDate) ? '- - ' : formatDate(createDate),
-    id: darCollectionId,
-    style: {
-      color: styles.color.submissionDate,
-      fontSize: styles.fontSize.submissionDate
-    },
-    label
-  };
-};
-
-const piCellData =  ({darCollectionId, pi, label = 'pi'}) => {
-  return {
-    data: '--',
-    id: darCollectionId,
-    style: {
-      color: styles.color.pi,
-      fontSize: styles.fontSize.pi
-    },
-    label
-  };
-};
-
-const institutionCellData = ({darCollectionId, institution, label = 'institution'}) => {
-  return {
-    data: institution,
-    id: darCollectionId,
-    style: {
-      color: styles.color.institution,
-      fontSize: styles.fontSize.institution
-    },
-    label
-  };
-};
-
-const datasetCountCellData = ({darCollectionId, datasets, label = 'datasets'}) => {
-  return {
-    data: datasets.length,
-    id: darCollectionId,
-    style: {
-      color: styles.color.datasetCount,
-      fontSize: styles.fontSize.datasetCount
-    },
-    label
-  };
-};
-
-const statusCellData = ({status = '- -', darCollectionId, label = 'status'}) => {
-  return {
-    data: status,
-    id: darCollectionId,
-    style: {
-      color: styles.color.status,
-      fontSize: styles.fontSize.status
-    },
-    label
-  };
-};
-
-
-const actionsCellData = ({collection, showConfirmationModal}) => {
-  const { darCollectionId } = collection;
-  const cancel = {
-    isComponent: true,
-    id: darCollectionId,
-    style: {
-      color: styles.color.actions,
-      fontSize: styles.fontSize.actions
-    },
-    label: 'cancel-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `cancel-collection-cell-${darCollectionId}`
-      },
-      [h(CancelCollectionButton, {collection, showConfirmationModal})]
-    )};
-  const revise = {
-    isComponent: true,
-    id: darCollectionId,
-    label: 'resubmit-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `resubmit-collection-cell-${darCollectionId}`
-      },
-      [h(ResubmitCollectionButton, {collection, showConfirmationModal})]
-    )
-  };
-
-  return isCollectionCanceled(collection) ? revise : cancel;
 };
 
 
