@@ -5,7 +5,7 @@
   "dependencies": {
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
-    "@react-pdf/renderer": "^2.1.0",
+    "@react-pdf/renderer": "^2.1.1",
     "axios": "^0.25.0",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
