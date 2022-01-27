@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
-import { cloneDeep, isObject, includes, isNil, isEmpty } from 'lodash/fp';
-import { h, div, label } from 'react-hyperscript-helpers';
-import { Styles } from '../../libs/theme';
+import {useEffect, useState} from 'react';
+import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
+import {div, h, label} from 'react-hyperscript-helpers';
+import {Styles, Theme} from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
-import { SearchSelect } from '../SearchSelect';
+import {SearchSelect} from '../SearchSelect';
 import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
-import { Theme } from '../../libs/theme';
 
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
@@ -81,7 +80,7 @@ const FormFieldRow = (props) => {
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
+  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType, lcaContent} = props;
 
   const [card, setCard] = useState(props.card);
 
@@ -141,9 +140,11 @@ export default function LibraryCardFormModal(props) {
       div({ style: Styles.MODAL.CONTENT }, [
         h(CloseIconComponent, { closeFn: closeModal }),
         div({ style: Styles.MODAL.TITLE_HEADER }, [
-          modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
+          modalType === 'add' ? 'Add Library Card' : 'Update Library Card',
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
+        // Library Card Agreement Text
+        isEmpty(lcaContent) ? div() : div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]),
         //users dropdown
         h(FormFieldRow, {
           card,

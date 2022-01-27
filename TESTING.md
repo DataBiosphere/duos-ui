@@ -31,3 +31,13 @@ Run Cypress headless:
 ```
     npm run cypress:run
 ```
+
+## Component Testing
+
+See https://www.cypress.io/blog/2021/04/06/introducing-the-cypress-component-test-runner/ for more detailed information
+
+This command opens a browser window with component tests visible. 
+You don't need to have a running server started, this will do that for you. 
+```
+    npx cypress open-ct
+```

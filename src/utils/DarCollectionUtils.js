@@ -9,19 +9,23 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
   let dataUseProcessedRestrictions;
   try {
     datasets.forEach((dataset) => {
-      dataUses.push(dataset.dataUse);
+      dataUses.push(dataset.dataUse || {});
     });
-    dataUseProcessedRestrictions = await (await translateDataUseRestrictionsFromDataUseArray(dataUses));
+    dataUseProcessedRestrictions = await translateDataUseRestrictionsFromDataUseArray(dataUses);
   } catch(error) {
     throw new Error('Failed to generate data use translations');
   }
   //using restriction names, generate label for bucket
   dataUseProcessedRestrictions.forEach((restrictions, index) => {
-    const dataUseLabel = flow([
+    let dataUseLabel = flow([
       filter((restriction) => !isEmpty(restriction)),
       map((restriction) => restriction.alternateLabel || restriction.code),
       join(', ')
     ])(restrictions);
+
+    if(dataUseLabel.length < 1) {
+      dataUseLabel = 'Undefined Data Use';
+    }
 
     //check if label already exists in map. If so, add current element to said collection
     //otherwise generate new bucket for map and add element afterwards

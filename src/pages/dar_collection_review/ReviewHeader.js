@@ -7,14 +7,14 @@ const styles = {
     marginRight: '1rem'
   },
   secondaryHeader: {
-    fontSize: '1.8rem',
+    fontSize: '2.2rem',
     fontWeight: 400,
     marginRight: '1rem',
     paddingRight: '1rem',
     borderRight: '1px solid black'
   },
   title: {
-    fontSize: '3.5rem',
+    fontSize: '3rem',
     fontWeight: 600,
     marginBottom: '1.5rem'
   },
