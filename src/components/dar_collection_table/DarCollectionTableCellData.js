@@ -54,7 +54,7 @@ export function piCellData({darCollectionId, pi, label = 'pi'}) {
   };
 }
 
-export function institutionCellData({darCollectionId, institution, label = 'institution'}) {
+export function institutionCellData({institution = '- -', darCollectionId, label = 'institution'}) {
   return {
     data: institution,
     id: darCollectionId,
@@ -66,7 +66,7 @@ export function institutionCellData({darCollectionId, institution, label = 'inst
   };
 }
 
-export function datasetCountCellData({darCollectionId, datasets, label = 'datasets'}) {
+export function datasetCountCellData({datasets = '- -', darCollectionId, label = 'datasets'}) {
   return {
     data: datasets.length,
     id: darCollectionId,

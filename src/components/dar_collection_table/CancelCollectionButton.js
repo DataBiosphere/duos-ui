@@ -19,4 +19,4 @@ export default function CancelCollectionButton(props) {
     },
     onClick: () => props.showConfirmationModal(collection)
   });
-};
+}
