@@ -1,8 +1,9 @@
-import { div, label, span } from 'react-hyperscript-helpers';
+import { div, label, span, h } from 'react-hyperscript-helpers';
+import AtAGlance from './AtAGlance';
 
 const styles = {
   flexRowElement: {
-    fontFamily: 'Arial',
+    fontFamily: 'Montserrat',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
@@ -66,14 +67,16 @@ export default function ApplicationInformation(props) {
     piEmail = '- -',
     nonTechSummary,
     isLoading = false,
+    collection,
+    dataUseBuckets,
   } = props;
 
   return (
     div({className: 'application-information-page', style: {padding: '3%', backgroundColor: 'white'}}, [
-      !isLoading ? div({className: 'application-information-title', style: styles.title}, ['Application Information'])
+      !isLoading
+        ? h(AtAGlance, {collection: collection, dataUseBuckets: dataUseBuckets, styles: styles})
         : div({className: 'text-placeholder', key: 'application-information-title-placeholder', style: {height: '5rem', width: '20%', marginBottom: '2rem'}}),
-      //todo: At a Glance table
-      div({className: 'at-a-glance-subheader', style: styles.title}, ["At a glance"]),
+
       //todo: Applicant Information
       div({className: 'applicant-information-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),

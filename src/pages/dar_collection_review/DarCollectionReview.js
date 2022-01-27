@@ -150,6 +150,8 @@ export default function DarCollectionReview(props) {
         nonTechSummary: darInfo.nonTechRus,
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
+        collection: collection,
+        dataUseBuckets: dataUseBuckets,
       }),
     ])
   ]);
