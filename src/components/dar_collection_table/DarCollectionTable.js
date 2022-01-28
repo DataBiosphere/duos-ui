@@ -38,12 +38,12 @@ export const styles = {
   }),
   cellWidth: {
     darCode: '15%',
-    projectTitle: '25%',
-    submissionDate: '10%',
+    projectTitle: '20%',
+    submissionDate: '12.5%',
     pi: '5%',
-    institution: '10%',
+    institution: '20%',
     datasetCount: '7.5%',
-    status: '7.5%',
+    status: '10%',
     actions: '7.5%'
   },
   color: {

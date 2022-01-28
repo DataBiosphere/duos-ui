@@ -4,7 +4,9 @@ import ConfirmationModal from "../modals/ConfirmationModal";
 import {isCollectionCanceled} from "../../libs/utils";
 import {getProjectTitle} from "./DarCollectionTable";
 
-export default function CollectionConfirmationModal({collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection}) {
+export default function CollectionConfirmationModal(props) {
+  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection} = props;
+
   const getModalHeader = () => {
     if(!isNil(collection)) {
       return `${collection.darCode} - ${getProjectTitle(collection)}`;
