@@ -80,12 +80,13 @@ const columnHeaderFormat = {
 };
 
 const columnHeaderData = () => {
+  //TODO: signing official console should not have an actions column
   const {darCode, name, submissionDate, pi, institution, datasetCount, status, actions} = columnHeaderFormat;
   return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
 };
 
 
-const processCollectionRowData = (collections, showConfirmationModal, actionsFlag) => {
+const processCollectionRowData = (collections, showConfirmationModal, actionsDisabled) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets } = collection;
@@ -94,9 +95,9 @@ const processCollectionRowData = (collections, showConfirmationModal, actionsFla
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
-      const actionsButton = actionsFlag
-        ? cellData.actionsCellData({ collection, showConfirmationModal })
-        : div();
+      const actionsButton = actionsDisabled
+        ? div()
+        : cellData.actionsCellData({ collection, showConfirmationModal });
 
       // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return [
@@ -121,7 +122,7 @@ export default function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
-  const { collections, isLoading, cancelCollection, resubmitCollection, actionsFlag } = props;
+  const { collections, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -162,7 +163,7 @@ export default function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, actionsFlag),
+      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, actionsDisabled),
       "columnHeaders": columnHeaderData(),
       styles,
       tableSize: tableSize,

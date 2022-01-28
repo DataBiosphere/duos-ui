@@ -47,11 +47,7 @@ export default function CollectionConfirmationModal(props) {
     });
 
 
-  if(isCollectionCanceled(collection) === true) {
-    return resubmitModal;
-  } else {
-    return cancelModal;
-  }
+  return isCollectionCanceled(collection) === true ? resubmitModal() : cancelModal();
 }
 
 
