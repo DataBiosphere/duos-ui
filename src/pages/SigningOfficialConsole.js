@@ -126,7 +126,7 @@ export default function SigningOfficialConsole(props) {
           isLoading,
           cancelCollection: null,
           resubmitCollection: null,
-          actionsFlag: false
+          actionsDisabled: true
         }, [])
       ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [

@@ -40,8 +40,8 @@ export const styles = {
     darCode: '15%',
     projectTitle: '20%',
     submissionDate: '12.5%',
-    pi: '5%',
-    institution: '20%',
+    pi: '10%',
+    institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
     actions: '7.5%'
