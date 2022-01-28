@@ -89,12 +89,12 @@ const columnHeaderData = () => {
 const processCollectionRowData = (collections, showConfirmationModal, actionsDisabled) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
-      const { darCollectionId, darCode, createDate, datasets } = collection;
-      const institution = collection.createUser.institution.name;
+      const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       /*I want the election-dependent status to be explicit so that the
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
+      const institution = isNil(createUser) || isNil(createUser.institution) ? "- -" : createUser.institution.name;
       const actionsButton = actionsDisabled
         ? div()
         : cellData.actionsCellData({ collection, showConfirmationModal });
