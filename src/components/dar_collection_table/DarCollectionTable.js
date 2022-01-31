@@ -1,24 +1,25 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty, includes, find } from 'lodash/fp';
-import { Styles, Theme } from '../../libs/theme';
+import { isNil, isEmpty, find } from 'lodash/fp';
+import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
-import SimpleButton from '../SimpleButton';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import { formatDate, recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
+import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
+import cellData from './DarCollectionTableCellData';
+import CollectionConfirmationModal from "./CollectionConfirmationModal";
 
-const { determineCollectionStatus, nonCancellableCollectionStatuses, isCollectionCanceled } = darCollectionUtils;
-const getProjectTitle = ((collection) => {
+
+const { determineCollectionStatus } = darCollectionUtils;
+export const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
     return darData.projectTitle;
   }
 });
 
-const styles = {
+export const styles = {
   baseStyle: {
-    fontFamily: 'Arial',
+    fontFamily: 'Montserrat',
     fontSize: '1.6rem',
     fontWeight: 400,
     display: 'flex',
@@ -27,147 +28,87 @@ const styles = {
     alignItems: 'center'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    color: '#7B7B7B',
+    fontFamily: 'Montserrat',
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    letterSpacing: '0.2px',
+    textTransform: 'uppercase'
   }),
   cellWidth: {
     darCode: '15%',
-    projectTitle: '25%',
-    submissionDate: '15%',
-    status: '15%',
-    actions: '20%'
-  }
+    projectTitle: '20%',
+    submissionDate: '12.5%',
+    pi: '10%',
+    institution: '12.5%',
+    datasetCount: '7.5%',
+    status: '10%',
+    actions: '7.5%'
+  },
+  color: {
+    darCode: '#000000',
+    projectTitle: '#000000',
+    submissionDate: '#000000',
+    pi: '#000000',
+    institution: '#354052',
+    datasetCount: '#354052',
+    status: '#000000',
+    actions: '#000000',
+  },
+  fontSize: {
+    darCode: '1.6rem',
+    projectTitle: '1.4rem',
+    submissionDate: '1.4rem',
+    pi: '1.4rem',
+    institution: '1.4rem',
+    datasetCount: '2.0rem',
+    status: '1.6rem',
+    actions: '1.6rem'
+  },
 };
 
 const columnHeaderFormat = {
-  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode}},
-  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
-  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate}},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status}},
-  actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
+  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }},
+  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }},
+  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }},
+  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }},
+  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }},
+  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }},
+  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }},
+  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }}
 };
 
 const columnHeaderData = () => {
-  const {darCode, name, submissionDate, status, actions} = columnHeaderFormat;
-  return [darCode, name, submissionDate, status, actions];
-};
-
-const projectTitleCellData = ({projectTitle = '- -', darCollectionId, style = {}, label = 'project-title'}) => {
-  return {
-    data: projectTitle,
-    id: darCollectionId,
-    style,
-    label
-  };
-};
-
-const darCodeCellData = ({darCode = '- -', darCollectionId, style = {}, label = 'dar-code'}) => {
-  return {
-    data: darCode,
-    id: darCollectionId,
-    style,
-    label
-  };
-};
-
-const submissionDateCellData = ({createDate, darCollectionId, style = {}, label = 'submission-date'}) => {
-  return {
-    data: isNil(createDate) ? '- - ' : formatDate(createDate),
-    id: darCollectionId,
-    style,
-    label
-  };
-};
-
-const statusCellData = ({status = '- -', darCollectionId, style = {}, label = 'status'}) => {
-  return {
-    data: status,
-    id: darCollectionId,
-    style,
-    label
-  };
-};
-
-const CancelCollectionButton = (props) => {
-  const { collection } = props;
-  return h(SimpleButton, {
-    keyProp: `cancel-collection-${collection.id}`,
-    label: 'Cancel',
-    disabled: includes(determineCollectionStatus(collection))(nonCancellableCollectionStatuses),
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () => props.showConfirmationModal(collection)
-  });
-};
-
-const ResubmitCollectionButton = (props) => {
-  const { collection } = props;
-  return h(SimpleButton, {
-    keyProp: `resubmit-collection-${collection.id}`,
-    label: 'Revise',
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () => props.showConfirmationModal(collection)
-  });
-};
-
-const actionsCellData = ({collection, showConfirmationModal}) => {
-  const { darCollectionId } = collection;
-  const cancel = {
-    isComponent: true,
-    id: darCollectionId,
-    label: 'cancel-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `cancel-collection-cell-${darCollectionId}`
-      },
-      [h(CancelCollectionButton, {collection, showConfirmationModal})]
-    )};
-  const revise = {
-    isComponent: true,
-    id: darCollectionId,
-    label: 'resubmit-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `resubmit-collection-cell-${darCollectionId}`
-      },
-      [h(ResubmitCollectionButton, {collection, showConfirmationModal})]
-    )
-  };
-
-  return isCollectionCanceled(collection) ? revise : cancel;
+  //TODO: signing official console should not have an actions column
+  const {darCode, name, submissionDate, pi, institution, datasetCount, status, actions} = columnHeaderFormat;
+  return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
 };
 
 
-const processCollectionRowData = (collections, showConfirmationModal) => {
+const processCollectionRowData = (collections, showConfirmationModal, actionsDisabled) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
-      const { darCollectionId, darCode, createDate } = collection;
+      const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       /*I want the election-dependent status to be explicit so that the
       researcher knows why they can't cancel the collection*/
       const status = determineCollectionStatus(collection);
       const projectTitle = getProjectTitle(collection);
+      const institution = isNil(createUser) || isNil(createUser.institution) ? "- -" : createUser.institution.name;
+      const actionsButton = actionsDisabled
+        ? div()
+        : cellData.actionsCellData({ collection, showConfirmationModal });
+
+      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return [
-        darCodeCellData({ darCollectionId, darCode }),
-        projectTitleCellData({ darCollectionId, projectTitle }),
-        submissionDateCellData({ darCollectionId, createDate }),
-        statusCellData({ darCollectionId, status }),
-        actionsCellData({ collection, showConfirmationModal }),
+        cellData.darCodeCellData({ darCollectionId, darCode }),
+        cellData.projectTitleCellData({ darCollectionId, projectTitle }),
+        cellData.submissionDateCellData({ darCollectionId, createDate }),
+        cellData.piCellData({ darCollectionId }),
+        cellData.institutionCellData({ darCollectionId, institution }),
+        cellData.datasetCountCellData({ darCollectionId, datasets }),
+        cellData.statusCellData({ darCollectionId, status }),
+        actionsButton,
       ];
     });
   }
@@ -181,7 +122,7 @@ export default function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
-  const { collections, isLoading, cancelCollection, resubmitCollection } = props;
+  const { collections, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -219,57 +160,10 @@ export default function DarCollectionTable(props) {
     [pageCount]
   );
 
-  const getModalHeader = (collection) => {
-    if(!isNil(collection)) {
-      return `${selectedCollection.darCode} - ${getProjectTitle(selectedCollection)}`;
-    }
-    return '';
-  };
-
-  const cancelOnClick = async() => {
-    await cancelCollection(selectedCollection);
-    setShowConfirmation(false);
-  };
-
-  const resubmitOnClick = async() => {
-    await resubmitCollection(selectedCollection);
-    setShowConfirmation(false);
-  };
-
-  const cancelModal = (collection) =>
-    h(ConfirmationModal, {
-      showConfirmation,
-      styleOverride: {height: '35%'},
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Cancel DAR Collection',
-      message: `Are you sure you want to cancel ${collection.darCode}?`,
-      header: getModalHeader(collection),
-      onConfirm: cancelOnClick
-    });
-
-  const resubmitModal = (collection) =>
-    h(ConfirmationModal, {
-      showConfirmation,
-      styleOverride: {height: '35%'},
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Resubmit DAR Collection',
-      message: `Are you sure you want to resubmit ${collection.darCode}?`,
-      header: getModalHeader(collection),
-      onConfirm: resubmitOnClick
-    });
-
-  const confirmationModal = (collection) => {
-    if(isCollectionCanceled(collection) === true) {
-      return resubmitModal(collection);
-    } else {
-      return cancelModal(collection);
-    }
-  };
-
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal),
+      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, actionsDisabled),
       "columnHeaders": columnHeaderData(),
       styles,
       tableSize: tableSize,
@@ -281,6 +175,11 @@ export default function DarCollectionTable(props) {
         changeTableSize
       })
     }),
-    confirmationModal(selectedCollection)
+    CollectionConfirmationModal({
+      collection: selectedCollection,
+      showConfirmation,
+      setShowConfirmation,
+      cancelCollection,
+      resubmitCollection})
   ]);
 }
