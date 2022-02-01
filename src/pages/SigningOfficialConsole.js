@@ -15,7 +15,7 @@ import {consoleTypes} from "../components/dar_table/DarTableActions";
 import { USER_ROLES } from "../libs/utils";
 import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
 import { Config } from "../libs/config";
-import DarCollectionTable from "../components/dar_collection_table/DarCollectionTable";
+import { DarCollectionTableColumnOptions, DarCollectionTable } from "../components/dar_collection_table/DarCollectionTable";
 
 const tabs = {
   custodian: 'Data Submitter',
@@ -123,6 +123,16 @@ export default function SigningOfficialConsole(props) {
         h(DarCollectionTable, {
           isRendered: selectedTag === tabs.collections,
           collections: collectionList,
+          columns: [
+            DarCollectionTableColumnOptions.DAR_CODE,
+            DarCollectionTableColumnOptions.NAME,
+            DarCollectionTableColumnOptions.SUBMISSION_DATE,
+            DarCollectionTableColumnOptions.PI,
+            DarCollectionTableColumnOptions.INSTITUTION,
+            DarCollectionTableColumnOptions.DATASET_COUNT,
+            DarCollectionTableColumnOptions.STATUS,
+            DarCollectionTableColumnOptions.ACTIONS
+          ],
           isLoading,
           cancelCollection: null,
           resubmitCollection: null,

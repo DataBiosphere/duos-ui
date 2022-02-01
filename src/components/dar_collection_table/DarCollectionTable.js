@@ -68,7 +68,18 @@ export const styles = {
   },
 };
 
-const columnHeaderFormat = {
+export const DarCollectionTableColumnOptions = {
+  DAR_CODE: 'darCode',
+  NAME: 'name',
+  SUBMISSION_DATE: 'submissionDate',
+  PI: 'pi',
+  INSTITUTION: 'institution',
+  DATASET_COUNT: 'datasetCount',
+  STATUS: 'status',
+  ACTIONS: 'actions'
+};
+
+const columnHeaderConfig = {
   darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }},
   name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }},
   submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }},
@@ -79,14 +90,13 @@ const columnHeaderFormat = {
   actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }}
 };
 
-const columnHeaderData = () => {
-  //TODO: signing official console should not have an actions column
-  const {darCode, name, submissionDate, pi, institution, datasetCount, status, actions} = columnHeaderFormat;
-  return [darCode, name, submissionDate, pi, institution, datasetCount, status, actions];
+const defaultColumns = Object.keys(columnHeaderConfig);
+
+const columnHeaderData = (columns = defaultColumns) => {
+  return columns?.map((col) => columnHeaderConfig[col]);
 };
 
-
-const processCollectionRowData = (collections, showConfirmationModal, actionsDisabled) => {
+const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns }) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -100,21 +110,23 @@ const processCollectionRowData = (collections, showConfirmationModal, actionsDis
         : cellData.actionsCellData({ collection, showConfirmationModal });
 
       // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
-      return [
-        cellData.darCodeCellData({ darCollectionId, darCode }),
-        cellData.projectTitleCellData({ darCollectionId, projectTitle }),
-        cellData.submissionDateCellData({ darCollectionId, createDate }),
-        cellData.piCellData({ darCollectionId }),
-        cellData.institutionCellData({ darCollectionId, institution }),
-        cellData.datasetCountCellData({ darCollectionId, datasets }),
-        cellData.statusCellData({ darCollectionId, status }),
-        actionsButton,
-      ];
+      return columns.map((col) => {
+        switch(col) {
+          case 'darCode': return cellData.darCodeCellData({ darCollectionId, darCode });
+          case 'name': return cellData.projectTitleCellData({ darCollectionId, projectTitle });
+          case 'submissionDate': return cellData.submissionDateCellData({ darCollectionId, createDate });
+          case 'pi': return cellData.piCellData({ darCollectionId });
+          case 'institution': return cellData.institutionCellData({ darCollectionId, institution });
+          case 'datasetCount': return cellData.datasetCountCellData({ darCollectionId, datasets });
+          case 'status': return cellData.statusCellData({ darCollectionId, status });
+          case 'actions': return actionsButton;
+        }
+      });
     });
   }
 };
 
-export default function DarCollectionTable(props) {
+export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
@@ -122,7 +134,7 @@ export default function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
-  const { collections, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
+  const { collections, columns, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -163,8 +175,13 @@ export default function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData(visibleCollection, showConfirmationModal, actionsDisabled),
-      "columnHeaders": columnHeaderData(),
+      "rowData": processCollectionRowData({
+        collections: visibleCollection,
+        columns,
+        showConfirmationModal,
+        actionsDisabled
+      }),
+      "columnHeaders": columnHeaderData(columns),
       styles,
       tableSize: tableSize,
       "paginationBar": h(PaginationBar, {
@@ -182,4 +199,4 @@ export default function DarCollectionTable(props) {
       cancelCollection,
       resubmitCollection})
   ]);
-}
+};
