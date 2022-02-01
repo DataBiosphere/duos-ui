@@ -80,14 +80,14 @@ export const DarCollectionTableColumnOptions = {
 };
 
 const columnHeaderConfig = {
-  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }},
-  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }},
-  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }},
-  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }},
-  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }},
-  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }},
-  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }}
+  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }, sort: 1},
+  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }, sort: 0},
+  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }, sort: 0},
+  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }, sort: 0},
+  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }, sort: 0},
+  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }, sort: 0},
+  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }, sort: 0},
+  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }, sort: 0}
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);
@@ -120,6 +120,7 @@ const processCollectionRowData = ({ collections, showConfirmationModal, actionsD
           case 'datasetCount': return cellData.datasetCountCellData({ darCollectionId, datasets });
           case 'status': return cellData.statusCellData({ darCollectionId, status });
           case 'actions': return actionsButton;
+          default: return div();
         }
       });
     });

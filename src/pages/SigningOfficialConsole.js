@@ -130,8 +130,7 @@ export default function SigningOfficialConsole(props) {
             DarCollectionTableColumnOptions.PI,
             DarCollectionTableColumnOptions.INSTITUTION,
             DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.STATUS,
-            DarCollectionTableColumnOptions.ACTIONS
+            DarCollectionTableColumnOptions.STATUS
           ],
           isLoading,
           cancelCollection: null,
