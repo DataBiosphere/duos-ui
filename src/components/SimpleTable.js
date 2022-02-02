@@ -49,7 +49,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   const rows = rowData.map((row, index) => {
     const id = rowData[index][0].id;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row'},
+    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row', className: `row-data-${index}`},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
