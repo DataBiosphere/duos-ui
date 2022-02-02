@@ -14,7 +14,7 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
         const style = Object.assign({height: '0.5rem'}, baseStyle, cellStyle);
         return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
       });
-      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`}, row));
+      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`, className: `placeholder-row-${i}`}, row));
       i++;
     }
     return rowsSkeleton;

@@ -288,7 +288,7 @@ const collections = [
 ];
 
 describe('DataUseVoteSummary - Tests', function() {
-  it('renders a row of elements summarizing the vote result for each bucket', function() {
+  it('renders a single column of the data', function() {
     const columns = [
       DarCollectionTableColumnOptions.DAR_CODE
     ];
@@ -307,10 +307,11 @@ describe('DataUseVoteSummary - Tests', function() {
     colHeaders.should('have.length', 1);
   });
 
-  it('renders a row of elements summarizing the vote result for each bucket', function() {
+  it('renders multiple rows of the data', function() {
     const columns = [
       DarCollectionTableColumnOptions.DAR_CODE,
-      DarCollectionTableColumnOptions.DATASET_COUNT
+      DarCollectionTableColumnOptions.DATASET_COUNT,
+      DarCollectionTableColumnOptions.INSTITUTION
     ];
     mount(
       <DarCollectionTable
@@ -324,7 +325,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
     const colHeaders = cy.get('.column-header');
-    colHeaders.should('have.length', 2);
+    colHeaders.should('have.length', 3);
   });
 
   it('should render skeleton table if isLoading is true', function() {
@@ -335,7 +336,7 @@ describe('DataUseVoteSummary - Tests', function() {
     );
     const component = cy.get('.table-data');
     component.should('exist');
-    const rows = cy.get('.placeholder-row-1-container');
+    const rows = cy.get('.placeholder-row-0');
     rows.should('exist');
   });
 });
