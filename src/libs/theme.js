@@ -194,6 +194,12 @@ export const Styles = {
       borderTopRightRadius: 'inherit',
       alignItems: 'center'
     },
+    HEADER_SORT: {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+      width: '100%'
+    },
     RECORD_ROW: {
       fontFamily: targetFont,
       fontWeight: Theme.font.weight.regular,

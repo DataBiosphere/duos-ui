@@ -1,5 +1,5 @@
 import { isNil } from 'lodash/fp';
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, span } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import { useEffect } from 'react';
@@ -35,13 +35,30 @@ const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
 };
 
 //Column component that renders the column row based on column headers
-const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
+const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
   return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
-    return div({style: cellStyle, key: `column-row-${label}`}, [label]);
+    return div({style: cellStyle, key: `column-row-${label}`}, [
+      header.sortable && onSort
+        ? div({
+          style: Styles.TABLE.HEADER_SORT,
+          key: "data_id_cell",
+          className: 'cell-sort',
+          onClick: () => {
+            onSort({
+              key: header.key,
+              dir: sort.key === header.key ? sort.dir * -1 : 1
+            });
+          }
+        }, [
+          label,
+          span({ className: 'glyphicon sort-icon glyphicon-sort' })
+        ])
+        : label
+    ]);
   }));
 };
 
@@ -87,6 +104,8 @@ export default function SimpleTable(props) {
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
     tableSize,
     paginationBar,
+    sort,
+    onSort
   } = props;
 
   useEffect(() => {
@@ -94,7 +113,7 @@ export default function SimpleTable(props) {
   }, [rowData]);
 
   const {baseStyle, columnStyle} = styles;
-  const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle});
+  const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, paginationBar]);

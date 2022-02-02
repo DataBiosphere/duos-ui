@@ -7,6 +7,7 @@ import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } f
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from "./CollectionConfirmationModal";
+import * as Utils from '../../libs/utils';
 
 
 const { determineCollectionStatus } = darCollectionUtils;
@@ -80,14 +81,14 @@ export const DarCollectionTableColumnOptions = {
 };
 
 const columnHeaderConfig = {
-  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }, sort: 1},
-  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }, sort: 0},
-  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }, sort: 0},
-  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }, sort: 0},
-  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }, sort: 0},
-  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }, sort: 0},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }, sort: 0},
-  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }, sort: 0}
+  darCode: {key: DarCollectionTableColumnOptions.DAR_CODE, label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }, sortable: true},
+  name: {key: DarCollectionTableColumnOptions.NAME, label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }, sortable: true},
+  submissionDate: {key: DarCollectionTableColumnOptions.SUBMISSION_DATE, label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }, sortable: true},
+  pi: {key: DarCollectionTableColumnOptions.PI, label: 'PI', cellStyle: {width: styles.cellWidth.pi }, sortable: true},
+  institution: {key: DarCollectionTableColumnOptions.INSTITUTION, label: 'Institution', cellStyle: { width: styles.cellWidth.institution }, sortable: true},
+  datasetCount: {key: DarCollectionTableColumnOptions.DATASET_COUNT, label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }, sortable: true},
+  status: {key: DarCollectionTableColumnOptions.STATUS, label: 'Status', cellStyle: {width: styles.cellWidth.status }, sortable: true},
+  actions: {key: DarCollectionTableColumnOptions.ACTIONS, label: 'Action', cellStyle: { width: styles.cellWidth.actions }, sortable: true}
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);
@@ -96,8 +97,9 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns?.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns }) => {
+const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns, sort }) => {
   if(!isNil(collections)) {
+    const sortIndex = columns.indexOf(sort.key);
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       /*I want the election-dependent status to be explicit so that the
@@ -123,6 +125,10 @@ const processCollectionRowData = ({ collections, showConfirmationModal, actionsD
           default: return div();
         }
       });
+    }).sort((a, b) => {
+      const aVal = a[sortIndex].data;
+      const bVal = b[sortIndex].data;
+      return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true });
     });
   }
 };
@@ -131,11 +137,13 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
+  const [sort, setSort] = useState({ key: DarCollectionTableColumnOptions.DAR_CODE, dir: 1 });
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
 
   const { collections, columns, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
+  console.log('dar collection table', collections);
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -156,9 +164,10 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       currentPage,
       setPageCount,
       setCurrentPage,
-      setVisibleList: setVisibleCollections
+      setVisibleList: setVisibleCollections,
+      sort
     });
-  }, [tableSize, currentPage, pageCount, collections]);
+  }, [tableSize, currentPage, pageCount, collections, sort]);
 
   const showConfirmationModal = (collection) => {
     setSelectedCollection(collection);
@@ -180,7 +189,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         collections: visibleCollection,
         columns,
         showConfirmationModal,
-        actionsDisabled
+        actionsDisabled,
+        sort
       }),
       "columnHeaders": columnHeaderData(columns),
       styles,
@@ -191,7 +201,17 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         tableSize,
         goToPage,
         changeTableSize
-      })
+      }),
+      sort,
+      onSort: Utils.getColumnSort(
+        () => { return this.state ? this.state.dars: []; },
+        (sortedData, descendantOrder) => {
+          this.setState(prev => {
+            prev.dars = sortedData;
+            prev.darDescOrder = !descendantOrder;
+            return prev;
+          });
+        })
     }),
     CollectionConfirmationModal({
       collection: selectedCollection,
