@@ -41,7 +41,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
-    return div({style: cellStyle, key: `column-row-${label}`}, [label]);
+    return div({style: cellStyle, key: `column-row-${label}`, className: 'column-header',}, [label]);
   }));
 };
 
