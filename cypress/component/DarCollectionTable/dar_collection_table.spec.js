@@ -49,12 +49,10 @@ describe('DataUseVoteSummary - Tests', function() {
     );
     const colHeaders = cy.get('.column-header');
     colHeaders.should('have.length', 2);
-    const darCodeCell = cy.get('.row-data-0 .cell').select(0);
-    darCodeCell.should('exist');
-    darCodeCell.contains('DAR-259');
-    const datasetsCell = cy.get('.row-data-0 .cell').select(1);
-    datasetsCell.should('exist');
-    datasetsCell.contains('2');
+    const row = cy.get('.row-data-0');
+    row.should('exist');
+    row.children().eq(0).contains('DAR-259');
+    row.children().eq(1).contains('2');
   });
 
   it('should render skeleton table if isLoading is true', function() {
