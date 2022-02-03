@@ -80,14 +80,60 @@ export const DarCollectionTableColumnOptions = {
 };
 
 const columnHeaderConfig = {
-  darCode: {label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }, sort: 1},
-  name: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }, sort: 0},
-  submissionDate: {label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }, sort: 0},
-  pi: {label: 'PI', cellStyle: {width: styles.cellWidth.pi }, sort: 0},
-  institution: {label: 'Institution', cellStyle: { width: styles.cellWidth.institution }, sort: 0},
-  datasetCount: {label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }, sort: 0},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidth.status }, sort: 0},
-  actions: {label: 'Action', cellStyle: { width: styles.cellWidth.actions }, sort: 0}
+  darCode: {
+    label: 'DAR Code',
+    cellStyle: { width: styles.cellWidth.darCode },
+    cellDataFn: cellData.darCodeCellData
+  },
+  name: {
+    label: 'Project Title',
+    cellStyle: { width: styles.cellWidth.projectTitle },
+    cellDataFn: (props) => {
+      props.projectTitle = getProjectTitle(props.collection);
+      return cellData.projectTitleCellData(props);
+    }
+  },
+  submissionDate: {
+    label: 'Submission Date',
+    cellStyle: { width: styles.cellWidth.submissionDate },
+    cellDataFn: cellData.submissionDateCellData
+  },
+  pi: {
+    label: 'PI',
+    cellStyle: { width: styles.cellWidth.pi },
+    cellDataFn: cellData.datasetCountCellData
+  },
+  institution: {
+    label: 'Institution',
+    cellStyle: { width: styles.cellWidth.institution },
+    cellDataFn: (props) => {
+      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
+      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? "- -" : props.createUser.institution.name;
+      return cellData.institutionCellData(props);
+    }
+  },
+  datasetCount: {
+    label: 'Datasets',
+    cellStyle: { width: styles.cellWidth.datasetCount },
+    cellDataFn: cellData.datasetCountCellData
+  },
+  status: {
+    label: 'Status',
+    cellStyle: { width: styles.cellWidth.status },
+    cellDataFn: (props) => {
+      props.status = determineCollectionStatus(props.collection);
+      return cellData.statusCellData(props);
+    }
+  },
+  actions: {
+    label: 'Action',
+    cellStyle: { width: styles.cellWidth.actions },
+    cellDataFn: (props) => {
+      return props.actionsDisabled
+        ? div()
+        : cellData.actionsCellData(props);
+    }
+  }
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);
@@ -100,28 +146,13 @@ const processCollectionRowData = ({ collections, showConfirmationModal, actionsD
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      /*I want the election-dependent status to be explicit so that the
-      researcher knows why they can't cancel the collection*/
-      const status = determineCollectionStatus(collection);
-      const projectTitle = getProjectTitle(collection);
-      const institution = isNil(createUser) || isNil(createUser.institution) ? "- -" : createUser.institution.name;
-      const actionsButton = actionsDisabled
-        ? div()
-        : cellData.actionsCellData({ collection, showConfirmationModal });
-
-      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return columns.map((col) => {
-        switch(col) {
-          case 'darCode': return cellData.darCodeCellData({ darCollectionId, darCode });
-          case 'name': return cellData.projectTitleCellData({ darCollectionId, projectTitle });
-          case 'submissionDate': return cellData.submissionDateCellData({ darCollectionId, createDate });
-          case 'pi': return cellData.piCellData({ darCollectionId });
-          case 'institution': return cellData.institutionCellData({ darCollectionId, institution });
-          case 'datasetCount': return cellData.datasetCountCellData({ darCollectionId, datasets });
-          case 'status': return cellData.statusCellData({ darCollectionId, status });
-          case 'actions': return actionsButton;
-          default: return div();
-        }
+        return columnHeaderConfig[col].cellDataFn({
+          collection, darCollectionId, datasets,
+          darCode,
+          createDate, createUser,
+          actionsDisabled, showConfirmationModal
+        });
       });
     });
   }
