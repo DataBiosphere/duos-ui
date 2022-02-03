@@ -6,7 +6,7 @@ import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import {useTable} from 'react-table';
 import ChevronRight from 'react-material-icon-svg/dist/ChevronRight';
-import {getOr, head, values} from 'lodash/fp';
+import {get, getOr, head, isNil, values} from 'lodash/fp';
 
 const chevronRight = <ChevronRight fill={'#4D72AA'} style={{
   marginLeft: '1rem',
@@ -90,11 +90,26 @@ const buildDataRows = (tableInstance) => {
   ]);
 };
 
+// TODO: This isn't accurate ... need to figure out what the right value is.
+const processElectionStatus = (collection) => {
+  if (isNil(getOr(null, 'elections')(collection))) {
+    return 'Unreviewed';
+  }
+  return get('elections')(collection)[0].status;
+};
+
+// TODO: Flesh this out
+const processActionButtons = (collection) => {
+  return 'Vote';
+};
+
 const processRowData = (collections) => {
   return collections.map(collection => {
     const {dars, darCode, datasets, createUser} = collection;
     const title = getOr('--', 'data.projectTitle')(head(values(dars)));
     const institution = getOr('', 'institution.name')(createUser);
+    const status = processElectionStatus(collection);
+    const actions = processActionButtons(collection);
     return {
       col0: span({style: {}}, [chevronRight]),
       col1: span({style: {fontSize: '16px'}}, [darCode]),
@@ -102,8 +117,8 @@ const processRowData = (collections) => {
       col3: span({style: {}}, ['--']),
       col4: span({style: {}}, [institution]),
       col5: span({style: {fontSize: '16px'}}, [datasets.length]),
-      col6: span({style: {}}, ['Unreviewed']),
-      col7: span({style: {}}, ['Vote']),
+      col6: span({style: {}}, [status]),
+      col7: span({style: {}}, [actions]),
     };
   });
 };
