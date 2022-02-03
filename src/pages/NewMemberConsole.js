@@ -1,104 +1,172 @@
-import {useEffect, useState} from 'react';
-import {div, h, img, span} from 'react-hyperscript-helpers';
+import React, {useEffect, useMemo, useState} from 'react';
+import {div, img, span} from 'react-hyperscript-helpers';
 import {Collections} from '../libs/ajax';
-import SearchBar from '../components/SearchBar';
 import {Notifications, USER_ROLES} from '../libs/utils';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
-import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import {assign} from 'lodash/fp';
-import DarCollectionTable
-  from '../components/dar_collection_table/DarCollectionTable';
+import {useTable} from 'react-table';
+import ChevronRight from 'react-material-icon-svg/dist/ChevronRight';
+import {getOr, head, values} from 'lodash/fp';
 
-// This, the base style, and tableRowLoadingTemplate all apply to the skeleton loader.
-const tableHeaderTemplate = () => {
-  return [
-    div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
-      'DAR Code',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
-      'Project Title',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
-      'Submission Date',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort'}, [
-      'PI',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort'}, [
-      'Institution',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, [
-      'Datasets',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, [
-      'Status',
-      span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ['Action']),
-  ];
+const chevronRight = <ChevronRight fill={'#4D72AA'} style={{
+  marginLeft: '1rem',
+  verticalAlign: 'middle',
+}}/>;
+
+const baseStyles = {
+  container: {
+    marginTop: '2rem',
+    borderTop: '1px solid #979797',
+    backgroundColor: 'rgb(184,205,211,0.08)',
+    padding: '2rem',
+    width: '100%',
+    color: '#7B7B7B',
+    fontFamily: 'Montserrat',
+  },
+  headerRow: {
+    display: 'flex',
+    width: '100%',
+  },
+  headerCell: {
+    textTransform: 'uppercase',
+    fontSize: '12px',
+    padding: '1rem',
+  },
+  bodyRow: {
+    backgroundColor: '#FFFFFF',
+    border: '1px solid #DEDEDE',
+    width: '100%',
+    display: 'flex',
+    borderRadius: '4px',
+    marginBottom: '1rem',
+  },
+  bodyCell: {
+    padding: '1rem',
+    marginTop: '.5rem',
+  },
 };
 
-const baseStyle = {
-  margin: '1rem 2%',
-  display: 'flex',
-  justifyContent: 'left',
-  alignItems: 'center',
+const buildTable = (tableInstance) => {
+  return div({}, [
+    buildHeaderRow(tableInstance),
+    buildDataRows(tableInstance),
+  ]);
 };
 
-const tableRowLoadingTemplate = () => {
-  return [
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '16%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div({
-      style: assign(baseStyle, {width: '12%'}),
-      className: 'text-placeholder',
-    }),
-    div(
-      {style: assign(baseStyle, {width: '12%'}), className: 'text-placeholder'}),
-  ];
+const buildHeaderRow = (tableInstance) => {
+  const {headerGroups} = tableInstance;
+  return div({}, [
+    headerGroups.map(headerGroup =>
+      div(
+        {style: baseStyles.headerRow, ...headerGroup.getHeaderGroupProps()},
+        [
+          headerGroup.headers.map(column =>
+            div({style: Object.assign({}, baseStyles.headerCell, {width: column.width}), ...column.getHeaderProps()},
+              [column.render('Header')])),
+        ])
+    )
+  ]);
 };
 
-const handleSearchChange = () => {
+const buildDataRows = (tableInstance) => {
+  const {
+    columns,
+    getTableBodyProps,
+    rows,
+    prepareRow,
+  } = tableInstance;
+  return div({...getTableBodyProps()}, [
+    rows.map(row => {
+      prepareRow(row);
+      return (div({style: baseStyles.bodyRow, ...row.getRowProps()}, [
+        row.cells.map((cell, index) => {
+          const column = columns[index];
+          const style = Object.assign({}, baseStyles.bodyCell, {width: column.width});
+          return (div({style: style, ...cell.getCellProps()},
+            [cell.render('Cell')]));
+        }),
+      ]));
+    }),
+  ]);
 };
 
-export default function NewMemberConsole(props) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+const processRowData = (collections) => {
+  return collections.map(collection => {
+    const {dars, darCode, datasets, createUser} = collection;
+    const title = getOr('--', 'data.projectTitle')(head(values(dars)));
+    const institution = getOr('', 'institution.name')(createUser);
+    return {
+      col0: span({style: {}}, [chevronRight]),
+      col1: span({style: {fontSize: '16px'}}, [darCode]),
+      col2: span({style: {}}, [title]),
+      col3: span({style: {}}, ['--']),
+      col4: span({style: {}}, [institution]),
+      col5: span({style: {fontSize: '16px'}}, [datasets.length]),
+      col6: span({style: {}}, ['Unreviewed']),
+      col7: span({style: {}}, ['Vote']),
+    };
+  });
+};
 
+export default function NewMemberConsole() {
+
+  const [isLoaded, setIsLoaded] = useState(false);
   const [collections, setCollections] = useState([]);
-  const [filteredCollections, setFilteredCollections] = useState([]);
+  const columns = useMemo(
+    () => [
+      {
+        Header: '',
+        accessor: 'col0', // accessor is the "key" in the data
+        width: '5%',
+      },
+      {
+        Header: 'DAR ID',
+        accessor: 'col1',
+        width: '10%',
+      },
+      {
+        Header: 'Title',
+        accessor: 'col2',
+        width: '20%',
+      },
+      {
+        Header: 'PI',
+        accessor: 'col3',
+        width: '10%',
+      },
+      {
+        Header: 'Institution',
+        accessor: 'col4',
+        width: '25%',
+      },
+      {
+        Header: 'Datasets',
+        accessor: 'col5',
+        width: '10%',
+      },
+      {
+        Header: 'Status',
+        accessor: 'col6',
+        width: '10%',
+      },
+      {
+        Header: 'Action',
+        accessor: 'col7',
+        width: '10%',
+      },
+    ],
+    [],
+  );
+  const data = useMemo(() => processRowData(collections), [collections]);
+  const tableInstance = useTable({columns, data});
 
   useEffect(() => {
     const init = async () => {
       try {
-        setIsLoading(true);
-        const pendingCollections = await Collections.getCollectionsByRoleName(
+        const collections = await Collections.getCollectionsByRoleName(
           USER_ROLES.member);
-        setCollections(pendingCollections);
-        setFilteredCollections(pendingCollections);
-        setIsLoading(false);
+        setCollections(collections);
+        setIsLoaded(true);
       } catch (error) {
         Notifications.showError(
           {text: 'Error: Unable to retrieve data access requests from server'});
@@ -128,20 +196,12 @@ export default function NewMemberConsole(props) {
               }, ['Select and manage Data Access Requests for DAC review']),
             ]),
           ]),
-        h(SearchBar, {handleSearchChange, currentPage}),
       ]),
-      h(DarCollectionTable, {
-        isRendered: !isLoading,
-        collections: filteredCollections,
-        isLoading,
-        cancelCollection: undefined,
-        resubmitCollection: undefined,
-      }),
-      h(DarTableSkeletonLoader, {
-        isRendered: isLoading,
-        tableHeaderTemplate: tableHeaderTemplate(),
-        tableRowLoadingTemplate: tableRowLoadingTemplate(),
-      }),
+      div({
+        isRendered: isLoaded,
+        style: baseStyles.container,
+      },
+      [buildTable(tableInstance)]),
     ])
   );
 }
