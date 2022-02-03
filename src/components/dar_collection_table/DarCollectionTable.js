@@ -7,7 +7,6 @@ import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } f
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from "./CollectionConfirmationModal";
-import * as Utils from '../../libs/utils';
 
 
 const { determineCollectionStatus } = darCollectionUtils;
@@ -94,12 +93,11 @@ const columnHeaderConfig = {
 const defaultColumns = Object.keys(columnHeaderConfig);
 
 const columnHeaderData = (columns = defaultColumns) => {
-  return columns?.map((col) => columnHeaderConfig[col]);
+  return columns.map((col) => columnHeaderConfig[col]);
 };
 
 const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns, sort }) => {
   if(!isNil(collections)) {
-    const sortIndex = columns.indexOf(sort.key);
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       /*I want the election-dependent status to be explicit so that the
@@ -125,10 +123,6 @@ const processCollectionRowData = ({ collections, showConfirmationModal, actionsD
           default: return div();
         }
       });
-    }).sort((a, b) => {
-      const aVal = a[sortIndex].data;
-      const bVal = b[sortIndex].data;
-      return aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true });
     });
   }
 };
@@ -143,7 +137,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [selectedCollection, setSelectedCollection] = useState({});
 
   const { collections, columns, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
-  console.log('dar collection table', collections);
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -189,8 +182,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         collections: visibleCollection,
         columns,
         showConfirmationModal,
-        actionsDisabled,
-        sort
+        actionsDisabled
       }),
       "columnHeaders": columnHeaderData(columns),
       styles,
@@ -203,15 +195,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         changeTableSize
       }),
       sort,
-      onSort: Utils.getColumnSort(
-        () => { return this.state ? this.state.dars: []; },
-        (sortedData, descendantOrder) => {
-          this.setState(prev => {
-            prev.dars = sortedData;
-            prev.darDescOrder = !descendantOrder;
-            return prev;
-          });
-        })
+      onSort: setSort
     }),
     CollectionConfirmationModal({
       collection: selectedCollection,

@@ -625,11 +625,17 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+const sortVisibleTable = ({ list, sort }) => {
+  console.log('sort from recalc table', sort, list);
+  return list.sort(sort.key);
+};
+
 //Functions that are commonly used between tables//
 export const recalculateVisibleTable = async ({
-  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList,
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort
 }) => {
   try {
+    filteredList = sortVisibleTable({ list: filteredList, sort });
     setPageCount(calcTablePageCount(tableSize, filteredList));
     if (currentPage > pageCount) {
       setCurrentPage(pageCount);
