@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {div, img, span} from 'react-hyperscript-helpers';
 import {Collections} from '../libs/ajax';
-import {Notifications, USER_ROLES} from '../libs/utils';
+import {Notifications, USER_ROLES, processElectionStatus} from '../libs/utils';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import {useTable} from 'react-table';
@@ -91,7 +91,21 @@ const buildDataRows = (tableInstance) => {
 };
 
 // TODO: This isn't accurate ... need to figure out what the right value is.
-const processElectionStatus = (collection) => {
+// Find all the elections for the user's DAC ids
+// * no elections -> "Unreviewed"
+// * all Open -> "Open"
+// * all Canceled -> "Canceled"
+// * all Closed -> either "Approved" or "Denied" depending on final vote value
+const processCollectionElectionStatus = (collection) => {
+  const {dars} = collection;
+  // dars is a map of referenceId -> full DAR object
+  const darValues = values(dars);
+  // elections is a map of election id -> full Election object
+  const electionValues = values(getOr([], 'elections')(darValues));
+  // find all statuses that exist for all elections
+  const statuses = electionValues.map(e => processElectionStatus(e, e.votes, false));
+  // Look for all of the statuses in elections for my DAC
+
   if (isNil(getOr(null, 'elections')(collection))) {
     return 'Unreviewed';
   }
@@ -108,7 +122,7 @@ const processRowData = (collections) => {
     const {dars, darCode, datasets, createUser} = collection;
     const title = getOr('--', 'data.projectTitle')(head(values(dars)));
     const institution = getOr('', 'institution.name')(createUser);
-    const status = processElectionStatus(collection);
+    const status = processCollectionElectionStatus(collection);
     const actions = processActionButtons(collection);
     return {
       col0: span({style: {}}, [chevronRight]),
