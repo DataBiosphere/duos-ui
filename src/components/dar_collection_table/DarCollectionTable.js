@@ -80,14 +80,68 @@ export const DarCollectionTableColumnOptions = {
 };
 
 const columnHeaderConfig = {
-  darCode: {key: DarCollectionTableColumnOptions.DAR_CODE, label: 'DAR Code', cellStyle: { width: styles.cellWidth.darCode }, sortable: true},
-  name: {key: DarCollectionTableColumnOptions.NAME, label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle }, sortable: true},
-  submissionDate: {key: DarCollectionTableColumnOptions.SUBMISSION_DATE, label: 'Submission Date', cellStyle: {width: styles.cellWidth.submissionDate }, sortable: true},
-  pi: {key: DarCollectionTableColumnOptions.PI, label: 'PI', cellStyle: {width: styles.cellWidth.pi }, sortable: true},
-  institution: {key: DarCollectionTableColumnOptions.INSTITUTION, label: 'Institution', cellStyle: { width: styles.cellWidth.institution }, sortable: true},
-  datasetCount: {key: DarCollectionTableColumnOptions.DATASET_COUNT, label: 'Datasets', cellStyle: { width: styles.cellWidth.datasetCount }, sortable: true},
-  status: {key: DarCollectionTableColumnOptions.STATUS, label: 'Status', cellStyle: {width: styles.cellWidth.status }, sortable: true},
-  actions: {key: DarCollectionTableColumnOptions.ACTIONS, label: 'Action', cellStyle: { width: styles.cellWidth.actions }, sortable: true}
+  darCode: {
+    label: 'DAR Code',
+    cellStyle: { width: styles.cellWidth.darCode },
+    cellDataFn: cellData.darCodeCellData,
+    sortable: true
+  },
+  name: {
+    label: 'Project Title',
+    cellStyle: { width: styles.cellWidth.projectTitle },
+    cellDataFn: (props) => {
+      props.projectTitle = getProjectTitle(props.collection);
+      return cellData.projectTitleCellData(props);
+    },
+    sortable: true
+  },
+  submissionDate: {
+    label: 'Submission Date',
+    cellStyle: { width: styles.cellWidth.submissionDate },
+    cellDataFn: cellData.submissionDateCellData,
+    sortable: true
+  },
+  pi: {
+    label: 'PI',
+    cellStyle: { width: styles.cellWidth.pi },
+    cellDataFn: cellData.datasetCountCellData,
+    sortable: true
+  },
+  institution: {
+    label: 'Institution',
+    cellStyle: { width: styles.cellWidth.institution },
+    cellDataFn: (props) => {
+      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
+      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? "- -" : props.createUser.institution.name;
+      return cellData.institutionCellData(props);
+    },
+    sortable: true
+  },
+  datasetCount: {
+    label: 'Datasets',
+    cellStyle: { width: styles.cellWidth.datasetCount },
+    cellDataFn: cellData.datasetCountCellData,
+    sortable: true
+  },
+  status: {
+    label: 'Status',
+    cellStyle: { width: styles.cellWidth.status },
+    cellDataFn: (props) => {
+      props.status = determineCollectionStatus(props.collection);
+      return cellData.statusCellData(props);
+    },
+    sortable: true
+  },
+  actions: {
+    label: 'Action',
+    cellStyle: { width: styles.cellWidth.actions },
+    cellDataFn: (props) => {
+      return props.actionsDisabled
+        ? div()
+        : cellData.actionsCellData(props);
+    },
+    sortable: true
+  }
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);
@@ -96,32 +150,16 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns, sort }) => {
+const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns }) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      /*I want the election-dependent status to be explicit so that the
-      researcher knows why they can't cancel the collection*/
-      const status = determineCollectionStatus(collection);
-      const projectTitle = getProjectTitle(collection);
-      const institution = isNil(createUser) || isNil(createUser.institution) ? "- -" : createUser.institution.name;
-      const actionsButton = actionsDisabled
-        ? div()
-        : cellData.actionsCellData({ collection, showConfirmationModal });
-
-      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       return columns.map((col) => {
-        switch(col) {
-          case 'darCode': return cellData.darCodeCellData({ darCollectionId, darCode });
-          case 'name': return cellData.projectTitleCellData({ darCollectionId, projectTitle });
-          case 'submissionDate': return cellData.submissionDateCellData({ darCollectionId, createDate });
-          case 'pi': return cellData.piCellData({ darCollectionId });
-          case 'institution': return cellData.institutionCellData({ darCollectionId, institution });
-          case 'datasetCount': return cellData.datasetCountCellData({ darCollectionId, datasets });
-          case 'status': return cellData.statusCellData({ darCollectionId, status });
-          case 'actions': return actionsButton;
-          default: return div();
-        }
+        return columnHeaderConfig[col].cellDataFn({
+          collection, darCollectionId, datasets, darCode,
+          createDate, createUser,
+          actionsDisabled, showConfirmationModal
+        });
       });
     });
   }
@@ -131,7 +169,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState({ key: DarCollectionTableColumnOptions.DAR_CODE, dir: 1 });
+  const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
@@ -153,14 +191,19 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     recalculateVisibleTable({
       tableSize,
       pageCount,
-      filteredList: collections,
+      filteredList: processCollectionRowData({
+        collections,
+        columns,
+        showConfirmationModal,
+        actionsDisabled
+      }),
       currentPage,
       setPageCount,
       setCurrentPage,
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled]);
 
   const showConfirmationModal = (collection) => {
     setSelectedCollection(collection);
@@ -178,12 +221,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": processCollectionRowData({
-        collections: visibleCollection,
-        columns,
-        showConfirmationModal,
-        actionsDisabled
-      }),
+      "rowData": visibleCollection,
       "columnHeaders": columnHeaderData(columns),
       styles,
       tableSize: tableSize,

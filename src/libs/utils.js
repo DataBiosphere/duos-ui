@@ -626,8 +626,16 @@ export const getColumnSort = (getList, callback) => {
 };
 
 const sortVisibleTable = ({ list, sort }) => {
-  console.log('sort from recalc table', sort, list);
-  return list.sort(sort.key);
+  // Sort: { dir, colIndex }
+  return list.sort((a, b) => {
+    const aVal = a[sort.colIndex].data;
+    const bVal = b[sort.colIndex].data;
+    if (typeof aVal === 'number') {
+      return (aVal > bVal ? -1 : 1) * sort.dir;
+    } else {
+      return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+    }
+  });
 };
 
 //Functions that are commonly used between tables//
@@ -635,7 +643,12 @@ export const recalculateVisibleTable = async ({
   tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort
 }) => {
   try {
-    filteredList = sortVisibleTable({ list: filteredList, sort });
+    // Sort data before applying paging
+    if (sort) {
+      filteredList = sortVisibleTable({ list: filteredList, sort });
+    }
+
+    // Set paging variables and truncate the list
     setPageCount(calcTablePageCount(tableSize, filteredList));
     if (currentPage > pageCount) {
       setCurrentPage(pageCount);

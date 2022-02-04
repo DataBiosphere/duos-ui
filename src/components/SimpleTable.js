@@ -37,7 +37,7 @@ const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
 //Column component that renders the column row based on column headers
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header) => {
+  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header, colIndex) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
@@ -49,8 +49,8 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
           className: 'cell-sort',
           onClick: () => {
             onSort({
-              key: header.key,
-              dir: sort.key === header.key ? sort.dir * -1 : 1
+              colIndex: colIndex,
+              dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
             });
           }
         }, [
