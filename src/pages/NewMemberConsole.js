@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {div, img, span} from 'react-hyperscript-helpers';
+import {button, div, img, span} from 'react-hyperscript-helpers';
 import {Collections} from '../libs/ajax';
 import {Notifications, USER_ROLES, processElectionStatus} from '../libs/utils';
 import {Styles} from '../libs/theme';
@@ -38,13 +38,21 @@ const baseStyles = {
     border: '1px solid #DEDEDE',
     width: '100%',
     display: 'flex',
-    borderRadius: '4px',
+    borderRadius: '5px',
     marginBottom: '1rem',
   },
   bodyCell: {
     padding: '1rem',
     marginTop: '.5rem',
   },
+  activeButton: {
+    backgroundColor: '#0948B7',
+    width: '75px',
+    height: '30px',
+    color: 'white',
+    borderRadius: '5px',
+    textTransform: 'uppercase',
+  }
 };
 
 const buildTable = (tableInstance) => {
@@ -91,23 +99,9 @@ const buildDataRows = (tableInstance) => {
   ]);
 };
 
-// This method will filter available elections by the user and display an
-// accurate status for all elections that exist for the collection.
 const processCollectionElectionStatus = (collection, user) => {
-  const {dars} = collection;
-  // 'dars' is a map of referenceId -> full DAR object
-  const darValues = values(dars);
-  // 'elections' is a map of election id -> full Election object
-  const electionMaps = map('elections')(darValues);
-  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
   // Filter elections for my DACs by looking for elections with votes that have my user id
-  const filteredElections = filter(e => {
-    // Votes is a map of vote id -> full Vote object
-    const voteMap = getOr([], 'votes')(e);
-    const voteUserIds = map('dacUserId')(values(voteMap));
-    // If there is a vote for this user, then this is a valid election
-    return indexOf(user.dacUserId)(voteUserIds) >= 0;
-  })(electionValues);
+  const filteredElections = filterCollectionElectionsByUser(collection, user);
   // find all statuses that exist for all the user's elections
   const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
   if (isEmpty(statuses)) {
@@ -116,9 +110,33 @@ const processCollectionElectionStatus = (collection, user) => {
   return statuses.join(", ");
 };
 
-// TODO: Flesh this out
-const processActionButtons = (collection) => {
-  return 'Vote';
+// TODO: We don't have a page to send the user to for voting at this time.
+const processActionButtons = (collection, user) => {
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  const filteredElections = filterCollectionElectionsByUser(collection, user);
+  const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
+  if (indexOf('Open')(statuses) >= 0) {
+    return button({style: baseStyles.activeButton}, ['Vote']);
+  }
+  return div();
+};
+
+// Helper method to filter available elections by the user
+const filterCollectionElectionsByUser = (collection, user) => {
+  const {dars} = collection;
+  // 'dars' is a map of referenceId -> full DAR object
+  const darValues = values(dars);
+  // 'elections' is a map of election id -> full Election object
+  const electionMaps = map('elections')(darValues);
+  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  return filter(e => {
+    // Votes is a map of vote id -> full Vote object
+    const voteMap = getOr([], 'votes')(e);
+    const voteUserIds = map('dacUserId')(values(voteMap));
+    // If there is a vote for this user, then this is a valid election
+    return indexOf(user.dacUserId)(voteUserIds) >= 0;
+  })(electionValues);
 };
 
 const processRowData = (collections, user) => {
@@ -127,16 +145,16 @@ const processRowData = (collections, user) => {
     const title = getOr('--', 'data.projectTitle')(head(values(dars)));
     const institution = getOr('', 'institution.name')(createUser);
     const status = processCollectionElectionStatus(collection, user);
-    const actions = processActionButtons(collection);
+    const actions = processActionButtons(collection, user);
     return {
       col0: span({style: {}}, [chevronRight]),
-      col1: span({style: {fontSize: '16px'}}, [darCode]),
+      col1: span({style: {fontSize: '14px', fontWeight: 'bold'}}, [darCode]),
       col2: span({style: {}}, [title]),
-      col3: span({style: {}}, ['--']),
+      col3: span({style: {}}, ['--']), // TODO: We need the PI, get that when it's in the response
       col4: span({style: {}}, [institution]),
-      col5: span({style: {fontSize: '16px'}}, [datasets.length]),
-      col6: span({style: {}}, [status]),
-      col7: span({style: {}}, [actions]),
+      col5: span({style: {fontSize: '14px', fontWeight: 'bold'}}, [datasets.length]),
+      col6: span({style: {fontSize: '14px', fontWeight: 'bold'}}, [status]),
+      col7: span({style: {fontSize: '14px', fontWeight: 'bold'}}, [actions]),
     };
   });
 };
