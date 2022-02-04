@@ -6,7 +6,7 @@ import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import {useTable} from 'react-table';
 import ChevronRight from 'react-material-icon-svg/dist/ChevronRight';
-import {get, getOr, head, isNil, values} from 'lodash/fp';
+import {flatMap, get, getOr, head, isEmpty, isNil, map, uniq, values} from 'lodash/fp';
 
 const chevronRight = <ChevronRight fill={'#4D72AA'} style={{
   marginLeft: '1rem',
@@ -90,26 +90,21 @@ const buildDataRows = (tableInstance) => {
   ]);
 };
 
-// TODO: This isn't accurate ... need to figure out what the right value is.
-// Find all the elections for the user's DAC ids
-// * no elections -> "Unreviewed"
-// * all Open -> "Open"
-// * all Canceled -> "Canceled"
-// * all Closed -> either "Approved" or "Denied" depending on final vote value
 const processCollectionElectionStatus = (collection) => {
   const {dars} = collection;
-  // dars is a map of referenceId -> full DAR object
+  // 'dars' is a map of referenceId -> full DAR object
   const darValues = values(dars);
-  // elections is a map of election id -> full Election object
-  const electionValues = values(getOr([], 'elections')(darValues));
+  // 'elections' is a map of election id -> full Election object
+  const electionMaps = map('elections')(darValues);
+  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
+  // Filter elections for my DACs
+  // TODO: We don't have access to the dac ids for elections to do the filtering yet.
   // find all statuses that exist for all elections
-  const statuses = electionValues.map(e => processElectionStatus(e, e.votes, false));
-  // Look for all of the statuses in elections for my DAC
-
-  if (isNil(getOr(null, 'elections')(collection))) {
+  const statuses = uniq(electionValues.map(e => processElectionStatus(e, e.votes, false)));
+  if (isEmpty(statuses)) {
     return 'Unreviewed';
   }
-  return get('elections')(collection)[0].status;
+  return statuses.join(", ");
 };
 
 // TODO: Flesh this out
