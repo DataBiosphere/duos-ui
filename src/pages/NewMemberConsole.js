@@ -6,7 +6,8 @@ import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import {useTable} from 'react-table';
 import ChevronRight from 'react-material-icon-svg/dist/ChevronRight';
-import {flatMap, get, getOr, head, isEmpty, isNil, map, uniq, values} from 'lodash/fp';
+import {flatMap, filter, getOr, head, indexOf, isEmpty, map, uniq, values} from 'lodash/fp';
+import {Storage} from '../libs/storage';
 
 const chevronRight = <ChevronRight fill={'#4D72AA'} style={{
   marginLeft: '1rem',
@@ -90,17 +91,25 @@ const buildDataRows = (tableInstance) => {
   ]);
 };
 
-const processCollectionElectionStatus = (collection) => {
+// This method will filter available elections by the user and display an
+// accurate status for all elections that exist for the collection.
+const processCollectionElectionStatus = (collection, user) => {
   const {dars} = collection;
   // 'dars' is a map of referenceId -> full DAR object
   const darValues = values(dars);
   // 'elections' is a map of election id -> full Election object
   const electionMaps = map('elections')(darValues);
   const electionValues = flatMap((e) => { return values(e); })(electionMaps);
-  // Filter elections for my DACs
-  // TODO: We don't have access to the dac ids for elections to do the filtering yet.
-  // find all statuses that exist for all elections
-  const statuses = uniq(electionValues.map(e => processElectionStatus(e, e.votes, false)));
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  const filteredElections = filter(e => {
+    // Votes is a map of vote id -> full Vote object
+    const voteMap = getOr([], 'votes')(e);
+    const voteUserIds = map('dacUserId')(values(voteMap));
+    // If there is a vote for this user, then this is a valid election
+    return indexOf(user.dacUserId)(voteUserIds) >= 0;
+  })(electionValues);
+  // find all statuses that exist for all the user's elections
+  const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
   if (isEmpty(statuses)) {
     return 'Unreviewed';
   }
@@ -112,12 +121,12 @@ const processActionButtons = (collection) => {
   return 'Vote';
 };
 
-const processRowData = (collections) => {
+const processRowData = (collections, user) => {
   return collections.map(collection => {
     const {dars, darCode, datasets, createUser} = collection;
     const title = getOr('--', 'data.projectTitle')(head(values(dars)));
     const institution = getOr('', 'institution.name')(createUser);
-    const status = processCollectionElectionStatus(collection);
+    const status = processCollectionElectionStatus(collection, user);
     const actions = processActionButtons(collection);
     return {
       col0: span({style: {}}, [chevronRight]),
@@ -136,6 +145,7 @@ export default function NewMemberConsole() {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [collections, setCollections] = useState([]);
+  const user = Storage.getCurrentUser();
   const columns = useMemo(
     () => [
       {
@@ -181,7 +191,7 @@ export default function NewMemberConsole() {
     ],
     [],
   );
-  const data = useMemo(() => processRowData(collections), [collections]);
+  const data = useMemo(() => processRowData(collections, user), [collections, user]);
   const tableInstance = useTable({columns, data});
 
   useEffect(() => {
