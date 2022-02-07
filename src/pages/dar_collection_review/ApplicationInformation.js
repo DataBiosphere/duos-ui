@@ -1,5 +1,6 @@
 import { div, label, span, h } from 'react-hyperscript-helpers';
 import AtAGlance from './AtAGlance';
+import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 
 const styles = {
   flexRowElement: {
@@ -69,6 +70,18 @@ export default function ApplicationInformation(props) {
     isLoading = false,
     collection,
     dataUseBuckets,
+    externalCollaborators = '- -',
+    internalCollaborators = '- -',
+    signingOfficial = '- -',
+    itDirector = '- -',
+    signingOfficialEmail = '- -',
+    itDirectorEmail = '- -',
+    internalLabStaff = '- -',
+    anvilStorage = '- -',
+    localComputing = '- -',
+    cloudComputing = '- -',
+    cloudProvider = '- -',
+    cloudProviderDescription = '- -'
   } = props;
 
   return (
@@ -104,19 +117,37 @@ export default function ApplicationInformation(props) {
             width: '100%',
           }})
       ]),
-       //todo: Application Details
       div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'applicant-details-subheader', style: styles.title}, ["Application Details"]),
         div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('External Collaborators', 'external-collaborators', researcher, isLoading),
-          generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', researcher, isLoading)
+          generateLabelSpanContents('External Collaborators', 'external-collaborators', externalCollaborators, isLoading),
+          generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', internalCollaborators, isLoading)
         ]),
         div({className: 'information-row', style: styles.row}, [
-
+          generateLabelSpanContents('Signing Official', 'signing-official', signingOfficial, isLoading),
+          generateLabelSpanContents('IT Director', 'it-director', itDirector, isLoading)
         ]),
         div({className: 'information-row', style: styles.row}, [
-
+          generateLabelSpanContents('Signing Official Email', 'signing-official-email', signingOfficialEmail, isLoading),
+          generateLabelSpanContents('IT Director Email', 'it-director-email', itDirectorEmail, isLoading),
+        ]),
+        div({className: 'information-row', style: styles.row}, [
+          generateLabelSpanContents('Internal Lab Staff', 'internal-lab-staff', internalLabStaff, isLoading),
+          generateLabelSpanContents('Using AnVIL only for storage and analysis', 'anvil-storage', anvilStorage, isLoading),
+        ]),
+        div({className: 'information-row', style: styles.row}, [
+          generateLabelSpanContents('Requesting Permission to use local computing', 'local-computing', localComputing, isLoading),
+          generateLabelSpanContents('Requesting permission to use cloud computing', 'cloud-computing', cloudComputing, isLoading),
+        ]),
+        div({className: 'information-row', style: styles.row}, [
+          generateLabelSpanContents('Cloud Provider (description below)', 'cloud-provider', cloudProvider, isLoading),
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
+        ]),
+        div({className: 'cloud-provider-description-container'}, [
+          !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.nonTechSummaryText}, [cloudProviderDescription])
+            : div({className: 'text-placeholder', key: 'cloud-provider-description-placeholder', style: { height: '18rem',
+              width: '100%',
+            }})
         ])
       ]),
     ])

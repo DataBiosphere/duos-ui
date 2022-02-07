@@ -152,6 +152,18 @@ export default function DarCollectionReview(props) {
         isLoading: subcomponentLoading,
         collection: collection,
         dataUseBuckets: dataUseBuckets,
+        externalCollaborators: darInfo.externalCollaborators,
+        internalCollaborators: darInfo.internalCollaborators,
+        signingOfficial: darInfo.signingOfficial,
+        itDirector: darInfo.itDirector,
+        signingOfficialEmail: darInfo.signingOfficial, //todo
+        itDirectorEmail: darInfo.itDirector, //todo
+        internalLabStaff: darInfo.labCollaborators,
+        anvilStorage: darInfo.anvilUse,
+        localComputing: darInfo.localUse,
+        cloudComputing: darInfo.cloudUse,
+        cloudProvider: darInfo.cloudProvider,
+        cloudProviderDescription: darInfo.cloudProviderDescription
       }),
     ])
   ]);
