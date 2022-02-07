@@ -625,17 +625,22 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
-const sortVisibleTable = ({ list, sort }) => {
+const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
-  return list.sort((a, b) => {
-    const aVal = a[sort.colIndex].data;
-    const bVal = b[sort.colIndex].data;
-    if (typeof aVal === 'number') {
-      return (aVal > bVal ? -1 : 1) * sort.dir;
-    } else {
-      return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
-    }
-  });
+  if (!sort || sort.colIndex === undefined) {
+    return list;
+  }
+  else {
+    return list.sort((a, b) => {
+      const aVal = a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].data;
+      if (typeof aVal === 'number') {
+        return (aVal > bVal ? -1 : 1) * sort.dir;
+      } else {
+        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+      }
+    });
+  }
 };
 
 //Functions that are commonly used between tables//

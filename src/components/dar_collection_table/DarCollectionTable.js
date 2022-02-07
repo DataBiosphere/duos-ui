@@ -104,7 +104,7 @@ const columnHeaderConfig = {
   pi: {
     label: 'PI',
     cellStyle: { width: styles.cellWidth.pi },
-    cellDataFn: cellData.datasetCountCellData,
+    cellDataFn: cellData.piCellData,
     sortable: true
   },
   institution: {
