@@ -139,8 +139,7 @@ const columnHeaderConfig = {
       return props.actionsDisabled
         ? div()
         : cellData.actionsCellData(props);
-    },
-    sortable: true
+    }
   }
 };
 
