@@ -175,7 +175,7 @@ export default function NewMemberConsole() {
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [collections, setCollections] = useState([]);
-  const user = Storage.getCurrentUser();
+  const [user, setUser] = useState({});
   const columns = useMemo(
     () => [
       {
@@ -222,7 +222,6 @@ export default function NewMemberConsole() {
     [],
   );
   const data = useMemo(() => {
-    console.log(collections.length);
     return processRowData(collections, user);
   }, [collections, user]);
   const tableInstance = useTable({columns, data, initialState: { pageIndex: 0 }, usePagination});
@@ -233,6 +232,7 @@ export default function NewMemberConsole() {
         const collections = await Collections.getCollectionsByRoleName(
           USER_ROLES.member);
         setCollections(collections);
+        setUser(Storage.getCurrentUser());
         setIsLoaded(true);
       } catch (error) {
         Notifications.showError(
