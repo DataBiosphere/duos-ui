@@ -625,11 +625,35 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+const sortVisibleTable = ({ list = [], sort }) => {
+  // Sort: { dir, colIndex }
+  if (!sort || sort.colIndex === undefined) {
+    return list;
+  }
+  else {
+    return list.sort((a, b) => {
+      const aVal = a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].data;
+      if (typeof aVal === 'number') {
+        return (aVal > bVal ? -1 : 1) * sort.dir;
+      } else {
+        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+      }
+    });
+  }
+};
+
 //Functions that are commonly used between tables//
 export const recalculateVisibleTable = async ({
-  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort
 }) => {
   try {
+    // Sort data before applying paging
+    if (sort) {
+      filteredList = sortVisibleTable({ list: filteredList, sort });
+    }
+
+    // Set paging variables and truncate the list
     setPageCount(calcTablePageCount(tableSize, filteredList));
     if (currentPage > pageCount) {
       setCurrentPage(pageCount);
