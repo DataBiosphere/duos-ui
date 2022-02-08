@@ -4,9 +4,9 @@ import {Collections} from '../libs/ajax';
 import {Notifications, USER_ROLES, processElectionStatus} from '../libs/utils';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
-import {useTable} from 'react-table';
+import { useTable, usePagination } from 'react-table';
 import ChevronRight from 'react-material-icon-svg/dist/ChevronRight';
-import {flatMap, filter, getOr, head, indexOf, isEmpty, map, uniq, values} from 'lodash/fp';
+import {flatMap, isNil, filter, getOr, head, indexOf, isEmpty, map, uniq, values} from 'lodash/fp';
 import {Storage} from '../libs/storage';
 
 const chevronRight = <ChevronRight fill={'#4D72AA'} style={{
@@ -83,18 +83,30 @@ const buildDataRows = (tableInstance) => {
     getTableBodyProps,
     rows,
     prepareRow,
-  } = tableInstance;
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { pageIndex, pageSize },  } = tableInstance;
+    // console.log(JSON.stringify(tableInstance));
   return div({...getTableBodyProps()}, [
-    rows.map(row => {
-      prepareRow(row);
-      return (div({style: baseStyles.bodyRow, ...row.getRowProps()}, [
-        row.cells.map((cell, index) => {
-          const column = columns[index];
-          const style = Object.assign({}, baseStyles.bodyCell, {width: column.width});
-          return (div({style: style, ...cell.getCellProps()},
-            [cell.render('Cell')]));
-        }),
-      ]));
+    isNil(page) ?
+      span() :
+      page.map(row => {
+        prepareRow(row);
+        return (div({style: baseStyles.bodyRow, ...row.getRowProps()}, [
+          row.cells.map((cell, index) => {
+            const column = columns[index];
+            const style = Object.assign({}, baseStyles.bodyCell, {width: column.width});
+            return (div({style: style, ...cell.getCellProps()},
+              [cell.render('Cell')]));
+          }),
+        ]));
     }),
   ]);
 };
@@ -209,8 +221,11 @@ export default function NewMemberConsole() {
     ],
     [],
   );
-  const data = useMemo(() => processRowData(collections, user), [collections, user]);
-  const tableInstance = useTable({columns, data});
+  const data = useMemo(() => {
+    console.log(collections.length);
+    return processRowData(collections, user);
+  }, [collections, user]);
+  const tableInstance = useTable({columns, data, initialState: { pageIndex: 0 }, usePagination});
 
   useEffect(() => {
     const init = async () => {
