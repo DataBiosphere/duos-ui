@@ -1,7 +1,16 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {flatten, flow, forEach, get, uniq, values} from 'lodash/fp';
+import {
+  flatMap,
+  flatten,
+  flow,
+  forEach,
+  get,
+  getOr, indexOf,
+  uniq,
+  values,
+} from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -353,6 +362,22 @@ export const processCollectionElectionStatus = (collection, user) => {
   return statuses.join(", ");
 };
 
+export const filterCollectionElectionsByUser = (collection, user) => {
+  const {dars} = collection;
+  // 'dars' is a map of referenceId -> full DAR object
+  const darValues = values(dars);
+  // 'elections' is a map of election id -> full Election object
+  const electionMaps = map('elections')(darValues);
+  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  return filter(e => {
+    // Votes is a map of vote id -> full Vote object
+    const voteMap = getOr([], 'votes')(e);
+    const voteUserIds = map('dacUserId')(values(voteMap));
+    // If there is a vote for this user, then this is a valid election
+    return indexOf(user.dacUserId)(voteUserIds) >= 0;
+  })(electionValues);
+};
 
 export const getElectionDate = (election) => {
   let formattedString = '- -';
