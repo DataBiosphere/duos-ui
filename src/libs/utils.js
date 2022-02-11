@@ -342,7 +342,7 @@ export const PromiseSerial = funcs =>
 //DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
 
-// Returns a comma separated list of statues for all elections the user has
+// Returns a comma separated list of states for all elections the user has
 // access to in a DAR Collection
 export const processCollectionElectionStatus = (collection, user) => {
   // Filter elections for my DACs by looking for elections with votes that have my user id
