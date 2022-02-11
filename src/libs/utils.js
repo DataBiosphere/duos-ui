@@ -1,7 +1,7 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { flatten, flow, forEach, get, values } from 'lodash/fp';
+import {flatten, flow, forEach, get, uniq, values} from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -341,6 +341,19 @@ export const PromiseSerial = funcs =>
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
+
+export const processCollectionElectionStatus = (collection, user) => {
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  const filteredElections = filterCollectionElectionsByUser(collection, user);
+  // find all statuses that exist for all the user's elections
+  const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
+  if (isEmpty(statuses)) {
+    return 'Unreviewed';
+  }
+  return statuses.join(", ");
+};
+
+
 export const getElectionDate = (election) => {
   let formattedString = '- -';
   if(election) {
