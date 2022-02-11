@@ -1,7 +1,7 @@
 import SimpleTable from "../SimpleTable";
 import {h} from "react-hyperscript-helpers";
 import {Styles} from "../../libs/theme";
-import {isEmpty, isNil} from "lodash/fp";
+import {isNil} from "lodash/fp";
 import {useState} from "react";
 import {formatDate} from "../../libs/utils";
 
@@ -9,15 +9,19 @@ import {formatDate} from "../../libs/utils";
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
+    fontSize: '1.4rem',
     fontWeight: 400,
     color: '#333F52',
     display: 'flex',
     padding: '1rem 2%',
+    lineHeight: '1.6rem',
     justifyContent: 'space-between',
     alignItems: 'center'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
+    color: '#333F52',
     justifyContent: 'space-between',
   }),
   cellWidths: {
