@@ -1,17 +1,14 @@
 import SimpleTable from "../SimpleTable";
-import {div, h} from "react-hyperscript-helpers";
-import PaginationBar from "../PaginationBar";
-import {getProjectTitle, styles} from "../dar_collection_table/DarCollectionTable";
+import {h} from "react-hyperscript-helpers";
 import {Styles} from "../../libs/theme";
-import cellData from "../dar_collection_table/DarCollectionTableCellData";
-import {isEmpty, isNil} from "lodash/fp";
+import {isEmpty} from "lodash/fp";
 import {useState} from "react";
 import {User} from "../../libs/ajax";
 
 
 const styles = {
   baseStyle: {
-    fontFamily: 'Arial',
+    fontFamily: 'Montserrat Regular',
     fontSize: '14px',
     fontWeight: 400,
     display: 'flex',
@@ -30,37 +27,12 @@ const styles = {
   },
 };
 
-const columnHeaderConfig = {
-  vote: {
-    label: 'Vote',
-    cellStyle: { width: styles.cellWidth.vote },
-    cellDataFn: ,
-    sortable: true
-  },
-  name: {
-    label: 'Name',
-    cellStyle: { width: styles.cellWidth.name },
-    cellDataFn: ,
-    sortable: true
-  },
-  date: {
-    label: 'Date',
-    cellStyle: { width: styles.cellWidth.date },
-    cellDataFn: ,
-    sortable: true
-  },
-  rationale: {
-    label: 'Rationale',
-    cellStyle: { width: styles.cellWidth.rationale },
-    cellDataFn: ,
-    sortable: true
-  }
-};
-
 function voteCellData({vote = '- -', voteId, label = 'vote'}) {
   return {
     data: vote,
     id: voteId,
+    cellStyle: { width: styles.cellWidth.date },
+    sortable: true,
     label
   };
 }
@@ -69,6 +41,8 @@ function nameCellData({name = '- -', voteId, label = 'name'}) {
   return {
     data: name,
     id: voteId,
+    cellStyle: { width: styles.cellWidth.name },
+    sortable: true,
     label
   };
 }
@@ -77,6 +51,8 @@ function dateCellData({date = '- -', voteId, label = 'date'}) {
   return {
     data: date,
     id: voteId,
+    cellStyle: { width: styles.cellWidth.date },
+    sortable: true,
     label
   };
 }
@@ -85,6 +61,8 @@ function rationaleCellData({rationale = '- -', voteId, label = 'rationale'}) {
   return {
     data: rationale,
     id: voteId,
+    cellStyle: { width: styles.cellWidth.rationale },
+    sortable: true,
     label
   };
 }
@@ -120,15 +98,16 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 
 export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
-  const { dacVotes } = props;
+  const [tableSize, setTableSize] = useState(10);
+  const { dacVotes, isLoading } = props;
 
   return h(SimpleTable, {
     isLoading,
-    "rowData": visibleCollection,
-    "columnHeaders": columnHeaderData(columns),
+    "rowData": processVoteSummaryRowData(dacVotes),
+    "columnHeaders": columnHeaderData(),
     styles,
     tableSize: tableSize,
     sort,
     onSort: setSort
-  })
+  });
 }
