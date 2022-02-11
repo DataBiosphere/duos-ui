@@ -364,6 +364,7 @@ export const processCollectionElectionStatus = (collection, user) => {
   return statuses.join(", ");
 };
 
+// Filter elections in a DAR Collection by which ones the user has votes in
 export const filterCollectionElectionsByUser = (collection, user) => {
   const {dars} = collection;
   // 'dars' is a map of referenceId -> full DAR object
