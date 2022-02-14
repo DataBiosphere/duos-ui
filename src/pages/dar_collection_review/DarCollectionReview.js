@@ -7,9 +7,10 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import { find, isEmpty, flow } from 'lodash/fp';
+import { find, isEmpty, flow, filter, map } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
+import VotesPieChart from '../../components/common/VotesPieChart';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -40,6 +41,36 @@ const tabStyleOverride = {
     display: 'flex',
     border: '0px'
   },
+};
+
+const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
+  const buckets = dataUseBuckets.slice(1);
+  const findTargetElections = filter((election) => {
+    const votes = election.votes || [];
+    return find((vote) => vote.dacUser === currentUser.dacUserId)(votes);
+  });
+
+  return buckets.map((bucketData) => {
+    const {key, votes, elections} = bucketData;
+    const {dataAccess} = votes;
+    const {memberVotes} = dataAccess;
+
+    const dataAccessElections = filter(election => {
+      return election.electionType === 'DataAccess';
+    })(elections);
+    const targetElectionIds = flow(
+      findTargetElections,
+      map(election => election.electionId)
+    )(dataAccessElections);
+    const targetMemberVotes = filter(vote =>
+      find(vote.electionId)(targetElectionIds)
+    )(memberVotes);
+
+    return h(VotesPieChart, {
+      votes: targetMemberVotes,
+      title: `My DAC Votes -${key}`
+    });
+  });
 };
 
 export default function DarCollectionReview(props) {
@@ -151,6 +182,7 @@ export default function DarCollectionReview(props) {
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
       }),
+      renderDataUseSubsections(dataUseBuckets)
     ])
   ]);
 }
