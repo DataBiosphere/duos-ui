@@ -59,14 +59,9 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 };
 
 
-function voteCellData({vote, requestRevision, voteId, label = 'vote'}) {
-  const voteResult = requestRevision ? "Request Revision"
-    : isNil(vote.vote) ? "- -"
-      : vote.vote ? "Yes"
-        : "No";
-
+function voteCellData({vote, voteId, label = 'vote'}) {
   return {
-    data: voteResult,  //TODO need request revision case
+    data: isNil(vote.vote) ? "- -" : vote.vote ? "Yes" : "No",
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label
@@ -103,22 +98,22 @@ function rationaleCellData({rationale = '- -', voteId, label = 'rationale'}) {
 
 export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
-  const [sortedVotes, setSortedVotes] = useState([]);
+  const [visibleVotes, setVisibleVotes] = useState([]);
   const { dacVotes, isLoading } = props;
 
   useEffect(() => {
-    setSortedVotes(
+    setVisibleVotes(
       sortVisibleTable({
         list: processVoteSummaryRowData({ dacVotes }),
         sort
       })
     );
-  }, [sort, dacVotes, sortedVotes]);
+  }, [sort, dacVotes]);
 
 
   return h(SimpleTable, {
     isLoading,
-    "rowData": sortedVotes,
+    "rowData": visibleVotes,
     "columnHeaders": columnHeaderData(),
     styles,
     sort,
