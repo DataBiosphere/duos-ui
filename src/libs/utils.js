@@ -625,7 +625,7 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
-const sortVisibleTable = ({ list = [], sort }) => {
+export const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
   if (!sort || sort.colIndex === undefined) {
     return list;

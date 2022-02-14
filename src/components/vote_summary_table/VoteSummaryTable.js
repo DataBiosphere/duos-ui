@@ -2,9 +2,8 @@ import SimpleTable from "../SimpleTable";
 import {h} from "react-hyperscript-helpers";
 import {Styles} from "../../libs/theme";
 import {isNil} from "lodash/fp";
-import {useState} from "react";
-import {formatDate} from "../../libs/utils";
-
+import {useEffect, useState} from "react";
+import {formatDate, sortVisibleTable} from "../../libs/utils";
 
 const styles = {
   baseStyle: {
@@ -33,10 +32,10 @@ const styles = {
 };
 
 const columnHeaderFormat = {
-  vote: {label: 'Vote', cellStyle: {width: styles.cellWidths.vote}},
-  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
-  date: {label: 'Date', cellStyle: {width: styles.cellWidths.date}},
-  rationale: {label: 'Rationale', cellStyle: {width: styles.cellWidths.rationale}},
+  vote: {label: 'Vote', cellStyle: {width: styles.cellWidths.vote}, sortable: true},
+  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}, sortable: true},
+  date: {label: 'Date', cellStyle: {width: styles.cellWidths.date}, sortable: true},
+  rationale: {label: 'Rationale', cellStyle: {width: styles.cellWidths.rationale}, sortable: true},
 };
 
 const columnHeaderData = () => {
@@ -61,15 +60,15 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 
 
 function voteCellData({vote, requestRevision, voteId, label = 'vote'}) {
-  const voteResult = requestRevision ? "Request Revision" :
-    isNil(vote.vote) ? "- -" :
-      vote.vote ? "Yes" : "No";
+  const voteResult = requestRevision ? "Request Revision"
+    : isNil(vote.vote) ? "- -"
+      : vote.vote ? "Yes"
+        : "No";
 
   return {
-    data: voteResult,  //TODO need request revision case + format better
+    data: voteResult,  //TODO need request revision case
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
-    sortable: true,
     label
   };
 }
@@ -79,7 +78,6 @@ function nameCellData({name = '- -', voteId, label = 'name'}) {
     data: name,
     id: voteId,
     cellStyle: { width: styles.cellWidths.name },
-    sortable: true,
     label
   };
 }
@@ -89,7 +87,6 @@ function dateCellData({date, voteId, label = 'date'}) {
     data: isNil(date) ? '- - ' : formatDate(date),
     id: voteId,
     cellStyle: { width: styles.cellWidths.date },
-    sortable: true,
     label
   };
 }
@@ -99,7 +96,6 @@ function rationaleCellData({rationale = '- -', voteId, label = 'rationale'}) {
     data: rationale,
     id: voteId,
     cellStyle: { width: styles.cellWidths.rationale },
-    sortable: true,
     label
   };
 }
@@ -107,15 +103,24 @@ function rationaleCellData({rationale = '- -', voteId, label = 'rationale'}) {
 
 export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
-  const [tableSize, setTableSize] = useState(10);
+  const [sortedVotes, setSortedVotes] = useState([]);
   const { dacVotes, isLoading } = props;
+
+  useEffect(() => {
+    setSortedVotes(
+      sortVisibleTable({
+        list: processVoteSummaryRowData({ dacVotes }),
+        sort
+      })
+    );
+  }, [sort, dacVotes, sortedVotes]);
+
 
   return h(SimpleTable, {
     isLoading,
-    "rowData": processVoteSummaryRowData({ dacVotes }),
+    "rowData": sortedVotes,
     "columnHeaders": columnHeaderData(),
     styles,
-    tableSize,
     sort,
     onSort: setSort
   });
