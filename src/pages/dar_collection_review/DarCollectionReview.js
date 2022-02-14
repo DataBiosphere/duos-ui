@@ -46,7 +46,6 @@ const tabStyleOverride = {
 
 const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
   const buckets = dataUseBuckets.slice(1);
-
   return buckets.map((bucketData) => {
     const {key, votes} = bucketData;
     const memberVotes = flow(
@@ -182,8 +181,10 @@ export default function DarCollectionReview(props) {
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
       }),
-      //NOTE: this is just a placeholder line I used for this PR, in case you want to test it on collections
-      //I have no intention of using this line as it stands, the grouping of the different submodules in the bucket should be covered in a later ticket
+      /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
+      I have no intention of using this line as it stands, the groping/styling of the bucket subsection itself should be done in a later ticket
+      However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership
+      */
       // renderDataUseSubsections(dataUseBuckets, currentUser)
     ])
   ]);
