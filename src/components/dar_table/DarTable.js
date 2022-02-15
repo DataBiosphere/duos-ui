@@ -29,7 +29,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
       sortKey: 'dar.data.projectTitle',
       descendantOrder: descOrder
     })}, [
-      "Project Title",
+      "Title",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.DATASET_CELL, key: "dataset_name_cell", className: 'cell-sort', onClick: sortFunc({
@@ -71,7 +71,7 @@ export const tableHeaderTemplate = (consoleType) =>  {
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
-      "Project Title",
+      "Title",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
