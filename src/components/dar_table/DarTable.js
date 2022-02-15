@@ -60,7 +60,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
     div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: "election_status_cell" }, [
       "Election Status"
     ]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
   ];
 };
 
@@ -88,7 +88,7 @@ export const tableHeaderTemplate = (consoleType) =>  {
     ]),
     div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ["Election Status"]),
     div({style: Styles.TABLE.ELECTION_ACTIONS_CELL,
-      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
+      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
   ];
 };
 
