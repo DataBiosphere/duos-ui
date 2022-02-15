@@ -62,8 +62,6 @@ export default function DarCollectionReview(props) {
 
   useEffect(() => {
     const init = async () => {
-      //NOTE: backend is a bit restrictive, collections by id are currently not visible to anyone other than the creator
-      //Endpoint needs to be adjusted, for now just remove the check on a local instance
       const user = Storage.getCurrentUser();
       try {
         const collection = await Collections.getCollectionById(collectionId);
@@ -91,7 +89,7 @@ export default function DarCollectionReview(props) {
           clearTimeout(timeout);
         }, 500);
       } catch(error) {
-        Notifications.showError({text: "Error fetching DAR collection, redirected you to console page"});
+        Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
         Navigation.console(user, props.history);
       }
     };
