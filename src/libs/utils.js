@@ -1,7 +1,7 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { flatten, flow, forEach, get, values } from 'lodash/fp';
+import {flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values} from 'lodash/fp';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
@@ -341,6 +341,39 @@ export const PromiseSerial = funcs =>
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
+
+// Returns a comma separated list of states for all elections the user has
+// access to in a DAR Collection
+export const processCollectionElectionStatus = (collection, user) => {
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  const filteredElections = filterCollectionElectionsByUser(collection, user);
+  // find all statuses that exist for all the user's elections
+  const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
+  if (isEmpty(statuses)) {
+    return 'Unreviewed';
+  }
+  return statuses.join(", ");
+};
+
+// Filter elections in a DAR Collection by which ones the user has votes in
+export const filterCollectionElectionsByUser = (collection, user) => {
+  const {dars} = collection;
+  // 'dars' is a map of referenceId -> full DAR object
+  const darValues = values(dars);
+  // 'elections' is a map of election id -> full Election object
+  const electionMaps = map('elections')(darValues);
+  // electionValues is a list of actual election objects
+  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
+  // Filter elections for my DACs by looking for elections with votes that have my user id
+  return filter(e => {
+    // Votes is a map of vote id -> full Vote object
+    const voteMap = getOr({}, 'votes')(e);
+    const voteUserIds = map('dacUserId')(values(voteMap));
+    // If there is a vote for this user, then this is a valid election
+    return indexOf(user.dacUserId)(voteUserIds) >= 0;
+  })(electionValues);
+};
+
 export const getElectionDate = (election) => {
   let formattedString = '- -';
   if(election) {
@@ -625,11 +658,35 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+const sortVisibleTable = ({ list = [], sort }) => {
+  // Sort: { dir, colIndex }
+  if (!sort || sort.colIndex === undefined) {
+    return list;
+  }
+  else {
+    return list.sort((a, b) => {
+      const aVal = a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].data;
+      if (typeof aVal === 'number') {
+        return (aVal > bVal ? -1 : 1) * sort.dir;
+      } else {
+        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+      }
+    });
+  }
+};
+
 //Functions that are commonly used between tables//
 export const recalculateVisibleTable = async ({
-  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList, sort
 }) => {
   try {
+    // Sort data before applying paging
+    if (sort) {
+      filteredList = sortVisibleTable({ list: filteredList, sort });
+    }
+
+    // Set paging variables and truncate the list
     setPageCount(calcTablePageCount(tableSize, filteredList));
     if (currentPage > pageCount) {
       setCurrentPage(pageCount);

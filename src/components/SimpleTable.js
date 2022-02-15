@@ -1,5 +1,5 @@
 import { isNil } from 'lodash/fp';
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, span } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import { useEffect } from 'react';
@@ -14,7 +14,7 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
         const style = Object.assign({height: '0.5rem'}, baseStyle, cellStyle);
         return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
       });
-      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`}, row));
+      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`, className: `placeholder-row-${i}`}, row));
       i++;
     }
     return rowsSkeleton;
@@ -35,13 +35,30 @@ const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
 };
 
 //Column component that renders the column row based on column headers
-const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
+const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header) => {
+  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header, colIndex) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
-    return div({style: cellStyle, key: `column-row-${label}`}, [label]);
+    return div({style: cellStyle, key: `column-row-${label}`, className: 'column-header'}, [
+      header.sortable && onSort
+        ? div({
+          style: Styles.TABLE.HEADER_SORT,
+          key: "data_id_cell",
+          className: 'cell-sort',
+          onClick: () => {
+            onSort({
+              colIndex: colIndex,
+              dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
+            });
+          }
+        }, [
+          label,
+          span({ className: 'glyphicon sort-icon glyphicon-sort' })
+        ])
+        : label
+    ]);
   }));
 };
 
@@ -49,7 +66,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   const rows = rowData.map((row, index) => {
     const id = rowData[index][0].id;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row'},
+    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row', className: `row-data-${index}`},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
@@ -87,6 +104,8 @@ export default function SimpleTable(props) {
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
     tableSize,
     paginationBar,
+    sort,
+    onSort
   } = props;
 
   useEffect(() => {
@@ -94,7 +113,7 @@ export default function SimpleTable(props) {
   }, [rowData]);
 
   const {baseStyle, columnStyle} = styles;
-  const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle});
+  const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, isNil(paginationBar) ? div() : paginationBar]);

@@ -9,8 +9,7 @@ export default function ResubmitCollectionButton(props) {
     label: 'Revise',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
-      width: '30%',
-      padding: '2%',
+      padding: '5px 10px',
       fontSize: '1.45rem',
     },
     onClick: () => props.showConfirmationModal(collection)
