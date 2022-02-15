@@ -34,11 +34,17 @@ const styles = {
     fontWeight: 800,
     fontSize: '2.4rem',
   },
-  nonTechSummaryText: {
+  textBox: {
     marginTop: '1.5rem',
     backgroundColor: 'rgb(237	234	228	)',
     padding: '3rem',
     fontSize: '1.9rem'
+  },
+  applicantInfoRow: {
+    width: '80%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '5rem',
   },
 };
 
@@ -93,17 +99,17 @@ export default function ApplicationInformation(props) {
       //todo: Applicant Information
       div({className: 'applicant-information-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
           generateLabelSpanContents('Department', 'department', department, isLoading)
         ]),
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('City', 'city', city, isLoading),
           generateLabelSpanContents('Country', 'country', country, isLoading),
           generateLabelSpanContents('Institution', 'institution', institution, isLoading)
         ]),
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Principal Investgator', 'principal-investigator', pi, isLoading),
           generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading),
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
@@ -112,7 +118,7 @@ export default function ApplicationInformation(props) {
       !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.title}, ["Non-Technical Summary"])
         : div({className: 'text-placeholder', key: 'non-technical-summary-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
       div({className: 'non-technical-summary-container'}, [
-        !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.nonTechSummaryText}, [nonTechSummary])
+        !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.textBox}, [nonTechSummary])
           : div({className: 'text-placeholder', key: 'non-technical-summary-placeholder', style: { height: '18rem',
             width: '100%',
           }})
@@ -139,16 +145,17 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Requesting Permission to use local computing', 'local-computing', localComputing, isLoading),
           generateLabelSpanContents('Requesting permission to use cloud computing', 'cloud-computing', cloudComputing, isLoading),
         ]),
-        div({className: 'information-row', style: styles.row}, [
+        cloudComputing ? div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Cloud Provider (description below)', 'cloud-provider', cloudProvider, isLoading),
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
-        ]),
-        div({className: 'cloud-provider-description-container'}, [
-          !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.nonTechSummaryText}, [cloudProviderDescription])
+        ]) : div(generateLabelSpanContents('', 'row-three-blank', '', false),
+              generateLabelSpanContents('', 'row-three-blank', '', false)),
+        cloudComputing ? div({className: 'cloud-provider-description-container'}, [
+          !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.textBox}, [cloudProviderDescription])
             : div({className: 'text-placeholder', key: 'cloud-provider-description-placeholder', style: { height: '18rem',
               width: '100%',
             }})
-        ])
+        ])  : div(generateLabelSpanContents('', 'row-three-blank', '', false))
       ]),
     ])
   );

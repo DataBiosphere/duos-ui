@@ -1,9 +1,9 @@
 import {div, h} from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find, chunk} from 'lodash/fp';
+import {isNil, chunk} from 'lodash/fp';
 import {useState} from 'react';
 import SimpleTable from '../../components/SimpleTable';
 import {Styles} from '../../libs/theme';
-import cellData from './AtAGlanceCellData'
+import cellData from './AtAGlanceCellData';
 
 export const styles = {
   title: {
