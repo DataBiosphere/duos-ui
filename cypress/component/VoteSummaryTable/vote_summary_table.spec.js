@@ -32,7 +32,8 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    cy.contains("No");
+    const component = cy.get('.table-data');
+    component.contains("No");
   });
 
   it('Formats date of vote to YYYY-MM-DD in date column', function() {
@@ -42,7 +43,8 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    cy.contains("2022-01-12");
+    const component = cy.get('.table-data');
+    component.contains("2022-01-12");
   });
 
   it('Renders filler content for missing rationale', function() {
@@ -52,7 +54,8 @@ describe('VoteSummaryTable - Tests', function() {
         isLoading={false}
       />
     );
-    cy.contains("- -");
+    const component = cy.get('.table-data');
+    component.contains("- -");
   });
 
   it('Renders skeleton table if isLoading is true', function() {
