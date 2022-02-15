@@ -22,7 +22,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
       sortKey: 'dar.data.darCode',
       descendantOrder: descOrder
     })}, [
-      "Data Request ID",
+      "DAR ID",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.TITLE_CELL, key: "project_title_cell", className: 'cell-sort', onClick: sortFunc({
@@ -67,7 +67,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
 export const tableHeaderTemplate = (consoleType) =>  {
   return [
     div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
-      "Data Request ID",
+      "DAR ID",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [

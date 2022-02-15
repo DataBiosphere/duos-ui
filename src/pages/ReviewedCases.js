@@ -256,7 +256,7 @@ class ReviewedCases extends Component {
 
         div({ className: 'jumbotron table-box' }, [
           div({ className: 'grid-row' }, [
-            div({ className: 'col-2 cell-header access-color' }, ['Data Request id']),
+            div({ className: 'col-2 cell-header access-color' }, ['DAR ID']),
             div({ className: 'col-3 cell-header access-color' }, ['Project Title']),
             div({ className: 'col-1 cell-header access-color' }, ['Result Date']),
             div({ className: 'col-1 cell-header f-center access-color' }, ['Final Result']),
