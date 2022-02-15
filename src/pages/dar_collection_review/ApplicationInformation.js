@@ -76,18 +76,18 @@ export default function ApplicationInformation(props) {
     isLoading = false,
     collection,
     dataUseBuckets,
-    externalCollaborators = '- -',
-    internalCollaborators = '- -',
+    externalCollaborators = [],
+    internalCollaborators = [],
     signingOfficial = '- -',
     itDirector = '- -',
     signingOfficialEmail = '- -',
     itDirectorEmail = '- -',
-    internalLabStaff = '- -',
-    anvilStorage = '- -',
-    localComputing = '- -',
-    cloudComputing = '- -',
-    cloudProvider = '- -',
-    cloudProviderDescription = '- -'
+    internalLabStaff = [],
+    anvilStorage = '',
+    localComputing = '',
+    cloudComputing = '',
+    cloudProvider,
+    cloudProviderDescription
   } = props;
 
   return (
@@ -125,10 +125,16 @@ export default function ApplicationInformation(props) {
       ]),
       div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'applicant-details-subheader', style: styles.title}, ["Application Details"]),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('External Collaborators', 'external-collaborators', externalCollaborators, isLoading),
-          generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', internalCollaborators, isLoading)
-        ]),
+        // do not display this first row at all if there is no data to show
+        (externalCollaborators.length>0 || internalCollaborators.length>0) ?
+          div({className: 'information-row', style: styles.row}, [
+            (externalCollaborators.length>0) ?
+              generateLabelSpanContents('External Collaborators', 'external-collaborators', externalCollaborators, isLoading)
+              : generateLabelSpanContents('', 'row-one-blank', '', false), //blank span to keep row elements in line with those above
+            (internalCollaborators.length>0) ?
+              generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', internalCollaborators, isLoading)
+              : generateLabelSpanContents('', 'row-one-blank', '', false), //blank span to keep row elements in line with those above
+          ]) : '',
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Signing Official', 'signing-official', signingOfficial, isLoading),
           generateLabelSpanContents('IT Director', 'it-director', itDirector, isLoading)
@@ -137,25 +143,29 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Signing Official Email', 'signing-official-email', signingOfficialEmail, isLoading),
           generateLabelSpanContents('IT Director Email', 'it-director-email', itDirectorEmail, isLoading),
         ]),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('Internal Lab Staff', 'internal-lab-staff', internalLabStaff, isLoading),
-          generateLabelSpanContents('Using AnVIL only for storage and analysis', 'anvil-storage', anvilStorage, isLoading),
-        ]),
+        (internalCollaborators.length>0 || anvilStorage) ?
+          div({className: 'information-row', style: styles.row}, [
+            (internalCollaborators.length>0) ?
+              generateLabelSpanContents('Internal Lab Staff', 'internal-lab-staff', internalLabStaff, isLoading)
+              : generateLabelSpanContents('', 'row-four-blank', '', false), //blank span to keep row elements in line with those above
+            (anvilStorage) ?
+              generateLabelSpanContents('Using AnVIL only for storage and analysis', 'anvil-storage', anvilStorage, isLoading)
+              : generateLabelSpanContents('', 'row-four-blank', '', false), //blank span to keep row elements in line with those above
+          ]) : '',
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Requesting Permission to use local computing', 'local-computing', localComputing, isLoading),
           generateLabelSpanContents('Requesting permission to use cloud computing', 'cloud-computing', cloudComputing, isLoading),
         ]),
-        cloudComputing ? div({className: 'information-row', style: styles.row}, [
+        (cloudComputing) ? div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Cloud Provider (description below)', 'cloud-provider', cloudProvider, isLoading),
-          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
-        ]) : div(generateLabelSpanContents('', 'row-three-blank', '', false),
-              generateLabelSpanContents('', 'row-three-blank', '', false)),
-        cloudComputing ? div({className: 'cloud-provider-description-container'}, [
+          generateLabelSpanContents('', 'row-six-blank', '', false) //blank span to keep row elements in line with those above
+        ]) : '',
+        (cloudComputing) ? div({className: 'cloud-provider-description-container'}, [
           !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.textBox}, [cloudProviderDescription])
             : div({className: 'text-placeholder', key: 'cloud-provider-description-placeholder', style: { height: '18rem',
               width: '100%',
             }})
-        ])  : div(generateLabelSpanContents('', 'row-three-blank', '', false))
+        ])  : ''
       ]),
     ])
   );
