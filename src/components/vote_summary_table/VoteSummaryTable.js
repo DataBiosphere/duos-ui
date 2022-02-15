@@ -2,7 +2,7 @@ import SimpleTable from "../SimpleTable";
 import {h} from "react-hyperscript-helpers";
 import {Styles} from "../../libs/theme";
 import {isNil} from "lodash/fp";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {formatDate, sortVisibleTable} from "../../libs/utils";
 
 const styles = {
@@ -99,6 +99,7 @@ function rationaleCellData({rationale = '- -', voteId, label = 'rationale'}) {
 export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
   const [visibleVotes, setVisibleVotes] = useState([]);
+  const [tableSize, setTableSize] = useState(5);
   const { dacVotes, isLoading } = props;
 
   useEffect(() => {
@@ -108,13 +109,20 @@ export default function VoteSummaryTable(props) {
         sort
       })
     );
+    changeTableSize(visibleVotes.length);
   }, [sort, dacVotes]);
 
+  const changeTableSize = useCallback((value) => {
+    if (value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  }, []);
 
   return h(SimpleTable, {
     isLoading,
     "rowData": visibleVotes,
     "columnHeaders": columnHeaderData(),
+    tableSize,
     styles,
     sort,
     onSort: setSort
