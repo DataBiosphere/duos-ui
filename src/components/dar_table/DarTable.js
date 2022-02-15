@@ -58,7 +58,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: "election_status_cell" }, [
-      "Election Status"
+      "Status"
     ]),
     div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
   ];
@@ -86,7 +86,7 @@ export const tableHeaderTemplate = (consoleType) =>  {
       "DAC",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ["Election Status"]),
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ["Status"]),
     div({style: Styles.TABLE.ELECTION_ACTIONS_CELL,
       isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
   ];
