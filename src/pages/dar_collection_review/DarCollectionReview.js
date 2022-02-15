@@ -91,10 +91,8 @@ export default function DarCollectionReview(props) {
           clearTimeout(timeout);
         }, 500);
       } catch(error) {
-        Notifications.showError({text: "Cannot initialze collection, redirecting you to console page..."});
-        setTimeout(() => {
-          Navigation.console(user, props.history);
-        }, 2000);
+        Notifications.showError({text: "Error fetching DAR collection, redirected you to console page"});
+        Navigation.console(user, props.history);
       }
     };
 
