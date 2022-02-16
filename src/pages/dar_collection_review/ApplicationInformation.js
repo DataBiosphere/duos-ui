@@ -99,17 +99,17 @@ export default function ApplicationInformation(props) {
       //todo: Applicant Information
       div({className: 'applicant-information-container', style: { margin: '2.5rem 0'}}, [
         div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),
-        div({className: 'information-row', style: styles.applicantInfoRow}, [
+        div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
           generateLabelSpanContents('Department', 'department', department, isLoading)
         ]),
-        div({className: 'information-row', style: styles.applicantInfoRow}, [
+        div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('City', 'city', city, isLoading),
           generateLabelSpanContents('Country', 'country', country, isLoading),
           generateLabelSpanContents('Institution', 'institution', institution, isLoading)
         ]),
-        div({className: 'information-row', style: styles.applicantInfoRow}, [
+        div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Principal Investgator', 'principal-investigator', pi, isLoading),
           generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading),
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
@@ -127,7 +127,7 @@ export default function ApplicationInformation(props) {
         div({className: 'applicant-details-subheader', style: styles.title}, ["Application Details"]),
         // do not display this first row at all if there is no data to show
         (externalCollaborators.length>0 || internalCollaborators.length>0) ?
-          div({className: 'information-row', style: styles.row}, [
+          div({className: 'information-row', style: styles.applicantInfoRow}, [
             (externalCollaborators.length>0) ?
               generateLabelSpanContents('External Collaborators', 'external-collaborators', externalCollaborators, isLoading)
               : generateLabelSpanContents('', 'row-one-blank', '', false), //blank span to keep row elements in line with those above
@@ -135,16 +135,16 @@ export default function ApplicationInformation(props) {
               generateLabelSpanContents('Internal Collaborators', 'internal-collaborators', internalCollaborators, isLoading)
               : generateLabelSpanContents('', 'row-one-blank', '', false), //blank span to keep row elements in line with those above
           ]) : '',
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Signing Official', 'signing-official', signingOfficial, isLoading),
           generateLabelSpanContents('IT Director', 'it-director', itDirector, isLoading)
         ]),
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Signing Official Email', 'signing-official-email', signingOfficialEmail, isLoading),
           generateLabelSpanContents('IT Director Email', 'it-director-email', itDirectorEmail, isLoading),
         ]),
         (internalCollaborators.length>0 || anvilStorage) ?
-          div({className: 'information-row', style: styles.row}, [
+          div({className: 'information-row', style: styles.applicantInfoRow}, [
             (internalCollaborators.length>0) ?
               generateLabelSpanContents('Internal Lab Staff', 'internal-lab-staff', internalLabStaff, isLoading)
               : generateLabelSpanContents('', 'row-four-blank', '', false), //blank span to keep row elements in line with those above
@@ -152,11 +152,11 @@ export default function ApplicationInformation(props) {
               generateLabelSpanContents('Using AnVIL only for storage and analysis', 'anvil-storage', anvilStorage, isLoading)
               : generateLabelSpanContents('', 'row-four-blank', '', false), //blank span to keep row elements in line with those above
           ]) : '',
-        div({className: 'information-row', style: styles.row}, [
+        div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Requesting Permission to use local computing', 'local-computing', localComputing, isLoading),
           generateLabelSpanContents('Requesting permission to use cloud computing', 'cloud-computing', cloudComputing, isLoading),
         ]),
-        (cloudComputing) ? div({className: 'information-row', style: styles.row}, [
+        (cloudComputing) ? div({className: 'information-row', style: styles.applicantInfoRow}, [
           generateLabelSpanContents('Cloud Provider (description below)', 'cloud-provider', cloudProvider, isLoading),
           generateLabelSpanContents('', 'row-six-blank', '', false) //blank span to keep row elements in line with those above
         ]) : '',
