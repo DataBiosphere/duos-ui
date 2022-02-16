@@ -47,9 +47,9 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
       const { vote, displayName } = dacVote;
-      const { voteId, createDate, updateDate, rationale, requestRevision } = vote;
+      const { voteId, createDate, updateDate, rationale } = vote;
       return [
-        voteCellData({vote, requestRevision, voteId}),
+        voteCellData({vote, voteId}),
         nameCellData({name: displayName, voteId}),
         dateCellData({date: updateDate || createDate, voteId}),
         rationaleCellData({rationale, voteId})
