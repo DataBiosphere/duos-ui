@@ -10,6 +10,8 @@ import ApplicationInformation from './ApplicationInformation';
 import { find, isEmpty, flow } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
+import { Navigation } from '../../libs/utils';
+import { Storage } from '../../libs/storage';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -60,35 +62,36 @@ export default function DarCollectionReview(props) {
 
   useEffect(() => {
     const init = async () => {
-      //NOTE: backend is a bit restrictive, collections by id are currently not visible to anyone other than the creator
-      //Endpoint needs to be adjusted, for now just remove the check on a local instance
-      const [collection, user] = await Promise.all([
-        Collections.getCollectionById(collectionId),
-        User.getMe()
-      ]);
-      const {dars, datasets} = collection;
-      const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
-      const researcherProfile =  await User.getById(collection.createUserId);
-      const researcherProperties = {};
-      researcherProfile.researcherProperties.forEach((property) => {
-        const { propertyKey, propertyValue } = property;
-        researcherProperties[propertyKey] = propertyValue;
-      });
-      const processedBuckets = await flow([
-        generatePreProcessedBucketData,
-        processDataUseBuckets
-      ])({ dars, datasets });
-      setResearcherProperties(researcherProperties);
-      setDataUseBuckets(processedBuckets);
-      setCollection(collection);
-      setCurrentUser(user);
-      setDarInfo(darInfo);
-      setResearcherProfile(researcherProfile);
-      //setTimeout used to render skeleton loader while sub-components are initializing data for render
-      const timeout = setTimeout(() => {
-        setIsLoading(false);
-        clearTimeout(timeout);
-      }, 500);
+      const user = Storage.getCurrentUser();
+      try {
+        const collection = await Collections.getCollectionById(collectionId);
+        const { dars, datasets } = collection;
+        const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
+        const researcherProfile = await User.getById(collection.createUserId);
+        const researcherProperties = {};
+        researcherProfile.researcherProperties.forEach((property) => {
+          const { propertyKey, propertyValue } = property;
+          researcherProperties[propertyKey] = propertyValue;
+        });
+        const processedBuckets = await flow([
+          generatePreProcessedBucketData,
+          processDataUseBuckets,
+        ])({ dars, datasets });
+        setResearcherProperties(researcherProperties);
+        setDataUseBuckets(processedBuckets);
+        setCollection(collection);
+        setCurrentUser(user);
+        setDarInfo(darInfo);
+        setResearcherProfile(researcherProfile);
+        //setTimeout used to render skeleton loader while sub-components are initializing data for render
+        const timeout = setTimeout(() => {
+          setIsLoading(false);
+          clearTimeout(timeout);
+        }, 500);
+      } catch(error) {
+        Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
+        Navigation.console(user, props.history);
+      }
     };
 
     try {
