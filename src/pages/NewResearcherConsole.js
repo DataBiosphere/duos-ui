@@ -4,7 +4,7 @@ import { cloneDeep, map, findIndex, isEmpty } from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
-import DarCollectionTable from '../components/dar_collection_table/DarCollectionTable';
+import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
@@ -231,6 +231,15 @@ export default function NewResearcherConsole(props) {
       h(DarCollectionTable, {
         isRendered: selectedTab === tabNames.darCollections,
         collections: filteredList,
+        columns: [
+          DarCollectionTableColumnOptions.DAR_CODE,
+          DarCollectionTableColumnOptions.NAME,
+          DarCollectionTableColumnOptions.SUBMISSION_DATE,
+          DarCollectionTableColumnOptions.PI,
+          DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.STATUS,
+          DarCollectionTableColumnOptions.ACTIONS
+        ],
         isLoading,
         cancelCollection,
         resubmitCollection
