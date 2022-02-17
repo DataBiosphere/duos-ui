@@ -6,10 +6,8 @@ import VoteSummaryTable from "../../../src/components/vote_summary_table/VoteSum
 const dacVotes = [
   {
     "displayName": "John Doe",
-    "vote": {
-      "updateDate": 1642032000000,
-      "vote": false,
-    }
+    "updateDate": 1642032000000,
+    "vote": false,
   }
 ];
 

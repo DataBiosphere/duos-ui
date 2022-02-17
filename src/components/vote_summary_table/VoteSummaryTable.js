@@ -11,6 +11,7 @@ const styles = {
     fontSize: '1.4rem',
     fontWeight: 400,
     color: '#333F52',
+    backgroundColor: '#FFFFFF',
     display: 'flex',
     padding: '1rem 2%',
     lineHeight: '1.6rem',
@@ -46,8 +47,7 @@ const columnHeaderData = () => {
 const processVoteSummaryRowData = ({ dacVotes }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
-      const { vote, displayName } = dacVote;
-      const { voteId, createDate, updateDate, rationale } = vote;
+      const { vote, displayName, voteId, createDate, updateDate, rationale } = dacVote;
       return [
         voteCellData({vote, voteId}),
         nameCellData({name: displayName, voteId}),
@@ -61,7 +61,7 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 
 function voteCellData({vote, voteId, label = 'vote'}) {
   return {
-    data: isNil(vote.vote) ? "- -" : vote.vote ? "Yes" : "No",
+    data: isNil(vote) ? "- -" : vote ? "Yes" : "No",
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label
