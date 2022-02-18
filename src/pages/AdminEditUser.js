@@ -10,6 +10,7 @@ import {PageHeading} from "../components/PageHeading";
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
+const signingOfficialRole = {'roleId': 7, 'name': USER_ROLES.signingOfficial};
 
 export const AdminEditUser = hh(class AdminEditUser extends Component {
 
@@ -105,6 +106,24 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     });
   };
 
+  signingOfficialChanged = (e) => {
+    const checkState = e.target.checked;
+    // True? add admin role to state.updatedRoles
+    // False? remove admin role from state.updatedRoles
+    let newRoles = [researcherRole];
+    if (checkState) {
+      newRoles = _.concat(this.state.updatedRoles, signingOfficialRole);
+    } else {
+      newRoles = _.filter(this.state.updatedRoles, (r) => {
+        return r.roleId !== signingOfficialRole.roleId;
+      });
+    }
+    this.setState(prev => {
+      prev.updatedRoles = newRoles;
+      return prev;
+    });
+  };
+
   handleChange = (e) => {
     const name = e.target.name;
     const validName = name + 'Valid';
@@ -124,6 +143,12 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   isAdmin = () => {
     const admins = _.filter(this.state.updatedRoles, _.matches(adminRole));
     return !_.isEmpty(admins);
+  };
+
+  //TODO change to not rely on this.state.updatedRoles
+  isSigningOfficial = () => {
+    const signingOfficials = _.filter(this.state.updatedRoles, _.matches(signingOfficialRole));
+    return !_.isEmpty(signingOfficials);
   };
 
   render() {
@@ -200,9 +225,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                       input({
                         type: 'checkbox',
                         id: 'chk_signing_official',
-                        checked: this.isAdmin(),
+                        checked: this.isSigningOfficial(),
                         className: 'checkbox-inline user-checkbox',
-                        onChange: this.adminChanged
+                        onChange: this.signingOfficialChanged
                       }),
                       label({
                         id: 'lbl_signing_official',
