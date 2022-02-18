@@ -94,7 +94,7 @@ class AdminManageUsers extends Component {
       prev.showAddUserModal = true;
       return prev;
     });
-    this.props.history.push(`/admin_edit_user/${user.dacUserId}`)
+    this.props.history.push(`/admin_edit_user/${user.dacUserId}`);
   };
 
   //TODO: delete since researcher review page no longer exists

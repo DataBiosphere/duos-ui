@@ -247,7 +247,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 ]),
               ])
             ]),
-            ResearcherReview({userId: _.get(user, "dacUserId")}),
+            ResearcherReview({userId: this.props.match.params.dacUserId}),
 
             div({isRendered: this.state.emailValid === false && this.state.submitted === true}, [
               Alert({
