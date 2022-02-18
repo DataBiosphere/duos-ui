@@ -7,7 +7,6 @@ import {Alert} from '../components/Alert';
 import {ResearcherReview} from './ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from "../components/PageHeading";
-import SimpleButton from "../components/SimpleButton";
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
@@ -76,20 +75,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     this.setState({emailValid: updatedUser});
 
     event.preventDefault();
-
-    if (this.state.emailValid !== false) {
-      this.props.onOKRequest('addUser');
-    }
-
   };
 
-  closeHandler = () => {
-    this.props.onCloseRequest('addUser');
-  };
-
-  afterOpenHandler = () => {
-    this.props.onAfterOpen('addUser');
-  };
 
   emailPreferenceChanged = (e) => {
     // disable notifications checkbox is not checked: -> Set email preference TRUE
@@ -246,11 +233,11 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                       ['Disable Admin email notifications'])
                   ])
                 ]),
-                //TODO: refactor into separate component + not refresh when clicked
+                //TODO: refactor into separate component
                 div({ className: 'col-lg-12 col-xs-12 inline-block' }, [
                   button({
                     id: 'btn_save',
-                    onClick: () => {},
+                    onClick: this.OKHandler,
                     className: 'f-right btn-primary common-background',
                     disabled: !validForm
                   }, ['Save']),
