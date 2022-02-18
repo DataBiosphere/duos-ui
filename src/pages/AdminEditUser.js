@@ -70,180 +70,200 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: this.state.emailPreference,
       roles: this.state.updatedRoles
     };
-    user.dacUserId = this.state.user.dacUserId;
+    const userId = this.state.user.dacUserId;
+    user.dacUserId = userId;
     const payload = {updatedUser: user};
-    const updatedUser = await User.update(payload, this.state.user.dacUserId);
+    const updatedUser = await User.update(payload, userId);
     this.setState({emailValid: updatedUser});
 
+    await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
     event.preventDefault();
   };
 
+  //TODO: currently doesn't seem to be updating roles (neither does User.update above)
+  updateRolesIfDifferent = async (userId, updatedRoles) => {
+    const user = await User.getById(userId);
+    const currentRoles = user.roles;
 
-  emailPreferenceChanged = (e) => {
-    // disable notifications checkbox is not checked: -> Set email preference TRUE
-    // disable notifications checkbox is checked:     -> Set email preference FALSE
-    const checkState = e.target.checked;
-    this.setState({
-      emailPreference: !checkState
+    _.map(updatedRoles, role => {
+      if (_.contains(currentRoles, role)) {
+        User.addRoleToUser(userId, role.roleId);
+      }
+    });
+
+    _.map(currentRoles, role => {
+      if (!_.contains(updatedRoles, role)) {
+        User.deleteRoleFromUser(userId, role.roleId);
+      }
     });
   };
 
-  adminChanged = (e) => {
-    const checkState = e.target.checked;
-    // True? add admin role to state.updatedRoles
-    // False? remove admin role from state.updatedRoles
-    let newRoles = [researcherRole];
-    if (checkState) {
-      newRoles = _.concat(this.state.updatedRoles, adminRole);
-    } else {
-      newRoles = _.filter(this.state.updatedRoles, (r) => {
-        return r.roleId !== adminRole.roleId;
+
+    emailPreferenceChanged = (e) => {
+      // disable notifications checkbox is not checked: -> Set email preference TRUE
+      // disable notifications checkbox is checked:     -> Set email preference FALSE
+      const checkState = e.target.checked;
+      this.setState({
+        emailPreference: !checkState
       });
-    }
-    this.setState(prev => {
-      prev.updatedRoles = newRoles;
-      return prev;
-    });
-  };
+    };
 
-  signingOfficialChanged = (e) => {
-    const checkState = e.target.checked;
-    // True? add admin role to state.updatedRoles
-    // False? remove admin role from state.updatedRoles
-    let newRoles = [researcherRole];
-    if (checkState) {
-      newRoles = _.concat(this.state.updatedRoles, signingOfficialRole);
-    } else {
-      newRoles = _.filter(this.state.updatedRoles, (r) => {
-        return r.roleId !== signingOfficialRole.roleId;
+    adminChanged = (e) => {
+      const checkState = e.target.checked;
+      // True? add admin role to state.updatedRoles
+      // False? remove admin role from state.updatedRoles
+      let newRoles = [researcherRole];
+      if (checkState) {
+        newRoles = _.concat(this.state.updatedRoles, adminRole);
+      } else {
+        newRoles = _.filter(this.state.updatedRoles, (r) => {
+          return r.roleId !== adminRole.roleId;
+        });
+      }
+      this.setState(prev => {
+        prev.updatedRoles = newRoles;
+        return prev;
       });
-    }
-    this.setState(prev => {
-      prev.updatedRoles = newRoles;
-      return prev;
-    });
-  };
+    };
 
-  handleChange = (e) => {
-    const name = e.target.name;
-    const validName = name + 'Valid';
-    this.setState({
-      [name]: e.target.value,
-      [validName]: e.currentTarget.validity.valid
-    });
-  };
+    signingOfficialChanged = (e) => {
+      const checkState = e.target.checked;
+      // True? add admin role to state.updatedRoles
+      // False? remove admin role from state.updatedRoles
+      let newRoles = [researcherRole];
+      if (checkState) {
+        newRoles = _.concat(this.state.updatedRoles, signingOfficialRole);
+      } else {
+        newRoles = _.filter(this.state.updatedRoles, (r) => {
+          return r.roleId !== signingOfficialRole.roleId;
+        });
+      }
+      this.setState(prev => {
+        prev.updatedRoles = newRoles;
+        return prev;
+      });
+    };
 
-  formChange = () => {
-    this.setState(prev => {
-      prev.invalidForm = (prev.displayNameValid && prev.emailValid);
-      return prev;
-    });
-  };
+    handleChange = (e) => {
+      const name = e.target.name;
+      const validName = name + 'Valid';
+      this.setState({
+        [name]: e.target.value,
+        [validName]: e.currentTarget.validity.valid
+      });
+    };
 
-  isAdmin = () => {
-    const admins = _.filter(this.state.updatedRoles, _.matches(adminRole));
-    return !_.isEmpty(admins);
-  };
+    formChange = () => {
+      this.setState(prev => {
+        prev.invalidForm = (prev.displayNameValid && prev.emailValid);
+        return prev;
+      });
+    };
 
-  //TODO change to not rely on this.state.updatedRoles
-  isSigningOfficial = () => {
-    const signingOfficials = _.filter(this.state.updatedRoles, _.matches(signingOfficialRole));
-    return !_.isEmpty(signingOfficials);
-  };
+    isAdmin = () => {
+      const admins = _.filter(this.state.updatedRoles, _.matches(adminRole));
+      return !_.isEmpty(admins);
+    };
 
-  render() {
-    const {displayName, email, displayNameValid, emailValid} = this.state;
-    const validForm = displayNameValid && emailValid;
-    const {dacUserId} = this.props.match.params;
-    return (
-      div({className: "container container-wide"}, [
-        div({className: "row no-margin"}, [
-          div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
-            PageHeading({
-              id: "editUser",
-              imgSrc: editUserIcon,
-              iconSize: "medium",
-              color: "common",
-              title: "Edit User",
-              description: "Edit a User in the system"
-            }),
-          ]),
-          div({className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding"}, [
+    //TODO change to not rely on this.state.updatedRoles
+    isSigningOfficial = () => {
+      const signingOfficials = _.filter(this.state.updatedRoles, _.matches(signingOfficialRole));
+      return !_.isEmpty(signingOfficials);
+    };
 
-            form({
-              className: 'form-horizontal css-form ',
-              name: 'userForm',
-              encType: 'multipart/form-data',
-              onChange: this.formChange
-            }, [
-              div({className: 'form-group first-form-group'}, [
-                label({
-                  id: 'lbl_name',
-                  className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-                }, ['Name']),
-                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'}, [
-                  input({
-                    type: 'text',
-                    name: 'displayName',
-                    id: 'txt_name',
-                    className: 'form-control col-lg-12 vote-input',
-                    placeholder: 'User name',
-                    required: true,
-                    value: displayName,
-                    autoFocus: true,
-                    onChange: this.handleChange,
-                    ref: this.nameRef
-                  })
-                ])
-              ]),
+    render()
+    {
+      const {displayName, email, displayNameValid, emailValid} = this.state;
+      const validForm = displayNameValid && emailValid;
+      const {dacUserId} = this.props.match.params;
+      return (
+        div({className: "container container-wide"}, [
+          div({className: "row no-margin"}, [
+            div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
+              PageHeading({
+                id: "editUser",
+                imgSrc: editUserIcon,
+                iconSize: "medium",
+                color: "common",
+                title: "Edit User",
+                description: "Edit a User in the system"
+              }),
+            ]),
+            div({className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding"}, [
 
-              div({className: 'form-group'}, [
-                label({
-                  id: 'lbl_email',
-                  className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-                }, ['Google account id']),
-                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'}, [
-                  input({
-                    type: 'email',
-                    name: 'email',
-                    id: 'txt_email',
-                    className: 'form-control col-lg-12 vote-input',
-                    placeholder: 'e.g. username@broadinstitute.org',
-                    required: true,
-                    value: email,
-                    onChange: this.handleChange,
-                    ref: this.emailRef
-                  })
-                ])
-              ]),
-              //TODO: potentially isolate checkbox in own component
-              div({className: 'form-group'}, [
-                label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['Role']),
-                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
-                  div({className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'}, [
-                    div({className: 'checkbox'}, [
-                      input({
-                        type: 'checkbox',
-                        id: 'chk_signing_official',
-                        checked: this.isSigningOfficial(),
-                        className: 'checkbox-inline user-checkbox',
-                        onChange: this.signingOfficialChanged
-                      }),
-                      label({
-                        id: 'lbl_signing_official',
-                        className: 'regular-checkbox rp-choice-questions',
-                        htmlFor: 'chk_signing_official'
-                      }, ['Signing Official'])
-                    ]),
+              form({
+                className: 'form-horizontal css-form ',
+                name: 'userForm',
+                encType: 'multipart/form-data',
+                onChange: this.formChange
+              }, [
+                div({className: 'form-group first-form-group'}, [
+                  label({
+                    id: 'lbl_name',
+                    className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+                  }, ['Name']),
+                  div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'}, [
+                    input({
+                      type: 'text',
+                      name: 'displayName',
+                      id: 'txt_name',
+                      className: 'form-control col-lg-12 vote-input',
+                      placeholder: 'User name',
+                      required: true,
+                      value: displayName,
+                      autoFocus: true,
+                      onChange: this.handleChange,
+                      ref: this.nameRef
+                    })
                   ])
                 ]),
-              ]),
 
-              div({className: 'form-group'}, [
-                //TODO: currently removing this messes up spacing, but it no longer serves a purpose
-                label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['']),
-                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
-                  div({className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'}, [
+                div({className: 'form-group'}, [
+                  label({
+                    id: 'lbl_email',
+                    className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+                  }, ['Google account id']),
+                  div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'}, [
+                    input({
+                      type: 'email',
+                      name: 'email',
+                      id: 'txt_email',
+                      className: 'form-control col-lg-12 vote-input',
+                      placeholder: 'e.g. username@broadinstitute.org',
+                      required: true,
+                      value: email,
+                      onChange: this.handleChange,
+                      ref: this.emailRef
+                    })
+                  ])
+                ]),
+                div({className: 'form-group'}, [
+                  label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['Roles']),
+                  div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
+                    div({className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'}, [
+                      div({className: 'checkbox'}, [
+                        input({
+                          type: 'checkbox',
+                          id: 'chk_signing_official',
+                          checked: this.isSigningOfficial(),
+                          className: 'checkbox-inline user-checkbox',
+                          onChange: this.signingOfficialChanged
+                        }),
+                        label({
+                          id: 'lbl_signing_official',
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'chk_signing_official'
+                        }, ['Signing Official'])
+                      ]),
+                    ])
+                  ]),
+                ]),
+
+                div({className: 'form-group'}, [
+                  div({
+                    className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
+                    style: {'paddingLeft': '30px'}
+                  }, [
                     div({className: 'checkbox'}, [
                       input({
                         type: 'checkbox',
@@ -259,30 +279,29 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                       }, ['Admin'])
                     ])
                   ])
-                ])
-              ]),
-              div({className: 'form-group'}, [
-                div({
-                  isRendered: this.isAdmin(),
-                  className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
-                  style: {'paddingLeft': '30px'}
-                }, [
-                  div({className: 'checkbox'}, [
-                    input({
-                      id: 'chk_emailPreference',
-                      type: 'checkbox',
-                      className: 'checkbox-inline user-checkbox',
-                      // If email preference is TRUE  -> disable checkbox is not checked
-                      // If email preference is FALSE -> disable checkbox is checked
-                      checked: !this.state.emailPreference,
-                      onChange: this.emailPreferenceChanged
-                    }),
-                    label({className: 'regular-checkbox rp-choice-questions bold', htmlFor: 'chk_emailPreference'},
-                      ['Disable Admin email notifications'])
+                ]),
+                div({className: 'form-group'}, [
+                  div({
+                    isRendered: this.isAdmin(),
+                    className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
+                    style: {'paddingLeft': '30px'}
+                  }, [
+                    div({className: 'checkbox'}, [
+                      input({
+                        id: 'chk_emailPreference',
+                        type: 'checkbox',
+                        className: 'checkbox-inline user-checkbox',
+                        // If email preference is TRUE  -> disable checkbox is not checked
+                        // If email preference is FALSE -> disable checkbox is checked
+                        checked: !this.state.emailPreference,
+                        onChange: this.emailPreferenceChanged
+                      }),
+                      label({className: 'regular-checkbox rp-choice-questions bold', htmlFor: 'chk_emailPreference'},
+                        ['Disable Admin email notifications'])
+                    ])
                   ])
                 ]),
-                //TODO: refactor into separate component
-                div({ className: 'col-lg-12 col-xs-12 inline-block' }, [
+                div({className: 'col-lg-12 col-xs-12 inline-block'}, [
                   button({
                     id: 'btn_save',
                     onClick: this.OKHandler,
@@ -307,10 +326,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                     Alert({id: 'modal_' + ix, type: alert.type, title: alert.title, description: alert.msg})
                   ])
                 );
-              })])
+              })
+            ])
           ])
         ])
-      ])
-    );
-  }
+      );
+    }
 });
