@@ -35,13 +35,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   }
 
   async componentDidMount() {
-
-    if (this.props.user) {
-      const user = await User.getByEmail(this.props.user.email);
+      const user = await User.getById(this.props.match.params.dacUserId);
       const currentRoles = _.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };});
       const updatedRoles = _.isEmpty(currentRoles) ? [researcherRole] : currentRoles;
       this.setState({
-          mode: 'Edit',
           displayName: user.displayName,
           email: user.email,
           user: user,
@@ -56,23 +53,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
             emailValid: r2.validity.valid
           });
         });
-    } else {
-      this.setState({
-          mode: 'Add',
-          displayName: '',
-          email: '',
-          updatedRoles: [researcherRole],
-          emailPreference: false
-        },
-        () => {
-          let r1 = this.nameRef.current;
-          let r2 = this.emailRef.current;
-          this.setState({
-            displayNameValid: r1.validity.valid,
-            emailValid: r2.validity.valid
-          });
-        });
-    }
   }
 
   OKHandler = async (event) => {

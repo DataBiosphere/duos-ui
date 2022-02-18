@@ -94,6 +94,7 @@ class AdminManageUsers extends Component {
       prev.showAddUserModal = true;
       return prev;
     });
+    this.props.history.push(`/admin_edit_user/${user.dacUserId}`)
   };
 
   //TODO: delete since researcher review page no longer exists
@@ -191,7 +192,7 @@ class AdminManageUsers extends Component {
                     id: user.dacUserId + "_btnEditUser",
                     name: 'btn_editUser',
                     className: "cell-button hover-color",
-                    onClick: () => this.props.history.push(`/admin_edit_user/${user.dacUserId}`), //TODO move in separate function and fix route
+                    onClick: this.editUser(user)
                   }, ["Edit"]),
                 ]),
               ]),
