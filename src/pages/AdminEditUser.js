@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import React, {Component, Fragment} from 'react';
-import {div, form, h, hh, input, label} from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
 import {User} from '../libs/ajax';
 import {USER_ROLES} from '../libs/utils';
 import {Alert} from '../components/Alert';
 import {ResearcherReview} from './ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from "../components/PageHeading";
+import SimpleButton from "../components/SimpleButton";
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
@@ -141,7 +142,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   render() {
     const {displayName, email, displayNameValid, emailValid} = this.state;
     const validForm = displayNameValid && emailValid;
-    const {user} = this.props;
+    const {dacUserId} = this.props.match.params;
     return (
       div({className: "container container-wide"}, [
         div({className: "row no-margin"}, [
@@ -158,7 +159,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
           div({className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding"}, [
 
             form({
-              className: 'form-horizontal css-form',
+              className: 'form-horizontal css-form ',
               name: 'userForm',
               encType: 'multipart/form-data',
               onChange: this.formChange
@@ -245,9 +246,18 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                       ['Disable Admin email notifications'])
                   ])
                 ]),
+                //TODO: refactor into separate component + not refresh when clicked
+                div({ className: 'col-lg-12 col-xs-12 inline-block' }, [
+                  button({
+                    id: 'btn_save',
+                    onClick: () => {},
+                    className: 'f-right btn-primary common-background',
+                    disabled: !validForm
+                  }, ['Save']),
+                ])
               ])
             ]),
-            ResearcherReview({userId: this.props.match.params.dacUserId}),
+            ResearcherReview({userId: dacUserId}),
 
             div({isRendered: this.state.emailValid === false && this.state.submitted === true}, [
               Alert({
