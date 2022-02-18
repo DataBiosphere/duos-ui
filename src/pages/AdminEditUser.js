@@ -191,9 +191,32 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                   })
                 ])
               ]),
-
+              //TODO: potentially isolate checkbox in own component
               div({className: 'form-group'}, [
                 label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['Role']),
+                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
+                  div({className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'}, [
+                    div({className: 'checkbox'}, [
+                      input({
+                        type: 'checkbox',
+                        id: 'chk_signing_official',
+                        checked: this.isAdmin(),
+                        className: 'checkbox-inline user-checkbox',
+                        onChange: this.adminChanged
+                      }),
+                      label({
+                        id: 'lbl_signing_official',
+                        className: 'regular-checkbox rp-choice-questions',
+                        htmlFor: 'chk_signing_official'
+                      }, ['Signing Official'])
+                    ]),
+                  ])
+                ]),
+              ]),
+
+              div({className: 'form-group'}, [
+                //TODO: currently removing this messes up spacing, but it no longer serves a purpose
+                label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['']),
                 div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
                   div({className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'}, [
                     div({className: 'checkbox'}, [
@@ -264,6 +287,5 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
         ])
       ])
     );
-
   }
 });
