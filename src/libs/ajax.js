@@ -921,9 +921,22 @@ export const User = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
     return res.json();
   },
+
   getUnassignedUsers: async () => {
     const url = `${await Config.getApiUrl()}/api/user/institution/unassigned`;
     const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  addRoleToUser: async (userId, roleId) => {
+    const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
+    return res.data;
+  },
+
+  deleteRoleFromUser: async (userId, roleId) => {
+    const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.data;
   }
 
