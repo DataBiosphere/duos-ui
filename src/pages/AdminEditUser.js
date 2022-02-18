@@ -35,9 +35,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   }
 
   async componentDidMount() {
-    if (this.props.showModal === false) {
-      return;
-    }
 
     if (this.props.user) {
       const user = await User.getByEmail(this.props.user.email);
@@ -92,23 +89,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: this.state.emailPreference,
       roles: this.state.updatedRoles
     };
-    switch (this.state.mode) {
-      case 'Add': {
-        user.email = this.state.email;
-        const createdUser = await User.create(user);
-        this.setState({ emailValid: createdUser });
-        break;
-      }
-      case 'Edit': {
         user.dacUserId = this.state.user.dacUserId;
         const payload = { updatedUser: user };
         const updatedUser = await User.update(payload, this.state.user.dacUserId);
         this.setState({ emailValid: updatedUser });
-        break;
-      }
-      default:
-        break;
-    }
 
     event.preventDefault();
 
