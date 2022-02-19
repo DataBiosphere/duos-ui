@@ -41,3 +41,8 @@ You don't need to have a running server started, this will do that for you.
 ```
     npx cypress open-ct
 ```
+
+This runs component tests headless:
+```
+    npx cypress run-ct
+```
