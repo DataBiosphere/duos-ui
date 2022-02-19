@@ -1,0 +1,29 @@
+on: [pull_request]
+name: cypress integration tests
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Log Actor
+        run: echo "${{ github.actor }}"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm ci
+      - name: Copy Configs
+        run: cp config/perf.json public/config.json
+      - name: NPM Build
+        run: CI=false npm run build --silent
+      - name: Cypress run integration tests
+        uses: cypress-io/github-action@v2
+        env:
+          CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
+          CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
+          CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER_SA }}
+          CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER_SA }}
+          CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
+        with:
+          start: npm start
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
