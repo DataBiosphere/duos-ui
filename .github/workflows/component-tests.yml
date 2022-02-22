@@ -1,0 +1,17 @@
+on: [pull_request]
+name: cypress component tests
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Actor
+        run: echo "${{ github.actor }}"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm ci
+      - name : Cypress run component tests
+        uses: cypress-io/github-action@v2
+        with:
+          install: false
+          command: npx cypress run-ct
