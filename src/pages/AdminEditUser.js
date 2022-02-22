@@ -165,7 +165,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       return !_.isEmpty(admins);
     };
 
-    //TODO change to not rely on this.state.updatedRoles
     isSigningOfficial = () => {
       const signingOfficials = _.filter(this.state.updatedRoles, _.matches(signingOfficialRole));
       return !_.isEmpty(signingOfficials);
