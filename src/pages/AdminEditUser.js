@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import contains from 'lodash/fp';
 import React, {Component, Fragment} from 'react';
 import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
 import {User} from '../libs/ajax';
@@ -58,9 +59,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
   OKHandler = async (event) => {
     event.persist();
-    this.setState({
-      submitted: true
-    });
+    event.preventDefault();
+
     const validForm = this.state.displayNameValid && this.state.emailValid;
     if (validForm === false) {
       return;
@@ -74,10 +74,13 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     user.dacUserId = userId;
     const payload = {updatedUser: user};
     const updatedUser = await User.update(payload, userId);
-    this.setState({emailValid: updatedUser});
 
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
-    event.preventDefault();
+
+    this.setState({
+      submitted: true,
+      emailValid: updatedUser
+    });
   };
 
   //TODO: currently doesn't seem to be updating roles (neither does User.update above)
@@ -86,13 +89,21 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     const currentRoles = user.roles;
 
     _.map(updatedRoles, role => {
-      if (_.contains(currentRoles, role)) {
+      console.log(JSON.stringify(updatedRoles));
+      console.log(JSON.stringify(role));
+
+      if (!contains(currentRoles, role)) {
+        console.log("adding role to user");
         User.addRoleToUser(userId, role.roleId);
       }
     });
 
     _.map(currentRoles, role => {
-      if (!_.contains(updatedRoles, role)) {
+      console.log(JSON.stringify(currentRoles));
+      console.log(JSON.stringify(role));
+
+      if (!contains(updatedRoles, role)) {
+        console.log("deleting role from user");
         User.deleteRoleFromUser(userId, role.roleId);
       }
     });
