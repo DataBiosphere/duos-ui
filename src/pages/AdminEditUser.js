@@ -65,16 +65,14 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     if (validForm === false) {
       return;
     }
+    const userId = this.state.user.dacUserId;
     let user = {
+      dacUserId: userId,
       displayName: this.state.displayName,
       emailPreference: this.state.emailPreference,
-      roles: this.state.updatedRoles
     };
-    const userId = this.state.user.dacUserId;
-    user.dacUserId = userId;
     const payload = {updatedUser: user};
     const updatedUser = await User.update(payload, userId);
-
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
     this.setState({
@@ -83,27 +81,18 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     });
   };
 
-  //TODO: currently doesn't seem to be updating roles (neither does User.update above)
   updateRolesIfDifferent = async (userId, updatedRoles) => {
     const user = await User.getById(userId);
     const currentRoles = user.roles;
 
     _.map(updatedRoles, role => {
-      console.log(JSON.stringify(updatedRoles));
-      console.log(JSON.stringify(role));
-
       if (!contains(currentRoles, role)) {
-        console.log("adding role to user");
         User.addRoleToUser(userId, role.roleId);
       }
     });
 
     _.map(currentRoles, role => {
-      console.log(JSON.stringify(currentRoles));
-      console.log(JSON.stringify(role));
-
       if (!contains(updatedRoles, role)) {
-        console.log("deleting role from user");
         User.deleteRoleFromUser(userId, role.roleId);
       }
     });

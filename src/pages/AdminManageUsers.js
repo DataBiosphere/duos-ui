@@ -88,15 +88,6 @@ class AdminManageUsers extends Component {
   };
 
   editUser = (user) => () => {
-    /*
-    this.setState(prev => {
-      prev.userEmail = user.email;
-      prev.user = user;
-      prev.showAddUserModal = true;
-      return prev;
-    });
-
-     */
     this.props.history.push(`/admin_edit_user/${user.dacUserId}`);
   };
 
