@@ -5,9 +5,7 @@ import { User } from '../../libs/ajax';
 import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
-import { ResearcherReview } from '../../pages/ResearcherReview';
 import addUserIcon from '../../images/icon_add_user.png';
-import editUserIcon from '../../images/icon_edit_user.png';
 
 const adminRole = { 'roleId': 4, 'name': USER_ROLES.admin };
 const researcherRole = { 'roleId': 5, 'name': USER_ROLES.researcher };
@@ -136,7 +134,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   render() {
     const { displayName, email, displayNameValid, emailValid } = this.state;
     const validForm = displayNameValid && emailValid;
-    const { user } = this.props;
     return (
       BaseModal({
         id: 'addUserModal',
