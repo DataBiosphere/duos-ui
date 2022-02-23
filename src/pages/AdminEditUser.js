@@ -65,12 +65,12 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     if (validForm === false) {
       return;
     }
+    const userId = this.state.user.dacUserId;
     let user = {
+      dacUserId: userId,
       displayName: this.state.displayName,
       emailPreference: this.state.emailPreference,
     };
-    const userId = this.state.user.dacUserId;
-    user.dacUserId = userId;
     const payload = {updatedUser: user};
     const updatedUser = await User.update(payload, userId);
 
@@ -78,7 +78,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
     this.setState({
       submitted: true,
-      emailValid: updatedUser
+      emailValid: updatedUser,
     });
   };
 
@@ -178,14 +178,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       });
     };
 
-    isAdmin = () => {
-      const admins = _.filter(this.state.updatedRoles, _.matches(adminRole));
-      return !_.isEmpty(admins);
-    };
-
-    isSigningOfficial = () => {
-      const signingOfficials = _.filter(this.state.updatedRoles, _.matches(signingOfficialRole));
-      return !_.isEmpty(signingOfficials);
+    userIsRole = (role) => {
+      const matches = _.filter(this.state.updatedRoles, _.matches(role));
+      return !_.isEmpty(matches);
     };
 
     render()
@@ -262,7 +257,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                         input({
                           type: 'checkbox',
                           id: 'chk_signing_official',
-                          checked: this.isSigningOfficial(),
+                          checked: this.userIsRole(signingOfficialRole),
                           className: 'checkbox-inline user-checkbox',
                           onChange: this.signingOfficialChanged
                         }),
@@ -285,7 +280,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                       input({
                         type: 'checkbox',
                         id: 'chk_admin',
-                        checked: this.isAdmin(),
+                        checked: this.userIsRole(adminRole),
                         className: 'checkbox-inline user-checkbox',
                         onChange: this.adminChanged
                       }),
@@ -299,7 +294,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 ]),
                 div({className: 'form-group'}, [
                   div({
-                    isRendered: this.isAdmin(),
+                    isRendered: this.userIsRole(adminRole),
                     className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
                     style: {'paddingLeft': '30px'}
                   }, [
@@ -328,7 +323,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 ])
               ])
             ]),
-            ResearcherReview({userId: dacUserId}),
+            ResearcherReview({userId: dacUserId, user: this.state.user}),
 
             div({isRendered: this.state.emailValid === false && this.state.submitted === true}, [
               Alert({
