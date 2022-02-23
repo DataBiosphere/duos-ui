@@ -20,6 +20,7 @@ import { LibraryCard } from "../../libs/ajax";
 import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import LcaMarkdown from '../../assets/LCA.md';
+import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDownload';
 
 //Styles specific to this table
 const styles = {
@@ -75,7 +76,10 @@ const IssueLibraryCardButton = (props) => {
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
   const {card, showConfirmationModal} = props;
-  const message = 'Are you sure you want to issue this library card?';
+  const message = div({}, [
+    // LCA Terms Download
+    LibraryCardAgreementTermsDownload,
+    'Are you sure you want to issue this library card?']);
   const title = 'Issue Library Card';
   return h(SimpleButton, {
     keyProp: `issue-card-${card.userEmail}`,
