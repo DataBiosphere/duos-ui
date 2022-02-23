@@ -23,7 +23,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       email: '',
       displayNameValid: false,
       emailValid: false,
-      invalidForm: true,
       submitted: false,
       alerts: [],
       updatedRoles: [researcherRole],
@@ -61,8 +60,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     event.persist();
     event.preventDefault();
 
-    const validForm = this.state.displayNameValid && this.state.emailValid;
-    if (validForm === false) {
+    if (!this.formIsValid()) {
       return;
     }
     const userId = this.state.user.dacUserId;
@@ -116,6 +114,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     });
   };
 
+  formIsValid = () => {
+    return this.state.displayNameValid && this.state.emailValid;
+  };
 
     emailPreferenceChanged = (e) => {
       // disable notifications checkbox is not checked: -> Set email preference TRUE
@@ -153,13 +154,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       });
     };
 
-    formChange = () => {
-      this.setState(prev => {
-        prev.invalidForm = (prev.displayNameValid && prev.emailValid);
-        return prev;
-      });
-    };
-
     userIsRole = (role) => {
       const matches = _.filter(this.state.updatedRoles, _.matches(role));
       return !_.isEmpty(matches);
@@ -167,8 +161,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
     render()
     {
-      const {displayName, email, displayNameValid, emailValid} = this.state;
-      const validForm = displayNameValid && emailValid;
+      const {displayName, email} = this.state;
+      const validForm = this.formIsValid();
       const {dacUserId} = this.props.match.params;
       return (
         div({className: "container container-wide"}, [
@@ -189,7 +183,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 className: 'form-horizontal css-form ',
                 name: 'userForm',
                 encType: 'multipart/form-data',
-                onChange: this.formChange
               }, [
                 div({className: 'form-group first-form-group'}, [
                   label({
