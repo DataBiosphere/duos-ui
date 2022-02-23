@@ -126,34 +126,16 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       });
     };
 
-    adminChanged = (e) => {
+    roleStatusChanged = (e, role) => {
       const checkState = e.target.checked;
-      // True? add admin role to state.updatedRoles
-      // False? remove admin role from state.updatedRoles
+      // True? add role to state.updatedRoles
+      // False? remove role from state.updatedRoles
       let newRoles = [researcherRole];
       if (checkState) {
-        newRoles = _.concat(this.state.updatedRoles, adminRole);
+        newRoles = _.concat(this.state.updatedRoles, role);
       } else {
         newRoles = _.filter(this.state.updatedRoles, (r) => {
-          return r.roleId !== adminRole.roleId;
-        });
-      }
-      this.setState(prev => {
-        prev.updatedRoles = newRoles;
-        return prev;
-      });
-    };
-
-    signingOfficialChanged = (e) => {
-      const checkState = e.target.checked;
-      // True? add admin role to state.updatedRoles
-      // False? remove admin role from state.updatedRoles
-      let newRoles = [researcherRole];
-      if (checkState) {
-        newRoles = _.concat(this.state.updatedRoles, signingOfficialRole);
-      } else {
-        newRoles = _.filter(this.state.updatedRoles, (r) => {
-          return r.roleId !== signingOfficialRole.roleId;
+          return r.roleId !== role.roleId;
         });
       }
       this.setState(prev => {
@@ -259,7 +241,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                           id: 'chk_signing_official',
                           checked: this.userIsRole(signingOfficialRole),
                           className: 'checkbox-inline user-checkbox',
-                          onChange: this.signingOfficialChanged
+                          onChange: e => this.roleStatusChanged(e, signingOfficialRole)
                         }),
                         label({
                           id: 'lbl_signing_official',
@@ -282,7 +264,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                         id: 'chk_admin',
                         checked: this.userIsRole(adminRole),
                         className: 'checkbox-inline user-checkbox',
-                        onChange: this.adminChanged
+                        onChange: e => this.roleStatusChanged(e, adminRole)
                       }),
                       label({
                         id: 'lbl_admin',
