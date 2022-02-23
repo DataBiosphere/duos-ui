@@ -930,13 +930,13 @@ export const User = {
 
   addRoleToUser: async (userId, roleId) => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
+    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
     return res.json();
   },
 
   deleteRoleFromUser: async (userId, roleId) => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.json();
   }
 
