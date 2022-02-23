@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import contains from 'lodash/fp';
+import {union, contains, map} from 'lodash/fp';
 import React, {Component, Fragment} from 'react';
 import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
 import {User} from '../libs/ajax';
@@ -68,7 +68,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     let user = {
       displayName: this.state.displayName,
       emailPreference: this.state.emailPreference,
-      roles: this.state.updatedRoles
     };
     const userId = this.state.user.dacUserId;
     user.dacUserId = userId;
@@ -83,28 +82,36 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     });
   };
 
-  //TODO: currently doesn't seem to be updating roles (neither does User.update above)
   updateRolesIfDifferent = async (userId, updatedRoles) => {
     const user = await User.getById(userId);
-    const currentRoles = user.roles;
+    const currentRoleIds = map('roleId')(user.roles);
+    // Always make sure researcher is a role we already have or need to add.
+    const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles));
 
-    _.map(updatedRoles, role => {
-      console.log(JSON.stringify(updatedRoles));
-      console.log(JSON.stringify(role));
+    console.log("Current Roles:");
+    console.log(JSON.stringify(currentRoleIds));
 
-      if (!contains(currentRoles, role)) {
-        console.log("adding role to user");
-        User.addRoleToUser(userId, role.roleId);
+    console.log("Updated Roles:");
+    console.log(JSON.stringify(updatedRoleIds));
+
+    _.map(updatedRoleIds, roleId => {
+      console.log("Role Addition");
+      console.log("!contains(roleId)(currentRoleIds): " + JSON.stringify(!contains(roleId)(currentRoleIds)));
+      if (!contains(roleId)(currentRoleIds)) {
+        console.log("adding role to user: " + roleId);
+        User.addRoleToUser(userId, roleId);
       }
     });
 
-    _.map(currentRoles, role => {
-      console.log(JSON.stringify(currentRoles));
-      console.log(JSON.stringify(role));
-
-      if (!contains(updatedRoles, role)) {
-        console.log("deleting role from user");
-        User.deleteRoleFromUser(userId, role.roleId);
+    _.map(currentRoleIds, roleId => {
+      console.log("Role Deletion");
+      console.log("!contains(roleId)(updatedRoleIds): " + JSON.stringify(!contains(roleId)(updatedRoleIds)));
+      if (!contains(roleId)(updatedRoleIds)) {
+        // Safety check ... never delete the researcher role!!!
+        if (roleId !== researcherRole.roleId) {
+          console.log("deleting role from user: " + roleId);
+          User.deleteRoleFromUser(userId, roleId);
+        }
       }
     });
   };
