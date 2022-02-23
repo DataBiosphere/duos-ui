@@ -218,8 +218,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                     placeholder: 'e.g. username@broadinstitute.org',
                     required: true,
                     value: email,
-                    onChange: this.handleChange,
-                    ref: this.emailRef
+                    ref: this.emailRef,
+                    disabled: true
                   })
                 ])
               ]),
