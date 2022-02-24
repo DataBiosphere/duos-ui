@@ -22,7 +22,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       displayName: '',
       email: '',
       displayNameValid: false,
-   //   emailValid: false,
       submitted: false,
       alerts: [],
       updatedRoles: [researcherRole],
@@ -30,7 +29,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     };
 
     this.nameRef = React.createRef();
-    this.emailRef = React.createRef();
   }
 
   async componentDidMount() {
@@ -47,11 +45,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: user.emailPreference
     },
     () => {
-      let r1 = this.nameRef.current;
-      let r2 = this.emailRef.current;
       this.setState({
-        displayNameValid: r1.validity.valid,
-    //    emailValid: r2.validity.valid
+        displayNameValid: this.nameRef.current.validity.valid,
       });
     });
   }
@@ -114,7 +109,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   };
 
   formIsValid = () => {
-    return this.state.displayNameValid;// && this.state.emailValid;
+    return this.state.displayNameValid;
   };
 
   emailPreferenceChanged = (e) => {
@@ -218,7 +213,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                     placeholder: 'e.g. username@broadinstitute.org',
                     required: true,
                     value: email,
-                    ref: this.emailRef,
                     disabled: true
                   })
                 ])
