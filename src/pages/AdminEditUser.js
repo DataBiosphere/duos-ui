@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import {union, contains, map} from 'lodash/fp';
-import React, {Component, Fragment} from 'react';
-import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
+import React, {Component} from 'react';
+import {button, div, form, hh, input, label} from 'react-hyperscript-helpers';
 import {User} from '../libs/ajax';
 import {USER_ROLES} from '../libs/utils';
-import {Alert} from '../components/Alert';
 import {ResearcherReview} from './ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from "../components/PageHeading";
