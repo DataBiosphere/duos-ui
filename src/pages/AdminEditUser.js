@@ -22,7 +22,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       displayName: '',
       email: '',
       displayNameValid: false,
-      emailValid: false,
+   //   emailValid: false,
       submitted: false,
       alerts: [],
       updatedRoles: [researcherRole],
@@ -51,7 +51,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       let r2 = this.emailRef.current;
       this.setState({
         displayNameValid: r1.validity.valid,
-        emailValid: r2.validity.valid
+    //    emailValid: r2.validity.valid
       });
     });
   }
@@ -75,7 +75,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
     this.setState({
       submitted: true,
-      emailValid: updatedUser
+      displayNameValid: updatedUser
     });
   };
 
@@ -114,7 +114,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   };
 
   formIsValid = () => {
-    return this.state.displayNameValid && this.state.emailValid;
+    return this.state.displayNameValid;// && this.state.emailValid;
   };
 
   emailPreferenceChanged = (e) => {
@@ -317,23 +317,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
               ])
             ])
           ]),
-          ResearcherReview({userId: dacUserId}),
-
-          div({isRendered: this.state.emailValid === false && this.state.submitted === true}, [
-            Alert({
-              id: 'emailUsed', type: 'danger', title: 'Conflicts to resolve!',
-              description: 'There is a user already registered with this google account.'
-            })
-          ]),
-          div({isRendered: this.state.alerts.length > 0}, [
-            this.state.alerts.map((alert, ix) => {
-              return (
-                h(Fragment, {key: 'alert_' + ix}, [
-                  Alert({id: 'modal_' + ix, type: alert.type, title: alert.title, description: alert.msg})
-                ])
-              );
-            })
-          ])
+          ResearcherReview({userId: dacUserId})
         ])
       ])
     );
