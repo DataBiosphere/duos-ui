@@ -44,7 +44,6 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
   }
 
   calculateResearcherInfo = () => {
-    console.log("Processing props.user: " + JSON.stringify(this.props.user));
     const user = this.props.user;
     let researcherProps = getPropertyValuesFromUser(user);
     this.setState(prev => {
