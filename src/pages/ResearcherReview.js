@@ -54,8 +54,15 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
     });
   };
 
-  render() {
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.user !== prevProps.user) {
+      this.setState({
+        user: this.props.user
+      });
+    }
+  }
 
+  render() {
     const { formData, user, institution } = this.state;
 
     return (
