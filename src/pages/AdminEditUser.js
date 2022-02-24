@@ -75,7 +75,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
     this.setState({
       submitted: true,
-      emailValid: updatedUser,
+      emailValid: updatedUser
     });
   };
 
@@ -223,6 +223,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                   })
                 ])
               ]),
+
               div({className: 'form-group'}, [
                 label({className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'}, ['Roles']),
                 div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'}, [
@@ -230,21 +231,40 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                     div({className: 'checkbox'}, [
                       input({
                         type: 'checkbox',
-                        id: 'chk_signing_official',
-                        checked: this.userHasRole(signingOfficialRole),
+                        id: 'chk_researcher',
+                        checked: true,
                         className: 'checkbox-inline user-checkbox',
-                        onChange: e => this.roleStatusChanged(e, signingOfficialRole)
                       }),
                       label({
-                        id: 'lbl_signing_official',
+                        id: 'lbl_researcher',
                         className: 'regular-checkbox rp-choice-questions',
-                        htmlFor: 'chk_signing_official'
-                      }, ['Signing Official'])
+                        htmlFor: 'chk_researcher'
+                      }, ['Researcher'])
                     ]),
                   ])
                 ]),
               ]),
-
+              div({className: 'form-group'}, [
+                div({
+                  className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
+                  style: {'paddingLeft': '30px'}
+                }, [
+                  div({className: 'checkbox'}, [
+                    input({
+                      type: 'checkbox',
+                      id: 'chk_signing_official',
+                      checked: this.userHasRole(signingOfficialRole),
+                      className: 'checkbox-inline user-checkbox',
+                      onChange: e => this.roleStatusChanged(e, signingOfficialRole)
+                    }),
+                    label({
+                      id: 'lbl_signing_official',
+                      className: 'regular-checkbox rp-choice-questions',
+                      htmlFor: 'chk_signing_official'
+                    }, ['Signing Official'])
+                  ]),
+                ])
+              ]),
               div({className: 'form-group'}, [
                 div({
                   className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
@@ -297,7 +317,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
               ])
             ])
           ]),
-          ResearcherReview({userId: dacUserId, user: this.state.user}),
+          ResearcherReview({userId: dacUserId}),
 
           div({isRendered: this.state.emailValid === false && this.state.submitted === true}, [
             Alert({
