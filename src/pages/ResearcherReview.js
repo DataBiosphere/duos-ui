@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, hh, label, form, textarea } from 'react-hyperscript-helpers';
-import { User } from "../libs/ajax";
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
 import { isEmpty } from 'lodash';
@@ -40,25 +39,20 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
     };
   }
 
-  componentDidMount() {
-    this.findResearcherInfo();
+  async componentDidMount() {
+    await this.findResearcherInfo();
   }
 
-  async findResearcherInfo() {
-
-    const user = await User.getById(this.props.userId);
+  findResearcherInfo = async () => {
+    const user = this.props.user;
     let researcherProps = getPropertyValuesFromUser(user);
-
     this.setState(prev => {
       prev.user = user;
-      if(!isEmpty(user.institution)) {
-        prev.institution = user.institution;
-      }
+      prev.institution = !isEmpty(user.institution) ?  user.institution : null;
       prev.formData = researcherProps;
       return prev;
     });
-  }
-
+  };
 
   render() {
 

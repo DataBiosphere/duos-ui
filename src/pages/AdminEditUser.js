@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {union, contains, map} from 'lodash/fp';
+import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {Component} from 'react';
 import {button, div, form, hh, input, label} from 'react-hyperscript-helpers';
 import {User} from '../libs/ajax';
@@ -18,6 +18,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     super(props);
 
     this.state = {
+      user: {},
       displayName: '',
       email: '',
       displayNameValid: false,
@@ -33,7 +34,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     const currentRoles = _.map(user.roles, (ur) => {
       return {'roleId': ur.roleId, 'name': ur.name};
     });
-    const updatedRoles = _.isEmpty(currentRoles) ? [researcherRole] : currentRoles;
+    const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
     this.setState({
       displayName: user.displayName,
       email: user.email,
@@ -66,6 +67,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
     this.setState({
+      user: updatedUser,
       displayNameValid: updatedUser
     });
   };
@@ -76,28 +78,16 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     // Always make sure researcher is a role we already have or need to add.
     const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles));
 
-    console.log("Current Roles:");
-    console.log(JSON.stringify(currentRoleIds));
-
-    console.log("Updated Roles:");
-    console.log(JSON.stringify(updatedRoleIds));
-
     _.map(updatedRoleIds, roleId => {
-      console.log("Role Addition");
-      console.log("!contains(roleId)(currentRoleIds): " + JSON.stringify(!contains(roleId)(currentRoleIds)));
       if (!contains(roleId)(currentRoleIds)) {
-        console.log("adding role to user: " + roleId);
         User.addRoleToUser(userId, roleId);
       }
     });
 
     _.map(currentRoleIds, roleId => {
-      console.log("Role Deletion");
-      console.log("!contains(roleId)(updatedRoleIds): " + JSON.stringify(!contains(roleId)(updatedRoleIds)));
       if (!contains(roleId)(updatedRoleIds)) {
         // Safety check ... never delete the researcher role!!!
         if (roleId !== researcherRole.roleId) {
-          console.log("deleting role from user: " + roleId);
           User.deleteRoleFromUser(userId, roleId);
         }
       }
@@ -133,7 +123,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
   userHasRole = (role) => {
     const matches = _.filter(this.state.updatedRoles, _.matches(role));
-    return !_.isEmpty(matches);
+    return !isEmpty(matches);
   };
 
   handleChange = (e) => {
@@ -147,8 +137,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
 
   render() {
-    const {displayName, email, displayNameValid} = this.state;
-    const {dacUserId} = this.props.match.params;
+    const {user, displayName, email, displayNameValid} = this.state;
     return (
       div({className: "container container-wide"}, [
         div({className: "row no-margin"}, [
@@ -303,7 +292,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
               ])
             ])
           ]),
-          ResearcherReview({userId: dacUserId})
+          ResearcherReview({
+            isRendered: !isEmpty(user),
+            user: user
+          })
         ])
       ])
     );
