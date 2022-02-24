@@ -21,8 +21,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       displayName: '',
       email: '',
       displayNameValid: false,
-      submitted: false,
-      alerts: [],
       updatedRoles: [researcherRole],
       emailPreference: false
     };
@@ -68,7 +66,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
     this.setState({
-      submitted: true,
       displayNameValid: updatedUser
     });
   };
