@@ -66,9 +66,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     const updatedUser = await User.update(payload, userId);
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
-    this.setState({
-      user: updatedUser,
-      displayNameValid: updatedUser
+    console.log("Updating the user in state: " + JSON.stringify(updatedUser));
+    this.setState(prev => {
+      prev.user = Object.assign({}, updatedUser);
+      prev.displayNameValid = this.nameRef.current.validity.valid;
     });
   };
 
@@ -137,7 +138,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
 
   render() {
-    const {user, displayName, email, displayNameValid} = this.state;
+    const {displayName, email, displayNameValid} = this.state;
     return (
       div({className: "container container-wide"}, [
         div({className: "row no-margin"}, [
@@ -293,8 +294,8 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
             ])
           ]),
           ResearcherReview({
-            isRendered: !isEmpty(user),
-            user: user
+            isRendered: !isEmpty(this.state.user),
+            user: this.state.user
           })
         ])
       ])
