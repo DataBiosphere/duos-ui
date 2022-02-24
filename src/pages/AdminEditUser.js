@@ -223,6 +223,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                         type: 'checkbox',
                         id: 'chk_researcher',
                         checked: true,
+                        readOnly: true,
                         className: 'checkbox-inline user-checkbox',
                       }),
                       label({
