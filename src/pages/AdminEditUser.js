@@ -66,10 +66,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     const updatedUser = await User.update(payload, userId);
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
-    console.log("Updating the user in state: " + JSON.stringify(updatedUser));
-    this.setState(prev => {
-      prev.user = Object.assign({}, updatedUser);
-      prev.displayNameValid = this.nameRef.current.validity.valid;
+    this.setState({
+      user: Object.assign({}, updatedUser),
+      displayNameValid: this.nameRef.current.validity.valid
     });
   };
 
