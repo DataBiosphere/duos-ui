@@ -329,8 +329,8 @@ class AdminManageDul extends Component {
             div({ className: 'col-1 cell-header dul-color' }, ['Election N°']),
             div({ className: 'col-1 cell-header dul-color' }, ['Date']),
             div({ className: 'col-1 cell-header dul-color' }, ['DAC']),
-            div({ className: 'col-1 cell-header f-center dul-color' }, ['Election status']),
-            div({ className: 'col-1 cell-header f-center dul-color' }, ['Election actions'])
+            div({ className: 'col-1 cell-header f-center dul-color' }, ['Status']),
+            div({ className: 'col-1 cell-header f-center dul-color' }, ['Action'])
           ]),
 
           hr({ className: 'table-head-separator' }),

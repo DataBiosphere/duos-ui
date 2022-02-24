@@ -36,7 +36,7 @@ const styles = {
 //data struct to outline column widths and header labels
 const columnHeaderFormat = {
   partialDarCode: {label: 'Partial DAR Code', cellStyle: { width: styles.cellWidth.partialDarCode}},
-  projectTitle: {label: 'Project Title', cellStyle: { width: styles.cellWidth.projectTitle}},
+  projectTitle: {label: 'Title', cellStyle: { width: styles.cellWidth.projectTitle}},
   updateDate: {label: 'Last Updated', cellStyle: {width: styles.cellWidth.updateDate}},
   actions: {label: 'DAR Actions', cellStyle: { width: styles.cellWidth.actions}}
 };
