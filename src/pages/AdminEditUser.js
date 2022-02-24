@@ -52,7 +52,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     event.persist();
     event.preventDefault();
 
-    if (!this.formIsValid()) {
+    if (!this.state.displayNameValid) {
       return;
     }
     const userId = this.state.user.dacUserId;
@@ -104,10 +104,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     });
   };
 
-  formIsValid = () => {
-    return this.state.displayNameValid;
-  };
-
   emailPreferenceChanged = (e) => {
     // disable notifications checkbox is not checked: -> Set email preference TRUE
     // disable notifications checkbox is checked:     -> Set email preference FALSE
@@ -151,8 +147,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
 
   render() {
-    const {displayName, email} = this.state;
-    const validForm = this.formIsValid();
+    const {displayName, email, displayNameValid} = this.state;
     const {dacUserId} = this.props.match.params;
     return (
       div({className: "container container-wide"}, [
@@ -303,7 +298,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                   id: 'btn_save',
                   onClick: this.OKHandler,
                   className: 'f-right btn-primary common-background',
-                  disabled: !validForm
+                  disabled: !displayNameValid
                 }, ['Save']),
               ])
             ])
