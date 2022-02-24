@@ -199,6 +199,11 @@ export const Collections = {
     const url = `${await Config.getApiUrl()}/api/collections/role/${roleName}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
+  },
+  openElectionsById: async(id) => {
+    const url = `${await Config.getApiUrl()}/api/collections/${id}/election`;
+    const res = await axios.post(url, Config.authOpts());
+    return res.data;
   }
 };
 
