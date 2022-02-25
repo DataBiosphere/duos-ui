@@ -1,8 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Notifications } from '../../libs/utils';
 import { Collections } from '../../libs/ajax';
-import { isNil, toLower } from 'lodash/fp';
-import { div } from 'react-hyperscript-helpers';
+import { div, h} from 'react-hyperscript-helpers';
+import TableIconButton from '../TableIconButton';
+import TableTextButton from '../TableTextButton';
+import { Styles } from '../../libs/theme';
+import { Block } from '@material-ui/icons';
+import { checkIfOpenableElectionPresent, checkIfCancelableElectionPresent } from '../../utils/DarCollectionUtils';
+
+const hoverOpenButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
+const baseOpenButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+
+const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
+const baseCancelButtonStyle = Styles.TABLE.TABLE_ICON_BUTTON;
 
 export default function AdminActions(props) {
   /*
@@ -22,64 +32,19 @@ export default function AdminActions(props) {
     collection -> target collection for the button
   */
 
-  const { collection, showCancelModal, updateCollections, style } = props;
+  const { collection, showCancelModal, updateCollections } = props;
   const collectionId = collection.collectionId;
 
   const [openEnabled, setOpenEnabled] = useState(false);
-  const [openLabel, setOpenLabel] = useState('Open');
   const [cancelEnabled, setCancelEnabled] = useState(false);
 
   useEffect(() => {
-    if(!isNil(collection)) {
-      const { elections, dars } = collection;
-      const statusTally = {
-        'open': 0,
-        'canceled': 0,
-        'closed': 0
-      };
-      const electionCount = elections.size();
-      const darCount = dars.size();
+    const isCancelable = checkIfCancelableElectionPresent(collection);
+    const isOpenable = checkIfOpenableElectionPresent(collection);
 
-      elections.forEach(election => {
-        const { status } = election;
-        const lowerCaseStatus = toLower(status);
-        if(isNil(statusTally[lowerCaseStatus])) {
-          statusTally[lowerCaseStatus] = 0;
-        }
-        statusTally[lowerCaseStatus]++;
-      });
-
-      if(electionCount === darCount) {
-        if(statusTally['open'] === 0) {
-          setOpenEnabled(true);
-          setCancelEnabled(false);
-          setOpenLabel('Reopen');
-        } else if (statusTally['open'] === electionCount) {
-          setOpenEnabled(false);
-          setCancelEnabled(true);
-        } else if (statusTally['open'] < electionCount) {
-          setOpenEnabled(false);
-          setCancelEnabled(true);
-        }
-      } else {
-        /*
-          Scenario where all elections have not been genrated for a collection
-          Issue can only occur with legacy data
-
-          (Initial Thoughts)
-          Open
-            - If there are elections missing on DARs then the Open button should be enabled (labeled as Open Remaining or something similar)
-              to generate elections ONLY for the DARs that have none
-          Cancel
-            - Should always be enabled, the reset-reopen flow is a good way for Admin's to reset a "broken" collection
-        */
-        setOpenEnabled(true);
-        setOpenLabel("Open Remaining");
-        setCancelEnabled(true);
-      }
-    }
+    setOpenEnabled(isOpenable);
+    setCancelEnabled(isCancelable);
   }, [collection]);
-
   /*
     updateCollections should be a method defined on the Admin console
     should look something like this...
@@ -115,13 +80,35 @@ export default function AdminActions(props) {
     showCancelModal(collection);
   };
 
-  return div({className: 'admin'})
+  const openButtonAttributes = {
+    keyProp: `admin-open-${collectionId}`,
+    label: 'Open',
+    isRendered: openEnabled,
+    onClick: () => openOnClick(collectionId),
+    style: baseOpenButtonStyle,
+    hoverStyle: hoverOpenButtonStyle,
+  };
 
-  // return {
-  //   id: `collection-${collectionId}-admin-actions`,
-  //   isComponent: true,
-  //   label: 'admin-actions',
-  //   data: template
-  // }
+  const cancelButtonAttributes = {
+    keyProp: `admin-cancel-${collectionId}`,
+    isRendered: cancelEnabled,
+    onClick: () => cancelOnClick(collection),
+    style: baseCancelButtonStyle,
+    hoverStyle: hoverCancelButtonStyle,
+    icon: Block
+  };
 
+  return div({
+    className: 'admin-actions',
+    key: `admin-actions-${collectionId}`,
+    style: {
+      display: 'flex',
+      padding: '10px 5px',
+      justifyContent: 'space-around',
+      alignItems: 'end'
+    }
+  }, [
+    h(TableTextButton, openButtonAttributes),
+    h(TableIconButton, cancelButtonAttributes)
+  ]);
 }
