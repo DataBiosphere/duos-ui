@@ -50,7 +50,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   }
 
   OKHandler = async (event) => {
-    event.persist();
     event.preventDefault();
 
     if (!this.state.displayNameValid) {
