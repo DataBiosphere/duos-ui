@@ -5,9 +5,7 @@ import { User } from '../../libs/ajax';
 import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
-import { ResearcherReview } from '../../pages/ResearcherReview';
 import addUserIcon from '../../images/icon_add_user.png';
-import editUserIcon from '../../images/icon_edit_user.png';
 
 const adminRole = { 'roleId': 4, 'name': USER_ROLES.admin };
 const researcherRole = { 'roleId': 5, 'name': USER_ROLES.researcher };
@@ -38,43 +36,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       return;
     }
 
-    if (this.props.user) {
-      const user = await User.getByEmail(this.props.user.email);
-      const currentRoles = _.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };});
-      const updatedRoles = _.isEmpty(currentRoles) ? [researcherRole] : currentRoles;
+    this.setState({
+      displayName: '',
+      email: '',
+      updatedRoles: [researcherRole],
+      emailPreference: false
+    },
+    () => {
+      let r1 = this.nameRef.current;
+      let r2 = this.emailRef.current;
       this.setState({
-        mode: 'Edit',
-        displayName: user.displayName,
-        email: user.email,
-        user: user,
-        updatedRoles: updatedRoles,
-        emailPreference: user.emailPreference
-      },
-      () => {
-        let r1 = this.nameRef.current;
-        let r2 = this.emailRef.current;
-        this.setState({
-          displayNameValid: r1.validity.valid,
-          emailValid: r2.validity.valid
-        });
+        displayNameValid: r1.validity.valid,
+        emailValid: r2.validity.valid
       });
-    } else {
-      this.setState({
-        mode: 'Add',
-        displayName: '',
-        email: '',
-        updatedRoles: [researcherRole],
-        emailPreference: false
-      },
-      () => {
-        let r1 = this.nameRef.current;
-        let r2 = this.emailRef.current;
-        this.setState({
-          displayNameValid: r1.validity.valid,
-          emailValid: r2.validity.valid
-        });
-      });
-    }
+    });
   }
 
   OKHandler = async (event) => {
@@ -91,24 +66,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       emailPreference: this.state.emailPreference,
       roles: this.state.updatedRoles
     };
-    switch (this.state.mode) {
-      case 'Add': {
-        user.email = this.state.email;
-        const createdUser = await User.create(user);
-        this.setState({ emailValid: createdUser });
-        break;
-      }
-      case 'Edit': {
-        user.dacUserId = this.state.user.dacUserId;
-        const payload = { updatedUser: user };
-        const updatedUser = await User.update(payload, this.state.user.dacUserId);
-        this.setState({ emailValid: updatedUser });
-        break;
-      }
-      default:
-        break;
-    }
-
+    user.email = this.state.email;
+    const createdUser = await User.create(user);
+    this.setState({ emailValid: createdUser });
     event.preventDefault();
 
     if (this.state.emailValid !== false) {
@@ -174,7 +134,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   render() {
     const { displayName, email, displayNameValid, emailValid } = this.state;
     const validForm = displayNameValid && emailValid;
-    const { user } = this.props;
     return (
       BaseModal({
         id: 'addUserModal',
@@ -182,11 +141,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         disableOkBtn: !validForm,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
-        imgSrc: this.state.mode === 'Add' ? addUserIcon : editUserIcon,
+        imgSrc: addUserIcon,
         color: 'common',
-        title: this.state.mode === 'Add' ? 'Add User' : 'Edit User',
-        description: this.state.mode === 'Add' ? 'Catalog a new User in the system' : 'Edit a User in the system',
-        action: { label: this.state.mode === 'Add' ? 'Add' : 'Save', handler: this.OKHandler }
+        title: 'Add User',
+        description: 'Catalog a new User in the system',
+        action: { label: 'Add', handler: this.OKHandler }
       },
       [
         form({ className: 'form-horizontal css-form', name: 'userForm', encType: 'multipart/form-data', onChange: this.formChange }, [
@@ -263,9 +222,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               ])
             ]),
           ])
-        ]),
-        div({ isRendered: _.has(user, "dacUserId") }, [
-          ResearcherReview({userId: _.get(user, "dacUserId")})
         ]),
 
         div({ isRendered: this.state.emailValid === false && this.state.submitted === true }, [
