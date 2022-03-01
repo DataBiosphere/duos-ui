@@ -143,8 +143,8 @@ class MemberConsole extends Component {
         ]),
         div({ style: Styles.TABLE.CONTAINER }, [
           div({style: Styles.TABLE.HEADER_ROW}, [
-            div({style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
-            div({style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
+            div({style: Styles.TABLE.DATA_ID_CELL }, ["DAR ID"]),
+            div({style: Styles.TABLE.TITLE_CELL }, ["Title"]),
             div({style: Styles.TABLE.DAC_CELL }, ["DAC"]),
             div({style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Status"]),
             div({style: Styles.TABLE.DAC_CELL }, ["Logged"]),

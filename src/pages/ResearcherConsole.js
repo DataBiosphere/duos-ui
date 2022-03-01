@@ -194,14 +194,14 @@ class ResearcherConsole extends Component {
                   sortKey: 'dar.data.darCode',
                   descendantOrder: this.state.darDescOrder
                 }) }, [
-                  "Data Request ID",
+                  "DAR ID",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
                 div({ style: Theme.textTableHead, className: "col-xs-4 cell-sort access-color", onClick: this.sortDars({
                   sortKey: 'dar.data.projectTitle',
                   descendantOrder: this.state.darDescOrder
                 }) }, [
-                  "Project Title",
+                  "Title",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
                 div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortDars({
@@ -297,7 +297,7 @@ class ResearcherConsole extends Component {
                     sortKey: 'projectTitle',
                     descendantOrder: this.state.partialDescOrder
                   }) }, [
-                    "Project Title",
+                    "Title",
                     span({ className: 'glyphicon sort-icon glyphicon-sort' })
                   ]),
                   div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortPartials({

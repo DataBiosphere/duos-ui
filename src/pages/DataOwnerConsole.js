@@ -121,7 +121,7 @@ class DataOwnerConsole extends Component {
               div({ className: "row no-margin" }, [
                 div({ className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 cell-header dataset-color" }, ["Dataset ID"]),
                 div({ className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 cell-header dataset-color" }, ["Dataset Name"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dataset-color" }, ["Data Request ID"]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dataset-color" }, ["DAR ID"]),
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dataset-color" }, ["Review/Vote"]),
               ]),
 

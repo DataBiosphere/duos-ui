@@ -60,13 +60,16 @@ const processVotesForBucket = (darElections) => {
   const dataAccess = {
     finalVotes: [],
     memberVotes: [],
-    chairpersonVotes: []
+    chairpersonVotes: [],
+    agreementVotes: []
   };
 
   darElections.forEach((election) => {
     const {electionType, votes = []} = election;
     let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
     let targetFinal, targetChair, targetMember, targetFinalType;
+    const {agreementVotes} = dataAccess;
+
     if(electionType === 'RP') {
       targetFinalType = 'chairperson';
       targetMember = rp.memberVotes;
@@ -80,11 +83,22 @@ const processVotesForBucket = (darElections) => {
     }
     forEach(vote => {
       const lowerCaseType = toLower(vote.type);
+      switch (lowerCaseType) {
+        case 'agreement':
+          agreementVotes.push(vote);
+          break;
+        case 'chairperson':
+          targetChair.push(vote);
+          break;
+        case 'dac':
+          targetMember.push(vote);
+          break;
+        default:
+          break;
+      }
       if(lowerCaseType === targetFinalType && !isNil(vote.vote)) {
         targetFinal.push(vote);
       }
-      const targetArray = lowerCaseType === 'chairperson' ? targetChair : targetMember;
-      targetArray.push(vote);
     })(dateSortedVotes);
   });
   return { rp, dataAccess };

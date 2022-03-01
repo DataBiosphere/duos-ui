@@ -7,9 +7,11 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import { find, isEmpty, flow } from 'lodash/fp';
+import { find, isEmpty, flow, filter, map, flatMap } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
+import VotesPieChart from '../../components/common/VotesPieChart';
+import { isNil } from 'lodash';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 
@@ -42,6 +44,34 @@ const tabStyleOverride = {
     display: 'flex',
     border: '0px'
   },
+};
+
+const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
+  const buckets = dataUseBuckets.slice(1);
+  return buckets.map((bucketData) => {
+    const {key, votes} = bucketData;
+    const memberVotes = flow(
+      map(voteData => voteData.dataAccess),
+      filter((dataAccessData) => !isEmpty(dataAccessData)),
+      flatMap(filteredData => filteredData.memberVotes)
+    )(votes);
+    const targetElectionIds = flow(
+      filter(vote => vote.dacUserId === currentUser.dacUserId),
+      map(vote => vote.electionId)
+    )(memberVotes);
+    const targetMemberVotes = filter((vote) => {
+      const relevantVote = find((id) => vote.electionId === id)(targetElectionIds);
+      return !isNil(relevantVote);
+    })(memberVotes);
+    if(isEmpty(targetMemberVotes)) {
+      return div({key: `${key}-no-votes-chart`}, [`No votes for ${key}`]);
+    }
+    return h(VotesPieChart, {
+      votes: targetMemberVotes,
+      title: `My DAC Votes - ${key}`,
+      keyString: key
+    });
+  });
 };
 
 export default function DarCollectionReview(props) {
@@ -100,7 +130,7 @@ export default function DarCollectionReview(props) {
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
-  }, [collectionId]);
+  }, [collectionId, props.history]);
 
   useEffect(() => {
     setSubcomponentLoading(true);
@@ -168,6 +198,11 @@ export default function DarCollectionReview(props) {
         cloudProvider: darInfo.cloudProvider,
         cloudProviderDescription: darInfo.cloudProviderDescription
       }),
+      /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
+      I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
+      However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership
+      */
+      // renderDataUseSubsections(dataUseBuckets, currentUser)
     ])
   ]);
 }
