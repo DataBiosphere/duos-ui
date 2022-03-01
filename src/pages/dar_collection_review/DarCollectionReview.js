@@ -14,7 +14,6 @@ import VotesPieChart from '../../components/common/VotesPieChart';
 import { isNil } from 'lodash';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
-import ResearchProposalVoteCard from "../../components/common/ResearchProposalVoteCard";
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -185,9 +184,6 @@ export default function DarCollectionReview(props) {
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
       }),
-      h(ResearchProposalVoteCard, {
-        darInfo
-      })
       /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
       I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
       However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership
