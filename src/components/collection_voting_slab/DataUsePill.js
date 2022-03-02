@@ -24,8 +24,8 @@ const styles = {
 
 
 export default function DataUsePill(props) {
-  const {dataUseRestriction, key} = props;
-  const {code, description} = dataUseRestriction;
+  const {dataUse, key} = props;
+  const {code, description} = dataUse;
 
   return div({key: 'data_use_pill_' + key}, [
     span({ style: styles.code }, code === null ? '' : code),
