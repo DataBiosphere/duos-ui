@@ -1,8 +1,9 @@
 import {useEffect, useState} from "react";
-import {a, div, span} from "react-hyperscript-helpers";
+import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld from "lodash";
 import DataUsePill from "./DataUsePill";
+import DataUseAlert from "./DataUseAlert";
 
 const styles = {
   baseStyle: {
@@ -40,6 +41,7 @@ const styles = {
   },
   expandedData: {
     background: '#F9F8F6',
+    borderRadius: '8px'
   }
 };
 
@@ -60,6 +62,8 @@ const dataUsePills = (translatedDataUse) => {
 
   return div({className: "primary_data_use_pill"}, [formattedDataUses]);
 };
+
+
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
@@ -90,7 +94,11 @@ export default function ResearchProposalVoteSlab(props) {
       linkToExpand(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
-      darInfo.nonTechRus,
+      div({className: 'research_purpose'}, [
+        "Research Purpose",
+        darInfo.nonTechRus,
+        h(DataUseAlert, {translatedDataUse}),
+      ]),
       "VOTE and RATIONALE"
     ])
   ]);
