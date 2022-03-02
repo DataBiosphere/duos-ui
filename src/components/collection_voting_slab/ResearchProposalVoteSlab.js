@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {a, div} from "react-hyperscript-helpers";
-import {StructuredDarRp} from "./StructuredDarRp";
+import {StructuredDarRp} from "../StructuredDarRp";
 
 const styles = {
   srpHeader: {
