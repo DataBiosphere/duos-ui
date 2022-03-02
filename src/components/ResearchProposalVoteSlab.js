@@ -1,7 +1,6 @@
 import {useState} from "react";
-import {a, div, h} from "react-hyperscript-helpers";
+import {a, div} from "react-hyperscript-helpers";
 import {StructuredDarRp} from "./StructuredDarRp";
-import DataUseVoteSummary from "./common/DataUseVoteSummary/DataUseVoteSummary";
 
 const styles = {
   srpHeader: {
@@ -37,7 +36,7 @@ const researchPurposeTab = () => {
   ]);
 };
 
-export default function ResearchProposalVoteCard(props) {
+export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const { darInfo } = props;
 
