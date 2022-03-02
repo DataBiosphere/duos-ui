@@ -17,7 +17,8 @@ const styles = {
   description: {
     color: '#333F52',
     fontFamily: 'Montserrat',
-    fontSize: '1.4rem'
+    fontSize: '1.4rem',
+    fontWeight: '500',
   }
 };
 

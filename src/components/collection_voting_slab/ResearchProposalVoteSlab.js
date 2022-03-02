@@ -1,22 +1,20 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {a, div} from "react-hyperscript-helpers";
-import {StructuredDarRp} from "../StructuredDarRp";
+import {DataUseTranslation} from "../../libs/dataUseTranslation";
+import ld from "lodash";
+import DataUsePill from "./DataUsePill";
 
 const styles = {
-  srpHeader: {
-    color: '#000000',
+  baseStyle: {
+    backgroundColor: '#F1EDE8',
+    padding: '15px 25px',
+    margin: '10px 0 20px 0',
     fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
+  },
+  researchPurposeTab: {
     fontWeight: 'bold'
   },
-  srpText: {
-    color: '#333F52',
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem'
-  },
-  collapsedTab: {
-    backgroundColor: '#F1EDE8',
-    borderRadius: '5px 5px 0px 0px',
+  collapsedData: {
     //TODO: reassess shadow code once not overridden by other stylings
     shadowColor: "#000",
     shadowOffset: {
@@ -25,20 +23,35 @@ const styles = {
     },
     shadowOpacity: 0,
     shadowRadius: 4.65,
-
     elevation: 8,
   }
 };
 
 const researchPurposeTab = () => {
-  return div({}, [
+  return div({style: styles.researchPurposeTab}, [
     "Structured Research Purpose"
   ]);
+};
+
+const dataUsePills = (translatedDataUse) => {
+  return ld.map(ld.keys(translatedDataUse), key => {
+    const restrictions = translatedDataUse[key];
+    if (!ld.isEmpty(restrictions)) {
+      const listRestrictions = ld.map(restrictions, (restriction, i) => {
+        return DataUsePill({
+          dataUseRestriction: restriction,
+          key: i
+        });
+      });
+      return div({key: key}, [listRestrictions]);
+    }
+  });
 };
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const { darInfo } = props;
+  const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
   const linkToExpand = () => {
     const linkMessage = expanded ?
@@ -51,18 +64,14 @@ export default function ResearchProposalVoteSlab(props) {
     }, [linkMessage]);
   };
 
-  return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats'}, [
-    div({className: 'srp_collapsed', style: styles.collapsedTab}, [
-      researchPurposeTab(),
-      StructuredDarRp({
-        darInfo,
-        headerStyle: styles.srpHeader,
-        textStyle: styles.srpText
-      }),
+  return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12', style: styles.baseStyle}, [
+    researchPurposeTab(),
+    div({className: 'srp_collapsed', style: styles.collapsedData}, [
+      dataUsePills(translatedDataUse),
       linkToExpand(),
     ]),
     div({className: 'srp_expanded', isRendered: expanded}, [
-      "filler text"
+      darInfo.nonTechRus
     ])
   ]);
 
