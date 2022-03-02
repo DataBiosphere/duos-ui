@@ -39,8 +39,9 @@ export default function AdminActions(props) {
   const [cancelEnabled, setCancelEnabled] = useState(false);
 
   useEffect(() => {
-    const isCancelable = checkIfCancelableElectionPresent(collection);
-    const isOpenable = checkIfOpenableElectionPresent(collection);
+    const {dars} = collection;
+    const isCancelable = checkIfCancelableElectionPresent(dars);
+    const isOpenable = checkIfOpenableElectionPresent(dars);
 
     setOpenEnabled(isOpenable);
     setCancelEnabled(isCancelable);

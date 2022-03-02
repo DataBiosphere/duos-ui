@@ -119,21 +119,23 @@ export const processDataUseBuckets = async(buckets) => {
   return processedBuckets;
 };
 
-export const checkIfOpenableElectionPresent = (collection) => {
-  const { dars } = collection;
+//Admin only helper function
+//NOTE: write/check tests for this
+export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
   const darsWithElections = filter((dar = {}) => !isEmpty(dar.elections))(dars);
   if(darsWithElections !== darCount) { return true; }
   const elections = flow(
     map(dar => dar.elections),
-    flatMap(election => election), //pulling out the individual elections from the object/map
+    flatMap(electionMap => Object.values(electionMap)), //pulling out the individual elections from the object/map
     filter(election => election.status !== 'Open')
   )(dars);
   return elections.size() > 0;
 };
 
-export const checkIfCancelableElectionPresent = (collection) => {
-  const { dars } = collection;
+//Admin only helper function
+//NOTE: write, check tests for this
+export const checkIfCancelableElectionPresent = (dars) => {
   const elections = flow(
     map(dar => dar.elections),
     flatMap(electionMap => Object.values(electionMap)),
