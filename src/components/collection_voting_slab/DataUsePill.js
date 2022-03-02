@@ -1,29 +1,33 @@
-import {div} from "react-hyperscript-helpers";
+import {div, span} from "react-hyperscript-helpers";
 
 const styles = {
   code: {
     height: '32px',
     width: '53px',
-    borderRadius: '16px',
+    borderRadius: '5rem',
     backgroundColor: '#0948B7',
     color: '#FFFFFF',
-    fontFamily: 'Arial',
-    fontSize: '14px',
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
     fontWeight: 'bold',
-    textAlign: 'center'
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex'
   },
   description: {
     color: '#333F52',
-    fontFamily: 'Arial',
-    fontSize: '14px'
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem'
   }
 };
 
 
 export default function DataUsePill(props) {
-  const {dataUseRestriction} = props;
+  const {dataUseRestriction, key} = props;
+  const {code, description} = dataUseRestriction;
 
-  return div({}, [
-
+  return div({key: 'data_use_pill_' + key}, [
+    span({ style: styles.code }, code === null ? '' : code),
+    span({ style: styles.description }, [description])
   ]);
 }
