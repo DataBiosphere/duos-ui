@@ -6,17 +6,22 @@ import DataUsePill from "./DataUsePill";
 
 const styles = {
   baseStyle: {
-    backgroundColor: '#F1EDE8',
     padding: '15px 25px',
     margin: '10px 0 20px 0',
     fontFamily: 'Montserrat',
   },
   researchPurposeTab: {
-    fontWeight: 'bold'
+    backgroundColor: '#F1EDE8',
+    fontWeight: 'bold',
+    height: '32px',
+    width: '274px',
+    borderRadius: '4px 4px 0 0'
   },
   collapsedData: {
+    backgroundColor: '#F1EDE8',
+    borderRadius: '0 4px 4px 4px',
     //TODO: reassess shadow code once not overridden by other stylings
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 4,
