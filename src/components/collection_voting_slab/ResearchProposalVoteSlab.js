@@ -11,7 +11,7 @@ const styles = {
     fontFamily: 'Montserrat',
     display: 'contents'
   },
-  researchPurposeTab: {
+  slabTitle: {
     backgroundColor: '#F1EDE8',
     color: '#000000',
     fontSize: '1.6rem',
@@ -43,8 +43,8 @@ const styles = {
   }
 };
 
-const researchPurposeTab = () => {
-  return div({style: styles.researchPurposeTab}, [
+const slabTitle = () => {
+  return div({style: styles.slabTitle}, [
     "Structured Research Purpose"
   ]);
 };
@@ -83,14 +83,15 @@ export default function ResearchProposalVoteSlab(props) {
   };
 
   return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12', style: styles.baseStyle}, [
-    researchPurposeTab(),
+    slabTitle(),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
       span({style: {fontWeight: 'bold'}}, ["Primary:"]),
       dataUsePills(translatedDataUse),
       linkToExpand(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
-      darInfo.nonTechRus
+      darInfo.nonTechRus,
+      "VOTE and RATIONALE"
     ])
   ]);
 
