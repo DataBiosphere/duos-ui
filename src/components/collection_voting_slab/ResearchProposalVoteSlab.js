@@ -7,27 +7,27 @@ import DataUseBox from "./DataUseBox";
 
 const styles = {
   baseStyle: {
+    fontFamily: 'Montserrat',
     padding: '15px 25px',
     margin: '10px 0 20px 0',
-    fontFamily: 'Montserrat',
     display: 'contents'
   },
   slabTitle: {
-    backgroundColor: '#F1EDE8',
     color: '#000000',
+    backgroundColor: '#F1EDE8',
     fontSize: '1.6rem',
     fontWeight: 'bold',
-    height: '32px',
-    width: '274px',
+    width: 'fit-content',
+    padding: '1rem',
     borderRadius: '4px 4px 0 0',
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex'
   },
   link: {
-    marginLeft: '7rem',
+    color: '#0948B7',
     fontWeight: '500',
-    color: '#0948B7'
+    marginLeft: '7rem'
   },
   collapsedData: {
     color: '#333F52',
@@ -36,7 +36,7 @@ const styles = {
     padding: '15px 25px'
   },
   expandedData: {
-    background: '#F9F8F6',
+    backgroundColor: '#F9F8F6',
     borderRadius: '8px',
     padding: '15px 25px'
   },

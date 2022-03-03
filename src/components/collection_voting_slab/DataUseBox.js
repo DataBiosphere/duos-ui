@@ -3,8 +3,8 @@ import ld from "lodash";
 
 const styles = {
   box: {
-    backgroundColor: '#FFFFFF',
     color: '#DB3214',
+    backgroundColor: '#FFFFFF',
     fontFamily: 'Montserrat',
     padding: '1rem',
     margin: '1.5rem',

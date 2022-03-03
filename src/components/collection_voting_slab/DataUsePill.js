@@ -2,20 +2,20 @@ import {div, span} from "react-hyperscript-helpers";
 
 const styles = {
   baseStyle: {
-    display: 'flex',
-    gap: '1.5rem',
-    alignItems: 'center',
     fontFamily: 'Montserrat',
     fontSize: '1.4rem',
-    margin: '1rem 0 1rem 0'
+    margin: '1rem 0 1rem 0',
+    display: 'flex',
+    gap: '1.5rem',
+    alignItems: 'center'
   },
   code: {
+    color: '#FFFFFF',
+    backgroundColor: '#0948B7',
+    fontWeight: 'bold',
     height: '32px',
     width: '53px',
     borderRadius: '5rem',
-    backgroundColor: '#0948B7',
-    color: '#FFFFFF',
-    fontWeight: 'bold',
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex'
