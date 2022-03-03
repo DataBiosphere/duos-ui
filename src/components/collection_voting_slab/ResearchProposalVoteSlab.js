@@ -67,6 +67,23 @@ const dataUsePills = (translatedDataUse) => {
   return div({className: "primary_data_use_pill"}, [formattedDataUses]);
 };
 
+const dataUsePills2 = (translatedDataUse) => {
+  return ld.flatMap(ld.keys(translatedDataUse), key => {
+    const dataUses = translatedDataUse[key];
+    const label = span({style: {fontWeight: 'bold'}}, [key + ':']);
+    const formattedDataUses = ld.map(dataUses, (dataUse, i) => {
+      return DataUsePill({
+        dataUse,
+        key: i
+      });
+    });
+    return div([
+      label,
+      formattedDataUses
+    ]);
+  });
+};
+
 const researchPurposeSummary = (darInfo) => {
   return div({style: styles.researchPurposeSummary}, [darInfo.rus]);
 };
@@ -92,7 +109,7 @@ export default function ResearchProposalVoteSlab(props) {
     slabTitle(),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
       span({style: {fontWeight: 'bold'}}, ["Primary:"]),
-      dataUsePills(translatedDataUse),
+      dataUsePills2(translatedDataUse),
       collapseExpandLink(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [

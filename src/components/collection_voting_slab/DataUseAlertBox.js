@@ -42,7 +42,6 @@ const manuallyReviewedDataUses = (dataUses) => {
   });
 };
 
-
 export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
 
