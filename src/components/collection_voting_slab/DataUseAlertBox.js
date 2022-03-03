@@ -20,7 +20,8 @@ const styles = {
     fontWeight: '500',
   },
   exclamationPoint: {
-    fontSize: '5rem'
+    fontSize: '8rem',
+    fontWeight: 'bold'
   }
 
 };
@@ -38,7 +39,7 @@ const dataUseDescriptions = (translatedDataUse) => {
 };
 
 
-export default function DataUseBox(props) {
+export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
 
   return div({className: 'data_use_description_box', style: styles.box}, [
