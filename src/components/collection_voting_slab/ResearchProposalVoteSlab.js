@@ -80,17 +80,21 @@ const dataUsePills = (translatedDataUse) => {
 const dataUsePills2 = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    const formattedDataUses = ld.map(dataUses, (dataUse, i) => {
-      return DataUsePill({
-        dataUse,
-        key: i
-      });
-    });
-    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(formattedDataUses)}, [key + ':']);
+    const formattedDataUses = formatDataUsePills(dataUses);
+    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
     return div([
       label,
       formattedDataUses
     ]);
+  });
+};
+
+const formatDataUsePills = (dataUses) => {
+  return ld.map(dataUses, (dataUse, i) => {
+    return DataUsePill({
+      dataUse,
+      key: i
+    });
   });
 };
 
