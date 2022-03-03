@@ -24,6 +24,10 @@ const styles = {
     justifyContent: 'center',
     display: 'flex'
   },
+  dataUseCategoryLabel: {
+    fontWeight: 'bold',
+    textTransform: 'capitalize'
+  },
   link: {
     color: '#0948B7',
     fontWeight: '500',
@@ -82,7 +86,7 @@ const dataUsePills2 = (translatedDataUse) => {
         key: i
       });
     });
-    const label = span({style: {fontWeight: 'bold', textTransform: 'capitalize'}, isRendered: !isEmpty(formattedDataUses)}, [key + ':']);
+    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(formattedDataUses)}, [key + ':']);
     return div([
       label,
       formattedDataUses
