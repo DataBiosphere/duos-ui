@@ -14,7 +14,7 @@ const styles = {
     backgroundColor: '#0948B7',
     fontWeight: 'bold',
     height: '32px',
-    width: '53px',
+    minWidth: '53px',
     borderRadius: '5rem',
     alignItems: 'center',
     justifyContent: 'center',
