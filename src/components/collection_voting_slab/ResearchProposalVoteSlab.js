@@ -1,7 +1,7 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
-import ld from "lodash";
+import ld, {isEmpty} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
 
@@ -76,13 +76,13 @@ const dataUsePills = (translatedDataUse) => {
 const dataUsePills2 = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    const label = span({style: {fontWeight: 'bold', textTransform: 'capitalize'}}, [key + ':']);
     const formattedDataUses = ld.map(dataUses, (dataUse, i) => {
       return DataUsePill({
         dataUse,
         key: i
       });
     });
+    const label = span({style: {fontWeight: 'bold', textTransform: 'capitalize'}, isRendered: !isEmpty(formattedDataUses)}, [key + ':']);
     return div([
       label,
       formattedDataUses
