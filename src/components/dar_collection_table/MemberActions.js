@@ -31,8 +31,8 @@ export default function MemberActions(props) {
     Elections in the collection,
     Votes attached to the collection
   */
- //NOTE: update init method to work like the other two actions
- //buttons should just take the collection and have the filtering/processing occur here
+  //NOTE: update init method to work like the other two actions
+  //buttons should just take the collection and have the filtering/processing occur here
   const {elections, user, style, collectionId, history} = props;
   const [disabled, setDisabled] = useState([]);
   const [label, setLabel] = useState('Vote');
