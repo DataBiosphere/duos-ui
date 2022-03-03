@@ -18,7 +18,7 @@ const styles = {
     fontSize: '1.6rem',
     fontWeight: 'bold',
     width: 'fit-content',
-    padding: '1rem',
+    padding: '1.2rem',
     borderRadius: '4px 4px 0 0',
     alignItems: 'center',
     justifyContent: 'center',
@@ -40,6 +40,12 @@ const styles = {
     backgroundColor: '#F9F8F6',
     borderRadius: '8px',
     padding: '15px 25px'
+  },
+  researchPurposeTitle: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    marginTop: '1rem',
+    display: 'inline-block'
   },
   researchPurposeSummary: {
     fontSize: '1.4rem',
@@ -113,7 +119,7 @@ export default function ResearchProposalVoteSlab(props) {
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
-        span({style: {fontSize: '1.8rem', fontWeight: 'bold'}}, ["Research Purpose"]),
+        span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
         researchPurposeSummary(darInfo),
         h(DataUseAlertBox, {translatedDataUse}),
       ]),
