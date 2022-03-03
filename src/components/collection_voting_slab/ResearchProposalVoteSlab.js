@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld from "lodash";
