@@ -1,5 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
-import ld from "lodash";
+import ld, {isNil} from "lodash";
 
 const styles = {
   box: {
@@ -29,13 +29,18 @@ const styles = {
 const dataUseDescriptions = (translatedDataUse) => {
   const descriptions = ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    if (!ld.isEmpty(dataUses)) {
-      return ld.map(dataUses, dataUse => {
-        return div([dataUse.description]);
-      });
-    }
+    const sensitiveDataUses = manuallyReviewedDataUses(dataUses);
+    return ld.map(sensitiveDataUses, dataUse => {
+      return div([dataUse.description]);
+    });
   });
   return div({className: 'data_use_descriptions', style: styles.text}, [descriptions]);
+};
+
+const manuallyReviewedDataUses = (dataUses) => {
+  return ld.filter(dataUses, dataUse => {
+    return dataUse.manualReview;
+  });
 };
 
 
