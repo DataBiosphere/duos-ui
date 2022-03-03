@@ -1,14 +1,19 @@
 import {div, span} from "react-hyperscript-helpers";
 
 const styles = {
+  baseStyle: {
+    display: 'flex',
+    gap: '1.5rem',
+    alignItems: 'center',
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
+  },
   code: {
     height: '32px',
     width: '53px',
     borderRadius: '5rem',
     backgroundColor: '#0948B7',
     color: '#FFFFFF',
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
     fontWeight: 'bold',
     alignItems: 'center',
     justifyContent: 'center',
@@ -16,8 +21,6 @@ const styles = {
   },
   description: {
     color: '#333F52',
-    fontFamily: 'Montserrat',
-    fontSize: '1.4rem',
     fontWeight: '500',
   }
 };
@@ -27,7 +30,7 @@ export default function DataUsePill(props) {
   const {dataUse, key} = props;
   const {code, description} = dataUse;
 
-  return div({key: 'data_use_pill_' + key}, [
+  return div({key: 'data_use_pill_' + key, style: styles.baseStyle}, [
     span({ style: styles.code }, code === null ? '' : code),
     span({ style: styles.description }, [description])
   ]);
