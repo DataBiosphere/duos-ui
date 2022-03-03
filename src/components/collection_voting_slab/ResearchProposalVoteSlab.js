@@ -49,7 +49,7 @@ const styles = {
 };
 
 const slabTitle = () => {
-  return div({style: styles.slabTitle}, [
+  return div({className: 'slab_title', style: styles.slabTitle}, [
     "Structured Research Purpose"
   ]);
 };
@@ -72,15 +72,10 @@ const researchPurposeSummary = (darInfo) => {
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
-  const [dataUse, setDataUse] = useState([]);
   const { darInfo } = props;
   const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
-  useEffect(() => {
-    setDataUse(translatedDataUse);
-  }, []);
-
-  const linkToExpand = () => {
+  const collapseExpandLink = () => {
     const linkMessage = expanded ?
       'Hide Research Purpose and Vote' :
       'Expand to view Research Purpose and Vote';
@@ -97,11 +92,11 @@ export default function ResearchProposalVoteSlab(props) {
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
       span({style: {fontWeight: 'bold'}}, ["Primary:"]),
       dataUsePills(translatedDataUse),
-      linkToExpand(),
+      collapseExpandLink(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
-        div({style: {fontSize: '1.8rem', fontWeight: 'bold'}}, ["Research Purpose"]),
+        span({style: {fontSize: '1.8rem', fontWeight: 'bold'}}, ["Research Purpose"]),
         researchPurposeSummary(darInfo),
         h(DataUseBox, {translatedDataUse}),
       ]),

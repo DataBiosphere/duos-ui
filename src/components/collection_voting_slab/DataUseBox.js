@@ -30,18 +30,18 @@ const dataUseDescriptions = (translatedDataUse) => {
     const dataUses = translatedDataUse[key];
     if (!ld.isEmpty(dataUses)) {
       return ld.map(dataUses, dataUse => {
-        return div([dataUse.description, '\n']);
+        return div([dataUse.description]);
       });
     }
   });
-  return div({style: styles.text}, [descriptions]);
+  return div({className: 'data_use_descriptions', style: styles.text}, [descriptions]);
 };
 
 
 export default function DataUseBox(props) {
   const {translatedDataUse} = props;
 
-  return div({className: 'data_use_alert', style: styles.box}, [
+  return div({className: 'data_use_description_box', style: styles.box}, [
     span({style: styles.exclamationPoint}, ['!']),
     dataUseDescriptions(translatedDataUse)
   ]);
