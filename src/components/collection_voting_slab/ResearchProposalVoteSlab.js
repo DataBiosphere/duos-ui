@@ -108,7 +108,6 @@ export default function ResearchProposalVoteSlab(props) {
   return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12', style: styles.baseStyle}, [
     slabTitle(),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
-      span({style: {fontWeight: 'bold'}}, ["Primary:"]),
       dataUsePills2(translatedDataUse),
       collapseExpandLink(),
     ]),
