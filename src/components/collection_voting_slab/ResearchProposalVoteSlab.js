@@ -70,7 +70,7 @@ const dataUsePills = (translatedDataUse) => {
 const dataUsePills2 = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    const label = span({style: {fontWeight: 'bold'}}, [key + ':']);
+    const label = span({style: {fontWeight: 'bold', textTransform: 'capitalize'}}, [key + ':']);
     const formattedDataUses = ld.map(dataUses, (dataUse, i) => {
       return DataUsePill({
         dataUse,
