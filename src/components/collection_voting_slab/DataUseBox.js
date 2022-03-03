@@ -7,6 +7,7 @@ const styles = {
     color: '#DB3214',
     fontFamily: 'Montserrat',
     padding: '1rem',
+    margin: '1.5rem',
     border: '2px solid #DB3214',
     borderRadius: '8px',
     display: 'flex',

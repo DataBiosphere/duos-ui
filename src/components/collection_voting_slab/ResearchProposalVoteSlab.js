@@ -25,23 +25,21 @@ const styles = {
     display: 'flex'
   },
   collapsedData: {
-    backgroundColor: '#F1EDE8',
     color: '#333F52',
+    backgroundColor: '#F1EDE8',
     borderRadius: '0 4px 4px 4px',
-    padding: '15px 25px',
-    //TODO: reassess shadow code once not overridden by other stylings
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0,
-    shadowRadius: 4.65,
-    elevation: 8,
+    padding: '15px 25px'
   },
   expandedData: {
     background: '#F9F8F6',
-    borderRadius: '8px'
+    borderRadius: '8px',
+    padding: '15px 25px'
+  },
+  researchPurposeSummary: {
+    fontSize: '1.4rem',
+    fontWeight: '500',
+    lineHeight: '20px',
+    margin: '1.5rem'
   }
 };
 
@@ -63,7 +61,9 @@ const dataUsePills = (translatedDataUse) => {
   return div({className: "primary_data_use_pill"}, [formattedDataUses]);
 };
 
-
+const researchPurposeSummary = (darInfo) => {
+  return div({style: styles.researchPurposeSummary}, [darInfo.nonTechRus]);
+};
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
@@ -95,11 +95,11 @@ export default function ResearchProposalVoteSlab(props) {
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
-        "Research Purpose",
-        darInfo.nonTechRus,
+        div({style: {fontSize: '1.8rem', fontWeight: 'bold'}}, ["Research Purpose"]),
+        researchPurposeSummary(darInfo),
         h(DataUseBox, {translatedDataUse}),
       ]),
-      "VOTE and RATIONALE"
+      "VOTE AND RATIONALE COMPONENTS"
     ])
   ]);
 
