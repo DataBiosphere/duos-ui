@@ -1,5 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
-import ld, {isNil} from "lodash";
+import ld, {isEmpty} from "lodash";
 
 const styles = {
   box: {
@@ -27,14 +27,13 @@ const styles = {
 };
 
 const dataUseDescriptions = (translatedDataUse) => {
-  const descriptions = ld.flatMap(ld.keys(translatedDataUse), key => {
+  return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     const sensitiveDataUses = manuallyReviewedDataUses(dataUses);
     return ld.map(sensitiveDataUses, dataUse => {
       return div([dataUse.description]);
     });
   });
-  return div({className: 'data_use_descriptions', style: styles.text}, [descriptions]);
 };
 
 const manuallyReviewedDataUses = (dataUses) => {
@@ -47,8 +46,10 @@ const manuallyReviewedDataUses = (dataUses) => {
 export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
 
-  return div({className: 'data_use_description_box', style: styles.box}, [
+  const descriptions = dataUseDescriptions(translatedDataUse);
+
+  return div({className: 'data_use_description_box', style: styles.box, isRendered: !isEmpty(descriptions)}, [
     span({style: styles.exclamationPoint}, ['!']),
-    dataUseDescriptions(translatedDataUse)
+    div({className: 'data_use_descriptions', style: styles.text}, [descriptions])
   ]);
 }
