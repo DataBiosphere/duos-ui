@@ -29,8 +29,7 @@ const styles = {
 const dataUseDescriptions = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    const sensitiveDataUses = manuallyReviewedDataUses(dataUses);
-    return ld.map(sensitiveDataUses, dataUse => {
+    return ld.map(manuallyReviewedDataUses(dataUses), dataUse => {
       return div([dataUse.description]);
     });
   });
