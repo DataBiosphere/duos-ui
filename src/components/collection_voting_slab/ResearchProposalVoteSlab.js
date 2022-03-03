@@ -80,11 +80,10 @@ const dataUsePills = (translatedDataUse) => {
 const dataUsePills2 = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    const formattedDataUses = formatDataUsePills(dataUses);
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div([
+    return div({className: key + '_data_uses'}, [
       label,
-      formattedDataUses
+      formatDataUsePills(dataUses)
     ]);
   });
 };
