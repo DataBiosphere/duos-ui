@@ -218,7 +218,7 @@ describe('Chair Actions - Close Button', () => {
 
 describe('Chair Actions - Vote Button', () => {
   it('should not render if relevant elections are not votable', () => {
-    propCopy.collection.dars = nonOpenDars;
+    propCopy.collection.dars = nonVoteableDars;
     cy.stub(DAC, 'datasets').returns([{dataSetId: 1}, {dataSetId: 2}]);
     mount(<ChairActions {...propCopy} />);
     const voteButton = cy.get(`#chair-vote-${collectionId}`);
