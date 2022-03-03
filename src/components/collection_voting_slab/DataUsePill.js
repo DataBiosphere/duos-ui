@@ -7,6 +7,7 @@ const styles = {
     alignItems: 'center',
     fontFamily: 'Montserrat',
     fontSize: '1.4rem',
+    margin: '1rem 0 1rem 0'
   },
   code: {
     height: '32px',

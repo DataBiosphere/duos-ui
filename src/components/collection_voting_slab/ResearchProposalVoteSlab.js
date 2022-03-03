@@ -24,6 +24,11 @@ const styles = {
     justifyContent: 'center',
     display: 'flex'
   },
+  link: {
+    marginLeft: '7rem',
+    fontWeight: '500',
+    color: '#0948B7'
+  },
   collapsedData: {
     color: '#333F52',
     backgroundColor: '#F1EDE8',
@@ -82,6 +87,7 @@ export default function ResearchProposalVoteSlab(props) {
 
     return a({
       id: 'link_srp_collapse_expand',
+      style: styles.link,
       onClick: () => setExpanded(!expanded),
     }, [linkMessage]);
   };
