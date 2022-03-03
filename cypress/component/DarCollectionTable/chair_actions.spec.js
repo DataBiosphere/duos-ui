@@ -81,7 +81,7 @@ const missingElectionSet = {
   1: {
     elections: {},
     data: {
-      datasetIds: [1] //NOTE: need to mock dataset fetch somehow
+      datasetIds: [1]
     }
   },
   2: {
@@ -103,7 +103,8 @@ const cancelableDars = {
         status: 'Open',
         votes: {
           dacUserId: 1
-        }
+        },
+        datasetId: 1
       }
     }
   },
@@ -113,7 +114,8 @@ const cancelableDars = {
         status: 'Closed',
         votes: {
           dacUserId: 1
-        }
+        },
+        datasetId: 2
       }
     }
   }
@@ -136,16 +138,6 @@ const props = {
   showCancelModal: () => {},
   updateCollections: () => {},
 };
-
-
-/*
-Test cases
-  1 -> User does not have a vote in any collection, all elections
-    -> Ensure vote does not render
-  2 -> There is at least one DAR election that is non-open or non-existant
-    -> Ensure open button is rendered
-  3 -> There is at least one DAR election that is non-open or non-existant
-*/
 
 beforeEach(() => {
   propCopy = cloneDeep(props);
@@ -199,15 +191,15 @@ describe('Chair Actions - Open Button', () => {
 });
 
 describe('Chair Actions - Close Button', () => {
-  it('should render if there is a valid election for closing', () => {
-    propCopy.collection.dars = votableDars;
+  it('should render if there is a valid election for canceling', () => {
+    propCopy.collection.dars = cancelableDars;
     cy.stub(DAC, 'datasets').returns([{dataSetId:1},{dataSetId: 2}]);
     mount(<ChairActions {...propCopy} />);
     const openButton = cy.get(`#chair-cancel-${collectionId}`);
     openButton.should('exist');
   });
 
-  it('should not render if there is no valid election for closing', () => {
+  it('should not render if there is no valid election for canceling', () => {
     propCopy.collection.dars = nonOpenDars;
     cy.stub(DAC, 'datasets').returns([]);
     mount(<ChairActions {...propCopy} />);
