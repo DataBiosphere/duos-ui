@@ -68,7 +68,7 @@ const dataUsePills = (translatedDataUse) => {
 };
 
 const researchPurposeSummary = (darInfo) => {
-  return div({style: styles.researchPurposeSummary}, [darInfo.nonTechRus]);
+  return div({style: styles.researchPurposeSummary}, [darInfo.rus]);
 };
 
 export default function ResearchProposalVoteSlab(props) {
