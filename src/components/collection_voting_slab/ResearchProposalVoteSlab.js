@@ -33,6 +33,7 @@ const styles = {
     color: '#333F52',
     backgroundColor: '#F1EDE8',
     borderRadius: '0 4px 4px 4px',
+    borderBottom: '4px #646464 solid',
     padding: '15px 25px'
   },
   expandedData: {
