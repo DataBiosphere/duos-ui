@@ -3,7 +3,7 @@ import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld from "lodash";
 import DataUsePill from "./DataUsePill";
-import DataUseAlert from "./DataUseAlert";
+import DataUseBox from "./DataUseBox";
 
 const styles = {
   baseStyle: {
@@ -97,7 +97,7 @@ export default function ResearchProposalVoteSlab(props) {
       div({className: 'research_purpose'}, [
         "Research Purpose",
         darInfo.nonTechRus,
-        h(DataUseAlert, {translatedDataUse}),
+        h(DataUseBox, {translatedDataUse}),
       ]),
       "VOTE and RATIONALE"
     ])

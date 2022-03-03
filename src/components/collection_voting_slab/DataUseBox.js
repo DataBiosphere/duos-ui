@@ -1,6 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
-import * as ld from "lodash";
-
+import ld from "lodash";
 
 const styles = {
   box: {
@@ -38,7 +37,7 @@ const dataUseDescriptions = (translatedDataUse) => {
 };
 
 
-export default function DataUseAlert(props) {
+export default function DataUseBox(props) {
   const {translatedDataUse} = props;
 
   return div({className: 'data_use_alert', style: styles.box}, [
