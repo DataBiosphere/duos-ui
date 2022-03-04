@@ -77,7 +77,6 @@ export default function AtAGlance(props) {
       label: 'DAC vs DUOS Algorithm',
       cellStyle: {width: styles.cellWidth.dacVsDuosAlgorithm}
     },
-
     headerCell: {
       label: 'Header Cell',
       cellStyle: {width: styles.cellWidth.header},
@@ -92,12 +91,6 @@ export default function AtAGlance(props) {
   };
 
   const processAtAGlanceData = ({collection, dataUseBuckets}) => {
-    const rowElementMaxCount = 11;
-    //chunking elements subdivides the entire bucket list to rows of max rowElementMaxCount size
-    //Needed to provide predictable design, can't have a flexbox row of n elements with infinitesimal width
-    const chunkedBuckets = chunk(rowElementMaxCount)(dataUseBuckets);
-    //convert is once again used here to provide unique key identifier for the row
-    //necessary for React when rendering elements provided by an array
     if(!isNil(dataUseBuckets)) {
       return dataUseBuckets.map((dataUseBucket) => {
         const {
