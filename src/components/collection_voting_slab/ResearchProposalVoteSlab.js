@@ -65,23 +65,24 @@ const slabTitle = () => {
   ]);
 };
 
-const dataUsePills = (translatedDataUse) => {
-  return mapOverDataUses(translatedDataUse, (dataUses, key) => {
-    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({className: key + '_data_uses'}, [
-      label,
-      formatDataUsePills(dataUses)
-    ]);
-  });
-};
 
-const dataUsePills2 = (translatedDataUse) => {
+const dataUseSummary = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
     return div({className: key + '_data_uses'}, [
       label,
-      formatDataUsePills(dataUses)
+      dataUsePills(dataUses)
+    ]);
+  });
+};
+
+const dataUseSummary2 = (translatedDataUse) => {
+  return mapOverDataUses(translatedDataUse, (dataUses, key) => {
+    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
+    return div({className: key + '_data_uses'}, [
+      label,
+      dataUsePills(dataUses)
     ]);
   });
 };
@@ -93,7 +94,7 @@ export const mapOverDataUses = (translatedDataUse, iteratee) => {
   });
 };
 
-const formatDataUsePills = (dataUses) => {
+const dataUsePills = (dataUses) => {
   return ld.map(dataUses, (dataUse, i) => {
     return DataUsePill({
       dataUse,
@@ -126,7 +127,7 @@ export default function ResearchProposalVoteSlab(props) {
   return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12', style: styles.baseStyle}, [
     slabTitle(),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
-      dataUsePills2(translatedDataUse),
+      dataUseSummary(translatedDataUse),
       collapseExpandLink(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
