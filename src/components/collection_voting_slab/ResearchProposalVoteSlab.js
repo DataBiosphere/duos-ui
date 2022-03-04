@@ -88,6 +88,13 @@ const dataUsePills2 = (translatedDataUse) => {
   });
 };
 
+const mapOverDataUses = (translatedDataUse, iteratee) => {
+  return ld.flatMap(ld.keys(translatedDataUse), key => {
+    const dataUses = translatedDataUse[key];
+    return ld.map(dataUses, iteratee(dataUses, key));
+  });
+};
+
 const formatDataUsePills = (dataUses) => {
   return ld.map(dataUses, (dataUse, i) => {
     return DataUsePill({
