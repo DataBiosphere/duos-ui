@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigation, Notifications } from '../../libs/utils';
+import { Notifications } from '../../libs/utils';
 import { Collections, DAC } from '../../libs/ajax';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';

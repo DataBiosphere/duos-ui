@@ -8,7 +8,7 @@ import { Storage } from '../../../src/libs/storage';
 let propCopy;
 const collectionId = 1;
 const collectionSkeleton = {
-  collectiond,
+  collectionId,
   dars: undefined
 };
 

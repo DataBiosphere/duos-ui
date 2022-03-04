@@ -1,7 +1,6 @@
 import { h, div } from "react-hyperscript-helpers";
 import { useEffect, useState } from 'react';
-import { lowerCase, isEmpty, flow, flatMap } from "lodash/fp";
-import { filter, map } from "lodash";
+import { lowerCase, isEmpty, flow, flatMap, map, filter } from "lodash/fp";
 import { Storage } from "../../libs/storage";
 import TableTextButton from '../TableTextButton';
 import { Styles } from '../../libs/theme';
@@ -9,13 +8,16 @@ import { Styles } from '../../libs/theme';
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
 const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
 
-const findRelevantVotes = ({dars, userId}) => flow(
-  map(dar => dar.elections),
-  flatMap(electionMap => Object.values(electionMap)),
-  filter(election => lowerCase(election.status) === 'open'),
-  flatMap(election => Object.values(election.votes)),
-  filter(vote => vote.dacUserId === userId),
-)(dars);
+const findRelevantVotes = ({dars = {}, userId}) => {
+  const relevantVotes = flow(
+    map(dar => dar.elections),
+    flatMap(electionMap => Object.values(electionMap)),
+    filter(election => lowerCase(election.status) === 'open'),
+    flatMap(election => Object.values(election.votes)),
+    filter(vote => vote.dacUserId === userId),
+  )(dars);
+  return relevantVotes;
+};
 
 const determineButtonLabel = ({relevantVotes}) => {
   const submittedVotePresent = flow(
@@ -41,14 +43,14 @@ export default function MemberActions(props) {
   */
   //NOTE: update init method to work like the other two actions
   //buttons should just take the collection and have the filtering/processing occur here
-  const { collections } = props;
-  const { dars } = collections;
-  const { collectionId } = collections;
+  const { collection } = props;
+  const { collectionId } = collection;
   const [voteEnabled, setVoteEnabled] = useState(false);
   const [label, setLabel] = useState('Vote');
 
   useEffect(() => {
-    try{
+    try {
+      const { dars } = collection;
       const user = Storage.getCurrentUser();
       const userId = user.dacUserId;
       const relevantVotes = findRelevantVotes({dars, userId});
@@ -62,12 +64,11 @@ export default function MemberActions(props) {
     } catch(error) {
       setVoteEnabled(false);
     }
-  }, [dars]);
+  }, [collection]);
 
   const goToVote = (collectionId) => {
     history.push(`/dar_collection/${collectionId}`);
   };
-
   const voteButtonAttributes = {
     keyProp: `member-vote-${collectionId}`,
     label: label,
@@ -79,7 +80,7 @@ export default function MemberActions(props) {
 
   return div({
     className: 'member-actions',
-    key: `#member-actions-${collectionId}`,
+    key: `member-actions-${collectionId}`,
     style: {
       display: 'flex',
       padding: '10px 5px',
@@ -89,26 +90,4 @@ export default function MemberActions(props) {
   }, [
     h(TableTextButton, voteButtonAttributes)
   ]);
-
-  // return div({ style }, [
-  //   h(SimpleButton, {
-  //     label,
-  //     disabled,
-  //     keyProp: `${collectionId}-vote-button`,
-  //     baseColor,
-  //     additionalStyle: {
-  //       padding: '5px 10px',
-  //       fontSize: '1.45rem',
-  //     },
-  //     onClick: () => history.push(`/dar_collections/${collectionId}`)
-  //   })
-  // ]);
-
-  //This is an example of how the table column for actions would be configured for member actions
-  // return {
-  //   data: h(MemberActions, {elections, user, style, collectionId, history}),
-  //   isComponent: true,
-  //   id: `collection-${collectionId}-member-actions`,
-  //   label: 'vote-button'
-  // };
 }
