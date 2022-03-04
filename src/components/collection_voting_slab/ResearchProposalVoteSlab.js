@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld, {isEmpty} from "lodash";
@@ -91,7 +91,7 @@ const researchPurposeSummary = (darInfo) => {
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
-  const { darInfo } = props;
+  const {darInfo} = props;
   const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
   const collapseExpandLink = () => {
@@ -106,7 +106,7 @@ export default function ResearchProposalVoteSlab(props) {
     }, [linkMessage]);
   };
 
-  return div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12', style: styles.baseStyle}, [
+  return div({className: 'srp_slab', style: styles.baseStyle}, [
     slabTitle(),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
       dataUseSummary(translatedDataUse),
@@ -121,5 +121,4 @@ export default function ResearchProposalVoteSlab(props) {
       "VOTE AND RATIONALE COMPONENTS"
     ])
   ]);
-
 }

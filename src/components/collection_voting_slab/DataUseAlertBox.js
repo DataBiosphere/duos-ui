@@ -23,7 +23,6 @@ const styles = {
     fontSize: '8rem',
     fontWeight: 'bold'
   }
-
 };
 
 const dataUseDescriptions = (translatedDataUse) => {
@@ -43,7 +42,6 @@ const manuallyReviewedDataUses = (dataUses) => {
 
 export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
-
   const descriptions = dataUseDescriptions(translatedDataUse);
 
   return div({className: 'data_use_description_box', style: styles.box, isRendered: !isEmpty(descriptions)}, [
