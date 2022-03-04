@@ -86,7 +86,7 @@ const dataUsePills2 = (translatedDataUse) => {
   });
 };
 
-const mapOverDataUses = (translatedDataUse, iteratee) => {
+export const mapOverDataUses = (translatedDataUse, iteratee) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     return ld.map(dataUses, iteratee(dataUses, key));
