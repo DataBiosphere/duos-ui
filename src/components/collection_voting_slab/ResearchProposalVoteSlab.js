@@ -65,7 +65,6 @@ const slabTitle = () => {
   ]);
 };
 
-
 const dataUseSummary = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
@@ -74,23 +73,6 @@ const dataUseSummary = (translatedDataUse) => {
       label,
       dataUsePills(dataUses)
     ]);
-  });
-};
-
-const dataUseSummary2 = (translatedDataUse) => {
-  return mapOverDataUses(translatedDataUse, (dataUses, key) => {
-    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({className: key + '_data_uses'}, [
-      label,
-      dataUsePills(dataUses)
-    ]);
-  });
-};
-
-export const mapOverDataUses = (translatedDataUse, iteratee) => {
-  return ld.flatMap(ld.keys(translatedDataUse), key => {
-    const dataUses = translatedDataUse[key];
-    return ld.map(dataUses, iteratee(dataUses, key));
   });
 };
 

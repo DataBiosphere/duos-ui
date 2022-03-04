@@ -1,6 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
 import ld, {isEmpty} from "lodash";
-import {mapOverDataUses} from "./ResearchProposalVoteSlab";
 
 const styles = {
   box: {
@@ -30,14 +29,6 @@ const styles = {
 const dataUseDescriptions = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
-    return ld.map(manuallyReviewedDataUses(dataUses), dataUse => {
-      return div([dataUse.description]);
-    });
-  });
-};
-
-const dataUseDescriptions2 = (translatedDataUse) => {
-  return mapOverDataUses(translatedDataUse, (dataUses, key) => {
     return ld.map(manuallyReviewedDataUses(dataUses), dataUse => {
       return div([dataUse.description]);
     });
