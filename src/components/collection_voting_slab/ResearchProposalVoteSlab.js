@@ -66,15 +66,13 @@ const slabTitle = () => {
 };
 
 const dataUsePills = (translatedDataUse) => {
-  const primaryDataUses = translatedDataUse.primary;
-  const formattedDataUses = ld.map(primaryDataUses, (dataUse, i) => {
-    return DataUsePill({
-      dataUse,
-      key: i
-    });
+  return mapOverDataUses(translatedDataUse, (dataUses, key) => {
+    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
+    return div({className: key + '_data_uses'}, [
+      label,
+      formatDataUsePills(dataUses)
+    ]);
   });
-
-  return div({className: "primary_data_use_pill"}, [formattedDataUses]);
 };
 
 const dataUsePills2 = (translatedDataUse) => {
