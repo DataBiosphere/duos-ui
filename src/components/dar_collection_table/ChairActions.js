@@ -43,7 +43,8 @@ const initUserData = async({roles, dars, elections}) => {
     )(elections);
     return {relevantEmptyDars, relevantElections, relevantDatasetIds};
   } catch(error) {
-    throw new Error("Failed to initilize user data, redirecting to console...");
+    //if there's an issue with the collection it's best to fail safely, so hide all of the buttons
+    throw new Error('Error initializing component data');
   }
 };
 
@@ -72,7 +73,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, re
     const isCancelEnabled = !isEmpty(openRelevantElections);
     return {isCancelEnabled, userHasVote, label, isOpenEnabled};
   } catch(error) {
-    throw new Error("Error initializing collection, redirecting to console...");
+    throw new Error ('Error initializing chair actions');
   }
 };
 
@@ -98,6 +99,14 @@ export default function ChairActions(props) {
   const [voteEnabled, setVoteEnabled] = useState(false);
   const [voteLabel, setVoteLabel] = useState('Vote');
 
+  //if there's something wrong with the collection it's best to fail grecefully
+  //use this function to hide buttons on processing err
+  const updateStateOnFail = () => {
+    setOpenEnabled(false);
+    setCancelEnabled(false);
+    setVoteLabel(false);
+  };
+
   useEffect(() => {
     const init = async({roles, elections, dars, dacUserId}) => {
       const {relevantEmptyDars, relevantElections, relevantDatasetIds} = await initUserData({roles, dars, elections});
@@ -121,8 +130,7 @@ export default function ChairActions(props) {
       )(dars);
       init({roles, dars, dacUserId, elections});
     } catch(error) {
-      Notifications.showError({text: error.message || "Error initializing component, redirecting to console..."});
-      Navigation.console();
+      updateStateOnFail();
     }
   }, [dars, collection]);
 

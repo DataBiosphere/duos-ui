@@ -1,29 +1,37 @@
 import { h, div } from "react-hyperscript-helpers";
 import { useEffect, useState } from 'react';
-import { find, lowerCase, isEmpty, isNil } from "lodash/fp";
-import SimpleButton from "../SimpleButton";
-import { Theme } from "../../libs/theme";
+import { lowerCase, isEmpty, flow, flatMap } from "lodash/fp";
+import { filter, map } from "lodash";
+import { Storage } from "../../libs/storage";
+import TableTextButton from '../TableTextButton';
+import { Styles } from '../../libs/theme';
 
-const baseColor = Theme.palette.secondary;
+const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
+const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+
+const findRelevantVotes = ({dars, userId}) => flow(
+  map(dar => dar.elections),
+  flatMap(electionMap => Object.values(electionMap)),
+  filter(election => lowerCase(election.status) === 'open'),
+  flatMap(election => Object.values(election.votes)),
+  filter(vote => vote.dacUserId === userId),
+)(dars);
+
+const determineButtonLabel = ({relevantVotes}) => {
+  const submittedVotePresent = flow(
+    filter(vote => !isEmpty(vote.vote)),
+    isEmpty
+  )(relevantVotes);
+  return submittedVotePresent ? 'Update Vote' : 'Vote';
+};
 
 export default function MemberActions(props) {
-
-  const isButtonEnabled = ({elections, user}) => {
-    let userVote;
-    const enabledElection = find((election) => {
-      const {votes} = election;
-      const userVote = find((vote) => {
-        vote.dacuserid = user.dacuserid;
-      })(votes);
-      const isElectionOpen = (election => {
-        const lowerCaseStatus = lowerCase(election.status);
-        return lowerCaseStatus !== 'canceled' || lowerCaseStatus !== 'closed';
-      });
-      return userVote && isElectionOpen;
-    })(elections);
-
-    return {enabledElection, userVote};
-  };
+  /*
+    Members can only vote on collections
+    Only goal is to determine whether or not the vote button appears
+      //Look through votes on elections, if user has a vote present and the election is open, show button
+      //Otherwise hide the button
+  */
 
   /*
   For a collection, the component needs:
@@ -33,29 +41,68 @@ export default function MemberActions(props) {
   */
   //NOTE: update init method to work like the other two actions
   //buttons should just take the collection and have the filtering/processing occur here
-  const {elections, user, style, collectionId, history} = props;
-  const [disabled, setDisabled] = useState([]);
+  const { collections } = props;
+  const { dars } = collections;
+  const { collectionId } = collections;
+  const [voteEnabled, setVoteEnabled] = useState(false);
   const [label, setLabel] = useState('Vote');
 
   useEffect(() => {
-    const { userVote, enabledElection } = isButtonEnabled({elections, user});
-    setDisabled(isEmpty(enabledElection));
-    setLabel(!isNil(userVote) ? 'Update Vote' : 'Vote');
-  }, [user, elections]);
+    try{
+      const user = Storage.getCurrentUser();
+      const userId = user.dacUserId;
+      const relevantVotes = findRelevantVotes({dars, userId});
+      if(!isEmpty(relevantVotes)) {
+        const buttonLabel = determineButtonLabel({relevantVotes});
+        setVoteEnabled(true);
+        setLabel(buttonLabel);
+      } else {
+        setVoteEnabled(false);
+      }
+    } catch(error) {
+      setVoteEnabled(false);
+    }
+  }, [dars]);
 
-  return div({ style }, [
-    h(SimpleButton, {
-      label,
-      disabled,
-      keyProp: `${collectionId}-vote-button`,
-      baseColor,
-      additionalStyle: {
-        padding: '5px 10px',
-        fontSize: '1.45rem',
-      },
-      onClick: () => history.push(`/dar_collections/${collectionId}`)
-    })
+  const goToVote = (collectionId) => {
+    history.push(`/dar_collection/${collectionId}`);
+  };
+
+  const voteButtonAttributes = {
+    keyProp: `member-vote-${collectionId}`,
+    label: label,
+    isRendered: voteEnabled,
+    onClick: () => goToVote(collectionId),
+    style: baseTextButtonStyle,
+    hoverStyle: hoverTextButtonStyle
+  };
+
+  return div({
+    className: 'member-actions',
+    key: `#member-actions-${collectionId}`,
+    style: {
+      display: 'flex',
+      padding: '10px 5px',
+      justifyContent: 'space-around',
+      alignItems: 'end'
+    }
+  }, [
+    h(TableTextButton, voteButtonAttributes)
   ]);
+
+  // return div({ style }, [
+  //   h(SimpleButton, {
+  //     label,
+  //     disabled,
+  //     keyProp: `${collectionId}-vote-button`,
+  //     baseColor,
+  //     additionalStyle: {
+  //       padding: '5px 10px',
+  //       fontSize: '1.45rem',
+  //     },
+  //     onClick: () => history.push(`/dar_collections/${collectionId}`)
+  //   })
+  // ]);
 
   //This is an example of how the table column for actions would be configured for member actions
   // return {
