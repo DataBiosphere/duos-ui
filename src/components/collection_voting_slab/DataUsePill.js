@@ -32,7 +32,7 @@ export default function DataUsePill(props) {
   const {code, description} = dataUse;
 
   return div({key: 'data_use_pill_' + key, style: styles.baseStyle}, [
-    span({ style: styles.code }, code === null ? '' : code),
+    span({ style: styles.code }, [code]),
     span({ style: styles.description }, [description])
   ]);
 }

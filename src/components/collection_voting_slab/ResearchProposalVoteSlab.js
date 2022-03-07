@@ -58,13 +58,13 @@ const styles = {
   }
 };
 
-const slabTitle = () => {
+const SlabTitle = () => {
   return div({className: 'slab_title', style: styles.slabTitle}, [
     "Structured Research Purpose"
   ]);
 };
 
-const dataUseSummary = (translatedDataUse) => {
+const DataUseSummary = ({translatedDataUse}) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
@@ -84,11 +84,23 @@ const dataUsePills = (dataUses) => {
   });
 };
 
-const skeletonLoader = () => {
+const SkeletonLoader = () => {
   return div({style: styles.skeletonLoader, className: 'text-placeholder', key: `placeholder-data-use-description`});
 };
 
-const researchPurposeSummary = (darInfo) => {
+const CollapseExpandLink = ({expanded, setExpanded}) => {
+  const linkMessage = expanded ?
+    'Hide Research Purpose and Vote' :
+    'Expand to view Research Purpose and Vote';
+
+  return a({
+    id: 'link_srp_collapse_expand',
+    style: styles.link,
+    onClick: () => setExpanded(!expanded),
+  }, [linkMessage]);
+};
+
+const ResearchPurposeSummary = ({darInfo}) => {
   return div({style: styles.researchPurposeSummary}, [darInfo.rus]);
 };
 
@@ -97,29 +109,17 @@ export default function ResearchProposalVoteSlab(props) {
   const {darInfo} = props;
   const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
-  const collapseExpandLink = () => {
-    const linkMessage = expanded ?
-      'Hide Research Purpose and Vote' :
-      'Expand to view Research Purpose and Vote';
-
-    return a({
-      id: 'link_srp_collapse_expand',
-      style: styles.link,
-      onClick: () => setExpanded(!expanded),
-    }, [linkMessage]);
-  };
-
   return div({className: 'srp_slab', style: styles.baseStyle}, [
-    slabTitle(),
+    h(SlabTitle, {}),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
-      dataUseSummary(translatedDataUse),
-      collapseExpandLink(),
-      skeletonLoader(),
+      h(DataUseSummary, {translatedDataUse}),
+      h(CollapseExpandLink, {expanded, setExpanded}),
+      h(SkeletonLoader, {}),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
         span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
-        researchPurposeSummary(darInfo),
+        h(ResearchPurposeSummary, {darInfo}),
         h(DataUseAlertBox, {translatedDataUse}),
       ]),
     ]),
