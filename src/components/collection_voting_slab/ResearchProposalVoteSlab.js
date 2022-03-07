@@ -9,8 +9,7 @@ const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     padding: '15px 25px',
-    margin: '10px 0 20px 0',
-    display: 'contents'
+    margin: '10px 0 20px 0'
   },
   slabTitle: {
     color: '#000000',
@@ -20,9 +19,6 @@ const styles = {
     width: 'fit-content',
     padding: '1.2rem',
     borderRadius: '4px 4px 0 0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    display: 'flex'
   },
   dataUseCategoryLabel: {
     fontWeight: 'bold',
@@ -56,6 +52,9 @@ const styles = {
     fontWeight: '500',
     lineHeight: '20px',
     margin: '1.5rem'
+  },
+  skeletonLoader: {
+    height: '60px',
   }
 };
 
@@ -85,6 +84,10 @@ const dataUsePills = (dataUses) => {
   });
 };
 
+const skeletonLoader = () => {
+  return div({style: styles.skeletonLoader, className: 'text-placeholder', key: `placeholder-data-use-description`});
+};
+
 const researchPurposeSummary = (darInfo) => {
   return div({style: styles.researchPurposeSummary}, [darInfo.rus]);
 };
@@ -111,6 +114,7 @@ export default function ResearchProposalVoteSlab(props) {
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
       dataUseSummary(translatedDataUse),
       collapseExpandLink(),
+      skeletonLoader(),
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
@@ -118,7 +122,6 @@ export default function ResearchProposalVoteSlab(props) {
         researchPurposeSummary(darInfo),
         h(DataUseAlertBox, {translatedDataUse}),
       ]),
-      "VOTE AND RATIONALE COMPONENTS"
-    ])
+    ]),
   ]);
 }
