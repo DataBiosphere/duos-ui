@@ -144,4 +144,46 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.get('.data-use-alert-box').should('not.exist');
   });
+
+  it('Does not render data use summary when loading', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        darInfo={darInfoPrimarySecondaryUse}
+        isLoading={true}
+      />
+    );
+    cy.get("primary").should('not.exist');
+    cy.get("secondary").should('not.exist');
+  });
+
+  it('Does not render link to expand/collapse when loading', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        darInfo={darInfoSecondaryUseManualReviewTrue}
+        isLoading={true}
+      />
+    );
+    cy.get('Hide Research Purpose and Vote').should('not.exist');
+    cy.get('Expand to view Research Purpose and Vote').should('not.exist');
+  });
+
+  it('Renders skeleton when loading', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        darInfo={darInfoPrimaryUseManualReviewFalse}
+        isLoading={true}
+      />
+    );
+    cy.get('.text-placeholder').should('exist');
+  });
+
+  it('Does not render skeleton when not loading', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        darInfo={darInfoPrimaryUseManualReviewFalse}
+        isLoading={false}
+      />
+    );
+    cy.get('.text-placeholder').should('not.exist');
+  });
 });
