@@ -32,78 +32,72 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the alert box and exclamation point when translated data use a manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewTrue]}]}
+        translatedDataUse={{"primary": [dataUseManualReviewTrue]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('be.visible');
+    const component = cy.get('.data-use-alert-box').should('be.visible');
     component.contains('!');
   });
 
   it('Does not render the alert box and exclamation point when translated data use a manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewFalse]}]}
+        translatedDataUse={{"primary": [dataUseManualReviewFalse]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('not.be.visible');
-    component.get('data_use_descriptions').should('be.empty');
+    cy.get('.data-use-alert-box').should('not.exist');
   });
 
   it('Does not render the description of a data use without a manuallyReviewed attribute', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseNoManualReview]}]}
+        translatedDataUse={{"primary": [dataUseNoManualReview]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('not.be.visible');
-    component.get('data_use_descriptions').should('be.empty');
+    cy.get('.data-use-alert-box').should('not.exist');
   });
 
   it('Renders the description of a primary use manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewTrue]}, {"Secondary": [dataUseManualReviewFalse]}]}
+        translatedDataUse={{"primary": [dataUseManualReviewTrue], "secondary": [dataUseManualReviewFalse]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('be.visible');
-    const descriptions = component.get('data_use_descriptions');
-    descriptions.contains('data use 1');
-    descriptions.should('not.contain', 'data use 2');
+    cy.get('.data-use-alert-box').should('be.visible');
+    cy.contains('data use 1');
+    cy.get('data use 2').should('not.exist');
   });
 
   it('Renders the description of a secondary use manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewFalse]}, {"Secondary": [dataUseManualReviewTrue]}]}
+        translatedDataUse={{"primary": [dataUseManualReviewFalse], "secondary": [dataUseManualReviewTrue]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('be.visible');
-    const descriptions = component.get('data_use_descriptions');
-    descriptions.contains('data use 1');
-    descriptions.should('not.contain', 'data use 3');
+    cy.get('.data-use-alert-box').should('be.visible');
+    cy.contains('data use 1');
+    cy.get('data use 3').should('not.exist');
   });
 
   it('Renders the description multiple manually reviewed data uses in the same category', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewTrue, dataUseManualReviewTrue2]}]}
+        translatedDataUse={{"Primary": [dataUseManualReviewTrue, dataUseManualReviewTrue2]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('be.visible');
-    const descriptions = component.get('data_use_descriptions');
-    descriptions.contains('data use 1');
-    descriptions.contains('data use 2');
+    cy.get('.data-use-alert-box').should('be.visible');
+    cy.contains('data use 1');
+    cy.contains('data use 2');
   });
 
   it('Renders the description multiple manually reviewed data uses in different categories', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={[{"Primary": [dataUseManualReviewTrue2]}, {"Secondary": [dataUseManualReviewTrue]}]}
+        translatedDataUse={{"primary": [dataUseManualReviewTrue2], "secondary": [dataUseManualReviewTrue]}}
       />
     );
-    const component = cy.get('data_use_alert_box').should('be.visible');
-    const descriptions = component.get('data_use_descriptions');
-    descriptions.contains('data use 1');
-    descriptions.contains('data use 2');
+    cy.get('.data-use-alert-box').should('be.visible');
+    cy.contains('data use 1');
+    cy.contains('data use 2');
   });
 });
