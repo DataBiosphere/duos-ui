@@ -35,7 +35,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewTrue]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('be.visible');
+    const component = cy.get('data_use_alert_box').should('be.visible');
     component.contains('!');
   });
 
@@ -45,7 +45,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewFalse]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('not.be.visible');
+    const component = cy.get('data_use_alert_box').should('not.be.visible');
     component.get('data_use_descriptions').should('be.empty');
   });
 
@@ -55,7 +55,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseNoManualReview]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('not.be.visible');
+    const component = cy.get('data_use_alert_box').should('not.be.visible');
     component.get('data_use_descriptions').should('be.empty');
   });
 
@@ -65,7 +65,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewTrue]}, {"Secondary": [dataUseManualReviewFalse]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('be.visible');
+    const component = cy.get('data_use_alert_box').should('be.visible');
     const descriptions = component.get('data_use_descriptions');
     descriptions.contains('data use 1');
     descriptions.should('not.contain', 'data use 2');
@@ -77,7 +77,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewFalse]}, {"Secondary": [dataUseManualReviewTrue]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('be.visible');
+    const component = cy.get('data_use_alert_box').should('be.visible');
     const descriptions = component.get('data_use_descriptions');
     descriptions.contains('data use 1');
     descriptions.should('not.contain', 'data use 3');
@@ -89,7 +89,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewTrue, dataUseManualReviewTrue2]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('be.visible');
+    const component = cy.get('data_use_alert_box').should('be.visible');
     const descriptions = component.get('data_use_descriptions');
     descriptions.contains('data use 1');
     descriptions.contains('data use 2');
@@ -101,7 +101,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={[{"Primary": [dataUseManualReviewTrue2]}, {"Secondary": [dataUseManualReviewTrue]}]}
       />
     );
-    const component = cy.get('data_use_description_box').should('be.visible');
+    const component = cy.get('data_use_alert_box').should('be.visible');
     const descriptions = component.get('data_use_descriptions');
     descriptions.contains('data use 1');
     descriptions.contains('data use 2');
