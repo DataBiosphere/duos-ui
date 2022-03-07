@@ -106,15 +106,18 @@ const ResearchPurposeSummary = ({darInfo}) => {
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
-  const {darInfo} = props;
+  const {darInfo, isLoading} = props;
   const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
   return div({className: 'srp_slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
     div({className: 'srp_collapsed', style: styles.collapsedData}, [
-      h(DataUseSummary, {translatedDataUse}),
-      h(CollapseExpandLink, {expanded, setExpanded}),
-      h(SkeletonLoader, {}),
+      isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
+      h(CollapseExpandLink, {
+        expanded,
+        setExpanded,
+        isRendered: !isLoading
+      })
     ]),
     div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
       div({className: 'research_purpose'}, [
