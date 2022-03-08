@@ -35,7 +35,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseManualReviewTrue]}}
       />
     );
-    const component = cy.get('.data-use-alert-box').should('be.visible');
+    const component = cy.get('[dataCy=alert-box]').should('be.visible');
     component.contains('!');
   });
 
@@ -45,7 +45,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseManualReviewFalse]}}
       />
     );
-    cy.get('.data-use-alert-box').should('not.exist');
+    cy.get('[dataCy=alert-box]').should('not.exist');
   });
 
   it('Does not render the description of a data use without a manuallyReviewed attribute', function() {
@@ -54,7 +54,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseNoManualReview]}}
       />
     );
-    cy.get('.data-use-alert-box').should('not.exist');
+    cy.get('[dataCy=alert-box]').should('not.exist');
   });
 
   it('Renders the description of a primary use manually reviewed data use', function() {
@@ -63,7 +63,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseManualReviewTrue], "secondary": [dataUseManualReviewFalse]}}
       />
     );
-    cy.get('.data-use-alert-box').should('be.visible');
+    cy.get('[dataCy=alert-box]').should('be.visible');
     cy.contains('data use 1');
     cy.get('data use 2').should('not.exist');
   });
@@ -74,7 +74,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseManualReviewFalse], "secondary": [dataUseManualReviewTrue]}}
       />
     );
-    cy.get('.data-use-alert-box').should('be.visible');
+    cy.get('[dataCy=alert-box]').should('be.visible');
     cy.contains('data use 1');
     cy.get('data use 3').should('not.exist');
   });
@@ -85,7 +85,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"Primary": [dataUseManualReviewTrue, dataUseManualReviewTrue2]}}
       />
     );
-    cy.get('.data-use-alert-box').should('be.visible');
+    cy.get('[dataCy=alert-box]').should('be.visible');
     cy.contains('data use 1');
     cy.contains('data use 2');
   });
@@ -96,7 +96,7 @@ describe('DataUseAlertBox - Tests', function() {
         translatedDataUse={{"primary": [dataUseManualReviewTrue2], "secondary": [dataUseManualReviewTrue]}}
       />
     );
-    cy.get('.data-use-alert-box').should('be.visible');
+    cy.get('[dataCy=alert-box]').should('be.visible');
     cy.contains('data use 1');
     cy.contains('data use 2');
   });

@@ -44,8 +44,8 @@ export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
   const descriptions = dataUseDescriptions(translatedDataUse);
 
-  return div({className: 'data-use-alert-box', style: styles.box, isRendered: !isEmpty(descriptions)}, [
+  return div({dataCy: 'alert-box', style: styles.box, isRendered: !isEmpty(descriptions)}, [
     span({style: styles.exclamationPoint}, ['!']),
-    div({className: 'data-use-descriptions', style: styles.text}, [descriptions])
+    div({style: styles.text}, [descriptions])
   ]);
 }
