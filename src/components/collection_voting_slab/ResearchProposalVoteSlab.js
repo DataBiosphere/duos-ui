@@ -102,7 +102,9 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
 };
 
 const ResearchPurposeSummary = ({darInfo}) => {
-  return div({style: styles.researchPurposeSummary}, [darInfo.rus]);
+  return !isNil(darInfo) ?
+    div({style: styles.researchPurposeSummary}, [darInfo.rus]) :
+    div();
 };
 
 export default function ResearchProposalVoteSlab(props) {
