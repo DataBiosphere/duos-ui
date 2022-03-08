@@ -1,4 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
+import {isNil} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -29,10 +30,9 @@ const styles = {
 
 export default function DataUsePill(props) {
   const {dataUse, key} = props;
-  const {code, description} = dataUse;
 
   return div({key: 'data_use_pill_' + key, style: styles.baseStyle}, [
-    span({ style: styles.code }, [code]),
-    span({ style: styles.description }, [description])
+    span({ style: styles.code }, !isNil(dataUse) ? [dataUse.code] : []),
+    span({ style: styles.description }, !isNil(dataUse) ? [dataUse.description] : [])
   ]);
 }
