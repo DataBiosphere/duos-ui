@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
-import ld, {isEmpty} from "lodash";
+import ld, {isEmpty, isNil} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
 import {Transition} from "@headlessui/react";
@@ -108,7 +108,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const {darInfo, isLoading} = props;
-  const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
+  const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
 
 
   return div({className: 'srp-slab', style: styles.baseStyle}, [
