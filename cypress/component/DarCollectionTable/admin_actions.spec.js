@@ -6,7 +6,7 @@ import AdminActions from '../../../src/components/dar_collection_table/AdminActi
 const collectionId = 1;
 const props = {
   collection: {
-    collectionId,
+    darCollectionId: collectionId,
     dars: {
       1: {
         elections: {
@@ -40,7 +40,7 @@ describe('Admin Actions - Open Button', () => {
   });
 });
 
-describe('Admin actions - Closed button', () => {
+describe('Admin Actions - Closed button', () => {
   it('renders the cancel button if cancelable elections exists', () => {
     mount(<AdminActions {...props} />);
     const button = cy.get(`#admin-cancel-${collectionId}`);

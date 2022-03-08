@@ -33,13 +33,13 @@ export default function AdminActions(props) {
   */
 
   const { collection, showCancelModal, updateCollections } = props;
-  const collectionId = collection.collectionId;
+  const collectionId = collection.darCollectionId;
 
   const [openEnabled, setOpenEnabled] = useState(false);
   const [cancelEnabled, setCancelEnabled] = useState(false);
 
   useEffect(() => {
-    const {dars} = collection;
+    const { dars } = collection;
     const isCancelable = checkIfCancelableElectionPresent(dars);
     const isOpenable = checkIfOpenableElectionPresent(dars);
 
@@ -48,7 +48,7 @@ export default function AdminActions(props) {
   }, [collection]);
   /*
     updateCollections should be a method defined on the Admin console
-    should look something like this...
+    Should look something close to below, expect similar requirements on the other actions for things like cancel, revise, etc.
 
     const updateCollections = (updatedCollection) => {
       const collectionIndex = findIndex(collection => collection.collectionId === updatedCollection.collectionId);
@@ -66,18 +66,19 @@ export default function AdminActions(props) {
     }
   */
 
+  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
   const openOnClick = async (collectionId) => {
     let updatedCollection;
     try {
       updatedCollection = await Collections.openElectionsById(collectionId);
-    } catch(error) {
-      Notifications.showError({text: "Error updating collections status"});
+    } catch (error) {
+      Notifications.showError({ text: 'Error updating collections status' });
     }
     updateCollections(updatedCollection);
   };
 
+  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
-    //showCancelModal should be defined on the Admin Console.
     showCancelModal(collection);
   };
 
@@ -96,20 +97,23 @@ export default function AdminActions(props) {
     onClick: () => cancelOnClick(collection),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
-    icon: Block
+    icon: Block,
   };
 
-  return div({
-    className: 'admin-actions',
-    key: `admin-actions-${collectionId}`,
-    style: {
-      display: 'flex',
-      padding: '10px 5px',
-      justifyContent: 'space-around',
-      alignItems: 'end'
-    }
-  }, [
-    h(TableTextButton, openButtonAttributes),
-    h(TableIconButton, cancelButtonAttributes)
-  ]);
+  return div(
+    {
+      className: 'admin-actions',
+      key: `admin-actions-${collectionId}`,
+      style: {
+        display: 'flex',
+        padding: '10px 5px',
+        justifyContent: 'space-around',
+        alignItems: 'end',
+      },
+    },
+    [
+      h(TableTextButton, openButtonAttributes),
+      h(TableIconButton, cancelButtonAttributes),
+    ]
+  );
 }

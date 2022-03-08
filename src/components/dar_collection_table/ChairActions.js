@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Notifications } from '../../libs/utils';
-import { Collections, DAC } from '../../libs/ajax';
+import { Collections } from '../../libs/ajax';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import TableTextButton from '../TableTextButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, isNil, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq} from 'lodash/fp';
+import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
@@ -15,19 +15,8 @@ const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Styles.TABLE.TABLE_ICON_BUTTON;
 
-const initUserData = async({roles, dars, elections}) => {
+const initUserData = ({dars, elections, relevantDatasets}) => {
   try {
-    //map out user dac ids
-    const userDACs = flow(
-      filter(role => !isNil(role.dacId)),
-      map(role => role.dacId)
-    )(roles);
-
-    //NOTE: an API endpoint for batch call would be useful here
-    const relevantDatasets = await (userDACs.map(dacId => {
-      return DAC.datasets(dacId);
-    }));
-
     const relevantDatasetIds = flow(
       flatten,
       map(dataset => dataset.dataSetId),
@@ -80,7 +69,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, re
 export default function ChairActions(props) {
   /*
     Chair -> Admin actions plus vote button, however there are permission caveats
-    //Analysis cannot be done across the entire collection, only on elections that pertain to the user
+    Analysis cannot be done across the entire collection, only on elections that pertain to the user
 
     Therefore, for opening and closing you need...
       Elections -> only the elections that pertain to the users' DAC
@@ -90,10 +79,13 @@ export default function ChairActions(props) {
             -> See if user's vote has been submitted (Vote|Update Vote)
   */
 
-  const { showCancelModal, updateCollections, collection } = props;
+  //relevantDatasets is the list of datasets that the user has access to
+  //needed to determine if a user can open an election on a DAR that has no elections
+  //Done via API call, needs to be done on parent component to avoid making the same request (with the same result) for each row
+  const { showCancelModal, updateCollections, collection, relevantDatasets } =
+    props;
   const { dars } = collection;
-  const collectionId = collection.collectionId;
-
+  const collectionId = collection.darCollectionId;
   const [openEnabled, setOpenEnabled] = useState(false);
   const [cancelEnabled, setCancelEnabled] = useState(false);
   const [voteEnabled, setVoteEnabled] = useState(false);
@@ -108,33 +100,41 @@ export default function ChairActions(props) {
   };
 
   useEffect(() => {
-    const init = async({roles, elections, dars, dacUserId}) => {
-      const {relevantEmptyDars, relevantElections, relevantDatasetIds} = await initUserData({roles, dars, elections});
-      const {isCancelEnabled, userHasVote, label, isOpenEnabled} = calcComponentState({dacUserId, relevantElections, relevantEmptyDars, relevantDatasetIds});
+    const init = ({ elections, dars, dacUserId, relevantDatasets }) => {
+      const { relevantEmptyDars, relevantElections, relevantDatasetIds } =
+        initUserData({ dars, elections, relevantDatasets });
+      const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
+        calcComponentState({
+          dacUserId,
+          relevantElections,
+          relevantEmptyDars,
+          relevantDatasetIds,
+        });
       setOpenEnabled(isOpenEnabled);
       //To determine cancel enabled, see if any election is open
       setCancelEnabled(isCancelEnabled);
       //set label based on function return, visibility determined by setVoteEnabled
       setVoteLabel(label);
       //To determine if vote is enabled, check if user has a vote AND check that the open button is not enabled
-      setVoteEnabled((userHasVote && !isOpenEnabled));
+      setVoteEnabled(userHasVote && !isOpenEnabled);
     };
 
-    try{
-      const {dars} = collection;
+    try {
+      const { dars } = collection;
       const user = Storage.getCurrentUser();
-      const {roles, dacUserId} = user;
+      const { dacUserId } = user;
       const elections = flow(
-        map(dar => dar.elections),
-        flatMap(electionMap => Object.values(electionMap))
+        map((dar) => dar.elections),
+        flatMap((electionMap) => Object.values(electionMap))
       )(dars);
-      init({roles, dars, dacUserId, elections});
-    } catch(error) {
+      init({ dars, dacUserId, elections, relevantDatasets });
+    } catch (error) {
       updateStateOnFail();
     }
-  }, [dars, collection]);
+  }, [dars, collection, relevantDatasets]);
 
-  const openOnClick = async ({collectionId, updateCollections}) => {
+  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
+  const openOnClick = async ({ collectionId, updateCollections }) => {
     let updatedCollection;
     try {
       updatedCollection = await Collections.openElectionsById(collectionId);
@@ -148,6 +148,7 @@ export default function ChairActions(props) {
     history.push(`/dar_collection/${collectionId}`);
   };
 
+  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
     showCancelModal(collection);
   };
@@ -156,9 +157,9 @@ export default function ChairActions(props) {
     keyProp: `chair-open-${collectionId}`,
     label: 'Open',
     isRendered: openEnabled,
-    onClick:() => openOnClick({collectionId, updateCollections}),
+    onClick: () => openOnClick({ collectionId, updateCollections }),
     style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle
+    hoverStyle: hoverTextButtonStyle,
   };
 
   const cancelButtonAttributes = {
@@ -167,7 +168,7 @@ export default function ChairActions(props) {
     onClick: () => cancelOnClick(collection),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
-    icon: Block
+    icon: Block,
   };
 
   const voteButtonAttributes = {
@@ -179,18 +180,22 @@ export default function ChairActions(props) {
     hoverStyle: hoverTextButtonStyle,
   };
 
-  return div({
-    className: 'chair-actions',
-    key: `chair-actions-${collectionId}`,
-    style: {
-      display: 'flex',
-      padding: '10px 5px',
-      justifyContent: 'space-around',
-      alignItems: 'end'
-    }
-  }, [
-    h(TableTextButton, openButtonAttributes),
-    h(TableTextButton, voteButtonAttributes),
-    h(TableIconButton, cancelButtonAttributes),
-  ]);
+  return div(
+    {
+      className: 'chair-actions',
+      key: `chair-actions-${collectionId}`,
+      id: `chair-actions-${collectionId}`,
+      style: {
+        display: 'flex',
+        padding: '10px 5px',
+        justifyContent: 'space-around',
+        alignItems: 'end',
+      },
+    },
+    [
+      h(TableTextButton, openButtonAttributes),
+      h(TableTextButton, voteButtonAttributes),
+      h(TableIconButton, cancelButtonAttributes),
+    ]
+  );
 }
