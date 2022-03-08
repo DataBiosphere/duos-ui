@@ -4,7 +4,6 @@ import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld, {isEmpty, isNil} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
-import {Transition} from "@headlessui/react";
 
 const styles = {
   baseStyle: {
@@ -123,24 +122,12 @@ export default function ResearchProposalVoteSlab(props) {
         isRendered: !isLoading
       })
     ]),
-
-    h(Transition, {
-      show: expanded,
-      enter: "transition-opacity ease-linear duration-150",
-      enterFrom: "opacity-0",
-      enterTo: "opacity-100",
-      leave: "transition-opacity ease-linear duration-150",
-      leaveFrom: "opacity-100",
-      leaveTo: "opacity-0",
-    },
-    [
-      div({className: 'srp-expanded', style: styles.expandedData}, [
-        div({className: 'research-purpose'}, [
-          span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
-          h(ResearchPurposeSummary, {darInfo}),
-          h(DataUseAlertBox, {translatedDataUse}),
-        ]),
+    div({className: 'srp-expanded', style: styles.expandedData}, [
+      div({className: 'research-purpose'}, [
+        span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
+        h(ResearchPurposeSummary, {darInfo}),
+        h(DataUseAlertBox, {translatedDataUse}),
       ]),
-    ])
+    ]),
   ]);
 }
