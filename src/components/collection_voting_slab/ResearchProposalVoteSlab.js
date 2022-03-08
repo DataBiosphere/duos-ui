@@ -4,6 +4,7 @@ import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld, {isEmpty} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
+import {Transition} from "@headlessui/react";
 
 const styles = {
   baseStyle: {
@@ -59,7 +60,7 @@ const styles = {
 };
 
 const SlabTitle = () => {
-  return div({className: 'slab_title', style: styles.slabTitle}, [
+  return div({className: 'slab-title', style: styles.slabTitle}, [
     "Structured Research Purpose"
   ]);
 };
@@ -68,7 +69,7 @@ const DataUseSummary = ({translatedDataUse}) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({className: key + '_data_uses'}, [
+    return div({className: key + '-data-uses'}, [
       label,
       dataUsePills(dataUses)
     ]);
@@ -85,7 +86,7 @@ const dataUsePills = (dataUses) => {
 };
 
 const SkeletonLoader = () => {
-  return div({style: styles.skeletonLoader, className: 'text-placeholder', key: `placeholder-data-use-description`});
+  return div({className: 'text-placeholder', style: styles.skeletonLoader});
 };
 
 const CollapseExpandLink = ({expanded, setExpanded}) => {
@@ -109,9 +110,10 @@ export default function ResearchProposalVoteSlab(props) {
   const {darInfo, isLoading} = props;
   const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
 
-  return div({className: 'srp_slab', style: styles.baseStyle}, [
+
+  return div({className: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
-    div({className: 'srp_collapsed', style: styles.collapsedData}, [
+    div({className: 'srp-collapsed', style: styles.collapsedData}, [
       isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
       h(CollapseExpandLink, {
         expanded,
@@ -119,12 +121,24 @@ export default function ResearchProposalVoteSlab(props) {
         isRendered: !isLoading
       })
     ]),
-    div({className: 'srp_expanded', style: styles.expandedData, isRendered: expanded}, [
-      div({className: 'research_purpose'}, [
-        span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
-        h(ResearchPurposeSummary, {darInfo}),
-        h(DataUseAlertBox, {translatedDataUse}),
+
+    h(Transition, {
+      show: expanded,
+      enter: "transition-opacity ease-linear duration-150",
+      enterFrom: "opacity-0",
+      enterTo: "opacity-100",
+      leave: "transition-opacity ease-linear duration-150",
+      leaveFrom: "opacity-100",
+      leaveTo: "opacity-0",
+    },
+    [
+      div({className: 'srp-expanded', style: styles.expandedData}, [
+        div({className: 'research-purpose'}, [
+          span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
+          h(ResearchPurposeSummary, {darInfo}),
+          h(DataUseAlertBox, {translatedDataUse}),
+        ]),
       ]),
-    ]),
+    ])
   ]);
 }
