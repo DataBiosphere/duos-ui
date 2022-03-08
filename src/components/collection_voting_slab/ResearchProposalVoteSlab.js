@@ -4,6 +4,7 @@ import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld, {isEmpty, isNil} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
+import {AnimatePresence, motion} from "framer-motion";
 
 const styles = {
   baseStyle: {
@@ -122,12 +123,30 @@ export default function ResearchProposalVoteSlab(props) {
         isRendered: !isLoading
       })
     ]),
-    div({className: 'srp-expanded', style: styles.expandedData}, [
-      div({className: 'research-purpose'}, [
-        span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
-        h(ResearchPurposeSummary, {darInfo}),
-        h(DataUseAlertBox, {translatedDataUse}),
-      ]),
-    ]),
+
+    h(AnimatePresence, {initial:false}, [
+      expanded && (
+        h(motion.section, {
+          key:'content',
+          initial:'collapsed',
+          animate:'expanded',
+          exit:'collapsed',
+          variants:{
+            collapsed: { opacity: 0, height: 0, y: -50, overflow: 'hidden'  },
+            expanded: { opacity: 1, height: 'auto', y: 0, overflow: 'hidden'  }
+          },
+          transition:{ duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
+        }, [
+          div({className: 'srp-expanded', style: styles.expandedData}, [
+            div({className: 'research-purpose'}, [
+              span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
+              h(ResearchPurposeSummary, {darInfo}),
+              h(DataUseAlertBox, {translatedDataUse}),
+            ]),
+          ]),
+        ])
+      )
+    ])
   ]);
+
 }
