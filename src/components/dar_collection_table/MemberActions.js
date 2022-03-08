@@ -3,10 +3,14 @@ import { useEffect, useState } from 'react';
 import { lowerCase, isEmpty, flow, flatMap, map, filter } from "lodash/fp";
 import { Storage } from "../../libs/storage";
 import TableTextButton from '../TableTextButton';
-import { Styles } from '../../libs/theme';
+import { Styles, Theme } from '../../libs/theme';
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
+  fontFamily: 'Montserrant',
+  margin: '0%',
+  padding: '5x 10px'
+});
 
 const findRelevantVotes = ({dars = {}, userId}) => {
   const relevantVotes = flow(
@@ -67,6 +71,7 @@ export default function MemberActions(props) {
   const goToVote = (collectionId) => {
     history.push(`/dar_collection/${collectionId}`);
   };
+
   const voteButtonAttributes = {
     keyProp: `member-vote-${collectionId}`,
     label: label,

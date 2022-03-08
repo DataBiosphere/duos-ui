@@ -9,10 +9,14 @@ import { Block } from '@material-ui/icons';
 import { checkIfOpenableElectionPresent, checkIfCancelableElectionPresent } from '../../utils/DarCollectionUtils';
 
 const hoverOpenButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseOpenButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
+  fontFamily: 'Montserrant',
+  margin: '0%',
+  fontSize: '1.2rem'
+});
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Styles.TABLE.TABLE_ICON_BUTTON;
+const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
 
 export default function AdminActions(props) {
   /*
@@ -87,7 +91,7 @@ export default function AdminActions(props) {
     label: 'Open',
     isRendered: openEnabled,
     onClick: () => openOnClick(collectionId),
-    style: baseOpenButtonStyle,
+    style: baseTextButtonStyle,
     hoverStyle: hoverOpenButtonStyle,
   };
 

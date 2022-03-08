@@ -17,10 +17,10 @@ import { isEmpty } from 'lodash';
 */
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {fontFamily: 'Montserrant', margin: '0%'});
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Styles.TABLE.TABLE_ICON_BUTTON;
+const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
 
 //Function to determine if collection is resubmittable
 //Should only show up if all of the dars have a canceled status

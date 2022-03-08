@@ -10,10 +10,14 @@ import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMa
 import { Storage } from '../../libs/storage';
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
+  fontFamily: 'Montserrant',
+  fontSize: '1.4rem',
+  margin: '0%',
+});
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Styles.TABLE.TABLE_ICON_BUTTON;
+const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
 
 const initUserData = ({dars, elections, relevantDatasets}) => {
   try {
