@@ -107,6 +107,18 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
+const animationAttributes = {
+  key:'content',
+  initial:'collapsed',
+  animate:'expanded',
+  exit:'collapsed',
+  variants: {
+    collapsed: {opacity: 0, height: 0, y: -50, overflow: 'hidden'},
+    expanded: {opacity: 1, height: 'auto', y: 0, overflow: 'hidden'}
+  },
+  transition:{duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
+};
+
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const {darInfo, isLoading} = props;
@@ -123,20 +135,9 @@ export default function ResearchProposalVoteSlab(props) {
         isRendered: !isLoading
       })
     ]),
-
     h(AnimatePresence, {initial:false}, [
       expanded && (
-        h(motion.section, {
-          key:'content',
-          initial:'collapsed',
-          animate:'expanded',
-          exit:'collapsed',
-          variants:{
-            collapsed: { opacity: 0, height: 0, y: -50, overflow: 'hidden'  },
-            expanded: { opacity: 1, height: 'auto', y: 0, overflow: 'hidden'  }
-          },
-          transition:{ duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
-        }, [
+        h(motion.section, animationAttributes, [
           div({className: 'srp-expanded', style: styles.expandedData}, [
             div({className: 'research-purpose'}, [
               span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
@@ -148,5 +149,4 @@ export default function ResearchProposalVoteSlab(props) {
       )
     ])
   ]);
-
 }
