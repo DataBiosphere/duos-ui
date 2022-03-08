@@ -60,7 +60,7 @@ const styles = {
 };
 
 const SlabTitle = () => {
-  return div({className: 'slab-title', style: styles.slabTitle}, [
+  return div({style: styles.slabTitle}, [
     "Structured Research Purpose"
   ]);
 };
@@ -69,7 +69,7 @@ const DataUseSummary = ({translatedDataUse}) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({className: key + '-data-uses'}, [
+    return div([
       label,
       dataUsePills(dataUses)
     ]);
@@ -95,7 +95,6 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
     'Expand to view Research Purpose and Vote';
 
   return a({
-    id: 'link_srp_collapse_expand',
     style: styles.link,
     onClick: () => setExpanded(!expanded),
   }, [linkMessage]);
@@ -125,9 +124,9 @@ export default function ResearchProposalVoteSlab(props) {
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
 
 
-  return div({className: 'srp-slab', style: styles.baseStyle}, [
+  return div({dataCy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
-    div({className: 'srp-collapsed', style: styles.collapsedData}, [
+    div({style: styles.collapsedData}, [
       isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
       h(CollapseExpandLink, {
         expanded,
@@ -138,8 +137,8 @@ export default function ResearchProposalVoteSlab(props) {
     h(AnimatePresence, {initial:false}, [
       expanded && (
         h(motion.section, animationAttributes, [
-          div({className: 'srp-expanded', style: styles.expandedData}, [
-            div({className: 'research-purpose'}, [
+          div({dataCy: 'srp-expanded', style: styles.expandedData}, [
+            div({dataCy: 'research-purpose'}, [
               span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
               h(ResearchPurposeSummary, {darInfo}),
               h(DataUseAlertBox, {translatedDataUse}),

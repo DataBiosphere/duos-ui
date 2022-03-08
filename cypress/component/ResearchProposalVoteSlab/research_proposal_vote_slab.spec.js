@@ -3,7 +3,6 @@ import React from 'react';
 import {mount} from "@cypress/react";
 import ResearchProposalVoteSlab from "../../../src/components/collection_voting_slab/ResearchProposalVoteSlab";
 
-
 const darInfoPrimaryUseManualReviewFalse = {
   "rus": "test",
   "diseases": true
@@ -18,7 +17,6 @@ const darInfoPrimarySecondaryUse = {
   "illegalBehavior": true
 };
 
-
 describe('ResearchProposalVoteSlab - Tests', function() {
   it('Does not render expanded view when collapsed', function() {
     mount(
@@ -26,8 +24,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    const component = cy.get('.srp-slab');
-    component.get('.srp-expanded').should('not.exist');
+    cy.get('[dataCy=srp-slab]').should('be.visible');
+    cy.get('[dataCy=srp-expanded]').should('not.exist');
   });
 
   it('Renders primary data use pill', function() {
@@ -100,7 +98,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.get('.research-purpose').should('exist');
+    cy.get('[dataCy=research-purpose]').should('exist');
     cy.contains('test');
   });
 
@@ -110,7 +108,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.get('.research-purpose').should('not.exist');
+    cy.get('[dataCy=research-purpose]').should('not.exist');
+    cy.get('test').should('not.exist');
   });
 
   it('Renders data use alert box when expanded with manually reviewed data uses', function() {
@@ -122,7 +121,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.get('.data-use-alert-box').should('exist');
+    cy.get('[dataCy=alert-box]').should('exist');
   });
 
   it('Does not render data use alert box when expanded with manually reviewed data uses', function() {
@@ -133,7 +132,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.get('.data-use-alert-box').should('not.exist');
+    cy.get('[dataCy=alert-box]').should('not.exist');
   });
 
   it('Does not render data use alert box when collapsed', function() {
@@ -142,7 +141,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />
     );
-    cy.get('.data-use-alert-box').should('not.exist');
+    cy.get('[dataCy=alert-box]').should('not.exist');
   });
 
   it('Does not render data use summary when loading', function() {
