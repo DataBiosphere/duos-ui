@@ -20,7 +20,7 @@ const styles = {
     fontWeight: '500',
   },
   exclamationPoint: {
-    fontSize: '8rem',
+    fontSize: '3rem',
     fontWeight: 'bold'
   }
 };
