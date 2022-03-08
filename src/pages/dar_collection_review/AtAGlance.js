@@ -83,8 +83,6 @@ export default function AtAGlance(props) {
     },
   };
 
-  //todo: use collection and dataUseBuckets to get necessary data
-  //todo: update logic in AtAGlanceCellData.js
   const columnHeaderData = () => {
     const {dataUse, dacFinalDecision, structuredResearchPurpose, dacResearchPurposeAgreement, duosAlgorithmDecision, dacVsDuosAlgorithm} = columnHeaderFormat;
     return [dataUse, dacFinalDecision, structuredResearchPurpose, dacResearchPurposeAgreement, duosAlgorithmDecision, dacVsDuosAlgorithm];
