@@ -120,7 +120,6 @@ export const processDataUseBuckets = async(buckets) => {
 };
 
 //Admin only helper function
-//NOTE: write/check tests for this
 export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
   const darsWithElections = filter((dar = {}) => !isEmpty(dar.elections))(dars);
@@ -134,7 +133,6 @@ export const checkIfOpenableElectionPresent = (dars) => {
 };
 
 //Admin only helper function
-//NOTE: write, check tests for this
 export const checkIfCancelableElectionPresent = (dars) => {
   const elections = flow(
     map(dar => dar.elections),
