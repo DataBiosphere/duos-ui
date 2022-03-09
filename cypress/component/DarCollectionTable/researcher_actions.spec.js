@@ -42,15 +42,6 @@ const darsWithNoElections = {
   }
 };
 
-
-/*
-  Researcher Action Test
-                  -> test that container is rendered
-                  -> test cancel render conditions
-                  -> test resubmit render conditions
-                  -> test if review is rendered
-*/
-
 const props = {
   collection: collectionSkeleton,
   showConfirmationModal: () => {},

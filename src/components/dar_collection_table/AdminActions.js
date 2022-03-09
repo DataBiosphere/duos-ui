@@ -27,7 +27,6 @@ export default function AdminActions(props) {
 
     Therefore, to make the above calculations, you'll need...
       Elections -> all elections in the collection
-      Votes -> Not needed? Votes are attached to the election regardless
   */
 
   /*
