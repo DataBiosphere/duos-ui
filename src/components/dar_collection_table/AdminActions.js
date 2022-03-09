@@ -70,7 +70,7 @@ export default function AdminActions(props) {
     }
   */
 
-  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
+  //NOTE: adjust as needed for console ticket implementation. Function declaration is listed as a minimal placeholder
   const openOnClick = async (collectionId) => {
     let updatedCollection;
     try {
@@ -81,7 +81,7 @@ export default function AdminActions(props) {
     updateCollections(updatedCollection);
   };
 
-  //NOTE: adjust as needed for console implementation. Function declaration is listed as a minimal placeholder
+  //NOTE: adjust as needed for console ticket implementation. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
     showCancelModal(collection);
   };

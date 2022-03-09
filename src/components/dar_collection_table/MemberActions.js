@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { lowerCase, isEmpty, flow, flatMap, map, filter } from "lodash/fp";
 import { Storage } from "../../libs/storage";
 import TableTextButton from '../TableTextButton';
-import { Styles, Theme } from '../../libs/theme';
+import { Styles } from '../../libs/theme';
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
 const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
