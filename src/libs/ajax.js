@@ -1002,6 +1002,15 @@ export const Votes = {
     const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}/final`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
     return await res.json();
+  },
+
+  updateVotesByIds: async (voteIds, vote) => {
+    let url = `${await Config.getApiUrl()}/api/votes?votes=${vote.vote}`;
+    if (!isNil(vote.rationale)) {
+      url += '&rationale=${vote.rationale}';
+    }
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteIds), { method: 'PUT' }]));
+    return await res.json();
   }
 };
 
