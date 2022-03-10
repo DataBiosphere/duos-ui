@@ -31,7 +31,7 @@ export default function CollectionSubmitVoteBox(props) {
             h(SimpleButton, {label: "No"})
           ])
         ]),
-        div({style: { display: 'flex', flexDirection: 'column'}}, [
+        div({style: { display: 'flex', flexDirection: 'column', width: '40rem'}}, [
           span(["Rationale (optional):"]),
           textarea({
             name: 'Rationale Input',
