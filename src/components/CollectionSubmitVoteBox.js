@@ -1,9 +1,11 @@
 import {div, span} from "react-hyperscript-helpers";
 
 export default function CollectionSubmitVoteBox(props) {
+  const {question} = props;
+
   return (
     div([
-      div(["QUESTION"]),
+      div([question]),
       div({dataCy: 'content'}[
         div({dataCy: 'vote-container'},[
           span(["Vote Title"]),
