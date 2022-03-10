@@ -6,6 +6,9 @@ const styles = {
     fontFamily: 'Montserrat',
     display: 'flex',
     flexDirection: 'column'
+  },
+  content: {
+    display: 'flex'
   }
 };
 
@@ -15,10 +18,10 @@ export default function CollectionSubmitVoteBox(props) {
   return (
     div({style: styles.baseStyle}, [
       div([question]),
-      div([
+      div({style: styles.content}, [
         div([
           span(["Your Vote*"]),
-          div([
+          div({style: styles.content}, [
             h(SimpleButton, {label: "Yes"}),
             h(SimpleButton, {label: "No"})
           ])
