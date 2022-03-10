@@ -1,12 +1,16 @@
-import {div, h, input, span, textarea} from "react-hyperscript-helpers";
+import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
-import isEmpty from "lodash/fp/isEmpty";
 
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    color: '#333F52',
     display: 'flex',
     flexDirection: 'column'
+  },
+  question: {
+    fontSize: '1.8rem',
+    fontWeight: 'bold'
   },
   content: {
     display: 'flex'
@@ -18,7 +22,7 @@ export default function CollectionSubmitVoteBox(props) {
 
   return (
     div({style: styles.baseStyle}, [
-      div([question]),
+      div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div([
           span(["Your Vote*"]),
@@ -27,7 +31,7 @@ export default function CollectionSubmitVoteBox(props) {
             h(SimpleButton, {label: "No"})
           ])
         ]),
-        div({style: styles.content}, [
+        div({style: { display: 'flex', flexDirection: 'column'}}, [
           span(["Rationale (optional):"]),
           textarea({
             name: 'Rationale Input',
