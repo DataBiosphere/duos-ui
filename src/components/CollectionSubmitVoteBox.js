@@ -8,11 +8,11 @@ export default function CollectionSubmitVoteBox(props) {
       div([question]),
       div({dataCy: 'content'}[
         div({dataCy: 'vote-container'},[
-          span(["Vote Title"]),
+          span(["Your Vote*"]),
           div(["Buttons"])
         ]),
         div({dataCy: 'rationale-container'},[
-          span(["Rationale Title"]),
+          span(["Rationale (optional):"]),
           div(["Rationale Box"])
         ])
       ])
