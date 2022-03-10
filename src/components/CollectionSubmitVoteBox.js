@@ -1,4 +1,5 @@
-import {div, span} from "react-hyperscript-helpers";
+import {div, h, span} from "react-hyperscript-helpers";
+import SimpleButton from "./SimpleButton";
 
 const styles = {
   baseStyle: {
@@ -17,7 +18,10 @@ export default function CollectionSubmitVoteBox(props) {
       div([
         div([
           span(["Your Vote*"]),
-          div(["Buttons"])
+          div([
+            h(SimpleButton, {label: "Yes"}),
+            h(SimpleButton, {label: "No"})
+          ])
         ]),
         div([
           span(["Rationale (optional):"]),
