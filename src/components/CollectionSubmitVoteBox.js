@@ -1,5 +1,6 @@
-import {div, h, span} from "react-hyperscript-helpers";
+import {div, h, input, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
+import isEmpty from "lodash/fp/isEmpty";
 
 const styles = {
   baseStyle: {
@@ -26,9 +27,14 @@ export default function CollectionSubmitVoteBox(props) {
             h(SimpleButton, {label: "No"})
           ])
         ]),
-        div([
+        div({style: styles.content}, [
           span(["Rationale (optional):"]),
-          div(["Rationale Box"])
+          textarea({
+            name: 'Rationale Input',
+            placeholder: "test",
+            rows: 4,
+            required: false,
+          }),
         ])
       ])
     ])
