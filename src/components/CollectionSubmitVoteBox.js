@@ -1,7 +1,7 @@
 import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
-import {isNil} from "lodash";
+import ld, {isNil} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -36,7 +36,9 @@ export default function CollectionSubmitVoteBox(props) {
   }, []);
 
   const updateVote = (vote) => {
+    const voteIds = ld.map(votes, v => v.voteId);
     console.log("vote submitted: " + vote);
+    console.log(voteIds);
   };
 
   return (
