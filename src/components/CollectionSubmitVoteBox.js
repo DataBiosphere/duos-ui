@@ -2,6 +2,7 @@ import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
+import {CheckCircleOutlined} from "@material-ui/icons";
 
 const styles = {
   baseStyle: {
@@ -25,7 +26,7 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes} = props;
 
   const updateRationale = () => {
-    console.log("Sumbit!");
+    console.log("Submit!");
   };
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function CollectionSubmitVoteBox(props) {
     const voteIds = ld.map(votes, v => v.voteId);
     console.log("vote submitted: " + vote);
     console.log(voteIds);
+   // Votes.updateVotesByIds(voteIds, {vote});
   };
 
   return (
@@ -48,7 +50,7 @@ export default function CollectionSubmitVoteBox(props) {
         div([
           span(["Your Vote*"]),
           div({style: styles.content}, [
-            h(SimpleButton, {label: "Yes", onClick: () => updateVote(true)}),
+            h(SimpleButton, {label: span([h(CheckCircleOutlined, {}), "Yes"]), onClick: () => updateVote(true)}),
             h(SimpleButton, {label: "No", onClick: () => updateVote(false)})
           ])
         ]),
@@ -61,7 +63,7 @@ export default function CollectionSubmitVoteBox(props) {
             onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
             rows: 4,
-            style: {borderRadius: '4px', fontWeight: '500'},
+            style: {borderRadius: '4px', fontWeight: '500', color: 'rgba(24,24,24,0.65)'},
           }),
         ])
       ])
