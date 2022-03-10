@@ -1,6 +1,7 @@
 import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
+import {isNil} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -20,11 +21,18 @@ const styles = {
 
 export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
-  const {question} = props;
+  const {question, votes} = props;
 
   const updateRationale = () => {
     console.log("Sumbit!");
   };
+
+  useEffect(() => {
+    const prevRationale = votes[0].rationale;
+    if (!isNil(prevRationale)) {
+      setRationale(prevRationale);
+    }
+  }, []);
 
   return (
     div({style: styles.baseStyle}, [
