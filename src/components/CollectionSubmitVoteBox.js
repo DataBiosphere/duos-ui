@@ -2,7 +2,7 @@ import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
-import {CheckCircleOutlined} from "@material-ui/icons";
+import {CancelOutlined, CheckCircleOutlined} from "@material-ui/icons";
 import VoteResultIcon from "./common/DataUseVoteSummary/VoteResultIcon";
 
 const styles = {
@@ -62,12 +62,12 @@ export default function CollectionSubmitVoteBox(props) {
           span(["Your Vote*"]),
           div({style: styles.content}, [
             h(SimpleButton, {
-              label: span([h(CheckCircleOutlined, {}), "Yes"]),
+              label: span([h(CheckCircleOutlined), "Yes"]),
               onClick: () => updateVote(true),
               baseColor: '#1FA371'
             }),
             h(SimpleButton, {
-              label: "No",
+              label: span([h(CancelOutlined), "No"]),
               onClick: () => updateVote(false),
               baseColor: '#DA0003'
             }),
