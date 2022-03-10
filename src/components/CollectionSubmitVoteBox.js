@@ -6,13 +6,13 @@ import ld, {isNil} from "lodash";
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    fontWeight: 'bold',
     color: '#333F52',
     display: 'flex',
     flexDirection: 'column'
   },
   question: {
     fontSize: '1.8rem',
-    fontWeight: 'bold'
   },
   content: {
     display: 'flex'
@@ -61,7 +61,7 @@ export default function CollectionSubmitVoteBox(props) {
             onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
             rows: 4,
-            style: {borderRadius: '4px'},
+            style: {borderRadius: '4px', fontWeight: '500'},
           }),
         ])
       ])
