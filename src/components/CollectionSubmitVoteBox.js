@@ -31,7 +31,7 @@ export default function CollectionSubmitVoteBox(props) {
           span(["Rationale (optional):"]),
           textarea({
             name: 'Rationale Input',
-            placeholder: "test",
+            placeholder: "Optional: Describe your rationale or add comments here",
             rows: 4,
             required: false,
           }),
