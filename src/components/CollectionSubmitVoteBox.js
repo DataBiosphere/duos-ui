@@ -1,5 +1,6 @@
 import {div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
+import {useEffect, useState} from "react";
 
 const styles = {
   baseStyle: {
@@ -18,7 +19,9 @@ const styles = {
 };
 
 export default function CollectionSubmitVoteBox(props) {
+  const [rationale, setRationale] = useState('');
   const {question} = props;
+
 
   return (
     div({style: styles.baseStyle}, [
@@ -35,8 +38,11 @@ export default function CollectionSubmitVoteBox(props) {
           span(["Rationale (optional):"]),
           textarea({
             name: 'Rationale Input',
+            value: rationale,
             placeholder: "Optional: Describe your rationale or add comments here",
+            onChange: event => setRationale(event.target.value),
             rows: 4,
+            style: {borderRadius: '4px'},
             required: false,
           }),
         ])
