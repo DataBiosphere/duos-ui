@@ -19,6 +19,7 @@ const styles = {
   }
 };
 
+
 export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const {question, votes} = props;
@@ -34,6 +35,10 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
+  const updateVote = (vote) => {
+    console.log("vote submitted: " + vote);
+  };
+
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
@@ -41,8 +46,8 @@ export default function CollectionSubmitVoteBox(props) {
         div([
           span(["Your Vote*"]),
           div({style: styles.content}, [
-            h(SimpleButton, {label: "Yes"}),
-            h(SimpleButton, {label: "No"})
+            h(SimpleButton, {label: "Yes", onClick: () => updateVote(true)}),
+            h(SimpleButton, {label: "No", onClick: () => updateVote(false)})
           ])
         ]),
         div({style: { display: 'flex', flexDirection: 'column', width: '40rem'}}, [
@@ -51,7 +56,7 @@ export default function CollectionSubmitVoteBox(props) {
             name: 'Rationale Input',
             value: rationale,
             placeholder: "Optional: Describe your rationale or add comments here",
-            onChange: event => setRationale(event.target.value),
+            onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
             rows: 4,
             style: {borderRadius: '4px'},
