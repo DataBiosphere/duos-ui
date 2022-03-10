@@ -22,6 +22,9 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const {question} = props;
 
+  const updateRationale = () => {
+    console.log("Sumbit!");
+  };
 
   return (
     div({style: styles.baseStyle}, [
@@ -41,9 +44,9 @@ export default function CollectionSubmitVoteBox(props) {
             value: rationale,
             placeholder: "Optional: Describe your rationale or add comments here",
             onChange: event => setRationale(event.target.value),
+            onBlur: updateRationale,
             rows: 4,
             style: {borderRadius: '4px'},
-            required: false,
           }),
         ])
       ])
