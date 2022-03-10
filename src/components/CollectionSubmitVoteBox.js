@@ -3,7 +3,6 @@ import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
 import {CancelOutlined, CheckCircleOutlined} from "@material-ui/icons";
-import VoteResultIcon from "./common/DataUseVoteSummary/VoteResultIcon";
 
 const styles = {
   baseStyle: {
@@ -33,6 +32,7 @@ const styles = {
 
 
 export default function CollectionSubmitVoteBox(props) {
+  const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
   const {question, votes} = props;
 
@@ -41,6 +41,11 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   useEffect(() => {
+    const prevVote = votes[0].vote;
+    if (!isNil(prevVote)) {
+      setVote(prevVote);
+    }
+
     const prevRationale = votes[0].rationale;
     if (!isNil(prevRationale)) {
       setRationale(prevRationale);
