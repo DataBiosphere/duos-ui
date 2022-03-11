@@ -57,6 +57,7 @@ export default function CollectionSubmitVoteBox(props) {
 
       if (!isNil(prevVote.vote)) {
         setVote(prevVote.vote);
+        setSubmitted(true);
       }
       if (!isNil(prevVote.rationale)) {
         setRationale(prevVote.rationale);
@@ -86,13 +87,15 @@ export default function CollectionSubmitVoteBox(props) {
           label: span([h(CheckCircleOutlined), "Yes"]),
           onClick: () => updateVote(true),
           baseColor: '#1FA371',
-          additionalStyle: styles.buttonAdditionalStyle
+          additionalStyle: styles.buttonAdditionalStyle,
+          disabled: isFinal && submitted
         }),
         h(SimpleButton, {
           label: span([h(CancelOutlined), "No"]),
           onClick: () => updateVote(false),
           baseColor: '#DA0003',
-          additionalStyle: styles.buttonAdditionalStyle
+          additionalStyle: styles.buttonAdditionalStyle,
+          disabled: isFinal && submitted
         })
       ])
     ]);
