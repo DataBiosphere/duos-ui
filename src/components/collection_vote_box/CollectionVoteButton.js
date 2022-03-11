@@ -21,19 +21,6 @@ export default function CollectionVoteButton(props) {
   const [style, setStyle] = useState({});
   const { onClick, label, disabled, isSelected, baseColor } = props;
 
-  const updateStyle = (backgroundColor, labelColor, clickable, disabled) => {
-    const additionalStyle = {
-      backgroundColor,
-      color: labelColor,
-      border: clickable ? '0px' : '1px solid',
-      cursor: (clickable && !disabled) ? 'pointer' : 'default',
-      opacity: disabled ? '0.5' : '1'
-    };
-
-    const newStyle = Object.assign({}, styles.baseStyle, additionalStyle);
-    setStyle(newStyle);
-  };
-
   useEffect(() => {
     isSelected ? selectedButtonStyle() : defaultButtonStyle();
   }, [isSelected]);
@@ -44,6 +31,19 @@ export default function CollectionVoteButton(props) {
 
   const selectedButtonStyle = () => {
     updateStyle(baseColor, styles.selectedLabelColor, true, disabled);
+  };
+
+  const updateStyle = (backgroundColor, labelColor, showSelectedStyle, disabled) => {
+    const additionalStyle = {
+      backgroundColor,
+      color: labelColor,
+      border: showSelectedStyle ? '0px' : '1px solid',
+      cursor: (showSelectedStyle && !disabled) ? 'pointer' : 'default',
+      opacity: disabled ? '0.5' : '1'
+    };
+
+    const newStyle = Object.assign({}, styles.baseStyle, additionalStyle);
+    setStyle(newStyle);
   };
 
   return button({
