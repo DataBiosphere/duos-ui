@@ -7,7 +7,6 @@ import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } f
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from "./CollectionConfirmationModal";
-import AdminActions from './AdminActions';
 
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
@@ -16,11 +15,6 @@ export const getProjectTitle = ((collection) => {
     return darData.projectTitle;
   }
 });
-
-//List actions component here for easy access
-const consoleActions = {
-  admin: AdminActions
-};
 
 export const styles = {
   baseStyle: {
@@ -156,15 +150,16 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType }) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = ''}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode,
-          createDate, createUser,
-          actionsDisabled, showConfirmationModal, consoleType
+          createDate, createUser, actionsDisabled,
+          showConfirmationModal, consoleType,
+          openCollection
         });
       });
     });
@@ -179,8 +174,11 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
+  const [consoleAction, setConsoleAction] = useState();
 
-  const { collections, columns, isLoading, cancelCollection, resubmitCollection, actionsDisabled, consoleType } = props;
+  //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
+  //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
+  const { collections, columns, isLoading, cancelCollection, resubmitCollection, openCollection, actionsDisabled, consoleType } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -202,7 +200,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         columns,
         showConfirmationModal,
         actionsDisabled,
-        consoleType
+        consoleType,
+        openCollection
       }),
       currentPage,
       setPageCount,
@@ -210,9 +209,10 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection]);
 
-  const showConfirmationModal = (collection) => {
+  const showConfirmationModal = (collection, action = '') => {
+    setConsoleAction(action);
     setSelectedCollection(collection);
     setShowConfirmation(true);
   };
@@ -260,7 +260,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       showConfirmation,
       setShowConfirmation,
       cancelCollection,
-      resubmitCollection
+      resubmitCollection,
+      consoleAction
     })
   ]);
 };

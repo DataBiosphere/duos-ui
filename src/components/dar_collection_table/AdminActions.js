@@ -35,7 +35,7 @@ export default function AdminActions(props) {
     collection -> target collection for the button
   */
 
-  const { collection, showCancelModal, updateCollections } = props;
+  const { collection, showConfirmationModal, openCollection } = props;
   const collectionId = collection.darCollectionId;
 
   const [openEnabled, setOpenEnabled] = useState(false);
@@ -69,20 +69,12 @@ export default function AdminActions(props) {
     }
   */
 
-  //NOTE: adjust as needed for console ticket implementation. Function declaration is listed as a minimal placeholder
   const openOnClick = async (collectionId) => {
-    let updatedCollection;
-    try {
-      updatedCollection = await Collections.openElectionsById(collectionId);
-    } catch (error) {
-      Notifications.showError({ text: 'Error updating collections status' });
-    }
-    updateCollections(updatedCollection);
+    openCollection(collectionId);
   };
 
-  //NOTE: adjust as needed for console ticket implementation. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
-    showCancelModal(collection);
+    showConfirmationModal(collection, 'cancel');
   };
 
   const openButtonAttributes = {

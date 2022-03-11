@@ -3,16 +3,16 @@ import SearchBar from '../components/SearchBar';
 import { Collections } from '../libs/ajax';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import { findIndex, cloneDeep } from 'lodash/fp';
+import { Styles } from '../libs/theme';
+import {h, div, img} from 'react-hyperscript-helpers';
+import { Storage } from '../libs/storage';
+import lockIcon from '../images/lock-icon.png';
 
-export default function AdminManageDarCollections(props) {
+export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
-  const [tableSize, setTableSize] = useState(10);
-  const [descendantOrder, setDescendantOrder] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const searchTerms = useRef('');
-  const [cancelModalEnabled, setCancelModalEnabled] = useState(false);
   const filterFn = getSearchFilterFunctions().darCollections;
 
   const handleSearchChange = useCallback(() => searchOnFilteredList(
@@ -21,6 +21,8 @@ export default function AdminManageDarCollections(props) {
     filterFn,
     setFilteredList
   ), [collections, filterFn]);
+
+  const currentUser = Storage.getCurrentUser();
 
   useEffect(() => {
     const init = async() => {
@@ -51,10 +53,6 @@ export default function AdminManageDarCollections(props) {
     }
   };
 
-  const showCancelModal = () => {
-    setCancelModalEnabled(true);
-  };
-
   const cancelCollection = async(collectionId) => {
     try {
       const canceledCollection = await Collections.cancelCollection(collectionId);
@@ -72,4 +70,36 @@ export default function AdminManageDarCollections(props) {
       Notifications.showError({text: 'Error opening target collection'});
     }
   };
+
+  //NOTE: check to see if the template is formatted correctly
+  return (
+    div({style: Styles.PAGE}, [
+      div({ isRendered: !isLoading, style: {display: 'flex'}}, [
+        div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
+          div({style: Styles.TITLE}, [`Welcome ${currentUser.displayName}!`])
+        ])
+      ]),
+
+      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
+          div({style: Styles.ICON_CONTAINER}, [
+            img({
+              id: 'lock-icon',
+              src: lockIcon,
+              style: Styles.HEADER_IMG
+            })
+          ]),
+          div({style: Styles.HEADER_CONTAINER}, [
+            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ["Data Access Request Collections"]),
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
+              "DAR Collections saved in DUOS"
+            ]),
+          ])
+        ]),
+        h(SearchBar, { handleSearchChange })
+      ])
+
+      //Insert Collections table here...
+    ])
+  );
 }

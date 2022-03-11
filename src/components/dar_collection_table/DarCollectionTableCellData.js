@@ -4,6 +4,10 @@ import {div, h} from "react-hyperscript-helpers";
 import CancelCollectionButton from "./CancelCollectionButton";
 import ResubmitCollectionButton from "./ResubmitCollectionButton";
 import {styles} from "./DarCollectionTable";
+import AdminActions from "./AdminActions";
+import ChairActions from "./ChairActions";
+import MemberActions from './MemberActions';
+import ResearcherActions from './ResearcherActions'
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label = 'project-title'}) {
   return {
@@ -90,12 +94,42 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, showConfirmationModal, setModalMessage}) {
+export function consoleActionsCellData({collection, openCollection, showConfirmationModal, consoleType}) {
+  let actionComponent;
 
+  switch (consoleType) {
+    case 'admin':
+      actionComponent = AdminActions;
+      break;
+    case 'chair':
+      actionComponent = ChairActions;
+      break;
+    case 'member':
+      actionComponent = MemberActions;
+      break;
+    default:
+      actionComponent = ResearcherActions;
+      break;
+  }
+
+  return {
+    isComponent: true,
+    id: collection.darCollectionId,
+    style: {
+      color: styles.color.actions,
+      fontSzie: styles.fontSize.actions
+    },
+    label: 'tabel-actions',
+    data: actionComponent({
+      collection,
+      showConfirmationModal,
+      openCollection
+    })
+  };
 }
 
 
-//Outdated, remove once references have been removed
+//Outdated, remove once older implementation has been removed/updated
 export function actionsCellData({collection, showConfirmationModal}) {
   const { darCollectionId } = collection;
   const cancel = {
