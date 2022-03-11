@@ -76,28 +76,39 @@ export default function CollectionSubmitVoteBox(props) {
     // Votes.updateVotesByIds(voteIds, {vote, rationale});
   };
 
+  const VoteSubsection = () => {
+    return div({style: styles.subsection}, [
+      h(VoteSubsectionHeading),
+      div({style: styles.voteButtonsSection}, [
+        h(SimpleButton, {
+          label: span([h(CheckCircleOutlined), "Yes"]),
+          onClick: () => updateVote(true),
+          baseColor: '#1FA371',
+          additionalStyle: styles.buttonAdditionalStyle
+        }),
+        h(SimpleButton, {
+          label: span([h(CancelOutlined), "No"]),
+          onClick: () => updateVote(false),
+          baseColor: '#DA0003',
+          additionalStyle: styles.buttonAdditionalStyle
+        })
+      ])
+    ]);
+  };
+
+  const VoteSubsectionHeading = () => {
+    const heading = isFinal?
+      "Your Vote* (Vote and Rationale cannot be updated after submitting)" :
+      "Your Vote*";
+    return span([heading]);
+  };
+
 
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-        div({style: styles.subsection}, [
-          span(["Your Vote*"]),
-          div({style: styles.voteButtonsSection}, [
-            h(SimpleButton, {
-              label: span([h(CheckCircleOutlined), "Yes"]),
-              onClick: () => updateVote(true),
-              baseColor: '#1FA371',
-              additionalStyle: styles.buttonAdditionalStyle
-            }),
-            h(SimpleButton, {
-              label: span([h(CancelOutlined), "No"]),
-              onClick: () => updateVote(false),
-              baseColor: '#DA0003',
-              additionalStyle: styles.buttonAdditionalStyle
-            })
-          ])
-        ]),
+       h(VoteSubsection),
         div({style: styles.subsection}, [
           span(["Rationale (optional):"]),
           textarea({
