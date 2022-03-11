@@ -33,10 +33,6 @@ const styles = {
     display: 'flex',
     columnGap: '1rem'
   },
-  buttonAdditionalStyle: {
-    height: '45px',
-    width: '94px'
-  },
   rationaleTextArea: {
     borderRadius: '4px',
     fontWeight: '500',
@@ -88,14 +84,12 @@ export default function CollectionSubmitVoteBox(props) {
           label: span([h(CheckCircleOutlined), "Yes"]),
           onClick: () => updateVote(true),
           baseColor: '#1FA371',
-       //   additionalStyle: styles.buttonAdditionalStyle,
           disabled: isFinal && submitted
         }),
         h(CollectionVoteButton, {
           label: span([h(CancelOutlined), "No"]),
           onClick: () => updateVote(false),
           baseColor: '#DA0003',
-        //  additionalStyle: styles.buttonAdditionalStyle,
           disabled: isFinal && submitted
         })
       ])

@@ -3,6 +3,8 @@ import {button} from "react-hyperscript-helpers";
 
 const styles = {
   baseStyle: {
+    height: '45px',
+    width: '94px',
     border: `1px solid`,
     borderRadius: '5px',
     display: 'flex',
