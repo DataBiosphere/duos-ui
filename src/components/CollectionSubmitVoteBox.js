@@ -45,7 +45,7 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes} = props;
 
   const updateRationale = () => {
-    console.log("Submit!");
+    console.log("Rationale updated to " + rationale);
   };
 
   useEffect(() => {
@@ -67,26 +67,30 @@ export default function CollectionSubmitVoteBox(props) {
    // Votes.updateVotesByIds(voteIds, {vote});
   };
 
+  const VoteSubsection = () => {
+    return div({style: styles.subsection}, [
+      span(["Your Vote*"]),
+      div({style: styles.voteButtons}, [
+        h(SimpleButton, {
+          label: span([h(CheckCircleOutlined), "Yes"]),
+          onClick: () => updateVote(true),
+          baseColor: '#1FA371'
+        }),
+        h(SimpleButton, {
+          label: span([h(CancelOutlined), "No"]),
+          onClick: () => updateVote(false),
+          baseColor: '#DA0003'
+        }),
+        button([h(VoteResultIcon, {result: true})])
+      ])
+    ]);
+  };
+
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-        div({style: styles.subsection}, [
-          span(["Your Vote*"]),
-          div({style: styles.voteButtons}, [
-            h(SimpleButton, {
-              label: span([h(CheckCircleOutlined), "Yes"]),
-              onClick: () => updateVote(true),
-              baseColor: '#1FA371'
-            }),
-            h(SimpleButton, {
-              label: span([h(CancelOutlined), "No"]),
-              onClick: () => updateVote(false),
-              baseColor: '#DA0003'
-            }),
-            button([h(VoteResultIcon, {result: true})])
-          ])
-        ]),
+        h(VoteSubsection),
         div({style: styles.subsection}, [
           span(["Rationale (optional):"]),
           textarea({
