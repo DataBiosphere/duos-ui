@@ -4,6 +4,8 @@ import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
 import {CancelOutlined, CheckCircleOutlined} from "@material-ui/icons";
 import VoteResultIcon from "./common/DataUseVoteSummary/VoteResultIcon";
+import {Votes} from "../libs/ajax";
+import {isEmpty} from "lodash/fp";
 
 const styles = {
   baseStyle: {
@@ -26,9 +28,13 @@ const styles = {
     flexDirection: 'column',
     rowGap: '1.5rem'
   },
-  voteButtons: {
+  voteButtonsSection: {
     display: 'flex',
     columnGap: '1rem'
+  },
+  buttonAdditionalStyle: {
+    height: '45px',
+    width: '94px'
   },
   rationaleTextArea: {
     borderRadius: '4px',
@@ -44,19 +50,16 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const {question, votes} = props;
 
-  const updateRationale = () => {
-    console.log("Rationale updated to " + rationale);
-  };
-
   useEffect(() => {
-    const prevVote = votes[0].vote;
-    if (!isNil(prevVote)) {
-      setVote(prevVote);
-    }
+    if (!isEmpty(votes)) {
+      const prevVote = votes[0];
 
-    const prevRationale = votes[0].rationale;
-    if (!isNil(prevRationale)) {
-      setRationale(prevRationale);
+      if (!isNil(prevVote.vote)) {
+        setVote(prevVote.vote);
+      }
+      if (!isNil(prevVote.rationale)) {
+        setRationale(prevVote.rationale);
+      }
     }
   }, []);
 
@@ -67,30 +70,34 @@ export default function CollectionSubmitVoteBox(props) {
    // Votes.updateVotesByIds(voteIds, {vote});
   };
 
-  const VoteSubsection = () => {
-    return div({style: styles.subsection}, [
-      span(["Your Vote*"]),
-      div({style: styles.voteButtons}, [
-        h(SimpleButton, {
-          label: span([h(CheckCircleOutlined), "Yes"]),
-          onClick: () => updateVote(true),
-          baseColor: '#1FA371'
-        }),
-        h(SimpleButton, {
-          label: span([h(CancelOutlined), "No"]),
-          onClick: () => updateVote(false),
-          baseColor: '#DA0003'
-        }),
-        button([h(VoteResultIcon, {result: true})])
-      ])
-    ]);
+  const updateRationale = () => {
+    const voteIds = ld.map(votes, v => v.voteId);
+    console.log("Rationale updated to " + rationale);
+    // Votes.updateVotesByIds(voteIds, {vote, rationale});
   };
+
 
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-        h(VoteSubsection),
+        div({style: styles.subsection}, [
+          span(["Your Vote*"]),
+          div({style: styles.voteButtonsSection}, [
+            h(SimpleButton, {
+              label: span([h(CheckCircleOutlined), "Yes"]),
+              onClick: () => updateVote(true),
+              baseColor: '#1FA371',
+              additionalStyle: styles.buttonAdditionalStyle
+            }),
+            h(SimpleButton, {
+              label: span([h(CancelOutlined), "No"]),
+              onClick: () => updateVote(false),
+              baseColor: '#DA0003',
+              additionalStyle: styles.buttonAdditionalStyle
+            })
+          ])
+        ]),
         div({style: styles.subsection}, [
           span(["Rationale (optional):"]),
           textarea({
@@ -99,8 +106,8 @@ export default function CollectionSubmitVoteBox(props) {
             placeholder: "Optional: Describe your rationale or add comments here",
             onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
-            rows: 4,
             style: styles.rationaleTextArea,
+            rows: 4,
           }),
         ])
       ])
