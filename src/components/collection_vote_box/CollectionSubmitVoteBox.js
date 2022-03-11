@@ -62,20 +62,7 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
-  const updateVote = (newVote) => {
-    const voteIds = ld.map(votes, v => v.voteId);
-    console.log("vote submitted: " + newVote);
-    console.log(voteIds);
-    setVote(newVote);
-    setSubmitted(true);
-   // Votes.updateVotesByIds(voteIds, {vote});
-  };
 
-  const updateRationale = () => {
-    const voteIds = ld.map(votes, v => v.voteId);
-    console.log("Rationale updated to " + rationale);
-    // Votes.updateVotesByIds(voteIds, {vote, rationale});
-  };
 
   const VoteSubsection = () => {
     return div({style: styles.subsection}, [
@@ -106,25 +93,44 @@ export default function CollectionSubmitVoteBox(props) {
     return span([heading]);
   };
 
+  const updateVote = (newVote) => {
+    const voteIds = ld.map(votes, v => v.voteId);
+    console.log("vote submitted: " + newVote);
+    console.log(voteIds);
+    setVote(newVote);
+    setSubmitted(true);
+    // Votes.updateVotesByIds(voteIds, {vote});
+  };
+
+  const RationaleSubsection = () => {
+    return div({style: styles.subsection}, [
+      span(["Rationale (optional):"]),
+      textarea({
+        name: 'Rationale Input',
+        value: rationale,
+        placeholder: "Optional: Describe your rationale or add comments here",
+        onChange: e => setRationale(e.target.value),
+        onBlur: updateRationale,
+        style: styles.rationaleTextArea,
+        rows: 4,
+        disabled: isFinal && submitted
+      }),
+    ]);
+  };
+
+  const updateRationale = () => {
+    const voteIds = ld.map(votes, v => v.voteId);
+    console.log("Rationale updated to " + rationale);
+    // Votes.updateVotesByIds(voteIds, {vote, rationale});
+  };
+
 
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-       h(VoteSubsection),
-        div({style: styles.subsection}, [
-          span(["Rationale (optional):"]),
-          textarea({
-            name: 'Rationale Input',
-            value: rationale,
-            placeholder: "Optional: Describe your rationale or add comments here",
-            onChange: e => setRationale(e.target.value),
-            onBlur: updateRationale,
-            style: styles.rationaleTextArea,
-            rows: 4,
-            disabled: isFinal && submitted
-          }),
-        ])
+        h(VoteSubsection),
+        h(RationaleSubsection)
       ])
     ])
   );
