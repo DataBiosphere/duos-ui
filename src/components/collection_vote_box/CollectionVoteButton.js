@@ -11,7 +11,8 @@ const styles = {
     justifyContent: 'center',
     fontSize: '16px',
     padding: '5%'
-  }
+  },
+  defaultLabelColor: '#333F52'
 };
 
 export default function CollectionVoteButton(props) {
@@ -21,20 +22,18 @@ export default function CollectionVoteButton(props) {
   const updateStyle = (backgroundColor, labelColor, clickable, disabled) => {
     const additionalStyle = {
       backgroundColor,
-      color: labelColor, //make this a hex or rgba value
+      color: labelColor,
       border: clickable ? '0px' : '1px solid',
-      cursor: (clickable && !disabled) ? 'pointer' : 'default'
+      cursor: (clickable && !disabled) ? 'pointer' : 'default',
+      opacity: disabled ? '0.5' : '1'
     };
 
     const newStyle = Object.assign({}, styles.baseStyle, additionalStyle);
-    if (disabled) {
-      newStyle.opacity = '0.5';
-    }
     setStyle(newStyle);
   };
 
   useEffect(() => {
-    updateStyle('white', '#333F52', false, disabled);
+    updateStyle('white', styles.defaultLabelColor, false, disabled);
   }, [baseColor, disabled]);
 
   return button({
@@ -44,6 +43,6 @@ export default function CollectionVoteButton(props) {
     onMouseEnter: () =>
       !disabled && updateStyle(baseColor, 'white', true, disabled),
     onMouseLeave: () =>
-      !disabled && updateStyle('white', '#333F52', false, disabled),
+      !disabled && updateStyle('white', styles.defaultLabelColor, false, disabled),
   }, [label]);
 }
