@@ -12,7 +12,9 @@ const styles = {
     fontSize: '16px',
     padding: '5%'
   },
-  defaultLabelColor: '#333F52'
+  defaultBackgroundColor: '#FFFFFF',
+  defaultLabelColor: '#333F52',
+  selectedLabelColor: '#FFFFFF'
 };
 
 export default function CollectionVoteButton(props) {
@@ -33,7 +35,7 @@ export default function CollectionVoteButton(props) {
   };
 
   useEffect(() => {
-    updateStyle('white', styles.defaultLabelColor, false, disabled);
+    updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
   }, [baseColor, disabled]);
 
   return button({
@@ -41,8 +43,8 @@ export default function CollectionVoteButton(props) {
     key: keyProp || `${label}-button`,
     onClick: () => !disabled && onClick(),
     onMouseEnter: () =>
-      !disabled && updateStyle(baseColor, 'white', true, disabled),
+      !disabled && updateStyle(baseColor, styles.selectedLabelColor, true, disabled),
     onMouseLeave: () =>
-      !disabled && updateStyle('white', styles.defaultLabelColor, false, disabled),
+      !disabled && updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled),
   }, [label]);
 }
