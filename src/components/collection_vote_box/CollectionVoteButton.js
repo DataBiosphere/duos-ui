@@ -19,7 +19,7 @@ const styles = {
 
 export default function CollectionVoteButton(props) {
   const [style, setStyle] = useState({});
-  const { currentVote, onClick, label, disabled, baseColor, keyProp, isSelected } = props;
+  const { onClick, label, disabled, isSelected, baseColor } = props;
 
   const updateStyle = (backgroundColor, labelColor, clickable, disabled) => {
     const additionalStyle = {
@@ -35,19 +35,21 @@ export default function CollectionVoteButton(props) {
   };
 
   useEffect(() => {
-    isSelected ?
-      updateStyle(baseColor, styles.selectedLabelColor, true, disabled) :
-      updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
+    isSelected ? selectedButtonStyle() : defaultButtonStyle();
   }, [isSelected]);
+
+  const defaultButtonStyle = () => {
+    updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
+  };
+
+  const selectedButtonStyle = () => {
+    updateStyle(baseColor, styles.selectedLabelColor, true, disabled);
+  };
 
   return button({
     style,
-    key: keyProp || `${label}-button`,
     onClick: () => !disabled && onClick(),
-    onMouseEnter: () =>
-      !disabled && updateStyle(baseColor, styles.selectedLabelColor, true, disabled),
-    onMouseLeave: () =>
-      !disabled && !isSelected &&
-      updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled),
+    onMouseEnter: () => !disabled && selectedButtonStyle(),
+    onMouseLeave: () => !disabled && !isSelected && defaultButtonStyle(),
   }, [label]);
 }
