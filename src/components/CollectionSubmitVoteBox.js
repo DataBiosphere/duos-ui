@@ -48,6 +48,7 @@ const styles = {
 export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const {question, votes, isFinal} = props;
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function CollectionSubmitVoteBox(props) {
     const voteIds = ld.map(votes, v => v.voteId);
     console.log("vote submitted: " + vote);
     console.log(voteIds);
+    setSubmitted(true);
    // Votes.updateVotesByIds(voteIds, {vote});
   };
 
