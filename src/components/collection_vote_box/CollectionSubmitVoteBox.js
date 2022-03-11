@@ -80,7 +80,7 @@ export default function CollectionSubmitVoteBox(props) {
           onClick: () => updateVote(false),
           baseColor: '#DA0003',
           disabled: isFinal && submitted,
-          isSelected: vote === false
+          isSelected: vote === false,
         })
       ])
     ]);
@@ -102,22 +102,6 @@ export default function CollectionSubmitVoteBox(props) {
     // Votes.updateVotesByIds(voteIds, {vote});
   };
 
-  const RationaleSubsection = () => {
-    return div({style: styles.subsection}, [
-      span(["Rationale (optional):"]),
-      textarea({
-        name: 'Rationale Input',
-        value: rationale,
-        placeholder: "Optional: Describe your rationale or add comments here",
-        onChange: e => setRationale(e.target.value),
-        onBlur: updateRationale,
-        style: styles.rationaleTextArea,
-        rows: 4,
-        disabled: isFinal && submitted
-      }),
-    ]);
-  };
-
   const updateRationale = () => {
     const voteIds = ld.map(votes, v => v.voteId);
     console.log("Rationale updated to " + rationale);
@@ -130,7 +114,19 @@ export default function CollectionSubmitVoteBox(props) {
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         h(VoteSubsection),
-        h(RationaleSubsection)
+        div({style: styles.subsection}, [
+          span(["Rationale (optional):"]),
+          textarea({
+            name: 'Rationale Input',
+            value: rationale,
+            placeholder: "Optional: Describe your rationale or add comments here",
+            onChange: e => setRationale(e.target.value),
+            onBlur: updateRationale,
+            style: styles.rationaleTextArea,
+            rows: 4,
+            disabled: isFinal && submitted
+          }),
+        ])
       ])
     ])
   );
