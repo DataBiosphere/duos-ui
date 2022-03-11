@@ -5,7 +5,6 @@ const styles = {
   baseStyle: {
     height: '45px',
     width: '94px',
-    border: `1px solid`,
     borderRadius: '5px',
     display: 'flex',
     alignItems: 'center',
@@ -19,10 +18,11 @@ export default function CollectionVoteButton(props) {
   const [style, setStyle] = useState({});
   const { currentVote, onClick, label, disabled, baseColor, keyProp, isSelected } = props;
 
-  const updateStyle = (backgroundColor, baseColor, clickable, disabled) => {
+  const updateStyle = (backgroundColor, labelColor, clickable, disabled) => {
     const additionalStyle = {
       backgroundColor,
-      color: baseColor, //make this a hex or rgba value
+      color: labelColor, //make this a hex or rgba value
+      border: clickable ? '0px' : '1px solid',
       cursor: (clickable && !disabled) ? 'pointer' : 'default'
     };
 
