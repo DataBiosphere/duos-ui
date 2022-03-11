@@ -62,10 +62,11 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
-  const updateVote = (vote) => {
+  const updateVote = (newVote) => {
     const voteIds = ld.map(votes, v => v.voteId);
-    console.log("vote submitted: " + vote);
+    console.log("vote submitted: " + newVote);
     console.log(voteIds);
+    setVote(newVote);
     setSubmitted(true);
    // Votes.updateVotesByIds(voteIds, {vote});
   };
@@ -84,7 +85,8 @@ export default function CollectionSubmitVoteBox(props) {
           label: span([h(CheckCircleOutlined), "Yes"]),
           onClick: () => updateVote(true),
           baseColor: '#1FA371',
-          disabled: isFinal && submitted
+          disabled: isFinal && submitted,
+          isSelected: true
         }),
         h(CollectionVoteButton, {
           label: span([h(CancelOutlined), "No"]),
