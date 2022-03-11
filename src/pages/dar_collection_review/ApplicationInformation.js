@@ -1,6 +1,6 @@
 import { div, label, span, h } from 'react-hyperscript-helpers';
 import AtAGlance from './AtAGlance';
-import {chunk} from "lodash/fp";
+import {chunk, isBoolean, isEmpty} from "lodash/fp";
 
 const styles = {
   flexRowElement: {
@@ -65,8 +65,10 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading) => {
   const labelArray = appDetailLabels.map(label => {
     // only generate elements that are populated
-    if (label[0] && label[0]!='' && label[0].length > 0) {
-      return generateLabelSpanContents(label[1], label[2], label[0], loading);
+    if (!isEmpty(label[0])) {
+      // check to see if processing is required for output (booleans)
+      const spanValue = (typeof label[0] == 'boolean') ? label[0].toString() : label[0];
+      return generateLabelSpanContents(label[1], label[2], spanValue, loading);
     }
   });
   // use the chunk method to organize them in arrays of two
