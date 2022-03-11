@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {button} from "react-hyperscript-helpers";
 
 export default function CollectionVoteButton(props) {
+  const [style, setStyle] = useState({});
   const { currentVote, onClick, label, disabled, baseColor, keyProp, isSelected } = props;
 
   const updateStyle = (backgroundColor, baseColor, clickable, disabled) => {
@@ -25,12 +26,9 @@ export default function CollectionVoteButton(props) {
     setStyle(newStyle);
   };
 
-  const [style, setStyle] = useState({});
-
   useEffect(() => {
-    updateStyle('white', baseColor, false, disabled);
+    updateStyle('white', '#333F52', false, disabled);
   }, [baseColor, disabled]);
-
 
   return button({
     style,
@@ -39,6 +37,6 @@ export default function CollectionVoteButton(props) {
     onMouseEnter: () =>
       !disabled && updateStyle(baseColor, 'white', true, disabled),
     onMouseLeave: () =>
-      !disabled && updateStyle('white', baseColor, false, disabled),
+      !disabled && updateStyle('white', '#333F52', false, disabled),
   }, [label]);
 }
