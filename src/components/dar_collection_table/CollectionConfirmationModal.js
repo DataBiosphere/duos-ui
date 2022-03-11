@@ -1,11 +1,11 @@
-import {isNil} from "lodash/fp";
+import {isNil, toLower} from "lodash/fp";
 import {h} from "react-hyperscript-helpers";
 import ConfirmationModal from "../modals/ConfirmationModal";
 import {isCollectionCanceled} from "../../libs/utils";
 import {getProjectTitle} from "./DarCollectionTable";
 
 export default function CollectionConfirmationModal(props) {
-  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection} = props;
+  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection, consoleAction} = props;
 
   const getModalHeader = () => {
     if(!isNil(collection)) {
@@ -46,8 +46,20 @@ export default function CollectionConfirmationModal(props) {
       onConfirm: resubmitOnClick
     });
 
+  switch (consoleAction) {
+    case 'resubmit':
+      return resubmitModal();
+    case 'cancel':
+      return cancelModal();
+    //conditional used in older references, wil remove when implementation is updated
+    //Logic for this old assumption is flawed since chairs in different DACs may have different actions enabled for the same collection
+    //Updates will occur in later console tickets
+    default:
+      return isCollectionCanceled(collection) === true
+        ? resubmitModal()
+        : cancelModal();
+  }
 
-  return isCollectionCanceled(collection) === true ? resubmitModal() : cancelModal();
 }
 
 

@@ -90,7 +90,12 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
+export function consoleActionsCellData({collection, showConfirmationModal, setModalMessage}) {
 
+}
+
+
+//Outdated, remove once references have been removed
 export function actionsCellData({collection, showConfirmationModal}) {
   const { darCollectionId } = collection;
   const cancel = {
@@ -132,6 +137,19 @@ export function actionsCellData({collection, showConfirmationModal}) {
   };
 
   return isCollectionCanceled(collection) ? revise : cancel;
+}
+
+export function collectionConsoleActionsData({props, ActionComponent}) {
+  return {
+    isComponent: true,
+    id: props.collection.darCollectionId,
+    style: {
+      color: styles.color.actions,
+      fontSize: styles.fontSize.actions
+    },
+    label: `admin-actions`,
+    data: h(ActionComponent, {...props})
+  };
 }
 
 export default {
