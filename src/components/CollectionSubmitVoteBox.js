@@ -48,7 +48,7 @@ const styles = {
 export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
-  const {question, votes} = props;
+  const {question, votes, isFinal} = props;
 
   useEffect(() => {
     if (!isEmpty(votes)) {
