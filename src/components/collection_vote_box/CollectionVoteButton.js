@@ -35,8 +35,10 @@ export default function CollectionVoteButton(props) {
   };
 
   useEffect(() => {
-    updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
-  }, [baseColor, disabled]);
+    isSelected ?
+      updateStyle(baseColor, styles.selectedLabelColor, true, disabled) :
+      updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
+  }, [isSelected]);
 
   return button({
     style,
@@ -45,6 +47,7 @@ export default function CollectionVoteButton(props) {
     onMouseEnter: () =>
       !disabled && updateStyle(baseColor, styles.selectedLabelColor, true, disabled),
     onMouseLeave: () =>
-      !disabled && updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled),
+      !disabled && !isSelected &&
+      updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled),
   }, [label]);
 }
