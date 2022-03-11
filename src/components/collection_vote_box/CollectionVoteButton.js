@@ -1,25 +1,30 @@
 import {useEffect, useState} from "react";
 import {button} from "react-hyperscript-helpers";
 
+const styles = {
+  baseStyle: {
+    border: `1px solid`,
+    borderRadius: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '16px',
+    padding: '5%'
+  }
+};
+
 export default function CollectionVoteButton(props) {
   const [style, setStyle] = useState({});
   const { currentVote, onClick, label, disabled, baseColor, keyProp, isSelected } = props;
 
   const updateStyle = (backgroundColor, baseColor, clickable, disabled) => {
-    const baseStyle = {
+    const additionalStyle = {
       backgroundColor,
       color: baseColor, //make this a hex or rgba value
-      border: `1px solid`,
-      borderRadius: '5px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '16px',
-      padding: '5%',
       cursor: (clickable && !disabled) ? 'pointer' : 'default'
     };
 
-    const newStyle = Object.assign({}, baseStyle);
+    const newStyle = Object.assign({}, styles.baseStyle, additionalStyle);
     if (disabled) {
       newStyle.opacity = '0.5';
     }
