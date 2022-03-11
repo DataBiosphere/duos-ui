@@ -124,6 +124,7 @@ export default function CollectionSubmitVoteBox(props) {
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
+            disabled: isFinal && submitted
           }),
         ])
       ])
