@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {button} from "react-hyperscript-helpers";
 
 export default function CollectionVoteButton(props) {
-  const { onClick, label, disabled, baseColor, keyProp } = props;
+  const { currentVote, onClick, label, disabled, baseColor, keyProp, isSelected } = props;
 
   const updateStyle = (backgroundColor, baseColor, clickable, disabled) => {
     const baseStyle = {
@@ -15,7 +15,7 @@ export default function CollectionVoteButton(props) {
       justifyContent: 'center',
       fontSize: '16px',
       padding: '5%',
-      cursor: clickable ? 'pointer' : 'default'
+      cursor: (clickable && !disabled) ? 'pointer' : 'default'
     };
 
     const newStyle = Object.assign({}, baseStyle);
@@ -31,18 +31,14 @@ export default function CollectionVoteButton(props) {
     updateStyle('white', baseColor, false, disabled);
   }, [baseColor, disabled]);
 
-  const getDivAttributes = (disabled) => {
-    const baseAttributes = {
-      style,
-      key: keyProp || `${label}-button`,
-      onClick: () => !disabled && onClick(),
-      onMouseEnter: () =>
-        !disabled && updateStyle(baseColor, 'white', true, disabled),
-      onMouseLeave: () =>
-        !disabled && updateStyle('white', baseColor, false, disabled),
-    };
-    return baseAttributes;
-  };
 
-  return button(getDivAttributes(disabled), [label]);
+  return button({
+    style,
+    key: keyProp || `${label}-button`,
+    onClick: () => !disabled && onClick(),
+    onMouseEnter: () =>
+      !disabled && updateStyle(baseColor, 'white', true, disabled),
+    onMouseLeave: () =>
+      !disabled && updateStyle('white', baseColor, false, disabled),
+  }, [label]);
 }
