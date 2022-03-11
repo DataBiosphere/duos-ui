@@ -1,11 +1,12 @@
 import {button, div, h, span, textarea} from "react-hyperscript-helpers";
-import SimpleButton from "./SimpleButton";
+import SimpleButton from "../SimpleButton";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
 import {CancelOutlined, CheckCircleOutlined} from "@material-ui/icons";
-import VoteResultIcon from "./common/DataUseVoteSummary/VoteResultIcon";
-import {Votes} from "../libs/ajax";
+import VoteResultIcon from "../common/DataUseVoteSummary/VoteResultIcon";
+import {Votes} from "../../libs/ajax";
 import {isEmpty} from "lodash/fp";
+import CollectionVoteButton from "./CollectionVoteButton";
 
 const styles = {
   baseStyle: {
@@ -83,18 +84,18 @@ export default function CollectionSubmitVoteBox(props) {
     return div({style: styles.subsection}, [
       h(VoteSubsectionHeading),
       div({style: styles.voteButtonsSection}, [
-        h(SimpleButton, {
+        h(CollectionVoteButton, {
           label: span([h(CheckCircleOutlined), "Yes"]),
           onClick: () => updateVote(true),
           baseColor: '#1FA371',
-          additionalStyle: styles.buttonAdditionalStyle,
+       //   additionalStyle: styles.buttonAdditionalStyle,
           disabled: isFinal && submitted
         }),
-        h(SimpleButton, {
+        h(CollectionVoteButton, {
           label: span([h(CancelOutlined), "No"]),
           onClick: () => updateVote(false),
           baseColor: '#DA0003',
-          additionalStyle: styles.buttonAdditionalStyle,
+        //  additionalStyle: styles.buttonAdditionalStyle,
           disabled: isFinal && submitted
         })
       ])
