@@ -1,8 +1,9 @@
-import {div, h, span, textarea} from "react-hyperscript-helpers";
+import {button, div, h, span, textarea} from "react-hyperscript-helpers";
 import SimpleButton from "./SimpleButton";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
 import {CancelOutlined, CheckCircleOutlined} from "@material-ui/icons";
+import VoteResultIcon from "./common/DataUseVoteSummary/VoteResultIcon";
 
 const styles = {
   baseStyle: {
@@ -10,23 +11,30 @@ const styles = {
     fontWeight: 'bold',
     color: '#333F52',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    rowGap: '2rem'
   },
   question: {
     fontSize: '1.8rem',
   },
   content: {
-    display: 'flex'
+    display: 'flex',
+    justifyContent: 'space-between'
   },
-  rationaleSubsection: {
+  subsection: {
     display: 'flex',
     flexDirection: 'column',
-    width: '40rem'
+    rowGap: '1.5rem'
+  },
+  voteButtons: {
+    display: 'flex',
+    columnGap: '1rem'
   },
   rationaleTextArea: {
     borderRadius: '4px',
     fontWeight: '500',
-    color: '181818A6'
+    color: '181818A6',
+    width: '40rem',
   }
 };
 
@@ -63,9 +71,9 @@ export default function CollectionSubmitVoteBox(props) {
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-        div([
+        div({style: styles.subsection}, [
           span(["Your Vote*"]),
-          div({style: styles.content}, [
+          div({style: styles.voteButtons}, [
             h(SimpleButton, {
               label: span([h(CheckCircleOutlined), "Yes"]),
               onClick: () => updateVote(true),
@@ -76,9 +84,10 @@ export default function CollectionSubmitVoteBox(props) {
               onClick: () => updateVote(false),
               baseColor: '#DA0003'
             }),
+            button([h(VoteResultIcon, {result: true})])
           ])
         ]),
-        div({style: styles.rationaleSubsection}, [
+        div({style: styles.subsection}, [
           span(["Rationale (optional):"]),
           textarea({
             name: 'Rationale Input',
