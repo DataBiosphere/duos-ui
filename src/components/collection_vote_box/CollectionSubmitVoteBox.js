@@ -36,7 +36,7 @@ const styles = {
   rationaleTextArea: {
     borderRadius: '4px',
     fontWeight: '500',
-    color: '181818A6',
+    color: '#181818A6',
     width: '40rem',
   }
 };
