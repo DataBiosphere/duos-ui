@@ -86,13 +86,14 @@ export default function CollectionSubmitVoteBox(props) {
           onClick: () => updateVote(true),
           baseColor: '#1FA371',
           disabled: isFinal && submitted,
-          isSelected: true
+          isSelected: vote === true
         }),
         h(CollectionVoteButton, {
           label: span([h(CancelOutlined), "No"]),
           onClick: () => updateVote(false),
           baseColor: '#DA0003',
-          disabled: isFinal && submitted
+          disabled: isFinal && submitted,
+          isSelected: vote === false
         })
       ])
     ]);
