@@ -20,9 +20,9 @@ updates:
       interval: "daily"
     target-branch: "develop"
     reviewers:
-      - "rushtong"
+      - "@DataBiosphere/DUOS"
     assignees:
-      - "rushtong"
+      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "docker"
