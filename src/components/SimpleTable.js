@@ -76,7 +76,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         //assume component is in hyperscript format
         //wrap component in dive with columnWidth applied
         if (isComponent) {
-          output = div({style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
+          output = div({role: "cell", style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
         //if there is no onClick function, render as simple cell
         } else if (isNil(onClick)) {
           output = h(SimpleTextCell, { text: data, style: appliedStyle, keyProp: `filtered-list-${id}-${label}`, cellIndex });

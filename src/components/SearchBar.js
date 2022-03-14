@@ -2,6 +2,7 @@
 import { useRef } from 'react';
 import { div, input } from 'react-hyperscript-helpers';
 import { Styles} from '../libs/theme';
+import { defaultTo } from 'lodash/fp';
 
 export default function SearchBar(props) {
   const { handleSearchChange } = props;
@@ -24,7 +25,7 @@ export default function SearchBar(props) {
       //Styling seems to only work when defined here, variable reference doesn't work
       //Odds are there's a competing style, need to figure out where it's coming from
       style,
-      onChange:() => handleSearchChange(props.searchRef || searchTerms),
+      onChange:() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms),
       ref: props.searchRef || searchTerms
     })
   ]);

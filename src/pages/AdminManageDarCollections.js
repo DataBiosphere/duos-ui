@@ -1,28 +1,26 @@
-import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import {useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
 import { Collections } from '../libs/ajax';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import { findIndex, cloneDeep } from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
-import { Storage } from '../libs/storage';
 import lockIcon from '../images/lock-icon.png';
+import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
 
 export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const searchTerms = useRef('');
+  const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
 
-  const handleSearchChange = useCallback(() => searchOnFilteredList(
-    searchTerms.current.value,
+  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
+    searchTerms,
     collections,
     filterFn,
     setFilteredList
   ), [collections, filterFn]);
-
-  const currentUser = Storage.getCurrentUser();
 
   useEffect(() => {
     const init = async() => {
@@ -47,7 +45,7 @@ export default function AdminManageDarCollections() {
     } else {
       const collectionsCopy = cloneDeep(collections);
       collectionsCopy[targetIndex] = updatedCollection;
-      const updatedFilteredList = filterFn(searchTerms.current.value, collectionsCopy);
+      const updatedFilteredList = filterFn(searchRef.current.value, collectionsCopy);
       setCollections(collectionsCopy);
       setFilteredList(updatedFilteredList);
     }
@@ -72,34 +70,53 @@ export default function AdminManageDarCollections() {
   };
 
   //NOTE: check to see if the template is formatted correctly
-  return (
-    div({style: Styles.PAGE}, [
-      div({ isRendered: !isLoading, style: {display: 'flex'}}, [
-        div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
-          div({style: Styles.TITLE}, [`Welcome ${currentUser.displayName}!`])
-        ])
-      ]),
-
-      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
-        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
-          div({style: Styles.ICON_CONTAINER}, [
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
+      div(
+        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
+        [
+          div({ style: Styles.ICON_CONTAINER }, [
             img({
               id: 'lock-icon',
               src: lockIcon,
-              style: Styles.HEADER_IMG
-            })
+              style: Styles.HEADER_IMG,
+            }),
           ]),
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ["Data Access Request Collections"]),
-            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
-              "DAR Collections saved in DUOS"
+          div({ style: Styles.HEADER_CONTAINER }, [
+            div({ style: { ...Styles.TITLE} }, [
+              'Data Access Request Collections',
             ]),
-          ])
-        ]),
-        h(SearchBar, { handleSearchChange })
-      ])
-
-      //Insert Collections table here...
-    ])
-  );
+            div(
+              {
+                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+                  fontSize: '16px',
+                }),
+              },
+              ['List of all DAR Collections saved in DUOS']
+            ),
+          ]),
+        ]
+      ),
+      h(SearchBar, { handleSearchChange, searchRef }),
+    ]),
+    //NOTE: check to see if this works
+    h(DarCollectionTable, {
+      collections: filteredList,
+      columns: [
+        DarCollectionTableColumnOptions.DAR_CODE,
+        DarCollectionTableColumnOptions.NAME,
+        DarCollectionTableColumnOptions.SUBMISSION_DATE,
+        DarCollectionTableColumnOptions.PI,
+        DarCollectionTableColumnOptions.INSTITUTION,
+        DarCollectionTableColumnOptions.DATASET_COUNT,
+        DarCollectionTableColumnOptions.STATUS,
+        DarCollectionTableColumnOptions.ACTIONS
+      ],
+      isLoading,
+      cancelCollection,
+      resubmitCollection: null,
+      openCollection,
+      consoleType: 'admin'
+    }),
+  ]);
 }

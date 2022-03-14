@@ -138,7 +138,7 @@ const columnHeaderConfig = {
       return props.actionsDisabled
         ? div()
         : props.consoleType
-          ? cellData.collectionConsoleActionsData(props)
+          ? cellData.consoleActionsCellData(props)
           : cellData.actionsCellData(props);
     }
   }

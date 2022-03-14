@@ -99,16 +99,16 @@ export function consoleActionsCellData({collection, openCollection, showConfirma
 
   switch (consoleType) {
     case 'admin':
-      actionComponent = AdminActions;
+      actionComponent = h(AdminActions, {collection, openCollection, showConfirmationModal});
       break;
     case 'chair':
-      actionComponent = ChairActions;
+      actionComponent = h(ChairActions, {collection, openCollection, showConfirmationModal});
       break;
     case 'member':
-      actionComponent = MemberActions;
+      actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal});
       break;
     default:
-      actionComponent = ResearcherActions;
+      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal});
       break;
   }
 
@@ -119,12 +119,8 @@ export function consoleActionsCellData({collection, openCollection, showConfirma
       color: styles.color.actions,
       fontSzie: styles.fontSize.actions
     },
-    label: 'tabel-actions',
-    data: actionComponent({
-      collection,
-      showConfirmationModal,
-      openCollection
-    })
+    label: 'table-actions',
+    data: actionComponent
   };
 }
 
@@ -194,5 +190,6 @@ export default {
   institutionCellData,
   datasetCountCellData,
   statusCellData,
-  actionsCellData
+  actionsCellData,
+  consoleActionsCellData
 };
