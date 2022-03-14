@@ -7,8 +7,6 @@ updates:
     target-branch: "develop"
     reviewers:
       - "@DataBiosphere/DUOS"
-    assignees:
-      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "npm"
@@ -20,8 +18,6 @@ updates:
       interval: "daily"
     target-branch: "develop"
     reviewers:
-      - "@DataBiosphere/DUOS"
-    assignees:
       - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
