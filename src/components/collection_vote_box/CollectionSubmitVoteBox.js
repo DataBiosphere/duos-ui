@@ -5,6 +5,7 @@ import {isEmpty} from "lodash/fp";
 import CollectionVoteYesButton from "./CollectionVoteYesButton";
 import CollectionVoteNoButton from "./CollectionVoteNoButton";
 import {Notifications} from "../../libs/utils";
+import {Votes} from "../../libs/ajax";
 
 const styles = {
   baseStyle: {
@@ -60,24 +61,21 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
-  const updateVote = (newVote) => {
+  const updateVote = async (newVote) => {
     try {
       const voteIds = ld.map(votes, v => v.voteId);
-      console.log("vote submitted: " + newVote);
-      console.log(voteIds);
       setVote(newVote);
       setSubmitted(true);
-      // Votes.updateVotesByIds(voteIds, {vote});
+      await Votes.updateVotesByIds(voteIds, {vote});
       Notifications.showSuccess({text: `Updated votes to ${newVote}`});
-    } catch(error) {
-      Notifications.showError({ text: 'Error: Failed to update votes' });
+    } catch (error) {
+      Notifications.showError({text: 'Error: Failed to update votes'});
     }
   };
 
-  const updateRationale = () => {
+  const updateRationale = async () => {
     const voteIds = ld.map(votes, v => v.voteId);
-    console.log("Rationale updated to " + rationale);
-    // Votes.updateVotesByIds(voteIds, {vote, rationale});
+    await Votes.updateVotesByIds(voteIds, {vote, rationale});
   };
 
   const VoteSubsectionHeading = () => {
