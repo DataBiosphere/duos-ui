@@ -39,7 +39,6 @@ export default function CollectionVoteButton(props) {
       color: labelColor,
       border: showSelectedStyle ? '0px' : '1px solid',
       cursor: (showSelectedStyle && !disabled) ? 'pointer' : 'default',
-      opacity: disabled ? '0.5' : '1'
     });
   };
 
