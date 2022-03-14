@@ -69,21 +69,20 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
 // function to generate application details content
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading) => {
   //const appDetails = appDetailLabels.filter(label => (typeof label[0] !== 'boolean' && isEmpty(label[0])));
-  const labels = filter(
-      appDetailLabels, label => {
-    (typeof label.value === 'boolean' || !isEmpty(label.value));
-  });
+  // const labels = filter(
+  //     appDetailLabels, label => {
+  //   (typeof label.value === 'boolean' || !isEmpty(label.value));
+  // });
+  debugger; // eslint-disable-line
   const labelArray = appDetailLabels.map(label => {
     // todo: shold we display false booleans?
-    // if (typeof label.value === 'boolean') {
-    //   // todo: would this be better with a spanValue of 'Yes'
-    //   return generateLabelSpanContents(label.title, label.key, label.value.toString(), loading);
-    // // only generate elements that are populated
-    // } else if (!isEmpty(label.value)) {
-    //   // check to see if processing is required for output (booleans)
-    //   return generateLabelSpanContents(label.title, label.key, label.value, loading);
-    // }
-    return generateLabelSpanContents(label.title, label.key, label.value.toString(), loading);
+    if (typeof label.value === 'boolean') {
+      return generateLabelSpanContents(label.title, label.key, 'Yes', loading);
+    // only generate elements that are populated
+    } else if (!isEmpty(label.value)) {
+      // check to see if processing is required for output (booleans)
+      return generateLabelSpanContents(label.title, label.key, label.value, loading);
+    }
   });
   // use the chunk method to organize them in arrays of two
   const chunkedArr = chunk(rowElementMaxCount)(labelArray);
