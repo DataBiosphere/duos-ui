@@ -59,30 +59,6 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
-  const VoteSubsection = () => {
-    return div({style: styles.subsection}, [
-      h(VoteSubsectionHeading),
-      div({style: styles.voteButtonsSection}, [
-        h(CollectionVoteYesButton, {
-          onClick: () => updateVote(true),
-          disabled: isFinal && submitted,
-          isSelected: vote === true
-        }),
-        h(CollectionVoteNoButton, {
-          onClick: () => updateVote(false),
-          disabled: isFinal && submitted,
-          isSelected: vote === false,
-        })
-      ])
-    ]);
-  };
-
-  const VoteSubsectionHeading = () => {
-    const heading = isFinal?
-      "Your Vote* (Vote and Rationale cannot be updated after submitting)" :
-      "Your Vote*";
-    return span([heading]);
-  };
 
   const updateVote = (newVote) => {
     const voteIds = ld.map(votes, v => v.voteId);
@@ -99,12 +75,32 @@ export default function CollectionSubmitVoteBox(props) {
     // Votes.updateVotesByIds(voteIds, {vote, rationale});
   };
 
+  const VoteSubsectionHeading = () => {
+    const heading = isFinal?
+      "Your Vote* (Vote and Rationale cannot be updated after submitting)" :
+      "Your Vote*";
+    return span([heading]);
+  };
 
   return (
     div({style: styles.baseStyle}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
-        h(VoteSubsection),
+        div({style: styles.subsection}, [
+          h(VoteSubsectionHeading),
+          div({style: styles.voteButtonsSection}, [
+            h(CollectionVoteYesButton, {
+              onClick: () => updateVote(true),
+              disabled: isFinal && submitted,
+              isSelected: vote === true
+            }),
+            h(CollectionVoteNoButton, {
+              onClick: () => updateVote(false),
+              disabled: isFinal && submitted,
+              isSelected: vote === false,
+            })
+          ])
+        ]),
         div({style: styles.subsection}, [
           span(["Rationale (optional):"]),
           textarea({
