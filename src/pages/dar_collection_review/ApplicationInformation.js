@@ -1,6 +1,6 @@
 import { div, label, span, h } from 'react-hyperscript-helpers';
 import AtAGlance from './AtAGlance';
-import {_, chunk, filter, isBoolean, isEmpty} from "lodash/fp";
+import {chunk, filter, isEmpty} from "lodash/fp";
 
 const styles = {
   flexRowElement: {
@@ -61,26 +61,18 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
   );
 };
 
-// What you should do is use lodash's filter() with appDetailLabels so that
-// only the elements with a valid label[0] value (non-empty string, non-empty object, non-empty array, booleans) show up.
-// typeof label[0] === 'boolean' || !isEmpty(label[0])
-// The filter method will return a new array of the appDetailLabels that can be processed with generateLabelSpanContents
-
 // function to generate application details content
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading) => {
-  //const appDetails = appDetailLabels.filter(label => (typeof label[0] !== 'boolean' && isEmpty(label[0])));
-  // const labels = filter(
-  //     appDetailLabels, label => {
-  //   (typeof label.value === 'boolean' || !isEmpty(label.value));
-  // });
-  debugger; // eslint-disable-line
-  const labelArray = appDetailLabels.map(label => {
-    // todo: shold we display false booleans?
+  // lodash/fp filter (non-empty string, non-empty object, non-empty array, booleans)
+  const labels = filter(label => {
+    return (typeof label.value === 'boolean' || !isEmpty(label.value));
+  }) (appDetailLabels);
+
+  const labelArray = labels.map(label => {
     if (typeof label.value === 'boolean') {
-      return generateLabelSpanContents(label.title, label.key, 'Yes', loading);
-    // only generate elements that are populated
-    } else if (!isEmpty(label.value)) {
-      // check to see if processing is required for output (booleans)
+      // Inject "Yes" / "No" for booleans
+      return generateLabelSpanContents(label.title, label.key, (label.value ? 'Yes' : 'No'), loading);
+    } else {
       return generateLabelSpanContents(label.title, label.key, label.value, loading);
     }
   });
@@ -99,7 +91,7 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading) => {
 
 export default function ApplicationInformation(props) {
   const {
-    researcher = '- - ',
+    researcher = '- -',
     email = '- -',
     department = '- -',
     city = '- -',
@@ -121,7 +113,7 @@ export default function ApplicationInformation(props) {
     anvilStorage = '',
     localComputing = '',
     cloudComputing = '',
-    cloudProvider,
+    cloudProvider = '- -',
     cloudProviderDescription
   } = props;
 
