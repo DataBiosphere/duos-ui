@@ -4,6 +4,7 @@ import ld, {isNil} from "lodash";
 import {isEmpty} from "lodash/fp";
 import CollectionVoteYesButton from "./CollectionVoteYesButton";
 import CollectionVoteNoButton from "./CollectionVoteNoButton";
+import {Notifications} from "../../libs/utils";
 
 const styles = {
   baseStyle: {
@@ -59,14 +60,18 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, []);
 
-
   const updateVote = (newVote) => {
-    const voteIds = ld.map(votes, v => v.voteId);
-    console.log("vote submitted: " + newVote);
-    console.log(voteIds);
-    setVote(newVote);
-    setSubmitted(true);
-    // Votes.updateVotesByIds(voteIds, {vote});
+    try {
+      const voteIds = ld.map(votes, v => v.voteId);
+      console.log("vote submitted: " + newVote);
+      console.log(voteIds);
+      setVote(newVote);
+      setSubmitted(true);
+      // Votes.updateVotesByIds(voteIds, {vote});
+      Notifications.showSuccess({text: `Updated votes to ${newVote}`});
+    } catch(error) {
+      Notifications.showError({ text: 'Error: Failed to update votes' });
+    }
   };
 
   const updateRationale = () => {
