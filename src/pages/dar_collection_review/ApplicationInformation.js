@@ -1,6 +1,6 @@
 import { div, label, span, h } from 'react-hyperscript-helpers';
 import AtAGlance from './AtAGlance';
-import {chunk, isBoolean, isEmpty} from "lodash/fp";
+import {_, chunk, filter, isBoolean, isEmpty} from "lodash/fp";
 
 const styles = {
   flexRowElement: {
@@ -61,15 +61,29 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
   );
 };
 
+// What you should do is use lodash's filter() with appDetailLabels so that
+// only the elements with a valid label[0] value (non-empty string, non-empty object, non-empty array, booleans) show up.
+// typeof label[0] === 'boolean' || !isEmpty(label[0])
+// The filter method will return a new array of the appDetailLabels that can be processed with generateLabelSpanContents
+
 // function to generate application details content
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading) => {
+  //const appDetails = appDetailLabels.filter(label => (typeof label[0] !== 'boolean' && isEmpty(label[0])));
+  const labels = filter(
+      appDetailLabels, label => {
+    (typeof label.value === 'boolean' || !isEmpty(label.value));
+  });
   const labelArray = appDetailLabels.map(label => {
-    // only generate elements that are populated
-    if (!isEmpty(label[0])) {
-      // check to see if processing is required for output (booleans)
-      const spanValue = (typeof label[0] == 'boolean') ? label[0].toString() : label[0];
-      return generateLabelSpanContents(label[1], label[2], spanValue, loading);
-    }
+    // todo: shold we display false booleans?
+    // if (typeof label.value === 'boolean') {
+    //   // todo: would this be better with a spanValue of 'Yes'
+    //   return generateLabelSpanContents(label.title, label.key, label.value.toString(), loading);
+    // // only generate elements that are populated
+    // } else if (!isEmpty(label.value)) {
+    //   // check to see if processing is required for output (booleans)
+    //   return generateLabelSpanContents(label.title, label.key, label.value, loading);
+    // }
+    return generateLabelSpanContents(label.title, label.key, label.value.toString(), loading);
   });
   // use the chunk method to organize them in arrays of two
   const chunkedArr = chunk(rowElementMaxCount)(labelArray);
@@ -113,17 +127,17 @@ export default function ApplicationInformation(props) {
   } = props;
 
   const appDetailLabels = [
-    [externalCollaborators, 'External Collaborators', 'external-collaborators'],
-    [internalCollaborators, 'Internal Collaborators', 'internal-collaborators'],
-    [signingOfficial, 'Signing Official', 'signing-official'],
-    [itDirector, 'IT Director', 'it-director'],
-    [signingOfficialEmail, 'Signing Official Email', 'signing-official-email'],
-    [itDirectorEmail, 'IT Director Email', 'it-director-email'],
-    [internalLabStaff, 'Internal Lab Staff', 'internal-lab-staff'],
-    [anvilStorage, 'Using AnVIL only for storage and analysis', 'anvil-storage'],
-    [localComputing, 'Requesting Permission to use local computing', 'local-computing'],
-    [cloudComputing, 'Requesting permission to use cloud computing', 'cloud-computing'],
-    [cloudProvider, 'Cloud Provider (description below)', 'cloud-provider']
+    {value: externalCollaborators, title: 'External Collaborators', key: 'external-collaborators'},
+    {value: internalCollaborators, title: 'Internal Collaborators', key: 'internal-collaborators'},
+    {value: signingOfficial, title: 'Signing Official', key: 'signing-official'},
+    {value: itDirector, title: 'IT Director', key: 'it-director'},
+    {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
+    {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
+    {value: internalLabStaff, title: 'Internal Lab Staff', key: 'internal-lab-staff'},
+    {value: anvilStorage, title: 'Using AnVIL only for storage and analysis', key: 'anvil-storage'},
+    {value: localComputing, title: 'Requesting Permission to use local computing', key: 'local-computing'},
+    {value: cloudComputing, title: 'Requesting permission to use cloud computing', key: 'cloud-computing'},
+    {value: cloudProvider, title: 'Cloud Provider (description below)', key: 'cloud-provider'},
   ];
 
   return (
