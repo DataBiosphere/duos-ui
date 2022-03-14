@@ -51,15 +51,24 @@ export default function CollectionSubmitVoteBox(props) {
     if (!isEmpty(votes)) {
       const prevVote = votes[0];
 
-      if (!isNil(prevVote.vote)) {
+      const voteValues = ld.map(votes, vote => vote.vote);
+      if (allMatch(voteValues)) {
         setVote(prevVote.vote);
         setSubmitted(true);
       }
-      if (!isNil(prevVote.rationale)) {
+
+      const rationaleValues = ld.map(votes, vote => vote.rationale);
+      if (allMatch(rationaleValues)) {
         setRationale(prevVote.rationale);
       }
     }
-  }, []);
+  }, [votes]);
+
+  const allMatch = (values)  => {
+    return ld.every(values, v => {
+      return !isNil(v) && v === values[0];
+    });
+  };
 
   const updateVote = async (newVote) => {
     try {
@@ -67,7 +76,7 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateVotesByIds(voteIds, {vote, rationale});
       setVote(newVote);
       setSubmitted(true);
-      Notifications.showSuccess({text: `Updated votes to ${newVote}`});
+      Notifications.showSuccess({text: `Successfully updated votes`});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update votes'});
     }
