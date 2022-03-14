@@ -9,7 +9,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '16px',
+    fontSize: '18px',
     padding: '5%'
   },
   defaultBackgroundColor: '#FFFFFF',
