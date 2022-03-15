@@ -1005,9 +1005,7 @@ export const Votes = {
   },
 
   updateVotesByIds: async (voteIds, vote) => {
-    let url = isNil(vote.rationale) ?
-      `${await Config.getApiUrl()}/api/votes?vote=${vote.vote}` :
-      `${await Config.getApiUrl()}/api/votes?vote=${vote.vote}&rationale=${vote.rationale}`;
+    let url = `${await Config.getApiUrl()}/api/votes?vote=${vote.vote}&rationale=${vote.rationale}`;
 
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteIds), { method: 'PUT' }]));
     return await res.json();
