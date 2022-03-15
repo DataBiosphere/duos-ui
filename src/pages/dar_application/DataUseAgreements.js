@@ -54,7 +54,7 @@ export default function DataUseAgreements(props) {
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        h3({ className: 'rp-form-title access-color' }, ['4.1 Data Use Agreements']),
+        h3({ className: 'rp-form-title access-color' }, ['4.1 Attestation and Agreement(s)']),
 
         div({ className: 'form-group' }, [
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
