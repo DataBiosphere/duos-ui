@@ -73,7 +73,7 @@ export default function CollectionSubmitVoteBox(props) {
   const updateVote = async (newVote) => {
     try {
       const voteIds = ld.map(votes, v => v.voteId);
-      await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
+    //  await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
       Notifications.showSuccess({text: `Successfully updated votes`});

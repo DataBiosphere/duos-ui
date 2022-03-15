@@ -162,6 +162,9 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         question={"question"}
       />
     );
+    cy.intercept('PUT', '/api/votes', {
+      statusCode: 200
+    }).as('updateVote')
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=yes-collection-vote-button]').click();
