@@ -614,7 +614,7 @@ export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
   let attributes;
   if(!disabled) {
-    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip, key};
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip, key, id: key};
   } else {
     attributes = {style, disabled, "data-tip": dataTip, key};
   }

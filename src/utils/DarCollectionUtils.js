@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil } from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -132,6 +132,30 @@ export const processDataUseBuckets = async(buckets) => {
   processedBuckets.unshift(rpVoteData);
   return processedBuckets;
 };
+
+//Admin only helper function
+export const checkIfOpenableElectionPresent = (dars) => {
+  const darCount = size(dars);
+  const darsWithElections = filter((dar = {}) => !isEmpty(dar.elections))(dars);
+  if(darsWithElections !== darCount) { return true; }
+  const elections = flow(
+    map(dar => dar.elections),
+    flatMap(electionMap => Object.values(electionMap)), //pulling out the individual elections from the object/map
+    filter(election => election.status !== 'Open')
+  )(dars);
+  return elections.size() > 0;
+};
+
+//Admin only helper function
+export const checkIfCancelableElectionPresent = (dars) => {
+  const elections = flow(
+    map(dar => dar.elections),
+    flatMap(electionMap => Object.values(electionMap)),
+    filter(election => election.status === 'Open')
+  )(dars);
+  return !isEmpty(elections);
+};
+
 
 export default {
   generatePreProcessedBucketData,
