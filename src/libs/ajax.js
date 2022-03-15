@@ -202,7 +202,7 @@ export const Collections = {
   },
   openElectionsById: async(id) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/election`;
-    const res = await axios.post(url, Config.authOpts());
+    const res = await axios.post(url, {}, Config.authOpts());
     return res.data;
   }
 };

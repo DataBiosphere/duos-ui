@@ -7,7 +7,7 @@ import {styles} from "./DarCollectionTable";
 import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
-import ResearcherActions from './ResearcherActions'
+import ResearcherActions from './ResearcherActions';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label = 'project-title'}) {
   return {

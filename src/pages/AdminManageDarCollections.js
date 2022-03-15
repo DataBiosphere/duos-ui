@@ -62,7 +62,7 @@ export default function AdminManageDarCollections() {
 
   const openCollection = async(collectionId) => {
     try {
-      const openCollection = await Collections.openCollection(collectionId);
+      const openCollection = await Collections.openElectionsById(collectionId);
       updateCollections(openCollection);
     } catch(error) {
       Notifications.showError({text: 'Error opening target collection'});
