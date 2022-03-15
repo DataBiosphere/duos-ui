@@ -78,7 +78,6 @@ export default function DataUseAgreements(props) {
               ])
             ]),
 
-
             div({ className: 'row no-margin' }, [
               h3({ className: 'rp-form-title access-color' }, ['Data Access Agreement(s)']),
             ]),
@@ -86,20 +85,13 @@ export default function DataUseAgreements(props) {
             div({ className: 'row no-margin' }, [
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 label({ className: 'control-label default-color' }, [
-                  'Important: Your ',
-                  a({ href: 'https://era.nih.gov/erahelp/commons/#Commons/roles/SO.htm%3FTocPath%3DUser%2520Roles%7C_____9', target: '_blank'}, 'Signing Official' ),
-                  ' must sign and send a Library Card Agreement authorizing your use prior to accesssing to data.'
+                  "By submitting this data access request, you agree to all terms in the agreement(s) listed below"
                 ])
               ]),
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 LibraryCardAgreement
               ]),
-
-              div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                p({ className: 'rp-agreement' },
-                  ['By submitting this data access request, you agree to all terms relevant to Authorized Users in the agreement']),
-              ])
             ])
           ]),
 
