@@ -76,7 +76,6 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, clou
   }) (appDetailLabels);
 
   const labelArray = labels.map(label => {
-    debugger; // eslint-disable-line
     if (typeof label.value === 'boolean') {
       // Inject "Yes" / "No" for booleans
       return generateLabelSpanContents(label.title, label.key, (label.value ? 'Yes' : 'No'), loading);
