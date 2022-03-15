@@ -78,6 +78,11 @@ export default function DataUseAgreements(props) {
               ])
             ]),
 
+
+            div({ className: 'row no-margin' }, [
+              h3({ className: 'rp-form-title access-color' }, ['Data Access Agreement(s)']),
+            ]),
+
             div({ className: 'row no-margin' }, [
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 label({ className: 'control-label default-color' }, [
