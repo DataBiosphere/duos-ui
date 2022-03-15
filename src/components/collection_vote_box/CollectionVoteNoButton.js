@@ -25,6 +25,7 @@ export default function CollectionVoteNoButton(props) {
   };
 
   return h(CollectionVoteButton, {
+    dataCy: "no-collection-vote-button",
     label: h(Label),
     onClick: () => onClick(),
     baseColor: '#DA0003',

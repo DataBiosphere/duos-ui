@@ -90,7 +90,7 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   return (
-    div({style: styles.baseStyle}, [
+    div({style: styles.baseStyle, dataCy: 'collection-vote-box'}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div({style: styles.subsection}, [

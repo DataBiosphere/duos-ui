@@ -19,7 +19,7 @@ const styles = {
 
 export default function CollectionVoteButton(props) {
   const [additionalStyle, setAdditionalStyle] = useState({});
-  const { onClick, label, disabled, isSelected, baseColor } = props;
+  const { onClick, label, disabled, isSelected, baseColor, dataCy } = props;
 
   useEffect(() => {
     isSelected ? selectedButtonStyle() : defaultButtonStyle();
@@ -43,6 +43,7 @@ export default function CollectionVoteButton(props) {
   };
 
   return button({
+    dataCy,
     style: Object.assign({}, styles.baseStyle, additionalStyle),
     onClick: () => !disabled && onClick(),
     onMouseEnter: () => !disabled && selectedButtonStyle(),
