@@ -6,11 +6,7 @@ updates:
       interval: "daily"
     target-branch: "develop"
     reviewers:
-      - "rushtong"
-      - "JVThomas"
-    assignees:
-      - "rushtong"
-      - "JVThomas"
+      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "npm"
@@ -22,9 +18,7 @@ updates:
       interval: "daily"
     target-branch: "develop"
     reviewers:
-      - "rushtong"
-    assignees:
-      - "rushtong"
+      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "docker"
