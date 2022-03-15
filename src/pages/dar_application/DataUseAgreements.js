@@ -78,21 +78,19 @@ export default function DataUseAgreements(props) {
               ])
             ]),
 
-            div({ className: 'row no-margin' }, [
+            div({ className: 'row no-margin rp-group' }, [
               h3({ className: 'rp-form-title access-color' }, ['Data Access Agreement(s)']),
-            ]),
 
-            div({ className: 'row no-margin' }, [
-              div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                label({ className: 'control-label default-color' }, [
-                  "By submitting this data access request, you agree to all terms in the agreement(s) listed below"
+              div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group' }, [
+                label({ className: 'control-label rp-title-question' }, [
+                  'By submitting this data access request, you agree to all terms in the agreement(s) listed below.'
                 ])
               ]),
+            ]),
 
-              div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                LibraryCardAgreement
-              ]),
-            ])
+            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+              LibraryCardAgreement
+            ]),
           ]),
 
           div({ className: 'row no-margin' }, [
