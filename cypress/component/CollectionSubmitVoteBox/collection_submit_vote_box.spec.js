@@ -2,6 +2,7 @@
 import React from 'react';
 import CollectionSubmitVoteBox from "../../../src/components/collection_vote_box/CollectionSubmitVoteBox";
 import {mount} from "@cypress/react";
+import {Votes} from '../../../src/libs/ajax';
 
 const votesMatch = [
   {vote: true, voteId: 1, rationale: "test"},
@@ -144,14 +145,14 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         question={"question"}
       />
     );
+    cy.stub(Votes, 'updateVotesByIds');
+
     cy.get('textarea').should('have.text', '');
     cy.get('textarea').type('sample text');
     cy.get('textarea').blur();
     cy.get('textarea').should('have.text', 'sample text');
     cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('textarea').type('123');
-    cy.get('textarea').blur();
-    cy.get('textarea').should('have.text', 'sample text');
+    cy.get('textarea').should('be.disabled');
   });
 
   it('can only vote once when vote is final', function() {
@@ -162,9 +163,8 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         question={"question"}
       />
     );
-    cy.intercept('PUT', '/api/votes', {
-      statusCode: 200
-    }).as('updateVote')
+    cy.stub(Votes, 'updateVotesByIds');
+
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=yes-collection-vote-button]').click();
