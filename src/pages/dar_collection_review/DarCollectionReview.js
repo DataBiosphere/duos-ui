@@ -183,6 +183,20 @@ export default function DarCollectionReview(props) {
         nonTechSummary: darInfo.nonTechRus,
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
+        collection: collection,
+        dataUseBuckets: dataUseBuckets,
+        externalCollaborators: darInfo.externalCollaborators,
+        internalCollaborators: darInfo.internalCollaborators,
+        signingOfficial: darInfo.signingOfficial,
+        itDirector: darInfo.itDirector,
+        signingOfficialEmail: darInfo.signingOfficial, //todo
+        itDirectorEmail: darInfo.itDirector, //todo
+        internalLabStaff: darInfo.labCollaborators,
+        anvilStorage: darInfo.anvilUse,
+        localComputing: darInfo.localUse,
+        cloudComputing: darInfo.cloudUse,
+        cloudProvider: darInfo.cloudProvider,
+        cloudProviderDescription: darInfo.cloudProviderDescription
       }),
       /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
       I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
