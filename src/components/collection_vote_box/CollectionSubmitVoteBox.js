@@ -45,9 +45,12 @@ export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const {question, votes, isFinal} = props;
 
   useEffect(() => {
+    setDisabled(props.isDisabled);
+
     if (!isEmpty(votes)) {
       const prevVote = votes[0];
 
@@ -64,6 +67,10 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, [votes]);
 
+  useEffect(() => {
+    setDisabled(props.isDisabled || (isFinal && submitted));
+  }, [props.isDisabled, isFinal, submitted])
+
   const allMatch = (values)  => {
     return ld.every(values, v => {
       return !isNil(v) && v === values[0];
@@ -73,7 +80,7 @@ export default function CollectionSubmitVoteBox(props) {
   const updateVote = async (newVote) => {
     try {
       const voteIds = ld.map(votes, v => v.voteId);
-    //  await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
+      await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
       Notifications.showSuccess({text: `Successfully updated votes`});
@@ -98,12 +105,12 @@ export default function CollectionSubmitVoteBox(props) {
           div({style: styles.voteButtonsSection}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
-              disabled: isFinal && submitted,
+              disabled,
               isSelected: vote === true
             }),
             h(CollectionVoteNoButton, {
               onClick: () => updateVote(false),
-              disabled: isFinal && submitted,
+              disabled,
               isSelected: vote === false,
             })
           ])

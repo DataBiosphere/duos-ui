@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { div, h } from 'react-hyperscript-helpers';
+import {button, div, h} from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
@@ -164,6 +164,7 @@ export default function DarCollectionReview(props) {
       h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
     ]),
     div({ className: 'review-page-body', style: {padding: '1% 0% 0% 10%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
+
       h(TabControl, {
         labels: Object.values(tabs),
         selectedTab,
@@ -183,7 +184,7 @@ export default function DarCollectionReview(props) {
         nonTechSummary: darInfo.nonTechRus,
         department: researcherProperties.department,
         isLoading: subcomponentLoading,
-      }),
+      })
       /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
       I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
       However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership
