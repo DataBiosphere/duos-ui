@@ -114,7 +114,7 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
-  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, key: 'table-data-rows'})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, paginationBar]);
 }

@@ -37,9 +37,9 @@ export default function AdminManageDarCollections() {
   }, []);
 
   const updateCollections = (updatedCollection) => {
-    const targetIndex = findIndex((collection) => {
-      collection.darCollectionId = updatedCollection.darCollectionId;
-    })(collections);
+    const targetIndex = findIndex((collection) =>
+      collection.darCollectionId === updatedCollection.darCollectionId
+    )(collections);
     if(targetIndex < 0) {
       Notifications.showError({text: 'Error: Could not find target collection'});
     } else {
