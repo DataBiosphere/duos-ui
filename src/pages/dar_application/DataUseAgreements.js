@@ -59,7 +59,7 @@ export default function DataUseAgreements(props) {
         div({ className: 'form-group' }, [
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
             label({ className: 'control-label rp-title-question' }, [
-              'DUOS Library Card Data Access Agreement & Attestation'
+              'By submitting this data access request, you agree to all terms in the agreement(s) listed below.'
             ])
           ]),
 
