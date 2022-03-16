@@ -122,14 +122,14 @@ export const processDataUseBuckets = async(buckets) => {
 //Admin only helper function
 export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
-  const darsWithElections = filter((dar = {}) => !isEmpty(dar.elections))(dars);
-  if(darsWithElections !== darCount) { return true; }
+  const darsWithElections = filter((dar) => !isEmpty(dar.elections))(dars);
+  if(darsWithElections.length !== darCount) { return true; }
   const elections = flow(
     map(dar => dar.elections),
     flatMap(electionMap => Object.values(electionMap)), //pulling out the individual elections from the object/map
     filter(election => election.status !== 'Open')
   )(dars);
-  return elections.size() > 0;
+  return elections.length > 0;
 };
 
 //Admin only helper function

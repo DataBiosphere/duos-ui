@@ -180,9 +180,10 @@ export const Collections = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
-  cancelCollection: async(id) => {
+  cancelCollection: async(id, roleName) => {
     const url = `${await Config.getApiUrl()}/api/collections/${id}/cancel`;
-    const res = await axios.put(url, {}, Config.authOpts());
+    const config = Object.assign({params: {roleName}}, Config.authOpts());
+    const res = await axios.put(url, {}, config);
     return res.data;
   },
   resubmitCollection: async(id) => {

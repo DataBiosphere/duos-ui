@@ -41,7 +41,7 @@ export default function AdminManageDarCollections() {
       collection.darCollectionId === updatedCollection.darCollectionId
     )(collections);
     if(targetIndex < 0) {
-      Notifications.showError({text: 'Error: Could not find target collection'});
+      Notifications.showError({text: `Error: Could not find ${updatedCollection.darCode} collection`});
     } else {
       const collectionsCopy = cloneDeep(collections);
       collectionsCopy[targetIndex] = updatedCollection;
@@ -51,21 +51,23 @@ export default function AdminManageDarCollections() {
     }
   };
 
-  const cancelCollection = async(collectionId) => {
+  const cancelCollection = async({darCode, darCollectionId}) => {
     try {
-      const canceledCollection = await Collections.cancelCollection(collectionId);
+      const canceledCollection = await Collections.cancelCollection(darCollectionId, "admin");
       updateCollections(canceledCollection);
+      Notifications.showSuccess({text: `Successfully canceled ${darCode}`});
     } catch(error) {
-      Notifications.showError({text: 'Error canceling target collection'});
+      Notifications.showError({text: `Error canceling ${darCode}`});
     }
   };
 
-  const openCollection = async(collectionId) => {
+  const openCollection = async({darCode, darCollectionId}) => {
     try {
-      const openCollection = await Collections.openElectionsById(collectionId);
+      const openCollection = await Collections.openElectionsById(darCollectionId);
       updateCollections(openCollection);
+      Notifications.showSuccess({text: `Successfully opened ${darCode}`});
     } catch(error) {
-      Notifications.showError({text: 'Error opening target collection'});
+      Notifications.showError({text: `Error opening ${darCode}`});
     }
   };
 
@@ -99,7 +101,6 @@ export default function AdminManageDarCollections() {
       ),
       h(SearchBar, { handleSearchChange, searchRef }),
     ]),
-    //NOTE: check to see if this works
     h(DarCollectionTable, {
       collections: filteredList,
       columns: [

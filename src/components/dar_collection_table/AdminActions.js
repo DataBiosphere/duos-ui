@@ -71,7 +71,7 @@ export default function AdminActions(props) {
     keyProp: `admin-open-${collectionId}`,
     label: 'Open',
     isRendered: openEnabled,
-    onClick: () => openOnClick(collectionId),
+    onClick: () => openOnClick(collection),
     baseColor: Theme.palette.secondary,
     additionalStyle: {
       padding: '5px 10px',

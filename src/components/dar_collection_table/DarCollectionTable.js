@@ -255,7 +255,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
           - Modal function can be defined via useCallback, recomputed if op state variable changes
           - Above can also be applied for modal message (expect use useMemo instead of useCallback)
     */
-    CollectionConfirmationModal({
+    h(CollectionConfirmationModal, {
       collection: selectedCollection,
       showConfirmation,
       setShowConfirmation,
