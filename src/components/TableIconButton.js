@@ -29,7 +29,7 @@ export default function TableIconButton(props) {
     onMouseEnter = onMouseEnterFn,
     onMouseLeave = onMouseLeaveFn,
     isRendered = true,
-    dataTip,
+    dataTip = '',
     keyProp,
     disabled = false
   } = props;

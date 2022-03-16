@@ -4,8 +4,9 @@ import {Theme} from "../../libs/theme";
 
 export default function ResubmitCollectionButton(props) {
   const { collection } = props;
+  const collectionId = collection.darCollectionId;
   return h(SimpleButton, {
-    keyProp: `resubmit-collection-${collection.id}`,
+    keyProp: `resubmit-collection-${collectionId}`,
     label: 'Revise',
     baseColor: Theme.palette.secondary,
     additionalStyle: {

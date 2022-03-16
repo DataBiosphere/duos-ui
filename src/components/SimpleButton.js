@@ -35,6 +35,7 @@ export default function SimpleButton(props) {
     const baseAttributes = {
       style,
       key: keyProp || `${label}-button`,
+      id: keyProp || `${label}-button`,
       onClick: () => !disabled && onClick(),
       onMouseEnter: () =>
         !disabled && updateStyle(baseColor, 'white', additionalStyle, true, disabled),
