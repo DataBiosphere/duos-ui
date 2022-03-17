@@ -1,10 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values} from 'lodash/fp';
+import {map as nonFPMap} from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
+import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick } from "lodash/fp";
 import {User} from "./ajax";
 
 export const UserProperties = {
@@ -45,17 +45,37 @@ export const darCollectionUtils = {
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
   determineCollectionStatus: (collection) => {
-    const elections = !isEmpty(collection.dars) ?
+    const electionStatusCount = {};
+    if(!isEmpty(collection.dars)) {
       flow([
-        map((dar) => values(dar.elections)),
+        map((dar) => {
+          const {elections} = dar;
+          if(isEmpty(elections)) {
+            if(!electionStatusCount['Submitted']) {
+              electionStatusCount['Submitted'] = 0;
+            }
+            electionStatusCount['Submitted']++;
+            return [];
+          } else {
+            return values(elections);
+          }
+        }),
         flatten,
-      ])(collection.dars)
-      : [];
-    return !isEmpty(elections)
-      ? 'Under Election'
-      : isCollectionCanceled(collection)
-        ? 'Canceled'
-        : 'Submitted';
+        each(election => {
+          const {status, electionType} = election;
+          if(toLower(electionType) === 'dataaccess') {
+            if(isNil(electionStatusCount[status])) {
+              electionStatusCount[status] = 0;
+            }
+            electionStatusCount[status]++;
+          }
+        })
+      ])(collection.dars);
+    }
+
+    return nonFPMap(electionStatusCount, (value, key) => {
+      return `${key}: ${value}`;
+    }).join('\n');
   },
 };
 ///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////

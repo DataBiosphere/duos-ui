@@ -24,7 +24,8 @@ export const styles = {
     display: 'flex',
     padding: '1rem 2%',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    whiteSpace: 'pre-wrap'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
