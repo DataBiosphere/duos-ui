@@ -26,7 +26,7 @@ export default function AdminActions(props) {
     collection -> target collection for the button
   */
 
-  const { collection, showConfirmationModal, openCollection } = props;
+  const { collection, showConfirmationModal } = props;
   const collectionId = collection.darCollectionId;
   const [openEnabled, setOpenEnabled] = useState(false);
   const [cancelEnabled, setCancelEnabled] = useState(false);
@@ -59,8 +59,8 @@ export default function AdminActions(props) {
     }
   */
 
-  const openOnClick = async (collectionId) => {
-    openCollection(collectionId);
+  const openOnClick = async (collection) => {
+    showConfirmationModal(collection, 'open');
   };
 
   const cancelOnClick = (collection) => {

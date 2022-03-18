@@ -262,6 +262,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setShowConfirmation,
       cancelCollection,
       resubmitCollection,
+      openCollection,
       consoleAction
     })
   ]);

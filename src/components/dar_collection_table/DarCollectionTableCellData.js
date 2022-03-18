@@ -99,7 +99,7 @@ export function consoleActionsCellData({collection, openCollection, showConfirma
 
   switch (consoleType) {
     case 'admin':
-      actionComponent = h(AdminActions, {collection, openCollection, showConfirmationModal});
+      actionComponent = h(AdminActions, {collection, showConfirmationModal});
       break;
     case 'chair':
       actionComponent = h(ChairActions, {collection, openCollection, showConfirmationModal});

@@ -44,7 +44,7 @@ export default function AdminManageDarCollections() {
       Notifications.showError({text: `Error: Could not find ${updatedCollection.darCode} collection`});
     } else {
       const collectionsCopy = cloneDeep(collections);
-      //NOTE: update does not return datasets, so a direct colelction update will mess up the datasets column
+      //NOTE: update does not return datasets, so a direct collection update will mess up the datasets column
       //That's not a big deal, we know the only things updated were the elections, so we can still update the dars (sicne elections are nested inside)
       collectionsCopy[targetIndex].dars = updatedCollection.dars;
       const updatedFilteredList = filterFn(searchRef.current.value, collectionsCopy);
@@ -73,7 +73,6 @@ export default function AdminManageDarCollections() {
     }
   };
 
-  //NOTE: check to see if the template is formatted correctly
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
       div(
