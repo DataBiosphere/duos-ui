@@ -177,22 +177,20 @@ export const Styles = {
   },
   TABLE: {
     CONTAINER: {
-      margin: "3rem auto",
-      border: '0.5px solid lightGray',
-      borderRadius: '10px'
+      marginTop: '2rem',
+      borderTop: '1px solid #979797',
+      backgroundColor: 'rgb(184,205,211,0.08)',
+      padding: '2rem',
+      width: '100%',
+      color: '#7B7B7B',
+      fontFamily: 'Montserrat',
     },
     HEADER_ROW: {
-      fontFamily: targetFont,
-      fontSize: '1.6rem',
-      color: "#00243C",
+      textTransform: 'uppercase',
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: '1rem',
       fontWeight: Theme.font.weight.semibold,
-      backgroundColor: "#f3f6f7",
-      display: "flex",
-      justifyContent: "left",
-      height: "51px",
-      borderTopLeftRadius: 'inherit',
-      borderTopRightRadius: 'inherit',
-      alignItems: 'center'
     },
     HEADER_SORT: {
       display: 'flex',
@@ -201,15 +199,15 @@ export const Styles = {
       width: '100%'
     },
     RECORD_ROW: {
-      fontFamily: targetFont,
-      fontWeight: Theme.font.weight.regular,
-      fontSize: Theme.font.size.small,
-      display: "flex",
-      justifyContent: "left",
-      padding: "0.8rem 0"
+      backgroundColor: '#FFFFFF',
+      border: '1px solid #DEDEDE',
+      width: '100%',
+      display: 'flex',
+      borderRadius: '5px',
+      marginBottom: '1rem',
     },
     RECORD_TEXT: {
-      color: "#00243C"
+      color: '#7B7B7B',
     },
     DAR_TEXT_HOVER: {
       cursor: 'pointer',
@@ -260,6 +258,8 @@ export const Styles = {
       alignItems: "center",
     },
     ELECTION_STATUS_CELL: {
+      color: '#7B7B7B',
+      fontWeight: Theme.font.weight.medium,
       width: "12%",
       margin: "0 1%",
       display: "flex",

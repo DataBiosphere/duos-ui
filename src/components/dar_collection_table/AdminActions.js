@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { div, h} from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import SimpleButton from '../SimpleButton';
 import { Styles, Theme } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { checkIfOpenableElectionPresent, checkIfCancelableElectionPresent } from '../../utils/DarCollectionUtils';
+import {
+  checkIfOpenableElectionPresent,
+  checkIfCancelableElectionPresent,
+} from '../../utils/DarCollectionUtils';
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
+const baseCancelButtonStyle = Object.assign(
+  {},
+  Styles.TABLE.TABLE_ICON_BUTTON,
+  { alignItems: 'center' }
+);
 
 export default function AdminActions(props) {
   /*
@@ -15,7 +22,6 @@ export default function AdminActions(props) {
     Cancel should be unrestricted, should be able to run no matter what
     Open should only happen if there's no election
     Re-open should pop up if the latest elections are all closed/cancelled (mix should not be possible)
-
     Therefore, to make the above calculations, you'll need...
       Elections -> all elections in the collection
   */
@@ -42,7 +48,6 @@ export default function AdminActions(props) {
   /*
     updateCollections should be a method defined on the Admin console
     Should look something close to below, expect similar requirements on the other actions for things like cancel, revise, etc.
-
     const updateCollections = (updatedCollection) => {
       const collectionIndex = findIndex(collection => collection.collectionId === updatedCollection.collectionId);
       try {
@@ -75,8 +80,8 @@ export default function AdminActions(props) {
     baseColor: Theme.palette.secondary,
     additionalStyle: {
       padding: '5px 10px',
-      fontSize: '1.45rem'
-    }
+      fontSize: '1.45rem',
+    },
   };
 
   const cancelButtonAttributes = {
@@ -96,7 +101,7 @@ export default function AdminActions(props) {
         display: 'flex',
         padding: '10px 0px',
         alignItems: 'end',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
       },
     },
     [

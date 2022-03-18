@@ -88,16 +88,7 @@ class AdminManageUsers extends Component {
   };
 
   editUser = (user) => () => {
-    this.setState(prev => {
-      prev.userEmail = user.email;
-      prev.user = user;
-      prev.showAddUserModal = true;
-      return prev;
-    });
-  };
-
-  openResearcherReview = (userId) => {
-    this.props.history.push(`researcher_review/${userId}`);
+    this.props.history.push(`/admin_edit_user/${user.dacUserId}`);
   };
 
   okModal = async () => {

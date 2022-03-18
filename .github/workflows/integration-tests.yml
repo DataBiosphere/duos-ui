@@ -1,5 +1,5 @@
 on: [pull_request]
-name: cypress tests
+name: cypress integration tests
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
@@ -27,8 +27,3 @@ jobs:
           start: npm start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
-      - name : Cypress run component tests
-        uses: cypress-io/github-action@v2
-        with: 
-          install: false
-          command: npx cypress run-ct

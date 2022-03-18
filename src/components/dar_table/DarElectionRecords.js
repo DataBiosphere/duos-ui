@@ -34,7 +34,7 @@ const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, vot
   const tag = includeLink ? a : div;
   return tag({
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
-      color: includeLink ? Theme.palette.link : 'black' //color adjustment for manage console
+      color: includeLink ? Theme.palette.link : Styles.TABLE.ELECTION_STATUS_CELL.color //color adjustment for manage console
     }),
     onClick: () => includeLink && goToReviewResults(dar, history, status)
   }, [status]);

@@ -87,7 +87,7 @@ const columnHeaderConfig = {
     sortable: true
   },
   name: {
-    label: 'Project Title',
+    label: 'Title',
     cellStyle: { width: styles.cellWidth.projectTitle },
     cellDataFn: (props) => {
       props.projectTitle = getProjectTitle(props.collection);
