@@ -28,7 +28,7 @@ const styles = {
     flexDirection: 'column',
     rowGap: '1.5rem'
   },
-  voteButtonsSection: {
+  voteButtons: {
     display: 'flex',
     columnGap: '1rem'
   },
@@ -110,7 +110,7 @@ export default function CollectionSubmitVoteBox(props) {
       div({style: styles.content}, [
         div({style: styles.subsection}, [
           h(VoteSubsectionHeading),
-          div({style: styles.voteButtonsSection}, [
+          div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
               disabled,
@@ -133,7 +133,7 @@ export default function CollectionSubmitVoteBox(props) {
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
-            disabled: isFinal && submitted
+            disabled
           }),
         ])
       ])
