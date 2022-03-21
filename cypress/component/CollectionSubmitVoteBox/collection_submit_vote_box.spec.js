@@ -79,6 +79,28 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
   });
 
+  it('renders existing rationale if rationale is the same for all votes', function() {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMatch}
+        isFinal={false}
+        question={"question"}
+      />
+    );
+    cy.get('textarea').should('have.text', 'test');
+  });
+
+  it('Does not render existing rationale in textarea if rationale different between votes', function() {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMixed}
+        isFinal={false}
+        question={"question"}
+      />
+    );
+    cy.get('textarea').should('not.contain.text');
+  });
+
   it('can always edit rationale textarea when vote is not final', function() {
     mount(
       <CollectionSubmitVoteBox
