@@ -83,11 +83,20 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
-      Notifications.showSuccess({text: `Successfully updated votes`});
+      Notifications.showSuccess({text: `Successfully updated vote value`});
     } catch (error) {
-      Notifications.showError({text: 'Error: Failed to update votes'});
+      Notifications.showError({text: 'Error: Failed to update vote value'});
     }
   };
+
+  const updateRationale = () => {
+    try {
+      const voteIds = ld.map(votes, v => v.voteId);
+      Notifications.showSuccess({text: `Successfully updated vote rationale`});
+    } catch (error) {
+      Notifications.showError({text: 'Error: Failed to update vote rationale'});
+    }
+  }
 
   const VoteSubsectionHeading = () => {
     const heading = isFinal?
@@ -122,7 +131,7 @@ export default function CollectionSubmitVoteBox(props) {
             value: rationale,
             placeholder: "Optional: Describe your rationale or add comments here",
             onChange: e => setRationale(e.target.value),
-            onBlur: () => updateVote(vote),
+            onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
             disabled: isFinal && submitted
