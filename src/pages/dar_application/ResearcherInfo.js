@@ -11,7 +11,7 @@ const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
-const libraryCardLink = h(Link, {to: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402923319323-Library-Card-Agreements', style: linkStyle, target: '_blank'}, ['Library Card']);
+const libraryCardLink = a({href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402923319323-Library-Card-Agreements', style: linkStyle, target: '_blank'}, ['Library Card']);
 const missingLibraryCard = span(["You must submit ", profileLink, " and obtain a ", libraryCardLink, " from your Signing Official before you can submit a Data Access Request"]);
 
 export default function ResearcherInfo(props) {
