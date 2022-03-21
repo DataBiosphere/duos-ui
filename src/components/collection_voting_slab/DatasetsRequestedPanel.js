@@ -1,6 +1,7 @@
-import {div, span} from "react-hyperscript-helpers";
+import {div, h, span} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
+import SimpleTable from "../SimpleTable";
 
 const styles = {
   baseStyle: {
@@ -36,13 +37,23 @@ export default function DatasetsRequestedPanel(props) {
 
   useEffect(() => {
     setDatasetCount(bucketDatasetsForDac.length);
-  }, [bucketDatasetsForDac])
+  }, [bucketDatasetsForDac]);
+
+  const DatasetList = () => {
+    const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
+      return div([
+        span({style: {width: '15%'}}, [dataset.dataSetId]),
+        span({style: {width: '80%'}}, [dataset.label])
+      ])
+    })
+    return div([datasetRows]);
+  }
 
   return div({style: styles.baseStyle}, [
     div([
       span({style: styles.title}, ["Datasets Requested"]),
       "(" + datasetCount + ")"
     ]),
-    "Hello"
+    DatasetList()
   ]);
 }
