@@ -1018,8 +1018,17 @@ export const Votes = {
     let url = `${await Config.getApiUrl()}/api/votes`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteUpdate), { method: 'PUT' }]));
     return await res.json();
-  }
+  },
 
+  updateRationaleByIds: async (voteIds, rationale) => {
+    const rationaleUpdate = {};
+    rationaleUpdate.rationale = rationale;
+    rationaleUpdate.voteIds = voteIds;
+
+    let url = `${await Config.getApiUrl()}/api/votes/rationale`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(rationaleUpdate), { method: 'PUT' }]));
+    return await res.json();
+  }
 };
 
 export const AuthenticateNIH = {

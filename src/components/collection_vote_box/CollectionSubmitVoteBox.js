@@ -99,7 +99,7 @@ export default function CollectionSubmitVoteBox(props) {
   }
 
   const VoteSubsectionHeading = () => {
-    const heading = isFinal?
+    const heading = isFinal ?
       "Your Vote* (Vote and Rationale cannot be updated after submitting)" :
       "Your Vote*";
     return span([heading]);
