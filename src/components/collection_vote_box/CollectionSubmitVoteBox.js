@@ -49,8 +49,10 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes, isFinal} = props;
 
   useEffect(() => {
-    setDisabled(props.isDisabled);
+    setDisabled(props.isDisabled || (isFinal && submitted));
+  }, [props.isDisabled, isFinal, submitted])
 
+  useEffect(() => {
     if (!isEmpty(votes)) {
       const prevVote = votes[0];
 
@@ -67,10 +69,6 @@ export default function CollectionSubmitVoteBox(props) {
     }
   }, [votes]);
 
-  useEffect(() => {
-    setDisabled(props.isDisabled || (isFinal && submitted));
-  }, [props.isDisabled, isFinal, submitted])
-
   const allMatch = (values)  => {
     return ld.every(values, v => {
       return !isNil(v) && v === values[0];
@@ -83,15 +81,16 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
-      Notifications.showSuccess({text: `Successfully updated vote value`});
+      Notifications.showSuccess({text: `Successfully updated vote`});
     } catch (error) {
-      Notifications.showError({text: 'Error: Failed to update vote value'});
+      Notifications.showError({text: 'Error: Failed to update vote'});
     }
   };
 
-  const updateRationale = () => {
+  const updateRationale = async () => {
     try {
       const voteIds = ld.map(votes, v => v.voteId);
+      await Votes.updateRationaleByIds(voteIds, rationale);
       Notifications.showSuccess({text: `Successfully updated vote rationale`});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote rationale'});
