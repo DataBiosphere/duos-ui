@@ -1031,6 +1031,7 @@ class DataAccessRequestApplication extends Component {
                 externalCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
+                researcherUser: this.state.researcher,
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,

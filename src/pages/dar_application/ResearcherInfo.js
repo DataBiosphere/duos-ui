@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
-import { isEmpty, isNil } from 'lodash/fp';
+import { isEmpty, isNil, get } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
+const missingLibraryCard = span(["You must submit ", profileLink, " and obtain a Library Card from your Signing Official before you can submit a Data Access Request"]);
 
 export default function ResearcherInfo(props) {
   const {
@@ -60,6 +61,12 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
+  const [researcherUser, setResearcherUser] = useState(props.researcherUser);
+  const [hasLibraryCards, setHasLibraryCards] = useState(false);
+
+  useEffect(() => {
+    setHasLibraryCards(!isEmpty(get('libraryCards')(researcherUser)));
+  }, [researcherUser]);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
@@ -68,7 +75,8 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+    setResearcherUser(props.researcherUser);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -109,10 +117,13 @@ export default function ResearcherInfo(props) {
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        div({ isRendered: completed === false, className: 'rp-alert' }, [
+        div({ isRendered: !hasLibraryCards, className: 'rp-alert' }, [
+          Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
+        ]),
+        div({ isRendered: (completed === false && hasLibraryCards), className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
-        div({ isRendered: completed === true, className: 'rp-alert' }, [
+        div({ isRendered: (completed === true && hasLibraryCards), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 
