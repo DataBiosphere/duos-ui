@@ -996,7 +996,7 @@ class DataAccessRequestApplication extends Component {
                 + (this.state.step === 4 ? 'active' : '')
             }, [
               small({}, ['Step 4']),
-              'Data Use Agreements',
+              'Attestation & Agreements',
               span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
             ])
           ])
