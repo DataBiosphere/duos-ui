@@ -1,5 +1,6 @@
 import {div, span} from "react-hyperscript-helpers";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import ld from "lodash";
 
 const styles = {
   baseStyle: {
@@ -10,18 +11,28 @@ const styles = {
     borderBottom: '4px #646464 solid',
     padding: '15px 25px'
   },
-  heading: {
+  title: {
     fontWeight: 'bold'
   }
 }
 
 export default function DatasetsRequestedPanel(props) {
-  const [collectionDatasets, setCollectionDatasets] = useState([]);
-  const {collection, dacDatasets} = props;
+  const [bucketDatasetsForDac, setBucketDatasetsForDac] = useState([]);
+  const {bucket, dacDatasets} = props;
+
+  useEffect(() => {
+   const bucketDatasetIds = ld.flatMapDeep(bucket.elections, election => {
+     return ld.flatMapDeep(election, dataset =>  dataset.dataSetId)
+   });
+   const bucketDatasetsForDac = ld.filter(dacDatasets, dacDataset => {
+     return ld.includes(bucketDatasetIds, dacDataset.dataSetId)
+   });
+    setBucketDatasetsForDac(bucketDatasetsForDac);
+  }, [bucket, dacDatasets])
 
   return div({style: styles.baseStyle}, [
     div([
-      span({style: styles.heading}, ["Datasets Requested"]),
+      span({style: styles.title}, ["Datasets Requested"]),
       "(Number of datasets)"
     ]),
     "Hello"
