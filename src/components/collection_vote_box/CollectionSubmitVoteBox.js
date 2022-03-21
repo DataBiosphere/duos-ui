@@ -40,13 +40,12 @@ const styles = {
   }
 };
 
-
 export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const {question, votes, isFinal} = props;
+  const {question, votes, isFinal, isLoading} = props;
 
   useEffect(() => {
     setDisabled(props.isDisabled || (isFinal && submitted));
@@ -113,12 +112,12 @@ export default function CollectionSubmitVoteBox(props) {
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
-              disabled,
+              disabled: disabled || isLoading,
               isSelected: vote === true
             }),
             h(CollectionVoteNoButton, {
               onClick: () => updateVote(false),
-              disabled,
+              disabled: disabled || isLoading,
               isSelected: vote === false,
             })
           ])
@@ -133,10 +132,10 @@ export default function CollectionSubmitVoteBox(props) {
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
-            disabled
+            disabled: disabled || isLoading,
           }),
         ])
-      ])
+      ]),
     ])
   );
 }
