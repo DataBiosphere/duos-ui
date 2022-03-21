@@ -1010,11 +1010,16 @@ export const Votes = {
   },
 
   updateVotesByIds: async (voteIds, vote) => {
-    let url = `${await Config.getApiUrl()}/api/votes?vote=${vote.vote}&rationale=${vote.rationale}`;
+    const voteUpdate = {};
+    voteUpdate.vote = vote.vote;
+    voteUpdate.rationale = vote.rationale;
+    voteUpdate.voteIds = voteIds;
 
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteIds), { method: 'PUT' }]));
+    let url = `${await Config.getApiUrl()}/api/votes`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteUpdate), { method: 'PUT' }]));
     return await res.json();
   }
+
 };
 
 export const AuthenticateNIH = {
