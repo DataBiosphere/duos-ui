@@ -15,7 +15,7 @@ const StepAlertTemplate = (props) => {
 
   return (
     ul({style: ulLinkStyle}, [
-      li({isRendered: props.step1Invalid}, [
+      li({isRendered: props.step1Invalid || props.libraryCardInvalid}, [
         a({key: 'step1-alert', onClick: (() => props.goToStep(1))}, ['Step 1'])
       ]),
       li({isRendered: props.step2Invalid}, [
@@ -40,15 +40,16 @@ export default function DataUseAgreements(props) {
     step1Invalid,
     step2Invalid,
     step3Invalid,
+    libraryCardInvalid,
     updateShowValidationMessages,
     showValidationMessages,
     goToStep
   } = props;
 
   useEffect(() => {
-    const updatedStatus = step1Invalid || step2Invalid || step3Invalid;
+    const updatedStatus = step1Invalid || step2Invalid || step3Invalid || libraryCardInvalid;
     updateShowValidationMessages(updatedStatus);
-  }, [updateShowValidationMessages, step1Invalid, step2Invalid, step3Invalid]);
+  }, [updateShowValidationMessages, step1Invalid, step2Invalid, step3Invalid, libraryCardInvalid]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -99,7 +100,7 @@ export default function DataUseAgreements(props) {
                 id: 'formErrors',
                 type: 'danger',
                 title: 'Please, complete all required fields for the following steps:',
-                description: h(StepAlertTemplate, {step1Invalid, step2Invalid, step3Invalid, goToStep})
+                description: h(StepAlertTemplate, {step1Invalid, step2Invalid, step3Invalid, goToStep, libraryCardInvalid})
               })
             ]),
 
