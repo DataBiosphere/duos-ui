@@ -1,7 +1,6 @@
-import {div, h, span} from "react-hyperscript-helpers";
+import {a, div, h, span} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
-import {isEmpty} from "lodash/fp";
 
 const styles = {
   baseStyle: {
@@ -25,30 +24,37 @@ const styles = {
   datasetCount: {
     color: '#747474',
     fontSize: '1.2rem'
-  }
+  },
+  link: {
+    color: '#0948B7',
+    fontWeight: '500',
+    marginLeft: '7rem'
+  },
 }
 
 export default function DatasetsRequestedPanel(props) {
-  const [bucketDatasetsForDac, setBucketDatasetsForDac] = useState([]);
+  const [filteredDatasets, setFilteredDatasets] = useState([]);
   const [datasetCount, setDatasetCount] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const {bucket, dacDatasets} = props;
+  const collapsedDatasetCapacity = 5;
 
   useEffect(() => {
-    const bucketElections = !isNil(bucket) ? bucket.elections : [];
+    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
     const bucketDatasetIds = ld.flatMapDeep(bucketElections, election => {
-     return ld.flatMapDeep(election, dataset =>  dataset.dataSetId)
+     return ld.flatMapDeep(election, e =>  e.dataSetId)
     });
 
-   const bucketDatasetsForDac = ld.filter(dacDatasets, dacDataset => {
-     return ld.includes(bucketDatasetIds, dacDataset.dataSetId)
-   });
-   setBucketDatasetsForDac(bucketDatasetsForDac);
+    const datasetsForDacInBucket = ld.filter(dacDatasets, dacDataset => {
+      return ld.includes(bucketDatasetIds, dacDataset.dataSetId)
+    });
+    setFilteredDatasets(datasetsForDacInBucket);
   }, [bucket, dacDatasets]);
 
 
   useEffect(() => {
-    setDatasetCount(bucketDatasetsForDac.length);
-  }, [bucketDatasetsForDac]);
+    setDatasetCount(filteredDatasets.length);
+  }, [filteredDatasets]);
 
 
   const SectionHeading = () => {
@@ -59,7 +65,7 @@ export default function DatasetsRequestedPanel(props) {
   }
 
   const DatasetList = () => {
-    const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
+    const datasetRows = ld.map(filteredDatasets, dataset => {
       return div({style: {display: 'flex'}}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
@@ -80,6 +86,18 @@ export default function DatasetsRequestedPanel(props) {
 
     return datasetNameProperty ? datasetNameProperty.propertyValue : '- -'
   }
+
+  const expandLink = () => {
+    const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
+
+    return a({
+      style: styles.link,
+      onClick: () => setExpanded(true),
+      isRendered: !expanded
+    }, [
+      `+ View ${hiddenDatasetCount} more
+      `]);
+  };
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
