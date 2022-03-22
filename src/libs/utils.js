@@ -545,22 +545,27 @@ export const getSearchFilterFunctions = () => {
       return includesRoles || includesBaseAttributes;
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
+      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
+      const lowerCaseTerm = toLower(term);
       const { darCode } = collection;
+      const dars = Object.values(collection.dars);
+      const institution = !isEmpty(dars) && !isEmpty(dars[0].data) ? dars[0].data.institution : '';
       const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
       const { createDate, data } = referenceDar;
       const { projectTitle } = data;
       const status = darCollectionUtils.determineCollectionStatus(collection);
       const matched = find((phrase) =>
-        includes(term, toLower(phrase))
-      )([darCode, formatDate(createDate), projectTitle, status]);
+        includes(lowerCaseTerm, toLower(phrase))
+      )([datasetCount, darCode, formatDate(createDate), ...(projectTitle.split(" ")), status, ...(institution.split(" "))]);
       return !isNil(matched);
     })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
+      const lowerCaseTerm = toLower(term);
       const { data, draft, createDate, updateDate } = draftRecord;
       const { partialDarCode, projectTitle } = data;
       const matched = find((phrase) =>
-        includes(term, toLower(phrase))
-      )([partialDarCode, projectTitle, (updateDate || createDate)]);
+        includes(lowerCaseTerm, toLower(phrase))
+      )([partialDarCode, ...(projectTitle.split(" ")), (updateDate || createDate)]);
       return !isNil(matched) && (draft !== false || draft !== 'false');
     })(targetList)
   };
