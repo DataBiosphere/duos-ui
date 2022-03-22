@@ -1,7 +1,6 @@
 import {div, h, span} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
-import SimpleTable from "../SimpleTable";
 
 const styles = {
   baseStyle: {
@@ -12,7 +11,7 @@ const styles = {
     borderBottom: '4px #646464 solid',
     padding: '15px 25px'
   },
-  title: {
+  heading: {
     fontWeight: 'bold'
   }
 }
@@ -39,6 +38,14 @@ export default function DatasetsRequestedPanel(props) {
     setDatasetCount(bucketDatasetsForDac.length);
   }, [bucketDatasetsForDac]);
 
+
+  const SectionHeading = () => {
+    return div([
+      span({style: styles.heading}, ["Datasets Requested"]),
+      "(" + datasetCount + ")"
+    ]);
+  }
+
   const DatasetList = () => {
     const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
       return div([
@@ -49,11 +56,9 @@ export default function DatasetsRequestedPanel(props) {
     return div([datasetRows]);
   }
 
+
   return div({style: styles.baseStyle}, [
-    div([
-      span({style: styles.title}, ["Datasets Requested"]),
-      "(" + datasetCount + ")"
-    ]),
-    DatasetList()
+    h(SectionHeading),
+    h(DatasetList)
   ]);
 }
