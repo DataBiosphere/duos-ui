@@ -5,6 +5,7 @@ import ld, {isNil} from "lodash";
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
     color: '#333F52',
     backgroundColor: '#F1EDE8',
     borderRadius: '0 0 4px 4px',
@@ -12,7 +13,14 @@ const styles = {
     padding: '15px 25px'
   },
   heading: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    display: 'flex',
+    columnGap: '0.5rem',
+    alignItems: 'center'
+  },
+  datasetCount: {
+    color: '#747474',
+    fontSize: '1.2rem'
   }
 }
 
@@ -40,9 +48,9 @@ export default function DatasetsRequestedPanel(props) {
 
 
   const SectionHeading = () => {
-    return div([
-      span({style: styles.heading}, ["Datasets Requested"]),
-      "(" + datasetCount + ")"
+    return div({style: styles.heading}, [
+      'Datasets Requested',
+      span({style: styles.datasetCount}, [`(${datasetCount})`])
     ]);
   }
 
