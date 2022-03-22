@@ -1,6 +1,7 @@
 import {div, h, span} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
 import ld, {isNil} from "lodash";
+import {isEmpty} from "lodash/fp";
 
 const styles = {
   baseStyle: {
@@ -56,14 +57,22 @@ export default function DatasetsRequestedPanel(props) {
 
   const DatasetList = () => {
     const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
-      return div([
-        span({style: {width: '15%'}}, [dataset.alias]),
-        span({style: {width: '80%'}}, [dataset.properties[0].propertyValue])
+      return div({style: {display: 'flex'}}, [
+        div({style: {width: '12.5%'}}, [dataset.alias]),
+        div({style: {width: '75%'}}, [datasetName(dataset)])
       ])
     })
     return div([datasetRows]);
   }
 
+  const datasetName = (dataset) => {
+    const datasetNameProperty = !isNil(dataset.properties) &&
+      ld.find(dataset.properties, property => {
+        return property.propertyName === 'Dataset Name'
+      });
+
+    return datasetNameProperty ? datasetNameProperty.propertyValue : '- -'
+  }
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
