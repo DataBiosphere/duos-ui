@@ -49,7 +49,7 @@ export default function CollectionSubmitVoteBox(props) {
 
   useEffect(() => {
     setDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
-  }, [props.isDisabled, isFinal, submitted])
+  }, [props.isDisabled, isFinal, submitted, isLoading])
 
   useEffect(() => {
     if (!isEmpty(votes)) {
