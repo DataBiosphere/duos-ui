@@ -21,7 +21,7 @@ jobs:
       id: short-sha
       run: echo "::set-output name=sha::$(git rev-parse --short=12 HEAD)"
     - name: Auth to GCR
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v0
       with:
         version: '270.0.0'
         service_account_email: ${{ secrets.GCR_PUBLISH_EMAIL }}
