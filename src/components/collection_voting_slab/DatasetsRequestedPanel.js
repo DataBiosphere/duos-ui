@@ -30,6 +30,10 @@ const styles = {
     color: '#0948B7',
     fontWeight: '500',
   },
+  skeletonLoader: {
+    height: '30px',
+    width: '60%'
+  }
 }
 
 export default function DatasetsRequestedPanel(props) {
@@ -37,8 +41,8 @@ export default function DatasetsRequestedPanel(props) {
   const [visibleDatasets, setVisibleDatasets] = useState([]);
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
-  const {bucket, dacDatasets} = props;
   const collapsedDatasetCapacity = 5;
+  const {bucket, dacDatasets, isLoading} = props;
 
   useEffect(() => {
     const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
@@ -56,11 +60,14 @@ export default function DatasetsRequestedPanel(props) {
   useEffect(() => {
     setDatasetCount(filteredDatasets.length);
 
-    (datasetCount <= collapsedDatasetCapacity) ? setExpanded(true) : setExpanded(false);
+    const datasetsHiddenWhenCollapsed = datasetCount > collapsedDatasetCapacity;
 
-    const collapsedViewDatasets = (datasetCount <= collapsedDatasetCapacity)
-      ? filteredDatasets
-      : filteredDatasets.slice(0, 5);
+    datasetsHiddenWhenCollapsed ? setExpanded(false) : setExpanded(true);
+
+    const collapsedViewDatasets = datasetsHiddenWhenCollapsed
+      ? filteredDatasets.slice(0, 5)
+      : filteredDatasets;
+
     setVisibleDatasets(collapsedViewDatasets)
   }, [filteredDatasets]);
 
@@ -68,18 +75,20 @@ export default function DatasetsRequestedPanel(props) {
   const SectionHeading = () => {
     return div({style: styles.heading}, [
       'Datasets Requested',
-      span({style: styles.datasetCount}, [`(${datasetCount})`])
+      span({style: styles.datasetCount, isRendered: !isLoading}, [`(${datasetCount})`])
     ]);
   }
 
   const DatasetList = () => {
-    const datasetRows = ld.map(filteredDatasets, dataset => {
+    const datasetRows = ld.map(visibleDatasets, dataset => {
       return div({style: {display: 'flex'}}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
       ])
     })
-    return div([datasetRows]);
+    return isLoading
+      ? div({className: 'text-placeholder', style: styles.skeletonLoader})
+      : div([datasetRows]);
   }
 
   const datasetId = (dataset) => {
