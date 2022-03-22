@@ -11,7 +11,10 @@ const styles = {
     backgroundColor: '#F1EDE8',
     borderRadius: '0 0 4px 4px',
     borderBottom: '4px #646464 solid',
-    padding: '15px 25px'
+    padding: '15px 25px',
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '1rem'
   },
   heading: {
     fontWeight: 'bold',
@@ -58,11 +61,15 @@ export default function DatasetsRequestedPanel(props) {
   const DatasetList = () => {
     const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
       return div({style: {display: 'flex'}}, [
-        div({style: {width: '12.5%'}}, [dataset.alias]),
+        div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
       ])
     })
     return div([datasetRows]);
+  }
+
+  const datasetId = (dataset) => {
+    return !isNil(dataset.alias) ? dataset.alias : '- -'
   }
 
   const datasetName = (dataset) => {
