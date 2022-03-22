@@ -6,6 +6,7 @@ const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.4rem',
+    fontWeight: '500',
     color: '#333F52',
     backgroundColor: '#F1EDE8',
     borderRadius: '0 0 4px 4px',
@@ -13,7 +14,7 @@ const styles = {
     padding: '15px 25px',
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '1rem'
+    rowGap: '1.5rem'
   },
   heading: {
     fontWeight: 'bold',
@@ -28,12 +29,12 @@ const styles = {
   link: {
     color: '#0948B7',
     fontWeight: '500',
-    marginLeft: '7rem'
   },
 }
 
 export default function DatasetsRequestedPanel(props) {
   const [filteredDatasets, setFilteredDatasets] = useState([]);
+  const [visibleDatasets, setVisibleDatasets] = useState([]);
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const {bucket, dacDatasets} = props;
@@ -54,6 +55,13 @@ export default function DatasetsRequestedPanel(props) {
 
   useEffect(() => {
     setDatasetCount(filteredDatasets.length);
+
+    (datasetCount <= collapsedDatasetCapacity) ? setExpanded(true) : setExpanded(false);
+
+    const collapsedViewDatasets = (datasetCount <= collapsedDatasetCapacity)
+      ? filteredDatasets
+      : filteredDatasets.slice(0, 5);
+    setVisibleDatasets(collapsedViewDatasets)
   }, [filteredDatasets]);
 
 
@@ -87,20 +95,26 @@ export default function DatasetsRequestedPanel(props) {
     return datasetNameProperty ? datasetNameProperty.propertyValue : '- -'
   }
 
-  const expandLink = () => {
+  const ExpandLink = () => {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
 
     return a({
       style: styles.link,
-      onClick: () => setExpanded(true),
+      onClick: expandDatasets,
       isRendered: !expanded
     }, [
-      `+ View ${hiddenDatasetCount} more
-      `]);
+      `+ View ${hiddenDatasetCount} more`
+    ]);
   };
+
+  const expandDatasets = () => {
+    setExpanded(true)
+    setVisibleDatasets(filteredDatasets)
+  }
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
-    h(DatasetList)
+    h(DatasetList),
+    h(ExpandLink)
   ]);
 }
