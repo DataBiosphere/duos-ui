@@ -211,4 +211,38 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
   });
+
+  it('disables vote buttons and text area if page is loading', function () {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMixed}
+        isFinal={false}
+        question={"question"}
+        isLoading={true}
+      />
+    );
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
+  })
+
+  it('disables vote buttons and text area if isDisabled prop is true', function () {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMixed}
+        isFinal={false}
+        question={"question"}
+        isDisabled={true}
+      />
+    );
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
+  })
 });
