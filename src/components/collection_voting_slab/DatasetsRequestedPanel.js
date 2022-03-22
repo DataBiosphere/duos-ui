@@ -42,8 +42,8 @@ export default function DatasetsRequestedPanel(props) {
   const DatasetList = () => {
     const datasetRows = ld.map(bucketDatasetsForDac, dataset => {
       return div([
-        span({style: {width: '15%'}}, [dataset.dataSetId]),
-        span({style: {width: '80%'}}, [dataset.label])
+        span({style: {width: '15%'}}, [dataset.alias]),
+        span({style: {width: '80%'}}, [dataset.properties[0].propertyValue])
       ])
     })
     return div([datasetRows]);
