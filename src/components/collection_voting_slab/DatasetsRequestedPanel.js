@@ -1,6 +1,6 @@
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
-import ld, {isNil} from "lodash";
+import {isNil, flatMapDeep, filter, includes, map, find} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -58,12 +58,12 @@ export default function DatasetsRequestedPanel(props) {
 
   const datasetsForDacInBucket = () => {
     const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
-    const bucketDatasetIds = ld.flatMapDeep(bucketElections, election => {
-      return ld.flatMapDeep(election, e =>  e.dataSetId);
+    const bucketDatasetIds = flatMapDeep(bucketElections, election => {
+      return flatMapDeep(election, e =>  e.dataSetId);
     });
 
-    return ld.filter(dacDatasets, dacDataset => {
-      return ld.includes(bucketDatasetIds, dacDataset.dataSetId);
+    return filter(dacDatasets, dacDataset => {
+      return includes(bucketDatasetIds, dacDataset.dataSetId);
     });
   };
 
@@ -89,7 +89,7 @@ export default function DatasetsRequestedPanel(props) {
   };
 
   const DatasetList = () => {
-    const datasetRows = ld.map(visibleDatasets, dataset => {
+    const datasetRows = map(visibleDatasets, dataset => {
       return div({style: {display: 'flex'}}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
@@ -106,7 +106,7 @@ export default function DatasetsRequestedPanel(props) {
 
   const datasetName = (dataset) => {
     const datasetNameProperty = !isNil(dataset.properties) &&
-      ld.find(dataset.properties, property => {
+      find(dataset.properties, property => {
         return property.propertyName === 'Dataset Name';
       });
 
