@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {button} from "react-hyperscript-helpers";
 
 const styles = {
@@ -21,17 +21,17 @@ export default function CollectionVoteButton(props) {
   const [additionalStyle, setAdditionalStyle] = useState({});
   const { onClick, label, disabled, isSelected, baseColor, dataCy } = props;
 
+  const defaultButtonStyle = useCallback(() => {
+    updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
+  }, [disabled]);
+
+  const selectedButtonStyle = useCallback(() => {
+    updateStyle(baseColor, styles.selectedLabelColor, true, disabled);
+  }, [baseColor, disabled]);
+
   useEffect(() => {
     isSelected ? selectedButtonStyle() : defaultButtonStyle();
-  }, [isSelected]);
-
-  const defaultButtonStyle = () => {
-    updateStyle(styles.defaultBackgroundColor, styles.defaultLabelColor, false, disabled);
-  };
-
-  const selectedButtonStyle = () => {
-    updateStyle(baseColor, styles.selectedLabelColor, true, disabled);
-  };
+  }, [defaultButtonStyle, isSelected, selectedButtonStyle]);
 
   const updateStyle = (backgroundColor, labelColor, showSelectedStyle, disabled) => {
     setAdditionalStyle({
