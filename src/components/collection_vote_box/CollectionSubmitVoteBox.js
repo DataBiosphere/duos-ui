@@ -69,10 +69,9 @@ export default function CollectionSubmitVoteBox(props) {
   }, [votes]);
 
   const allMatch = (values)  => {
-    return !isEmpty(values) &&
-      every(values, v => {
-        return !isNil(v) && v === values[0];
-      });
+    return every(values, v => {
+      return !isNil(v) && v === values[0];
+    });
   };
 
   const updateVote = async (newVote) => {
