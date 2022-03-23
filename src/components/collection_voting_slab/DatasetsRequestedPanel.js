@@ -39,7 +39,7 @@ const styles = {
     height: '30px',
     width: '60%'
   }
-}
+};
 
 export default function DatasetsRequestedPanel(props) {
   const [filteredDatasets, setFilteredDatasets] = useState([]);
@@ -50,31 +50,34 @@ export default function DatasetsRequestedPanel(props) {
   const {bucket, dacDatasets, isLoading} = props;
 
   useEffect(() => {
-    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
-    const bucketDatasetIds = ld.flatMapDeep(bucketElections, election => {
-     return ld.flatMapDeep(election, e =>  e.dataSetId);
-    });
-
-    const datasetsForDacInBucket = ld.filter(dacDatasets, dacDataset => {
-      return ld.includes(bucketDatasetIds, dacDataset.dataSetId);
-    });
-    setFilteredDatasets(datasetsForDacInBucket);
+    const datasets = datasetsForDacInBucket();
+    setFilteredDatasets(datasets);
+    setDatasetCount(datasets.length);
+    collapseView({datasets});
   }, [bucket, dacDatasets]);
 
+  const datasetsForDacInBucket = () => {
+    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
+    const bucketDatasetIds = ld.flatMapDeep(bucketElections, election => {
+      return ld.flatMapDeep(election, e =>  e.dataSetId);
+    });
 
-  useEffect(() => {
-    setDatasetCount(filteredDatasets.length);
+    return ld.filter(dacDatasets, dacDataset => {
+      return ld.includes(bucketDatasetIds, dacDataset.dataSetId);
+    });
+  };
 
-    const datasetsHiddenWhenCollapsed = datasetCount > collapsedDatasetCapacity;
+  const collapseView = ({datasets}) => {
+    const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
 
     datasetsHiddenWhenCollapsed ? setExpanded(false) : setExpanded(true);
 
-    const collapsedViewDatasets = datasetsHiddenWhenCollapsed
-      ? filteredDatasets.slice(0, 5)
-      : filteredDatasets;
+    const collapsedViewDatasets = datasetsHiddenWhenCollapsed ?
+      datasets.slice(0, 5) :
+      datasets;
 
     setVisibleDatasets(collapsedViewDatasets);
-  }, [filteredDatasets]);
+  };
 
 
   const SectionHeading = () => {
@@ -82,48 +85,56 @@ export default function DatasetsRequestedPanel(props) {
       'Datasets Requested',
       span({style: styles.datasetCount, isRendered: !isLoading, dataCy: 'dataset-count'}, [`(${datasetCount})`])
     ]);
-  }
+  };
 
   const DatasetList = () => {
     const datasetRows = ld.map(visibleDatasets, dataset => {
       return div({style: {display: 'flex'}}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
-      ])
-    })
+      ]);
+    });
     return isLoading
       ? div({className: 'text-placeholder', style: styles.skeletonLoader})
       : div({style: styles.datasetList, dataCy: 'dataset-list'}, [datasetRows]);
-  }
+  };
 
   const datasetId = (dataset) => {
     return !isNil(dataset.alias) ? dataset.alias : '- -';
-  }
+  };
 
   const datasetName = (dataset) => {
     const datasetNameProperty = !isNil(dataset.properties) &&
       ld.find(dataset.properties, property => {
-        return property.propertyName === 'Dataset Name'
+        return property.propertyName === 'Dataset Name';
       });
 
     return datasetNameProperty ? datasetNameProperty.propertyValue : '- -';
-  }
+  };
 
   const ExpandLink = () => {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
+    const linkMessage = expanded ?
+      `- View less` :
+      `+ View ${hiddenDatasetCount} more`;
 
     return a({
       dataCy: 'expand-link',
       style: styles.link,
-      onClick: expandDatasetList,
-      isRendered: !expanded
-    }, [`+ View ${hiddenDatasetCount} more`]);
+      onClick: expanded ? collapseDatasetList : expandDatasetList,
+    }, [linkMessage]);
   };
 
   const expandDatasetList = () => {
     setExpanded(true);
     setVisibleDatasets(filteredDatasets);
-  }
+  };
+
+  const collapseDatasetList = () => {
+    setExpanded(false);
+    setVisibleDatasets(filteredDatasets.slice(0, 5));
+  };
+
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
