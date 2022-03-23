@@ -94,15 +94,15 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, openCollection, showConfirmationModal, consoleType}) {
+export function consoleActionsCellData({collection, openCollection, goToVote, showConfirmationModal, consoleType}) {
   let actionComponent;
 
   switch (consoleType) {
     case 'admin':
       actionComponent = h(AdminActions, {collection, showConfirmationModal});
       break;
-    case 'chair':
-      actionComponent = h(ChairActions, {collection, openCollection, showConfirmationModal});
+    case 'chairperson':
+      actionComponent = h(ChairActions, {collection, openCollection, showConfirmationModal, goToVote});
       break;
     case 'member':
       actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal});

@@ -47,6 +47,7 @@ import DatasetStatistics from "./pages/DatasetStatistics";
 import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from "./pages/AdminEditUser";
+import NewChairConsole from './pages/NewChairConsole';
 
 const Routes = (props) => (
   <Switch>
@@ -83,6 +84,10 @@ const Routes = (props) => (
     }
     {
       props.env === 'dev' ? <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+        : ''
+    }
+    {
+      props.env === 'dev' ? <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
         : ''
     }
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />

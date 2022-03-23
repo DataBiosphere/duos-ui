@@ -86,8 +86,7 @@ export default function ChairActions(props) {
   //relevantDatasets is the list of datasets that the user has access to
   //needed to determine if a user can open an election on a DAR that has no elections
   //Done via API call, needs to be done on parent component to avoid making the same request (will return the same result) on each row
-  const { showCancelModal, updateCollections, collection, relevantDatasets } =
-    props;
+  const { showCancelModal, updateCollections, collection, relevantDatasets, goToVote } = props;
   const { dars } = collection;
   const collectionId = collection.darCollectionId;
   const [openEnabled, setOpenEnabled] = useState(false);
@@ -146,10 +145,6 @@ export default function ChairActions(props) {
       Notifications.showError({ text: 'Error updating collections status' });
     }
     updateCollections(updatedCollection);
-  };
-
-  const goToVote = (collectionId) => {
-    history.push(`/dar_collection/${collectionId}`);
   };
 
   //NOTE: adjust as needed for console implementation ticket. Function declaration is listed as a minimal placeholder

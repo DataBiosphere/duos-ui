@@ -8,12 +8,13 @@ import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
 import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
 
-export default function AdminManageDarCollections() {
+export default function NewChairConsole(props) {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
+  const { history } = props;
 
   const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
     searchTerms,
@@ -25,9 +26,9 @@ export default function AdminManageDarCollections() {
   useEffect(() => {
     const init = async() => {
       try {
-        const collectionsResp = await Collections.getCollectionsByRoleName("admin");
-        setCollections(collectionsResp);
-        setFilteredList(collectionsResp);
+        const collections = await Collections.getCollectionsByRoleName("chairperson");
+        setCollections(collections);
+        setFilteredList(collections);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error initializing Collections table'});
@@ -39,6 +40,7 @@ export default function AdminManageDarCollections() {
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
   const cancelCollection = cancelCollectionFn({updateCollections});
   const openCollection = openCollectionFn({updateCollections});
+  const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
@@ -53,8 +55,8 @@ export default function AdminManageDarCollections() {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: { ...Styles.TITLE} }, [
-              'Data Access Request Collections',
+            div({ style: { ...Styles.TITLE } }, [
+              'Manage Data Access Request Collections',
             ]),
             div(
               {
@@ -62,7 +64,7 @@ export default function AdminManageDarCollections() {
                   fontSize: '16px',
                 }),
               },
-              ['List of all DAR Collections saved in DUOS']
+              ['Manage your DAC\'s Data Access Requests']
             ),
           ]),
         ]
@@ -79,13 +81,16 @@ export default function AdminManageDarCollections() {
         DarCollectionTableColumnOptions.INSTITUTION,
         DarCollectionTableColumnOptions.DATASET_COUNT,
         DarCollectionTableColumnOptions.STATUS,
-        DarCollectionTableColumnOptions.ACTIONS
+        DarCollectionTableColumnOptions.ACTIONS,
       ],
       isLoading,
       cancelCollection,
       resubmitCollection: null,
       openCollection,
-      consoleType: 'admin'
+      goToVote,
+      consoleType: 'chairperson',
     }),
   ]);
+
+
 }

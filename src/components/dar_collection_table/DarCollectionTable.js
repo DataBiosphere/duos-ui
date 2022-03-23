@@ -151,7 +151,7 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = ''}) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -160,7 +160,7 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
           collection, darCollectionId, datasets, darCode,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
-          openCollection
+          openCollection, goToVote
         });
       });
     });
@@ -179,7 +179,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
 
   //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
   //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
-  const { collections, columns, isLoading, cancelCollection, resubmitCollection, openCollection, actionsDisabled, consoleType } = props;
+  const { collections, columns, isLoading, cancelCollection, resubmitCollection, openCollection, actionsDisabled, goToVote, consoleType } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -202,7 +202,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         showConfirmationModal,
         actionsDisabled,
         consoleType,
-        openCollection
+        openCollection,
+        goToVote
       }),
       currentPage,
       setPageCount,
@@ -210,7 +211,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);
