@@ -80,7 +80,7 @@ export default function DatasetsRequestedPanel(props) {
   const SectionHeading = () => {
     return div({style: styles.heading}, [
       'Datasets Requested',
-      span({style: styles.datasetCount, isRendered: !isLoading}, [`(${datasetCount})`])
+      span({style: styles.datasetCount, isRendered: !isLoading, dataCy: 'dataset-count'}, [`(${datasetCount})`])
     ]);
   }
 
@@ -93,7 +93,7 @@ export default function DatasetsRequestedPanel(props) {
     })
     return isLoading
       ? div({className: 'text-placeholder', style: styles.skeletonLoader})
-      : div({style: styles.datasetList}, [datasetRows]);
+      : div({style: styles.datasetList, dataCy: 'dataset-list'}, [datasetRows]);
   }
 
   const datasetId = (dataset) => {
@@ -113,6 +113,7 @@ export default function DatasetsRequestedPanel(props) {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
 
     return a({
+      dataCy: 'expand-link',
       style: styles.link,
       onClick: expandDatasetList,
       isRendered: !expanded
