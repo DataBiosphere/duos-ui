@@ -53,7 +53,7 @@ export default function DatasetsRequestedPanel(props) {
     const datasets = datasetsForDacInBucket();
     setFilteredDatasets(datasets);
     setDatasetCount(datasets.length);
-    collapseView({datasets});
+    collapseView(datasets);
   }, [bucket, dacDatasets]);
 
   const datasetsForDacInBucket = () => {
@@ -67,10 +67,8 @@ export default function DatasetsRequestedPanel(props) {
     });
   };
 
-  const collapseView = ({datasets}) => {
+  const collapseView = (datasets) => {
     const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
-
-    datasetsHiddenWhenCollapsed ? setExpanded(false) : setExpanded(true);
 
     const collapsedViewDatasets = datasetsHiddenWhenCollapsed ?
       datasets.slice(0, 5) :
@@ -78,7 +76,6 @@ export default function DatasetsRequestedPanel(props) {
 
     setVisibleDatasets(collapsedViewDatasets);
   };
-
 
   const SectionHeading = () => {
     return div({style: styles.heading}, [
@@ -115,13 +112,14 @@ export default function DatasetsRequestedPanel(props) {
   const ExpandLink = () => {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
     const linkMessage = expanded ?
-      `- View less` :
+      `- View ${hiddenDatasetCount} less` :
       `+ View ${hiddenDatasetCount} more`;
 
     return a({
       dataCy: 'expand-link',
       style: styles.link,
       onClick: expanded ? collapseDatasetList : expandDatasetList,
+      isRendered: hiddenDatasetCount > 0
     }, [linkMessage]);
   };
 
@@ -134,7 +132,6 @@ export default function DatasetsRequestedPanel(props) {
     setExpanded(false);
     setVisibleDatasets(filteredDatasets.slice(0, 5));
   };
-
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
