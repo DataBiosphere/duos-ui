@@ -116,9 +116,7 @@ export default function DatasetsRequestedPanel(props) {
       style: styles.link,
       onClick: expandDatasetList,
       isRendered: !expanded
-    }, [
-      `+ View ${hiddenDatasetCount} more`
-    ]);
+    }, [`+ View ${hiddenDatasetCount} more`]);
   };
 
   const expandDatasetList = () => {
