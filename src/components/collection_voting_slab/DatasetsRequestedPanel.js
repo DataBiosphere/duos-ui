@@ -71,7 +71,7 @@ export default function DatasetsRequestedPanel(props) {
     const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
 
     const collapsedViewDatasets = datasetsHiddenWhenCollapsed ?
-      datasets.slice(0, 5) :
+      datasets.slice(0, collapsedDatasetCapacity) :
       datasets;
 
     setVisibleDatasets(collapsedViewDatasets);
@@ -80,7 +80,11 @@ export default function DatasetsRequestedPanel(props) {
   const SectionHeading = () => {
     return div({style: styles.heading}, [
       'Datasets Requested',
-      span({style: styles.datasetCount, isRendered: !isLoading, dataCy: 'dataset-count'}, [`(${datasetCount})`])
+      span({
+        style: styles.datasetCount,
+        isRendered: !isLoading,
+        dataCy: 'dataset-count'
+      }, [`(${datasetCount})`])
     ]);
   };
 
@@ -109,14 +113,14 @@ export default function DatasetsRequestedPanel(props) {
     return datasetNameProperty ? datasetNameProperty.propertyValue : '- -';
   };
 
-  const ExpandLink = () => {
+  const CollapseExpandLink = () => {
     const hiddenDatasetCount = datasetCount - collapsedDatasetCapacity;
     const linkMessage = expanded ?
       `- View ${hiddenDatasetCount} less` :
       `+ View ${hiddenDatasetCount} more`;
 
     return a({
-      dataCy: 'expand-link',
+      dataCy: 'collapse-expand-link',
       style: styles.link,
       onClick: expanded ? collapseDatasetList : expandDatasetList,
       isRendered: hiddenDatasetCount > 0
@@ -130,12 +134,12 @@ export default function DatasetsRequestedPanel(props) {
 
   const collapseDatasetList = () => {
     setExpanded(false);
-    setVisibleDatasets(filteredDatasets.slice(0, 5));
+    setVisibleDatasets(filteredDatasets.slice(0, collapsedDatasetCapacity));
   };
 
   return div({style: styles.baseStyle}, [
     h(SectionHeading),
     h(DatasetList),
-    h(ExpandLink)
+    h(CollapseExpandLink)
   ]);
 }
