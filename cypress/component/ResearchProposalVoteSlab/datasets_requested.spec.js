@@ -118,7 +118,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-list]').should('contain.text', 'DUOS-3');
     cy.get('[dataCy=dataset-list]').should('contain.text', 'Dataset 3');
 
-    cy.get('[dataCy=expand-link]').should('not.exist');
+    cy.get('[dataCy=collapse-expand-link]').should('not.exist');
   });
 
   it('Renders five datasets without an expansion link', function () {
@@ -152,7 +152,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-list]').should('contain.text', 'DUOS-5');
     cy.get('[dataCy=dataset-list]').should('contain.text', 'Dataset 5');
 
-    cy.get('[dataCy=expand-link]').should('not.exist');
+    cy.get('[dataCy=collapse-expand-link]').should('not.exist');
   });
 
   it('Renders more than five datasets with an expansion link', function () {
@@ -191,10 +191,10 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-list]').should('not.contain.text', 'DUOS-7');
     cy.get('[dataCy=dataset-list]').should('not.contain.text', 'Dataset 7');
 
-    cy.get('[dataCy=expand-link]').should('be.visible').should('contain.text', '+ View 2 more');
+    cy.get('[dataCy=collapse-expand-link]').should('contain.text', '+ View 2 more');
   });
 
-  it('Shows more datasets when expansion link is clicked', function () {
+  it('Shows more or less datasets when link is clicked', function () {
     mount(
       <DatasetsRequestedPanel
         bucket={{
@@ -218,8 +218,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-list]').should('not.contain.text', 'DUOS-7');
     cy.get('[dataCy=dataset-list]').should('not.contain.text', 'Dataset 7');
 
-    cy.get('[dataCy=expand-link]').should('be.visible').should('contain.text', '+ View 2 more');
-    cy.get('[dataCy=expand-link]').click();
+    cy.get('[dataCy=collapse-expand-link]').should('contain.text', '+ View 2 more');
+    cy.get('[dataCy=collapse-expand-link]').click();
 
     cy.get('[dataCy=dataset-list]').children().should('have.length', 7);
     cy.get('[dataCy=dataset-count]').should('contain.text', '(7)');
@@ -227,8 +227,12 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-list]').should('contain.text', 'Dataset 6');
     cy.get('[dataCy=dataset-list]').should('contain.text', 'DUOS-7');
     cy.get('[dataCy=dataset-list]').should('contain.text', 'Dataset 7');
-    cy.get('[dataCy=expand-link]').should('not.be.visible');
 
+    cy.get('[dataCy=collapse-expand-link]').should('contain.text', '- View 2 less');
+    cy.get('[dataCy=collapse-expand-link]').click();
+
+    cy.get('[dataCy=dataset-list]').children().should('have.length', 5);
+    cy.get('[dataCy=collapse-expand-link]').should('contain.text', '+ View 2 more');
   });
 
   it('Renders filler dataset id if attribute is null', function () {
