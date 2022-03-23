@@ -1,6 +1,6 @@
 import {div, h, span, textarea} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
-import {map, every, isNil} from "lodash";
+import {every, isNil, map} from "lodash";
 import {isEmpty} from "lodash/fp";
 import CollectionVoteYesButton from "./CollectionVoteYesButton";
 import CollectionVoteNoButton from "./CollectionVoteNoButton";
@@ -69,9 +69,10 @@ export default function CollectionSubmitVoteBox(props) {
   }, [votes]);
 
   const allMatch = (values)  => {
-    return every(values, v => {
-      return !isNil(v) && v === values[0];
-    });
+    return !isEmpty(values) &&
+      every(values, v => {
+        return !isNil(v) && v === values[0];
+      });
   };
 
   const updateVote = async (newVote) => {
