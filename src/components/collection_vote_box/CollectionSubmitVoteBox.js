@@ -1,6 +1,6 @@
 import {div, h, span, textarea} from "react-hyperscript-helpers";
 import {useEffect, useState} from "react";
-import ld, {isNil} from "lodash";
+import {map, every, isNil} from "lodash";
 import {isEmpty} from "lodash/fp";
 import CollectionVoteYesButton from "./CollectionVoteYesButton";
 import CollectionVoteNoButton from "./CollectionVoteNoButton";
@@ -49,19 +49,19 @@ export default function CollectionSubmitVoteBox(props) {
 
   useEffect(() => {
     setDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
-  }, [props.isDisabled, isFinal, submitted, isLoading])
+  }, [props.isDisabled, isFinal, submitted, isLoading]);
 
   useEffect(() => {
     if (!isEmpty(votes)) {
       const prevVote = votes[0];
 
-      const voteValues = ld.map(votes, vote => vote.vote);
+      const voteValues = map(votes, vote => vote.vote);
       if (allMatch(voteValues)) {
         setVote(prevVote.vote);
         setSubmitted(true);
       }
 
-      const rationaleValues = ld.map(votes, vote => vote.rationale);
+      const rationaleValues = map(votes, vote => vote.rationale);
       if (allMatch(rationaleValues)) {
         setRationale(prevVote.rationale);
       }
@@ -69,14 +69,14 @@ export default function CollectionSubmitVoteBox(props) {
   }, [votes]);
 
   const allMatch = (values)  => {
-    return ld.every(values, v => {
+    return every(values, v => {
       return !isNil(v) && v === values[0];
     });
   };
 
   const updateVote = async (newVote) => {
     try {
-      const voteIds = ld.map(votes, v => v.voteId);
+      const voteIds = map(votes, v => v.voteId);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
@@ -88,13 +88,13 @@ export default function CollectionSubmitVoteBox(props) {
 
   const updateRationale = async () => {
     try {
-      const voteIds = ld.map(votes, v => v.voteId);
+      const voteIds = map(votes, v => v.voteId);
       await Votes.updateRationaleByIds(voteIds, rationale);
       Notifications.showSuccess({text: `Successfully updated vote rationale`});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote rationale'});
     }
-  }
+  };
 
   const VoteSubsectionHeading = () => {
     const heading = isFinal ?
