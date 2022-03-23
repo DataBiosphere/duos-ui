@@ -547,16 +547,16 @@ export const getSearchFilterFunctions = () => {
     darCollections: (term, targetList) => filter(collection => {
       const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
       const lowerCaseTerm = toLower(term);
-      const { darCode } = collection;
-      const dars = Object.values(collection.dars);
-      const institution = !isEmpty(dars) && !isEmpty(dars[0].data) ? dars[0].data.institution : '';
+      const { darCode, createDate } = collection;
       const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
-      const { createDate, data } = referenceDar;
-      const { projectTitle } = data;
-      const status = darCollectionUtils.determineCollectionStatus(collection);
-      const matched = find((phrase) =>
-        includes(lowerCaseTerm, toLower(phrase))
-      )([datasetCount, darCode, formatDate(createDate), ...(projectTitle.split(" ")), status, ...(institution.split(" "))]);
+      const { data } = referenceDar;
+      const { projectTitle = '', institution = '' } = data;
+      const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
+      const matched = find((phrase) => {
+        const termArr = lowerCaseTerm.split(" ");
+        debugger; // eslint-disable-line
+        return find(term => includes(term, phrase))(termArr);
+      })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
       return !isNil(matched);
     })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
