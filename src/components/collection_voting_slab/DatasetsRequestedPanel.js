@@ -26,6 +26,11 @@ const styles = {
     color: '#747474',
     fontSize: '1.2rem'
   },
+  datasetList: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '0.75rem'
+  },
   link: {
     color: '#0948B7',
     fontWeight: '500',
@@ -47,11 +52,11 @@ export default function DatasetsRequestedPanel(props) {
   useEffect(() => {
     const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
     const bucketDatasetIds = ld.flatMapDeep(bucketElections, election => {
-     return ld.flatMapDeep(election, e =>  e.dataSetId)
+     return ld.flatMapDeep(election, e =>  e.dataSetId);
     });
 
     const datasetsForDacInBucket = ld.filter(dacDatasets, dacDataset => {
-      return ld.includes(bucketDatasetIds, dacDataset.dataSetId)
+      return ld.includes(bucketDatasetIds, dacDataset.dataSetId);
     });
     setFilteredDatasets(datasetsForDacInBucket);
   }, [bucket, dacDatasets]);
@@ -68,7 +73,7 @@ export default function DatasetsRequestedPanel(props) {
       ? filteredDatasets.slice(0, 5)
       : filteredDatasets;
 
-    setVisibleDatasets(collapsedViewDatasets)
+    setVisibleDatasets(collapsedViewDatasets);
   }, [filteredDatasets]);
 
 
@@ -88,11 +93,11 @@ export default function DatasetsRequestedPanel(props) {
     })
     return isLoading
       ? div({className: 'text-placeholder', style: styles.skeletonLoader})
-      : div([datasetRows]);
+      : div({style: styles.datasetList}, [datasetRows]);
   }
 
   const datasetId = (dataset) => {
-    return !isNil(dataset.alias) ? dataset.alias : '- -'
+    return !isNil(dataset.alias) ? dataset.alias : '- -';
   }
 
   const datasetName = (dataset) => {
@@ -101,7 +106,7 @@ export default function DatasetsRequestedPanel(props) {
         return property.propertyName === 'Dataset Name'
       });
 
-    return datasetNameProperty ? datasetNameProperty.propertyValue : '- -'
+    return datasetNameProperty ? datasetNameProperty.propertyValue : '- -';
   }
 
   const ExpandLink = () => {
@@ -109,16 +114,16 @@ export default function DatasetsRequestedPanel(props) {
 
     return a({
       style: styles.link,
-      onClick: expandDatasets,
+      onClick: expandDatasetList,
       isRendered: !expanded
     }, [
       `+ View ${hiddenDatasetCount} more`
     ]);
   };
 
-  const expandDatasets = () => {
-    setExpanded(true)
-    setVisibleDatasets(filteredDatasets)
+  const expandDatasetList = () => {
+    setExpanded(true);
+    setVisibleDatasets(filteredDatasets);
   }
 
   return div({style: styles.baseStyle}, [
