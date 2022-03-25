@@ -10,8 +10,8 @@ const dataset = (id) => {
     properties: [
       {propertyName: "Dataset Name", propertyValue: `Dataset ${id}`}
     ]
-  }
-}
+  };
+};
 
 const dacDatasets = [
   dataset(1),
@@ -21,7 +21,7 @@ const dacDatasets = [
   dataset(5),
   dataset(6),
   dataset(7),
-]
+];
 
 
 describe('DatasetsRequestedPanel - Tests', function () {
