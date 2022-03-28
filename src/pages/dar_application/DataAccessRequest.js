@@ -35,7 +35,7 @@ const uploadFileDescription = {
 
 const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
 
-//NOTE: need to change props to acccount for file locations for previous uploaded file
+//NOTE: need to change props to account for file locations for previous uploaded file
 export default function DataAccessRequest(props) {
   const {
     darCode,
