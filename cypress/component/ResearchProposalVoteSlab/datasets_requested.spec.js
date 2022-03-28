@@ -35,7 +35,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-count]').should('contain.text', '(0)');
   });
 
-  it('Renders no dataset information if no bucketDatasetIds provided', function () {
+  it('Renders no dataset information if bucketDatasetIds is null', function () {
     mount(
       <DatasetsRequestedPanel
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
@@ -58,11 +58,34 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('[dataCy=dataset-count]').should('contain.text', '(0)');
   });
 
-  it('Renders no dataset information if no dacDatasetIds provided', function () {
+  it('Renders no dataset information if dacDatasetIds is null', function () {
     mount(
       <DatasetsRequestedPanel
         bucketDatasetIds={[1, 2, 3]}
         collectionDatasets={collectionDatasets}
+      />
+    );
+    cy.get('[dataCy=dataset-list]').children().should('have.length', 0);
+    cy.get('[dataCy=dataset-count]').should('contain.text', '(0)');
+  });
+
+  it('Renders no dataset information if collectionDatasets is empty', function () {
+    mount(
+      <DatasetsRequestedPanel
+        bucketDatasetIds={[1, 2, 3]}
+        dacDatasetIds={[1, 2, 3]}
+        collectionDatasets={[]}
+      />
+    );
+    cy.get('[dataCy=dataset-list]').children().should('have.length', 0);
+    cy.get('[dataCy=dataset-count]').should('contain.text', '(0)');
+  });
+
+  it('Renders no dataset information if collectionDatasets is null', function () {
+    mount(
+      <DatasetsRequestedPanel
+        bucketDatasetIds={[1, 2, 3]}
+        dacDatasetIds={[1, 2, 3]}
       />
     );
     cy.get('[dataCy=dataset-list]').children().should('have.length', 0);
