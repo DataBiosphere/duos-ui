@@ -76,7 +76,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         //assume component is in hyperscript format
         //wrap component in dive with columnWidth applied
         if (isComponent) {
-          output = div({style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
+          output = div({role: "cell", style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
         //if there is no onClick function, render as simple cell
         } else if (isNil(onClick)) {
           output = h(SimpleTextCell, { text: data, style: appliedStyle, keyProp: `filtered-list-${id}-${label}`, cellIndex });
@@ -114,7 +114,7 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
-  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, key: 'table-data-rows'})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, isNil(paginationBar) ? div() : paginationBar]);
 }

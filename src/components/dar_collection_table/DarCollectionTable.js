@@ -8,7 +8,6 @@ import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from "./CollectionConfirmationModal";
 
-
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
@@ -25,7 +24,8 @@ export const styles = {
     display: 'flex',
     padding: '1rem 2%',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    whiteSpace: 'pre-wrap'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -138,7 +138,9 @@ const columnHeaderConfig = {
     cellDataFn: (props) => {
       return props.actionsDisabled
         ? div()
-        : cellData.actionsCellData(props);
+        : props.consoleType
+          ? cellData.consoleActionsCellData(props)
+          : cellData.actionsCellData(props);
     }
   }
 };
@@ -149,15 +151,16 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, showConfirmationModal, actionsDisabled, columns = defaultColumns }) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = ''}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode,
-          createDate, createUser,
-          actionsDisabled, showConfirmationModal
+          createDate, createUser, actionsDisabled,
+          showConfirmationModal, consoleType,
+          openCollection
         });
       });
     });
@@ -172,8 +175,11 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
+  const [consoleAction, setConsoleAction] = useState();
 
-  const { collections, columns, isLoading, cancelCollection, resubmitCollection, actionsDisabled } = props;
+  //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
+  //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
+  const { collections, columns, isLoading, cancelCollection, resubmitCollection, openCollection, actionsDisabled, consoleType } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -194,7 +200,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         collections,
         columns,
         showConfirmationModal,
-        actionsDisabled
+        actionsDisabled,
+        consoleType,
+        openCollection
       }),
       currentPage,
       setPageCount,
@@ -202,9 +210,10 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection]);
 
-  const showConfirmationModal = (collection) => {
+  const showConfirmationModal = (collection, action = '') => {
+    setConsoleAction(action);
     setSelectedCollection(collection);
     setShowConfirmation(true);
   };
@@ -234,11 +243,27 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       sort,
       onSort: setSort
     }),
-    CollectionConfirmationModal({
+    /*
+      Modal needs to be more flexible
+      Should take in an operation type, use that to determine message on modal
+      Operations: Open, Cancel, Revise
+
+      How to make more flexible?
+        - Need to change message based on operation
+        - Need to change prop function based on operation
+        - showConfirmationModal
+          - Can be take in an extra op argument, assign that as a state variable
+          - Modal function can be defined via useCallback, recomputed if op state variable changes
+          - Above can also be applied for modal message (expect use useMemo instead of useCallback)
+    */
+    h(CollectionConfirmationModal, {
       collection: selectedCollection,
       showConfirmation,
       setShowConfirmation,
       cancelCollection,
-      resubmitCollection})
+      resubmitCollection,
+      openCollection,
+      consoleAction
+    })
   ]);
 };

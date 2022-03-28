@@ -5,7 +5,7 @@ import {isCollectionCanceled} from "../../libs/utils";
 import {getProjectTitle} from "./DarCollectionTable";
 
 export default function CollectionConfirmationModal(props) {
-  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection} = props;
+  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection, openCollection, consoleAction} = props;
 
   const getModalHeader = () => {
     if(!isNil(collection)) {
@@ -24,7 +24,12 @@ export default function CollectionConfirmationModal(props) {
     setShowConfirmation(false);
   };
 
-  const cancelModal = () =>
+  const openOnClick = async() => {
+    await openCollection(collection);
+    setShowConfirmation(false);
+  };
+
+  const cancelModal =
     h(ConfirmationModal, {
       showConfirmation,
       styleOverride: {height: '35%'},
@@ -35,7 +40,7 @@ export default function CollectionConfirmationModal(props) {
       onConfirm: cancelOnClick
     });
 
-  const resubmitModal = () =>
+  const resubmitModal =
     h(ConfirmationModal, {
       showConfirmation,
       styleOverride: {height: '35%'},
@@ -46,8 +51,33 @@ export default function CollectionConfirmationModal(props) {
       onConfirm: resubmitOnClick
     });
 
+  const openModal = h(ConfirmationModal, {
+    showConfirmation,
+    styleOverride: { height: '35%' },
+    closeConfirmation: () => setShowConfirmation(false),
+    title: 'Open DAR Collection',
+    message: `Are you sure you want to open ${collection.darCode}?`,
+    header: getModalHeader,
+    onConfirm: openOnClick,
+  });
 
-  return isCollectionCanceled(collection) === true ? resubmitModal() : cancelModal();
+
+  switch (consoleAction) {
+    case 'resubmit':
+      return resubmitModal;
+    case 'cancel':
+      return cancelModal;
+    case 'open':
+      return openModal;
+    //conditional used in older references, wil remove when implementation is updated
+    //Logic for this old assumption is flawed since chairs in different DACs may have different actions enabled for the same collection
+    //Updates will occur in later console tickets
+    default:
+      return isCollectionCanceled(collection) === true
+        ? resubmitModal
+        : cancelModal;
+  }
+
 }
 
 

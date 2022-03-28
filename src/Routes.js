@@ -45,6 +45,7 @@ import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from "./pages/DatasetStatistics";
 import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
+import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from "./pages/AdminEditUser";
 
 const Routes = (props) => (
@@ -101,6 +102,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
