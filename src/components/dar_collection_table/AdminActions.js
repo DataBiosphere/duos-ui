@@ -45,24 +45,6 @@ export default function AdminActions(props) {
     setOpenEnabled(isOpenable);
     setCancelEnabled(isCancelable);
   }, [collection]);
-  /*
-    updateCollections should be a method defined on the Admin console
-    Should look something close to below, expect similar requirements on the other actions for things like cancel, revise, etc.
-    const updateCollections = (updatedCollection) => {
-      const collectionIndex = findIndex(collection => collection.collectionId === updatedCollection.collectionId);
-      try {
-        if(!isNil(collectionIndex)) {
-          const updatedCollection = await Collections.openElectionsById(collectionId);
-          const collectionsCopy = collections.slice();
-          collectionsCopy[collectionIndex] = updatedCollection;
-          setCollections(collections);
-        }
-        const collectionsCopy = collections.slice() //assume collections is the state variable on parent
-      } catch(error) {
-        Notifications.showError({text: 'Error updating collection statuses})
-      }
-    }
-  */
 
   const openOnClick = async (collection) => {
     showConfirmationModal(collection, 'open');

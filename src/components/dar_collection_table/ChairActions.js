@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Notifications } from '../../libs/utils';
-import { Collections } from '../../libs/ajax';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
-import TableTextButton from '../TableTextButton';
-import { Styles } from '../../libs/theme';
+import { Styles, Theme } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
 import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
-
-const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
-  fontFamily: 'Montserrant',
-  fontSize: '1.4rem',
-  margin: '0%',
-});
+import SimpleButton from '../SimpleButton';
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
+const baseCancelButtonStyle = Object.assign(
+  {},
+  Styles.TABLE.TABLE_ICON_BUTTON,
+  { alignItems: 'center' }
+);
 
 const initUserData = ({dars, elections, relevantDatasets}) => {
   try {
@@ -43,8 +38,8 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
 
 const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, relevantDatasetIds}) => {
   try{
-    const nonOpenRelevantElections = [];
-    const openRelevantElections = [];
+    let nonOpenReleventElectionPresent = false;
+    let openRelevantElectionPresent = false;
     let userHasVote = false;
     let label = "Vote";
 
@@ -52,18 +47,19 @@ const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, re
     //also for each election, see if user has a vote and whether or not they've already voted
     forEach(election => {
       if(includes(election.datasetId)(relevantDatasetIds)) {
-        const {votes} = election;
-        toLower(election.status) === 'open' ? openRelevantElections.push(election) : nonOpenRelevantElections.push(election);
+        const {votes, status} = election;
+        const isElectionOpen = toLower(status) === 'open';
+        isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
         forEach(vote => {
-          if(vote.dacUserId === dacUserId) {userHasVote = true;}
+          if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
           if(!isEmpty(vote.vote)) { label = "Update Vote";}
         })(votes);
       }
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
-    const isOpenEnabled = (!isEmpty(relevantEmptyDars) || !isEmpty(nonOpenRelevantElections));
+    const isOpenEnabled = (!isEmpty(relevantEmptyDars) || nonOpenReleventElectionPresent);
     //To determine cancel, see if openRelevantElections is populated
-    const isCancelEnabled = !isEmpty(openRelevantElections);
+    const isCancelEnabled = openRelevantElectionPresent;
     return {isCancelEnabled, userHasVote, label, isOpenEnabled};
   } catch(error) {
     throw new Error ('Error initializing chair actions');
@@ -86,7 +82,7 @@ export default function ChairActions(props) {
   //relevantDatasets is the list of datasets that the user has access to
   //needed to determine if a user can open an election on a DAR that has no elections
   //Done via API call, needs to be done on parent component to avoid making the same request (will return the same result) on each row
-  const { showCancelModal, updateCollections, collection, relevantDatasets, goToVote } = props;
+  const { showConfirmationModal, collection, relevantDatasets, goToVote } = props;
   const { dars } = collection;
   const collectionId = collection.darCollectionId;
   const [openEnabled, setOpenEnabled] = useState(false);
@@ -118,8 +114,8 @@ export default function ChairActions(props) {
       setCancelEnabled(isCancelEnabled);
       //set label based on function return, visibility determined by setVoteEnabled
       setVoteLabel(label);
-      //To determine if vote is enabled, check if user has a vote AND check that the open button is not enabled
-      setVoteEnabled(userHasVote && !isOpenEnabled);
+      //enable vote button, viibility determined by userHasVote
+      setVoteEnabled(userHasVote);
     };
 
     try {
@@ -136,29 +132,24 @@ export default function ChairActions(props) {
     }
   }, [dars, collection, relevantDatasets]);
 
-  //NOTE: adjust as needed for console implementation ticket. Function declaration is listed as a minimal placeholder
-  const openOnClick = async ({ collectionId, updateCollections }) => {
-    let updatedCollection;
-    try {
-      updatedCollection = await Collections.openElectionsById(collectionId);
-    } catch (error) {
-      Notifications.showError({ text: 'Error updating collections status' });
-    }
-    updateCollections(updatedCollection);
+  const openOnClick = async (collection) => {
+    showConfirmationModal(collection, 'open');
   };
 
-  //NOTE: adjust as needed for console implementation ticket. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
-    showCancelModal(collection);
+    showConfirmationModal(collection, 'cancel');
   };
 
   const openButtonAttributes = {
     keyProp: `chair-open-${collectionId}`,
     label: 'Open',
     isRendered: openEnabled,
-    onClick: () => openOnClick({ collectionId, updateCollections }),
-    style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle,
+    onClick: () => openOnClick(collection),
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      padding: '5px 10px',
+      fontSize: '1.45rem',
+    },
   };
 
   const cancelButtonAttributes = {
@@ -175,8 +166,11 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle,
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      padding: '5px 10px',
+      fontSize: '1.45rem',
+    }
   };
 
   return div(
@@ -192,8 +186,8 @@ export default function ChairActions(props) {
       },
     },
     [
-      h(TableTextButton, openButtonAttributes),
-      h(TableTextButton, voteButtonAttributes),
+      h(SimpleButton, openButtonAttributes),
+      h(SimpleButton, voteButtonAttributes),
       h(TableIconButton, cancelButtonAttributes),
     ]
   );

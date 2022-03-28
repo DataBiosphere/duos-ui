@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
-import { Collections } from '../libs/ajax';
+import { Collections, User } from '../libs/ajax';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
@@ -11,6 +11,7 @@ import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../uti
 export default function NewChairConsole(props) {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
+  const [relevantDatasets, setRelevantDatasets] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
@@ -26,8 +27,12 @@ export default function NewChairConsole(props) {
   useEffect(() => {
     const init = async() => {
       try {
-        const collections = await Collections.getCollectionsByRoleName("chairperson");
+        const [collections, relevantDatasets] = await Promise.all([
+          Collections.getCollectionsByRoleName("chairperson"),
+          User.getUserRelevantDatasets()
+        ]);
         setCollections(collections);
+        setRelevantDatasets(relevantDatasets);
         setFilteredList(collections);
         setIsLoading(false);
       } catch(error) {
@@ -84,11 +89,12 @@ export default function NewChairConsole(props) {
         DarCollectionTableColumnOptions.ACTIONS,
       ],
       isLoading,
+      relevantDatasets,
       cancelCollection,
       resubmitCollection: null,
       openCollection,
       goToVote,
-      consoleType: 'chairperson',
+      consoleType: 'chairperson'
     }),
   ]);
 

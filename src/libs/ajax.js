@@ -944,8 +944,12 @@ export const User = {
     const url = `${await Config.getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.json();
+  },
+  getUserRelevantDatasets: async() => {
+    const url = `${await Config.getApiUrl()}/api/user/me/dac/datasets`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   }
-
 };
 
 export const Votes = {
