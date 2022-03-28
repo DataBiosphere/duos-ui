@@ -219,7 +219,17 @@ class AdminConsole extends Component {
                   iconSize: 'large',
                 })
               ]),
-              consoleBoxPlaceholder
+              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_manageDarCollections',
+                  url: '/admin_manage_dar_collections',
+                  color: 'access',
+                  title: 'Manage DAR Collection',
+                  description: 'Select and access DAR Collections for review',
+                  iconName: 'manage-access',
+                  iconSize: 'large',
+                })
+              ]),
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [

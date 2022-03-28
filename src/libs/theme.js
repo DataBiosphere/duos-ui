@@ -393,7 +393,8 @@ export const Styles = {
       cursor: 'pointer'
     },
     TABLE_BUTTON_ICON_HOVER: {
-      color: '#2FA4E7'
+      color: '#2FA4E7',
+      cursor: 'pointer'
     },
     TABLE_ICON_BUTTON: {
       display: 'flex',

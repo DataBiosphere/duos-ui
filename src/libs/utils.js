@@ -1,10 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values} from 'lodash/fp';
+import {map as nonFPMap} from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick} from "lodash/fp";
+import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick } from "lodash/fp";
 import {User} from "./ajax";
 
 export const UserProperties = {
@@ -45,17 +45,37 @@ export const darCollectionUtils = {
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
   determineCollectionStatus: (collection) => {
-    const elections = !isEmpty(collection.dars) ?
+    const electionStatusCount = {};
+    if(!isEmpty(collection.dars)) {
       flow([
-        map((dar) => values(dar.elections)),
+        map((dar) => {
+          const {elections} = dar;
+          if(isEmpty(elections)) {
+            if(!electionStatusCount['Submitted']) {
+              electionStatusCount['Submitted'] = 0;
+            }
+            electionStatusCount['Submitted']++;
+            return [];
+          } else {
+            return values(elections);
+          }
+        }),
         flatten,
-      ])(collection.dars)
-      : [];
-    return !isEmpty(elections)
-      ? 'Under Election'
-      : isCollectionCanceled(collection)
-        ? 'Canceled'
-        : 'Submitted';
+        each(election => {
+          const {status, electionType} = election;
+          if(toLower(electionType) === 'dataaccess') {
+            if(isNil(electionStatusCount[status])) {
+              electionStatusCount[status] = 0;
+            }
+            electionStatusCount[status]++;
+          }
+        })
+      ])(collection.dars);
+    }
+
+    return nonFPMap(electionStatusCount, (value, key) => {
+      return `${key}: ${value}`;
+    }).join('\n');
   },
 };
 ///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
@@ -525,22 +545,27 @@ export const getSearchFilterFunctions = () => {
       return includesRoles || includesBaseAttributes;
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
-      const { darCode } = collection;
+      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
+      const lowerCaseTerm = toLower(term);
+      const { darCode, createDate } = collection;
       const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
-      const { createDate, data } = referenceDar;
-      const { projectTitle } = data;
-      const status = darCollectionUtils.determineCollectionStatus(collection);
-      const matched = find((phrase) =>
-        includes(term, toLower(phrase))
-      )([darCode, formatDate(createDate), projectTitle, status]);
+      const { data } = referenceDar;
+      const { projectTitle = '', institution = '' } = data;
+      const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
+      const matched = find((phrase) => {
+        const termArr = lowerCaseTerm.split(" ");
+        debugger; // eslint-disable-line
+        return find(term => includes(term, phrase))(termArr);
+      })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
       return !isNil(matched);
     })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
+      const lowerCaseTerm = toLower(term);
       const { data, draft, createDate, updateDate } = draftRecord;
       const { partialDarCode, projectTitle } = data;
       const matched = find((phrase) =>
-        includes(term, toLower(phrase))
-      )([partialDarCode, projectTitle, (updateDate || createDate)]);
+        includes(lowerCaseTerm, toLower(phrase))
+      )([partialDarCode, ...(projectTitle.split(" ")), (updateDate || createDate)]);
       return !isNil(matched) && (draft !== false || draft !== 'false');
     })(targetList)
   };
