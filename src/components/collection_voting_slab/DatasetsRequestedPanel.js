@@ -1,6 +1,6 @@
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {useCallback, useEffect, useState} from "react";
-import {isNil, flatMapDeep, filter, includes, map, find} from "lodash";
+import {isNil, map, includes, filter} from "lodash/fp";
 
 const styles = {
   baseStyle: {
@@ -47,42 +47,25 @@ export default function DatasetsRequestedPanel(props) {
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const collapsedDatasetCapacity = 5;
-  const {bucket, dacDatasets, collectionDatasets, isLoading} = props;
+  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading} = props;
+
 
   const datasetsForDacInBucket = useCallback(() => {
-    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
-    const bucketDatasetIds = flatMapDeep(bucketElections, election => {
-      return flatMapDeep(election, e =>  e.dataSetId);
-    });
+    const requiredDatasetIds =  filter(bucketDatasetId => {
+      return includes(bucketDatasetId)(dacDatasetIds);
+    })(bucketDatasetIds);
 
-    return filter(dacDatasets, dacDataset => {
-      return includes(bucketDatasetIds, dacDataset.dataSetId);
-    });
-  }, [bucket, dacDatasets]);
-
-  const datasetsForDacInBucket2 = useCallback(() => {
-    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
-    const bucketDatasetIds = flatMapDeep(bucketElections, election => {
-      return flatMapDeep(election, e =>  e.dataSetId);
-    });
-
-    const datasetIds =  filter(dacDatasets, dacDataset => {
-      return includes(bucketDatasetIds, dacDataset.dataSetId);
-    });
-
-    return map(collectionDatasets, dataset => {
-      return includes(datasetIds, dataset.datasetId);
-    });
-
-
-  }, [bucket, collectionDatasets, dacDatasets]);
+    return filter( dataset => {
+      return includes(dataset.datasetId)(requiredDatasetIds);
+    })(collectionDatasets);
+  }, [bucketDatasetIds, collectionDatasets, dacDatasetIds]);
 
   useEffect(() => {
-    const datasets = datasetsForDacInBucket2();
+    const datasets = datasetsForDacInBucket();
     setFilteredDatasets(datasets);
     setDatasetCount(datasets.length);
     collapseView(datasets);
-  }, [bucket, dacDatasets, datasetsForDacInBucket]);
+  }, [datasetsForDacInBucket]);
 
   const collapseView = (datasets) => {
     const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
@@ -106,12 +89,13 @@ export default function DatasetsRequestedPanel(props) {
   };
 
   const DatasetList = () => {
-    const datasetRows = map(visibleDatasets, dataset => {
+    const datasetRows = map(dataset => {
       return div({style: {display: 'flex'}}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
       ]);
-    });
+    })(visibleDatasets);
+
     return isLoading
       ? div({className: 'text-placeholder', style: styles.skeletonLoader})
       : div({style: styles.datasetList, dataCy: 'dataset-list'}, [datasetRows]);
