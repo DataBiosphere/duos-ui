@@ -72,11 +72,23 @@ describe('Researcher Info', () => {
   it('renders the missing library cards alert correctly', () => {
     mount(<WrappedResearcherInfo {...props}/>);
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('be.visible');
+    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
+    cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
   });
 
-  it('does not render missing library cards alert', () => {
-    const mergedProps = {...props, ...{researcherUser: researcherUserWithLibraryCards}};
+  it('renders the profile submitted alert', () => {
+    const mergedProps = {...props, ...{completed: true, researcherUser: researcherUserWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
+    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
+    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
+    cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
+  });
+
+  it('renders the profile unsubmitted alert', () => {
+    const mergedProps = {...props, ...{completed: false, researcherUser: researcherUserWithLibraryCards}};
+    mount(<WrappedResearcherInfo {...mergedProps}/>);
+    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
+    cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
   });
 
