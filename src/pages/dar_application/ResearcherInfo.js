@@ -116,16 +116,24 @@ export default function ResearcherInfo(props) {
   };
 
   return (
-    div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
+    div({
+      dataCy: 'researcher-info',
+      className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        div({ isRendered: !hasLibraryCards, className: 'rp-alert' }, [
+        div({
+          dataCy: 'researcher-info-missing-library-cards',
+          isRendered: !hasLibraryCards, className: 'rp-alert' }, [
           Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
         ]),
-        div({ isRendered: (completed === false && hasLibraryCards), className: 'rp-alert' }, [
+        div({
+          dataCy: 'researcher-info-profile-unsubmitted',
+          isRendered: (completed === false && hasLibraryCards), className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
-        div({ isRendered: (completed === true && hasLibraryCards), className: 'rp-alert' }, [
+        div({
+          dataCy: 'researcher-info-profile-submitted',
+          isRendered: (completed === true && hasLibraryCards), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 
