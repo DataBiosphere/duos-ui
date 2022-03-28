@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { div, h} from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
