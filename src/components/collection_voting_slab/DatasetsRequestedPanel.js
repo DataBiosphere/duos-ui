@@ -1,6 +1,6 @@
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {useCallback, useEffect, useState} from "react";
-import {isNil, map, includes, filter} from "lodash/fp";
+import {isNil, filter, includes, map} from "lodash/fp";
 
 const styles = {
   baseStyle: {
@@ -55,7 +55,7 @@ export default function DatasetsRequestedPanel(props) {
       return includes(bucketDatasetId)(dacDatasetIds);
     })(bucketDatasetIds);
 
-    return filter( dataset => {
+    return filter(dataset => {
       return includes(dataset.datasetId)(requiredDatasetIds);
     })(collectionDatasets);
   }, [bucketDatasetIds, collectionDatasets, dacDatasetIds]);
