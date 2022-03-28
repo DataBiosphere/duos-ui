@@ -50,22 +50,22 @@ export default function DatasetsRequestedPanel(props) {
   const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading} = props;
 
 
-  const datasetsForDacInBucket = useCallback(() => {
-    const requiredDatasetIds =  filter(bucketDatasetId => {
+  const requestedDatasetIds = useCallback(() => {
+    const datasetsForDacInBucket =  filter(bucketDatasetId => {
       return includes(bucketDatasetId)(dacDatasetIds);
     })(bucketDatasetIds);
 
     return filter(dataset => {
-      return includes(dataset.datasetId)(requiredDatasetIds);
+      return includes(dataset.datasetId)(datasetsForDacInBucket);
     })(collectionDatasets);
   }, [bucketDatasetIds, collectionDatasets, dacDatasetIds]);
 
   useEffect(() => {
-    const datasets = datasetsForDacInBucket();
+    const datasets = requestedDatasetIds();
     setFilteredDatasets(datasets);
     setDatasetCount(datasets.length);
     collapseView(datasets);
-  }, [datasetsForDacInBucket]);
+  }, [requestedDatasetIds]);
 
   const collapseView = (datasets) => {
     const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
