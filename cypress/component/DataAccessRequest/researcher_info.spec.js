@@ -11,8 +11,7 @@ const props = {
   cloudProviderDescription: '',
   eRACommonsDestination: '',
   externalCollaborators: [],
-  formFieldChange: () => {
-  },
+  formFieldChange: () => {},
   internalCollaborators: [],
   invalidInvestigator: false,
   invalidResearcher: false,
@@ -21,17 +20,14 @@ const props = {
   linkedIn: '',
   location: '',
   nihValid: true,
-  onNihStatusUpdate: () => {
-  },
+  onNihStatusUpdate: () => {},
   orcid: '',
-  partialSave: () => {
-  },
+  partialSave: () => {},
   researcher: '',
   researcherUser: {},
   researcherGate: '',
   showValidationMessages: false,
-  nextPage: () => {
-  },
+  nextPage: () => {},
   cloudProviderType: '',
   cloudProvider: '',
   isCloudUseInvalid: false,
