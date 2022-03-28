@@ -80,7 +80,7 @@ export default function CollectionSubmitVoteBox(props) {
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setVote(newVote);
       setSubmitted(true);
-      Notifications.showSuccess({text: `Successfully updated vote`});
+      Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote'});
     }
@@ -90,7 +90,7 @@ export default function CollectionSubmitVoteBox(props) {
     try {
       const voteIds = map(votes, v => v.voteId);
       await Votes.updateRationaleByIds(voteIds, rationale);
-      Notifications.showSuccess({text: `Successfully updated vote rationale`});
+      Notifications.showSuccess({text: 'Successfully updated vote rationale'});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote rationale'});
     }
@@ -98,8 +98,8 @@ export default function CollectionSubmitVoteBox(props) {
 
   const VoteSubsectionHeading = () => {
     const heading = isFinal ?
-      "Your Vote* (Vote and Rationale cannot be updated after submitting)" :
-      "Your Vote*";
+      'Your Vote* (Vote and Rationale cannot be updated after submitting)' :
+      'Your Vote*';
     return span([heading]);
   };
 
@@ -123,11 +123,11 @@ export default function CollectionSubmitVoteBox(props) {
           ])
         ]),
         div({style: styles.subsection}, [
-          span(["Rationale (optional):"]),
+          span(['Rationale (optional):']),
           textarea({
             name: 'Rationale Input',
             value: rationale,
-            placeholder: "Optional: Describe your rationale or add comments here",
+            placeholder: 'Optional: Describe your rationale or add comments here',
             onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
             style: styles.rationaleTextArea,

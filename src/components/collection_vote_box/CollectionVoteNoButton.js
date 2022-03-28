@@ -20,12 +20,12 @@ export default function CollectionVoteNoButton(props) {
   const Label = () => {
     return span({style: styles.label}, [
       h(CancelOutlined, {style: styles.icon}),
-      "No"
+      'No'
     ]);
   };
 
   return h(CollectionVoteButton, {
-    dataCy: "no-collection-vote-button",
+    dataCy: 'no-collection-vote-button',
     label: h(Label),
     onClick: () => onClick(),
     baseColor: '#DA0003',

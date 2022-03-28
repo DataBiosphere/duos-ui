@@ -20,12 +20,12 @@ export default function CollectionVoteYesButton(props) {
   const Label = () => {
     return span({style: styles.label}, [
       h(CheckCircleOutlined, {style: styles.icon}),
-      "Yes"
+      'Yes'
     ]);
   };
 
   return h(CollectionVoteButton, {
-    dataCy: "yes-collection-vote-button",
+    dataCy: 'yes-collection-vote-button',
     label: h(Label),
     onClick: () => onClick(),
     baseColor: '#1FA371',
