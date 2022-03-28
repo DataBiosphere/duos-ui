@@ -47,7 +47,7 @@ export default function DatasetsRequestedPanel(props) {
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const collapsedDatasetCapacity = 5;
-  const {bucket, dacDatasets, isLoading} = props;
+  const {bucket, dacDatasets, collectionDatasets, isLoading} = props;
 
   const datasetsForDacInBucket = useCallback(() => {
     const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
@@ -60,8 +60,25 @@ export default function DatasetsRequestedPanel(props) {
     });
   }, [bucket, dacDatasets]);
 
+  const datasetsForDacInBucket2 = useCallback(() => {
+    const bucketElections = (!isNil(bucket) && !isNil(bucket.elections)) ? bucket.elections : [];
+    const bucketDatasetIds = flatMapDeep(bucketElections, election => {
+      return flatMapDeep(election, e =>  e.dataSetId);
+    });
+
+    const datasetIds =  filter(dacDatasets, dacDataset => {
+      return includes(bucketDatasetIds, dacDataset.dataSetId);
+    });
+
+    return map(collectionDatasets, dataset => {
+      return includes(datasetIds, dataset.datasetId);
+    });
+
+
+  }, [bucket, collectionDatasets, dacDatasets]);
+
   useEffect(() => {
-    const datasets = datasetsForDacInBucket();
+    const datasets = datasetsForDacInBucket2();
     setFilteredDatasets(datasets);
     setDatasetCount(datasets.length);
     collapseView(datasets);
@@ -101,16 +118,11 @@ export default function DatasetsRequestedPanel(props) {
   };
 
   const datasetId = (dataset) => {
-    return !isNil(dataset.alias) ? dataset.alias : '- -';
+    return !isNil(dataset.datasetIdentifier) ? dataset.datasetIdentifier : '- -';
   };
 
   const datasetName = (dataset) => {
-    const datasetNameProperty = !isNil(dataset.properties) &&
-      find(dataset.properties, property => {
-        return property.propertyName === 'Dataset Name';
-      });
-
-    return datasetNameProperty ? datasetNameProperty.propertyValue : '- -';
+    return !isNil(dataset.name) ? dataset.name : '- -';
   };
 
   const CollapseExpandLink = () => {
