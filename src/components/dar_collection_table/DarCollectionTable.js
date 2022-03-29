@@ -127,7 +127,7 @@ const columnHeaderConfig = {
     label: 'Status',
     cellStyle: { width: styles.cellWidth.status },
     cellDataFn: (props) => {
-      props.status = determineCollectionStatus(props.collection);
+      props.status = determineCollectionStatus(props.collection, props.relevantDatasets);
       return cellData.statusCellData(props);
     },
     sortable: true
@@ -181,7 +181,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
   const {
     collections, columns, isLoading, cancelCollection, resubmitCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets = []
+    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
   } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles

@@ -44,20 +44,35 @@ export const darCollectionUtils = {
   //this needs to be defined outside of the object, keys can't reference other key/value pairs on object initialization,
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
-  determineCollectionStatus: (collection) => {
+  determineCollectionStatus: (collection, relevantDatasets) => {
     const electionStatusCount = {};
     if(!isEmpty(collection.dars)) {
       flow([
         map((dar) => {
-          const {elections} = dar;
+          const { elections } = dar;
+          //election is empty => no elections made for dar
+          //need to figure out if dar is relevant, can obtain datasetId from dar.data
+          //see if its relevant, if it is, add 1 to submitted on hash
+          //return empty array at the end
           if(isEmpty(elections)) {
-            if(!electionStatusCount['Submitted']) {
-              electionStatusCount['Submitted'] = 0;
+            const datasetId = dar.data.datasetIds[0];
+            if(includes(relevantDatasets, datasetId)) {
+              if(isNil(electionStatusCount['Submitted'])) {
+                electionStatusCount['Submitted'] = 0;
+              }
+              electionStatusCount['Submitted']++;
             }
-            electionStatusCount['Submitted']++;
             return [];
           } else {
-            return values(elections);
+            //if elections exist, filer out elections based on relevant ids
+            //NOTE: Admin does not have relevantIds, DAC roles do
+            const electionArr = Object.values(elections);
+            if(isNil(relevantDatasets)) {
+              return electionArr;
+            } else {
+              const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
+              return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
+            }
           }
         }),
         flatten,
@@ -72,7 +87,6 @@ export const darCollectionUtils = {
         })
       ])(collection.dars);
     }
-
     return nonFPMap(electionStatusCount, (value, key) => {
       return `${key}: ${value}`;
     }).join('\n');
@@ -545,6 +559,7 @@ export const getSearchFilterFunctions = () => {
       return includesRoles || includesBaseAttributes;
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
+      if(isEmpty(term)) {return true;}
       const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
       const lowerCaseTerm = toLower(term);
       const { darCode, createDate } = collection;
