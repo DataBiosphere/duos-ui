@@ -56,7 +56,7 @@ export default function DatasetsRequestedPanel(props) {
     })(bucketDatasetIds);
 
     return filter(dataset => {
-      return includes(dataset.datasetId)(datasetsForDacInBucket);
+      return includes(dataset.dataSetId)(datasetsForDacInBucket);
     })(collectionDatasets);
   }, [bucketDatasetIds, collectionDatasets, dacDatasetIds]);
 
