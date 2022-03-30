@@ -27,12 +27,12 @@ export default function NewChairConsole(props) {
   useEffect(() => {
     const init = async() => {
       try {
-        const [collections, relevantDatasets] = await Promise.all([
+        const [collections, datasets] = await Promise.all([
           Collections.getCollectionsByRoleName("chairperson"),
           User.getUserRelevantDatasets()
         ]);
         setCollections(collections);
-        setRelevantDatasets(relevantDatasets);
+        setRelevantDatasets(datasets);
         setFilteredList(collections);
         setIsLoading(false);
       } catch(error) {

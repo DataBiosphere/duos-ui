@@ -3,7 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles, Theme } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq } from 'lodash/fp';
+import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
@@ -21,22 +21,28 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       map(dataset => dataset.dataSetId),
       uniq
     )(relevantDatasets);
-    const relevantEmptyDars = filter(dar => {
-      if(isEmpty(dar.elections)){ return false; }
+    const relevantDarsNoElections = filter(dar => {
       const datasetId = !isEmpty(dar.data) ? dar.data.datasetIds[0] : undefined;
-      return includes(datasetId)(relevantDatasetIds);
+      return includes(datasetId, relevantDatasetIds) ? isEmpty(dar.elections) : false;
     })(dars);
-    const relevantElections = filter((election) =>
-      includes(election.datasetId)(relevantDatasetIds)
-    )(elections);
-    return {relevantEmptyDars, relevantElections, relevantDatasetIds};
+    const relevantElections = filter((election) => {
+      //NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
+      //For the sake of this tickey I'm going to fall back on dar.data.datasetIds[0] as a fallback calc
+      if(!isNil(election.dataSetId)) {
+        return includes(election.dataSetId, relevantDatasetIds);
+      } else {
+        const datasetId = !isEmpty(dars[election.referenceId].data) ? dars[election.referenceId].data.datasetIds[0] : -1;
+        return includes(datasetId, relevantDatasetIds);
+      }
+    })(elections);
+    return {relevantDarsNoElections, relevantElections, relevantDatasetIds};
   } catch(error) {
     //if there's an issue with the collection it's best to fail safely, so hide all of the buttons
     throw new Error('Error initializing component data');
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, relevantDatasetIds}) => {
+const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
   try{
     let nonOpenReleventElectionPresent = false;
     let openRelevantElectionPresent = false;
@@ -46,18 +52,16 @@ const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, re
     //iterate through elections, push open and non-open elections into their respective arrays
     //also for each election, see if user has a vote and whether or not they've already voted
     forEach(election => {
-      if(includes(election.datasetId)(relevantDatasetIds)) {
-        const {votes, status} = election;
-        const isElectionOpen = toLower(status) === 'open';
-        isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
-        forEach(vote => {
-          if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
-          if(!isEmpty(vote.vote)) { label = "Update Vote";}
-        })(votes);
-      }
+      const {votes, status} = election;
+      const isElectionOpen = toLower(status) === 'open';
+      isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
+      forEach(vote => {
+        if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
+        if(!isEmpty(vote.vote)) { label = "Update Vote";}
+      })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
-    const isOpenEnabled = (!isEmpty(relevantEmptyDars) || nonOpenReleventElectionPresent);
+    const isOpenEnabled = (!isEmpty(relevantDarsNoElections) || nonOpenReleventElectionPresent);
     //To determine cancel, see if openRelevantElections is populated
     const isCancelEnabled = openRelevantElectionPresent;
     return {isCancelEnabled, userHasVote, label, isOpenEnabled};
@@ -100,14 +104,17 @@ export default function ChairActions(props) {
 
   useEffect(() => {
     const init = ({ elections, dars, dacUserId, relevantDatasets }) => {
-      const { relevantEmptyDars, relevantElections, relevantDatasetIds } =
-        initUserData({ dars, elections, relevantDatasets });
+      const { relevantDarsNoElections, relevantElections } =
+        initUserData({
+          dars,
+          elections,
+          relevantDatasets
+        });
       const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
         calcComponentState({
           dacUserId,
           relevantElections,
-          relevantEmptyDars,
-          relevantDatasetIds,
+          relevantDarsNoElections
         });
       setOpenEnabled(isOpenEnabled);
       //To determine cancel enabled, see if any election is open
@@ -181,7 +188,7 @@ export default function ChairActions(props) {
       style: {
         display: 'flex',
         padding: '10px 5px',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         alignItems: 'end',
       },
     },

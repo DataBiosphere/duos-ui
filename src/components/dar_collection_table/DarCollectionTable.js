@@ -37,14 +37,14 @@ export const styles = {
     textTransform: 'uppercase'
   }),
   cellWidth: {
-    darCode: '15%',
+    darCode: '8%',
     projectTitle: '20%',
     submissionDate: '12.5%',
     pi: '10%',
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
-    actions: '7.5%'
+    actions: '14.5%'
   },
   color: {
     darCode: '#000000',
