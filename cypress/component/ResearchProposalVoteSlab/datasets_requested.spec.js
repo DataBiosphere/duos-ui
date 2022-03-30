@@ -236,7 +236,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         collectionDatasets={[
           {
             dataSetId: 1,
-            dataSetIdentifier: 'DUOS-1'
+            datasetIdentifier: 'DUOS-1'
           }
         ]}
       />
