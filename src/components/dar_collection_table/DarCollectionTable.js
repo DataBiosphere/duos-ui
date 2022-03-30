@@ -25,7 +25,11 @@ export const styles = {
     padding: '1rem 2%',
     justifyContent: 'space-between',
     alignItems: 'center',
-    whiteSpace: 'pre-wrap'
+    whiteSpace: 'pre-wrap',
+    backgroundColor: 'white',
+    border: '1px solid #DEDEDE',
+    borderRadius: '4px',
+    margin: '0.5% 0'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -34,7 +38,9 @@ export const styles = {
     fontSize: '1.2rem',
     fontWeight: 'bold',
     letterSpacing: '0.2px',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    backgroundColor: 'B8CDD3',
+    border: 'none'
   }),
   cellWidth: {
     darCode: '8%',
@@ -44,7 +50,7 @@ export const styles = {
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
-    actions: '14.5%'
+    actions: '14.5%',
   },
   color: {
     darCode: '#000000',
@@ -64,7 +70,7 @@ export const styles = {
     institution: '1.4rem',
     datasetCount: '2.0rem',
     status: '1.6rem',
-    actions: '1.6rem'
+    actions: '1.6rem',
   },
 };
 

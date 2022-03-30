@@ -14,8 +14,9 @@ export function projectTitleCellData({projectTitle = '- -', darCollectionId, lab
     data: projectTitle,
     id: darCollectionId,
     style : {
-      color: styles.color.projectTitle,
-      fontSize: styles.fontSize.projectTitle
+      color: '#354052',
+      fontSize: styles.fontSize.projectTitle,
+      paddingRight: '2%'
     },
     label
   };
@@ -39,10 +40,10 @@ export function submissionDateCellData({createDate, darCollectionId, label = 'su
     data: isNil(createDate) ? '- - ' : formatDate(createDate),
     id: darCollectionId,
     style: {
-      color: styles.color.submissionDate,
-      fontSize: styles.fontSize.submissionDate
+      color: '#354052',
+      fontSize: styles.fontSize.submissionDate,
     },
-    label
+    label,
   };
 }
 
@@ -51,7 +52,7 @@ export function piCellData({darCollectionId, pi, label = 'pi'}) {
     data: '- -',
     id: darCollectionId,
     style: {
-      color: styles.color.pi,
+      color: '#354052',
       fontSize: styles.fontSize.pi
     },
     label
@@ -63,10 +64,11 @@ export function institutionCellData({institution = '- -', darCollectionId, label
     data: institution,
     id: darCollectionId,
     style: {
-      color: styles.color.institution,
-      fontSize: styles.fontSize.institution
+      color: '#354052',
+      fontSize: styles.fontSize.institution,
+      paddingRight: '1%',
     },
-    label
+    label,
   };
 }
 
@@ -75,8 +77,9 @@ export function datasetCountCellData({datasets = '- -', darCollectionId, label =
     data: datasets.length,
     id: darCollectionId,
     style: {
-      color: styles.color.datasetCount,
-      fontSize: styles.fontSize.datasetCount
+      color: '#333F52',
+      fontSize: styles.fontSize.datasetCount,
+      fontWeight: 600,
     },
     label
   };
@@ -87,7 +90,8 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
     data: status,
     id: darCollectionId,
     style: {
-      color: styles.color.status,
+      color: '#333F52',
+      fontWeight: 600,
       fontSize: styles.fontSize.status
     },
     label

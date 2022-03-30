@@ -48,7 +48,7 @@ export default function NewChairConsole(props) {
   const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
 
   return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
       div(
         { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
         [
@@ -60,16 +60,21 @@ export default function NewChairConsole(props) {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: { ...Styles.TITLE } }, [
+            div({ style: {
+              fontFamily: 'Montserrat',
+              fontWeight: 600,
+              fontSize: '2.8rem'
+            } }, [
               'Manage Data Access Request Collections',
             ]),
             div(
               {
-                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-                  fontSize: '16px',
-                }),
+                style: {
+                  fontFamily: 'Montserrat',
+                  fontSize: '1.6rem'
+                },
               },
-              ['Manage your DAC\'s Data Access Requests']
+              ['Select and manage Data Access Request for DAC Review']
             ),
           ]),
         ]

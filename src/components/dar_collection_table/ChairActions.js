@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
-import { Styles, Theme } from '../../libs/theme';
+import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
 import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
+const duosBlue = '#0948B7';
+const cancelGray = '#333F52';
+
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign(
   {},
   Styles.TABLE.TABLE_ICON_BUTTON,
+  {color: cancelGray},
   { alignItems: 'center' }
 );
 
@@ -27,7 +31,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
     })(dars);
     const relevantElections = filter((election) => {
       //NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
-      //For the sake of this tickey I'm going to fall back on dar.data.datasetIds[0] as a fallback calc
+      //For this ticket I'm going to use dar.data.datasetIds[0] as a fallback value
       if(!isNil(election.dataSetId)) {
         return includes(election.dataSetId, relevantDatasetIds);
       } else {
@@ -152,10 +156,14 @@ export default function ChairActions(props) {
     label: 'Open',
     isRendered: openEnabled,
     onClick: () => openOnClick(collection),
-    baseColor: Theme.palette.secondary,
+    baseColor: duosBlue,
+    hoverColor: duosBlue,
     additionalStyle: {
-      padding: '5px 10px',
+      padding: '3% 10%',
       fontSize: '1.45rem',
+      fontWeight: 600,
+      color: 'white',
+      marginRight: '30%'
     },
   };
 
@@ -173,11 +181,15 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    baseColor: Theme.palette.secondary,
+    baseColor: duosBlue,
+    hoverColor: duosBlue,
     additionalStyle: {
-      padding: '5px 10px',
+      padding: '3% 10%',
       fontSize: '1.45rem',
-    }
+      fontWeight: 600,
+      color: 'white',
+      marginRight: '30%'
+    },
   };
 
   return div(
@@ -188,7 +200,7 @@ export default function ChairActions(props) {
       style: {
         display: 'flex',
         padding: '10px 5px',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'end',
       },
     },
