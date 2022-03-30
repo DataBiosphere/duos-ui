@@ -2,11 +2,13 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, find, flatMap, flow, map, isNil, isEmpty} from "lodash/fp";
+import {filter, find, flatMap, flow, map, isNil, isEmpty, get} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
 import {generatePreProcessedBucketData} from "../../utils/DarCollectionUtils";
+import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
+import {flatMapDeep} from "lodash";
 
 const styles = {
   baseStyle: {
@@ -45,7 +47,7 @@ const styles = {
 export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {title, bucket, collection, isChair, isLoading} = props;
+  const {title, bucket, collection, dacDatasetIds, isChair, isLoading} = props;
   //const abc = consentTranslations.translateDataUseRestrictionsFromDataUseArray();
 
   useEffect(()  => {
@@ -101,11 +103,28 @@ export default function MultiDatasetVoteSlab(props) {
     ]);
   };
 
+  const DatasetsRequested = () => {
+
+    const bucketDatasetIds = flow(
+      get('elections'),
+      flatMapDeep(() => {
+        flatMapDeep(() => get('dataSetId'));
+      })
+    )(bucket);
+
+    return h(DatasetsRequestedPanel, {
+      dacDatasetIds,
+      bucketDatasetIds,
+      collectionDatasets: get('datasets')(collection),
+      isLoading
+    });
+  };
+
 
   return div({style: styles.baseStyle}, [
     div({style: styles.slabTitle}, [title]),
     div({style: styles.dataUses}, ['Data Use Translations']),
     VoteInfoSubsection(),
-    div({}, ['Datasets Required'])
+    DatasetsRequested()
   ]);
 }
