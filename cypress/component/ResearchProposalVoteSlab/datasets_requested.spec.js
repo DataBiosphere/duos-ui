@@ -5,7 +5,7 @@ import DatasetsRequestedPanel from "../../../src/components/collection_voting_sl
 
 const dataset = (id) => {
   return {
-    datasetId: id,
+    dataSetId: id,
     datasetIdentifier: `DUOS-${id}`,
     name: `Dataset ${id}`
   };
@@ -217,7 +217,7 @@ describe('DatasetsRequestedPanel - Tests', function () {
         dacDatasetIds={[1]}
         collectionDatasets={[
           {
-            datasetId: 1,
+            dataSetId: 1,
             name: 'Dataset 1'
           }
         ]}
@@ -235,8 +235,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
         dacDatasetIds={[1]}
         collectionDatasets={[
           {
-            datasetId: 1,
-            datasetIdentifier: 'DUOS-1'
+            dataSetId: 1,
+            dataSetIdentifier: 'DUOS-1'
           }
         ]}
       />
