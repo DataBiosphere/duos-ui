@@ -1,11 +1,12 @@
 import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
-import {isNil} from 'lodash';
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, find, flatMap, flow, isEmpty, map} from "lodash/fp";
+import {filter, find, flatMap, flow, map, isNil, isEmpty} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
+import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
+import {generatePreProcessedBucketData} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
@@ -42,8 +43,9 @@ const styles = {
 
 
 export default function MultiDatasetVoteSlab(props) {
+  const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {title, bucket, isChair, isLoading} = props;
+  const {title, bucket, collection, isChair, isLoading} = props;
   //const abc = consentTranslations.translateDataUseRestrictionsFromDataUseArray();
 
   useEffect(()  => {
@@ -56,24 +58,34 @@ export default function MultiDatasetVoteSlab(props) {
       flatMap(filteredData => filteredData.memberVotes)
     )(votes);
 
-    const targetElectionIds = flow(
+    const targetUserElectionIds = flow(
       filter(vote => vote.dacUserId === user.dacUserId),
       map(vote => vote.electionId)
     )(memberVotes);
 
-    const targetMemberVotes = filter((vote) => {
-      const relevantVote = find((id) => vote.electionId === id)(targetElectionIds);
+    const targetUserVotes = filter((vote) => {
+      const relevantVote = find((id) => vote.electionId === id)(targetUserElectionIds);
       return !isNil(relevantVote);
     })(memberVotes);
 
-    setDacVotes(targetMemberVotes);
+    setCurrentUserVotes(targetUserVotes);
   }, [bucket]);
 
+  useEffect( () => {
+    const init = async () => {
+      const {dars, datasets} = collection;
+      const buckets = await generatePreProcessedBucketData({dars, datasets});
+      console.log(buckets);
+    };
+    init();
+  });
+
   const VoteInfoSubsection = () => {
+
     return div({style: styles.voteInfo}, [
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
-        votes: null,
+        votes: currentUserVotes,
         isFinal: isChair,
         isLoading
       }),
