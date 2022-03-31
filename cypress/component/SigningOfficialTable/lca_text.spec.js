@@ -16,7 +16,7 @@ describe('SigningOfficialTable - Tests', function() {
       researchers={[]}
       unregisteredResearchers={[]}
     />);
-    const button = cy.contains('Add New Researcher');
+    const button = cy.contains('ADD NEW RESEARCHER');
     expect(button).to.exist;
     button.click();
     const lcaHeader = cy.contains(lcaHeaderText);

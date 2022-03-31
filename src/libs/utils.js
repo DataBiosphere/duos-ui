@@ -56,7 +56,7 @@ export const darCollectionUtils = {
           //see if its relevant, if it is, add 1 to submitted on hash
           //return empty array at the end
           if(isEmpty(elections)) {
-            const datasetId = dar.data.datasetIds[0];
+            const datasetId = (isEmpty(dar.data) || isEmpty(dar.data.datasetIds)) ? -1 : dar.data.datasetIds[0];
             if(includes(relevantDatasets, datasetId)) {
               if(isNil(electionStatusCount['Submitted'])) {
                 electionStatusCount['Submitted'] = 0;
@@ -573,7 +573,7 @@ export const getSearchFilterFunctions = () => {
     })(targetList),
     darCollections: (term, targetList) => filter(collection => {
       if(isEmpty(term)) {return true;}
-      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
+      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
       const lowerCaseTerm = toLower(term);
       const { darCode, createDate } = collection;
       const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
