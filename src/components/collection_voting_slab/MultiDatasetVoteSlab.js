@@ -2,14 +2,12 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, find, flatMap, flow, map, isNil, isEmpty, get, includes, forEach} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, forEach, find} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
-import {generatePreProcessedBucketData} from "../../utils/DarCollectionUtils";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
-import {flatMapDeep} from "lodash";
-import {DataSet, User} from "../../libs/ajax";
+import {User} from "../../libs/ajax";
 
 const styles = {
   baseStyle: {
@@ -47,9 +45,7 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const [filteredDatasets, setFilteredDatasets] = useState([]);
   const {title, bucket, collection, dacDatasetIds, isChair, isLoading} = props;
-  //const abc = consentTranslations.translateDataUseRestrictionsFromDataUseArray();
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -61,11 +57,16 @@ export default function MultiDatasetVoteSlab(props) {
       flatMap(filteredData => filteredData.memberVotes)
     )(votes);
 
-    const userVotes = flow(
-      filter(vote => vote.dacUserId === user.dacUserId),
-      filter(vote => !isNil(vote.electionId))
-    )(memberVotes);
 
+    const dacVotes = flow(
+      map(voteData => voteData.dataAccess),
+      filter((dataAccessData) => !isEmpty(dataAccessData)),
+      map(filteredData => filteredData.memberVotes),
+      find(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes)))
+    )(votes);
+    setDacVotes(dacVotes);
+
+    const userVotes = filter(vote => vote.dacUserId === user.dacUserId)(memberVotes);
     setCurrentUserVotes(userVotes);
   }, [bucket]);
 
@@ -75,20 +76,20 @@ export default function MultiDatasetVoteSlab(props) {
 
       const bucketDatasetIds = [];
       forEach(election =>
-        forEach(e => {
-          const id = get('dataSetId')(e);
+        forEach(electionData => {
+          const id = get('dataSetId')(electionData);
           bucketDatasetIds.push(id);
         })(election)
       )(bucketElections);
 
       setBucketDatasetIds(bucketDatasetIds);
 
-      const currentUserDatasets = filter(dataset =>
+      const datasetsInBucketForDac = filter(dataset =>
         includes(dataset.dataSetId, bucketDatasetIds)
       )(await User.getDatasetsForMe());
 
       const dataUseTranslations = await translateDataUseRestrictionsFromDataUseArray(
-        map(dataset => dataset.dataUse)(currentUserDatasets)
+        map(dataset => dataset.dataUse)(datasetsInBucketForDac)
       );
 
       console.log(dataUseTranslations);
