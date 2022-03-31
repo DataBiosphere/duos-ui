@@ -108,12 +108,12 @@ export default function MultiDatasetVoteSlab(props) {
         isFinal: isChair,
         isLoading
       }),
-      ChairVoteInfo
+      ChairVoteInfo()
     ]);
   };
 
   const ChairVoteInfo = () => {
-    return div({isRendered: isChair && dacVotes.length > 0}[
+    return div({isRendered: isChair && dacVotes.length > 0}, [
       h(VotesPieChart, {
         votes: dacVotes,
       }),
