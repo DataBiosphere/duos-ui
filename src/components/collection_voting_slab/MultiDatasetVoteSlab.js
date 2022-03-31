@@ -12,6 +12,8 @@ import {User} from "../../libs/ajax";
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
+    fontWeight: 'bold',
     padding: '15px 25px',
     margin: '10px 0 20px 0'
   },
@@ -19,7 +21,6 @@ const styles = {
     color: '#000000',
     backgroundColor: '#F1EDE8',
     fontSize: '1.6rem',
-    fontWeight: 'bold',
     height: '32px',
     width: 'fit-content',
     padding: '1.5rem',
@@ -57,7 +58,6 @@ export default function MultiDatasetVoteSlab(props) {
       flatMap(filteredData => filteredData.memberVotes)
     )(votes);
 
-
     const dacVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -88,9 +88,12 @@ export default function MultiDatasetVoteSlab(props) {
         includes(dataset.dataSetId, bucketDatasetIds)
       )(await User.getDatasetsForMe());
 
+      console.log(await User.getDatasetsForMe());
+
       const dataUseTranslations = await translateDataUseRestrictionsFromDataUseArray(
-        map(dataset => dataset.dataUse)(datasetsInBucketForDac)
+        map(dataset => dataset.dataUse)(datasetsInBucketForDac),
       );
+
 
       console.log(dataUseTranslations);
     };
@@ -98,7 +101,6 @@ export default function MultiDatasetVoteSlab(props) {
   }, [bucket]);
 
   const VoteInfoSubsection = () => {
-
     return div({style: styles.voteInfo}, [
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
@@ -106,14 +108,19 @@ export default function MultiDatasetVoteSlab(props) {
         isFinal: isChair,
         isLoading
       }),
+      ChairVoteInfo
+    ]);
+  };
+
+  const ChairVoteInfo = () => {
+    return div({isRendered: isChair && dacVotes.length > 0}[
       h(VotesPieChart, {
         votes: dacVotes,
-        isRendered: isChair && dacVotes.length > 0
       }),
+      div(['My DAC\'s Votes (detail)']),
       h(VoteSummaryTable, {
         dacVotes,//needs votes for this bucket from this DAC (maybe a single election to avoid repeats)
         isLoading,
-        isRendered: isChair && dacVotes.length > 0
       })
     ]);
   };
