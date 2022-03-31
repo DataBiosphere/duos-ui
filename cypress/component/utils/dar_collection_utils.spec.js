@@ -80,7 +80,7 @@ const openableDars = {
       }
     }
   }
-}
+};
 
 describe('checkIfOpenableElectionPresent()', () => {
   it('returns true if there is at least one election that is not open', () => {
