@@ -1,4 +1,4 @@
-import {div, h} from "react-hyperscript-helpers";
+import {div, h, span} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
@@ -8,6 +8,8 @@ import {useEffect, useState} from "react";
 import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {User} from "../../libs/ajax";
+import ld from "lodash";
+import DataUsePill from "./DataUsePill";
 
 const styles = {
   baseStyle: {
@@ -48,16 +50,14 @@ export default function MultiDatasetVoteSlab(props) {
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
   const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isLoading} = props;
 
+
   useEffect(() => {
     const user = Storage.getCurrentUser();
     const votes = !isNil(bucket) ? bucket.votes : [];
 
-    const memberVotes = flow(
-      map(voteData => voteData.dataAccess),
-      filter((dataAccessData) => !isEmpty(dataAccessData)),
-      flatMap(filteredData => filteredData.memberVotes)
-    )(votes);
-
+//VOTES FOR DAC OF CURRENT USER
+    //TODO: filter for all elections, collapse if same vote value (if different dates or rationale, concatenate), else
+    //display all
     const dacVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -66,46 +66,66 @@ export default function MultiDatasetVoteSlab(props) {
     )(votes);
     setDacVotes(dacVotes);
 
-    const userVotes = filter(vote => vote.dacUserId === user.dacUserId)(memberVotes);
+    //votes in this bucket by this user across all data access elections -- used for vote box
+    //TODO: check if all votes are for open elections, else disable vote box
+    const userVotes = flow(
+      map(voteData => voteData.dataAccess),
+      filter((dataAccessData) => !isEmpty(dataAccessData)),
+      flatMap(filteredData => filteredData.memberVotes),
+      filter(memberVote => memberVote.dacUserId === user.dacUserId)
+    )(votes);
     setCurrentUserVotes(userVotes);
   }, [bucket]);
 
   useEffect(() => {
-    const init = async () => {
+    const initDataUses = async () => {
       const bucketElections = get('elections', bucket);
 
-      const bucketDatasetIds = [];
+      const datasetIds = [];
       forEach(election =>
         forEach(electionData => {
           const id = get('dataSetId')(electionData);
-          bucketDatasetIds.push(id);
+          datasetIds.push(id);
         })(election)
       )(bucketElections);
-
-      setBucketDatasetIds(bucketDatasetIds);
+      setBucketDatasetIds(datasetIds);
 
       const datasetsInBucketForDac = filter(dataset =>
-        includes(dataset.dataSetId, bucketDatasetIds)
+        includes(dataset.dataSetId, datasetIds)
       )(await User.getDatasetsForMe());
-
-      console.log(await User.getDatasetsForMe());
 
       const dataUseTranslations = await translateDataUseRestrictionsFromDataUseArray(
         map(dataset => dataset.dataUse)(datasetsInBucketForDac),
       );
 
-
       console.log(dataUseTranslations);
     };
-    init();
+    initDataUses();
   }, [bucket]);
+
+  const DataUseSummary = () => {
+    const dataUsePills = (dataUses) => {
+      return ld.map(dataUses, (dataUse, i) => {
+        return DataUsePill({
+          dataUse,
+          key: i
+        });
+      });
+    };
+
+    const dataUses = get('dataUses')(bucket);
+    return !isNil(dataUses)
+      ? div({style: styles.dataUses}, [dataUsePills(dataUses)])
+      : div();
+  };
 
   const VoteInfoSubsection = () => {
     return div({style: styles.voteInfo}, [
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
-        votes: currentUserVotes, //needs votes from this user for this bucket across all data access elections
+        votes: currentUserVotes,
         isFinal: isChair,
+        isDisabled: isEmpty(currentUserVotes),
         isLoading
       }),
       ChairVoteInfo()
@@ -119,7 +139,7 @@ export default function MultiDatasetVoteSlab(props) {
       }),
       div(['My DAC\'s Votes (detail)']),
       h(VoteSummaryTable, {
-        dacVotes,//needs votes for this bucket from this DAC (maybe a single election to avoid repeats)
+        dacVotes,
         isLoading,
       })
     ]);
@@ -134,10 +154,9 @@ export default function MultiDatasetVoteSlab(props) {
     });
   };
 
-
   return div({style: styles.baseStyle}, [
     div({style: styles.slabTitle}, [title]),
-    div({style: styles.dataUses}, ['Data Use Translations']),
+    DataUseSummary(),
     VoteInfoSubsection(),
     DatasetsRequested()
   ]);

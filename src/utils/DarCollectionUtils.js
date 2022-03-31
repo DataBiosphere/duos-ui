@@ -107,15 +107,19 @@ const processVotesForBucket = (darElections) => {
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
 export const processDataUseBuckets = async(buckets) => {
   buckets = await buckets;
+
   //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
-    const { dars } = bucket;
+    const { dars, dataUse } = bucket;
     const elections = flow([
       map((dar) => Object.values(dar.elections)),
     ])(dars);
     //votes indexing lines up with dar indexing
     const votes = map(processVotesForBucket)(elections);
-    return { key, dars, elections, votes };
+
+    const dataUses = filter(dataUseDescription => !isEmpty(dataUseDescription))(dataUse);
+
+    return { key, dars, elections, votes, dataUses };
   })(buckets);
 
   //Process custom RP Vote bucket for VoteSummary
@@ -123,6 +127,7 @@ export const processDataUseBuckets = async(buckets) => {
     flatMap((bucket) => bucket.votes),
     map((votes) => ({rp:votes.rp}))
   ])(processedBuckets);
+
 
   const rpVoteData = {
     key: 'RP Vote',
