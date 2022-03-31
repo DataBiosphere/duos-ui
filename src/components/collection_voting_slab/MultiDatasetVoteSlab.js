@@ -75,32 +75,16 @@ export default function MultiDatasetVoteSlab(props) {
       filter(memberVote => memberVote.dacUserId === user.dacUserId)
     )(votes);
     setCurrentUserVotes(userVotes);
-  }, [bucket]);
 
-  useEffect(() => {
-    const initDataUses = async () => {
-      const bucketElections = get('elections', bucket);
-
-      const datasetIds = [];
-      forEach(election =>
-        forEach(electionData => {
-          const id = get('dataSetId')(electionData);
-          datasetIds.push(id);
-        })(election)
-      )(bucketElections);
-      setBucketDatasetIds(datasetIds);
-
-      const datasetsInBucketForDac = filter(dataset =>
-        includes(dataset.dataSetId, datasetIds)
-      )(await User.getDatasetsForMe());
-
-      const dataUseTranslations = await translateDataUseRestrictionsFromDataUseArray(
-        map(dataset => dataset.dataUse)(datasetsInBucketForDac),
-      );
-
-      console.log(dataUseTranslations);
-    };
-    initDataUses();
+    const bucketElections = get('elections', bucket);
+    const datasetIds = [];
+    forEach(election =>
+      forEach(electionData => {
+        const id = get('dataSetId')(electionData);
+        datasetIds.push(id);
+      })(election)
+    )(bucketElections);
+    setBucketDatasetIds(datasetIds);
   }, [bucket]);
 
   const DataUseSummary = () => {
