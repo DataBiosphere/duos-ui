@@ -571,21 +571,23 @@ export const getSearchFilterFunctions = () => {
 
       return includesRoles || includesBaseAttributes;
     })(targetList),
-    darCollections: (term, targetList) => filter(collection => {
-      if(isEmpty(term)) {return true;}
-      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
-      const lowerCaseTerm = toLower(term);
-      const { darCode, createDate } = collection;
-      const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
-      const { data } = referenceDar;
-      const { projectTitle = '', institution = '' } = data;
-      const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
-      const matched = find((phrase) => {
-        const termArr = lowerCaseTerm.split(" ");
-        return find(term => includes(term, phrase))(termArr);
-      })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
-      return !isNil(matched);
-    })(targetList),
+    darCollections: (term, targetList) =>
+      isEmpty(term) ? targetList :
+        filter(collection => {
+          if(isEmpty(term)) {return true;}
+          const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
+          const lowerCaseTerm = toLower(term);
+          const { darCode, createDate } = collection;
+          const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
+          const { data } = referenceDar;
+          const { projectTitle = '', institution = '' } = data;
+          const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
+          const matched = find((phrase) => {
+            const termArr = lowerCaseTerm.split(" ");
+            return find(term => includes(term, phrase))(termArr);
+          })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
+          return !isNil(matched);
+        })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
       const lowerCaseTerm = toLower(term);
       const { data, draft, createDate, updateDate } = draftRecord;
