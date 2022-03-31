@@ -2,13 +2,14 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, find, flatMap, flow, map, isNil, isEmpty, get} from "lodash/fp";
+import {filter, find, flatMap, flow, map, isNil, isEmpty, get, includes, forEach} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
 import {generatePreProcessedBucketData} from "../../utils/DarCollectionUtils";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {flatMapDeep} from "lodash";
+import {DataSet, User} from "../../libs/ajax";
 
 const styles = {
   baseStyle: {
@@ -42,15 +43,15 @@ const styles = {
 };
 
 
-
-
 export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
+  const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
+  const [filteredDatasets, setFilteredDatasets] = useState([]);
   const {title, bucket, collection, dacDatasetIds, isChair, isLoading} = props;
   //const abc = consentTranslations.translateDataUseRestrictionsFromDataUseArray();
 
-  useEffect(()  => {
+  useEffect(() => {
     const user = Storage.getCurrentUser();
     const votes = !isNil(bucket) ? bucket.votes : [];
 
@@ -60,34 +61,47 @@ export default function MultiDatasetVoteSlab(props) {
       flatMap(filteredData => filteredData.memberVotes)
     )(votes);
 
-    const targetUserElectionIds = flow(
+    const userVotes = flow(
       filter(vote => vote.dacUserId === user.dacUserId),
-      map(vote => vote.electionId)
+      filter(vote => !isNil(vote.electionId))
     )(memberVotes);
 
-    const targetUserVotes = filter((vote) => {
-      const relevantVote = find((id) => vote.electionId === id)(targetUserElectionIds);
-      return !isNil(relevantVote);
-    })(memberVotes);
-
-    setCurrentUserVotes(targetUserVotes);
+    setCurrentUserVotes(userVotes);
   }, [bucket]);
 
-  useEffect( () => {
+  useEffect(() => {
     const init = async () => {
-      const {dars, datasets} = collection;
-      const buckets = await generatePreProcessedBucketData({dars, datasets});
-      console.log(buckets);
+      const bucketElections = get('elections', bucket);
+
+      const bucketDatasetIds = [];
+      forEach(election =>
+        forEach(e => {
+          const id = get('dataSetId')(e);
+          bucketDatasetIds.push(id);
+        })(election)
+      )(bucketElections);
+
+      setBucketDatasetIds(bucketDatasetIds);
+
+      const currentUserDatasets = filter(dataset =>
+        includes(dataset.dataSetId, bucketDatasetIds)
+      )(await User.getDatasetsForMe());
+
+      const dataUseTranslations = await translateDataUseRestrictionsFromDataUseArray(
+        map(dataset => dataset.dataUse)(currentUserDatasets)
+      );
+
+      console.log(dataUseTranslations);
     };
     init();
-  });
+  }, [bucket]);
 
   const VoteInfoSubsection = () => {
 
     return div({style: styles.voteInfo}, [
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
-        votes: currentUserVotes,
+        votes: currentUserVotes, //needs votes from this user for this bucket across all data access elections
         isFinal: isChair,
         isLoading
       }),
@@ -96,7 +110,7 @@ export default function MultiDatasetVoteSlab(props) {
         isRendered: isChair && dacVotes.length > 0
       }),
       h(VoteSummaryTable, {
-        dacVotes,
+        dacVotes,//needs votes for this bucket from this DAC (maybe a single election to avoid repeats)
         isLoading,
         isRendered: isChair && dacVotes.length > 0
       })
@@ -104,14 +118,6 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const DatasetsRequested = () => {
-
-    const bucketDatasetIds = flow(
-      get('elections'),
-      flatMapDeep(() => {
-        flatMapDeep(() => get('dataSetId'));
-      })
-    )(bucket);
-
     return h(DatasetsRequestedPanel, {
       dacDatasetIds,
       bucketDatasetIds,
