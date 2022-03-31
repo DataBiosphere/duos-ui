@@ -183,12 +183,12 @@ export const updateCollectionFn = ({collections, filterFn, searchRef, setCollect
     }
   };
 
-export const cancelCollectionFn = ({updateCollections}) =>
+export const cancelCollectionFn = ({updateCollections, role}) =>
   async ({ darCode, darCollectionId }) => {
     try {
       const canceledCollection = await Collections.cancelCollection(
         darCollectionId,
-        'admin'
+        role
       );
       updateCollections(canceledCollection);
       Notifications.showSuccess({ text: `Successfully canceled ${darCode}` });

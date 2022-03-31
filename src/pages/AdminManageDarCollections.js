@@ -37,7 +37,7 @@ export default function AdminManageDarCollections() {
   }, []);
 
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: 'admin'});
   const openCollection = openCollectionFn({updateCollections});
 
   return div({ style: Styles.PAGE }, [
