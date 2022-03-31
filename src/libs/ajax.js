@@ -873,12 +873,6 @@ export const User = {
     return res.data;
   },
 
-  getDatasetsForMe: async () => {
-    const url = `${await Config.getApiUrl()}/api/user/me/dac/datasets`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
-  },
-
   getById: async id => {
     const url = `${await Config.getApiUrl()}/api/user/${id}`;
     const res = await axios.get(url, Config.authOpts());
