@@ -39,6 +39,11 @@ const styles = {
   voteInfo: {
     backgroundColor: '#D4E1EB',
     padding: '22px 25px'
+  },
+  chairVoteInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '1.5rem'
   }
 };
 
@@ -108,7 +113,7 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const ChairVoteInfo = () => {
-    return div({isRendered: isChair && dacVotes.length > 0}, [
+    return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
       h(VotesPieChart, {
         votes: dacVotes,
       }),
