@@ -30,6 +30,12 @@ const styles = {
     date: '10%',
     rationale: '50%',
   },
+  containerOverride: {
+    marginTop: '0',
+    borderTop: '0',
+    backgroundColor: 'rgba(184, 205, 211, 0)',
+    padding: '0',
+  }
 };
 
 const columnHeaderFormat = {
