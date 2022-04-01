@@ -81,14 +81,11 @@ export default function MultiDatasetVoteSlab(props) {
     setCurrentUserVotes(userVotes);
 
     //TODO: make sure election has a vote that has this users' userId in it
-    const bucketElections = get('elections', bucket);
-    const datasetIds = [];
-    forEach(election =>
-      forEach(electionData => {
-        const id = get('dataSetId')(electionData);
-        datasetIds.push(id);
-      })(election)
-    )(bucketElections);
+    //note: may need to find id in dar
+    const datasetIds = flow(
+      get('elections'),
+      flatMap(election => flatMap(electionData => electionData.dataSetId)(election)),
+    )(bucket);
     setBucketDatasetIds(datasetIds);
   }, [bucket]);
 
