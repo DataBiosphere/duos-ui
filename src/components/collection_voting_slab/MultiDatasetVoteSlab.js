@@ -2,7 +2,7 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, forEach, find, every} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
@@ -66,12 +66,12 @@ export default function MultiDatasetVoteSlab(props) {
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
       map(filteredData => filteredData.memberVotes),
-      find(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes)))
+      filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+      flatMap(memberVotes => memberVotes)
     )(votes);
     setDacVotes(dacVotes);
 
-    //votes in this bucket by this user across all data access elections -- used for vote box
-    //TODO: check if all votes are for open elections, else disable vote box
+    //User votes used in voteBox
     const userVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -80,11 +80,13 @@ export default function MultiDatasetVoteSlab(props) {
     )(votes);
     setCurrentUserVotes(userVotes);
 
-    //TODO: make sure election has a vote that has this users' userId in it
+    //TODO: make sure election has a vote that has this users' userId in it  X
     //note: may need to find id in dar
     const datasetIds = flow(
       get('elections'),
-      flatMap(election => flatMap(electionData => electionData.dataSetId)(election)),
+      flatMap(election => flatMap(electionData => electionData)(election)),
+      filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(userVotes))),
+      map(electionData => electionData.dataSetId)
     )(bucket);
     setBucketDatasetIds(datasetIds);
   }, [bucket]);
@@ -100,8 +102,8 @@ export default function MultiDatasetVoteSlab(props) {
     const allOpenElections = flow(
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
-      filter(election => includes(election.electionId)(map(vote => vote.electionId)(currentUserVotes))),
-      every(election => election.status === 'Open')
+      filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(currentUserVotes))),
+      every(electionData => electionData.status === 'Open')
     )(bucket);
 
     return div({style: styles.voteInfo}, [
