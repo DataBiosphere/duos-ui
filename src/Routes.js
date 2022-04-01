@@ -48,6 +48,7 @@ import DarCollectionReview from './pages/dar_collection_review/DarCollectionRevi
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from "./pages/AdminEditUser";
 import NewChairConsole from './pages/NewChairConsole';
+import NewMemberConsole from './pages/NewMemberConsole';
 
 const Routes = (props) => (
   <Switch>
@@ -88,6 +89,10 @@ const Routes = (props) => (
     }
     {
       props.env === 'dev' ? <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
+        : ''
+    }
+    {
+      props.env === 'dev' ? <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
         : ''
     }
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />

@@ -63,7 +63,8 @@ export default function AdminActions(props) {
     additionalStyle: {
       padding: '5px 10px',
       fontSize: '1.45rem',
-      fontWeight: 600
+      fontWeight: 600,
+      marginRight: '15%'
     },
   };
 
@@ -84,7 +85,7 @@ export default function AdminActions(props) {
         display: 'flex',
         padding: '10px 0px',
         alignItems: 'end',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
       },
     },
     [

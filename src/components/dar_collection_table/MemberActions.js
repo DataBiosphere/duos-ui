@@ -1,33 +1,26 @@
 import { h, div } from "react-hyperscript-helpers";
 import { useEffect, useState } from 'react';
-import { lowerCase, isEmpty, flow, flatMap, map, filter } from "lodash/fp";
+import { toLower, isEmpty, flow, flatMap, map, filter, toUpper, any, isNil } from "lodash/fp";
 import { Storage } from "../../libs/storage";
-import TableTextButton from '../TableTextButton';
-import { Styles } from '../../libs/theme';
+import SimpleButton from '../SimpleButton';
 
-const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
-  fontFamily: 'Montserrant',
-  margin: '0%',
-  padding: '5x 10px'
-});
+const duosBlue = '#0948B7';
 
-const findRelevantVotes = ({dars = {}, userId}) => {
+const findRelevantVotes = ({ dars = {}, userId}) => {
   const relevantVotes = flow(
-    map(dar => dar.elections),
-    flatMap(electionMap => Object.values(electionMap)),
-    filter(election => lowerCase(election.status) === 'open'),
-    flatMap(election => Object.values(election.votes)),
-    filter(vote => vote.dacUserId === userId),
+    map((dar) => dar.elections),
+    flatMap((electionMap) => Object.values(electionMap)),
+    filter((election) => toLower(election.status) === 'open' && !isEmpty(election.votes)),
+    flatMap((election) => Object.values(election.votes)),
+    filter((vote) => vote.dacUserId === userId)
   )(dars);
   return relevantVotes;
 };
 
+
+
 const determineButtonLabel = ({relevantVotes}) => {
-  const submittedVotePresent = flow(
-    filter(vote => !isEmpty(vote.vote)),
-    isEmpty
-  )(relevantVotes);
+  const submittedVotePresent = any(vote => !isNil(vote.vote))(relevantVotes);
   return submittedVotePresent ? 'Update Vote' : 'Vote';
 };
 
@@ -45,7 +38,7 @@ export default function MemberActions(props) {
     Elections in the collection,
     Votes attached to the collection
   */
-  const { collection } = props;
+  const { collection, goToVote } = props;
   const collectionId = collection.darCollectionId;
   const [voteEnabled, setVoteEnabled] = useState(false);
   const [label, setLabel] = useState('Vote');
@@ -68,17 +61,20 @@ export default function MemberActions(props) {
     }
   }, [collection]);
 
-  const goToVote = (collectionId) => {
-    history.push(`/dar_collection/${collectionId}`);
-  };
-
   const voteButtonAttributes = {
     keyProp: `member-vote-${collectionId}`,
-    label: label,
+    label: toUpper(label),
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle
+    baseColor: duosBlue,
+    hoverColor: duosBlue,
+    additionalStyle: {
+      padding: '3% 10%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      color: 'white',
+      marginRight: '30%'
+    }
   };
 
   return div({
@@ -87,10 +83,11 @@ export default function MemberActions(props) {
     style: {
       display: 'flex',
       padding: '10px 5px',
-      justifyContent: 'space-around',
-      alignItems: 'end'
+      justifyContent: 'flex-start',
+      alignItems: 'end',
+      fontFamily: 'Montserrat'
     }
   }, [
-    h(TableTextButton, voteButtonAttributes)
+    h(SimpleButton, voteButtonAttributes)
   ]);
 }
