@@ -1,15 +1,14 @@
-import {div, h, span} from "react-hyperscript-helpers";
+import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
 import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, forEach, find} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
-import {translateDataUseRestrictionsFromDataUseArray} from "../../libs/dataUseTranslation";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
-import {User} from "../../libs/ajax";
 import ld from "lodash";
 import DataUsePill from "./DataUsePill";
+import {dataUsePills} from "./ResearchProposalVoteSlab";
 
 const styles = {
   baseStyle: {
@@ -76,6 +75,7 @@ export default function MultiDatasetVoteSlab(props) {
     )(votes);
     setCurrentUserVotes(userVotes);
 
+    //TODO: make sure election has a vote that has this users' userId in it
     const bucketElections = get('elections', bucket);
     const datasetIds = [];
     forEach(election =>
@@ -88,15 +88,6 @@ export default function MultiDatasetVoteSlab(props) {
   }, [bucket]);
 
   const DataUseSummary = () => {
-    const dataUsePills = (dataUses) => {
-      return ld.map(dataUses, (dataUse, i) => {
-        return DataUsePill({
-          dataUse,
-          key: i
-        });
-      });
-    };
-
     const dataUses = get('dataUses')(bucket);
     return !isNil(dataUses)
       ? div({style: styles.dataUses}, [dataUsePills(dataUses)])

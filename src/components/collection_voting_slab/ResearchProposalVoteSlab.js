@@ -76,7 +76,7 @@ const DataUseSummary = ({translatedDataUse}) => {
   });
 };
 
-const dataUsePills = (dataUses) => {
+export const dataUsePills = (dataUses) => {
   return ld.map(dataUses, (dataUse, i) => {
     return DataUsePill({
       dataUse,
