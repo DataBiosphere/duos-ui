@@ -2,12 +2,10 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, forEach, find} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, forEach, find, every} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
-import ld from "lodash";
-import DataUsePill from "./DataUsePill";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
 
 const styles = {
@@ -62,6 +60,8 @@ export default function MultiDatasetVoteSlab(props) {
 //VOTES FOR DAC OF CURRENT USER
     //TODO: filter for all elections, collapse if same vote value (if different dates or rationale, concatenate), else
     //display all
+
+    //NOTE: display all for pie chart, collapse if possible for table
     const dacVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -100,12 +100,19 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const VoteInfoSubsection = () => {
+    const allOpenElections = flow(
+      get('elections'),
+      flatMap(election => flatMap(electionData => electionData)(election)),
+      filter(election => includes(election.electionId)(map(vote => vote.electionId)(currentUserVotes))),
+      every(election => election.status === 'Open')
+    )(bucket);
+
     return div({style: styles.voteInfo}, [
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
         isFinal: isChair,
-        isDisabled: isEmpty(currentUserVotes),
+        isDisabled: isEmpty(currentUserVotes) || !allOpenElections,
         isLoading
       }),
       ChairVoteInfo()
