@@ -23,7 +23,7 @@ import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
-import NewMemberConsole from './pages/NewMemberConsole';
+import MemberConsole from './pages/MemberConsole';
 import ChairConsole from './pages/ChairConsole';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
@@ -91,7 +91,7 @@ const Routes = (props) => (
         : ''
     }
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
+    <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
     <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />
     <AuthenticatedRoute path="/data_owner_review/:voteId/:referenceId/:dataSetId" component={DataOwnerReview} props={props}
       rolesAllowed={[USER_ROLES.dataOwner]} />
