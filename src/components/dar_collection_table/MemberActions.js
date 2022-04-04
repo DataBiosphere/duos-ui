@@ -51,8 +51,8 @@ export default function MemberActions(props) {
       const relevantVotes = findRelevantVotes({dars, userId});
       if(!isEmpty(relevantVotes)) {
         const buttonLabel = determineButtonLabel({relevantVotes});
-        setVoteEnabled(true);
         setLabel(buttonLabel);
+        setVoteEnabled(true);
       } else {
         setVoteEnabled(false);
       }
