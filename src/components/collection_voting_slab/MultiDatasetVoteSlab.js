@@ -2,7 +2,7 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every, forEach, groupBy} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
@@ -85,6 +85,7 @@ export default function MultiDatasetVoteSlab(props) {
     const datasetIds = flow(
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
+      filter(electionData => electionData.electionType === 'DataAccess'),
       filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(userVotes))),
       map(electionData => electionData.dataSetId)
     )(bucket);
@@ -119,6 +120,39 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const ChairVoteInfo = () => {
+    const votesGroupedByUser = groupBy(vote => vote.dacUserId)(dacVotes);
+    console.log(votesGroupedByUser);
+
+    const collapsedVotesByUser = map(votesByUserKey => {
+      const votesByUser = votesGroupedByUser[votesByUserKey];
+      const collapsedVotes = [];
+      collapsedVotes.push(votesByUser[0]);
+
+      forEach( vote => {
+        const matchingVote = find(collapsedVote => vote.vote === collapsedVote.vote)(collapsedVotes);
+        console.log(matchingVote);
+
+        const matchingVoteDifferentFields =
+          !isNil(matchingVote) &&
+          (vote.rationale !== matchingVote.rationale
+          || vote.createDate !== matchingVote.createDate);
+        console.log(matchingVoteDifferentFields);
+
+        if (isNil(matchingVote)) {
+          collapsedVotes.push(vote);
+        }
+        else if (!isNil(matchingVoteDifferentFields)) {
+          matchingVote.createDate += `\n${vote.createDate}`;
+          matchingVote.rationale += `\n${vote.rationale}`;
+        }
+
+      })(votesByUser);
+
+      return collapsedVotes;
+    })(Object.keys(votesGroupedByUser));
+
+
+
     return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
       h(VotesPieChart, {
         votes: dacVotes,
