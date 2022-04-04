@@ -150,10 +150,6 @@ export default function MultiDatasetVoteSlab(props) {
     })(Object.keys(votesGroupedByUser));
 
 
-
-    console.log(votesCollapsedByUser);
-
-
     return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
       h(VotesPieChart, {
         votes: dacVotes,
@@ -167,10 +163,15 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const collapseVotes = ({votes}) => {
+    const addIfUnique = (newValue, existingValues) => {
+      if(!isNil(newValue) && !includes(newValue, existingValues)) {
+        existingValues.push(newValue);
+      }
+    };
+
     const collapsedVotes = {};
     forEach( vote => {
       const matchingVote = collapsedVotes[`${vote.vote}`];
-
       if (isNil(matchingVote)) {
         collapsedVotes[`${vote.vote}`] = {
           vote: vote.vote,
@@ -180,12 +181,8 @@ export default function MultiDatasetVoteSlab(props) {
         };
       }
       else {
-        if(!isNil(vote.rationale) && !includes(vote.rationale, matchingVote.rationales)) {
-          matchingVote.rationales.push(vote.rationale);
-        }
-        if(!isNil(vote.createDate) && !includes(vote.createDate, matchingVote.createDates)) {
-          matchingVote.createDates.push(vote.createDate);
-        }
+        addIfUnique(vote.rationale, matchingVote.rationales);
+        addIfUnique(vote.createDate, matchingVote.createDates);
       }
     })(votes);
     return collapsedVotes;
