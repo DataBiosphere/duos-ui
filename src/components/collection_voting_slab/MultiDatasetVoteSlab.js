@@ -2,7 +2,7 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every, forEach, groupBy, cloneDeep} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, forEach, groupBy, cloneDeep} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
@@ -121,34 +121,11 @@ export default function MultiDatasetVoteSlab(props) {
 
   const ChairVoteInfo = () => {
     const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(dacVotes));
-
     const votesCollapsedByUser = flatMap(userIdKey => {
       const votesByUser = votesGroupedByUser[userIdKey];
       const collapsedVotes = collapseVotes({votes: votesByUser});
-
-      return map( key => {
-        const collapsedVote = collapsedVotes[key];
-        let collapsedRationale = "";
-        let collapsedDate = "";
-
-        forEach( r =>
-          collapsedRationale += `${r}\n`
-        )(collapsedVote.rationales);
-
-        forEach(d =>
-          collapsedDate += `${d}\n`
-        )(collapsedVote.createDates);
-
-        return {
-          vote: collapsedVote.vote ,
-          displayName: collapsedVote.displayName,
-          rationale: !isEmpty(collapsedRationale) ? collapsedRationale : null,
-          createDate: !isEmpty(collapsedDate) ? collapsedDate : null
-        };
-      })(Object.keys(collapsedVotes));
-
+      return convertToVoteObjects({collapsedVotes});
     })(Object.keys(votesGroupedByUser));
-
 
     return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
       h(VotesPieChart, {
@@ -186,6 +163,29 @@ export default function MultiDatasetVoteSlab(props) {
       }
     })(votes);
     return collapsedVotes;
+  };
+
+  const convertToVoteObjects = ({collapsedVotes}) => {
+    const appendAll = (values) => {
+      let result = '';
+      forEach(value => {
+        result += `${value}\n`;
+      })(values);
+      return !isEmpty(result) ? result : null;
+    };
+
+    return map( key => {
+      const collapsedVote = collapsedVotes[key];
+      const collapsedRationale = appendAll(collapsedVote.rationales);
+      const collapsedDate = appendAll(collapsedVote.createDates);
+
+      return {
+        vote: collapsedVote.vote ,
+        displayName: collapsedVote.displayName,
+        rationale: collapsedRationale,
+        createDate: collapsedDate
+      };
+    })(Object.keys(collapsedVotes));
   };
 
   const DatasetsRequested = () => {
