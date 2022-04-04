@@ -2,7 +2,7 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every, forEach, groupBy} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, find, every, forEach, groupBy, cloneDeep} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
@@ -120,37 +120,38 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const ChairVoteInfo = () => {
-    const votesGroupedByUser = groupBy(vote => vote.dacUserId)(dacVotes);
-    console.log(votesGroupedByUser);
+    const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(dacVotes));
 
-    const collapsedVotesByUser = map(votesByUserKey => {
-      const votesByUser = votesGroupedByUser[votesByUserKey];
-      const collapsedVotes = [];
-      collapsedVotes.push(votesByUser[0]);
+    const votesCollapsedByUser = flatMap(userIdKey => {
+      const votesByUser = votesGroupedByUser[userIdKey];
+      const collapsedVotes = collapseVotes({votes: votesByUser});
 
-      forEach( vote => {
-        const matchingVote = find(collapsedVote => vote.vote === collapsedVote.vote)(collapsedVotes);
-        console.log(matchingVote);
+      return map( key => {
+        const collapsedVote = collapsedVotes[key];
+        let collapsedRationale = "";
+        let collapsedDate = "";
 
-        const matchingVoteDifferentFields =
-          !isNil(matchingVote) &&
-          (vote.rationale !== matchingVote.rationale
-          || vote.createDate !== matchingVote.createDate);
-        console.log(matchingVoteDifferentFields);
+        forEach( r =>
+          collapsedRationale += `${r}\n`
+        )(collapsedVote.rationales);
 
-        if (isNil(matchingVote)) {
-          collapsedVotes.push(vote);
-        }
-        else if (!isNil(matchingVoteDifferentFields)) {
-          matchingVote.createDate += `\n${vote.createDate}`;
-          matchingVote.rationale += `\n${vote.rationale}`;
-        }
+        forEach(d =>
+          collapsedDate += `${d}\n`
+        )(collapsedVote.createDates);
 
-      })(votesByUser);
+        return {
+          vote: collapsedVote.vote ,
+          displayName: collapsedVote.displayName,
+          rationale: !isEmpty(collapsedRationale) ? collapsedRationale : null,
+          createDate: !isEmpty(collapsedDate) ? collapsedDate : null
+        };
+      })(Object.keys(collapsedVotes));
 
-      return collapsedVotes;
     })(Object.keys(votesGroupedByUser));
 
+
+
+    console.log(votesCollapsedByUser);
 
 
     return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
@@ -159,10 +160,35 @@ export default function MultiDatasetVoteSlab(props) {
       }),
       div(['My DAC\'s Votes (detail)']),
       h(VoteSummaryTable, {
-        dacVotes,
+        dacVotes: votesCollapsedByUser,
         isLoading,
       })
     ]);
+  };
+
+  const collapseVotes = ({votes}) => {
+    const collapsedVotes = {};
+    forEach( vote => {
+      const matchingVote = collapsedVotes[`${vote.vote}`];
+
+      if (isNil(matchingVote)) {
+        collapsedVotes[`${vote.vote}`] = {
+          vote: vote.vote,
+          displayName: vote.displayName,
+          rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
+          createDates: !isNil(vote.createDate) ? [vote.createDate] : []
+        };
+      }
+      else {
+        if(!isNil(vote.rationale) && !includes(vote.rationale, matchingVote.rationales)) {
+          matchingVote.rationales.push(vote.rationale);
+        }
+        if(!isNil(vote.createDate) && !includes(vote.createDate, matchingVote.createDates)) {
+          matchingVote.createDates.push(vote.createDate);
+        }
+      }
+    })(votes);
+    return collapsedVotes;
   };
 
   const DatasetsRequested = () => {
