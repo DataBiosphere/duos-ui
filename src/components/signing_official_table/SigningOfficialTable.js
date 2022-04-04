@@ -9,7 +9,6 @@ import PaginationBar from "../PaginationBar";
 import SearchBar from "../SearchBar";
 import {
   Notifications,
-  tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
@@ -204,12 +203,14 @@ export default function SigningOfficialTable(props) {
   const [lcaText, setLcaText] = useState("");
 
   //Search function for SearchBar component, function defined in utils
-  const handleSearchChange = tableSearchHandler(
-    researchers,
-    setFilteredResearchers,
-    setCurrentPage,
-    'signingOfficialResearchers'
-  );
+  const handleSearchChange = useCallback((searchTerms) => {
+    searchOnFilteredList(
+      searchTerms,
+      researchers,
+      researcherFilterFunction,
+      setFilteredResearchers
+    );
+  }, [researchers]);
 
   const showConfirmationModal = ({card, message, title, confirmType}) => {
     setSelectedCard(card);
