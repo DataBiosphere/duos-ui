@@ -1,9 +1,8 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import {mount} from "@cypress/react";
-import ResearchProposalVoteSlab from "../../../src/components/collection_voting_slab/ResearchProposalVoteSlab";
 import MultiDatasetVoteSlab from "../../../src/components/collection_voting_slab/MultiDatasetVoteSlab";
-import {h} from "react-hyperscript-helpers";
+import {Storage} from "../../../src/libs/storage";
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -34,7 +33,7 @@ const votesForOpenElection2 = {
   dataAccess: {
     memberVotes: [
       {dacUserId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
-      {dacUserId: 200, displayName: 'Sarah', rationale: 'test1', vote: false, electionId: 102, voteId: 5, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
       {dacUserId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
     ]
   }
@@ -44,7 +43,7 @@ const votesForClosedElection = {
   dataAccess: {
     memberVotes: [
       {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
-      {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 103, voteId: 8}
+      {dacUserId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
     ]
   }
 };
@@ -61,10 +60,6 @@ describe('ResearchProposalVoteSlab - Tests', function() {
           ]
         }}
         dacDatasetIds={[10, 20]}
-        collectionDatasets={[
-          {dataSetId: 385, name: 'Dataset 1', datasetIdentifier: 'DUOS-1'},
-          {dataSetId: 415, name: 'Dataset 2', datasetIdentifier: 'DUOS-2'},
-        ]}
         isChair={true}
       />
     );
@@ -76,58 +71,264 @@ describe('ResearchProposalVoteSlab - Tests', function() {
   });
 
   it('Renders a selected vote button when all current user votes match', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
   });
 
   it('Renders vote button unselected when not all current user votes match', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
   });
 
   it('Renders unselected disabled vote buttons if no votes for current user in bucket', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [closedElection],
+          votes: [votesForClosedElection]
+        }}
+        dacDatasetIds={[30]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
   });
 
   it('Renders unselected disabled vote buttons if some elections are closed and current votes do not match', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection2, closedElection],
+          votes: [votesForOpenElection2, votesForClosedElection]
+        }}
+        dacDatasetIds={[20, 30]}
+        isChair={false}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
   });
 
   it('Renders selected disabled vote buttons if some elections are closed and current votes do match', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, closedElection],
+          votes: [votesForOpenElection1, votesForClosedElection]
+        }}
+        dacDatasetIds={[10, 30]}
+        isChair={false}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
   });
 
   it('Does not render pie chart or vote summary table when current user is not chairperson', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [closedElection],
+          votes: [votesForClosedElection]
+        }}
+        dacDatasetIds={[30]}
+        isChair={false}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    cy.get('[dataCy=chair-vote-info]').should('not.exist');
   });
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [closedElection],
+          votes: [votesForClosedElection]
+        }}
+        dacDatasetIds={[30]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    cy.get('[dataCy=chair-vote-info]').should('not.exist');
   });
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [closedElection],
+          votes: [votesForClosedElection]
+        }}
+        dacDatasetIds={[30]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    cy.get('[dataCy=chair-vote-info]').should('exist');
   });
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, closedElection],
+          votes: [votesForOpenElection2, votesForClosedElection]
+        }}
+        dacDatasetIds={[10, 30]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    const component = cy.get('.table-data');
+    component.should('exist');
+    component.should('contain', 'test1');
+    component.should('contain', 'test2');
+    component.should('not.contain', 'test3');
   });
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection2, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
 
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
 
-  it('Renders collapsed row with appended dates/rationales when the same user has same vote but different dates / rationales for multiple elections', function() {
+  it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2');
   });
 
-  it('Does not append date/rationale values when properties are undefined', function() {
+  it('Does not append rationale values when properties are undefined', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection2, closedElection],
+          votes: [votesForOpenElection2, votesForClosedElection]
+        }}
+        dacDatasetIds={[10, 30]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
 
+    cy.get('.table-data').should('exist').should('not.contain', 'undefined');
+    cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
 
   it('Renders separate row with when the same user has different vote for multiple elections', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'No');
+    cy.get('.row-data-3').should('contain.text', 'Matt').should('contain.text', 'Yes');
   });
 
   it('Renders filler text when some fields of vote are empty', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection2],
+          votes: [votesForOpenElection2]
+        }}
+        dacDatasetIds={[20]}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
+    cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
   });
 });
