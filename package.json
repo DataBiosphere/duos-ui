@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "4.12.4",
-    "@material-ui/icons": "4.11.2",
+    "@material-ui/icons": "4.11.3",
     "@react-pdf/renderer": "^2.1.1",
     "axios": "^0.26.1",
     "bootstrap": "3.4.1",
