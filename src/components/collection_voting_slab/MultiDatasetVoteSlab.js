@@ -57,11 +57,6 @@ export default function MultiDatasetVoteSlab(props) {
     const user = Storage.getCurrentUser();
     const votes = !isNil(bucket) ? bucket.votes : [];
 
-//VOTES FOR DAC OF CURRENT USER
-    //TODO: filter for all elections, collapse if same vote value (if different dates or rationale, concatenate), else
-    //display all
-
-    //NOTE: display all for pie chart, collapse if possible for table
     const dacVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -71,7 +66,6 @@ export default function MultiDatasetVoteSlab(props) {
     )(votes);
     setDacVotes(dacVotes);
 
-    //User votes used in voteBox
     const userVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -80,8 +74,6 @@ export default function MultiDatasetVoteSlab(props) {
     )(votes);
     setCurrentUserVotes(userVotes);
 
-    //TODO: make sure election has a vote that has this users' userId in it  X
-    //note: may need to find id in dar
     const datasetIds = flow(
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
@@ -91,6 +83,7 @@ export default function MultiDatasetVoteSlab(props) {
     )(bucket);
     setBucketDatasetIds(datasetIds);
   }, [bucket]);
+
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
@@ -127,7 +120,7 @@ export default function MultiDatasetVoteSlab(props) {
       return convertToVoteObjects({collapsedVotes});
     })(Object.keys(votesGroupedByUser));
 
-    return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0}, [
+    return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
       h(VotesPieChart, {
         votes: dacVotes,
       }),
@@ -152,6 +145,7 @@ export default function MultiDatasetVoteSlab(props) {
       if (isNil(matchingVote)) {
         collapsedVotes[`${vote.vote}`] = {
           vote: vote.vote,
+          voteId: vote.voteId,
           displayName: vote.displayName,
           rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
           createDates: !isNil(vote.createDate) ? [vote.createDate] : []
@@ -181,6 +175,7 @@ export default function MultiDatasetVoteSlab(props) {
 
       return {
         vote: collapsedVote.vote ,
+        voteId: collapsedVote.voteId,
         displayName: collapsedVote.displayName,
         rationale: collapsedRationale,
         createDate: collapsedDate
