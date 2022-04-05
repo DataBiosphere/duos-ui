@@ -46,7 +46,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
+const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections, setVoteLabel}) => {
   try{
     let nonOpenReleventElectionPresent = false;
     let openRelevantElectionPresent = false;
@@ -61,7 +61,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
       isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
       forEach(vote => {
         if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
-        if(!isEmpty(vote.vote)) { label = "Update Vote";}
+        if(!isNil(vote.vote)) { label = "Update Vote";}
       })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
@@ -118,7 +118,8 @@ export default function ChairActions(props) {
         calcComponentState({
           dacUserId,
           relevantElections,
-          relevantDarsNoElections
+          relevantDarsNoElections,
+          setVoteLabel
         });
       setOpenEnabled(isOpenEnabled);
       //To determine cancel enabled, see if any election is open
@@ -159,11 +160,11 @@ export default function ChairActions(props) {
     baseColor: duosBlue,
     hoverColor: duosBlue,
     additionalStyle: {
-      padding: '3% 10%',
+      padding: '3% 7%',
       fontSize: '1.45rem',
       fontWeight: 600,
       color: 'white',
-      marginRight: '30%'
+      marginRight: '8%'
     },
   };
 
@@ -181,14 +182,15 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    baseColor: duosBlue,
-    hoverColor: duosBlue,
+    baseColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    hoverColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
     additionalStyle: {
-      padding: '3% 10%',
+      padding: '3% 7%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      color: 'white',
-      marginRight: '30%'
+      color: voteLabel === 'Update Vote' ? duosBlue : 'white',
+      marginRight: '8%',
+      border: `1px ${duosBlue} solid`,
     },
   };
 
@@ -201,7 +203,7 @@ export default function ChairActions(props) {
         display: 'flex',
         padding: '10px 5px',
         justifyContent: 'flex-start',
-        alignItems: 'end',
+        alignItems: 'center',
       },
     },
     [
