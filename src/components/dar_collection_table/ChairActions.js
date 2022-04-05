@@ -46,7 +46,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections, setVoteLabel}) => {
+const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
   try{
     let nonOpenReleventElectionPresent = false;
     let openRelevantElectionPresent = false;
