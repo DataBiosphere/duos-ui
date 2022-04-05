@@ -554,7 +554,6 @@ export const getSearchFilterFunctions = () => {
       const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
       const matched = find((phrase) => {
         const termArr = lowerCaseTerm.split(" ");
-        debugger; // eslint-disable-line
         return find(term => includes(term, phrase))(termArr);
       })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
       return !isNil(matched);
