@@ -62,6 +62,7 @@ const DeactivateLibraryCardButton = (props) => {
     keyProp: `deactivate-card-${card.id}`,
     label: 'Deactivate',
     baseColor: Theme.palette.error,
+    hoverColor: 'rgb(194, 38,11)',
     additionalStyle: {
       width: '30%',
       padding: '2%',
@@ -401,7 +402,8 @@ export default function SigningOfficialTable(props) {
           baseColor: Theme.palette.secondary,
           label: 'Add New Researcher',
           additionalStyle: {
-            width: '20rem'
+            width: '26rem',
+            padding: '4% 10%'
           }
         }),
       ])

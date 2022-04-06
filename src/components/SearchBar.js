@@ -14,7 +14,7 @@ export default function SearchBar(props) {
     borderRadius: '5px',
     height: '4rem',
     paddingLeft: '2%',
-    fontFamily: 'Arial',
+    fontFamily: 'Montserrat',
     fontSize: '1.5rem'
   };
 

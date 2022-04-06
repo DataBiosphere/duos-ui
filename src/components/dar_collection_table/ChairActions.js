@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
-import { Notifications } from '../../libs/utils';
-import { Collections } from '../../libs/ajax';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
-import TableTextButton from '../TableTextButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq } from 'lodash/fp';
+import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
+import SimpleButton from '../SimpleButton';
 
-const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {
-  fontFamily: 'Montserrant',
-  fontSize: '1.4rem',
-  margin: '0%',
-});
+const duosBlue = '#0948B7';
+const cancelGray = '#333F52';
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
+const baseCancelButtonStyle = Object.assign(
+  {},
+  Styles.TABLE.TABLE_ICON_BUTTON,
+  {color: cancelGray},
+  { alignItems: 'center' }
+);
 
 const initUserData = ({dars, elections, relevantDatasets}) => {
   try {
@@ -26,44 +25,49 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       map(dataset => dataset.dataSetId),
       uniq
     )(relevantDatasets);
-    const relevantEmptyDars = filter(dar => {
-      if(isEmpty(dar.elections)){ return false; }
+    const relevantDarsNoElections = filter(dar => {
       const datasetId = !isEmpty(dar.data) ? dar.data.datasetIds[0] : undefined;
-      return includes(datasetId)(relevantDatasetIds);
+      return includes(datasetId, relevantDatasetIds) ? isEmpty(dar.elections) : false;
     })(dars);
-    const relevantElections = filter((election) =>
-      includes(election.datasetId)(relevantDatasetIds)
-    )(elections);
-    return {relevantEmptyDars, relevantElections, relevantDatasetIds};
+    const relevantElections = filter((election) => {
+      //NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
+      //For this ticket I'm going to use dar.data.datasetIds[0] as a fallback value
+      if(!isNil(election.dataSetId)) {
+        return includes(election.dataSetId, relevantDatasetIds);
+      } else {
+        const datasetId = !isEmpty(dars[election.referenceId].data) ? dars[election.referenceId].data.datasetIds[0] : -1;
+        return includes(datasetId, relevantDatasetIds);
+      }
+    })(elections);
+    return {relevantDarsNoElections, relevantElections, relevantDatasetIds};
   } catch(error) {
     //if there's an issue with the collection it's best to fail safely, so hide all of the buttons
     throw new Error('Error initializing component data');
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantEmptyDars, relevantDatasetIds}) => {
+const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
   try{
-    const nonOpenRelevantElections = [];
-    const openRelevantElections = [];
+    let nonOpenReleventElectionPresent = false;
+    let openRelevantElectionPresent = false;
     let userHasVote = false;
     let label = "Vote";
 
     //iterate through elections, push open and non-open elections into their respective arrays
     //also for each election, see if user has a vote and whether or not they've already voted
     forEach(election => {
-      if(includes(election.datasetId)(relevantDatasetIds)) {
-        const {votes} = election;
-        toLower(election.status) === 'open' ? openRelevantElections.push(election) : nonOpenRelevantElections.push(election);
-        forEach(vote => {
-          if(vote.dacUserId === dacUserId) {userHasVote = true;}
-          if(!isEmpty(vote.vote)) { label = "Update Vote";}
-        })(votes);
-      }
+      const {votes, status} = election;
+      const isElectionOpen = toLower(status) === 'open';
+      isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
+      forEach(vote => {
+        if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
+        if(!isNil(vote.vote)) { label = "Update Vote";}
+      })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
-    const isOpenEnabled = (!isEmpty(relevantEmptyDars) || !isEmpty(nonOpenRelevantElections));
+    const isOpenEnabled = (!isEmpty(relevantDarsNoElections) || nonOpenReleventElectionPresent);
     //To determine cancel, see if openRelevantElections is populated
-    const isCancelEnabled = !isEmpty(openRelevantElections);
+    const isCancelEnabled = openRelevantElectionPresent;
     return {isCancelEnabled, userHasVote, label, isOpenEnabled};
   } catch(error) {
     throw new Error ('Error initializing chair actions');
@@ -86,8 +90,7 @@ export default function ChairActions(props) {
   //relevantDatasets is the list of datasets that the user has access to
   //needed to determine if a user can open an election on a DAR that has no elections
   //Done via API call, needs to be done on parent component to avoid making the same request (will return the same result) on each row
-  const { showCancelModal, updateCollections, collection, relevantDatasets } =
-    props;
+  const { showConfirmationModal, collection, relevantDatasets, goToVote } = props;
   const { dars } = collection;
   const collectionId = collection.darCollectionId;
   const [openEnabled, setOpenEnabled] = useState(false);
@@ -105,22 +108,26 @@ export default function ChairActions(props) {
 
   useEffect(() => {
     const init = ({ elections, dars, dacUserId, relevantDatasets }) => {
-      const { relevantEmptyDars, relevantElections, relevantDatasetIds } =
-        initUserData({ dars, elections, relevantDatasets });
+      const { relevantDarsNoElections, relevantElections } =
+        initUserData({
+          dars,
+          elections,
+          relevantDatasets
+        });
       const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
         calcComponentState({
           dacUserId,
           relevantElections,
-          relevantEmptyDars,
-          relevantDatasetIds,
+          relevantDarsNoElections,
+          setVoteLabel
         });
       setOpenEnabled(isOpenEnabled);
       //To determine cancel enabled, see if any election is open
       setCancelEnabled(isCancelEnabled);
       //set label based on function return, visibility determined by setVoteEnabled
       setVoteLabel(label);
-      //To determine if vote is enabled, check if user has a vote AND check that the open button is not enabled
-      setVoteEnabled(userHasVote && !isOpenEnabled);
+      //enable vote button, viibility determined by userHasVote
+      setVoteEnabled(userHasVote);
     };
 
     try {
@@ -137,33 +144,28 @@ export default function ChairActions(props) {
     }
   }, [dars, collection, relevantDatasets]);
 
-  //NOTE: adjust as needed for console implementation ticket. Function declaration is listed as a minimal placeholder
-  const openOnClick = async ({ collectionId, updateCollections }) => {
-    let updatedCollection;
-    try {
-      updatedCollection = await Collections.openElectionsById(collectionId);
-    } catch (error) {
-      Notifications.showError({ text: 'Error updating collections status' });
-    }
-    updateCollections(updatedCollection);
+  const openOnClick = async (collection) => {
+    showConfirmationModal(collection, 'open');
   };
 
-  const goToVote = (collectionId) => {
-    history.push(`/dar_collection/${collectionId}`);
-  };
-
-  //NOTE: adjust as needed for console implementation ticket. Function declaration is listed as a minimal placeholder
   const cancelOnClick = (collection) => {
-    showCancelModal(collection);
+    showConfirmationModal(collection, 'cancel');
   };
 
   const openButtonAttributes = {
     keyProp: `chair-open-${collectionId}`,
     label: 'Open',
     isRendered: openEnabled,
-    onClick: () => openOnClick({ collectionId, updateCollections }),
-    style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle,
+    onClick: () => openOnClick(collection),
+    baseColor: duosBlue,
+    hoverColor: duosBlue,
+    additionalStyle: {
+      padding: '3% 7%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      color: 'white',
+      marginRight: '8%'
+    },
   };
 
   const cancelButtonAttributes = {
@@ -180,8 +182,16 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    style: baseTextButtonStyle,
-    hoverStyle: hoverTextButtonStyle,
+    baseColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    hoverColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    additionalStyle: {
+      padding: '3% 7%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      color: voteLabel === 'Update Vote' ? duosBlue : 'white',
+      marginRight: '8%',
+      border: `1px ${duosBlue} solid`,
+    },
   };
 
   return div(
@@ -192,13 +202,13 @@ export default function ChairActions(props) {
       style: {
         display: 'flex',
         padding: '10px 5px',
-        justifyContent: 'space-around',
-        alignItems: 'end',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
       },
     },
     [
-      h(TableTextButton, openButtonAttributes),
-      h(TableTextButton, voteButtonAttributes),
+      h(SimpleButton, openButtonAttributes),
+      h(SimpleButton, voteButtonAttributes),
       h(TableIconButton, cancelButtonAttributes),
     ]
   );
