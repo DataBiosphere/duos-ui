@@ -245,6 +245,15 @@ describe('Chair Actions - Vote Button', () => {
     const voteButton = cy.get(`#chair-vote-${collectionId}`);
     voteButton.should('not.exist');
   });
+  it('should render the "Update Vote" button if the user can vote and had already submitted a vote previously', () => {
+    const targetDars = cloneDeep(votableDars);
+    propCopy.relevantDatasets = [{ dataSetId: 2}];
+    targetDars[2].elections[3].votes[2].vote = true;
+    propCopy.collection.dars = targetDars;
+    mount(<ChairActions {...propCopy}/>);
+    const voteButton = cy.get(`#chair-vote-${collectionId}`);
+    voteButton.should('exist');
+  });
 });
 
 

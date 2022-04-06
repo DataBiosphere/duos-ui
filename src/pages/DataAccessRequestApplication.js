@@ -14,7 +14,7 @@ import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
-import { isEmpty, isNil, assign } from 'lodash';
+import { isEmpty, isNil, assign, get } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
@@ -896,6 +896,7 @@ class DataAccessRequestApplication extends Component {
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
+    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', []));
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
@@ -1031,6 +1032,7 @@ class DataAccessRequestApplication extends Component {
                 externalCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
+                researcherUser: this.state.researcher,
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
@@ -1127,6 +1129,7 @@ class DataAccessRequestApplication extends Component {
                 step1Invalid,
                 step2Invalid,
                 step3Invalid,
+                libraryCardInvalid,
                 showValidationMessages,
                 updateShowValidationMessages: this.updateShowValidationMessages,
                 goToStep: this.goToStep

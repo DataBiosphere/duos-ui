@@ -63,8 +63,7 @@ export default function AdminActions(props) {
     additionalStyle: {
       padding: '5px 10px',
       fontSize: '1.45rem',
-      fontWeight: 600,
-      marginRight: '15%'
+      fontWeight: 600
     },
   };
 
