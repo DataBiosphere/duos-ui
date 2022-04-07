@@ -22,7 +22,8 @@ const nonVoteableDars = {
           dacUserId: 2
         }
       }
-    }
+    },
+    data: {}
   }
 };
 
@@ -34,9 +35,10 @@ const votableDars = {
         votes: {
           1: {dacUserId: 2}
         },
-        datasetId: 1
+        dataSetId: 1
       },
-    }
+    },
+    data: {}
   },
   2: {
     elections: {
@@ -45,9 +47,10 @@ const votableDars = {
         votes: {
           2: {dacUserId: 1}
         },
-        datasetId: 2
+        dataSetId: 2
       }
-    }
+    },
+    data: {}
   }
 };
 
@@ -59,9 +62,10 @@ const nonOpenDars = {
         votes: {
           dacUserId: 1
         },
-        datasetId: 1
+        dataSetId: 1
       },
-    }
+    },
+    data: {}
   },
   2: {
     elections: {
@@ -70,9 +74,10 @@ const nonOpenDars = {
         votes: {
           dacUserId: 1
         },
-        datasetId: 2
+        dataSetId: 2
       }
-    }
+    },
+    data: {}
   }
 };
 
@@ -89,9 +94,11 @@ const missingElectionSet = {
         status: 'Open',
         votes: {
           dacUserId: 2
-        }
+        },
+        referenceId: 2
       }
-    }
+    },
+    data: {}
   }
 };
 
@@ -103,9 +110,10 @@ const cancelableDars = {
         votes: {
           dacUserId: 1
         },
-        datasetId: 1
+        dataSetId: 1
       }
-    }
+    },
+    data: {}
   },
   2: {
     elections: {
@@ -114,9 +122,10 @@ const cancelableDars = {
         votes: {
           dacUserId: 1
         },
-        datasetId: 2
+        dataSetId: 2
       }
-    }
+    },
+    data: {}
   }
 };
 
@@ -132,10 +141,11 @@ const user = {
     }
   ]
 };
+
 const props = {
   collection: collectionSkeleton,
   showCancelModal: () => {},
-  updateCollections: () => {},
+  updateCollections: () => {}
 };
 
 beforeEach(() => {
@@ -173,8 +183,7 @@ describe('Chair Actions - Open Button', () => {
 
   it('should render if there are valid DARs with no election present', () => {
     propCopy.collection.dars = missingElectionSet;
-    let mockDacId = 1;
-    propCopy.relevantDatasets = [{ dacId: mockDacId++ }];
+    propCopy.relevantDatasets = [{ dataSetId: 1 }];
     mount(<ChairActions {...propCopy} />);
     const openButton = cy.get(`#chair-open-${collectionId}`);
     openButton.should('exist');
@@ -200,7 +209,7 @@ describe('Chair Actions - Close Button', () => {
 
   it('should not render if there is no valid election for canceling', () => {
     propCopy.collection.dars = nonOpenDars;
-    propCopy.relevantDatasets = []
+    propCopy.relevantDatasets = [];
     mount(<ChairActions {...propCopy} />);
     const openButton = cy.get(`#chair-cancel-${collectionId}`);
     openButton.should('not.exist');
@@ -235,6 +244,15 @@ describe('Chair Actions - Vote Button', () => {
     mount(<ChairActions {...propCopy} />);
     const voteButton = cy.get(`#chair-vote-${collectionId}`);
     voteButton.should('not.exist');
+  });
+  it('should render the "Update Vote" button if the user can vote and had already submitted a vote previously', () => {
+    const targetDars = cloneDeep(votableDars);
+    propCopy.relevantDatasets = [{ dataSetId: 2}];
+    targetDars[2].elections[3].votes[2].vote = true;
+    propCopy.collection.dars = targetDars;
+    mount(<ChairActions {...propCopy}/>);
+    const voteButton = cy.get(`#chair-vote-${collectionId}`);
+    voteButton.should('exist');
   });
 });
 

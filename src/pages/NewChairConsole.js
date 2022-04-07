@@ -6,8 +6,9 @@ import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
+import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
 
-export default function NewMemberConsole(props) {
+export default function NewChairConsole(props) {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [relevantDatasets, setRelevantDatasets] = useState();
@@ -16,32 +17,34 @@ export default function NewMemberConsole(props) {
   const filterFn = getSearchFilterFunctions().darCollections;
   const { history } = props;
 
-  const handleSearchChange = useCallback(
-    (searchTerms) =>
-      searchOnFilteredList(searchTerms, collections, filterFn, setFilteredList),
-    [collections, filterFn]
-  );
+  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
+    searchTerms,
+    collections,
+    filterFn,
+    setFilteredList
+  ), [collections, filterFn]);
 
   useEffect(() => {
-    const init = async () => {
+    const init = async() => {
       try {
         const [collections, datasets] = await Promise.all([
-          Collections.getCollectionsByRoleName('member'),
-          User.getUserRelevantDatasets(), //still need this on this console for status cell
+          Collections.getCollectionsByRoleName("chairperson"),
+          User.getUserRelevantDatasets()
         ]);
         setCollections(collections);
         setRelevantDatasets(datasets);
         setFilteredList(collections);
         setIsLoading(false);
-      } catch (error) {
-        Notifications.showError({
-          text: 'Error initializing Collections table',
-        });
+      } catch(error) {
+        Notifications.showError({text: 'Error initializing Collections table'});
       }
     };
     init();
   }, []);
 
+  const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: 'chairperson'});
+  const openCollection = openCollectionFn({updateCollections});
   const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
 
   return div({ style: Styles.PAGE }, [
@@ -71,7 +74,7 @@ export default function NewMemberConsole(props) {
                   fontSize: '1.6rem'
                 },
               },
-              ['Vote on Data Access Request for DAC Review']
+              ['Select and manage Data Access Request for DAC Review']
             ),
           ]),
         ]
@@ -92,9 +95,11 @@ export default function NewMemberConsole(props) {
       ],
       isLoading,
       relevantDatasets,
+      cancelCollection,
       resubmitCollection: null,
+      openCollection,
       goToVote,
-      consoleType: 'member'
+      consoleType: 'chairperson'
     }),
   ]);
 }

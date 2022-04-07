@@ -37,7 +37,7 @@ export default function PaginationBar(props) {
             onMouseLeave: (e) => removeTextHover(e, Theme.palette.primary),
           },['Prev']),
         ]),
-        div({style: Styles.TABLE.CURRENT_PAGE}, [
+        div({style: Styles.TABLE.PAGINATION_CURRENT_PAGE}, [
           span({},['Page ']),
           input({
             onChange: () => goToPage(toNumber(currentPage.current.value)),

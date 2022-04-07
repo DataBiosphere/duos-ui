@@ -1,19 +1,8 @@
-import {
-  flow,
-  isEmpty,
-  map,
-  join,
-  filter,
-  forEach,
-  flatMap,
-  toLower,
-  sortBy,
-  isNil,
-  size,
-  includes,
-  get
-} from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, includes, get, findIndex, cloneDeep} from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
+import { Notifications } from '../libs/utils';
+import { Collections } from '../libs/ajax';
+
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -209,6 +198,54 @@ export const checkIfCancelableElectionPresent = (dars) => {
   return !isEmpty(elections);
 };
 
+export const updateCollectionFn = ({collections, filterFn, searchRef, setCollections, setFilteredList}) =>
+  (updatedCollection) => {
+    const targetIndex = findIndex(
+      (collection) =>
+        collection.darCollectionId === updatedCollection.darCollectionId
+    )(collections);
+    if (targetIndex < 0) {
+      Notifications.showError({
+        text: `Error: Could not find ${updatedCollection.darCode} collection`,
+      });
+    } else {
+      const collectionsCopy = cloneDeep(collections);
+      //NOTE: update does not return datasets, so a direct collection update will mess up the datasets column
+      //That's not a big deal, we know the only things updated were the elections, so we can still update the dars (sicne elections are nested inside)
+      collectionsCopy[targetIndex].dars = updatedCollection.dars;
+      const updatedFilteredList = filterFn(
+        searchRef.current.value,
+        collectionsCopy
+      );
+      setCollections(collectionsCopy);
+      setFilteredList(updatedFilteredList);
+    }
+  };
+
+export const cancelCollectionFn = ({updateCollections, role}) =>
+  async ({ darCode, darCollectionId }) => {
+    try {
+      const canceledCollection = await Collections.cancelCollection(
+        darCollectionId,
+        role
+      );
+      updateCollections(canceledCollection);
+      Notifications.showSuccess({ text: `Successfully canceled ${darCode}` });
+    } catch (error) {
+      Notifications.showError({ text: `Error canceling ${darCode}` });
+    }
+  };
+
+export const openCollectionFn = ({updateCollections}) =>
+  async ({ darCode, darCollectionId }) => {
+    try {
+      const openCollection = await Collections.openElectionsById(darCollectionId);
+      updateCollections(openCollection);
+      Notifications.showSuccess({ text: `Successfully opened ${darCode}` });
+    } catch (error) {
+      Notifications.showError({ text: `Error opening ${darCode}` });
+    }
+  };
 
 export default {
   generatePreProcessedBucketData,

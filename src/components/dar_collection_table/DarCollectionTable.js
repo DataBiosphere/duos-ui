@@ -25,7 +25,11 @@ export const styles = {
     padding: '1rem 2%',
     justifyContent: 'space-between',
     alignItems: 'center',
-    whiteSpace: 'pre-wrap'
+    whiteSpace: 'pre-wrap',
+    backgroundColor: 'white',
+    border: '1px solid #DEDEDE',
+    borderRadius: '4px',
+    margin: '0.5% 0'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -34,17 +38,19 @@ export const styles = {
     fontSize: '1.2rem',
     fontWeight: 'bold',
     letterSpacing: '0.2px',
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    backgroundColor: 'B8CDD3',
+    border: 'none'
   }),
   cellWidth: {
-    darCode: '15%',
+    darCode: '8%',
     projectTitle: '20%',
     submissionDate: '12.5%',
     pi: '10%',
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
-    actions: '7.5%'
+    actions: '14.5%',
   },
   color: {
     darCode: '#000000',
@@ -64,7 +70,7 @@ export const styles = {
     institution: '1.4rem',
     datasetCount: '2.0rem',
     status: '1.6rem',
-    actions: '1.6rem'
+    actions: '1.6rem',
   },
 };
 
@@ -127,7 +133,7 @@ const columnHeaderConfig = {
     label: 'Status',
     cellStyle: { width: styles.cellWidth.status },
     cellDataFn: (props) => {
-      props.status = determineCollectionStatus(props.collection);
+      props.status = determineCollectionStatus(props.collection, props.relevantDatasets);
       return cellData.statusCellData(props);
     },
     sortable: true
@@ -151,7 +157,7 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = ''}) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -160,7 +166,7 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
           collection, darCollectionId, datasets, darCode,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
-          openCollection
+          openCollection, goToVote, relevantDatasets
         });
       });
     });
@@ -179,7 +185,10 @@ export const DarCollectionTable = function DarCollectionTable(props) {
 
   //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
   //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
-  const { collections, columns, isLoading, cancelCollection, resubmitCollection, openCollection, actionsDisabled, consoleType } = props;
+  const {
+    collections, columns, isLoading, cancelCollection, resubmitCollection,
+    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
+  } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -202,7 +211,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         showConfirmationModal,
         actionsDisabled,
         consoleType,
-        openCollection
+        openCollection,
+        goToVote,
+        relevantDatasets
       }),
       currentPage,
       setPageCount,
@@ -210,7 +221,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);

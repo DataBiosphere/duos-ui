@@ -178,10 +178,11 @@ export const Styles = {
   TABLE: {
     CONTAINER: {
       marginTop: '2rem',
+      marginLeft: '-6%',
       borderTop: '1px solid #979797',
       backgroundColor: 'rgb(184,205,211,0.08)',
-      padding: '2rem',
-      width: '100%',
+      padding: '2rem 4rem',
+      width: '112%',
       color: '#7B7B7B',
       fontFamily: 'Montserrat',
     },
@@ -315,22 +316,25 @@ export const Styles = {
     },
     PAGINATION_BUTTON: {
       margin: '2%',
-      flex: 1
+      flex: 1,
+      fontFamily: 'Montserrat'
     },
     PAGINATION_CURRENT_PAGE: {
       margin: '2% 0',
-      flex: 2
+      flex: 2,
+      fontFamily: 'Montserrat'
     },
     PAGINATION_INPUT: {
       textAlign: 'center',
       width: '20%',
-      fontFamily: targetFont
+      fontFamily: 'Montserrat'
     },
     PAGINATION_TABLE_SIZE_SECTION: {
       display: 'flex',
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+      fontFamily: 'Montserrat'
     },
     TABLE_TEXT_BUTTON: {
       display: 'flex',
