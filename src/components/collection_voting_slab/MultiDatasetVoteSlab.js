@@ -46,6 +46,19 @@ const styles = {
   }
 };
 
+const addIfUnique = (newValue, existingValues) => {
+  if(!isNil(newValue) && !includes(newValue, existingValues)) {
+    existingValues.push(newValue);
+  }
+};
+
+const appendAll = (values) => {
+  let result = '';
+  forEach(value => {
+    result += `${value}\n`;
+  })(values);
+  return !isEmpty(result) ? result : null;
+};
 
 export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
@@ -134,12 +147,6 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const collapseVotes = ({votes}) => {
-    const addIfUnique = (newValue, existingValues) => {
-      if(!isNil(newValue) && !includes(newValue, existingValues)) {
-        existingValues.push(newValue);
-      }
-    };
-
     const collapsedVotes = {};
     forEach( vote => {
       const matchingVote = collapsedVotes[`${vote.vote}`];
@@ -161,14 +168,6 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const convertToVoteObjects = ({collapsedVotes}) => {
-    const appendAll = (values) => {
-      let result = '';
-      forEach(value => {
-        result += `${value}\n`;
-      })(values);
-      return !isEmpty(result) ? result : null;
-    };
-
     return map( key => {
       const collapsedVote = collapsedVotes[key];
       const collapsedRationale = appendAll(collapsedVote.rationales);
