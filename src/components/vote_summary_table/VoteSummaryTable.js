@@ -14,9 +14,10 @@ const styles = {
     backgroundColor: '#FFFFFF',
     display: 'flex',
     padding: '1rem 2%',
-    lineHeight: '1.6rem',
+    lineHeight: '2rem',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    whiteSpace: 'pre-line'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     fontFamily: 'Montserrat',
