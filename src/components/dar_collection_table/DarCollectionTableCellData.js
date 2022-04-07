@@ -109,7 +109,7 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
       actionComponent = h(ChairActions, {collection, showConfirmationModal, goToVote, relevantDatasets});
       break;
     case 'member':
-      actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal});
+      actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal, goToVote});
       break;
     default:
       actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal});

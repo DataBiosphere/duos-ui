@@ -102,6 +102,4 @@ export default function NewChairConsole(props) {
       consoleType: 'chairperson'
     }),
   ]);
-
-
 }

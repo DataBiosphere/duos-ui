@@ -25,13 +25,14 @@ import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDow
 //Styles specific to this table
 const styles = {
   baseStyle: {
-    fontFamily: 'Arial',
-    fontSize: '14px',
+    fontFamily: 'Montserrat',
+    fontSize: '1.45rem',
     fontWeight: 400,
+    color: 'rgb(53, 64, 82)',
     display: 'flex',
     padding: '1rem 2%',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -41,7 +42,6 @@ const styles = {
     name: '20%',
     libraryCard: '25%',
     role: '20%',
-    // activeDARs: '10%'
   },
 };
 
@@ -65,8 +65,10 @@ const DeactivateLibraryCardButton = (props) => {
     hoverColor: 'rgb(194, 38,11)',
     additionalStyle: {
       width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem'
+      padding: '2.25% 5%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      fontFamily: 'Montserrat'
     },
     onClick: () => showConfirmationModal({card, message, title, confirmType: 'delete'})
   });
@@ -88,8 +90,10 @@ const IssueLibraryCardButton = (props) => {
     baseColor: Theme.palette.secondary,
     additionalStyle: {
       width: '30%',
-      padding: '2%',
+      padding: '2.25% 5%',
       fontSize: '1.45rem',
+      fontWeight: 600,
+      fontFamily: 'Montserrat'
     },
     onClick: () => showConfirmationModal({ card, message, title, confirmType: 'issue' }),
   });
@@ -403,7 +407,8 @@ export default function SigningOfficialTable(props) {
           label: 'Add New Researcher',
           additionalStyle: {
             width: '26rem',
-            padding: '4% 10%'
+            padding: '4% 10%',
+            fontWeight: '600'
           }
         }),
       ])

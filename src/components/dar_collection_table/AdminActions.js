@@ -84,7 +84,7 @@ export default function AdminActions(props) {
         display: 'flex',
         padding: '10px 0px',
         alignItems: 'end',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
       },
     },
     [

@@ -23,7 +23,7 @@ import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
-import NewMemberConsole from './pages/NewMemberConsole';
+import MemberConsole from './pages/MemberConsole';
 import ChairConsole from './pages/ChairConsole';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
@@ -48,6 +48,7 @@ import DarCollectionReview from './pages/dar_collection_review/DarCollectionRevi
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from "./pages/AdminEditUser";
 import NewChairConsole from './pages/NewChairConsole';
+import NewMemberConsole from './pages/NewMemberConsole';
 
 const Routes = (props) => (
   <Switch>
@@ -90,8 +91,12 @@ const Routes = (props) => (
       props.env === 'dev' ? <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
         : ''
     }
+    {
+      props.env === 'dev' ? <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
+        : ''
+    }
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
+    <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
     <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />
     <AuthenticatedRoute path="/data_owner_review/:voteId/:referenceId/:dataSetId" component={DataOwnerReview} props={props}
       rolesAllowed={[USER_ROLES.dataOwner]} />
