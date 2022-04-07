@@ -1,4 +1,4 @@
-import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size } from 'lodash/fp';
+import {flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, includes} from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -138,6 +138,19 @@ export const processDataUseBuckets = async(buckets) => {
   return processedBuckets;
 };
 
+//Gets member votes from this bucket by members of this user's DAC
+export const extractDacUserVotesFromBucket = (bucket, user) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.dataAccess),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    map(filteredData => filteredData.memberVotes),
+    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+    flatMap(memberVotes => memberVotes)
+  )(votes);
+};
+
 //Admin only helper function
 export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
@@ -164,5 +177,6 @@ export const checkIfCancelableElectionPresent = (dars) => {
 
 export default {
   generatePreProcessedBucketData,
-  processDataUseBuckets
+  processDataUseBuckets,
+  extractDacUserVotesFromBucket
 };
