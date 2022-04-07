@@ -151,6 +151,18 @@ export const extractDacUserVotesFromBucket = (bucket, user) => {
   )(votes);
 };
 
+//Gets this user's votes from this bucket; final votes if isChair is true, member votes if false
+export const extractUserVotesFromBucket = (bucket, user, isChair) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.dataAccess),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    flatMap(filteredData => isChair ? filteredData.finalVotes : filteredData.memberVotes),
+    filter(vote => vote.dacUserId === user.dacUserId)
+  )(votes);
+};
+
 //Admin only helper function
 export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
@@ -178,5 +190,6 @@ export const checkIfCancelableElectionPresent = (dars) => {
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
-  extractDacUserVotesFromBucket
+  extractDacUserVotesFromBucket,
+  extractUserVotesFromBucket
 };

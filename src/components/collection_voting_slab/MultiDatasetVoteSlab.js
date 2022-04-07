@@ -8,7 +8,7 @@ import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
 import {formatDate} from "../../libs/utils";
-import {extractDacUserVotesFromBucket} from "../../utils/DarCollectionUtils";
+import {extractDacUserVotesFromBucket, extractUserVotesFromBucket} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
@@ -70,16 +70,9 @@ export default function MultiDatasetVoteSlab(props) {
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    const votes = !isNil(bucket) ? bucket.votes : [];
-    setDacVotes(extractDacUserVotesFromBucket(bucket, user));
 
-    const userVotes = flow(
-      map(voteData => voteData.dataAccess),
-      filter((dataAccessData) => !isEmpty(dataAccessData)),
-      flatMap(filteredData => isChair ? filteredData.finalVotes : filteredData.memberVotes),
-      filter(vote => vote.dacUserId === user.dacUserId)
-    )(votes);
-    setCurrentUserVotes(userVotes);
+    setDacVotes(extractDacUserVotesFromBucket(bucket, user));
+    setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
 
     const datasetIds = flow(
       get('elections'),
