@@ -110,23 +110,6 @@ const noVoteInDars = {
   },
 };
 
-const noElectionsForDars = {
-  1: {
-    elections: {
-      1: {
-        status: 'Open',
-        votes: {
-          1: { dacUserId: 2 },
-        },
-        datasetId: 1,
-      },
-    },
-  },
-  2: {
-    elections: {},
-  },
-};
-
 const user = {
   dacUserId: 1,
   roles: [
@@ -180,19 +163,19 @@ describe('Member Actions - Vote Button', () => {
     voteButton.should('not.exist');
   });
 
-  it('shows "Vote" if the user has yet to vote on an election', () => {
+  it('shows "VOTE" if the user has yet to vote on an election', () => {
     propCopy.collection.dars = votableDars;
     mount(<MemberActions {...propCopy} />);
     const voteButton = cy.get(`#member-vote-${collectionId}`);
     voteButton.should('exist');
-    voteButton.contains('Vote');
+    voteButton.contains('VOTE');
   });
 
-  it('shows "Update Vote" if the user has already voted but the election is still open', () => {
+  it('shows "UPDATE VOTE" if the user has already voted but the election is still open', () => {
     propCopy.collection.dars = submittedVoteDars;
     mount(<MemberActions {...propCopy} />);
     const voteButton = cy.get(`#member-vote-${collectionId}`);
     voteButton.should('exist');
-    voteButton.contains('Update Vote');
+    voteButton.contains('UPDATE VOTE');
   });
 });

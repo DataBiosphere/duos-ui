@@ -44,23 +44,42 @@ export const darCollectionUtils = {
   //this needs to be defined outside of the object, keys can't reference other key/value pairs on object initialization,
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
-  determineCollectionStatus: (collection) => {
+  determineCollectionStatus: (collection, relevantDatasets) => {
     const electionStatusCount = {};
+    let output;
     if(!isEmpty(collection.dars)) {
-      flow([
+      const targetElections = flow([
         map((dar) => {
-          const {elections} = dar;
+          const { elections } = dar;
+          //election is empty => no elections made for dar
+          //need to figure out if dar is relevant, can obtain datasetId from dar.data
+          //see if its relevant, if it is, add 1 to submitted on hash
+          //return empty array at the end
           if(isEmpty(elections)) {
-            if(!electionStatusCount['Submitted']) {
-              electionStatusCount['Submitted'] = 0;
+            const datasetId = (isEmpty(dar.data) || isEmpty(dar.data.datasetIds)) ? -1 : dar.data.datasetIds[0];
+            if(includes(relevantDatasets, datasetId)) {
+              if(isNil(electionStatusCount['Submitted'])) {
+                electionStatusCount['Submitted'] = 0;
+              }
+              electionStatusCount['Submitted']++;
             }
-            electionStatusCount['Submitted']++;
             return [];
           } else {
-            return values(elections);
+            //if elections exist, filer out elections based on relevant ids
+            //NOTE: Admin does not have relevantIds, DAC roles do
+            const electionArr = Object.values(elections);
+            if(isNil(relevantDatasets)) {
+              return electionArr;
+            } else {
+              const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
+              return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
+            }
           }
         }),
-        flatten,
+        flatten
+      ])(collection.dars);
+
+      if(isNil(relevantDatasets)) {
         each(election => {
           const {status, electionType} = election;
           if(toLower(electionType) === 'dataaccess') {
@@ -69,14 +88,16 @@ export const darCollectionUtils = {
             }
             electionStatusCount[status]++;
           }
-        })
-      ])(collection.dars);
+        })(targetElections);
+        output = nonFPMap(electionStatusCount, (value, key) => {
+          return `${key}: ${value}`;
+        }).join('\n');
+      } else {
+        output = outputCommaSeperatedElectionStatuses(targetElections);
+      }
+      return output;
     }
-
-    return nonFPMap(electionStatusCount, (value, key) => {
-      return `${key}: ${value}`;
-    }).join('\n');
-  },
+  }
 };
 ///////DAR Collection Utils END/////////////////////////////////////////////////////////////////////////////////
 
@@ -362,17 +383,23 @@ export const PromiseSerial = funcs =>
 //DAR CONSOLES UTILITY FUNCTIONS//
 /////////////////////////////////
 
+export const outputCommaSeperatedElectionStatuses = (elections) => {
+  // find all statuses that exist for all the user's elections
+  const statuses = uniq(
+    elections.map((e) => processElectionStatus(e, e.votes, false))
+  ).filter((status) => !isEmpty(status));
+  if (isEmpty(statuses)) {
+    return 'Unreviewed';
+  }
+  return statuses.join(', ');
+};
+
 // Returns a comma separated list of states for all elections the user has
 // access to in a DAR Collection
 export const processCollectionElectionStatus = (collection, user) => {
   // Filter elections for my DACs by looking for elections with votes that have my user id
   const filteredElections = filterCollectionElectionsByUser(collection, user);
-  // find all statuses that exist for all the user's elections
-  const statuses = uniq(filteredElections.map(e => processElectionStatus(e, e.votes, false)));
-  if (isEmpty(statuses)) {
-    return 'Unreviewed';
-  }
-  return statuses.join(", ");
+  return outputCommaSeperatedElectionStatuses(filteredElections);
 };
 
 // Filter elections in a DAR Collection by which ones the user has votes in
@@ -544,20 +571,23 @@ export const getSearchFilterFunctions = () => {
 
       return includesRoles || includesBaseAttributes;
     })(targetList),
-    darCollections: (term, targetList) => filter(collection => {
-      const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length : 0;
-      const lowerCaseTerm = toLower(term);
-      const { darCode, createDate } = collection;
-      const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
-      const { data } = referenceDar;
-      const { projectTitle = '', institution = '' } = data;
-      const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
-      const matched = find((phrase) => {
-        const termArr = lowerCaseTerm.split(" ");
-        return find(term => includes(term, phrase))(termArr);
-      })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
-      return !isNil(matched);
-    })(targetList),
+    darCollections: (term, targetList) =>
+      isEmpty(term) ? targetList :
+        filter(collection => {
+          if(isEmpty(term)) {return true;}
+          const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
+          const lowerCaseTerm = toLower(term);
+          const { darCode, createDate } = collection;
+          const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
+          const { data } = referenceDar;
+          const { projectTitle = '', institution = '' } = data;
+          const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
+          const matched = find((phrase) => {
+            const termArr = lowerCaseTerm.split(" ");
+            return find(term => includes(term, phrase))(termArr);
+          })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
+          return !isNil(matched);
+        })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
       const lowerCaseTerm = toLower(term);
       const { data, draft, createDate, updateDate } = draftRecord;

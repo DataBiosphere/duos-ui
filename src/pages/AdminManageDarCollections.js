@@ -2,11 +2,11 @@ import {useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
 import { Collections } from '../libs/ajax';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
-import { findIndex, cloneDeep } from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
+import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
 
 export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([]);
@@ -36,42 +36,9 @@ export default function AdminManageDarCollections() {
     init();
   }, []);
 
-  const updateCollections = (updatedCollection) => {
-    const targetIndex = findIndex((collection) =>
-      collection.darCollectionId === updatedCollection.darCollectionId
-    )(collections);
-    if(targetIndex < 0) {
-      Notifications.showError({text: `Error: Could not find ${updatedCollection.darCode} collection`});
-    } else {
-      const collectionsCopy = cloneDeep(collections);
-      //NOTE: update does not return datasets, so a direct collection update will mess up the datasets column
-      //That's not a big deal, we know the only things updated were the elections, so we can still update the dars (sicne elections are nested inside)
-      collectionsCopy[targetIndex].dars = updatedCollection.dars;
-      const updatedFilteredList = filterFn(searchRef.current.value, collectionsCopy);
-      setCollections(collectionsCopy);
-      setFilteredList(updatedFilteredList);
-    }
-  };
-
-  const cancelCollection = async({darCode, darCollectionId}) => {
-    try {
-      const canceledCollection = await Collections.cancelCollection(darCollectionId, "admin");
-      updateCollections(canceledCollection);
-      Notifications.showSuccess({text: `Successfully canceled ${darCode}`});
-    } catch(error) {
-      Notifications.showError({text: `Error canceling ${darCode}`});
-    }
-  };
-
-  const openCollection = async({darCode, darCollectionId}) => {
-    try {
-      const openCollection = await Collections.openElectionsById(darCollectionId);
-      updateCollections(openCollection);
-      Notifications.showSuccess({text: `Successfully opened ${darCode}`});
-    } catch(error) {
-      Notifications.showError({text: `Error opening ${darCode}`});
-    }
-  };
+  const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: 'admin'});
+  const openCollection = openCollectionFn({updateCollections});
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between' } }, [

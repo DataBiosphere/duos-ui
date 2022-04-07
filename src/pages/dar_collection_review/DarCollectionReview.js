@@ -7,11 +7,10 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import { find, isEmpty, flow, filter, map, flatMap } from 'lodash/fp';
+import { find, isEmpty, flow, filter, map, flatMap, isNil } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import VotesPieChart from '../../components/common/VotesPieChart';
-import { isNil } from 'lodash';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 
