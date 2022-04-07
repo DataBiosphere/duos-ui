@@ -71,14 +71,13 @@ export default function MultiDatasetVoteSlab(props) {
   useEffect(() => {
     const user = Storage.getCurrentUser();
     const votes = !isNil(bucket) ? bucket.votes : [];
-
     setDacVotes(extractDacUserVotesFromBucket(bucket, user));
 
     const userVotes = flow(
       map(voteData => voteData.dataAccess),
       filter((dataAccessData) => !isEmpty(dataAccessData)),
-      flatMap(filteredData => filteredData.memberVotes),
-      filter(memberVote => memberVote.dacUserId === user.dacUserId)
+      flatMap(filteredData => isChair ? filteredData.finalVotes : filteredData.memberVotes),
+      filter(vote => vote.dacUserId === user.dacUserId)
     )(votes);
     setCurrentUserVotes(userVotes);
 
@@ -86,7 +85,6 @@ export default function MultiDatasetVoteSlab(props) {
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
       filter(electionData => electionData.electionType === 'DataAccess'),
-      filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(userVotes))),
       map(electionData => electionData.dataSetId)
     )(bucket);
     setBucketDatasetIds(datasetIds);
