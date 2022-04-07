@@ -8,7 +8,11 @@ import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
 import {formatDate} from "../../libs/utils";
-import {extractDacUserVotesFromBucket, extractUserVotesFromBucket} from "../../utils/DarCollectionUtils";
+import {
+  extractDacUserVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  extractUserVotesFromBucket
+} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
@@ -67,22 +71,12 @@ export default function MultiDatasetVoteSlab(props) {
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
   const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isLoading} = props;
 
-
   useEffect(() => {
     const user = Storage.getCurrentUser();
-
     setDacVotes(extractDacUserVotesFromBucket(bucket, user));
     setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
-
-    const datasetIds = flow(
-      get('elections'),
-      flatMap(election => flatMap(electionData => electionData)(election)),
-      filter(electionData => electionData.electionType === 'DataAccess'),
-      map(electionData => electionData.dataSetId)
-    )(bucket);
-    setBucketDatasetIds(datasetIds);
+    setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
   }, [bucket]);
-
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);

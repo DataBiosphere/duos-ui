@@ -1,4 +1,18 @@
-import {flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, includes} from 'lodash/fp';
+import {
+  flow,
+  isEmpty,
+  map,
+  join,
+  filter,
+  forEach,
+  flatMap,
+  toLower,
+  sortBy,
+  isNil,
+  size,
+  includes,
+  get
+} from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -163,6 +177,15 @@ export const extractUserVotesFromBucket = (bucket, user, isChair) => {
   )(votes);
 };
 
+export const extractDatasetIdsFromBucket = (bucket) => {
+  return flow(
+    get('elections'),
+    flatMap(election => flatMap(electionData => electionData)(election)),
+    filter(electionData => electionData.electionType === 'DataAccess'),
+    map(electionData => electionData.dataSetId)
+  )(bucket);
+};
+
 //Admin only helper function
 export const checkIfOpenableElectionPresent = (dars) => {
   const darCount = size(dars);
@@ -191,5 +214,6 @@ export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
   extractDacUserVotesFromBucket,
-  extractUserVotesFromBucket
+  extractUserVotesFromBucket,
+  extractDatasetIdsFromBucket
 };
