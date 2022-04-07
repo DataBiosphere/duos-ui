@@ -76,7 +76,7 @@ export default function MultiDatasetVoteSlab(props) {
     setDacVotes(extractDacUserVotesFromBucket(bucket, user));
     setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
-  }, [bucket]);
+  }, [bucket, isChair]);
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
