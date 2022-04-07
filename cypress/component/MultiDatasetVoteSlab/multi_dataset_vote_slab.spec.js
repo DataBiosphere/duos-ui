@@ -3,6 +3,7 @@ import React from 'react';
 import {mount} from "@cypress/react";
 import MultiDatasetVoteSlab from "../../../src/components/collection_voting_slab/MultiDatasetVoteSlab";
 import {Storage} from "../../../src/libs/storage";
+import {Votes} from "../../../src/libs/ajax";
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -22,7 +23,7 @@ const closedElection =  [
 const votesForOpenElection1 = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     memberVotes: [
       {dacUserId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
@@ -35,7 +36,7 @@ const votesForOpenElection1 = {
 const votesForOpenElection2 = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     memberVotes: [
       {dacUserId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
@@ -48,7 +49,7 @@ const votesForOpenElection2 = {
 const votesForClosedElection = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 103, voteId: 7},
     ],
     memberVotes: [
       {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
@@ -79,7 +80,30 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.contains('Use is permitted for a health, medical, or biomedical research purpose');
   });
 
-  it('Renders a selected vote button when all current user votes match', function() {
+  it('Renders a selected vote button when all current user votes match (Member)', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={false}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('not.be.disabled');
+  });
+
+  it('Renders a disabled selected vote button when all current user votes match (Chair)', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -92,9 +116,14 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
   });
 
   it('Renders vote button unselected when not all current user votes match', function() {
@@ -106,13 +135,18 @@ describe('ResearchProposalVoteSlab - Tests', function() {
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
         dacDatasetIds={[10, 20]}
-        isChair={true}
+        isChair={false}
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('textarea').should('not.be.disabled');
   });
 
   it('Renders unselected disabled vote buttons if no votes for current user in bucket', function() {
@@ -124,13 +158,18 @@ describe('ResearchProposalVoteSlab - Tests', function() {
           votes: [votesForClosedElection]
         }}
         dacDatasetIds={[30]}
-        isChair={true}
+        isChair={false}
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('textarea').should('be.disabled');
   });
 
   it('Renders unselected disabled vote buttons if some elections are closed and current votes do not match', function() {
@@ -146,6 +185,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
@@ -168,6 +208,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
