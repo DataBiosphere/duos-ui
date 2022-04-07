@@ -7,6 +7,7 @@ import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
+import {formatDate} from "../../libs/utils";
 
 const styles = {
   baseStyle: {
@@ -171,7 +172,7 @@ export default function MultiDatasetVoteSlab(props) {
     return map( key => {
       const collapsedVote = collapsedVotes[key];
       const collapsedRationale = appendAll(collapsedVote.rationales);
-      const collapsedDate = appendAll(collapsedVote.createDates);
+      const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
 
       return {
         vote: collapsedVote.vote ,

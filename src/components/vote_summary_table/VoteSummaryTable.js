@@ -86,7 +86,7 @@ function nameCellData({name = '- -', voteId, label = 'name'}) {
 
 function dateCellData({date, voteId, label = 'date'}) {
   return {
-    data: isNil(date) ? '- - ' : formatDate(date),
+    data: date,
     id: voteId,
     cellStyle: { width: styles.cellWidths.date },
     label
