@@ -7,7 +7,7 @@ export async function searchOntology(obolibraryURL) {
   const params = {id: obolibraryURL};
   try{
     let resp = await axios.get(`${baseURL}search`, {params});
-    return resp.data[0];
+    return resp.data;
   } catch(error) {
     Notifications.showError('Error: Ontology Search Request failed');
   }

@@ -1,4 +1,4 @@
-import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
+import {isNil, isEmpty, filter, join, concat, clone, uniq, head, flow} from 'lodash/fp';
 import { searchOntology } from './ontologyService';
 import { Notifications } from './utils';
 
@@ -162,12 +162,13 @@ export const consentTranslations = {
   }
 };
 
-const getOntologyName = async(obolibraryURL) => {
-  const ontology = await searchOntology(obolibraryURL);
-  return ontology.label;
+const getOntologyName = async(urls) => {
+  const joinedUrls = urls.join(',');
+  const ontology = await searchOntology(joinedUrls);
+  return ontology.map(data => data.label);
 };
 
-export const processRestrictionStatements = async (key, dataUse, ontologyMap = {}) => {
+export const processRestrictionStatements = async (key, dataUse) => {
   let resp;
   let value = dataUse[key];
   /*
@@ -187,17 +188,9 @@ export const processRestrictionStatements = async (key, dataUse, ontologyMap = {
       } else {
         //condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
         try {
-          //map async ontology requests to map
-          //this way you can avoid making repeated requests
-          const ontologyPromises = value.map((ontologyId) => {
-            if (isEmpty(ontologyMap[ontologyId])) {
-              ontologyMap[ontologyId] = getOntologyName(ontologyId);
-            }
-            return ontologyMap[ontologyId];
-          });
-          resp = Promise.all(ontologyPromises).then((ontologies) =>
-            consentTranslations.diseaseRestrictions(ontologies)
-          );
+          const ontologyUrls = uniq(value);
+          const ontologyLabels = await getOntologyName(ontologyUrls);
+          resp = consentTranslations.diseaseRestrictions(ontologyLabels);
         } catch (error) {
           Notifications.showError({ text: 'Ontology API Request Error' });
         }
@@ -267,11 +260,10 @@ const translateDataUseRestrictions = async (dataUse) => {
 
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
   const targetKeys = Object.keys(consentTranslations);
-  const ontologyMap = {};
   try {
     const translationPromises = dataUses.map((dataUse) =>
       Promise.all(
-        targetKeys.map((key) => processRestrictionStatements(key, dataUse, ontologyMap))
+        targetKeys.map((key) => processRestrictionStatements(key, dataUse))
       )
     );
     return filter(
