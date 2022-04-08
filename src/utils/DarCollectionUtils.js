@@ -11,7 +11,7 @@ import {
   isNil,
   size,
   includes,
-  get
+  get, concat
 } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
@@ -165,14 +165,16 @@ export const extractDacUserVotesFromBucket = (bucket, user) => {
   )(votes);
 };
 
-//Gets this user's votes from this bucket; final votes if isChair is true, member votes if false
+//Gets this user's votes from this bucket; final and chairperson votes if isChair is true, member votes if false
 export const extractUserVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
   return flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    flatMap(filteredData => isChair ? filteredData.finalVotes : filteredData.memberVotes),
+    flatMap(filteredData => isChair ?
+      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
 };
