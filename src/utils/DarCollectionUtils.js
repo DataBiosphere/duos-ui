@@ -153,6 +153,17 @@ export const extractDacUserVotesFromBucket = (bucket, user) => {
   )(votes);
 };
 
+//TODO: refine
+//Gets member votes from the given voteData by members of this user's DAC
+export const extractDacVotesFromBucketVoteData = (voteData, user) => {
+  return flow(
+    filter((voteData) => !isEmpty(voteData)),
+    map(filteredData => filteredData.memberVotes),
+    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+    flatMap(memberVotes => memberVotes)
+  )(voteData);
+};
+
 //Gets this user's votes from this bucket; final and chairperson votes if isChair is true, member votes if false
 export const extractUserVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
@@ -165,6 +176,18 @@ export const extractUserVotesFromBucket = (bucket, user, isChair) => {
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
+};
+
+//TODO: refine
+//Gets this user's votes from this vote data; final and chairperson votes if isChair is true, member votes if false
+export const extractUserVotesFromBucketVoteData = (voteData, user, isChair) => {
+  return flow(
+    filter((voteData) => !isEmpty(voteData)),
+    flatMap(filteredData => isChair ?
+      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.memberVotes),
+    filter(vote => vote.dacUserId === user.dacUserId)
+  )(voteData);
 };
 
 export const extractDatasetIdsFromBucket = (bucket) => {
