@@ -1,10 +1,17 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
 import ld, {isEmpty, isNil} from "lodash";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
 import {AnimatePresence, motion} from "framer-motion";
+import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
+import {Storage} from "../../libs/storage";
+import {
+  extractDacUserVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  extractUserVotesFromBucket
+} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
@@ -120,9 +127,14 @@ const ResearchPurposeSummary = ({darInfo}) => {
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
-  const {darInfo, isLoading} = props;
+  const [currentUserVotes, setCurrentUserVotes] = useState([]);
+  const {darInfo, bucket, isChair, isLoading} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
 
+  useEffect(() => {
+    const user = Storage.getCurrentUser();
+   // setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
+  }, [bucket, isChair]);
 
   return div({dataCy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
@@ -142,6 +154,13 @@ export default function ResearchProposalVoteSlab(props) {
               span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
               h(ResearchPurposeSummary, {darInfo}),
               h(DataUseAlertBox, {translatedDataUse}),
+              h(CollectionSubmitVoteBox, {
+                question: 'Was the research purpose accurately converted to a structured format?',
+                votes: currentUserVotes,
+                isFinal: false,
+                isDisabled: isEmpty(currentUserVotes),
+                isLoading
+              }),
             ]),
           ]),
         ])
