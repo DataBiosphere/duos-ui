@@ -169,15 +169,12 @@ class DatasetRegistration extends Component {
     }
   }
 
-  async getOntologies(urls) {
+  async getOntologies(urls = []) {
     if (fp.isEmpty(urls)) {
       return [];
-    }
-    else {
-      let ontologies = await Promise.all(
-        urls.map(url => searchOntology(url)
-          .then(data => { return data; })
-        ));
+    } else {
+      const urlParams = urls.join(',');
+      const ontologies = await searchOntology(urlParams);
       return ontologies;
     }
   }
