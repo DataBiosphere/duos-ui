@@ -28,7 +28,7 @@ export default function VotesPieChart(props) {
     pieHole = 0.3,
     height = 'inherit',
     width = 'inherit',
-    style = { padding: '10px 5px'}
+    style = { padding: '20px 0'}
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);

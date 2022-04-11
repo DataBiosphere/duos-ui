@@ -112,9 +112,10 @@ export default function SimpleTable(props) {
     ReactTooltip.rebuild();
   }, [rowData]);
 
-  const {baseStyle, columnStyle} = styles;
+  const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, key: 'table-data-rows'})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
-  return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, isNil(paginationBar) ? div() : paginationBar]);
+  return div({className: 'table-data', style: containerOverride || Styles.TABLE.CONTAINER, role: 'table'},
+    [output, isNil(paginationBar) ? div() : paginationBar]);
 }

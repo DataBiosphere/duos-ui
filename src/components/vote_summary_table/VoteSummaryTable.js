@@ -14,9 +14,10 @@ const styles = {
     backgroundColor: '#FFFFFF',
     display: 'flex',
     padding: '1rem 2%',
-    lineHeight: '1.6rem',
+    lineHeight: '2rem',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    whiteSpace: 'pre-line'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     fontFamily: 'Montserrat',
@@ -30,6 +31,12 @@ const styles = {
     date: '10%',
     rationale: '50%',
   },
+  containerOverride: {
+    marginTop: '0',
+    borderTop: '0',
+    backgroundColor: 'rgba(184, 205, 211, 0)',
+    padding: '0',
+  }
 };
 
 const columnHeaderFormat = {
@@ -79,7 +86,7 @@ function nameCellData({name = '- -', voteId, label = 'name'}) {
 
 function dateCellData({date, voteId, label = 'date'}) {
   return {
-    data: isNil(date) ? '- - ' : formatDate(date),
+    data: date,
     id: voteId,
     cellStyle: { width: styles.cellWidths.date },
     label
