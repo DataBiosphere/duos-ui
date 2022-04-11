@@ -1,8 +1,7 @@
-import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, findIndex, cloneDeep} from 'lodash/fp';
+import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, includes, get, concat, findIndex, cloneDeep } from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import { Notifications } from '../libs/utils';
 import { Collections } from '../libs/ajax';
-
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -110,15 +109,19 @@ const processVotesForBucket = (darElections) => {
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
 export const processDataUseBuckets = async(buckets) => {
   buckets = await buckets;
+
   //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
-    const { dars } = bucket;
+    const { dars, dataUse } = bucket;
     const elections = flow([
       map((dar) => Object.values(dar.elections)),
     ])(dars);
     //votes indexing lines up with dar indexing
     const votes = map(processVotesForBucket)(elections);
-    return { key, dars, elections, votes };
+
+    const dataUses = filter(dataUseDescription => !isEmpty(dataUseDescription))(dataUse);
+
+    return { key, dars, elections, votes, dataUses };
   })(buckets);
 
   //Process custom RP Vote bucket for VoteSummary
@@ -127,6 +130,7 @@ export const processDataUseBuckets = async(buckets) => {
     map((votes) => ({rp:votes.rp}))
   ])(processedBuckets);
 
+
   const rpVoteData = {
     key: 'RP Vote',
     votes: rpVotes,
@@ -134,6 +138,42 @@ export const processDataUseBuckets = async(buckets) => {
   };
   processedBuckets.unshift(rpVoteData);
   return processedBuckets;
+};
+
+//Gets member votes from this bucket by members of this user's DAC
+export const extractDacUserVotesFromBucket = (bucket, user) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.dataAccess),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    map(filteredData => filteredData.memberVotes),
+    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+    flatMap(memberVotes => memberVotes)
+  )(votes);
+};
+
+//Gets this user's votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+export const extractUserVotesFromBucket = (bucket, user, isChair) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.dataAccess),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    flatMap(filteredData => isChair ?
+      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.memberVotes),
+    filter(vote => vote.dacUserId === user.dacUserId)
+  )(votes);
+};
+
+export const extractDatasetIdsFromBucket = (bucket) => {
+  return flow(
+    get('elections'),
+    flatMap(election => flatMap(electionData => electionData)(election)),
+    filter(electionData => electionData.electionType === 'DataAccess'),
+    map(electionData => electionData.dataSetId)
+  )(bucket);
 };
 
 //Admin only helper function
@@ -210,5 +250,8 @@ export const openCollectionFn = ({updateCollections}) =>
 
 export default {
   generatePreProcessedBucketData,
-  processDataUseBuckets
+  processDataUseBuckets,
+  extractDacUserVotesFromBucket,
+  extractUserVotesFromBucket,
+  extractDatasetIdsFromBucket
 };
