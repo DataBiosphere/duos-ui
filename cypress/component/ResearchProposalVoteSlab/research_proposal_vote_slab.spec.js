@@ -22,10 +22,10 @@ const darInfoPrimarySecondaryUse = {
 const votesForElection1 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     memberVotes: [
       {dacUserId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
@@ -38,10 +38,10 @@ const votesForElection1 = {
 const votesForElection2 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     memberVotes: [
       {dacUserId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
@@ -54,10 +54,10 @@ const votesForElection2 = {
 const votesForElection3 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 103, voteId: 7},
+      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 103, voteId: 7},
     ],
     memberVotes: [
       {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
@@ -258,8 +258,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('textarea').should('not.be.disabled');
   });
 
-  //TODO: can chairs change their rp votes
-  it('Renders a disabled selected vote button when all current user votes match (Chair)', function() {
+  it('Renders a selected vote button when all current user votes match (Chair)', function() {
     mount(
       <ResearchProposalVoteSlab
         bucket={{
@@ -274,12 +273,12 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[dataCy=yes-collection-vote-button]').click();
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('textarea').should('be.disabled');
+    cy.get('textarea').should('not.be.disabled');
   });
 
   it('Renders vote button unselected when not all current user votes match (Member)', function() {
@@ -299,9 +298,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -322,9 +321,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[dataCy=yes-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('not.be.disabled');
   });
 
