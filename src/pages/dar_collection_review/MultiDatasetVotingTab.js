@@ -2,7 +2,7 @@ import MultiDatasetVoteSlab from "../../components/collection_voting_slab/MultiD
 import {div, h} from "react-hyperscript-helpers";
 import ResearchProposalVoteSlab from "../../components/collection_voting_slab/ResearchProposalVoteSlab";
 import {useEffect, useState} from "react";
-import {find, get} from 'lodash/fp';
+import {find, get, filter, flow, sortBy} from 'lodash/fp';
 
 const styles = {
   baseStyle: {
@@ -18,7 +18,8 @@ const styles = {
 
 export default function MultiDatasetVotingTab(props) {
   const [rpBucket, setRpBucket] = useState({});
-  const {darInfo, dataUseBuckets, isChair, isLoading} = props;
+  const [dataBuckets, setDataBuckets] = useState([]);
+  const {darInfo, buckets, isChair, isLoading} = props;
 
   const [bucket, setBucket] = useState({
     elections: [
@@ -102,8 +103,16 @@ export default function MultiDatasetVotingTab(props) {
   });
 
   useEffect(() => {
-    setRpBucket(find(bucket => get('key')(bucket) === 'RP Vote')(dataUseBuckets));
-  }, [dataUseBuckets]);
+    setRpBucket(find(bucket => get('key')(bucket) === 'RP Vote')(buckets));
+    setDataBuckets(flow(
+      filter(bucket => get('key')(bucket) !== 'RP Vote'),
+      sortBy(bucket => get('key')(bucket))
+    )(buckets));
+  }, [buckets]);
+
+  const DatasetVoteSlabs = () => {
+
+  };
 
   return div({style: styles.baseStyle}, [
     div({style: styles.title}, ["Research Proposal"]),
