@@ -158,8 +158,8 @@ export const processDataUseBuckets = async(buckets) => {
   return processedBuckets;
 };
 
-//Gets member votes from this bucket by members of this user's DAC
-export const extractDacUserVotesFromBucket = (bucket, user) => {
+//Gets data access votes from this bucket by members of this user's DAC
+export const extractDacDataAccessVotesFromBucket = (bucket, user) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
   return flow(
@@ -171,19 +171,21 @@ export const extractDacUserVotesFromBucket = (bucket, user) => {
   )(votes);
 };
 
-//TODO: refine
-//Gets member votes from the given voteData by members of this user's DAC
-export const extractDacVotesFromBucketVoteData = (voteData, user) => {
+//Gets rp votes from this bucket by members of this user's DAC
+export const extractDacRPVotesFromBucket = (bucket, user) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
   return flow(
-    filter((voteData) => !isEmpty(voteData)),
+    map(voteData => voteData.rp),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
     map(filteredData => filteredData.memberVotes),
     filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
     flatMap(memberVotes => memberVotes)
-  )(voteData);
+  )(votes);
 };
 
-//Gets this user's votes from this bucket; final and chairperson votes if isChair is true, member votes if false
-export const extractUserVotesFromBucket = (bucket, user, isChair) => {
+//Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
   return flow(
@@ -196,16 +198,18 @@ export const extractUserVotesFromBucket = (bucket, user, isChair) => {
   )(votes);
 };
 
-//TODO: refine
-//Gets this user's votes from this vote data; final and chairperson votes if isChair is true, member votes if false
-export const extractUserVotesFromBucketVoteData = (voteData, user, isChair) => {
+//Gets this user's rp votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
   return flow(
-    filter((voteData) => !isEmpty(voteData)),
+    map(voteData => voteData.rp),
+    filter((rpData) => !isEmpty(rpData)),
     flatMap(filteredData => isChair ?
       concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
-  )(voteData);
+  )(votes);
 };
 
 export const extractDatasetIdsFromBucket = (bucket) => {
@@ -355,8 +359,10 @@ export const openCollectionFn = ({updateCollections}) =>
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
-  extractDacUserVotesFromBucket,
-  extractUserVotesFromBucket,
+  extractDacDataAccessVotesFromBucket,
+  extractDacRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
   collapseVotesByUser
 };

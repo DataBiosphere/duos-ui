@@ -8,12 +8,10 @@ import {AnimatePresence, motion} from "framer-motion";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import {Storage} from "../../libs/storage";
 import {
-  collapseVotesByUser,
-  extractDacUserVotesFromBucket, extractDacVotesFromBucketVoteData,
-  extractDatasetIdsFromBucket,
-  extractUserVotesFromBucket, extractUserVotesFromBucketVoteData
+  collapseVotesByUser, extractDacRPVotesFromBucket,
+  extractUserRPVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
-import {cloneDeep, flatMap, groupBy, map} from "lodash/fp";
+import {map} from "lodash/fp";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
 
@@ -157,10 +155,8 @@ export default function ResearchProposalVoteSlab(props) {
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    const votes = !isNil(bucket) ? bucket.votes : [];
-    const voteData = map(vote => vote.rp)(votes);
-    setDacVotes(extractDacVotesFromBucketVoteData(voteData, user));
-    setCurrentUserVotes(extractUserVotesFromBucketVoteData(voteData, user, isChair));
+    setDacVotes(extractDacRPVotesFromBucket(bucket, user));
+    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair));
   }, [bucket, isChair]);
 
 

@@ -2,17 +2,15 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, forEach, groupBy, cloneDeep} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
-import {formatDate} from "../../libs/utils";
+
 import {
-  collapseVotesByUser,
-  extractDacUserVotesFromBucket,
-  extractDatasetIdsFromBucket,
-  extractUserVotesFromBucket
+  collapseVotesByUser, extractDacDataAccessVotesFromBucket,
+  extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
 
 const styles = {
@@ -60,8 +58,8 @@ export default function MultiDatasetVoteSlab(props) {
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacUserVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user));
+    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
   }, [bucket, isChair]);
 
