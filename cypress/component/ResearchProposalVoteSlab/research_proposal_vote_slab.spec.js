@@ -2,6 +2,8 @@
 import React from 'react';
 import {mount} from "@cypress/react";
 import ResearchProposalVoteSlab from "../../../src/components/collection_voting_slab/ResearchProposalVoteSlab";
+import {Votes} from "../../../src/libs/ajax";
+import {Storage} from "../../../src/libs/storage";
 
 const darInfoPrimaryUseManualReviewFalse = {
   "rus": "test",
@@ -245,6 +247,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
     cy.get('[dataCy=yes-collection-vote-button]').click();
@@ -253,6 +258,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('textarea').should('not.be.disabled');
   });
 
+  //TODO: can chairs change their rp votes
   it('Renders a disabled selected vote button when all current user votes match (Chair)', function() {
     mount(
       <ResearchProposalVoteSlab
@@ -264,6 +270,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
@@ -285,6 +294,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').click();
@@ -304,6 +316,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
@@ -325,9 +340,12 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
+    cy.get('[dataCy=yes-collection-vote-button]').click();
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
@@ -344,6 +362,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('[dataCy=chair-vote-info]').should('not.exist');
   });
 
@@ -357,6 +378,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('[dataCy=chair-vote-info]').should('not.exist');
   });
@@ -372,6 +396,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('[dataCy=chair-vote-info]').should('exist');
   });
 
@@ -385,6 +412,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     const component = cy.get('.table-data');
     component.should('exist');
@@ -404,6 +434,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('.table-data').should('exist');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
@@ -418,6 +451,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2');
@@ -434,6 +470,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
 
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
     cy.get('.table-data').should('exist').should('not.contain', 'undefined');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
@@ -448,6 +487,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'No');
@@ -464,6 +506,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
