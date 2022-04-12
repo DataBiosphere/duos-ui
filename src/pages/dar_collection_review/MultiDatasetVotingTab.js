@@ -53,13 +53,16 @@ export default function MultiDatasetVotingTab(props) {
 
 
   const DatasetVoteSlabs = () => {
-    return map((bucket, i) => {
+    let index = 0;
+    return map(bucket => {
+      index++;
       return h(MultiDatasetVoteSlab,{
-        title: `GROUP ${i}`,
+        title: `GROUP ${index}`,
         bucket,
         dacDatasetIds,
         collectionDatasets,
-        isChair
+        isChair,
+        key: bucket.key
       });
     })(dataBuckets);
   };
