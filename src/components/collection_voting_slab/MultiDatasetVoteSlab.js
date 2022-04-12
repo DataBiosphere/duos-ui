@@ -19,8 +19,6 @@ const styles = {
     fontFamily: 'Montserrat',
     fontSize: '1.4rem',
     fontWeight: 'bold',
-    padding: '15px 25px',
-    margin: '10px 0 20px 0'
   },
   slabTitle: {
     color: '#000000',

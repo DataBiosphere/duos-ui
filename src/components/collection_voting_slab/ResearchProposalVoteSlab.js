@@ -9,8 +9,6 @@ import {AnimatePresence, motion} from "framer-motion";
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    padding: '15px 25px',
-    margin: '10px 0 20px 0'
   },
   slabTitle: {
     color: '#000000',

@@ -20,7 +20,8 @@ const styles = {
   },
   content: {
     display: 'flex',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    padding: '0 15px'
   },
   subsection: {
     display: 'flex',

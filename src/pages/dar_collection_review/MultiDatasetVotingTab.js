@@ -2,13 +2,18 @@ import MultiDatasetVoteSlab from "../../components/collection_voting_slab/MultiD
 import {div, h} from "react-hyperscript-helpers";
 import ResearchProposalVoteSlab from "../../components/collection_voting_slab/ResearchProposalVoteSlab";
 import {useEffect, useState} from "react";
-import {find, get, filter, flow, sortBy, map, isNil} from 'lodash/fp';
+import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {Storage} from "../../libs/storage";
 import {User} from "../../libs/ajax";
+import {extractDacUserVotesFromBucket} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FFFFFF',
+    padding: '35px',
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '35px'
   },
   title: {
     color: '#333F52',
@@ -16,6 +21,11 @@ const styles = {
     fontSize: '2.4rem',
     fontWeight: 'bold'
   }
+};
+
+const containsVotesByUser = (bucket) => {
+  const user = Storage.getCurrentUser();
+  return !isEmpty(extractDacUserVotesFromBucket(bucket, user));
 };
 
 export default function MultiDatasetVotingTab(props) {
@@ -30,6 +40,7 @@ export default function MultiDatasetVotingTab(props) {
     setRpBucket(find(bucket => get('key')(bucket) === 'RP Vote')(buckets));
     setDataBuckets(flow(
       filter(bucket => get('key')(bucket) !== 'RP Vote'),
+      filter(bucket => containsVotesByUser(bucket)),
       sortBy(bucket => get('key')(bucket))
     )(buckets));
   }, [buckets, collection]);
