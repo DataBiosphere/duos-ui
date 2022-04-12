@@ -1,11 +1,13 @@
 import MultiDatasetVoteSlab from "../../components/collection_voting_slab/MultiDatasetVoteSlab";
 import {h} from "react-hyperscript-helpers";
 import ResearchProposalVoteSlab from "../../components/collection_voting_slab/ResearchProposalVoteSlab";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import {find, get} from 'lodash/fp';
 
 
 export default function MultiDatasetVotingTab(props) {
-  const {darInfo, isChair, isLoading} = props;
+  const [rpBucket, setRpBucket] = useState({});
+  const {darInfo, dataUseBuckets, isChair, isLoading} = props;
 
   const [bucket, setBucket] = useState({
     elections: [
@@ -88,9 +90,13 @@ export default function MultiDatasetVotingTab(props) {
     ]
   });
 
+  useEffect(() => {
+    setRpBucket(find(bucket => get('key')(bucket) === 'RP Vote')(dataUseBuckets));
+  }, [dataUseBuckets]);
+
   return h(ResearchProposalVoteSlab, {
     darInfo,
-    bucket,
+    bucket: rpBucket,
     isChair,
     isLoading
   });

@@ -204,6 +204,7 @@ export default function DarCollectionReview(props) {
       h(MultiDatasetVotingTab, {
         isRendered: selectedTab === tabs.memberVote,
         darInfo,
+        dataUseBuckets,
         isChair: false,
         isLoading
       })
