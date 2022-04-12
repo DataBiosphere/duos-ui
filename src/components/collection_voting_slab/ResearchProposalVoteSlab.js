@@ -8,10 +8,14 @@ import {AnimatePresence, motion} from "framer-motion";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import {Storage} from "../../libs/storage";
 import {
-  extractDacUserVotesFromBucket,
+  collapseVotesByUser,
+  extractDacUserVotesFromBucket, extractDacVotesFromBucketVoteData,
   extractDatasetIdsFromBucket,
-  extractUserVotesFromBucket
+  extractUserVotesFromBucket, extractUserVotesFromBucketVoteData
 } from "../../utils/DarCollectionUtils";
+import {cloneDeep, flatMap, groupBy, map} from "lodash/fp";
+import VotesPieChart from "../common/VotesPieChart";
+import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
 
 const styles = {
   baseStyle: {
@@ -60,6 +64,12 @@ const styles = {
     fontWeight: '500',
     lineHeight: '20px',
     margin: '1.5rem'
+  },
+  chairVoteInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '1.5rem',
+    fontWeight: 'bold',
   },
   skeletonLoader: {
     height: '60px',
@@ -125,16 +135,34 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
+const ChairVoteInfo = ({dacVotes, isChair, isLoading}) => {
+  return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
+    h(VotesPieChart, {
+      votes: dacVotes,
+    }),
+    div(['My DAC\'s Votes (detail)']),
+    h(VoteSummaryTable, {
+      dacVotes: collapseVotesByUser(dacVotes),
+      isLoading,
+    })
+  ]);
+};
+
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
+  const [dacVotes, setDacVotes] = useState([]);
   const {darInfo, bucket, isChair, isLoading} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-   // setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
+    const votes = !isNil(bucket) ? bucket.votes : [];
+    const voteData = map(vote => vote.rp)(votes);
+    setDacVotes(extractDacVotesFromBucketVoteData(voteData, user));
+    setCurrentUserVotes(extractUserVotesFromBucketVoteData(voteData, user, isChair));
   }, [bucket, isChair]);
+
 
   return div({dataCy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
@@ -161,6 +189,7 @@ export default function ResearchProposalVoteSlab(props) {
                 isDisabled: isEmpty(currentUserVotes),
                 isLoading
               }),
+              h(ChairVoteInfo, {dacVotes, isChair, isLoading})
             ]),
           ]),
         ])
