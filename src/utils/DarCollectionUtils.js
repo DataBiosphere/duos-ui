@@ -231,7 +231,7 @@ export const collapseVotesByUser = (votes) => {
   })(Object.keys(votesGroupedByUser));
 };
 
-//helper method to collapse votes that converts them to an object with differing rationales and dates in arrays
+//helper method to collapse votes by converting them to an object with differing rationales and dates in arrays
 const collapseVotes = ({votes}) => {
   const collapsedVotes = {};
   forEach( vote => {
@@ -253,7 +253,7 @@ const collapseVotes = ({votes}) => {
   return collapsedVotes;
 };
 
-//helper method to follow collapseVotes in flow that creates standard vote objects
+//helper method to follow collapseVotes in flow
 const convertToVoteObjects = ({collapsedVotes}) => {
   return map( key => {
     const collapsedVote = collapsedVotes[key];

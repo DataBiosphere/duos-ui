@@ -11,7 +11,6 @@ import {
   collapseVotesByUser, extractDacRPVotesFromBucket,
   extractUserRPVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
-import {map} from "lodash/fp";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
 
