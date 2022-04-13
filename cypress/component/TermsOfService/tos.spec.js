@@ -5,10 +5,11 @@ import {mount} from '@cypress/react';
 import TermsOfService from '../../../src/pages/TermsOfService';
 import { ToS } from '../../../src/libs/ajax';
 
+const text = 'TOS Text';
+
 describe('Terms of Service Page', function() {
   it('Standard text loads correctly', function () {
     cy.viewport(600, 300);
-    const text = 'TOS Text';
     cy.stub(ToS, 'getDUOSText').returns(text);
     mount(<TermsOfService />);
     cy.contains(text).should('exist');
@@ -16,7 +17,6 @@ describe('Terms of Service Page', function() {
 
   it('Markdown text loads correctly', function () {
     cy.viewport(600, 300);
-    const text = 'TOS Text';
     const rawMarkdown = '# ' + text;
     cy.stub(ToS, 'getDUOSText').returns(rawMarkdown);
     mount(<TermsOfService />);
