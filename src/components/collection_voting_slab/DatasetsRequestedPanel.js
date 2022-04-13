@@ -90,7 +90,7 @@ export default function DatasetsRequestedPanel(props) {
 
   const DatasetList = () => {
     const datasetRows = map(dataset => {
-      return div({style: {display: 'flex'}}, [
+      return div({style: {display: 'flex'}, key: dataset.dataSetId}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
       ]);
