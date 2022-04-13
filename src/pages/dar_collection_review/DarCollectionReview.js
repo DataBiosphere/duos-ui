@@ -19,14 +19,14 @@ const tabContainerColor = 'rgb(115,154,164)';
 
 const tabStyleOverride = {
   baseStyle: {
-    fontFamily: 'Arial',
-    fontSize: '2rem',
-    width: '16%',
+    fontFamily: 'Montserrat;',
+    fontSize: '1.6rem',
+    width: 'fit-content',
     fontWeight: 600,
     border: '0px',
     display: 'flex',
     justifyContent: 'center',
-    padding: '0.5%',
+    padding: '1%',
   },
   tabSelected: {
     backgroundColor: 'white',
@@ -204,6 +204,7 @@ export default function DarCollectionReview(props) {
       h(MultiDatasetVotingTab, {
         isRendered: selectedTab === tabs.memberVote,
         darInfo,
+        collection,
         buckets: dataUseBuckets,
         isChair: false,
         isLoading
