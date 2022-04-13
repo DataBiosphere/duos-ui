@@ -227,7 +227,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
-  })
+  });
 
   it('disables vote buttons and text area if isDisabled prop is true', function () {
     mount(
@@ -244,5 +244,5 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
-  })
+  });
 });
