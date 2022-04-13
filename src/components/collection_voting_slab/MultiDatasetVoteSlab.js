@@ -169,7 +169,7 @@ export default function MultiDatasetVoteSlab(props) {
     });
   };
 
-  return div({style: styles.baseStyle}, [
+  return div({style: styles.baseStyle, dataCy: 'dataset-vote-slab'}, [
     div({style: styles.slabTitle}, [title]),
     DataUseSummary(),
     VoteInfoSubsection(),
