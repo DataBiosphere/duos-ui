@@ -47,26 +47,25 @@ describe('SigningOfficialTable - Tests', function() {
   });
 
   // This test works locally, but fails in github actions :-(
-  // Leaving this here in case we sort out why the action job doesn't work.
-  // it('SigningOfficialTable - Deactivate modal does not display the LCA Text', function() {
-  //   cy.viewport(600, 300);
-  //   mount(<SigningOfficialTable
-  //     isLoading={false}
-  //     signingOfficial={{institutionId: 1}}
-  //     researchers={[
-  //       {
-  //         email: 'email',
-  //         dacUserId: 1,
-  //         displayName: 'researcher',
-  //         roles: [{name: 'Researcher'}],
-  //         libraryCards: [{id: 1}]
-  //       }
-  //     ]}
-  //     unregisteredResearchers={[]}
-  //   />);
-  //   const button = cy.get('button').last();
-  //   expect(button).to.exist;
-  //   button.click();
-  //   cy.contains(lcaHeaderText).should('not.exist');
-  // });
+  it.skip('SigningOfficialTable - Deactivate modal does not display the LCA Text', function() {
+    cy.viewport(600, 300);
+    mount(<SigningOfficialTable
+      isLoading={false}
+      signingOfficial={{institutionId: 1}}
+      researchers={[
+        {
+          email: 'email',
+          dacUserId: 1,
+          displayName: 'researcher',
+          roles: [{name: 'Researcher'}],
+          libraryCards: [{id: 1}]
+        }
+      ]}
+      unregisteredResearchers={[]}
+    />);
+    const button = cy.get('button').last();
+    expect(button).to.exist;
+    button.click();
+    cy.contains(lcaHeaderText).should('not.exist');
+  });
 });
