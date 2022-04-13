@@ -49,12 +49,12 @@ export default function MultiDatasetVotingTab(props) {
     const init = async () => {
       const dacDatasets = await User.getUserRelevantDatasets();
       const datasetIds = flow(
-        map(dataset => dataset.dataSetId),
+        map(dataset => get('dataSetId')(dataset)),
         filter(datasetId => !isNil(datasetId))
       )(dacDatasets);
+
       setDacDatasetIds(datasetIds);
     };
-
     try {
       init();
     } catch(error) {
