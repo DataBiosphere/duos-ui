@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {a, div, h, span} from "react-hyperscript-helpers";
 import {DataUseTranslation} from "../../libs/dataUseTranslation";
-import {isEmpty, isNil, flatMap, map, keys} from "lodash";
+import {isEmpty, isNil, flatMap, map, keys} from "lodash/fp";
 import DataUsePill from "./DataUsePill";
 import DataUseAlertBox from "./DataUseAlertBox";
 import {AnimatePresence, motion} from "framer-motion";
@@ -92,23 +92,23 @@ const SlabTitle = () => {
 };
 
 const DataUseSummary = ({translatedDataUse}) => {
-  return flatMap(keys(translatedDataUse), key => {
+  return flatMap( key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
     return div([
       label,
       dataUsePills(dataUses)
     ]);
-  });
+  })(keys(translatedDataUse));
 };
 
 export const dataUsePills = (dataUses) => {
-  return map(dataUses, (dataUse, i) => {
+  return map( (dataUse, i) => {
     return DataUsePill({
       dataUse,
       key: i
     });
-  });
+  })(dataUses);
 };
 
 const SkeletonLoader = () => {
