@@ -91,7 +91,6 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
 
-
   useEffect(() => {
     const init = async () => {
       const user = Storage.getCurrentUser();
@@ -120,7 +119,6 @@ export default function DarCollectionReview(props) {
           setIsLoading(false);
           clearTimeout(timeout);
         }, 500);
-
       } catch(error) {
         Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
         Navigation.console(user, props.history);
