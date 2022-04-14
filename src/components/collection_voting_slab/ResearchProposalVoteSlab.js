@@ -15,6 +15,7 @@ const styles = {
     backgroundColor: '#F1EDE8',
     fontSize: '1.6rem',
     fontWeight: 'bold',
+    height: '32px',
     width: 'fit-content',
     padding: '1.2rem',
     borderRadius: '4px 4px 0 0',

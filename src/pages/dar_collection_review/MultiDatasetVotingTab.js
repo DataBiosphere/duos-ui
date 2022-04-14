@@ -52,14 +52,9 @@ export default function MultiDatasetVotingTab(props) {
         map(dataset => get('dataSetId')(dataset)),
         filter(datasetId => !isNil(datasetId))
       )(dacDatasets);
-
       setDacDatasetIds(datasetIds);
     };
-    try {
-      init();
-    } catch(error) {
-      setDacDatasetIds([]);
-    }
+    init();
   }, []);
 
 

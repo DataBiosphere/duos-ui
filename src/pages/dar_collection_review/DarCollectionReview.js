@@ -19,7 +19,7 @@ const tabContainerColor = 'rgb(115,154,164)';
 
 const tabStyleOverride = {
   baseStyle: {
-    fontFamily: 'Montserrat;',
+    fontFamily: 'Montserrat',
     fontSize: '1.6rem',
     width: 'fit-content',
     fontWeight: 600,
