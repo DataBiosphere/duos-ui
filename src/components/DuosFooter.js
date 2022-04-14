@@ -30,7 +30,7 @@ function DuosFooter() {
         ul({ className: "footer-links" }, [
           li({ className: "footer-links__item" }, ["\u00A9 Broad Institute"]),
           li({ className: "footer-links__item" }, [a({ href: "/privacy" }, ["Privacy Policy"]),]),
-          li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/terms-conditions" }, ["Terms of Service"]),]),
+          li({ className: "footer-links__item" }, [a({ href: '/tos' }, ["Terms of Service"]),]),
           li({ className: 'footer-links__item' }, [a({ href: '/status' }, ['Status'])])
         ])
       ])
