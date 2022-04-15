@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {Storage} from "../../libs/storage";
 import {User} from "../../libs/ajax";
-import {extractDacUserVotesFromBucket} from "../../utils/DarCollectionUtils";
+import {extractUserDataAccessVotesFromBucket} from "../../utils/DarCollectionUtils";
 
 const styles = {
   baseStyle: {
@@ -25,7 +25,7 @@ const styles = {
 
 const containsVotesByUser = (bucket) => {
   const user = Storage.getCurrentUser();
-  return !isEmpty(extractDacUserVotesFromBucket(bucket, user));
+  return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user));
 };
 
 export default function MultiDatasetVotingTab(props) {
