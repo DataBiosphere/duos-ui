@@ -2,16 +2,15 @@ import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, forEach, groupBy, cloneDeep} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
 import {dataUsePills} from "./ResearchProposalVoteSlab";
-import {formatDate} from "../../libs/utils";
+
 import {
-  extractDacUserVotesFromBucket,
-  extractDatasetIdsFromBucket,
-  extractUserVotesFromBucket
+  collapseVotesByUser, extractDacDataAccessVotesFromBucket,
+  extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
 
 const styles = {
@@ -51,20 +50,6 @@ const styles = {
   }
 };
 
-const addIfUnique = (newValue, existingValues) => {
-  if(!isNil(newValue) && !includes(newValue, existingValues)) {
-    existingValues.push(newValue);
-  }
-};
-
-const appendAll = (values) => {
-  let result = '';
-  forEach(value => {
-    result += `${value}\n`;
-  })(values);
-  return !isEmpty(result) ? result : null;
-};
-
 export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
@@ -73,8 +58,8 @@ export default function MultiDatasetVoteSlab(props) {
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacUserVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserVotesFromBucket(bucket, user, isChair));
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user));
+    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
   }, [bucket, isChair]);
 
@@ -106,60 +91,16 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const ChairVoteInfo = () => {
-    const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(dacVotes));
-    const votesCollapsedByUser = flatMap(userIdKey => {
-      const votesByUser = votesGroupedByUser[userIdKey];
-      const collapsedVotes = collapseVotes({votes: votesByUser});
-      return convertToVoteObjects({collapsedVotes});
-    })(Object.keys(votesGroupedByUser));
-
     return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
       h(VotesPieChart, {
         votes: dacVotes,
       }),
       div(['My DAC\'s Votes (detail)']),
       h(VoteSummaryTable, {
-        dacVotes: votesCollapsedByUser,
+        dacVotes: collapseVotesByUser(dacVotes),
         isLoading,
       })
     ]);
-  };
-
-  const collapseVotes = ({votes}) => {
-    const collapsedVotes = {};
-    forEach( vote => {
-      const matchingVote = collapsedVotes[`${vote.vote}`];
-      if (isNil(matchingVote)) {
-        collapsedVotes[`${vote.vote}`] = {
-          vote: vote.vote,
-          voteId: vote.voteId,
-          displayName: vote.displayName,
-          rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
-          createDates: !isNil(vote.createDate) ? [vote.createDate] : []
-        };
-      }
-      else {
-        addIfUnique(vote.rationale, matchingVote.rationales);
-        addIfUnique(vote.createDate, matchingVote.createDates);
-      }
-    })(votes);
-    return collapsedVotes;
-  };
-
-  const convertToVoteObjects = ({collapsedVotes}) => {
-    return map( key => {
-      const collapsedVote = collapsedVotes[key];
-      const collapsedRationale = appendAll(collapsedVote.rationales);
-      const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
-
-      return {
-        vote: collapsedVote.vote ,
-        voteId: collapsedVote.voteId,
-        displayName: collapsedVote.displayName,
-        rationale: collapsedRationale,
-        createDate: collapsedDate
-      };
-    })(Object.keys(collapsedVotes));
   };
 
   const DatasetsRequested = () => {
