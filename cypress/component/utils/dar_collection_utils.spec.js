@@ -535,42 +535,43 @@ describe('extractUserRPVotesFromBucket', () => {
 describe('collapseVotesByUser', () => {
   it('does not collapse votes by different users', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true},
-      {dacUserId: 2, displayName: 'John', vote: true},
-      {dacUserId: 3, displayName: 'Lauren', vote: true},
+      {dacUserId: 1, displayName: 'John', vote: true, voteId: 1},
+      {dacUserId: 2, displayName: 'John', vote: true, voteId: 2},
+      {dacUserId: 3, displayName: 'Lauren', vote: true, voteId: 3},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 2, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 3, displayName: 'Lauren', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, createDate: null});
   });
 
   it('does not collapse votes by the same user with different vote values', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true},
-      {dacUserId: 1, displayName: 'John', vote: false},
-      {dacUserId: 1, displayName: 'John'},
+      {dacUserId: 1, displayName: 'John', vote: true, voteId: 1},
+      {dacUserId: 1, displayName: 'John', vote: false, voteId: 2},
+      {dacUserId: 1, displayName: 'John', voteId: 3},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: false, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: undefined, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, createDate: null});
   });
 
   it('collapses votes by the same user without appending identical dates / rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
       dacUserId: 1,
+      voteId: 1,
       displayName: 'John',
       vote: true,
       rationale: 'rationale\n',
@@ -580,8 +581,8 @@ describe('collapseVotesByUser', () => {
 
   it('collapses votes by the same user and appends different dates', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000', voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
@@ -590,6 +591,7 @@ describe('collapseVotesByUser', () => {
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
       dacUserId: 1,
+      voteId: 1,
       displayName: 'John',
       vote: true,
       rationale: 'rationale\n',
@@ -599,14 +601,15 @@ describe('collapseVotesByUser', () => {
 
   it('collapses votes by the same user and appends different rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale1', createDate: '20000'},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale1', createDate: '20000', voteId: 1},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000', voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
       dacUserId: 1,
+      voteId: 1,
       displayName: 'John',
       vote: true,
       rationale: 'rationale1\nrationale2\n',
@@ -616,14 +619,15 @@ describe('collapseVotesByUser', () => {
 
   it('does not append null dates / rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
-      {dacUserId: 1, displayName: 'John', vote: true},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {dacUserId: 1, displayName: 'John', vote: true, voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
       dacUserId: 1,
+      voteId: 1,
       vote: true,
       displayName: 'John',
       rationale: 'rationale\n',

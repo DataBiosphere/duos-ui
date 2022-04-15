@@ -240,6 +240,7 @@ const collapseVotes = ({votes}) => {
       collapsedVotes[`${vote.vote}`] = {
         dacUserId: vote.dacUserId,
         vote: vote.vote,
+        voteId: vote.voteId,
         displayName: vote.displayName,
         rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
         createDates: !isNil(vote.createDate) ? [vote.createDate] : []
@@ -262,7 +263,8 @@ const convertToVoteObjects = ({collapsedVotes}) => {
 
     return {
       dacUserId: collapsedVote.dacUserId,
-      vote: collapsedVote.vote ,
+      vote: collapsedVote.vote,
+      voteId: collapsedVote.voteId,
       displayName: collapsedVote.displayName,
       rationale: collapsedRationale,
       createDate: collapsedDate
