@@ -1,7 +1,18 @@
 /* eslint-disable no-undef */
-import {checkIfOpenableElectionPresent, checkIfCancelableElectionPresent, updateCollectionFn, cancelCollectionFn, openCollectionFn} from '../../../src/utils/DarCollectionUtils';
-import { Collections } from '../../../src/libs/ajax';
-import { Notifications } from '../../../src/libs/utils';
+import {
+  checkIfOpenableElectionPresent,
+  checkIfCancelableElectionPresent,
+  updateCollectionFn,
+  cancelCollectionFn,
+  openCollectionFn,
+  extractDacDataAccessVotesFromBucket,
+  extractDacRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket, collapseVotesByUser
+} from '../../../src/utils/DarCollectionUtils';
+import {Collections} from '../../../src/libs/ajax';
+import {formatDate, Notifications} from '../../../src/libs/utils';
+
 
 const openableAndClosableDars = {
   1: {
@@ -109,10 +120,13 @@ describe('checkIfCancelableElectionPresent()', () => {
 describe('updateCollectionFn', () => {
   it('generates an update callback function for consoles to use', () => {
     const collections = [{}];
-    const filterFn = () => {};
-    const searchRef = {current:{value: 1}};
-    const setCollections = () => {};
-    const setFilteredList = () => {};
+    const filterFn = () => {
+    };
+    const searchRef = {current: {value: 1}};
+    const setCollections = () => {
+    };
+    const setFilteredList = () => {
+    };
 
     expect(updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList})).to.exist;
   });
@@ -120,7 +134,7 @@ describe('updateCollectionFn', () => {
   it('collections and filteredList with the filter results', () => {
     let filteredList = [];
     let collections = [{darCollectionId: 1, dars: {}}];
-    const updatedList = [{ darCollectionId: 1, dars: {} }];
+    const updatedList = [{darCollectionId: 1, dars: {}}];
     const updatedCollection = {darCollectionId: 1, dars: {1: {data: 'test'}}};
     const setFilteredList = (arr) => filteredList = arr;
     const setCollections = ((arr) => collections = arr);
@@ -136,15 +150,15 @@ describe('updateCollectionFn', () => {
   });
 });
 
-describe ('cancelCollectionFn', () => {
+describe('cancelCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
     const callback = cancelCollectionFn({updateCollections, role: 'admin'});
     expect(callback).to.exist;
   });
 
-  it('updates collections and filteredList on successful cancel', async() => {
-    let collections = [{dars: { 1: {status: 'Open'}}}];
+  it('updates collections and filteredList on successful cancel', async () => {
+    let collections = [{dars: {1: {status: 'Open'}}}];
     const updatedCollection = {dars: {1: {status: 'Canceled'}}};
     const updateCollections = (collection) => collections = [collection];
     const callback = cancelCollectionFn({updateCollections});
@@ -165,8 +179,8 @@ describe('openCollectionFn', () => {
     expect(callback).to.exist;
   });
 
-  it('updatesCollections on a successful open', async() => {
-    const updatedCollection = { dars: { 1: { status: 'Open' } } };
+  it('updatesCollections on a successful open', async () => {
+    const updatedCollection = {dars: {1: {status: 'Open'}}};
     cy.stub(Collections, 'openElectionsById').returns(updatedCollection);
     let collections = [{dars: {1: {status: 'Canceled'}}}];
     const updateCollections = (collection) => collections = [collection];
@@ -175,3 +189,447 @@ describe('openCollectionFn', () => {
     expect(collections[0].dars[1].status).to.equal(updatedCollection.dars[1].status);
   });
 });
+
+describe('extractDacDataAccessVotesFromBucket', () => {
+  it('returns empty list if data access votes in this bucket do not have the dacUserId of the given user', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{dacUserId: 2}, {dacUserId: 3}]
+          }
+        }
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacDataAccessVotesFromBucket(bucket, user);
+    expect(votes).to.be.empty;
+  });
+
+  it('returns all member votes in the same data access elections as the given user', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}, {dacUserId: 3}],
+          }
+        },
+        {
+          dataAccess: {
+            memberVotes: [
+              {vote: true, dacUserId: 4},
+              {vote: false, rationale: 'rationale', dacUserId: 1}],
+          }
+        },
+        {
+          dataAccess: {
+            memberVotes: [{vote: true, dacUserId: 5}, {dacUserId: 6}],
+          }
+        }
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacDataAccessVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(5);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({vote: true, dacUserId: 4});
+    expect(votes).to.deep.include({vote: false, rationale: 'rationale', dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 5});
+    expect(votes).to.not.deep.include({dacUserId: 6});
+  });
+
+  it('only returns data access votes', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+          },
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+          }
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacDataAccessVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: false, dacUserId: 3});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 2});
+  });
+
+  it('only returns member votes', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+          }
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacDataAccessVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: false, dacUserId: 3});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 2});
+  });
+});
+
+describe('extractDacRPVotesFromBucket', () => {
+  it('returns empty list if rp votes in this bucket do not have the dacUserId of the given user', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 2}, {dacUserId: 3}]
+          }
+        }
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacRPVotesFromBucket(bucket, user);
+    expect(votes).to.be.empty;
+  });
+
+  it('returns all member votes in the same rp elections as the given user', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}, {dacUserId: 3}],
+          }
+        },
+        {
+          rp: {
+            memberVotes: [
+              {vote: true, dacUserId: 4},
+              {vote: false, rationale: 'rationale', dacUserId: 1}],
+          }
+        },
+        {
+          rp: {
+            memberVotes: [{vote: true, dacUserId: 5}, {dacUserId: 6}],
+          }
+        }
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacRPVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(5);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({vote: true, dacUserId: 4});
+    expect(votes).to.deep.include({vote: false, rationale: 'rationale', dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 5});
+    expect(votes).to.not.deep.include({dacUserId: 6});
+  });
+
+  it('only returns rp votes', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+          },
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+          }
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacRPVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.not.deep.include({dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: false, dacUserId: 3});
+    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.deep.include({dacUserId: 2});
+  });
+
+  it('only returns member votes', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+          }
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractDacRPVotesFromBucket(bucket, user);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: false, dacUserId: 3});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 2});
+  });
+});
+
+describe('extractUserDataAccessVotesFromBucket', () => {
+  it('returns data access votes by this user', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{vote: false, dacUserId: 1}],
+          },
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {dacUserId: 2}],
+          },
+        },
+        {
+          dataAccess: {
+            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+
+  it('only returns member votes if isChair is false', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            finalVotes: [{vote: true, dacUserId: 1}]
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
+    expect(votes).to.have.lengthOf(1);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+
+  it('only returns final and chairperson votes if isChair is true', () => {
+    const bucket = {
+      votes: [
+        {
+          dataAccess: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            finalVotes: [{vote: true, dacUserId: 1}]
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserDataAccessVotesFromBucket(bucket, user, true);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+});
+
+describe('extractUserRPVotesFromBucket', () => {
+  it('returns rp votes by this user', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 1}, {dacUserId: 2}],
+          },
+          dataAccess: {
+            memberVotes: [{vote: false, dacUserId: 1}],
+          },
+        },
+        {
+          rp: {
+            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserRPVotesFromBucket(bucket, user, false);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+
+  it('only returns member votes if isChair is false', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            finalVotes: [{vote: true, dacUserId: 1}]
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserRPVotesFromBucket(bucket, user, false);
+    expect(votes).to.have.lengthOf(1);
+    expect(votes).to.deep.include({dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+
+  it('only returns final and chairperson votes if isChair is true', () => {
+    const bucket = {
+      votes: [
+        {
+          rp: {
+            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            finalVotes: [{vote: true, dacUserId: 1}]
+          },
+        },
+      ]
+    };
+    const user = {dacUserId: 1};
+
+    const votes = extractUserRPVotesFromBucket(bucket, user, true);
+    expect(votes).to.have.lengthOf(2);
+    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.not.deep.include({dacUserId: 1});
+    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
+    expect(votes).to.not.deep.include({dacUserId: 3});
+  });
+});
+
+describe('collapseVotesByUser', () => {
+  it('does not collapse votes by different users', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true},
+      {dacUserId: 2, displayName: 'John', vote: true},
+      {dacUserId: 3, displayName: 'Lauren', vote: true},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    expect(collapsedVotes).to.have.lengthOf(3);
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 2, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 3, displayName: 'Lauren', vote: true, rationale: null, createDate: null});
+  });
+
+  it('does not collapse votes by the same user with different vote values', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true},
+      {dacUserId: 1, displayName: 'John', vote: false},
+      {dacUserId: 1, displayName: 'John'},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    expect(collapsedVotes).to.have.lengthOf(3);
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: false, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, displayName: 'John', vote: undefined, rationale: null, createDate: null});
+  });
+
+  it('collapses votes by the same user without appending identical dates / rationales', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    expect(collapsedVotes).to.have.lengthOf(1);
+    expect(collapsedVotes).to.deep.include({
+      dacUserId: 1,
+      displayName: 'John',
+      vote: true,
+      rationale: 'rationale\n',
+      createDate: `${formatDate('20000')}\n`
+    });
+  });
+
+  it('collapses votes by the same user and appends different dates', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000'},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`;
+
+    expect(collapsedVotes).to.have.lengthOf(1);
+    expect(collapsedVotes).to.deep.include({
+      dacUserId: 1,
+      displayName: 'John',
+      vote: true,
+      rationale: 'rationale\n',
+      createDate: formattedDate
+    });
+  });
+
+  it('collapses votes by the same user and appends different rationales', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale1', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000'},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    expect(collapsedVotes).to.have.lengthOf(1);
+    expect(collapsedVotes).to.deep.include({
+      dacUserId: 1,
+      displayName: 'John',
+      vote: true,
+      rationale: 'rationale1\nrationale2\n',
+      createDate: `${formatDate('20000')}\n`
+    });
+  });
+
+  it('does not append null dates / rationales', () => {
+    const votes = [
+      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000'},
+      {dacUserId: 1, displayName: 'John', vote: true},
+    ];
+
+    const collapsedVotes = collapseVotesByUser(votes);
+    expect(collapsedVotes).to.have.lengthOf(1);
+    expect(collapsedVotes).to.deep.include({
+      dacUserId: 1,
+      vote: true,
+      displayName: 'John',
+      rationale: 'rationale\n',
+      createDate: `${formatDate('20000')}\n`
+    });
+  });
+});
+
+
