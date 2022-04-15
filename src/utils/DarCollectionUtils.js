@@ -1,6 +1,24 @@
-import { flow, isEmpty, map, join, filter, forEach, flatMap, toLower, sortBy, isNil, size, includes, get, concat, findIndex, cloneDeep } from 'lodash/fp';
+import {
+  flow,
+  isEmpty,
+  map,
+  join,
+  filter,
+  forEach,
+  flatMap,
+  toLower,
+  sortBy,
+  isNil,
+  size,
+  includes,
+  get,
+  concat,
+  findIndex,
+  cloneDeep,
+  groupBy
+} from 'lodash/fp';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
-import { Notifications } from '../libs/utils';
+import {formatDate, Notifications} from '../libs/utils';
 import { Collections } from '../libs/ajax';
 
 //Initial step, organizes raw data for further processing in later function/steps
@@ -140,8 +158,8 @@ export const processDataUseBuckets = async(buckets) => {
   return processedBuckets;
 };
 
-//Gets member votes from this bucket by members of this user's DAC
-export const extractDacUserVotesFromBucket = (bucket, user) => {
+//Gets data access votes from this bucket by members of this user's DAC
+export const extractDacDataAccessVotesFromBucket = (bucket, user) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
   return flow(
@@ -153,13 +171,40 @@ export const extractDacUserVotesFromBucket = (bucket, user) => {
   )(votes);
 };
 
-//Gets this user's votes from this bucket; final and chairperson votes if isChair is true, member votes if false
-export const extractUserVotesFromBucket = (bucket, user, isChair) => {
+//Gets rp votes from this bucket by members of this user's DAC
+export const extractDacRPVotesFromBucket = (bucket, user) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.rp),
+    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    map(filteredData => filteredData.memberVotes),
+    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+    flatMap(memberVotes => memberVotes)
+  )(votes);
+};
+
+//Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
   return flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
+    flatMap(filteredData => isChair ?
+      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.memberVotes),
+    filter(vote => vote.dacUserId === user.dacUserId)
+  )(votes);
+};
+
+//Gets this user's rp votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
+  const votes = !isNil(bucket) ? bucket.votes : [];
+
+  return flow(
+    map(voteData => voteData.rp),
+    filter((rpData) => !isEmpty(rpData)),
     flatMap(filteredData => isChair ?
       concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
       filteredData.memberVotes),
@@ -174,6 +219,69 @@ export const extractDatasetIdsFromBucket = (bucket) => {
     filter(electionData => electionData.electionType === 'DataAccess'),
     map(electionData => electionData.dataSetId)
   )(bucket);
+};
+
+//collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
+export const collapseVotesByUser = (votes) => {
+  const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(votes));
+  return flatMap(userIdKey => {
+    const votesByUser = votesGroupedByUser[userIdKey];
+    const collapsedVotes = collapseVotes({votes: votesByUser});
+    return convertToVoteObjects({collapsedVotes});
+  })(Object.keys(votesGroupedByUser));
+};
+
+//helper method to collapse votes by converting them to an object with differing rationales and dates in arrays
+const collapseVotes = ({votes}) => {
+  const collapsedVotes = {};
+  forEach( vote => {
+    const matchingVote = collapsedVotes[`${vote.vote}`];
+    if (isNil(matchingVote)) {
+      collapsedVotes[`${vote.vote}`] = {
+        vote: vote.vote,
+        voteId: vote.voteId,
+        displayName: vote.displayName,
+        rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
+        createDates: !isNil(vote.createDate) ? [vote.createDate] : []
+      };
+    }
+    else {
+      addIfUnique(vote.rationale, matchingVote.rationales);
+      addIfUnique(vote.createDate, matchingVote.createDates);
+    }
+  })(votes);
+  return collapsedVotes;
+};
+
+//helper method to follow collapseVotes in flow
+const convertToVoteObjects = ({collapsedVotes}) => {
+  return map( key => {
+    const collapsedVote = collapsedVotes[key];
+    const collapsedRationale = appendAll(collapsedVote.rationales);
+    const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
+
+    return {
+      vote: collapsedVote.vote ,
+      voteId: collapsedVote.voteId,
+      displayName: collapsedVote.displayName,
+      rationale: collapsedRationale,
+      createDate: collapsedDate
+    };
+  })(Object.keys(collapsedVotes));
+};
+
+const appendAll = (values) => {
+  let result = '';
+  forEach(value => {
+    result += `${value}\n`;
+  })(values);
+  return !isEmpty(result) ? result : null;
+};
+
+const addIfUnique = (newValue, existingValues) => {
+  if(!isNil(newValue) && !includes(newValue, existingValues)) {
+    existingValues.push(newValue);
+  }
 };
 
 //Admin only helper function
@@ -251,7 +359,10 @@ export const openCollectionFn = ({updateCollections}) =>
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
-  extractDacUserVotesFromBucket,
-  extractUserVotesFromBucket,
-  extractDatasetIdsFromBucket
+  extractDacDataAccessVotesFromBucket,
+  extractDacRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  collapseVotesByUser
 };
