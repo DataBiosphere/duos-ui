@@ -238,8 +238,8 @@ const collapseVotes = ({votes}) => {
     const matchingVote = collapsedVotes[`${vote.vote}`];
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
+        dacUserId: vote.dacUserId,
         vote: vote.vote,
-        voteId: vote.voteId,
         displayName: vote.displayName,
         rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
         createDates: !isNil(vote.createDate) ? [vote.createDate] : []
@@ -261,8 +261,8 @@ const convertToVoteObjects = ({collapsedVotes}) => {
     const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
 
     return {
+      dacUserId: collapsedVote.dacUserId,
       vote: collapsedVote.vote ,
-      voteId: collapsedVote.voteId,
       displayName: collapsedVote.displayName,
       rationale: collapsedRationale,
       createDate: collapsedDate
