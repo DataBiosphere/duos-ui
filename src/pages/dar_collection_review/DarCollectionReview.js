@@ -13,19 +13,20 @@ import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataU
 import VotesPieChart from '../../components/common/VotesPieChart';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
+import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
 
 const tabContainerColor = 'rgb(115,154,164)';
 
 const tabStyleOverride = {
   baseStyle: {
-    fontFamily: 'Arial',
-    fontSize: '2rem',
-    width: '16%',
+    fontFamily: 'Montserrat',
+    fontSize: '1.6rem',
+    width: 'fit-content',
     fontWeight: 600,
     border: '0px',
     display: 'flex',
     justifyContent: 'center',
-    padding: '0.5%',
+    padding: '1%',
   },
   tabSelected: {
     backgroundColor: 'white',
@@ -75,7 +76,8 @@ const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
 
 export default function DarCollectionReview(props) {
   const tabs = {
-    applicationInformation: 'Application Information'
+    applicationInformation: 'Application Information',
+    memberVote: 'Member Vote'
   };
 
   const collectionId = props.match.params.collectionId;
@@ -197,6 +199,14 @@ export default function DarCollectionReview(props) {
         cloudProvider: darInfo.cloudProvider,
         cloudProviderDescription: darInfo.cloudProviderDescription
       }),
+      h(MultiDatasetVotingTab, {
+        isRendered: selectedTab === tabs.memberVote,
+        darInfo,
+        collection,
+        buckets: dataUseBuckets,
+        isChair: false,
+        isLoading
+      })
       /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
       I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
       However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership

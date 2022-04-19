@@ -29,9 +29,9 @@ const styles = {
 
 
 export default function DataUsePill(props) {
-  const {dataUse, key} = props;
+  const {dataUse} = props;
 
-  return div({key: 'data_use_pill_' + key, style: styles.baseStyle}, [
+  return div({key: `data_use_pill_${dataUse.code}`, style: styles.baseStyle}, [
     span({ style: styles.code }, !isNil(dataUse) ? [dataUse.code] : []),
     span({ style: styles.description }, !isNil(dataUse) ? [dataUse.description] : [])
   ]);

@@ -104,11 +104,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
-    cy.get('[dataCy=yes-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -127,11 +127,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -150,11 +150,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=yes-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -173,12 +173,12 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('not.be.disabled');
-    cy.get('[dataCy=yes-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -197,11 +197,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=yes-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -220,11 +220,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=yes-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -243,11 +243,11 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').click();
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -265,7 +265,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
-    cy.get('[dataCy=chair-vote-info]').should('not.exist');
+    cy.get('[datacy=chair-vote-info]').should('not.exist');
   });
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function() {
@@ -282,7 +282,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
 
-    cy.get('[dataCy=chair-vote-info]').should('not.exist');
+    cy.get('[datacy=chair-vote-info]').should('not.exist');
   });
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function() {
@@ -299,7 +299,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
 
-    cy.get('[dataCy=chair-vote-info]').should('exist');
+    cy.get('[datacy=chair-vote-info]').should('exist');
   });
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function() {

@@ -20,7 +20,8 @@ const styles = {
   },
   content: {
     display: 'flex',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    padding: '0 15px'
   },
   subsection: {
     display: 'flex',
@@ -103,7 +104,7 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   return (
-    div({style: styles.baseStyle, dataCy: 'collection-vote-box'}, [
+    div({style: styles.baseStyle, datacy: 'collection-vote-box'}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div({style: styles.subsection}, [
