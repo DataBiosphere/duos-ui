@@ -130,7 +130,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-const ChairVoteInfo = ({dacVotes, isChair, isLoading}) => {
+export const ChairVoteInfo = ({dacVotes, isChair, isLoading}) => {
   return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
     h(VotesPieChart, {
       votes: dacVotes,

@@ -1,15 +1,13 @@
 import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
-import VotesPieChart from "../common/VotesPieChart";
-import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
 import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
-import {dataUsePills} from "./ResearchProposalVoteSlab";
+import {ChairVoteInfo, dataUsePills} from "./ResearchProposalVoteSlab";
 
 import {
-  collapseVotesByUser, extractDacDataAccessVotesFromBucket,
+  extractDacDataAccessVotesFromBucket,
   extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
 
@@ -84,20 +82,7 @@ export default function MultiDatasetVoteSlab(props) {
         isDisabled: isEmpty(currentUserVotes) || !allOpenElections,
         isLoading
       }),
-      ChairVoteInfo()
-    ]);
-  };
-
-  const ChairVoteInfo = () => {
-    return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
-      h(VotesPieChart, {
-        votes: dacVotes,
-      }),
-      div(['My DAC\'s Votes (detail)']),
-      h(VoteSummaryTable, {
-        dacVotes: collapseVotesByUser(dacVotes),
-        isLoading,
-      })
+      ChairVoteInfo({dacVotes, isChair, isLoading})
     ]);
   };
 
