@@ -3,7 +3,7 @@ import {h} from "react-hyperscript-helpers";
 import {Styles} from "../../libs/theme";
 import {isNil} from "lodash/fp";
 import {useCallback, useEffect, useState} from "react";
-import {formatDate, sortVisibleTable} from "../../libs/utils";
+import {sortVisibleTable} from "../../libs/utils";
 
 const styles = {
   baseStyle: {
