@@ -131,7 +131,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
 };
 
 export const ChairVoteInfo = ({dacVotes, isChair, isLoading}) => {
-  return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, dataCy: 'chair-vote-info'}, [
+  return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, datacy: 'chair-vote-info'}, [
     h(VotesPieChart, {
       votes: dacVotes,
     }),
@@ -157,7 +157,7 @@ export default function ResearchProposalVoteSlab(props) {
   }, [bucket, isChair]);
 
 
-  return div({dataCy: 'srp-slab', style: styles.baseStyle}, [
+  return div({datacy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
     div({style: styles.collapsedData}, [
       isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
@@ -170,8 +170,8 @@ export default function ResearchProposalVoteSlab(props) {
     h(AnimatePresence, {initial:false}, [
       expanded && (
         h(motion.section, animationAttributes, [
-          div({dataCy: 'srp-expanded', style: styles.expandedData}, [
-            div({dataCy: 'research-purpose'}, [
+          div({datacy: 'srp-expanded', style: styles.expandedData}, [
+            div({datacy: 'research-purpose'}, [
               span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
               h(ResearchPurposeSummary, {darInfo}),
               h(DataUseAlertBox, {translatedDataUse}),

@@ -112,8 +112,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=srp-slab]').should('be.visible');
-    cy.get('[dataCy=srp-expanded]').should('not.exist');
+    cy.get('[datacy=srp-slab]').should('be.visible');
+    cy.get('[datacy=srp-expanded]').should('not.exist');
     cy.contains("primary");
     cy.contains("DS");
   });
@@ -130,10 +130,10 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=dataset-vote-slab]').should('be.visible');
+    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.contains("GRU");
-    cy.get('[dataCy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[dataCy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
   });
 
   it('Does not renders dataset voting slab if the DAC does not vote on datasets in that bucket', function () {
@@ -148,7 +148,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=dataset-vote-slab]').should('not.exist');
+    cy.get('[datacy=dataset-vote-slab]').should('not.exist');
   });
 
   it('Renders multiple dataset voting slabs', function () {
@@ -163,7 +163,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=dataset-vote-slab]').should('be.visible');
+    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.contains("GROUP 1");
     cy.contains("GRU");
     cy.contains("GROUP 2");
@@ -182,7 +182,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=dataset-vote-slab]').should('be.visible');
+    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'No');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'Yes');
@@ -200,7 +200,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
-    cy.get('[dataCy=dataset-vote-slab]').should('be.visible');
+    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.table-data').should('not.exist');
   });
 });

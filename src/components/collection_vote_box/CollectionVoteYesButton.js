@@ -25,7 +25,7 @@ export default function CollectionVoteYesButton(props) {
   };
 
   return h(CollectionVoteButton, {
-    dataCy: 'yes-collection-vote-button',
+    datacy: 'yes-collection-vote-button',
     label: h(Label),
     onClick: () => onClick(),
     baseColor: '#1FA371',

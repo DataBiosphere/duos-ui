@@ -83,7 +83,7 @@ export default function DatasetsRequestedPanel(props) {
       span({
         style: styles.datasetCount,
         isRendered: !isLoading,
-        dataCy: 'dataset-count'
+        datacy: 'dataset-count'
       }, [`(${datasetCount})`])
     ]);
   };
@@ -98,7 +98,7 @@ export default function DatasetsRequestedPanel(props) {
 
     return isLoading
       ? div({className: 'text-placeholder', style: styles.skeletonLoader})
-      : div({style: styles.datasetList, dataCy: 'dataset-list'}, [datasetRows]);
+      : div({style: styles.datasetList, datacy: 'dataset-list'}, [datasetRows]);
   };
 
   const datasetId = (dataset) => {
@@ -116,7 +116,7 @@ export default function DatasetsRequestedPanel(props) {
       `+ View ${hiddenDatasetCount} more`;
 
     return a({
-      dataCy: 'collapse-expand-link',
+      datacy: 'collapse-expand-link',
       style: styles.link,
       onClick: expanded ? collapseDatasetList : expandDatasetList,
       isRendered: hiddenDatasetCount > 0
