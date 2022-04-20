@@ -7,10 +7,9 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, flatMap, isNil, get, includes} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, flatMap, get, includes} from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
-import VotesPieChart from '../../components/common/VotesPieChart';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
@@ -70,11 +69,11 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
 
-  const tabsForUserRole = useCallback((user, buckets) => {
+  const tabsForUser = useCallback((user, buckets) => {
     const userHasVotesForCollection = flow(
-      find(bucket => bucket.key === 'RP Vote'),
-      get('votes'),
-      flatMap(voteData => get('rp')(voteData)),
+      filter(bucket => bucket.key !== 'RP Vote'),
+      flatMap(bucket => get('votes')(bucket)),
+      flatMap(voteData => get('dataAccess')(voteData)),
       flatMap(rpVoteData => get('memberVotes')(rpVoteData)),
       map(vote => get('dacUserId')(vote)),
       includes(user.dacUserId)
@@ -116,7 +115,7 @@ export default function DarCollectionReview(props) {
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
-        setTabs(tabsForUserRole(user, processedBuckets));
+        setTabs(tabsForUser(user, processedBuckets));
         //setTimeout used to render skeleton loader while sub-components are initializing data for render
         const timeout = setTimeout(() => {
           setIsLoading(false);
@@ -134,7 +133,7 @@ export default function DarCollectionReview(props) {
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
-  }, [collectionId, props.history, tabsForUserRole]);
+  }, [collectionId, props.history, tabsForUser]);
 
   useEffect(() => {
     setSubcomponentLoading(true);
