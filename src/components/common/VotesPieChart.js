@@ -9,7 +9,7 @@ const processVotes = (votes) => {
   const decisionMap = {};
 
   votes.forEach((v) => {
-    const value = startCase(v.vote) || "Not submitted";
+    const value = v.vote ? "Yes" : !isNil(v.vote) ? "No" : "Not submitted";
     if(isNil(decisionMap[value])) {
       decisionMap[value] = 1;
     } else {
@@ -32,7 +32,7 @@ export default function VotesPieChart(props) {
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);
-  const options = { title, pieHole, is3d: false, fontName: 'Montserrat'};
+  const options = { title, pieHole, is3d: false, fontName: 'Montserrat', pieSliceText: 'none' };
 
   if(isEmpty(votes)) {
     return div({style, className: `${keyString}-pie-chart-no-data`}, [`No data for ${keyString}`]);
