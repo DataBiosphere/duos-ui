@@ -250,23 +250,25 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const page = user.isChairPerson ? '/chair_console'
-      : user.isMember ? '/member_console'
-        : user.isAdmin ? '/admin_console'
-          : user.isResearcher ? '/dataset_catalog'
-            : user.isDataOwner ? '/data_owner_console'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+    const page =
+      user.isAdmin ? '/admin_console'
+        :user.isChairPerson ? '/chair_console'
+          : user.isMember ? '/member_console'
+            : user.isResearcher ? '/dataset_catalog'
+              : user.isDataOwner ? '/data_owner_console'
+                : user.isAlumni ? '/summary_votes'
+                  : '/';
     history.push(page);
   },
   console: async (user, history) => {
-    const page = user.isChairPerson ? '/chair_console'
-      : user.isMember ? '/member_console'
-        : user.isAdmin ? '/admin_console'
-          : user.isResearcher ? '/researcher_console'
-            : user.isDataOwner ? '/data_owner_console'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+    const page =
+      user.isAdmin ? '/admin_console'
+        : user.isChairPerson ? '/chair_console'
+          : user.isMember ? '/member_console'
+            : user.isResearcher ? '/researcher_console'
+              : user.isDataOwner ? '/data_owner_console'
+                : user.isAlumni ? '/summary_votes'
+                  : '/';
     history.push(page);
   }
 };
