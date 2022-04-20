@@ -228,6 +228,14 @@ export default function DarCollectionReview(props) {
         buckets: dataUseBuckets,
         isChair: false,
         isLoading
+      }),
+      h(MultiDatasetVotingTab, {
+        isRendered: selectedTab === tabs.chairVote,
+        darInfo,
+        collection,
+        buckets: dataUseBuckets,
+        isChair: true,
+        isLoading
       })
       /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
       I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
