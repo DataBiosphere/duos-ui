@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
@@ -7,13 +7,14 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import { find, isEmpty, flow, filter, map, flatMap, isNil } from 'lodash/fp';
+import { find, isEmpty, flow, filter, map, flatMap, isNil, get } from 'lodash/fp';
 import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import VotesPieChart from '../../components/common/VotesPieChart';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
+import _ from "lodash";
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -45,6 +46,8 @@ const tabStyleOverride = {
     border: '0px'
   },
 };
+const chairpersonRoleId = 2;
+const memberRoleId = 1;
 
 const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
   const buckets = dataUseBuckets.slice(1);
@@ -74,22 +77,40 @@ const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
   });
 };
 
-export default function DarCollectionReview(props) {
-  const tabs = {
-    applicationInformation: 'Application Information',
-    memberVote: 'Member Vote'
-  };
 
+const userHasRole = (user, roleId) => {
+  const roleIds = flow(
+    get('roles'),
+    map(role => role.roleId)
+  )(user);
+  const matches = filter(id => id === roleId)(roleIds);
+  return !isEmpty(matches);
+};
+
+export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
+  const [tabs, setTabs] = useState({applicationInformation: 'Application Information'});
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
+
+  const tabsForUserRole = useCallback((user) => {
+    const updatedTabs = {applicationInformation: 'Application Information'};
+
+    if(userHasRole(user, chairpersonRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+      updatedTabs.chairVote = 'Chair Vote';
+    } else if (userHasRole(user, memberRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+    }
+    return updatedTabs;
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -114,6 +135,7 @@ export default function DarCollectionReview(props) {
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
+        setTabs(tabsForUserRole(user));
         //setTimeout used to render skeleton loader while sub-components are initializing data for render
         const timeout = setTimeout(() => {
           setIsLoading(false);
@@ -131,7 +153,7 @@ export default function DarCollectionReview(props) {
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
-  }, [collectionId, props.history]);
+  }, [collectionId, props.history, tabsForUserRole]);
 
   useEffect(() => {
     setSubcomponentLoading(true);
