@@ -29,7 +29,7 @@ const dataUseDescriptions = (translatedDataUse) => {
   return ld.flatMap(ld.keys(translatedDataUse), key => {
     const dataUses = translatedDataUse[key];
     return ld.map(manuallyReviewedDataUses(dataUses), dataUse => {
-      return div([dataUse.description]);
+      return div({key: dataUse.code}, [dataUse.description]);
     });
   });
 };
