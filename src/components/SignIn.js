@@ -28,8 +28,8 @@ export default function SignIn(props) {
     Storage.setGoogleData(response);
     try {
       const userRes = await User.getMe();
-      setUser(Object.assign(userRes, setUserRoleStatuses(userRes, Storage)));
-      redirect(user);
+      await setUser(Object.assign(userRes, setUserRoleStatuses(userRes, Storage)));
+      redirect(userRes);
     } catch (error) {
       try {
         let registeredUser = await User.registerUser();
@@ -45,9 +45,9 @@ export default function SignIn(props) {
               break;
             case 409:
               try {
-                let user = await this.getUser();
-                user = Object.assign({}, user, setUserRoleStatuses(user, Storage));
-                redirect(user);
+                let userRes = await User.getMe();
+                await setUser(Object.assign({}, userRes, setUserRoleStatuses(userRes, Storage)));
+                redirect(userRes);
               } catch (error) {
                 Storage.clearStorage();
               }
@@ -77,8 +77,8 @@ export default function SignIn(props) {
     }
   };
 
-  const redirect = useCallback((user) => {
-    Navigation.back(user, history);
+  const redirect = useCallback(async (user) => {
+    await Navigation.back(user, history);
     onSignIn();
   }, [onSignIn, history]);
 
