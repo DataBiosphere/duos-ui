@@ -22,7 +22,7 @@ export function extractDOIDFromUrl(urls) {
     }
   });
 
-  return urls;
+  return doidArr;
 }
 
 export default { searchOntology };
