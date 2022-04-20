@@ -1,5 +1,5 @@
 import {isNil, isEmpty, filter, join, concat, clone, uniq, head, flow} from 'lodash/fp';
-import { searchOntology } from './ontologyService';
+import { searchOntology, extractDOIDFromUrl } from './ontologyService';
 import { Notifications } from './utils';
 
 export const srpTranslations = {
@@ -163,8 +163,9 @@ export const consentTranslations = {
 };
 
 const getOntologyName = async(urls) => {
-  const joinedUrls = urls.join(',');
-  const ontology = await searchOntology(joinedUrls);
+  const doidArr = extractDOIDFromUrl(urls);
+  const params = doidArr.join(',');
+  const ontology = await searchOntology(params);
   return ontology.map(data => data.label);
 };
 

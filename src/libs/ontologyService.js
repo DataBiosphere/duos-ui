@@ -13,4 +13,16 @@ export async function searchOntology(obolibraryURL) {
   }
 }
 
+export function extractDOIDFromUrl(urls) {
+  const doidArr = [];
+  urls.forEach(url => {
+    const startIdx = url.search(/DOID_\d+/);
+    if (startIdx > -1) {
+      doidArr.push(url.slice(startIdx));
+    }
+  });
+
+  return urls;
+}
+
 export default { searchOntology };
