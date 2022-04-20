@@ -177,7 +177,7 @@ export const extractDacRPVotesFromBucket = (bucket, user) => {
 
   return flow(
     map(voteData => voteData.rp),
-    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    filter((rpData) => !isEmpty(rpData)),
     map(filteredData => filteredData.memberVotes),
     filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
     flatMap(memberVotes => memberVotes)
