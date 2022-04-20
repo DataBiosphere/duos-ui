@@ -5,9 +5,9 @@ import { map } from 'lodash';
 import { useMemo } from 'react';
 
 const pieSliceColors = {
-  0: {color: 'green'},
-  1: {color: 'red'},
-  2: {color: 'gray'}
+  0: {color: '#1FA371'},
+  1: {color: '#DA000E'},
+  2: {color: '#979797'}
 };
 
 const processVotes = (votes) => {
