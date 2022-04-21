@@ -29,8 +29,7 @@ export default function SignIn(props) {
     return () => (isSubscribed = false);
   }, []);
 
-  // Utility function called in the normal case and
-  // in the undocumented 409 response code case
+  // Utility function called in the normal success case and in the undocumented 409 case
   const setUserInStorageAndRedirect = async () => {
     const user = await User.getMe();
     setUserRoleStatuses(user, Storage);
