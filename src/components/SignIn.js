@@ -29,20 +29,26 @@ export default function SignIn(props) {
     return () => (isSubscribed = false);
   }, []);
 
+  // Utility function called in the normal case and
+  // in the undocumented 409 response code case
+  const setUserInStorageAndRedirect = async () => {
+    const user = await User.getMe();
+    setUserRoleStatuses(user, Storage);
+    await onSignIn();
+    redirect(user);
+  };
+
   const onSuccess = async (response) => {
     Storage.setGoogleData(response);
     try {
-      const user = await User.getMe();
-      setUserRoleStatuses(user, Storage);
-      await onSignIn();
-      redirect(user);
+      await setUserInStorageAndRedirect();
     } catch (error) {
       try {
         // New users without an existing account will error out in the above call
         // Register them and redirect them to the profile page.
         const registeredUser = await User.registerUser();
         setUserRoleStatuses(registeredUser, Storage);
-        onSignIn();
+        await onSignIn();
         history.push('/profile');
       } catch (error) {
         // Handle common error cases
@@ -54,9 +60,7 @@ export default function SignIn(props) {
               break;
             case 409:
               try {
-                let user = await User.getMe();
-                user = setUserRoleStatuses(user, Storage);
-                redirect(user);
+                await setUserInStorageAndRedirect();
               } catch (error) {
                 Storage.clearStorage();
               }
