@@ -23,4 +23,4 @@ updates:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "dependency"
+      prefix: "[DUOS-1740][risk=no] dependency"
