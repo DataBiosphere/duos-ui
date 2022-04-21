@@ -7,8 +7,12 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, flatMap, get, includes} from 'lodash/fp';
-import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
+import {find, isEmpty, flow, filter, map, some, get} from 'lodash/fp';
+import {
+  extractUserDataAccessVotesFromBucket,
+  generatePreProcessedBucketData,
+  processDataUseBuckets
+} from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
@@ -44,8 +48,8 @@ const tabStyleOverride = {
     border: '0px'
   },
 };
-const chairpersonRoleId = 2;
 const memberRoleId = 1;
+const chairpersonRoleId = 2;
 
 const userHasRole = (user, roleId) => {
   const roleIds = flow(
@@ -72,11 +76,8 @@ export default function DarCollectionReview(props) {
   const tabsForUser = useCallback((user, buckets) => {
     const userHasVotesForCollection = flow(
       filter(bucket => bucket.key !== 'RP Vote'),
-      flatMap(bucket => get('votes')(bucket)),
-      flatMap(voteData => get('dataAccess')(voteData)),
-      flatMap(rpVoteData => get('memberVotes')(rpVoteData)),
-      map(vote => get('dacUserId')(vote)),
-      includes(user.dacUserId)
+      map(bucket => extractUserDataAccessVotesFromBucket(bucket, user, false)),
+      some(votes => !isEmpty(votes))
     )(buckets);
 
     const updatedTabs = {applicationInformation: 'Application Information'};
