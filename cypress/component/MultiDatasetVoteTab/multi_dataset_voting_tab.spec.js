@@ -2,10 +2,8 @@
 import React from 'react';
 import {mount} from "@cypress/react";
 import {Storage} from "../../../src/libs/storage";
-import {Collections, User} from "../../../src/libs/ajax";
+import {User} from "../../../src/libs/ajax";
 import MultiDatasetVotingTab from "../../../src/pages/dar_collection_review/MultiDatasetVotingTab";
-import DarCollectionReview from "../../../src/pages/dar_collection_review/DarCollectionReview";
-import DarCollectionUtils from "../../../src/utils/DarCollectionUtils";
 
 const darInfo = {
   "rus": "test",
