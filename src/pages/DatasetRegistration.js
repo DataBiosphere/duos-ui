@@ -15,7 +15,7 @@ import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
 import { searchOntologies } from "../libs/utils";
-import {searchOntology} from "../libs/ontologyService";
+import { searchOntology, extractDOIDFromUrl } from '../libs/ontologyService';
 
 class DatasetRegistration extends Component {
 
@@ -169,15 +169,13 @@ class DatasetRegistration extends Component {
     }
   }
 
-  async getOntologies(urls) {
+  async getOntologies(urls = []) {
     if (fp.isEmpty(urls)) {
       return [];
-    }
-    else {
-      let ontologies = await Promise.all(
-        urls.map(url => searchOntology(url)
-          .then(data => { return data; })
-        ));
+    } else {
+      const doidArr = extractDOIDFromUrl(urls);
+      const urlParams = doidArr.join(',');
+      const ontologies = await searchOntology(urlParams);
       return ontologies;
     }
   }
