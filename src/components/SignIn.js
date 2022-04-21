@@ -33,15 +33,15 @@ export default function SignIn(props) {
     Storage.setGoogleData(response);
     try {
       const user = await User.getMe();
-      await setUserRoleStatuses(user, Storage);
-      onSignIn();
+      setUserRoleStatuses(user, Storage);
+      await onSignIn();
       redirect(user);
     } catch (error) {
       try {
         // New users without an existing account will error out in the above call
         // Register them and redirect them to the profile page.
         const registeredUser = await User.registerUser();
-        await setUserRoleStatuses(registeredUser, Storage);
+        setUserRoleStatuses(registeredUser, Storage);
         onSignIn();
         history.push('/profile');
       } catch (error) {
@@ -54,7 +54,8 @@ export default function SignIn(props) {
               break;
             case 409:
               try {
-                const user = await User.getMe();
+                let user = await User.getMe();
+                user = setUserRoleStatuses(user, Storage);
                 redirect(user);
               } catch (error) {
                 Storage.clearStorage();
