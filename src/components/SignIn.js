@@ -59,6 +59,7 @@ export default function SignIn(props) {
               setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
               break;
             case 409:
+              // If the user exists, regardless of conflict state, log them in.
               try {
                 await setUserInStorageAndRedirect();
               } catch (error) {
