@@ -11,7 +11,7 @@ updates:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "dependency"
+      prefix: "[DUOS-1740][risk=no] dependency"
   - package-ecosystem: docker
     directory: "/"
     schedule:
