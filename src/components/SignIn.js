@@ -13,30 +13,39 @@ import {Spinner} from './Spinner';
 export default function SignIn(props) {
 
   const [clientId, setClientId] = useState('');
-  const [user, setUser] = useState({});
   const [errorDisplay, setErrorDisplay] = useState({});
   const {onSignIn, history, customStyle} = props;
 
   useEffect(() => {
+    // Using `isSubscribed` resolves the
+    // "To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function." warning
+    let isSubscribed = true;
     const init = async () => {
-      setClientId(`${await Config.getGoogleClientId()}`);
+      if (isSubscribed) {
+        setClientId(`${await Config.getGoogleClientId()}`);
+      }
     };
     init();
+    return () => (isSubscribed = false);
   }, []);
 
-  const responseGoogle = async (response) => {
+  const onSuccess = async (response) => {
     Storage.setGoogleData(response);
     try {
-      const userRes = await User.getMe();
-      await setUser(Object.assign(userRes, setUserRoleStatuses(userRes, Storage)));
-      redirect(userRes);
+      const user = await User.getMe();
+      await setUserRoleStatuses(user, Storage);
+      onSignIn();
+      redirect(user);
     } catch (error) {
       try {
-        let registeredUser = await User.registerUser();
-        this.setUserRoleStatuses(registeredUser, Storage);
+        // New users without an existing account will error out in the above call
+        // Register them and redirect them to the profile page.
+        const registeredUser = await User.registerUser();
+        await setUserRoleStatuses(registeredUser, Storage);
         onSignIn();
         history.push('/profile');
       } catch (error) {
+        // Handle common error cases
         try {
           const status = error.status;
           switch (status) {
@@ -45,9 +54,8 @@ export default function SignIn(props) {
               break;
             case 409:
               try {
-                let userRes = await User.getMe();
-                await setUser(Object.assign({}, userRes, setUserRoleStatuses(userRes, Storage)));
-                redirect(userRes);
+                const user = await User.getMe();
+                redirect(user);
               } catch (error) {
                 Storage.clearStorage();
               }
@@ -63,7 +71,7 @@ export default function SignIn(props) {
     }
   };
 
-  const forbidden = (response) => {
+  const onFailure = (response) => {
     Storage.clearStorage();
     if (response.error === 'popup_closed_by_user') {
       setErrorDisplay({
@@ -71,16 +79,15 @@ export default function SignIn(props) {
       });
       setTimeout(() => {
         setErrorDisplay({});
-      }, 3000);
+      }, 2000);
     } else {
       setErrorDisplay({'title': response.error, 'description': response.details});
     }
   };
 
-  const redirect = useCallback(async (user) => {
-    await Navigation.back(user, history);
-    onSignIn();
-  }, [onSignIn, history]);
+  const redirect = useCallback( (user) => {
+    Navigation.back(user, history);
+  }, [history]);
 
   const spinnerOrSigninButton = () => {
     const disabled = clientId === '';
@@ -91,8 +98,8 @@ export default function SignIn(props) {
       width: '180px',
       theme: 'dark',
       clientId: clientId,
-      onSuccess: responseGoogle,
-      onFailure: forbidden,
+      onSuccess: onSuccess,
+      onFailure: onFailure,
       disabledStyle: {'opacity': '25%', 'cursor': 'not-allowed'}
     };
     return disabled ?
