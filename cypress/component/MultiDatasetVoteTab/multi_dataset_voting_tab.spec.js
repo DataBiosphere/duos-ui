@@ -204,5 +204,3 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.get('.table-data').should('not.exist');
   });
 });
-
-
