@@ -57,6 +57,14 @@ export default function MultiDatasetVotingTab(props) {
     init();
   }, []);
 
+  const isApprovalDisabled = () => {
+    const researcherLibraryCards = flow(
+      get('createUser'),
+      get('libraryCards')
+    )(collection);
+    const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
+    return isChair && researcherMissingLibraryCards;
+  };
 
   const DatasetVoteSlabs = () => {
     let index = 0;
