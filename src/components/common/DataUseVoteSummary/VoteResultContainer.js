@@ -1,6 +1,6 @@
 import VoteResultIcon from './VoteResultIcon';
 import VoteResultLabel from './VoteResultLabel';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, filter, isNil } from 'lodash/fp';
 import { h, div } from 'react-hyperscript-helpers';
 
 //helper function to generate keys for rendered elements
@@ -9,16 +9,18 @@ const convertLabelToKey = (label) => {
 };
 
 const determineUnanimousVoteResult = ({votes = []}) => {
-  const voteCount = votes.length;
-  if (isEmpty(votes) || voteCount < 1) {
+  const filteredVotes = filter((vote) => !isNil(vote.vote))(votes);
+  if (isEmpty(filteredVotes)) {
     return 'underReview';
   }
+  const voteCount = filteredVotes.length;
+
   let voteTally = {
     true: 0,
     false: 0,
   };
 
-  votes.forEach((vote = {}) => {
+  filteredVotes.forEach((vote = {}) => {
     voteTally[vote.vote] += 1;
   });
 
