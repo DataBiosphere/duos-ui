@@ -101,10 +101,10 @@ const DataUseSummary = ({translatedDataUse}) => {
 };
 
 export const dataUsePills = (dataUses) => {
-  return map( (dataUse, i) => {
+  return map( dataUse => {
     return DataUsePill({
       dataUse,
-      key: i
+      key: dataUse.code
     });
   })(dataUses);
 };

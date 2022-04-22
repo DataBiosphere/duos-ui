@@ -1,5 +1,5 @@
 import {div, span} from "react-hyperscript-helpers";
-import ld, {isEmpty} from "lodash";
+import {isEmpty, filter, keys, flatMap, map} from "lodash/fp";
 
 const styles = {
   box: {
@@ -26,18 +26,16 @@ const styles = {
 };
 
 const dataUseDescriptions = (translatedDataUse) => {
-  return ld.flatMap(ld.keys(translatedDataUse), key => {
+  return flatMap(key => {
     const dataUses = translatedDataUse[key];
-    return ld.map(manuallyReviewedDataUses(dataUses), dataUse => {
-      return div([dataUse.description]);
-    });
-  });
+    return map(dataUse => {
+      return div({key: dataUse.code}, [dataUse.description]);
+    })(manuallyReviewedDataUses(dataUses));
+  })(keys(translatedDataUse));
 };
 
 const manuallyReviewedDataUses = (dataUses) => {
-  return ld.filter(dataUses, dataUse => {
-    return dataUse.manualReview;
-  });
+  return filter(dataUse => dataUse.manualReview)(dataUses);
 };
 
 export default function DataUseAlertBox(props) {

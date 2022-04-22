@@ -177,7 +177,7 @@ export const extractDacRPVotesFromBucket = (bucket, user) => {
 
   return flow(
     map(voteData => voteData.rp),
-    filter((dataAccessData) => !isEmpty(dataAccessData)),
+    filter((rpData) => !isEmpty(rpData)),
     map(filteredData => filteredData.memberVotes),
     filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
     flatMap(memberVotes => memberVotes)
@@ -238,6 +238,7 @@ const collapseVotes = ({votes}) => {
     const matchingVote = collapsedVotes[`${vote.vote}`];
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
+        dacUserId: vote.dacUserId,
         vote: vote.vote,
         voteId: vote.voteId,
         displayName: vote.displayName,
@@ -261,7 +262,8 @@ const convertToVoteObjects = ({collapsedVotes}) => {
     const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
 
     return {
-      vote: collapsedVote.vote ,
+      dacUserId: collapsedVote.dacUserId,
+      vote: collapsedVote.vote,
       voteId: collapsedVote.voteId,
       displayName: collapsedVote.displayName,
       rationale: collapsedRationale,

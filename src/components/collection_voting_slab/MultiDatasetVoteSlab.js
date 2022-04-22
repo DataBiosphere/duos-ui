@@ -10,6 +10,7 @@ import {
   extractDacDataAccessVotesFromBucket,
   extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
 } from "../../utils/DarCollectionUtils";
+import {Alert} from "../Alert";
 
 const styles = {
   baseStyle: {
@@ -75,6 +76,11 @@ export default function MultiDatasetVoteSlab(props) {
     )(bucket);
 
     return div({style: styles.voteInfo}, [
+      h(Alert, {
+        title: 'Voting is disabled since not all elections are open.',
+        type: 'danger',
+        isRendered: !allOpenElections
+      }),
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,

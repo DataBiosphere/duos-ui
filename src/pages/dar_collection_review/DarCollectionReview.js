@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
@@ -7,10 +7,13 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import { find, isEmpty, flow, filter, map, flatMap, isNil } from 'lodash/fp';
-import { generatePreProcessedBucketData, processDataUseBuckets } from '../../utils/DarCollectionUtils';
+import {find, isEmpty, flow, filter, map, some, get} from 'lodash/fp';
+import {
+  extractUserDataAccessVotesFromBucket,
+  generatePreProcessedBucketData,
+  processDataUseBuckets
+} from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
-import VotesPieChart from '../../components/common/VotesPieChart';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
@@ -45,51 +48,50 @@ const tabStyleOverride = {
     border: '0px'
   },
 };
+const memberRoleId = 1;
+const chairpersonRoleId = 2;
 
-const renderDataUseSubsections = (dataUseBuckets, currentUser) => {
-  const buckets = dataUseBuckets.slice(1);
-  return buckets.map((bucketData) => {
-    const {key, votes} = bucketData;
-    const memberVotes = flow(
-      map(voteData => voteData.dataAccess),
-      filter((dataAccessData) => !isEmpty(dataAccessData)),
-      flatMap(filteredData => filteredData.memberVotes)
-    )(votes);
-    const targetElectionIds = flow(
-      filter(vote => vote.dacUserId === currentUser.dacUserId),
-      map(vote => vote.electionId)
-    )(memberVotes);
-    const targetMemberVotes = filter((vote) => {
-      const relevantVote = find((id) => vote.electionId === id)(targetElectionIds);
-      return !isNil(relevantVote);
-    })(memberVotes);
-    if(isEmpty(targetMemberVotes)) {
-      return div({key: `${key}-no-votes-chart`}, [`No votes for ${key}`]);
-    }
-    return h(VotesPieChart, {
-      votes: targetMemberVotes,
-      title: `My DAC Votes - ${key}`,
-      keyString: key
-    });
-  });
+const userHasRole = (user, roleId) => {
+  const roleIds = flow(
+    get('roles'),
+    map(role => role.roleId)
+  )(user);
+  const matches = filter(id => id === roleId)(roleIds);
+  return !isEmpty(matches);
 };
 
 export default function DarCollectionReview(props) {
-  const tabs = {
-    applicationInformation: 'Application Information',
-    memberVote: 'Member Vote'
-  };
-
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
+  const [tabs, setTabs] = useState({applicationInformation: 'Application Information'});
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
+
+  const tabsForUser = useCallback((user, buckets) => {
+    const userHasVotesForCollection = flow(
+      filter(bucket => bucket.key !== 'RP Vote'),
+      map(bucket => extractUserDataAccessVotesFromBucket(bucket, user, false)),
+      some(votes => !isEmpty(votes))
+    )(buckets);
+
+    const updatedTabs = {applicationInformation: 'Application Information'};
+    if(userHasVotesForCollection) {
+      if (userHasRole(user, chairpersonRoleId)) {
+        updatedTabs.memberVote = 'Member Vote';
+        updatedTabs.chairVote = 'Chair Vote';
+      } else if (userHasRole(user, memberRoleId)) {
+        updatedTabs.memberVote = 'Member Vote';
+      }
+    }
+
+    return updatedTabs;
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -114,6 +116,7 @@ export default function DarCollectionReview(props) {
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
+        setTabs(tabsForUser(user, processedBuckets));
         //setTimeout used to render skeleton loader while sub-components are initializing data for render
         const timeout = setTimeout(() => {
           setIsLoading(false);
@@ -131,7 +134,7 @@ export default function DarCollectionReview(props) {
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
-  }, [collectionId, props.history]);
+  }, [collectionId, props.history, tabsForUser]);
 
   useEffect(() => {
     setSubcomponentLoading(true);
@@ -206,12 +209,15 @@ export default function DarCollectionReview(props) {
         buckets: dataUseBuckets,
         isChair: false,
         isLoading
+      }),
+      h(MultiDatasetVotingTab, {
+        isRendered: selectedTab === tabs.chairVote,
+        darInfo,
+        collection,
+        buckets: dataUseBuckets,
+        isChair: true,
+        isLoading
       })
-      /*NOTE: the function call below is just a placeholder for this PR, in case you want to test it on collections
-      I have no intention of using this line as it stands, the grouping/styling of the bucket subsection itself should be done in a later ticket
-      However the function itself should be useful as a foundation/initial step if you want to filter votes by DAC membership
-      */
-      // renderDataUseSubsections(dataUseBuckets, currentUser)
     ])
   ]);
 }
