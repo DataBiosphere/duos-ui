@@ -37,12 +37,13 @@ Run Cypress headless:
 See https://www.cypress.io/blog/2021/04/06/introducing-the-cypress-component-test-runner/ for more detailed information
 
 This command opens a browser window with component tests visible. 
-You don't need to have a running server started, this will do that for you. 
+You don't need to have a running server started, this will do that for you.
+(Note that specifying any port with `open-ct` will default to 3000, this seems to be a cypress bug) 
 ```
-    npx cypress open-ct
+    npx cypress open-ct -p 3000
 ```
 
 This runs component tests headless:
 ```
-    npx cypress run-ct
+    npx cypress run-ct -p 8080
 ```

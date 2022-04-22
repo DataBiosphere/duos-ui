@@ -14,4 +14,4 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           install: false
-          command: npx cypress run-ct
+          command: npx cypress run-ct -p 8080

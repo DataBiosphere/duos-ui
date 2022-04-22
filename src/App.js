@@ -61,15 +61,15 @@ function App() {
 
   }, [history]);
 
-  const signOut = () => {
-    Storage.setUserIsLogged(false);
-    Storage.clearStorage();
-    setIsLoggedIn(false);
+  const signOut = async () => {
+    await Storage.setUserIsLogged(false);
+    await Storage.clearStorage();
+    await setIsLoggedIn(false);
   };
 
-  const signIn = () => {
-    Storage.setUserIsLogged(true);
-    setIsLoggedIn(true);
+  const signIn = async () => {
+    await Storage.setUserIsLogged(true);
+    await setIsLoggedIn(true);
   };
 
   return (
