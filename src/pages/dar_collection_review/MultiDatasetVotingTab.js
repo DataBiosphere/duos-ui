@@ -6,20 +6,25 @@ import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {Storage} from "../../libs/storage";
 import {User} from "../../libs/ajax";
 import {extractUserDataAccessVotesFromBucket} from "../../utils/DarCollectionUtils";
+import {Alert} from "../../components/Alert";
 
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
     padding: '35px',
+    whiteSpace: 'pre-line'
+  },
+  slabs: {
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '35px'
+    rowGap: '35px',
   },
   title: {
     color: '#333F52',
     fontFamily: 'Montserrat',
     fontSize: '2.4rem',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginBottom: '10px'
   }
 };
 
@@ -34,6 +39,8 @@ export default function MultiDatasetVotingTab(props) {
   const [collectionDatasets, setCollectionDatasets] = useState([]);
   const [dacDatasetIds, setDacDatasetIds] = useState([]);
   const {darInfo, buckets, collection, isChair, isLoading} = props;
+  const missingLibraryCardMessage = "The Researcher must have a Library Card before data access can be granted.\n" +
+    "You can still deny this request and/or vote on the Structured Research Purpose.";
 
   useEffect( () => {
     setCollectionDatasets(get('datasets')(collection));
@@ -58,13 +65,7 @@ export default function MultiDatasetVotingTab(props) {
   }, []);
 
   const DatasetVoteSlabs = () => {
-    const researcherLibraryCards = flow(
-      get('createUser'),
-      get('libraryCards')
-    )(collection);
-    const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
-    const isApprovalDisabled = isChair && researcherMissingLibraryCards;
-
+    const isApprovalDisabled = dataAccessApprovalDisabled();
     let index = 0;
     return map(bucket => {
       index++;
@@ -80,14 +81,31 @@ export default function MultiDatasetVotingTab(props) {
     })(dataBuckets);
   };
 
+  const dataAccessApprovalDisabled = () => {
+    const researcherLibraryCards = flow(
+      get('createUser'),
+      get('libraryCards')
+    )(collection);
+    const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
+    return isChair && researcherMissingLibraryCards;
+  };
+
   return div({style: styles.baseStyle}, [
     div({style: styles.title}, ["Research Proposal"]),
-    h(ResearchProposalVoteSlab, {
-      darInfo,
-      bucket: rpBucket,
-      isChair,
-      isLoading
+    Alert({
+      type: 'danger',
+      title: missingLibraryCardMessage,
+      id: 'missing_lc',
+      isRendered: dataAccessApprovalDisabled()
     }),
-    DatasetVoteSlabs()
+    div({style: styles.slabs}, [
+      h(ResearchProposalVoteSlab, {
+        darInfo,
+        bucket: rpBucket,
+        isChair,
+        isLoading
+      }),
+      DatasetVoteSlabs()
+    ])
   ]);
 }
