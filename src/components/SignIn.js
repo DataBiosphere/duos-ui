@@ -30,14 +30,14 @@ export default function SignIn(props) {
   }, []);
 
   // Utility function called in the normal success case and in the undocumented 409 case
-  // Check for ToS Acceptance. If not, set the
+  // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async () => {
     // Check if the user has accepted ToS yet or not:
     const user = await User.getMe();
     setUserRoleStatuses(user, Storage);
     await onSignIn();
-    const userDiagnostics = await ToS.getDiagnostics();
-    const {tosAccepted} = userDiagnostics;
+    const userStatus = await ToS.getStatus();
+    const {tosAccepted} = userStatus;
     if (!tosAccepted) {
       history.push('/tos_acceptance');
     } else {

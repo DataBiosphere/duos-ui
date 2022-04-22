@@ -50,7 +50,7 @@ import {AdminEditUser} from "./pages/AdminEditUser";
 import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
-import TermsOfServiceAcceptance from "./pages/TermsOfServiceAcceptance";
+import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 
 const Routes = (props) => (
   <Switch>

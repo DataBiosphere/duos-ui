@@ -1,7 +1,7 @@
-import ReactMarkdown from "react-markdown";
-import DOMPurify from "dompurify";
-import React from "react";
-import {ToS} from "./ajax";
+import ReactMarkdown from 'react-markdown';
+import DOMPurify from 'dompurify';
+import React from 'react';
+import {ToS} from './ajax';
 
 
 export const TosService = {

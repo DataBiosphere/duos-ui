@@ -1171,7 +1171,7 @@ export const ToS = {
    * }
    * @returns {Promise<any>}
    */
-  getDiagnostics: async () => {
+  getStatus: async () => {
     const url = `${await Config.getApiUrl()}/api/sam/register/self/diagnostics`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
