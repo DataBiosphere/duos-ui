@@ -116,7 +116,7 @@ const processVotesForBucket = (darElections) => {
         default:
           break;
       }
-      if(lowerCaseType === targetFinalType && !isNil(vote.vote)) {
+      if(lowerCaseType === targetFinalType) {
         targetFinal.push(vote);
       }
     })(dateSortedVotes);
