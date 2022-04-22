@@ -45,7 +45,7 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const {question, votes, isFinal, isLoading} = props;
+  const {question, votes, isFinal, isApprovalDisabled, isLoading} = props;
 
   useEffect(() => {
     setDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
@@ -112,7 +112,7 @@ export default function CollectionSubmitVoteBox(props) {
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
-              disabled,
+              disabled: disabled || isApprovalDisabled,
               isSelected: vote === true
             }),
             h(CollectionVoteNoButton, {

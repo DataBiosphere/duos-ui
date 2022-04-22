@@ -57,16 +57,14 @@ export default function MultiDatasetVotingTab(props) {
     init();
   }, []);
 
-  const isApprovalDisabled = () => {
+  const DatasetVoteSlabs = () => {
     const researcherLibraryCards = flow(
       get('createUser'),
       get('libraryCards')
     )(collection);
     const researcherMissingLibraryCards = isNil(researcherLibraryCards) || isEmpty(researcherLibraryCards);
-    return isChair && researcherMissingLibraryCards;
-  };
+    const isApprovalDisabled = isChair && researcherMissingLibraryCards;
 
-  const DatasetVoteSlabs = () => {
     let index = 0;
     return map(bucket => {
       index++;
@@ -76,6 +74,7 @@ export default function MultiDatasetVotingTab(props) {
         dacDatasetIds,
         collectionDatasets,
         isChair,
+        isApprovalDisabled,
         key: bucket.key
       });
     })(dataBuckets);
