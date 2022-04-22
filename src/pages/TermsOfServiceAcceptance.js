@@ -1,9 +1,9 @@
-import {div, h1} from 'react-hyperscript-helpers';
+import {div, h1, span} from 'react-hyperscript-helpers';
 import {useEffect, useState} from 'react';
-import {TosService} from '../libs/tosService';
+import {TosService} from "../libs/tosService";
+import {Navigation} from '../libs/utils';
 
-
-export default function TermsOfService() {
+export default function TermsOfServiceAcceptance() {
 
   const [tosText, setTosText] = useState('');
 
@@ -17,6 +17,7 @@ export default function TermsOfService() {
 
   return div({className: 'markdown-body'}, [
     h1({style: {color: '#00609f'}}, ['Terms of Service']),
-    tosText
+    tosText,
+    div({className: 'markdown-body'}, [span({}, ['Button!!!'])])
   ]);
 }

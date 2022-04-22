@@ -50,6 +50,7 @@ import {AdminEditUser} from "./pages/AdminEditUser";
 import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
+import TermsOfServiceAcceptance from "./pages/TermsOfServiceAcceptance";
 
 const Routes = (props) => (
   <Switch>
@@ -73,6 +74,7 @@ const Routes = (props) => (
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
     <Route path="/privacy" component={PrivacyPolicy} />
     <Route path="/tos" component={TermsOfService} />
+    <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} />
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
