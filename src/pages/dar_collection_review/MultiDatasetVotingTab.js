@@ -17,7 +17,7 @@ const styles = {
   slabs: {
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '35px',
+    rowGap: '35px'
   },
   title: {
     color: '#333F52',
