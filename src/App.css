@@ -1,11 +1,3 @@
-/* Workaround for a react-error-overlay bug:
-  https://github.com/facebook/create-react-app/issues/11773
-  https://github.com/facebook/create-react-app/issues/12064
-*/
-body > iframe {
-  pointer-events: none;
-}
-
 .App {
   text-align: center;
 }
