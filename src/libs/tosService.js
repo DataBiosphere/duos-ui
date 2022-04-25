@@ -2,9 +2,42 @@ import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import React from 'react';
 import {ToS} from './ajax';
+import homeHeaderBackground from "../images/home_header_background.png";
 
 
 export const TosService = {
+
+  getBackgroundStyle: () => {
+    return {
+      marginTop: '-50px',
+      paddingTop: '25px',
+      minHeight: '700px',
+      height: '100%',
+      maxHeight: '100%',
+      backgroundImage: `linear-gradient(to right, transparent, white 50%), url(${homeHeaderBackground})`,
+      backgroundRepeat: 'no-repeat'
+    };
+  },
+
+  getContainerStyle: () => {
+    return {
+      margin: '50px',
+      maxWidth: '800px',
+      padding: '1.5rem',
+      backgroundColor: 'white',
+      boxShadow: 'rgb(0 0 0 / 12%) 0 3px 2px 0',
+      borderRadius: '5px',
+    };
+  },
+
+  getScrollableStyle: () => {
+    return {
+      maxWidth: '800px',
+      height: '400px',
+      overflowX: 'hidden',
+      overflowY: 'auto',
+    };
+  },
 
   getFormattedText: async () => {
     const markdown = await ToS.getDUOSText();
