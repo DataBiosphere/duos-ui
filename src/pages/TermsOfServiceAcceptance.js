@@ -1,4 +1,4 @@
-import {div, h1, span} from 'react-hyperscript-helpers';
+import {div, h1} from 'react-hyperscript-helpers';
 import {useEffect, useState} from 'react';
 import {TosService} from "../libs/tosService";
 import {Navigation} from '../libs/utils';
@@ -15,9 +15,12 @@ export default function TermsOfServiceAcceptance() {
     init();
   }, []);
 
-  return div({className: 'markdown-body'}, [
-    h1({style: {color: '#00609f'}}, ['Terms of Service']),
-    tosText,
-    div({className: 'markdown-body'}, [span({}, ['Button!!!'])])
+  return div({style: TosService.getBackgroundStyle()}, [
+    div({style: TosService.getContainerStyle()}, [
+      h1({style: {color: '#00609f', marginLeft: '25px'}}, ['DUOS Terms of Service']),
+      div({style: TosService.getScrollableStyle()}, [tosText]),
+      div({}, ["Accept TOS"]),
+      div({}, ["Reject TOS"])
+    ])
   ]);
 }

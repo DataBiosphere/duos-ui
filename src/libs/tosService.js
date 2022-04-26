@@ -32,6 +32,7 @@ export const TosService = {
 
   getScrollableStyle: () => {
     return {
+      marginLeft: '25px',
       maxWidth: '800px',
       height: '400px',
       overflowX: 'hidden',
