@@ -2,9 +2,12 @@ const webpack = require('webpack');
 module.exports = function override(config) {
   const fallback = config.resolve.fallback || {};
   Object.assign(fallback, {
-    util: require.resolve("util/"),
+    util: require.resolve("util"),
     stream: require.resolve("stream-browserify"),
-    zlib: require.resolve("browserify-zlib")
+    zlib: require.resolve("browserify-zlib"),
+    assert: require.resolve("assert"),
+    buffer: require.resolve("buffer"),
+    process: require.resolve("process/browser")
   });
   config.resolve.fallback = fallback;
   config.plugins = (config.plugins || []).concat([
