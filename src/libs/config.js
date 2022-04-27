@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import isNil from 'lodash/fp';
 import {Storage} from './storage';
 
 export const Config = {
