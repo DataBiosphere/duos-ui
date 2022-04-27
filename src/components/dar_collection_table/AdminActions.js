@@ -73,6 +73,7 @@ export default function AdminActions(props) {
     onClick: () => cancelOnClick(collection),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
+    dataTip: 'Cancel Elections',
     icon: Block,
   };
 

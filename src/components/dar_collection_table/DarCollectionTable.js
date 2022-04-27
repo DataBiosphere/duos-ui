@@ -7,6 +7,7 @@ import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } f
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from "./CollectionConfirmationModal";
+import ReactTooltip from "react-tooltip";
 
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
@@ -275,6 +276,12 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       resubmitCollection,
       openCollection,
       consoleAction
+    }),
+    h(ReactTooltip, {
+      place: 'left',
+      effect: 'solid',
+      multiline: true,
+      className: 'tooltip-wrapper'
     })
   ]);
 };
