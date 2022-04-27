@@ -1178,7 +1178,7 @@ export const ToS = {
   },
   acceptToS: async () => {
     const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`;
-    const res = await axios.post(url, Config.authOpts());
+    const res = await axios.post(url, {}, Config.authOpts());
     return res.data;
   }
 };
