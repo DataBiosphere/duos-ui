@@ -422,7 +422,11 @@ export default function DataAccessRequest(props) {
                 a({
                   target: '_blank',
                   href: 'https://www.ncbi.nlm.nih.gov/books/NBK482114/',
-                }, ['here'], '.'),
+                }, ['here']), '.',
+                br(),
+                span({style: {fontWeight: 'bold'}}, [
+                  'If requesting NHGRI’s GTex dataset, please make sure you submit the exact RUS you previously submitted via dbGaP.'
+                ])
               ]),
             ]),
           ]),
