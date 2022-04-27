@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import isNil from 'lodash/fp';
 import {Storage} from './storage';
 
 export const Config = {
@@ -48,9 +49,8 @@ export const Config = {
     },
   }),
 
-  textPlainOpts: (token = Token.getToken()) => ({
+  textPlain: () => ({
     headers: {
-      Authorization: `Bearer ${token}`,
       Accept: 'text/plain',
       'X-App-ID': 'DUOS',
     },

@@ -1155,7 +1155,7 @@ export const LibraryCard = {
 export const ToS = {
   getDUOSText: async () => {
     const url = `${await Config.getApiUrl()}/tos/text/duos`;
-    const res = await axios.get(url, Config.textPlainOpts());
+    const res = await axios.get(url, Config.textPlain());
     return res.data;
   },
   /**
