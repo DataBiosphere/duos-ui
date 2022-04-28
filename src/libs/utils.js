@@ -2,11 +2,11 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import {map as nonFPMap} from 'lodash';
-import { DAR, DataSet } from "./ajax";
-import {Theme, Styles } from "./theme";
-import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick } from "lodash/fp";
-import {User} from "./ajax";
-import {Config} from "./config";
+import { DAR, DataSet } from './ajax';
+import {Theme, Styles } from './theme';
+import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick } from 'lodash/fp';
+import {User} from './ajax';
+import {Config} from './config';
 
 export const UserProperties = {
   ACADEMIC_EMAIL: "academicEmail",

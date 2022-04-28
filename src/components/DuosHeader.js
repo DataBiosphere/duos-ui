@@ -16,7 +16,7 @@ import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import { isNil, map, uniq } from 'lodash/fp';
-import {Config} from "../libs/config";
+import {Config} from '../libs/config';
 
 const styles = {
   drawerPaper: {
