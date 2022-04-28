@@ -16,6 +16,7 @@ import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import { isNil, map, uniq } from 'lodash/fp';
+import {Config} from "../libs/config";
 
 const styles = {
   drawerPaper: {
@@ -143,13 +144,24 @@ class DuosHeader extends Component {
       showSupportRequestModal: false,
       hover: false,
       dacChairPath: '',
+      dacMemberPath: '',
+      researcherPath: '',
       notificationData: [],
       openDrawer: false
     };
   }
 
   async componentDidMount() {
-    this.setState({dacChairPath: '/chair_console'});
+    const env = await Config.getEnv();
+    if (env === 'dev') {
+      this.setState({dacChairPath: '/new_chair_console'});
+      this.setState({dacMemberPath: '/new_member_console'});
+      this.setState({researcherPath: '/new_researcher_console'});
+    } else {
+      this.setState({dacChairPath: '/chair_console'});
+      this.setState({dacMemberPath: '/member_console'});
+      this.setState({researcherPath: '/researcher_console'});
+    }
     const notificationData =  await NotificationService.getActiveBanners();
     this.setState(prev => {
       prev.notificationData = notificationData;
@@ -370,7 +382,7 @@ class DuosHeader extends Component {
 
     const memberLink = (inDropDown) =>
       li({ isRendered: inDropDown ? isMember : isMember && !hasTwoOrMoreRoles() }, [
-        h(Link, { id: 'link_memberConsole', to: '/member_console' }, [
+        h(Link, { id: 'link_memberConsole', to: this.state.dacMemberPath }, [
           'DAC Member Console',
         ]),
       ]);
@@ -378,7 +390,7 @@ class DuosHeader extends Component {
     const researcherLink = (inDropDown) => li({ isRendered: inDropDown ? isResearcher : isResearcher && !hasTwoOrMoreRoles() }, [
       h(
         Link,
-        { id: 'link_researcherConsole', to: '/researcher_console' },
+        { id: 'link_researcherConsole', to: this.state.researcherPath },
         ['Researcher Console']
       ),
     ]);
@@ -651,13 +663,13 @@ class DuosHeader extends Component {
                   h(BasicListItem, {
                     isRendered: isMember,
                     applyPointer,
-                    targetLink: '/member_console',
+                    targetLink: this.state.dacMemberPath,
                     label: 'DAC Member Console',
                   }),
                   h(BasicListItem, {
                     isRendered: isResearcher,
                     applyPointer,
-                    targetLink: '/researcher_console',
+                    targetLink: this.state.researcherPath,
                     label: 'Researcher Console',
                   }),
                   h(BasicListItem, {
