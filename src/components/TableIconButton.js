@@ -3,6 +3,8 @@ import { h, span } from 'react-hyperscript-helpers';
 import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils';
 import { makeStyles } from '@material-ui/core';
 import { isNil } from 'lodash';
+import {useEffect} from "react";
+import ReactTooltip from "react-tooltip";
 
 const useStyles = makeStyles({
   root: {
@@ -14,6 +16,11 @@ const useStyles = makeStyles({
 });
 
 export default function TableIconButton(props) {
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, []);
+
   const onMouseEnterFn = (e) => {
     applyHoverEffects(e, hoverStyle);
   };
