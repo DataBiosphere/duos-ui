@@ -13,7 +13,7 @@ const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', addition
     fontSize: '16px',
     padding: '5% 10%',
     cursor: pointerBool ? 'pointer' : 'default',
-    textTransform: 'upper'
+    textTransform: 'uppercase'
   };
 
   const newStyle = Object.assign({}, baseStyle, additionalStyle);
