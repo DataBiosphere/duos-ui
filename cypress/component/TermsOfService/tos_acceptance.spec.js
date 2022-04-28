@@ -13,8 +13,8 @@ const mocks = {
   }
 };
 
-describe('Terms of Service Page', function () {
-  it('Standard text loads correctly', function () {
+describe('Terms of Service Acceptance Page', function () {
+  it('Standard text loads correctly and buttons work', function () {
     cy.viewport(600, 300);
     cy.stub(ToS, 'getDUOSText').returns(text);
     cy.stub(ToS, 'acceptToS').returns(true);
