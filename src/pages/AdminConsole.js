@@ -212,9 +212,6 @@ class AdminConsole extends Component {
                 })
               ]),
 
-
-
-
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
@@ -241,6 +238,7 @@ class AdminConsole extends Component {
                 })
               ]),
               div({
+                // TODO: We won't need this box when MDV is complete
                 isRendered: (this.state.env !== 'dev'),
                 className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
