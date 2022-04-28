@@ -17,7 +17,7 @@ export default function TermsOfService() {
 
   return div({style: TosService.getBackgroundStyle()}, [
     div({style: TosService.getContainerStyle()}, [
-      h1({style: {color: '#00609f', marginLeft: '50px'}}, ['DUOS Terms of Service']),
+      h1({style: {color: '#00609f', marginLeft: '25px'}}, ['DUOS Terms of Service']),
       div({style: TosService.getScrollableStyle(), className: 'markdown-body'}, [tosText])
     ])
   ]);
