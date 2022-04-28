@@ -275,6 +275,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       resubmitCollection,
       openCollection,
       consoleAction
-    }),
+    })
   ]);
 };
