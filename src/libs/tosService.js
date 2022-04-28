@@ -12,8 +12,6 @@ export const TosService = {
       marginTop: '-50px',
       paddingTop: '25px',
       minHeight: '700px',
-      height: '100%',
-      maxHeight: '100%',
       backgroundImage: `linear-gradient(to right, transparent, white 50%), url(${homeHeaderBackground})`,
       backgroundRepeat: 'no-repeat'
     };
