@@ -7,26 +7,26 @@ import {Navigation} from '../libs/utils';
 export default function TermsOfServiceAcceptance(props) {
 
   const [tosText, setTosText] = useState('');
-  const {history} = props;
+  const {history, onSignOut} = props;
 
   const acceptButtonStyle = {
+    alignItems: 'center',
     backgroundColor: 'rgb(0, 96, 159)',
-    color: 'white',
     border: '1px solid rgb(0, 96, 159)',
     borderRadius: '4px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.45rem',
-    padding: '5px 10px',
+    color: 'white',
     cursor: 'pointer',
+    display: 'flex',
+    fontSize: '1.45rem',
     fontWeight: '600',
+    justifyContent: 'center',
     marginLeft: '1rem',
+    padding: '5px 10px',
   };
 
   const rejectButtonStyle = Object.assign({}, acceptButtonStyle, {
-    color: 'black',
-    backgroundColor: 'rgb(255, 255, 255)'
+    backgroundColor: 'rgb(255, 255, 255)',
+    color: 'black'
   });
 
   useEffect(() => {
@@ -50,12 +50,13 @@ export default function TermsOfServiceAcceptance(props) {
       div({style: TosService.getScrollableStyle()}, [tosText]),
       div({
         style: {
+          marginTop: '.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'right',
         }
       }, [
-        button({style: rejectButtonStyle}, ["Reject TOS"]),
+        button({style: rejectButtonStyle, onClick: onSignOut}, ["Reject TOS"]),
         button({style: acceptButtonStyle, onClick: acceptToS}, ["Accept TOS"])
       ])
     ])

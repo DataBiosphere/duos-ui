@@ -25,7 +25,7 @@ export const TosService = {
       maxWidth: '800px',
       padding: '1.5rem',
       backgroundColor: 'white',
-      boxShadow: 'rgb(0 0 0 / 12%) 0 3px 2px 0',
+      boxShadow: 'rgb(0 0 0 / 12%) 0 3px 2px 1px',
       borderRadius: '5px',
     };
   },
