@@ -7,7 +7,8 @@ module.exports = function override(config) {
     zlib: require.resolve("browserify-zlib"),
     assert: require.resolve("assert"),
     buffer: require.resolve("buffer"),
-    process: require.resolve("process/browser")
+    process: require.resolve("process/browser"),
+    https: require.resolve("https-browserify")
   });
   config.resolve.fallback = fallback;
   config.plugins = (config.plugins || []).concat([

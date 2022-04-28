@@ -11,12 +11,17 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
+const { webpackConfig } = require('../../webpack.config');
+const { startDevServer } = require('@cypress/webpack-dev-server');
 
 /**
  * @type {Cypress.PluginConfig}
  */
 
 module.exports = (on, config) => {
+  on('dev-server:start', (options) => {
+    return startDevServer({ options, webpackConfig});
+  });
   if (config.testingType === 'component') {
     require('@cypress/react/plugins/react-scripts')(on, config);
   }
