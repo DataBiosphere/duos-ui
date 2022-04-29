@@ -66,7 +66,8 @@ describe('Researcher Info', () => {
   });
 
   it('renders the missing library cards alert correctly', () => {
-    mount(<WrappedResearcherInfo {...props}/>);
+    const mergedProps = {...props, ...{checkNihDataOnly: false}};
+    mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
     cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
