@@ -1,5 +1,5 @@
 import {div, h} from 'react-hyperscript-helpers';
-import {isNil, chunk} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import {useState} from 'react';
 import SimpleTable from '../../components/SimpleTable';
 import {Styles} from '../../libs/theme';
@@ -45,6 +45,14 @@ export const styles = {
     dacResearchPurposeAgreement: '1.6rem',
     duosAlgorithmDecision: '1.6rem',
     dacVsDuosAlgorithm: '1.6rem'
+  },
+  containerOverride: {
+    marginLeft: '-3%',
+    width: '106%',
+    borderTop: '1px solid #979797',
+    backgroundColor: 'rgb(184,205,211,0.08)',
+    color: '#7B7B7B',
+    marginTop: '2rem',
   }
 };
 
