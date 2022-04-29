@@ -41,6 +41,7 @@ class DataAccessRequestApplication extends Component {
         internalCollaborators: [],
         externalCollaborators: [],
         checkCollaborator: false,
+        checkNihDataOnly: false,
         rus: '',
         nonTechRus: '',
         linkedIn: '',
@@ -855,6 +856,7 @@ class DataAccessRequestApplication extends Component {
       orcid = '',
       researcherGate = '',
       checkCollaborator = false,
+      checkNihDataOnly = false,
       darCode,
       hmb = false,
       poa = false,
@@ -1015,6 +1017,7 @@ class DataAccessRequestApplication extends Component {
             div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
+                checkNihDataOnly: checkNihDataOnly,
                 completed: this.state.completed,
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,

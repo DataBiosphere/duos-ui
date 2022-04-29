@@ -58,27 +58,29 @@ export default function ResearcherInfo(props) {
 
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);
   const [signingOfficial, setSigningOfficial] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
   const [researcherUser, setResearcherUser] = useState(props.researcherUser);
-  const [hasLibraryCards, setHasLibraryCards] = useState(false);
+  const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
-    setHasLibraryCards(!isEmpty(get('libraryCards')(researcherUser)));
-  }, [researcherUser]);
+    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcherUser)) || checkNihDataOnly);
+  }, [checkNihDataOnly, researcherUser]);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
     setCheckCollaborator(props.checkCollaborator);
+    setCheckNihDataOnly(props.checkNihDataOnly);
     setITDirector(props.itDirector);
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -123,18 +125,31 @@ export default function ResearcherInfo(props) {
 
         div({
           datacy: 'researcher-info-missing-library-cards',
-          isRendered: !hasLibraryCards, className: 'rp-alert' }, [
+          isRendered: !libraryCardReqSatisfied, className: 'rp-alert' }, [
           Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
         ]),
         div({
           datacy: 'researcher-info-profile-unsubmitted',
-          isRendered: (completed === false && hasLibraryCards), className: 'rp-alert' }, [
+          isRendered: (completed === false && libraryCardReqSatisfied), className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === true && hasLibraryCards), className: 'rp-alert' }, [
+          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
+        ]),
+        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+          input({
+            type: 'checkbox',
+            id: 'chk_nih_data_only',
+            name: 'checkNihDataOnly',
+            className: 'checkbox-inline rp-checkbox',
+            disabled: !isNil(darCode),
+            checked: checkNihDataOnly,
+            onChange: (e) => formFieldChange({name: 'checkNihDataOnly', value: e.target.checked})
+          }),
+          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_nih_data_only' },
+            ['I am exclusively applying for NIH/NHGRI data (ex. GTex)'])
         ]),
 
         h3({ className: 'rp-form-title access-color' }, ['1. Researcher Information']),
