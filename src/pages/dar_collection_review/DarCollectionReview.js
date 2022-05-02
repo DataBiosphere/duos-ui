@@ -93,6 +93,13 @@ export default function DarCollectionReview(props) {
     return updatedTabs;
   }, []);
 
+  const filterBucketsForUser = (user, buckets) => {
+    const isRPBucket = (bucket) => get('key')(bucket) === 'RP Vote';
+    const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+
+    return filter(bucket => isRPBucket(bucket) || containsVotesByUser(bucket))(buckets);
+  };
+
   useEffect(() => {
     const init = async () => {
       const user = Storage.getCurrentUser();
@@ -110,13 +117,14 @@ export default function DarCollectionReview(props) {
           generatePreProcessedBucketData,
           processDataUseBuckets,
         ])({ dars, datasets });
+        const filteredBuckets = filterBucketsForUser(user, processedBuckets);
         setResearcherProperties(researcherProperties);
-        setDataUseBuckets(processedBuckets);
+        setDataUseBuckets(filteredBuckets);
         setCollection(collection);
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
-        setTabs(tabsForUser(user, processedBuckets));
+        setTabs(tabsForUser(user, filteredBuckets));
         //setTimeout used to render skeleton loader while sub-components are initializing data for render
         const timeout = setTimeout(() => {
           setIsLoading(false);
