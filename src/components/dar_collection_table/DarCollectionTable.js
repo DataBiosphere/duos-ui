@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isEmpty, find } from 'lodash/fp';
+import {isNil, isEmpty, find, flow, get} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
@@ -14,6 +14,17 @@ export const getProjectTitle = ((collection) => {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
     return darData.projectTitle;
   }
+});
+
+export const getPiName = ((collection) => {
+  // eslint-disable-next-line no-debugger
+  debugger;
+  return flow(
+    get('createUser'),
+    get('properties'),
+    find(property => property.propertyKey === 'piName'),
+    get('propertyValue')
+  )(collection);
 });
 
 export const styles = {
@@ -110,7 +121,10 @@ const columnHeaderConfig = {
   pi: {
     label: 'PI',
     cellStyle: { width: styles.cellWidth.pi },
-    cellDataFn: cellData.piCellData,
+    cellDataFn: (props) => {
+      props.piName = getPiName(props.collection);
+      return cellData.piCellData(props);
+    },
     sortable: true
   },
   institution: {

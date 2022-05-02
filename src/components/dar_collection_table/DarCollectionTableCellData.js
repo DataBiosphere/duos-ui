@@ -47,9 +47,9 @@ export function submissionDateCellData({createDate, darCollectionId, label = 'su
   };
 }
 
-export function piCellData({darCollectionId, pi, label = 'pi'}) {
+export function piCellData({piName = '- -', darCollectionId, label = 'pi'}) {
   return {
-    data: '- -',
+    data: piName,
     id: darCollectionId,
     style: {
       color: '#354052',
