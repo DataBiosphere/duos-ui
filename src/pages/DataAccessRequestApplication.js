@@ -898,7 +898,7 @@ class DataAccessRequestApplication extends Component {
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', []));
+    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', [])) && !checkNihDataOnly;
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
