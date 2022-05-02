@@ -60,6 +60,13 @@ const userHasRole = (user, roleId) => {
   return !isEmpty(matches);
 };
 
+export const filterBucketsForUser = (user, buckets) => {
+  const isRPBucket = (bucket) => get('key')(bucket) === 'RP Vote';
+  const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+
+  return filter(bucket => isRPBucket(bucket) || containsVotesByUser(bucket))(buckets);
+};
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
@@ -92,13 +99,6 @@ export default function DarCollectionReview(props) {
 
     return updatedTabs;
   }, []);
-
-  const filterBucketsForUser = (user, buckets) => {
-    const isRPBucket = (bucket) => get('key')(bucket) === 'RP Vote';
-    const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
-
-    return filter(bucket => isRPBucket(bucket) || containsVotesByUser(bucket))(buckets);
-  };
 
   useEffect(() => {
     const init = async () => {

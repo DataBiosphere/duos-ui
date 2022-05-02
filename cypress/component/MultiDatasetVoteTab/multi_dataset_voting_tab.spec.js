@@ -118,7 +118,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.contains("DS");
   });
 
-  it('Renders dataset voting slab if the DAC votes on datasets in that bucket', function () {
+  it('Renders dataset voting slab with vote button selected', function () {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
@@ -134,21 +134,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.contains("GRU");
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
-  });
-
-  it('Does not renders dataset voting slab if the DAC does not vote on datasets in that bucket', function () {
-    mount(
-      <MultiDatasetVotingTab
-        darInfo={darInfo}
-        buckets={[bucket2]}
-        collection={collection}
-        isChair={false}
-      />
-    );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
-
-    cy.get('[datacy=dataset-vote-slab]').should('not.exist');
   });
 
   it('Renders multiple dataset voting slabs', function () {
