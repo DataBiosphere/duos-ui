@@ -81,11 +81,7 @@ export default function DarCollectionReview(props) {
   const [researcherProperties, setResearcherProperties] = useState({});
 
   const tabsForUser = useCallback((user, buckets) => {
-    const userHasVotesForCollection = flow(
-      filter(bucket => bucket.key !== 'RP Vote'),
-      map(bucket => extractUserDataAccessVotesFromBucket(bucket, user, false)),
-      some(votes => !isEmpty(votes))
-    )(buckets);
+    const userHasVotesForCollection = !isEmpty(filter(bucket => bucket.key !== 'RP Vote')(buckets));
 
     const updatedTabs = {applicationInformation: 'Application Information'};
     if(userHasVotesForCollection) {

@@ -206,7 +206,7 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
     map(voteData => voteData.rp),
     filter((rpData) => !isEmpty(rpData)),
     flatMap(filteredData => isChair ?
-      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.chairpersonVotes :
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
