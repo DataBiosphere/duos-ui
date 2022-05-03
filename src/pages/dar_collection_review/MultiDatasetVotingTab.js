@@ -37,9 +37,9 @@ export default function MultiDatasetVotingTab(props) {
 
   useEffect( () => {
     setCollectionDatasets(get('datasets')(collection));
-    setRpBucket(find(bucket => get('key')(bucket) === 'RP Vote')(buckets));
+    setRpBucket(find(bucket => get('isRP')(bucket))(buckets));
     setDataBuckets(flow(
-      filter(bucket => get('key')(bucket) !== 'RP Vote'),
+      filter(bucket => get('isRP')(bucket) !== true),
       sortBy(bucket => get('key')(bucket))
     )(buckets));
   }, [buckets, collection]);

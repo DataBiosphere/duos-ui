@@ -61,7 +61,7 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const isRPBucket = (bucket) => get('key')(bucket) === 'RP Vote';
+  const isRPBucket = (bucket) => get('isRP')(bucket);
   const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
 
   return filter(bucket => isRPBucket(bucket) || containsVotesByUser(bucket))(buckets);
@@ -81,7 +81,8 @@ export default function DarCollectionReview(props) {
   const [researcherProperties, setResearcherProperties] = useState({});
 
   const tabsForUser = useCallback((user, buckets) => {
-    const userHasVotesForCollection = !isEmpty(filter(bucket => bucket.key !== 'RP Vote')(buckets));
+    const dataAccessBucketsForUser = filter(bucket => get('isRP')(bucket) !== true)(buckets);
+    const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
 
     const updatedTabs = {applicationInformation: 'Application Information'};
     if(userHasVotesForCollection) {
