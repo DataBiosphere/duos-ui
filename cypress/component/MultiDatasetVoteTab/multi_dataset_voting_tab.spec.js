@@ -4,7 +4,6 @@ import {mount} from "@cypress/react";
 import {Storage} from "../../../src/libs/storage";
 import {User} from "../../../src/libs/ajax";
 import MultiDatasetVotingTab from "../../../src/pages/dar_collection_review/MultiDatasetVotingTab";
-import {collapseVotesByUser} from "../../../src/utils/DarCollectionUtils";
 import {filterBucketsForUser} from "../../../src/pages/dar_collection_review/DarCollectionReview";
 
 const darInfo = {
