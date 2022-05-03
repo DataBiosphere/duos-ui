@@ -139,12 +139,8 @@ export default function ApplicationInformation(props) {
   ];
 
   return (
-    div({className: 'application-information-page', style: {padding: '3%', backgroundColor: 'white'}}, [
-      !isLoading
-        ? h(AtAGlance, {collection: collection, dataUseBuckets: dataUseBuckets, styles: styles})
-        : div({className: 'text-placeholder', key: 'application-information-title-placeholder', style: {height: '5rem', width: '20%', marginBottom: '2rem'}}),
-
-      div({className: 'applicant-information-container', style: { margin: '2.5rem 0'}}, [
+    div({className: 'application-information-page', style: {padding: '2% 3%', backgroundColor: 'white'}}, [
+      div({className: 'applicant-information-container', style: { margin: '0 0 2.5rem 0'}}, [
         div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
