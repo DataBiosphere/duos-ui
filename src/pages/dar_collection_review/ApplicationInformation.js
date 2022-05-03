@@ -1,5 +1,4 @@
-import { div, label, span, h } from 'react-hyperscript-helpers';
-import AtAGlance from './AtAGlance';
+import { div, label, span } from 'react-hyperscript-helpers';
 import {chunk, filter, isEmpty} from "lodash/fp";
 
 const styles = {
@@ -108,8 +107,6 @@ export default function ApplicationInformation(props) {
     piEmail = '- -',
     nonTechSummary,
     isLoading = false,
-    collection,
-    dataUseBuckets,
     externalCollaborators = [],
     internalCollaborators = [],
     signingOfficial = '- -',
