@@ -22,6 +22,7 @@ export default function TermsOfServiceAcceptance(props) {
   const acceptToS = useCallback(async () => {
     const user = await Storage.getCurrentUser();
     await TosService.acceptTos();
+    await Storage.setUserIsLogged(true);
     Navigation.back(user, history);
   }, [history]);
 

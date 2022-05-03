@@ -39,6 +39,7 @@ export default function SignIn(props) {
     const userStatus = await ToS.getStatus();
     const {tosAccepted} = userStatus;
     if (!tosAccepted) {
+      await Storage.setUserIsLogged(false);
       history.push('/tos_acceptance');
     } else {
       redirect(user);
