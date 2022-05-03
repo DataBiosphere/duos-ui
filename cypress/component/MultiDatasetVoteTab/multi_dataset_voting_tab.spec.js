@@ -246,7 +246,7 @@ describe('filterBucketsForUser - Tests', function() {
 
   it('Does not filter out rp buckets or buckets with votes by the current user', function () {
     const currentUser = {dacUserId: 200};
-    const rpBucket = {isRp: true, key: 'RP Vote'};
+    const rpBucket = {isRP: true, key: 'RP Vote'};
     const prefilteredBuckets = [rpBucket, bucket1, bucket2];
 
     const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
