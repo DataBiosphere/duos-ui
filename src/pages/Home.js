@@ -5,16 +5,17 @@ import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
-import {Link} from "react-router-dom";
+import {Link} from 'react-router-dom';
+import {Storage} from '../libs/storage';
 
 class Home extends Component {
 
   render() {
     const {
-      isLogged,
       onSignIn,
       history
     } = this.props;
+    const isLogged = Storage.userIsLogged();
 
     const homeTitle = {
       color: '#FFFFFF',

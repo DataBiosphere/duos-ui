@@ -9,7 +9,7 @@ import {Theme} from '../libs/theme';
 export default function TermsOfServiceAcceptance(props) {
 
   const [tosText, setTosText] = useState('');
-  const {history, onSignOut} = props;
+  const {history} = props;
 
   useEffect(() => {
     const init = async () => {
@@ -40,11 +40,17 @@ export default function TermsOfServiceAcceptance(props) {
     },
   });
 
+  const signOut = async () => {
+    await Storage.setUserIsLogged(false);
+    await Storage.clearStorage();
+    history.push('/');
+  };
+
   const rejectButton = h(SimpleButton, {
     keyProp: `tos-accept`,
     label: 'Reject Terms of Service',
     isRendered: true,
-    onClick: onSignOut,
+    onClick: signOut,
     baseColor: 'darkgray',
     hoverColor: '#d13b07',
     additionalStyle: {

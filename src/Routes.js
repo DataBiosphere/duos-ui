@@ -135,6 +135,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
+    <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     <Route path="*" component={NotFound} />
   </Switch>
 );
