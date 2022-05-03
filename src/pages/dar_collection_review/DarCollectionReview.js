@@ -61,10 +61,9 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const isRPBucket = (bucket) => get('isRP')(bucket);
   const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
 
-  return filter(bucket => isRPBucket(bucket) || containsVotesByUser(bucket))(buckets);
+  return filter(bucket => get('isRP')(bucket) || containsVotesByUser(bucket))(buckets);
 };
 
 export default function DarCollectionReview(props) {
