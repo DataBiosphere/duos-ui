@@ -1,4 +1,4 @@
-import {div} from 'react-hyperscript-helpers';
+import {div, h1} from 'react-hyperscript-helpers';
 import DOMPurify from 'dompurify';
 import './PrivacyPolicy.css';
 import ReactMarkdown from 'react-markdown';
@@ -67,5 +67,8 @@ const content = <ReactMarkdown
 </ReactMarkdown>;
 
 export default function PrivacyPolicy() {
-  return div({className: 'markdown-body'}, [content]);
+  return div({className: 'markdown-body'}, [
+    h1({style: {paddingBottom: '1.5rem'}}, ['DUOS Privacy Policy']),
+    content
+  ]);
 }
