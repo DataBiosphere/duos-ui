@@ -245,4 +245,43 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
     cy.get('textarea').should('be.disabled');
   });
+
+  it('disables yes vote button if isApprovalDisabled is true', function () {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMixed}
+        isFinal={false}
+        question={"question"}
+        isDisabled={false}
+        isApprovalDisabled={true}
+      />
+    );
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+  });
+
+  it('does not disable no vote button if isApprovalDisabled is true', function () {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMixed}
+        isFinal={false}
+        question={"question"}
+        isDisabled={false}
+        isApprovalDisabled={true}
+      />
+    );
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('textarea').should('not.be.disabled');
+  });
 });

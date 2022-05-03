@@ -97,7 +97,19 @@ const collection = {
   datasets: [
     {dataSetId: 300},
     {dataSetId: 400}
-  ]
+  ],
+  createUser: {
+    libraryCards: [{id: 1}]
+  }
+};
+
+const collectionMissingLibraryCard = {
+  datasets: [
+    {dataSetId: 300}
+  ],
+  createUser: {
+    libraryCards: []
+  }
 };
 
 describe('MultiDatasetVoteTab - Tests', function() {
@@ -188,6 +200,36 @@ describe('MultiDatasetVoteTab - Tests', function() {
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.table-data').should('not.exist');
+  });
+
+  it('Renders warning text that data access cannot be approved when the researcher is missing a library card', function () {
+    mount(
+      <MultiDatasetVotingTab
+        darInfo={darInfo}
+        buckets={[bucket1, bucket2]}
+        collection={collectionMissingLibraryCard}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
+
+    cy.get('[id=missing_lc_alert]').should('be.visible');
+  });
+
+  it('Does not render warning text that data access cannot be approved when the researcher has a library card', function () {
+    mount(
+      <MultiDatasetVotingTab
+        darInfo={darInfo}
+        buckets={[bucket1, bucket2]}
+        collection={collection}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
+
+    cy.get('[id=missing_lc_alert]').should('not.exist');
   });
 });
 

@@ -93,6 +93,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         disabled: !rpElectionOpen
       });
     return div({ id: 'chair-vote' }, [
+      div({ style: ERROR, isRendered: hasLibraryCard === false}, [errorMessage]),
       accessVoteQuestion,
       rpVoteQuestion,
       div({ style: LINK_SECTION }, [
@@ -103,8 +104,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       ]),
       div({ style: {color: this.state.viewMatchResults ? 'inherit' : 'transparent'} }, [
         this.formatMatchData(matchData)
-      ]),
-      div({ style: ERROR, isRendered: hasLibraryCard === false}, [errorMessage])
+      ])
     ]);
   }
 });
