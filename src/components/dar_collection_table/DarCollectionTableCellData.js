@@ -1,4 +1,4 @@
-import {isNil} from "lodash/fp";
+import {isEmpty, isNil} from "lodash/fp";
 import {formatDate, isCollectionCanceled} from "../../libs/utils";
 import {div, h} from "react-hyperscript-helpers";
 import CancelCollectionButton from "./CancelCollectionButton";
@@ -47,9 +47,9 @@ export function submissionDateCellData({createDate, darCollectionId, label = 'su
   };
 }
 
-export function piCellData({darCollectionId, pi, label = 'pi'}) {
+export function piCellData({piName, darCollectionId, label = 'pi'}) {
   return {
-    data: '- -',
+    data: !isEmpty(piName) ? piName : '- -',
     id: darCollectionId,
     style: {
       color: '#354052',
