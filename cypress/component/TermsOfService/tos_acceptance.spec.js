@@ -9,8 +9,8 @@ import {Navigation} from '../../../src/libs/utils';
 
 const text = 'TOS Text';
 const mocks = {
-  signOut() {
-  }
+  push() {},
+  signOut() {}
 };
 
 describe('Terms of Service Acceptance Page', function () {
@@ -23,7 +23,7 @@ describe('Terms of Service Acceptance Page', function () {
     const signOutSpy = cy.spy(mocks, 'signOut');
 
     mount(<TermsOfServiceAcceptance
-      history={{}}
+      history={mocks.push}
       onSignOut={mocks.signOut}
     />);
 
