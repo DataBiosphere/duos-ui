@@ -41,6 +41,7 @@ class DataAccessRequestApplication extends Component {
         internalCollaborators: [],
         externalCollaborators: [],
         checkCollaborator: false,
+        checkNihDataOnly: false,
         rus: '',
         nonTechRus: '',
         linkedIn: '',
@@ -855,6 +856,7 @@ class DataAccessRequestApplication extends Component {
       orcid = '',
       researcherGate = '',
       checkCollaborator = false,
+      checkNihDataOnly = false,
       darCode,
       hmb = false,
       poa = false,
@@ -896,7 +898,7 @@ class DataAccessRequestApplication extends Component {
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', []));
+    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', [])) && !checkNihDataOnly;
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
@@ -1015,6 +1017,7 @@ class DataAccessRequestApplication extends Component {
             div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
+                checkNihDataOnly: checkNihDataOnly,
                 completed: this.state.completed,
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
