@@ -9,8 +9,7 @@ import {Navigation} from '../../../src/libs/utils';
 
 const text = 'TOS Text';
 const mocks = {
-  push() {},
-  signOut() {}
+  history: { push() {} }
 };
 
 describe('Terms of Service Acceptance Page', function () {
@@ -20,20 +19,21 @@ describe('Terms of Service Acceptance Page', function () {
     cy.stub(ToS, 'acceptToS').returns(true);
     cy.stub(Storage, 'getCurrentUser').returns({});
     cy.stub(Navigation, 'back').returns(true);
-    const signOutSpy = cy.spy(mocks, 'signOut');
+    const setUserIsLoggedSpy = cy.spy(Storage, 'setUserIsLogged');
+    const clearStorageSpy = cy.spy(Storage, 'clearStorage');
 
     mount(<TermsOfServiceAcceptance
-      history={mocks.push}
-      onSignOut={mocks.signOut}
+      history={mocks.history}
     />);
 
     // Test that the reject button clicks and calls sign-out
     cy.contains(text).should('exist');
     const rejectButton = cy.contains('reject', {matchCase: false});
     expect(rejectButton).to.exist;
-    rejectButton.click().then(() =>
-      expect(signOutSpy).to.be.called
-    );
+    rejectButton.click().then(() => {
+      expect(setUserIsLoggedSpy).to.be.called;
+      expect(clearStorageSpy).to.be.called;
+    });
 
     // Test that the accept button clicks and calls accept ToS
     const acceptButton = cy.contains('accept', {matchCase: false});
