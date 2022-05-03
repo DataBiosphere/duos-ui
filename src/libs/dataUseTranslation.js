@@ -226,28 +226,29 @@ export const processDefinedLimitations = (
   return statement;
 };
 
+//Helper function to handle OTHER attribute translations in dataUse
 const processOtherInDataUse = (dataUse, restrictionStatements) => {
   //Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
-  const promiseArray = [];
-  if (!isNil(dataUse.other)) {
-    promiseArray.push(
+  if (dataUse.otherRestrictions === true && !isNil(dataUse.other)) {
+    restrictionStatements.push(
       Promise.resolve({
-        code: 'OTH',
-        description: dataUse.other,
+        code: 'OTH1',
+        description: `Primary Other: ${isEmpty(dataUse.other) ? 'Not provided' : dataUse.other}`,
       })
     );
   }
   if (!isNil(dataUse.secondaryOther)) {
-    promiseArray.push(
+    restrictionStatements.push(
       Promise.resolve({
         code: 'OTH2',
-        description: dataUse.secondaryOther,
+        description: `Secondary Other: ${isEmpty(dataUse.secondaryOther) ? 'Not provided' : dataUse.secondaryOther}`,
       })
     );
   }
-  return restrictionStatements.concat(promiseArray);
+  return restrictionStatements;
 };
 
+//Function to translate restrictions from a single dataUse
 const translateDataUseRestrictions = async (dataUse) => {
   if(!dataUse) {return [];}
   let restrictionStatements = [];
@@ -259,14 +260,15 @@ const translateDataUseRestrictions = async (dataUse) => {
   return (await Promise.all(restrictionStatements)).filter((value) => !isEmpty(value));
 };
 
+//Function to translate restrictions in an array of dataUses
 export const translateDataUseRestrictionsFromDataUseArray = async (dataUses) => {
   const targetKeys = Object.keys(consentTranslations);
   try {
-    const translationPromises = dataUses.map((dataUse) =>
-      Promise.all(
-        targetKeys.map((key) => processRestrictionStatements(key, dataUse))
-      )
-    );
+    const translationPromises = dataUses.map((dataUse) => {
+      const restrictionStatementPromises = targetKeys.map(key => processRestrictionStatements(key, dataUse));
+      processOtherInDataUse(dataUse, restrictionStatementPromises);
+      return Promise.all(restrictionStatementPromises);
+    });
     return filter(
       (restriction) => !isEmpty(restriction)
     ) (await Promise.all(translationPromises));
