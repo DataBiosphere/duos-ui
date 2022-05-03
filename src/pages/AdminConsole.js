@@ -22,7 +22,8 @@ class AdminConsole extends Component {
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
       timeOut: {},
-      isDataSetElection: {}
+      isDataSetElection: {},
+      env: props.env
     };
     this.electionTimeout = this.electionTimeout.bind(this);
   }
@@ -182,7 +183,10 @@ class AdminConsole extends Component {
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+              // TODO: `admin_manage_access` will be fully deprecated with MDV
+              div({
+                isRendered: (this.state.env !== 'dev'),
+                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
                   url: '/admin_manage_access',
@@ -194,6 +198,20 @@ class AdminConsole extends Component {
                   unreviewedCases: darUnreviewedCases
                 }),
               ]),
+              div({
+                isRendered: (this.state.env === 'dev'),
+                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_manageDarCollections',
+                  url: '/admin_manage_dar_collections',
+                  color: 'access',
+                  title: 'Manage DAR Collection',
+                  description: 'Select and access DAR Collections for review',
+                  iconName: 'manage-access',
+                  iconSize: 'large',
+                })
+              ]),
+
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
@@ -219,7 +237,10 @@ class AdminConsole extends Component {
                   iconSize: 'large',
                 })
               ]),
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+              div({
+                // TODO: We won't need this box when MDV is complete
+                isRendered: (this.state.env !== 'dev'),
+                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
                   url: '/admin_manage_dar_collections',
