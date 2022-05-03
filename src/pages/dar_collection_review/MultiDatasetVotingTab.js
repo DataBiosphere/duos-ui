@@ -2,9 +2,8 @@ import MultiDatasetVoteSlab from "../../components/collection_voting_slab/MultiD
 import {div, h} from "react-hyperscript-helpers";
 import ResearchProposalVoteSlab from "../../components/collection_voting_slab/ResearchProposalVoteSlab";
 import {useEffect, useState} from "react";
-import {find, get, filter, flow, sortBy, map, isNil} from 'lodash/fp';
+import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {User} from "../../libs/ajax";
-import {extractUserDataAccessVotesFromBucket} from "../../utils/DarCollectionUtils";
 import {Alert} from "../../components/Alert";
 
 const styles = {
