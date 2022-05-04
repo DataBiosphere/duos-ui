@@ -16,7 +16,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
-  const borderStyle = '0.05rem solid #e9ecef';
+  const borderStyle = '0.05rem solid #E9ECEF';
   const dividerStyle = '.1rem solid #979797';
   const startElementStyle = {
     borderTopLeftRadius: '4%',
