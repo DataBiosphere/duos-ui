@@ -1,14 +1,14 @@
 import { div } from 'react-hyperscript-helpers';
 
 const labelFontStyle = {
-  fontFamily: 'Arial',
-  fontSize: 20,
+  fontFamily: 'Montserrat',
+  fontSize: '1.4rem',
   fontWeight: 600,
   flex: 1,
   justifyContent: 'center',
   display: 'flex',
   padding: '12%',
-  backgroundColor: 'rgb(243, 245, 248)',
+  backgroundColor: '#F3F5F8',
   textAlign: 'center',
   alignItems: 'center',
 };
