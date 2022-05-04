@@ -16,23 +16,24 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
-  const borderStyle = '1% solid rgb(225, 225, 229)';
+  const borderStyle = '0.05rem solid #e9ecef';
+  const dividerStyle = '.1rem solid #979797';
   const startElementStyle = {
     borderTopLeftRadius: '4%',
-    border: borderStyle,
-    borderRight: '0px',
-    marginLeft: '2.5%'
+    marginLeft: '2.5%',
+    borderTop: borderStyle,
+    borderLeft: borderStyle
   };
   const endElementStyle = {
     borderTopRightRadius: '4%',
-    border: borderStyle,
-    borderLeft: '0px',
-    marginRight: '2.5%'
+    marginRight: '2.5%',
+    borderTop: borderStyle,
+    borderRight: borderStyle
   };
   const middleElementStyle = {
-    border: borderStyle,
-    borderLeft: '0px',
-    borderRight: '0px'
+    borderTop: borderStyle,
+    borderLeft: dividerStyle,
+    borderRight: dividerStyle
   };
 
   const elementTemplate = (row = []) => {
