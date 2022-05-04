@@ -7,7 +7,7 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, some, get} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket,
   generatePreProcessedBucketData,
@@ -60,6 +60,12 @@ const userHasRole = (user, roleId) => {
   return !isEmpty(matches);
 };
 
+export const filterBucketsForUser = (user, buckets) => {
+  const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+
+  return filter(bucket => get('isRP')(bucket) || containsVotesByUser(bucket))(buckets);
+};
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
@@ -74,11 +80,8 @@ export default function DarCollectionReview(props) {
   const [researcherProperties, setResearcherProperties] = useState({});
 
   const tabsForUser = useCallback((user, buckets) => {
-    const userHasVotesForCollection = flow(
-      filter(bucket => bucket.key !== 'RP Vote'),
-      map(bucket => extractUserDataAccessVotesFromBucket(bucket, user, false)),
-      some(votes => !isEmpty(votes))
-    )(buckets);
+    const dataAccessBucketsForUser = filter(bucket => get('isRP')(bucket) !== true)(buckets);
+    const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
 
     const updatedTabs = {applicationInformation: 'Application Information'};
     if(userHasVotesForCollection) {
@@ -110,13 +113,14 @@ export default function DarCollectionReview(props) {
           generatePreProcessedBucketData,
           processDataUseBuckets,
         ])({ dars, datasets });
+        const filteredBuckets = filterBucketsForUser(user, processedBuckets);
         setResearcherProperties(researcherProperties);
-        setDataUseBuckets(processedBuckets);
+        setDataUseBuckets(filteredBuckets);
         setCollection(collection);
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
-        setTabs(tabsForUser(user, processedBuckets));
+        setTabs(tabsForUser(user, filteredBuckets));
         //setTimeout used to render skeleton loader while sub-components are initializing data for render
         const timeout = setTimeout(() => {
           setIsLoading(false);
