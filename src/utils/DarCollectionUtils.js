@@ -198,7 +198,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
   )(votes);
 };
 
-//Gets this user's rp votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+//Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
 export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
