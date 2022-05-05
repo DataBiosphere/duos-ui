@@ -154,7 +154,7 @@ export default function DarCollectionReview(props) {
   }, [subcomponentLoading, isLoading]);
 
   return div({className: 'collection-review-page'}, [
-    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto' }}, [
+    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto 3% auto' }}, [
       h(ReviewHeader, {
         darCode: collection.darCode || '- -',
         projectTitle: darInfo.projectTitle || '- -',

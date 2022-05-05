@@ -5,9 +5,6 @@ const iconFontStyle = {
   fontSize: '3.5rem',
   flex: 1,
 };
-const iconContainerStyle = {
-  display: 'flex',
-};
 
 //Possible icons should be Yes, No, Mixed, and Under Review
 export default function VoteResultIcon({result, propKey}) {
@@ -43,7 +40,7 @@ export default function VoteResultIcon({result, propKey}) {
     {
       key: `vote-result-box-${propKey}`,
       className: `vote-result-box-${propKey}`,
-      style: iconContainerStyle
+      style: {display: 'flex'}
     },
     templates[result]
   );
