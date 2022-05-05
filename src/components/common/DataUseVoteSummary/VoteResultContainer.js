@@ -41,10 +41,7 @@ export default function VoteResultContainer({
   additionalLabelStyle = {},
 }) {
   const baseContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-evenly',
-    width: '10%',
+    width: '15%',
   };
   const hyphenatedKey = convertLabelToKey(label);
 
@@ -60,8 +57,8 @@ export default function VoteResultContainer({
         propKey: hyphenatedKey,
         label,
         additionalLabelStyle,
-      }),
-      h(VoteResultIcon, { result, propKey: hyphenatedKey }),
+        result
+      })
     ]
   );
 }

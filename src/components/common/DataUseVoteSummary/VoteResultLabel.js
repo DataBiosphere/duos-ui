@@ -1,14 +1,13 @@
 import {div, h, span} from 'react-hyperscript-helpers';
-import {useEffect} from "react";
-import ReactTooltip from "react-tooltip";
+import VoteResultIcon from "./VoteResultIcon";
 
 const labelContainerStyle = {
-  flex: 1,
   display: 'flex',
-  padding: '12%',
+  padding: '4px 10px',
   backgroundColor: '#F3F5F8',
   textAlign: 'center',
   alignItems: 'center',
+  justifyContent: 'space-between'
 };
 
 const labelFontStyle = {
@@ -21,7 +20,7 @@ const labelFontStyle = {
 };
 
 
-export default function VoteResultLabel({ propKey, label, additionalLabelStyle = {} }) {
+export default function VoteResultLabel({ propKey, label, result, additionalLabelStyle = {} }) {
   return div(
     {
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
@@ -30,7 +29,8 @@ export default function VoteResultLabel({ propKey, label, additionalLabelStyle =
       'data-tip': label
     },
     [
-      span({style: labelFontStyle}, [label])
+      span({style: labelFontStyle}, [label]),
+      h(VoteResultIcon, { result, propKey })
     ]
   );
 }
