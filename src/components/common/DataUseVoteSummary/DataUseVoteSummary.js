@@ -85,8 +85,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     }, [
       rowTemplate(chunkedBuckets),
       h(ReactTooltip, {
-        id: 'tip_mixed_result',
-        place: 'left',
+        place: 'bottom',
         effect: 'solid',
         multiline: true,
         className: 'tooltip-wrapper'

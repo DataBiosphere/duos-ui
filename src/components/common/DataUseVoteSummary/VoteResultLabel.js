@@ -1,4 +1,6 @@
-import {div, span} from 'react-hyperscript-helpers';
+import {div, h, span} from 'react-hyperscript-helpers';
+import {useEffect} from "react";
+import ReactTooltip from "react-tooltip";
 
 const labelContainerStyle = {
   flex: 1,
@@ -24,7 +26,8 @@ export default function VoteResultLabel({ propKey, label, additionalLabelStyle =
     {
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
       className: `vote-result-label-text-${propKey}`,
-      key: `vote-result-label-${propKey}`
+      key: `vote-result-label-${propKey}`,
+      'data-tip': label
     },
     [
       span({style: labelFontStyle}, [label])
