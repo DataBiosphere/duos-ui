@@ -6,6 +6,7 @@ const iconFontStyle = {
   fontSize: '3.5rem',
   flex: 1,
 };
+
 const determineUnanimousVoteResult = ({votes = []}) => {
   const filteredVotes = filter((vote) => !isNil(vote.vote))(votes);
   if (isEmpty(filteredVotes)) {
@@ -63,6 +64,7 @@ export default function VoteResultIcon({propKey, finalVotes}) {
       })
     ]
   };
+
   const result = determineUnanimousVoteResult({votes: finalVotes});
   return div(
     {

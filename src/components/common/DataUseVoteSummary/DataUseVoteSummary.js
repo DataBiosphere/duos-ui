@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
 import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
-import VoteResultContainer from './VoteResultContainer';
 import ReactTooltip from 'react-tooltip';
+import VoteResultLabel from "./VoteResultLabel";
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
@@ -20,13 +20,11 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   const dividerStyle = '.1rem solid #979797';
   const startElementStyle = {
     borderTopLeftRadius: '4%',
-    marginLeft: '2.5%',
     borderTop: borderStyle,
     borderLeft: borderStyle
   };
   const endElementStyle = {
     borderTopRightRadius: '4%',
-    marginRight: '2.5%',
     borderTop: borderStyle,
     borderRight: borderStyle
   };
@@ -50,7 +48,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
       const finalVotes = flatMap((voteObj) =>
         !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
       )(votes);
-      return h(VoteResultContainer, { label: key, finalVotes, additionalLabelStyle }, []);
+      return h(VoteResultLabel, { label: key, finalVotes, additionalLabelStyle }, []);
     })(row);
   };
 
