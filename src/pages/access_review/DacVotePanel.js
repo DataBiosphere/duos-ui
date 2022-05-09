@@ -7,7 +7,7 @@ import { Theme } from '../../libs/theme';
 import { Navigation, Notifications } from '../../libs/utils';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
-import { cloneDeep, find, getOr, isNil, isEmpty, isEqual } from 'lodash/fp';
+import {cloneDeep, find, getOr, isNil, isEmpty, isEqual, omit} from 'lodash/fp';
 
 const ROOT = {
   height: '100%',
@@ -272,14 +272,16 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   // posts the supplied vote for this DAR
   submitVote = async (vote) => {
     const { darId } = this.props;
+    // filter `createDate` from the vote object so we're not trying to update that field.
+    const votePayload = omit(['createDate'])(vote);
     try {
       if (vote.type === 'FINAL') {
         // submit a final access vote.
-        await Votes.updateFinalAccessDarVote(darId, vote);
+        await Votes.updateFinalAccessDarVote(darId, votePayload);
       } else if (vote.createDate === null) {
-        await Votes.postDarVote(darId, vote);
+        await Votes.postDarVote(darId, votePayload);
       } else {
-        await Votes.updateDarVote(darId, vote);
+        await Votes.updateDarVote(darId, votePayload);
       }
       this.setState({ alert: 'success' });
     }
