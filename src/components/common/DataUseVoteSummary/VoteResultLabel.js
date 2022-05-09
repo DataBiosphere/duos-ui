@@ -19,7 +19,13 @@ const labelFontStyle = {
   textOverflow: 'ellipsis'
 };
 
-export default function VoteResultLabel({ propKey, label, finalVotes, additionalLabelStyle = {} }) {
+//helper function to generate keys for rendered elements
+const convertLabelToKey = (label) => {
+  return label.split(' ').join('-');
+};
+
+export default function VoteResultLabel({ label, finalVotes, additionalLabelStyle = {} }) {
+  const propKey = convertLabelToKey(label);
   return div(
     {
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
