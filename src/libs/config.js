@@ -48,9 +48,8 @@ export const Config = {
     },
   }),
 
-  textPlainOpts: (token = Token.getToken()) => ({
+  textPlain: () => ({
     headers: {
-      Authorization: `Bearer ${token}`,
       Accept: 'text/plain',
       'X-App-ID': 'DUOS',
     },

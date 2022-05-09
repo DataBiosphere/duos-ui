@@ -80,7 +80,7 @@ function App() {
           h(Spinner, {
             name: 'mainSpinner', group: 'duos', loadingImage
           }),
-          h(Routes, { onSignIn: signIn, isLogged: isLoggedIn, env: env })
+          h(Routes, { onSignOut: signOut, onSignIn: signIn, isLogged: isLoggedIn, env: env })
         ])
       ]),
       DuosFooter()
