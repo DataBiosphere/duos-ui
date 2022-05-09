@@ -19,8 +19,7 @@ const labelFontStyle = {
   textOverflow: 'ellipsis'
 };
 
-
-export default function VoteResultLabel({ propKey, label, result, additionalLabelStyle = {} }) {
+export default function VoteResultLabel({ propKey, label, finalVotes, additionalLabelStyle = {} }) {
   return div(
     {
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
@@ -30,7 +29,7 @@ export default function VoteResultLabel({ propKey, label, result, additionalLabe
     },
     [
       span({style: labelFontStyle}, [label]),
-      h(VoteResultIcon, { result, propKey })
+      h(VoteResultIcon, { propKey, finalVotes })
     ]
   );
 }

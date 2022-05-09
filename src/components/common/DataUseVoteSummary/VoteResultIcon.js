@@ -1,13 +1,40 @@
 import {CheckCircle, Cancel, Autorenew, RemoveCircle} from '@material-ui/icons';
 import {h, div} from 'react-hyperscript-helpers';
+import {filter, isEmpty, isNil} from "lodash/fp";
 
 const iconFontStyle = {
   fontSize: '3.5rem',
   flex: 1,
 };
+const determineUnanimousVoteResult = ({votes = []}) => {
+  const filteredVotes = filter((vote) => !isNil(vote.vote))(votes);
+  if (isEmpty(filteredVotes)) {
+    return 'underReview';
+  }
+  const voteCount = filteredVotes.length;
+
+  let voteTally = {
+    true: 0,
+    false: 0,
+  };
+
+  filteredVotes.forEach((vote = {}) => {
+    voteTally[vote.vote] += 1;
+  });
+
+  if (voteTally.true === voteCount) {
+    return true;
+  } else if (voteTally.false === voteCount) {
+    return false;
+  } else if (voteTally.true + voteTally.false === voteCount) {
+    return 'mixed';
+  } else {
+    return 'underReview';
+  }
+};
 
 //Possible icons should be Yes, No, Mixed, and Under Review
-export default function VoteResultIcon({result, propKey}) {
+export default function VoteResultIcon({propKey, finalVotes}) {
   const templates = {
     true: [
       h(CheckCircle, {
@@ -36,6 +63,7 @@ export default function VoteResultIcon({result, propKey}) {
       })
     ]
   };
+  const result = determineUnanimousVoteResult({votes: finalVotes});
   return div(
     {
       key: `vote-result-box-${propKey}`,
