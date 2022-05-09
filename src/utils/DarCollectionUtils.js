@@ -4,6 +4,7 @@ import {
   map,
   join,
   filter,
+  find,
   forEach,
   flatMap,
   toLower,
@@ -17,9 +18,10 @@ import {
   cloneDeep,
   groupBy
 } from 'lodash/fp';
-import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
+import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
-import { Collections } from '../libs/ajax';
+import { Collections, Match } from '../libs/ajax';
+import { processMatchData } from './VoteUtils'
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -148,7 +150,6 @@ export const processDataUseBuckets = async(buckets) => {
     map((votes) => ({rp:votes.rp}))
   ])(processedBuckets);
 
-
   const rpVoteData = {
     key: 'RP Vote',
     votes: rpVotes,
@@ -210,6 +211,39 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
+};
+
+export const getMatchDataForBuckets = async (buckets) => {
+  const electionIdBucketMap = {}; //{ referenceId: bucket} }
+  const idsArr = [];
+
+  forEach((bucket) => {
+    const {key, elections = []} = bucket;
+    let dataAccessReferenceId;
+    if(toLower(key) !== 'rp vote') {
+      elections.every((darElections = []) => {
+        dataAccessReferenceId = (
+          find(election => toLower(election.electionType) === 'dataaccess')(darElections) || {}
+        ).referenceId;
+        return isNil(dataAccessReferenceId);
+      });
+      if(!isNil(dataAccessReferenceId)) {
+        idsArr.push(dataAccessReferenceId);
+        electionIdBucketMap[dataAccessReferenceId] = bucket;
+      } else {
+        bucket.algorithmResult = false; //What's the fallback value for a theorietical DataAccess election with no corresponding match data?
+      }
+    }
+  })(buckets);
+
+  const matchData = await Match.findMatchBatch(idsArr);
+  matchData.forEach((match) => {
+    const { purpose } = match;
+    const targetBucket = electionIdBucketMap[purpose];
+    if(!isNil(targetBucket)) {
+      targetBucket.algorithmResult = processMatchData(match);
+    }
+  });
 };
 
 export const extractDatasetIdsFromBucket = (bucket) => {

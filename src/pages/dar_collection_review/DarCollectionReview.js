@@ -11,6 +11,7 @@ import {find, isEmpty, flow, filter, map, some, get} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket,
   generatePreProcessedBucketData,
+  getMatchDataForBuckets,
   processDataUseBuckets
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
@@ -110,6 +111,7 @@ export default function DarCollectionReview(props) {
           generatePreProcessedBucketData,
           processDataUseBuckets,
         ])({ dars, datasets });
+        await getMatchDataForBuckets(processedBuckets);
         setResearcherProperties(researcherProperties);
         setDataUseBuckets(processedBuckets);
         setCollection(collection);
@@ -117,11 +119,7 @@ export default function DarCollectionReview(props) {
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
         setTabs(tabsForUser(user, processedBuckets));
-        //setTimeout used to render skeleton loader while sub-components are initializing data for render
-        const timeout = setTimeout(() => {
-          setIsLoading(false);
-          clearTimeout(timeout);
-        }, 500);
+        setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
         Navigation.console(user, props.history);

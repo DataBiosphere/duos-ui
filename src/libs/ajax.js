@@ -712,6 +712,14 @@ export const Match = {
     const url = `${await Config.getApiUrl()}/api/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
+  },
+
+  findMatchBatch: async (purposeIdsArr = []) => {
+    const purposeIds = purposeIdsArr.join(',');
+    const url = `${await Config.getApiUrl()}/api/match/purpose/batch`;
+    const config = Object.assign({}, Config.authOpts(), {params: { purposeIds}});
+    const res = await axios.get(url, config);
+    return res.data;
   }
 };
 
