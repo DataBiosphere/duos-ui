@@ -8,7 +8,7 @@ describe('VoteResultIcon - Tests', function () {
   it('Shows a Yes result if all votes are true', function () {
     mount(
       <VoteResultIcon
-        finalVotes={[{ vote: true }, {vote: true}]}
+        votes={[{ vote: true }, {vote: true}]}
         propKey= {propKeyString}/>
     );
     cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
@@ -17,7 +17,7 @@ describe('VoteResultIcon - Tests', function () {
   it('Shows a No Result if all votes are false', function() {
     mount(
       <VoteResultIcon
-        finalVotes={[{ vote: false }, { vote: false }]}
+        votes={[{ vote: false }, { vote: false }]}
         propKey={propKeyString} />
     );
     cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
@@ -26,7 +26,7 @@ describe('VoteResultIcon - Tests', function () {
   it('Shows a Under Review Result if not all votes are in', function () {
     mount(
       <VoteResultIcon
-        finalVotes={[{vote: undefined}]}
+        votes={[{vote: undefined}]}
         propKey={propKeyString}
       />
     );
@@ -36,7 +36,7 @@ describe('VoteResultIcon - Tests', function () {
   it('Shows a Mixed Result if contains true and false votes', function () {
     mount(
       <VoteResultIcon
-        finalVotes={[{vote:true}, {vote:false}]}
+        votes={[{vote:true}, {vote:false}]}
         propKey={propKeyString}
       />
     );

@@ -25,7 +25,7 @@ const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
 
-export default function VoteResultBox({ label, finalVotes, additionalLabelStyle = {} }) {
+export default function VoteResultBox({ label, votes, additionalLabelStyle = {} }) {
   const propKey = convertLabelToKey(label);
   return div(
     {
@@ -36,7 +36,7 @@ export default function VoteResultBox({ label, finalVotes, additionalLabelStyle 
     },
     [
       span({style: labelFontStyle}, [label]),
-      h(VoteResultIcon, { propKey, finalVotes })
+      h(VoteResultIcon, { propKey, votes })
     ]
   );
 }

@@ -35,7 +35,7 @@ const determineUnanimousVoteResult = ({votes = []}) => {
 };
 
 //Possible icons should be Yes, No, Mixed, and Under Review
-export default function VoteResultIcon({propKey, finalVotes}) {
+export default function VoteResultIcon({propKey, votes}) {
   const templates = {
     true: [
       h(CheckCircle, {
@@ -65,7 +65,7 @@ export default function VoteResultIcon({propKey, finalVotes}) {
     ]
   };
 
-  const result = determineUnanimousVoteResult({votes: finalVotes});
+  const result = determineUnanimousVoteResult({votes});
   return div(
     {
       key: `vote-result-icon-${propKey}`,

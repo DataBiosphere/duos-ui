@@ -50,7 +50,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
       const finalVotes = flatMap((voteObj) =>
         !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
       )(votes);
-      return h(VoteResultBox, { label: key, finalVotes, additionalLabelStyle }, []);
+      return h(VoteResultBox, { label: key, votes: finalVotes, additionalLabelStyle }, []);
     })(row);
   };
 
