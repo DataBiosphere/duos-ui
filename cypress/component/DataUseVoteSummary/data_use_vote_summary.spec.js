@@ -36,8 +36,10 @@ describe('DataUseVoteSummary - Tests', function() {
     component.should('exist');
     const rows = cy.get('.vote-summary-row');
     rows.should('have.length', 1);
-    const elements = cy.get('.vote-summary-container');
-    elements.should('have.length', 2);
+    const bucketResult1 = cy.get('.vote-result-label-text-RP-Vote');
+    bucketResult1.should('exist');
+    const bucketResult2 = cy.get('.vote-result-label-text-Bucket-2');
+    bucketResult2.should('exist');
   });
   it('should not render if isLoading is true', function() {
     mount(
