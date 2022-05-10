@@ -32,7 +32,8 @@ export default function VoteResultBox({ label, votes, additionalLabelStyle = {} 
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
       className: `vote-result-box-text-${propKey}`,
       key: `vote-result-box-${propKey}`,
-      'data-tip': label
+      'data-tip': label,
+      'data-for': 'vote-result'
     },
     [
       span({style: labelFontStyle}, [label]),
