@@ -54,7 +54,7 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
     });
   };
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (this.props.user !== prevProps.user) {
       this.setState({
         user: this.props.user

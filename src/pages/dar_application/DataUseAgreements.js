@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { a, div, fieldset, h, h3, label, li, ol, ul, p, span} from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h3, label, li, ol, ul, span} from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { Alert } from '../../components/Alert';
 import { LibraryCardAgreement } from '../../components/LibraryCardAgreement';

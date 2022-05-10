@@ -21,7 +21,7 @@ import {
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
-import { processMatchData } from './VoteUtils'
+import { processMatchData } from './VoteUtils';
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -90,7 +90,6 @@ const processVotesForBucket = (darElections) => {
     const {electionType, votes = []} = election;
     let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
     let targetFinal, targetChair, targetMember, targetFinalType;
-    const {agreementVotes} = dataAccess;
 
     if(electionType === 'RP') {
       targetFinalType = 'chairperson';
