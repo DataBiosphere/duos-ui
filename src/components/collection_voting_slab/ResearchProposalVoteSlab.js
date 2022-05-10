@@ -13,6 +13,7 @@ import {
 } from "../../utils/DarCollectionUtils";
 import VotesPieChart from "../common/VotesPieChart";
 import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
+import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 
 const styles = {
   baseStyle: {
@@ -130,17 +131,41 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, isLoading}) => {
-  return div({style: styles.chairVoteInfo, isRendered: isChair && dacVotes.length > 0, datacy: 'chair-vote-info'}, [
-    h(VotesPieChart, {
-      votes: dacVotes,
-    }),
-    div(['My DAC\'s Votes (detail)']),
-    h(VoteSummaryTable, {
-      dacVotes: collapseVotesByUser(dacVotes),
-      isLoading,
-    })
-  ]);
+//this component needs algorithmResult, should it be sent as a prop or set via React.Context?
+export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}}) => {
+  return div(
+    {
+      style: styles.chairVoteInfo,
+      isRendered: isChair && dacVotes.length > 0,
+      datacy: 'chair-vote-info',
+    },
+    [
+      div(
+        {
+          style: {
+            backgroundColor: '#FFFFFF',
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '1% 0',
+          },
+        },
+        [
+          h(VotesPieChart, {
+            votes: dacVotes,
+          }),
+          h(CollectionAlgorithmDecision, {
+            algorithmResult,
+            styleOverride: { borderLeft: '1px solid #333F52' },
+          }),
+        ]
+      ),
+      div(["My DAC's Votes (detail)"]),
+      h(VoteSummaryTable, {
+        dacVotes: collapseVotesByUser(dacVotes),
+        isLoading,
+      }),
+    ]
+  );
 };
 
 export default function ResearchProposalVoteSlab(props) {

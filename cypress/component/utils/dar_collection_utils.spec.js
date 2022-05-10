@@ -8,11 +8,11 @@ import {
   extractDacDataAccessVotesFromBucket,
   extractDacRPVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket, collapseVotesByUser
+  extractUserRPVotesFromBucket, collapseVotesByUser, getMatchDataForBuckets
 } from '../../../src/utils/DarCollectionUtils';
-import {Collections} from '../../../src/libs/ajax';
+import {Collections, Match} from '../../../src/libs/ajax';
 import {formatDate, Notifications} from '../../../src/libs/utils';
-
+import {cloneDeep} from 'lodash/fp';
 
 const openableAndClosableDars = {
   1: {
@@ -94,6 +94,26 @@ const openableDars = {
     }
   }
 };
+
+const mockBuckets = [
+  {
+    key: 'RP Vote',
+    isRP: true
+  },
+  {
+    key: 'OTH1',
+    elections: [
+      [
+        { electionType: 'RP', referenceId: 'test3' },
+        { electionType: 'DataAccess', referenceId: 'test4' },
+      ],
+      [
+        { electionType: 'RP', referenceId: 'test5' },
+        { electionType: 'DataAccess', referenceId: 'test6' },
+      ],
+    ],
+  }
+];
 
 describe('checkIfOpenableElectionPresent()', () => {
   it('returns true if there is at least one election that is not open', () => {
@@ -632,6 +652,51 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       rationale: 'rationale\n',
       createDate: `${formatDate('20000')}\n`
+    });
+  });
+});
+
+describe('getMatchDataForBuckets', () => {
+  it("fetches matches for buckets based on the bucket's data access election", async() => {
+
+    const mockDate = new Date();
+    const mockId = 10;
+    const mockMatchReturn = [
+      {
+        purpose: 'test4',
+        match: true,
+        failed: false,
+        createDate: mockDate,
+        id: mockId
+      }
+    ];
+
+    cy.stub(Match, 'findMatchBatch').returns(mockMatchReturn);
+    const buckets = cloneDeep(mockBuckets);
+    await getMatchDataForBuckets(buckets);
+    buckets.forEach(bucket => {
+      if(bucket.key.toLowerCase() !== 'rp vote') {
+        const {algorithmResult} = bucket;
+        expect(algorithmResult).to.not.be.empty;
+        expect(algorithmResult.result).to.equal('Yes');
+        expect(algorithmResult.createDate).to.equal(mockDate);
+        expect(algorithmResult.id).to.equal(mockId);
+      }
+    });
+  });
+
+  it('sets "N/A defaults if no match data is found', async() => {
+    cy.stub(Match, 'findMatchBatch').returns([]);
+    const buckets = cloneDeep(mockBuckets);
+    await getMatchDataForBuckets(buckets);
+    buckets.forEach(bucket => {
+      if(bucket.key.toLowerCase() !== 'rp vote') {
+        const {algorithmResult} = bucket;
+        expect(algorithmResult).to.not.be.empty;
+        expect(algorithmResult.result).to.equal('N/A');
+        expect(algorithmResult.createDate).to.equal('N/A');
+        expect(algorithmResult.id).to.equal(bucket.key);
+      }
     });
   });
 });

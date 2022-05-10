@@ -76,7 +76,7 @@ export default function MultiDatasetVotingTab(props) {
         collectionDatasets,
         isChair,
         isApprovalDisabled,
-        key: bucket.key
+        key: bucket.key,
       });
     })(dataBuckets);
   };

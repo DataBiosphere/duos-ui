@@ -106,9 +106,6 @@ const processVotesForBucket = (darElections) => {
     forEach(vote => {
       const lowerCaseType = toLower(vote.type);
       switch (lowerCaseType) {
-        case 'agreement':
-          agreementVotes.push(vote);
-          break;
         case 'chairperson':
           targetChair.push(vote);
           break;
@@ -230,18 +227,21 @@ export const getMatchDataForBuckets = async (buckets) => {
       if(!isNil(dataAccessReferenceId)) {
         idsArr.push(dataAccessReferenceId);
         electionIdBucketMap[dataAccessReferenceId] = bucket;
-      } else {
-        bucket.algorithmResult = false; //What's the fallback value for a theorietical DataAccess election with no corresponding match data?
       }
+      bucket.algorithmResult = {result: 'N/A', createDate: 'N/A', id: key};
     }
   })(buckets);
 
   const matchData = await Match.findMatchBatch(idsArr);
   matchData.forEach((match) => {
-    const { purpose } = match;
+    const { purpose, createDate, id } = match;
     const targetBucket = electionIdBucketMap[purpose];
     if(!isNil(targetBucket)) {
-      targetBucket.algorithmResult = processMatchData(match);
+      targetBucket.algorithmResult = {
+        result: processMatchData(match),
+        createDate,
+        id
+      };
     }
   });
 };

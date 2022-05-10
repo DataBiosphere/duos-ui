@@ -30,11 +30,11 @@ export default function VotesPieChart(props) {
   const {
     votes = [],
     keyString,
-    title = 'Pie Chart Results',
+    title = props.title || "My DAC's Votes (summary)",
     pieHole = 0.3,
     height = 'inherit',
-    width = 'inherit',
-    style = { padding: '20px 0'}
+    width = "100%",
+    style = { padding: '20px 0', display: 'flex', flex: 1, }
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);
@@ -44,15 +44,18 @@ export default function VotesPieChart(props) {
     is3d: false,
     fontName: 'Montserrat',
     pieSliceText: 'none',
-    slices: pieSliceColors
+    slices: pieSliceColors,
+    titleTextStyle: {
+      fontSize: 15
+    },
   };
 
   if(isEmpty(votes)) {
     return div({style, className: `${keyString}-pie-chart-no-data`}, [`No data for ${keyString}`]);
   }
-  return div({display: 'flex', style}, [
+  return div({style}, [
     h(Chart, {
-      chartType:"PieChart",
+      chartType: "PieChart",
       data: processedVotes,
       options: options,
       width,
