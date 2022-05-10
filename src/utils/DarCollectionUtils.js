@@ -196,7 +196,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
   )(votes);
 };
 
-//Gets this user's rp votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+//Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
 export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
@@ -204,7 +204,7 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
     map(voteData => voteData.rp),
     filter((rpData) => !isEmpty(rpData)),
     flatMap(filteredData => isChair ?
-      concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
+      filteredData.chairpersonVotes :
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);

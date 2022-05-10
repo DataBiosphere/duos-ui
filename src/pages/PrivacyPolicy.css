@@ -5,11 +5,20 @@ div.markdown-body {
   font-family: Montserrat, sans-serif;
 }
 
+.markdown-body h1 {
+  color: #333F52;
+  font-size: 32px;
+}
+
 .markdown-body h2 {
-  color: #00609f;
+  color: #333F52;
+  font-size: 24px;
 }
 
 .markdown-body ol ol {
   list-style-type: lower-roman;
 }
 
+.markdown-body p {
+  margin-bottom: 1.5rem;
+}

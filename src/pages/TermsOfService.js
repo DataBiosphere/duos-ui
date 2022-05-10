@@ -1,28 +1,24 @@
-import {ToS} from '../libs/ajax';
-import {div} from 'react-hyperscript-helpers';
-import React, {useEffect, useState} from 'react';
-import ReactMarkdown from 'react-markdown';
-import DOMPurify from 'dompurify';
+import {div, h1} from 'react-hyperscript-helpers';
+import {useEffect, useState} from 'react';
+import {TosService} from '../libs/tosService';
 
 
 export default function TermsOfService() {
-
-  const formatMarkdown = (markdown) => {
-    return <ReactMarkdown
-      components={{a: (props) => <a target={'_blank'} {...props}/>}}>
-      {DOMPurify.sanitize(markdown)}
-    </ReactMarkdown>;
-  };
 
   const [tosText, setTosText] = useState('');
 
   useEffect(() => {
     const init = async () => {
-      const text = await ToS.getDUOSText();
-      setTosText(text.replace('https://app.terra.bio/#', '/'));
+      const text = await TosService.getFormattedText();
+      setTosText(text);
     };
     init();
   }, []);
 
-  return div({className: 'markdown-body'}, [formatMarkdown(tosText)]);
+  return div({style: TosService.getBackgroundStyle()}, [
+    div({style: TosService.getContainerStyle()}, [
+      h1({style: {color: '#00609f', marginLeft: '25px'}}, ['DUOS Terms of Service']),
+      div({style: TosService.getScrollableStyle(), className: 'markdown-body'}, [tosText])
+    ])
+  ]);
 }

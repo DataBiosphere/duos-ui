@@ -455,7 +455,7 @@ describe('extractUserDataAccessVotesFromBucket', () => {
     expect(votes).to.not.deep.include({dacUserId: 3});
   });
 
-  it('only returns final and chairperson votes if isChair is true', () => {
+  it('only returns chairperson votes if isChair is true', () => {
     const bucket = {
       votes: [
         {
@@ -513,8 +513,7 @@ describe('extractUserRPVotesFromBucket', () => {
         {
           rp: {
             memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
-            finalVotes: [{vote: true, dacUserId: 1}]
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}]
           },
         },
       ]
@@ -529,14 +528,13 @@ describe('extractUserRPVotesFromBucket', () => {
     expect(votes).to.not.deep.include({dacUserId: 3});
   });
 
-  it('only returns final and chairperson votes if isChair is true', () => {
+  it('only returns chairperson votes if isChair is true', () => {
     const bucket = {
       votes: [
         {
           rp: {
             memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
-            finalVotes: [{vote: true, dacUserId: 1}]
+            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}]
           },
         },
       ]
@@ -544,8 +542,7 @@ describe('extractUserRPVotesFromBucket', () => {
     const user = {dacUserId: 1};
 
     const votes = extractUserRPVotesFromBucket(bucket, user, true);
-    expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({vote: true, dacUserId: 1});
+    expect(votes).to.have.lengthOf(1);
     expect(votes).to.not.deep.include({dacUserId: 1});
     expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
     expect(votes).to.not.deep.include({dacUserId: 3});

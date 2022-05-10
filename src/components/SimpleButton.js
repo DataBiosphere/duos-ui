@@ -1,6 +1,5 @@
 import { button } from 'react-hyperscript-helpers';
 import { useState, useEffect } from 'react';
-import {toUpper} from 'lodash/fp';
 
 const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', additionalStyle = {}, pointerBool, disabled, baseColor, setStyle}) => {
   const baseStyle = {
@@ -13,7 +12,8 @@ const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', addition
     justifyContent: 'center',
     fontSize: '16px',
     padding: '5% 10%',
-    cursor: pointerBool ? 'pointer' : 'default'
+    cursor: pointerBool ? 'pointer' : 'default',
+    textTransform: 'uppercase'
   };
 
   const newStyle = Object.assign({}, baseStyle, additionalStyle);
@@ -46,5 +46,5 @@ export default function SimpleButton(props) {
     return baseAttributes;
   };
 
-  return button(getDivAttributes(disabled), [toUpper(label)]);
+  return button(getDivAttributes(disabled), [label]);
 }

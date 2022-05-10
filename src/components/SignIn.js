@@ -3,7 +3,7 @@ import {useEffect, useState, useCallback} from 'react';
 import GoogleLogin from 'react-google-login';
 import {button, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
-import {User} from '../libs/ajax';
+import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
 import {Navigation, setUserRoleStatuses} from '../libs/utils';
@@ -30,25 +30,34 @@ export default function SignIn(props) {
   }, []);
 
   // Utility function called in the normal success case and in the undocumented 409 case
-  const setUserInStorageAndRedirect = async () => {
+  // Check for ToS Acceptance - redirect user if not set.
+  const checkToSAndRedirect = async () => {
+    // Check if the user has accepted ToS yet or not:
     const user = await User.getMe();
     setUserRoleStatuses(user, Storage);
     await onSignIn();
-    redirect(user);
+    const userStatus = await ToS.getStatus();
+    const {tosAccepted} = userStatus;
+    if (!tosAccepted) {
+      await Storage.setUserIsLogged(false);
+      history.push('/tos_acceptance');
+    } else {
+      redirect(user);
+    }
   };
 
   const onSuccess = async (response) => {
     Storage.setGoogleData(response);
     try {
-      await setUserInStorageAndRedirect();
+      await checkToSAndRedirect();
     } catch (error) {
       try {
         // New users without an existing account will error out in the above call
-        // Register them and redirect them to the profile page.
+        // Register them and redirect them to the ToS Acceptance page.
         const registeredUser = await User.registerUser();
         setUserRoleStatuses(registeredUser, Storage);
         await onSignIn();
-        history.push('/profile');
+        history.push('/tos_acceptance');
       } catch (error) {
         // Handle common error cases
         try {
@@ -60,7 +69,7 @@ export default function SignIn(props) {
             case 409:
               // If the user exists, regardless of conflict state, log them in.
               try {
-                await setUserInStorageAndRedirect();
+                await checkToSAndRedirect();
               } catch (error) {
                 Storage.clearStorage();
               }
