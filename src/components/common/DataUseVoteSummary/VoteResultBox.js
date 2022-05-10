@@ -25,13 +25,13 @@ const convertLabelToKey = (label) => {
   return label.split(' ').join('-');
 };
 
-export default function VoteResultLabel({ label, finalVotes, additionalLabelStyle = {} }) {
+export default function VoteResultBox({ label, finalVotes, additionalLabelStyle = {} }) {
   const propKey = convertLabelToKey(label);
   return div(
     {
       style: Object.assign({}, labelContainerStyle, additionalLabelStyle),
-      className: `vote-result-label-text-${propKey}`,
-      key: `vote-result-label-${propKey}`,
+      className: `vote-result-box-text-${propKey}`,
+      key: `vote-result-box-${propKey}`,
       'data-tip': label
     },
     [

@@ -68,8 +68,8 @@ export default function VoteResultIcon({propKey, finalVotes}) {
   const result = determineUnanimousVoteResult({votes: finalVotes});
   return div(
     {
-      key: `vote-result-box-${propKey}`,
-      className: `vote-result-box-${propKey}`,
+      key: `vote-result-icon-${propKey}`,
+      className: `vote-result-icon-${propKey}`,
       style: {display: 'flex'}
     },
     templates[result]

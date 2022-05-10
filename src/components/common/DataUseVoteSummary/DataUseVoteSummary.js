@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
 import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
-import VoteResultLabel from "./VoteResultLabel";
+import VoteResultBox from "./VoteResultBox";
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
@@ -16,16 +16,18 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   //first element -> left corners rounded, no right border
   //middle element, no rounded corners, no left or right border
   //end element -> right corners rounded, no left border
-  const borderStyle = '0.05rem solid #E9ECEF';
-  const dividerStyle = '.1rem solid #979797';
+  const borderStyle = '0.1rem solid #E9ECEF';
+  const dividerStyle = '0.01rem solid #979797';
   const startElementStyle = {
     borderTopLeftRadius: '4%',
     borderTop: borderStyle,
-    borderLeft: borderStyle
+    borderLeft: borderStyle,
+    borderRight: dividerStyle
   };
   const endElementStyle = {
     borderTopRightRadius: '4%',
     borderTop: borderStyle,
+    borderLeft: dividerStyle,
     borderRight: borderStyle
   };
   const middleElementStyle = {
@@ -48,7 +50,7 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
       const finalVotes = flatMap((voteObj) =>
         !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
       )(votes);
-      return h(VoteResultLabel, { label: key, finalVotes, additionalLabelStyle }, []);
+      return h(VoteResultBox, { label: key, finalVotes, additionalLabelStyle }, []);
     })(row);
   };
 
