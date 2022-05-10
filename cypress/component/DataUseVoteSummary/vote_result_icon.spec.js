@@ -33,7 +33,7 @@ describe('VoteResultIcon - Tests', function () {
     cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
     cy.get(`.vote-result-under-review-icon-${propKeyString}`).should('exist');
   });
-  it('Shows a Mixed Result if contains true and false votes', function () {
+  it('Shows a Mixed Result if there are true and false votes', function () {
     mount(
       <VoteResultIcon
         votes={[{vote:true}, {vote:false}]}
