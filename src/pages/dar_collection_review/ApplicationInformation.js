@@ -51,13 +51,13 @@ const styles = {
 
 const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
   return div(
-    {className: 'flex-row-element', style: styles.flexRowElement},
+    {className: 'flex-row-element', style: styles.flexRowElement, id: `${key}-flex-row-element`},
     !isLoading ? [
-      label({ className: `${key}-label`, style: styles.label}, [labelValue]),
-      span({ className: `${key}-span`, style: styles.value }, [spanValue]),
+      label({ id: `${key}-label`, key: `${key}-label`, style: styles.label}, [labelValue]),
+      span({ id: `${key}-span`, key: `${key}-span`, style: styles.value }, [spanValue]),
     ] : [
-      div({className: 'text-placeholder', key:`${label}-label-placeholder`, style: {width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}),
-      div({className: 'text-placeholder', key:`${label}-text-placeholder`, style: {width: '70%', height: '3.2rem'}}),
+      div({className: 'text-placeholder', key:`${label}-label-placeholder`, id: `${label}-label-placeholder`, style: {width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}),
+      div({className: 'text-placeholder', key:`${label}-text-placeholder`, id: `${label}-label-placeholder`, style: {width: '70%', height: '3.2rem'}}),
     ]
   );
 };
@@ -87,8 +87,8 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, clou
 
   // use a map function to generate a new array that wraps each chunk in the row style
   // template that you can then plug into the component's return statement
-  const output = chunkedArr.map(chunk => {
-    return div({className: 'information-row', style: styles.applicantInfoRow}, chunk);
+  const output = chunkedArr.map((chunk, index) => {
+    return div({className: 'information-row', key: `information-row-${index}`, style: styles.applicantInfoRow}, chunk);
   });
 
   return output;
@@ -121,14 +121,17 @@ export default function ApplicationInformation(props) {
     cloudProviderDescription
   } = props;
 
+  const processCollaborators = (collaborators) =>
+    collaborators.map(collaborator => collaborator.name).join(', ');
+
   const appDetailLabels = [
-    {value: externalCollaborators, title: 'External Collaborators', key: 'external-collaborators'},
-    {value: internalCollaborators, title: 'Internal Collaborators', key: 'internal-collaborators'},
+    {value: processCollaborators(externalCollaborators), title: 'External Collaborators', key: 'external-collaborators'},
+    {value: processCollaborators(internalCollaborators), title: 'Internal Collaborators', key: 'internal-collaborators'},
     {value: signingOfficial, title: 'Signing Official', key: 'signing-official'},
     {value: itDirector, title: 'IT Director', key: 'it-director'},
     {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
     {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
-    {value: internalLabStaff, title: 'Internal Lab Staff', key: 'internal-lab-staff'},
+    {value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff'},
     {value: anvilStorage, title: 'Using AnVIL only for storage and analysis', key: 'anvil-storage'},
     {value: localComputing, title: 'Requesting Permission to use local computing', key: 'local-computing'},
     {value: cloudComputing, title: 'Requesting permission to use cloud computing', key: 'cloud-computing'},
