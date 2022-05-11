@@ -154,7 +154,7 @@ export default function DarCollectionReview(props) {
   }, [subcomponentLoading, isLoading]);
 
   return div({className: 'collection-review-page'}, [
-    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto' }}, [
+    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto 3% auto' }}, [
       h(ReviewHeader, {
         darCode: collection.darCode || '- -',
         projectTitle: darInfo.projectTitle || '- -',
@@ -171,7 +171,7 @@ export default function DarCollectionReview(props) {
       }),
       h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
     ]),
-    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.2%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
+    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
       h(TabControl, {
         labels: Object.values(tabs),
         selectedTab,
