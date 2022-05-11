@@ -5,34 +5,42 @@ import VoteResultIcon from '../../../src/components/common/DataUseVoteSummary/Vo
 
 const propKeyString = 'test';
 describe('VoteResultIcon - Tests', function () {
-  it('Shows a Yes result if the result is "true"', function () {
-    mount(<VoteResultIcon result={true} propKey= {propKeyString}/>);
-    cy.get(`.vote-result-box-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-yes-icon-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-yes-text-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-yes-text-${propKeyString}`).contains("Yes");
-  });
-  it('Shows a No Result if the result is false', function() {
-    mount(<VoteResultIcon result={false} propKey={propKeyString} />);
-    cy.get(`.vote-result-box-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-no-icon-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-no-text-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-no-text-${propKeyString}`).contains('No');
-  });
-  it('Shows a Under Review Result if the result is "underReview"', function () {
-    mount(<VoteResultIcon result="underReview" propKey={propKeyString} />);
-    cy.get(`.vote-result-box-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-under-review-icon-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-under-review-text-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-under-review-text-${propKeyString}`).contains('Under Review');
-  });
-  it('Shows a Mixed Result if the result is "mixed"', function () {
-    mount(<VoteResultIcon result="mixed" propKey={propKeyString} />);
-    cy.get(`.vote-result-box-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-mixed-icon-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-mixed-text-${propKeyString}`).should('exist');
-    cy.get(`.vote-result-mixed-text-${propKeyString}`).contains(
-      'Mixed'
+  it('Shows a Yes result if all votes are true', function () {
+    mount(
+      <VoteResultIcon
+        votes={[{ vote: true }, {vote: true}]}
+        propKey= {propKeyString}/>
     );
+    cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
+    cy.get(`.vote-result-yes-icon-${propKeyString}`).should('exist');
+  });
+  it('Shows a No Result if all votes are false', function() {
+    mount(
+      <VoteResultIcon
+        votes={[{ vote: false }, { vote: false }]}
+        propKey={propKeyString} />
+    );
+    cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
+    cy.get(`.vote-result-no-icon-${propKeyString}`).should('exist');
+  });
+  it('Shows a Under Review Result if not all votes are in', function () {
+    mount(
+      <VoteResultIcon
+        votes={[{vote: undefined}]}
+        propKey={propKeyString}
+      />
+    );
+    cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
+    cy.get(`.vote-result-under-review-icon-${propKeyString}`).should('exist');
+  });
+  it('Shows a Mixed Result if there are true and false votes', function () {
+    mount(
+      <VoteResultIcon
+        votes={[{vote:true}, {vote:false}]}
+        propKey={propKeyString}
+      />
+    );
+    cy.get(`.vote-result-icon-${propKeyString}`).should('exist');
+    cy.get(`.vote-result-mixed-icon-${propKeyString}`).should('exist');
   });
 });
