@@ -111,6 +111,7 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
     case 'member':
       actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal, goToVote});
       break;
+    case 'researcher':
     default:
       actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal});
       break;
@@ -121,7 +122,7 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
     id: collection.darCollectionId,
     style: {
       color: styles.color.actions,
-      fontSzie: styles.fontSize.actions
+      fontSize: styles.fontSize.actions
     },
     label: 'table-actions',
     data: actionComponent

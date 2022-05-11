@@ -29,18 +29,20 @@ const isCollectionRevisable = (dars = {}) => {
 };
 
 //Function to detmine if collection is cancelable
-//Should only show up if none of the DARs have Open Elections
+//Should only show up if none of the DARs have Open or Closed Elections
 const isCollectionCancelable = (dars = {}) => {
   const hasDars = !isEmpty(dars);
   const allCanceled = every(dar => lowerCase(dar.status) === 'canceled')(dars);
-  const hasNoOpenElections = flow(
+  const hasNoOpenOrClosedElections = flow(
     filter(dar => lowerCase(dar.status) !== 'canceled'),
     map(dar => dar.elections),
     flatMap((electionMap = {}) => Object.values(electionMap)),
-    filter((election) => lowerCase(election.status) === 'open'),
+    filter((election) => lowerCase(election.status) === 'open' || lowerCase(election.status) === 'closed'),
     isEmpty
   )(dars);
-  return hasDars && !allCanceled && hasNoOpenElections;
+  // eslint-disable-next-line no-debugger
+  debugger;
+  return hasDars && !allCanceled && hasNoOpenOrClosedElections;
 };
 
 export default function ResearcherActions(props) {
