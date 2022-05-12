@@ -153,7 +153,7 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Institution', 'institution', institution, isLoading)
         ]),
         div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('Principal Investgator', 'principal-investigator', pi, isLoading),
+          generateLabelSpanContents('Principal Investigator', 'principal-investigator', pi, isLoading),
           generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading),
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
         ])
@@ -167,7 +167,7 @@ export default function ApplicationInformation(props) {
           }})
       ]),
       div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
-        div({className: 'applicant-details-subheader', style: styles.subheader}, ["Application Details"]),
+        div({className: 'application-details-subheader', style: styles.subheader}, ["Application Details"]),
         dynamicRowGeneration(2, appDetailLabels, isLoading, cloudComputing),
         (cloudComputing) ?
           div({className: 'cloud-provider-description-container'}, [
