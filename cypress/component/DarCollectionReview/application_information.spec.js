@@ -168,5 +168,117 @@ describe('Application Information', () => {
     cloudProviderDescription.should('not.exist');
   });
 
+  it('renders the local computing information', () => {
+    const props = {
+      localComputing: false,
+    };
+    mount(<ApplicationInformation {...props}/>);
+    const requestLabel = cy.get('#local-computing-label');
+    expect(requestLabel).to.exist;
+    requestLabel.contains('Requesting permission to use local computing');
+    const requestSpan = cy.get('#local-computing-span');
+    expect(requestSpan).to.exist;
+    requestSpan.contains('No');
+  });
+
+  it('renders a list of external collaborators', () => {
+    const props = {
+      externalCollaborators: [{name: 'Person A'}, {name: 'Person B'}]
+    };
+    mount(<ApplicationInformation {...props} />);
+    const requestLabel = cy.get('#external-collaborators-label');
+    expect(requestLabel).to.exist;
+    requestLabel.contains('External Collaborators');
+    const requestSpan = cy.get('#external-collaborators-span');
+    expect(requestSpan).to.exist;
+    requestSpan.contains('Person A, Person B');
+  });
+
+  it('renders a list of internal collaborators', () => {
+    const props = {
+      internalCollaborators: [{ name: 'Person C' }, { name: 'Person D' }],
+    };
+    mount(<ApplicationInformation {...props} />);
+    const requestLabel = cy.get('#internal-collaborators-label');
+    expect(requestLabel).to.exist;
+    requestLabel.contains('Internal Collaborators');
+    const requestSpan = cy.get('#internal-collaborators-span');
+    expect(requestSpan).to.exist;
+    requestSpan.contains('Person C, Person D');
+  });
+
+  it('renders a list of internal lab staff', () => {
+    const props = {
+      internalLabStaff: [{ name: 'Person E' }, { name: 'Person F' }],
+    };
+    mount(<ApplicationInformation {...props} />);
+    const requestLabel = cy.get('#internal-lab-staff-label');
+    expect(requestLabel).to.exist;
+    requestLabel.contains('Internal Lab Staff');
+    const requestSpan = cy.get('#internal-lab-staff-span');
+    expect(requestSpan).to.exist;
+    requestSpan.contains('Person E, Person F');
+  });
+
+  it('renders the signing official and signing official email', () => {
+    const props = {
+      signingOfficial: 'Person SO',
+      signingOfficialEmail: 'test@test.com',
+    };
+    mount(<ApplicationInformation {...props} />);
+    const nameLabel = cy.get('#signing-official-label');
+    expect(nameLabel).to.exist;
+    nameLabel.contains('Signing Official');
+
+    const nameSpan =  cy.get('#signing-official-span');
+    expect(nameSpan).to.exist;
+    nameSpan.contains('Person SO');
+
+    const emailLabel = cy.get('#signing-official-email-label');
+    expect(emailLabel).to.exist;
+    emailLabel.contains('Signing Official Email');
+
+    const emailSpan = cy.get('#signing-official-email-span');
+    expect(emailSpan).to.exist;
+    emailSpan.contains('test@test.com');
+  });
+
+  it('renders the IT director and IT director email', () => {
+    const props = {
+      itDirector: 'Person SO',
+      itDirectorEmail: 'test@test.com',
+    };
+    mount(<ApplicationInformation {...props} />);
+    const nameLabel = cy.get('#it-director-label');
+    expect(nameLabel).to.exist;
+    nameLabel.contains('IT Director');
+
+    const nameSpan = cy.get('#it-director-span');
+    expect(nameSpan).to.exist;
+    nameSpan.contains('Person SO');
+
+    const emailLabel = cy.get('#it-director-email-label');
+    expect(emailLabel).to.exist;
+    emailLabel.contains('IT Director Email');
+
+    const emailSpan = cy.get('#it-director-email-span');
+    expect(emailSpan).to.exist;
+    emailSpan.contains('test@test.com');
+  });
+
+  it('redners AnVIL storage information', ()=> {
+    const props = {
+      anvilStorage: true
+    };
+
+    mount(<ApplicationInformation {...props} />);
+    const anvilSpan = cy.get('#anvil-storage-span');
+    expect(anvilSpan).to.exist;
+    anvilSpan.contains('Yes');
+
+    const anvilLabel = cy.get('#anvil-storage-label');
+    expect(anvilLabel).to.exist;
+    anvilLabel.contains('Using AnVIL only for storage and analysis');
+  });
 });
 

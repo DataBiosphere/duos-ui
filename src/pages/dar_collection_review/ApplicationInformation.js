@@ -133,7 +133,7 @@ export default function ApplicationInformation(props) {
     {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
     {value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff'},
     {value: anvilStorage, title: 'Using AnVIL only for storage and analysis', key: 'anvil-storage'},
-    {value: localComputing, title: 'Requesting Permission to use local computing', key: 'local-computing'},
+    {value: localComputing, title: 'Requesting permission to use local computing', key: 'local-computing'},
     {value: cloudComputing, title: 'Requesting permission to use cloud computing', key: 'cloud-computing'},
     {value: cloudProvider, title: 'Cloud Provider (description below)', key: 'cloud-provider'},
   ];
