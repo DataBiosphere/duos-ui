@@ -242,7 +242,8 @@ export default function NewResearcherConsole(props) {
         ],
         isLoading,
         cancelCollection,
-        resubmitCollection
+        resubmitCollection,
+        consoleType: 'researcher'
       }),
       h(DarDraftTable, {
         isRendered: selectedTab === tabNames.darDrafts,
