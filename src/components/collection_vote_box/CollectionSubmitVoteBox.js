@@ -104,7 +104,7 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   return (
-    div({style: styles.baseStyle, datacy: 'collection-vote-box'}, [
+    div({style: Object.assign({paddingBottom: '2%'}, styles.baseStyle), datacy: 'collection-vote-box'}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div({style: styles.subsection}, [

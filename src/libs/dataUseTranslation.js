@@ -1,4 +1,4 @@
-import {isNil, isEmpty, filter, join, concat, clone, uniq, head, flow} from 'lodash/fp';
+import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
 import { searchOntology, extractDOIDFromUrl } from './ontologyService';
 import { Notifications } from './utils';
 

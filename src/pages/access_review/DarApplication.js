@@ -4,7 +4,8 @@ import {Theme} from '../../libs/theme';
 import {AppSummary} from './AppSummary';
 import {VoteSummary} from './VoteSummary';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
-import { isEmpty, isNil, get, getOr, filter, find } from 'lodash/fp';
+import { isEmpty, isNil, get, filter, find } from 'lodash/fp';
+import { processMatchData } from '../../utils/VoteUtils';
 
 const SECTION = {
   fontFamily: 'Arial',
@@ -30,9 +31,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     let voteString;
 
     const formatMatchData = (matchData) => {
-      const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
-      const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
-      voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
+      voteString = processMatchData(matchData);
       return div({style: SECTION}, [
         div({style: HEADER_BOLD},['DUOS Algorithm Decision: ']),
         div({style: {...HEADER, paddingLeft: "5px"}}, [voteString])
