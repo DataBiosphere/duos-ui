@@ -113,7 +113,7 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
       break;
     case 'researcher':
     default:
-      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal});
+      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal, goToVote});
       break;
   }
 

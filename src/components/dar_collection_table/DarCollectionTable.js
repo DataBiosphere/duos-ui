@@ -164,9 +164,7 @@ const columnHeaderConfig = {
     cellDataFn: (props) => {
       return props.actionsDisabled
         ? div()
-        : props.consoleType
-          ? cellData.consoleActionsCellData(props)
-          : cellData.actionsCellData(props);
+        : cellData.consoleActionsCellData(props);
     }
   }
 };

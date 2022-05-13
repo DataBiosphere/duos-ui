@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
 */
 
 const hoverTextButtonStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
-const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {fontFamily: 'Montserrant', margin: '0%'});
+const baseTextButtonStyle = Object.assign({}, Styles.TABLE.TABLE_TEXT_BUTTON, {margin: '0%'});
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
@@ -28,8 +28,8 @@ const isCollectionRevisable = (dars = {}) => {
   return every(dar => lowerCase(dar.status) === 'canceled')(dars);
 };
 
-//Function to detmine if collection is cancelable
-//Should only show up if none of the DARs have Open or Closed Elections
+//Function to determine if collection is cancelable
+//Should only show up if none of the DARs have Open or Closed Elections (elections that have reached DACs)
 const isCollectionCancelable = (dars = {}) => {
   const hasDars = !isEmpty(dars);
   const allCanceled = every(dar => lowerCase(dar.status) === 'canceled')(dars);
@@ -37,11 +37,10 @@ const isCollectionCancelable = (dars = {}) => {
     filter(dar => lowerCase(dar.status) !== 'canceled'),
     map(dar => dar.elections),
     flatMap((electionMap = {}) => Object.values(electionMap)),
-    filter((election) => lowerCase(election.status) === 'open' || lowerCase(election.status) === 'closed'),
+    map(election => lowerCase(election.status)),
+    filter(electionStatus => electionStatus === 'open' || electionStatus === 'closed'),
     isEmpty
   )(dars);
-  // eslint-disable-next-line no-debugger
-  debugger;
   return hasDars && !allCanceled && hasNoOpenOrClosedElections;
 };
 
@@ -66,7 +65,7 @@ export default function ResearcherActions(props) {
 
   //NOTE: minimal placeholder, adjust as needed for console implementation
   const cancelOnClick = (collection) => {
-    showConfirmationModal(collection);
+    showConfirmationModal(collection, 'cancel');
   };
 
   const reviewButtonAttributes = {
@@ -83,6 +82,7 @@ export default function ResearcherActions(props) {
     label: 'Cancel',
     isRendered: cancelEnabled,
     onClick: () => cancelOnClick(collection),
+    dataTip: 'Cancel Collection',
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
     icon: Block
