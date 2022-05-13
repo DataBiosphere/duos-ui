@@ -131,7 +131,6 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-//this component needs algorithmResult, should it be sent as a prop or set via React.Context?
 export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}}) => {
   return div(
     {
