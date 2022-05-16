@@ -2,8 +2,9 @@ import React from 'react';
 import { div, a, span, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
-import {isNil, head, get, getOr} from 'lodash/fp';
+import {isNil, head, get} from 'lodash/fp';
 import * as moment from 'moment';
+import {processMatchData} from '../../utils/VoteUtils';
 
 const LINK = {
   color: Theme.palette.link,
@@ -50,9 +51,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   formatMatchData = (matchData) => {
-    const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
-    const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
-    const voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
+    const voteString = processMatchData(matchData);
     const createDateString = moment(get('createDate')(matchData)).format('YYYY-MM-DD');
     const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
     return div({}, [

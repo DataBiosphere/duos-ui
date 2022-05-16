@@ -4,6 +4,7 @@ import {
   map,
   join,
   filter,
+  find,
   forEach,
   flatMap,
   toLower,
@@ -17,9 +18,10 @@ import {
   cloneDeep,
   groupBy
 } from 'lodash/fp';
-import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
+import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
-import { Collections } from '../libs/ajax';
+import { Collections, Match } from '../libs/ajax';
+import { processMatchData } from './VoteUtils';
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -88,7 +90,6 @@ const processVotesForBucket = (darElections) => {
     const {electionType, votes = []} = election;
     let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
     let targetFinal, targetChair, targetMember, targetFinalType;
-    const {agreementVotes} = dataAccess;
 
     if(electionType === 'RP') {
       targetFinalType = 'chairperson';
@@ -104,9 +105,6 @@ const processVotesForBucket = (darElections) => {
     forEach(vote => {
       const lowerCaseType = toLower(vote.type);
       switch (lowerCaseType) {
-        case 'agreement':
-          agreementVotes.push(vote);
-          break;
         case 'chairperson':
           targetChair.push(vote);
           break;
@@ -147,7 +145,6 @@ export const processDataUseBuckets = async(buckets) => {
     flatMap((bucket) => bucket.votes),
     map((votes) => ({rp:votes.rp}))
   ])(processedBuckets);
-
 
   const rpVoteData = {
     key: 'RP Vote',
@@ -210,6 +207,42 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
       filteredData.memberVotes),
     filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
+};
+
+export const getMatchDataForBuckets = async (buckets) => {
+  const electionIdBucketMap = {}; //{ referenceId: bucket} }
+  const idsArr = [];
+
+  forEach((bucket) => {
+    const {key, elections = []} = bucket;
+    let dataAccessReferenceId;
+    if(toLower(key) !== 'rp vote') {
+      elections.every((darElections = []) => {
+        dataAccessReferenceId = (
+          find(election => toLower(election.electionType) === 'dataaccess')(darElections) || {}
+        ).referenceId;
+        return isNil(dataAccessReferenceId);
+      });
+      if(!isNil(dataAccessReferenceId)) {
+        idsArr.push(dataAccessReferenceId);
+        electionIdBucketMap[dataAccessReferenceId] = bucket;
+      }
+      bucket.algorithmResult = {result: 'N/A', createDate: 'N/A', id: key};
+    }
+  })(buckets);
+
+  const matchData = await Match.findMatchBatch(idsArr);
+  matchData.forEach((match) => {
+    const { purpose, createDate, id } = match;
+    const targetBucket = electionIdBucketMap[purpose];
+    if(!isNil(targetBucket)) {
+      targetBucket.algorithmResult = {
+        result: processMatchData(match),
+        createDate,
+        id
+      };
+    }
+  });
 };
 
 export const extractDatasetIdsFromBucket = (bucket) => {
