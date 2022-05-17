@@ -13,22 +13,26 @@ const collectionSkeleton = {
 
 const canceledDars = {
   1: {
-    status: 'Canceled'
+    data: {
+      status: 'Canceled'
+    }
   },
   2: {
-    status: 'Canceled'
+    data: {
+      status: 'Canceled'
+    }
   }
 };
 
 const darsWithElections = {
   1: {
     elections: {
-      1: { status: 'Open' }
+      1: { data: {status: 'Open' } }
     }
   },
   2: {
     elections: {
-      2: { status: 'Closed'}
+      2: { data: {status: 'Closed'} }
     }
   }
 };
@@ -70,6 +74,12 @@ describe('Researcher Actions - Cancel Button', () => {
   });
   it('does not render if the election is already canceled', () => {
     propCopy.collection.dars = canceledDars;
+    mount(<ResearcherActions {...propCopy} />);
+    const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
+    cancelButton.should('not.exist');
+  });
+  it('does not render cancel button is collection has elections on it', () => {
+    propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
     const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
     cancelButton.should('not.exist');
