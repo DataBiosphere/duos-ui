@@ -8,7 +8,7 @@ import { every, lowerCase, flow, map, filter, flatMap, isEmpty } from 'lodash/fp
 import SimpleButton from "../SimpleButton";
 
 /*
-  Researcher -> Review: go to dar collection page
+  Researcher -> Review: go to dar application page with disabled fields
              -> Revise: use existing revise button functionality
              -> Cancel: show modal to confirm collection cancellation
   Since researcher console only gets collections that the user has made, we don't need
@@ -19,18 +19,18 @@ const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
 
 //Function to determine if collection is resubmittable
-//Should only show up if all of the dars have a canceled status
+//Should only show up if all of the DARs have a canceled status
 const isCollectionRevisable = (dars = {}) => {
   return every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
 };
 
 //Function to determine if collection is cancelable
-//Should only show up if none of the DARs have elections
+//Should only show up if none of the DARs have elections and not all DARs in the collection are canceled
 const isCollectionCancelable = (dars = {}) => {
   const hasDars = !isEmpty(dars);
   const allCanceled = every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
   const hasNoElections = flow(
-    filter(dar => lowerCase(dar.status) !== 'canceled'),
+    filter(dar => lowerCase(dar.data.status) !== 'canceled'),
     map(dar => dar.elections),
     flatMap((electionMap = {}) => Object.values(electionMap)),
     isEmpty

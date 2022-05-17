@@ -26,22 +26,26 @@ const canceledDars = {
 
 const darsWithElections = {
   1: {
+    data: {},
     elections: {
-      1: { data: {status: 'Open' } }
+      1: { status: 'Open' }
     }
   },
   2: {
+    data: {},
     elections: {
-      2: { data: {status: 'Closed'} }
+      2: { status: 'Closed' }
     }
   }
 };
 
 const darsWithNoElections = {
   1: {
+    data: {},
     elections: {}
   },
   2: {
+    data: {},
     elections: {}
   }
 };
