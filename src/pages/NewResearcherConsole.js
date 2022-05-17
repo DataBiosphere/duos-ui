@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import { cloneDeep, map, findIndex, isEmpty, pullAt } from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys} from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -121,9 +121,14 @@ export default function NewResearcherConsole(props) {
   }, [researcherCollections, researcherDrafts, dataStructs, selectedTab]);
 
   //review collection function, passed to collections table to be used in buttons
-  const reviewCollection = (collectionId) => {
+  const reviewCollection = (darCollection) => {
     try {
-      history.push(`/dar_collection/${collectionId}`);
+      const referenceIds = flow(
+        get('dars'),
+        keys,
+      )(darCollection);
+      const referenceId = referenceIds[0];
+      history.push(`/dar_application/${referenceId}`);
     } catch (error) {
       Notifications.showError({
         text: 'Error: Cannot view target collection'
@@ -166,6 +171,7 @@ export default function NewResearcherConsole(props) {
       const clonedCollections = cloneDeep(researcherCollections);
       pullAt(targetIndex, clonedCollections);
       setResearcherCollections(clonedCollections);
+
       Notifications.showSuccess({text: `Revising collection ${darCode}`});
     } catch (error) {
       Notifications.showError({
