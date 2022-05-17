@@ -25,27 +25,25 @@ const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, 
 //Function to determine if collection is resubmittable
 //Should only show up if all of the dars have a canceled status
 const isCollectionRevisable = (dars = {}) => {
-  return every(dar => lowerCase(dar.status) === 'canceled')(dars);
+  return every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
 };
 
 //Function to determine if collection is cancelable
-//Should only show up if none of the DARs have Open or Closed Elections (elections that have reached DACs)
+//Should only show up if none of the DARs have elections
 const isCollectionCancelable = (dars = {}) => {
   const hasDars = !isEmpty(dars);
   const allCanceled = every(dar => lowerCase(dar.status) === 'canceled')(dars);
-  const hasNoOpenOrClosedElections = flow(
+  const hasNoElections = flow(
     filter(dar => lowerCase(dar.status) !== 'canceled'),
     map(dar => dar.elections),
     flatMap((electionMap = {}) => Object.values(electionMap)),
-    map(election => lowerCase(election.status)),
-    filter(electionStatus => electionStatus === 'open' || electionStatus === 'closed'),
     isEmpty
   )(dars);
-  return hasDars && !allCanceled && hasNoOpenOrClosedElections;
+  return hasDars && !allCanceled && hasNoElections;
 };
 
 export default function ResearcherActions(props) {
-  const { collection, showConfirmationModal, history } = props;
+  const { collection, showConfirmationModal, reviewCollection } = props;
   const collectionId = collection.darCollectionId;
   const { dars } = collection;
 
@@ -59,10 +57,6 @@ export default function ResearcherActions(props) {
     setReviseEnabled(isRevisable);
   }, [dars]);
 
-  const reviewOnClick = (collectionId) => {
-    history.push(`/dar_collection/${collectionId}`);
-  };
-
   //NOTE: minimal placeholder, adjust as needed for console implementation
   const cancelOnClick = (collection) => {
     showConfirmationModal(collection, 'cancel');
@@ -72,7 +66,7 @@ export default function ResearcherActions(props) {
     keyProp: `researcher-review-${collectionId}`,
     label: 'Review',
     isRendered: true,
-    onClick: () => reviewOnClick(collectionId),
+    onClick: () => reviewCollection(collectionId),
     style: baseTextButtonStyle,
     hoverStyle: hoverTextButtonStyle
   };
