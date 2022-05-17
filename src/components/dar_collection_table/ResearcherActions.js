@@ -63,7 +63,7 @@ export default function ResearcherActions(props) {
     keyProp: `researcher-review-${collectionId}`,
     label: 'Review',
     isRendered: true,
-    onClick: () => reviewCollection(collectionId),
+    onClick: () => reviewCollection(collection),
     baseColor: Theme.palette.secondary,
     additionalStyle: {
       padding: '5px 10px',
