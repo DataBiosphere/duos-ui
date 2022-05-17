@@ -127,6 +127,9 @@ export default function NewResearcherConsole(props) {
         keys,
         head
       )(darCollection);
+      if (isNil(referenceId)) {
+        throw new Error("Error: Could not find target collection");
+      }
       history.push(`/dar_application/${referenceId}`);
     } catch (error) {
       Notifications.showError({
