@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil, head} from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -122,11 +122,11 @@ export default function NewResearcherConsole(props) {
   //review collection function, passed to collections table to be used in buttons
   const reviewCollection = (darCollection) => {
     try {
-      const referenceIds = flow(
+      const referenceId = flow(
         get('dars'),
         keys,
+        head
       )(darCollection);
-      const referenceId = referenceIds[0];
       history.push(`/dar_application/${referenceId}`);
     } catch (error) {
       Notifications.showError({

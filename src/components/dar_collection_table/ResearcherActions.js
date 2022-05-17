@@ -21,21 +21,24 @@ const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, 
 //Function to determine if collection is resubmittable
 //Should only show up if all of the DARs have a canceled status
 const isCollectionRevisable = (dars = {}) => {
-  return every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
+  return allCanceledDars(dars);
 };
 
 //Function to determine if collection is cancelable
 //Should only show up if none of the DARs have elections and not all DARs in the collection are canceled
 const isCollectionCancelable = (dars = {}) => {
   const hasDars = !isEmpty(dars);
-  const allCanceled = every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
   const hasNoElections = flow(
     filter(dar => lowerCase(dar.data.status) !== 'canceled'),
     map(dar => dar.elections),
     flatMap((electionMap = {}) => Object.values(electionMap)),
     isEmpty
   )(dars);
-  return hasDars && !allCanceled && hasNoElections;
+  return hasDars && !allCanceledDars(dars) && hasNoElections;
+};
+
+const allCanceledDars = (dars = {}) => {
+  return every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
 };
 
 export default function ResearcherActions(props) {
