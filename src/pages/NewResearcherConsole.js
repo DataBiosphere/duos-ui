@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil} from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -9,7 +9,6 @@ import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import DarDraftTable from '../components/dar_drafts_table/DarDraftTable';
-import { isNil } from 'lodash';
 
 //helper function with a built in delay to allow skeleton loader to show when data is loading or when the user switch tabs
 //primarily done to make the tab switching more obvious
@@ -169,9 +168,8 @@ export default function NewResearcherConsole(props) {
       }
       //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
-      pullAt(targetIndex, clonedCollections);
-      setResearcherCollections(clonedCollections);
-
+      const updatedCollections = pullAt(targetIndex, clonedCollections);
+      setResearcherCollections(updatedCollections);
       Notifications.showSuccess({text: `Revising collection ${darCode}`});
     } catch (error) {
       Notifications.showError({

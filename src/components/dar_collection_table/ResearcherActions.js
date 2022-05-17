@@ -4,8 +4,7 @@ import ResubmitCollectionButton from './ResubmitCollectionButton';
 import { h, div } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Block } from '@material-ui/icons';
-import { every, lowerCase, flow, map, filter, flatMap } from 'lodash/fp';
-import { isEmpty } from 'lodash';
+import { every, lowerCase, flow, map, filter, flatMap, isEmpty } from 'lodash/fp';
 import SimpleButton from "../SimpleButton";
 
 /*
