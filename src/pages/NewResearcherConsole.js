@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import { cloneDeep, map, findIndex, isEmpty } from 'lodash/fp';
+import { cloneDeep, map, findIndex, isEmpty, pullAt } from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -120,6 +120,17 @@ export default function NewResearcherConsole(props) {
     }
   }, [researcherCollections, researcherDrafts, dataStructs, selectedTab]);
 
+  //review collection function, passed to collections table to be used in buttons
+  const reviewCollection = (collectionId) => {
+    try {
+      history.push(`/dar_collection/${collectionId}`);
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error: Cannot view target collection'
+      });
+    }
+  };
+
   //cancel collection function, passed to collections table to be used in buttons
   const cancelCollection = async (darCollection) => {
     try {
@@ -145,14 +156,15 @@ export default function NewResearcherConsole(props) {
   const resubmitCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
-      const resubmittedCollection = await Collections.resubmitCollection(darCollectionId);
+      await Collections.resubmitCollection(darCollectionId);
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
         throw new Error("Error: Could not find target collection");
       }
+      //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
-      clonedCollections[targetIndex] = resubmittedCollection;
+      pullAt(targetIndex, clonedCollections);
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({text: `Revising collection ${darCode}`});
     } catch (error) {
@@ -243,6 +255,7 @@ export default function NewResearcherConsole(props) {
         isLoading,
         cancelCollection,
         resubmitCollection,
+        reviewCollection,
         consoleType: 'researcher'
       }),
       h(DarDraftTable, {

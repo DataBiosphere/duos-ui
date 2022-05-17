@@ -137,7 +137,6 @@ const columnHeaderConfig = {
     label: 'Institution',
     cellStyle: { width: styles.cellWidth.institution },
     cellDataFn: (props) => {
-      // TODO: Populate institution when https://broadworkbench.atlassian.net/browse/DUOS-1595 is complete
       props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? "- -" : props.createUser.institution.name;
       return cellData.institutionCellData(props);
     },
@@ -175,7 +174,7 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -184,7 +183,7 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
           collection, darCollectionId, datasets, darCode,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
-          openCollection, goToVote, relevantDatasets
+          openCollection, goToVote, reviewCollection, relevantDatasets
         });
       });
     });
@@ -204,7 +203,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
   //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
   const {
-    collections, columns, isLoading, cancelCollection, resubmitCollection,
+    collections, columns, isLoading, cancelCollection, resubmitCollection, reviewCollection,
     openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
   } = props;
   /*
@@ -231,6 +230,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
+        reviewCollection,
         relevantDatasets
       }),
       currentPage,
