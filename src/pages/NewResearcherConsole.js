@@ -128,12 +128,12 @@ export default function NewResearcherConsole(props) {
         head
       )(darCollection);
       if (isNil(referenceId)) {
-        throw new Error("Error: Could not find target collection");
+        throw new Error("Error: Could not find target Data Access Request");
       }
       history.push(`/dar_application/${referenceId}`);
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot view target collection'
+        text: 'Error: Cannot view target Data Access Request'
       });
     }
   };
@@ -146,15 +146,15 @@ export default function NewResearcherConsole(props) {
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target collection");
+        throw new Error("Error: Could not find target Data Access Request");
       }
       const clonedCollections = cloneDeep(researcherCollections);
       clonedCollections[targetIndex] = canceledCollection;
       setResearcherCollections(clonedCollections);
-      Notifications.showSuccess({text: `Deleted collection ${darCode}`});
+      Notifications.showSuccess({text: `Deleted Data Access Request ${darCode}`});
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot cancel target collection'
+        text: 'Error: Cannot cancel target Data Access Request'
       });
     }
   };
@@ -167,16 +167,16 @@ export default function NewResearcherConsole(props) {
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target collection");
+        throw new Error("Error: Could not find target Data Access Request");
       }
       //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
       const updatedCollections = pullAt(targetIndex, clonedCollections);
       setResearcherCollections(updatedCollections);
-      Notifications.showSuccess({text: `Revising collection ${darCode}`});
+      Notifications.showSuccess({text: `Revising Data Access Request ${darCode}`});
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot revise target collection'
+        text: 'Error: Cannot revise target Data Access Request'
       });
     }
   };
