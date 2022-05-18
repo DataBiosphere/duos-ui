@@ -45,8 +45,8 @@ export default function CollectionConfirmationModal(props) {
       showConfirmation,
       styleOverride: {height: '35%'},
       closeConfirmation: () => setShowConfirmation(false),
-      title: 'Resubmit DAR Collection',
-      message: `Are you sure you want to resubmit ${collection.darCode}?`,
+      title: 'Revise DAR Collection',
+      message: `Are you sure you want to revise ${collection.darCode}?`,
       header: getModalHeader,
       onConfirm: resubmitOnClick
     });

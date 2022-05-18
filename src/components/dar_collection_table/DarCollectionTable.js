@@ -199,9 +199,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
   const [consoleAction, setConsoleAction] = useState();
-
-  //cancel, resubmit, and open need to be assigned as an "updateCollection" when relevant?
-  //  - depends, if cancel and resubmit are locked behind modals then I only would have to pass in openCollection (only for admin and chair)
   const {
     collections, columns, isLoading, cancelCollection, resubmitCollection, reviewCollection,
     openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
@@ -239,7 +236,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, reviewCollection]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);
