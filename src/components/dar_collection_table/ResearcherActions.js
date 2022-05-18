@@ -92,8 +92,9 @@ export default function ResearcherActions(props) {
       style: {
         display: 'flex',
         padding: '10px 5px',
-        justifyContent: 'space-around',
-        alignItems: 'end'
+        justifyContent: 'flex-start',
+        alignItems: 'end',
+        columnGap: '1rem'
       }
     },
     //placeholder template, adjust for console implementation
