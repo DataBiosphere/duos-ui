@@ -23,6 +23,7 @@
     "array-bracket-spacing": "warn",
     "no-unused-vars": "warn",
     "no-extra-semi": "warn",
+    "quotes": ["warn", "single"], // Checks for single quote usage where possible
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "react/jsx-filename-extension": [
