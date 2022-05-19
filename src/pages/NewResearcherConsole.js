@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import { cloneDeep, map, findIndex, isEmpty } from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil, head, concat} from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -9,7 +9,6 @@ import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import DarDraftTable from '../components/dar_drafts_table/DarDraftTable';
-import { isNil } from 'lodash';
 
 //helper function with a built in delay to allow skeleton loader to show when data is loading or when the user switch tabs
 //primarily done to make the tab switching more obvious
@@ -120,6 +119,25 @@ export default function NewResearcherConsole(props) {
     }
   }, [researcherCollections, researcherDrafts, dataStructs, selectedTab]);
 
+  //review collection function, passed to collections table to be used in buttons
+  const reviewCollection = (darCollection) => {
+    try {
+      const referenceId = flow(
+        get('dars'),
+        keys,
+        head
+      )(darCollection);
+      if (isNil(referenceId)) {
+        throw new Error("Error: Could not find target Data Access Request");
+      }
+      history.push(`/dar_application/${referenceId}`);
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error: Cannot view target Data Access Request'
+      });
+    }
+  };
+
   //cancel collection function, passed to collections table to be used in buttons
   const cancelCollection = async (darCollection) => {
     try {
@@ -128,36 +146,41 @@ export default function NewResearcherConsole(props) {
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target collection");
+        throw new Error("Error: Could not find target Data Access Request");
       }
       const clonedCollections = cloneDeep(researcherCollections);
       clonedCollections[targetIndex] = canceledCollection;
       setResearcherCollections(clonedCollections);
-      Notifications.showSuccess({text: `Deleted collection ${darCode}`});
+      Notifications.showSuccess({text: `Deleted Data Access Request ${darCode}`});
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot cancel target collection'
+        text: 'Error: Cannot cancel target Data Access Request'
       });
     }
   };
 
-  //resubmit collection function, passed to collections table to be used in buttons
-  const resubmitCollection = async (darCollection) => {
+  //revise collection function, passed to collections table to be used in buttons
+  const reviseCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
-      const resubmittedCollection = await Collections.resubmitCollection(darCollectionId);
+      const draftCollection = await Collections.reviseCollection(darCollectionId);
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target collection");
+        throw new Error("Error: Could not find target Data Access Request");
       }
+      //add resubmitted collection to DAR Draft table
+      const updatedDrafts = concat([draftCollection])(researcherDrafts);
+      setResearcherDrafts(updatedDrafts);
+
+      //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
-      clonedCollections[targetIndex] = resubmittedCollection;
-      setResearcherCollections(clonedCollections);
-      Notifications.showSuccess({text: `Revising collection ${darCode}`});
+      const updatedCollections = pullAt(targetIndex, clonedCollections);
+      setResearcherCollections(updatedCollections);
+      Notifications.showSuccess({text: `Revising Data Access Request ${darCode}`});
     } catch (error) {
       Notifications.showError({
-        text: 'Error: Cannot revise target collection'
+        text: 'Error: Cannot revise target Data Access Request'
       });
     }
   };
@@ -242,7 +265,9 @@ export default function NewResearcherConsole(props) {
         ],
         isLoading,
         cancelCollection,
-        resubmitCollection
+        reviseCollection,
+        reviewCollection,
+        consoleType: 'researcher'
       }),
       h(DarDraftTable, {
         isRendered: selectedTab === tabNames.darDrafts,

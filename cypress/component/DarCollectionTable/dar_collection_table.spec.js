@@ -23,7 +23,7 @@ describe('DataUseVoteSummary - Tests', function() {
         isRendered={true}
         isLoading={false}
         cancelCollection={null}
-        resubmitCollection={null}
+        reviseCollection={null}
         actionsDisabled={false}
       />
     );
@@ -43,7 +43,7 @@ describe('DataUseVoteSummary - Tests', function() {
         isRendered={true}
         isLoading={false}
         cancelCollection={null}
-        resubmitCollection={null}
+        reviseCollection={null}
         actionsDisabled={false}
       />
     );

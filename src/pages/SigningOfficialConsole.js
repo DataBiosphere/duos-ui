@@ -134,7 +134,7 @@ export default function SigningOfficialConsole(props) {
           ],
           isLoading,
           cancelCollection: null,
-          resubmitCollection: null,
+          reviseCollection: null,
           actionsDisabled: true
         }, [])
       ]),

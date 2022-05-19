@@ -13,31 +13,39 @@ const collectionSkeleton = {
 
 const canceledDars = {
   1: {
-    status: 'Canceled'
+    data: {
+      status: 'Canceled'
+    }
   },
   2: {
-    status: 'Canceled'
+    data: {
+      status: 'Canceled'
+    }
   }
 };
 
 const darsWithElections = {
   1: {
+    data: {},
     elections: {
       1: { status: 'Open' }
     }
   },
   2: {
+    data: {},
     elections: {
-      2: { status: 'Closed'}
+      2: { status: 'Closed' }
     }
   }
 };
 
 const darsWithNoElections = {
   1: {
+    data: {},
     elections: {}
   },
   2: {
+    data: {},
     elections: {}
   }
 };
@@ -74,6 +82,12 @@ describe('Researcher Actions - Cancel Button', () => {
     const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
     cancelButton.should('not.exist');
   });
+  it('does not render cancel button is collection has elections on it', () => {
+    propCopy.collection.dars = darsWithElections;
+    mount(<ResearcherActions {...propCopy} />);
+    const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
+    cancelButton.should('not.exist');
+  });
 });
 
 describe('Researcher Actions - Review Button', () => {
@@ -86,17 +100,17 @@ describe('Researcher Actions - Review Button', () => {
 });
 
 describe('Researcher Actions - Revise Button', () => {
-  it('renders the resubmit button if all of the DARs are cancelled', () => {
+  it('renders the revise button if all of the DARs are cancelled', () => {
     propCopy.collection.dars = canceledDars;
     mount(<ResearcherActions {...propCopy} />);
-    const resubmitButton = cy.get(`#resubmit-collection-${collectionId}`);
-    resubmitButton.should('exist');
+    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
+    reviseButton.should('exist');
   });
 
-  it('does not render the resubmit button if there are open elections present', () => {
+  it('does not render the revise button if there are open elections present', () => {
     propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
-    const resubmitButton = cy.get(`#resubmit-collection-${collectionId}`);
-    resubmitButton.should('not.exist');
+    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
+    reviseButton.should('not.exist');
   });
 });

@@ -96,7 +96,7 @@ export default function NewChairConsole(props) {
       isLoading,
       relevantDatasets,
       cancelCollection,
-      resubmitCollection: null,
+      reviseCollection: null,
       openCollection,
       goToVote,
       consoleType: 'chairperson'
