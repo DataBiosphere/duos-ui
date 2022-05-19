@@ -100,17 +100,17 @@ describe('Researcher Actions - Review Button', () => {
 });
 
 describe('Researcher Actions - Revise Button', () => {
-  it('renders the resubmit button if all of the DARs are cancelled', () => {
+  it('renders the revise button if all of the DARs are cancelled', () => {
     propCopy.collection.dars = canceledDars;
     mount(<ResearcherActions {...propCopy} />);
-    const resubmitButton = cy.get(`#resubmit-collection-${collectionId}`);
-    resubmitButton.should('exist');
+    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
+    reviseButton.should('exist');
   });
 
-  it('does not render the resubmit button if there are open elections present', () => {
+  it('does not render the revise button if there are open elections present', () => {
     propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
-    const resubmitButton = cy.get(`#resubmit-collection-${collectionId}`);
-    resubmitButton.should('not.exist');
+    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
+    reviseButton.should('not.exist');
   });
 });

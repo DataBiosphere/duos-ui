@@ -159,11 +159,11 @@ export default function NewResearcherConsole(props) {
     }
   };
 
-  //resubmit collection function, passed to collections table to be used in buttons
-  const resubmitCollection = async (darCollection) => {
+  //revise collection function, passed to collections table to be used in buttons
+  const reviseCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
-      await Collections.resubmitCollection(darCollectionId);
+      await Collections.reviseCollection(darCollectionId);
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
@@ -261,7 +261,7 @@ export default function NewResearcherConsole(props) {
         ],
         isLoading,
         cancelCollection,
-        resubmitCollection,
+        reviseCollection,
         reviewCollection,
         consoleType: 'researcher'
       }),

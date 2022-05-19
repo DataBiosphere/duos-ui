@@ -200,7 +200,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [selectedCollection, setSelectedCollection] = useState({});
   const [consoleAction, setConsoleAction] = useState();
   const {
-    collections, columns, isLoading, cancelCollection, resubmitCollection, reviewCollection,
+    collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
     openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
   } = props;
   /*
@@ -287,7 +287,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       showConfirmation,
       setShowConfirmation,
       cancelCollection,
-      resubmitCollection,
+      reviseCollection,
       openCollection,
       consoleAction
     })

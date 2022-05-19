@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {Styles, Theme} from '../../libs/theme';
-import ResubmitCollectionButton from './ResubmitCollectionButton';
+import ReviseCollectionButton from './ReviseCollectionButton';
 import { h, div } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Block } from '@material-ui/icons';
@@ -18,7 +18,7 @@ import SimpleButton from "../SimpleButton";
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
 
-//Function to determine if collection is resubmittable
+//Function to determine if collection is revisable
 //Should only show up if all of the DARs have a canceled status
 const isCollectionRevisable = (dars = {}) => {
   return allCanceledDars(dars);
@@ -99,7 +99,7 @@ export default function ResearcherActions(props) {
     },
     //placeholder template, adjust for console implementation
     [
-      h(ResubmitCollectionButton, {isRendered: reviseEnabled, showConfirmationModal, collection}),
+      h(ReviseCollectionButton, {isRendered: reviseEnabled, showConfirmationModal, collection}),
       h(SimpleButton, reviewButtonAttributes),
       h(TableIconButton, cancelButtonAttributes)
     ]

@@ -5,7 +5,7 @@ import {isCollectionCanceled} from "../../libs/utils";
 import {getProjectTitle} from "./DarCollectionTable";
 
 export default function CollectionConfirmationModal(props) {
-  const {collection, showConfirmation, setShowConfirmation, cancelCollection, resubmitCollection, openCollection, consoleAction} = props;
+  const {collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction} = props;
 
   const getModalHeader = () => {
     if(!isNil(collection)) {
@@ -19,8 +19,8 @@ export default function CollectionConfirmationModal(props) {
     setShowConfirmation(false);
   };
 
-  const resubmitOnClick = async() => {
-    await resubmitCollection(collection);
+  const reviseOnClick = async() => {
+    await reviseCollection(collection);
     setShowConfirmation(false);
   };
 
@@ -40,7 +40,7 @@ export default function CollectionConfirmationModal(props) {
       onConfirm: cancelOnClick
     });
 
-  const resubmitModal =
+  const reviseModal =
     h(ConfirmationModal, {
       showConfirmation,
       styleOverride: {height: '35%'},
@@ -48,7 +48,7 @@ export default function CollectionConfirmationModal(props) {
       title: 'Revise DAR Collection',
       message: `Are you sure you want to revise ${collection.darCode}?`,
       header: getModalHeader,
-      onConfirm: resubmitOnClick
+      onConfirm: reviseOnClick
     });
 
   const openModal = h(ConfirmationModal, {
@@ -63,8 +63,8 @@ export default function CollectionConfirmationModal(props) {
 
 
   switch (consoleAction) {
-    case 'resubmit':
-      return resubmitModal;
+    case 'revise':
+      return reviseModal;
     case 'cancel':
       return cancelModal;
     case 'open':
@@ -74,7 +74,7 @@ export default function CollectionConfirmationModal(props) {
     //Updates will occur in later console tickets
     default:
       return isCollectionCanceled(collection) === true
-        ? resubmitModal
+        ? reviseModal
         : cancelModal;
   }
 
