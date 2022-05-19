@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil, head} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, pullAt, get, flow, keys, isNil, head, concat} from 'lodash/fp';
 import TabControl from '../components/TabControl';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -163,12 +163,16 @@ export default function NewResearcherConsole(props) {
   const reviseCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
-      await Collections.reviseCollection(darCollectionId);
+      const draftCollection = await Collections.reviseCollection(darCollectionId);
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
         throw new Error("Error: Could not find target Data Access Request");
       }
+      //add resubmitted collection to DAR Draft table
+      const updatedDrafts = concat([draftCollection])(researcherDrafts);
+      setResearcherDrafts(updatedDrafts);
+
       //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
       const updatedCollections = pullAt(targetIndex, clonedCollections);
