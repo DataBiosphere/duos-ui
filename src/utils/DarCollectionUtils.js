@@ -198,7 +198,6 @@ export const extractDacRPVotesFromBucket = (bucket, user) => {
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
   let output;
-
   output = flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
@@ -210,9 +209,9 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair, admi
       filteredData.memberVotes)
     //filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
-  if(!adminPage) {
-    output = filter((vote) => vote.dacUserId === user.dacUserId)(output);
-  }
+  output = !adminPage ?
+    filter((vote) => vote.dacUserId === user.dacUserId)(output) :
+    filter((vote) => !isNil(vote.vote));
   return output;
 };
 
