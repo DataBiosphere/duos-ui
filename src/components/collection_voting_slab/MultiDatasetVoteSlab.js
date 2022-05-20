@@ -51,15 +51,16 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading} = props;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, adminPage} = props;
   const {algorithmResult} = bucket;
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
     setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair));
+    //admin view will require the admin to be able to see all votes rather than filtering them out based on dac id
+    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
-  }, [bucket, isChair]);
+  }, [bucket, isChair, adminPage]);
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
@@ -85,10 +86,12 @@ export default function MultiDatasetVoteSlab(props) {
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
+        //NOTE: review isFinal update, need to see what happens if adminPage is taken into consideration
         isFinal: isChair,
-        isDisabled: isEmpty(currentUserVotes) || !allOpenElections,
+        isDisabled: adminPage || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
-        isLoading
+        isLoading,
+        adminPage
       }),
       ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult})
     ]);
@@ -99,7 +102,8 @@ export default function MultiDatasetVoteSlab(props) {
       dacDatasetIds,
       bucketDatasetIds,
       collectionDatasets,
-      isLoading
+      isLoading,
+      adminPage
     });
   };
 

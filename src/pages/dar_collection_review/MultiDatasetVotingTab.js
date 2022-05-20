@@ -31,9 +31,9 @@ export default function MultiDatasetVotingTab(props) {
   const [dataBuckets, setDataBuckets] = useState([]);
   const [collectionDatasets, setCollectionDatasets] = useState([]);
   const [dacDatasetIds, setDacDatasetIds] = useState([]);
-  const {darInfo, buckets, collection, isChair, isLoading} = props;
-  const missingLibraryCardMessage = "The Researcher must have a Library Card before data access can be granted.\n" +
-    "You can still deny this request and/or vote on the Structured Research Purpose.";
+  const {darInfo, buckets, collection, isChair, isLoading, adminPage} = props;
+  const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n' +
+    (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '');
 
   useEffect( () => {
     setCollectionDatasets(get('datasets')(collection));
@@ -46,7 +46,7 @@ export default function MultiDatasetVotingTab(props) {
 
   useEffect(() => {
     const init = async () => {
-      const dacDatasets = await User.getUserRelevantDatasets();
+      const dacDatasets = adminPage ? [] : await User.getUserRelevantDatasets();
       const datasetIds = flow(
         map(dataset => get('dataSetId')(dataset)),
         filter(datasetId => !isNil(datasetId))
@@ -54,7 +54,7 @@ export default function MultiDatasetVotingTab(props) {
       setDacDatasetIds(datasetIds);
     };
     init();
-  }, []);
+  }, [adminPage]);
 
   const DatasetVoteSlabs = () => {
     const isApprovalDisabled = dataAccessApprovalDisabled();
@@ -69,6 +69,7 @@ export default function MultiDatasetVotingTab(props) {
         isChair,
         isApprovalDisabled,
         key: bucket.key,
+        adminPage
       });
     })(dataBuckets);
   };
@@ -95,7 +96,7 @@ export default function MultiDatasetVotingTab(props) {
         darInfo,
         bucket: rpBucket,
         isChair,
-        isLoading
+        isLoading,
       }),
       DatasetVoteSlabs()
     ])

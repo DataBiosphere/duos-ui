@@ -156,16 +156,29 @@ export const processDataUseBuckets = async(buckets) => {
 };
 
 //Gets data access votes from this bucket by members of this user's DAC
-export const extractDacDataAccessVotesFromBucket = (bucket, user) => {
+export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
+  let memberVotesArrays;
 
-  return flow(
-    map(voteData => voteData.dataAccess),
+  memberVotesArrays = flow(
+    map((voteData) => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    map(filteredData => filteredData.memberVotes),
-    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
-    flatMap(memberVotes => memberVotes)
+    map((filteredData) => filteredData.memberVotes)
   )(votes);
+
+  if(!adminPage) {
+    memberVotesArrays = filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes)));
+  }
+
+  return flatMap(memberVotes => memberVotes)(memberVotesArrays);
+
+  // return flow(
+  //   map(voteData => voteData.dataAccess),
+  //   filter((dataAccessData) => !isEmpty(dataAccessData)),
+  //   map(filteredData => filteredData.memberVotes),
+  //   filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
+  //   flatMap(memberVotes => memberVotes)
+  // )(votes);
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
@@ -182,17 +195,25 @@ export const extractDacRPVotesFromBucket = (bucket, user) => {
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
-export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
+export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
+  let output;
 
-  return flow(
+  output = flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    flatMap(filteredData => isChair ?
+    //flatMap and filter steps are the only things that need to be adjusted for adminPage
+    //flatMap only needs boolean adjustment to account for adminPage
+    //filter should not happen if admin page
+    flatMap(filteredData => adminPage || isChair ?
       concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
-      filteredData.memberVotes),
-    filter(vote => vote.dacUserId === user.dacUserId)
+      filteredData.memberVotes)
+    //filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
+  if(!adminPage) {
+    output = filter((vote) => vote.dacUserId === user.dacUserId)(output);
+  }
+  return output;
 };
 
 //Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
