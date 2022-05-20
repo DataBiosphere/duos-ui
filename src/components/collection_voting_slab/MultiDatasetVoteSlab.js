@@ -56,7 +56,7 @@ export default function MultiDatasetVoteSlab(props) {
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user));
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
     //admin view will require the admin to be able to see all votes rather than filtering them out based on dac id
     setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
@@ -81,7 +81,7 @@ export default function MultiDatasetVoteSlab(props) {
       h(Alert, {
         title: 'Voting is disabled since not all elections are open.',
         type: 'danger',
-        isRendered: !allOpenElections
+        isRendered: !adminPage && !allOpenElections
       }),
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',

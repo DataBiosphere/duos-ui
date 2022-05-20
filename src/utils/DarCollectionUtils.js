@@ -248,7 +248,7 @@ export const getMatchDataForBuckets = async (buckets) => {
         idsArr.push(dataAccessReferenceId);
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
-      bucket.algorithmResult = {result: 'N/A', createDate: 'N/A', id: key};
+      bucket.algorithmResult = {result: 'N/A', createDate: undefined, id: key};
     }
   })(buckets);
 
