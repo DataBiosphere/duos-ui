@@ -350,6 +350,30 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('textarea').should('be.disabled');
   });
 
+  it('Renders a disabled vote button readOnly is true', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        bucket={{
+          votes: [votesForElection1, votesForElection2]
+        }}
+        isChair={false}
+        readOnly={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Votes, 'updateVotesByIds');
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('textarea').should('be.disabled');
+  });
+
   it('Does not render pie chart or vote summary table when current user is not chairperson', function() {
     mount(
       <ResearchProposalVoteSlab

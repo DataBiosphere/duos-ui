@@ -251,6 +251,30 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('textarea').should('be.disabled');
   });
 
+  it('Renders a disabled vote button when readOnly is true', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection1, openElection2],
+          votes: [votesForOpenElection1, votesForOpenElection2]
+        }}
+        dacDatasetIds={[10, 20]}
+        isChair={false}
+        readOnly={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Votes, 'updateVotesByIds');
+
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('textarea').should('be.disabled');
+  });
+
   it('Does not render pie chart or vote summary table when current user is not chairperson', function() {
     mount(
       <MultiDatasetVoteSlab
