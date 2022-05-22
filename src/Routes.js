@@ -92,6 +92,10 @@ const Routes = (props) => (
         : ''
     }
     {
+      props.env === 'dev' ? <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
+        : ''
+    }
+    {
       props.env === 'dev' ? <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
         : ''
     }
