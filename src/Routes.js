@@ -51,6 +51,7 @@ import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
+import DarVoteReview from "./pages/dar_collection_review/DarVoteReview";
 
 const Routes = (props) => (
   <Switch>
@@ -92,7 +93,7 @@ const Routes = (props) => (
         : ''
     }
     {
-      props.env === 'dev' ? <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
+      props.env === 'dev' ? <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarVoteReview} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
         : ''
     }
     {

@@ -51,7 +51,7 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading} = props;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, readOnly, isLoading} = props;
   const {algorithmResult} = bucket;
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function MultiDatasetVoteSlab(props) {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
         isFinal: isChair,
-        isDisabled: isEmpty(currentUserVotes) || !allOpenElections,
+        isDisabled: readOnly || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
         isLoading
       }),
