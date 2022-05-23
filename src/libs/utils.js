@@ -66,9 +66,10 @@ export const darCollectionUtils = {
             }
             return [];
           } else {
-            //if elections exist, filer out elections based on relevant ids
+            //if elections exist, filter out elections based on relevant ids
+            //only Data Access elections impact the status of the collection
             //NOTE: Admin does not have relevantIds, DAC roles do
-            const electionArr = Object.values(elections);
+            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
             if(isNil(relevantDatasets)) {
               return electionArr;
             } else {
@@ -82,13 +83,11 @@ export const darCollectionUtils = {
 
       if(isNil(relevantDatasets)) {
         each(election => {
-          const {status, electionType} = election;
-          if(toLower(electionType) === 'dataaccess') {
-            if(isNil(electionStatusCount[status])) {
-              electionStatusCount[status] = 0;
-            }
-            electionStatusCount[status]++;
+          const {status} = election;
+          if(isNil(electionStatusCount[status])) {
+            electionStatusCount[status] = 0;
           }
+          electionStatusCount[status]++;
         })(targetElections);
         output = nonFPMap(electionStatusCount, (value, key) => {
           return `${key}: ${value}`;
