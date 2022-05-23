@@ -749,8 +749,8 @@ export const sortVisibleTable = ({ list = [], sort }) => {
   }
   else {
     return list.sort((a, b) => {
-      const aVal = a[sort.colIndex].data;
-      const bVal = b[sort.colIndex].data;
+      const aVal = a[sort.colIndex].value || a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].value || b[sort.colIndex].data;
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {

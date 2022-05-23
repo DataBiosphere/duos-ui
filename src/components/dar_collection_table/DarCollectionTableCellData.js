@@ -8,6 +8,7 @@ import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
+import DarCollectionReviewLink from './DarCollectionReviewLink';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label = 'project-title'}) {
   return {
@@ -32,6 +33,17 @@ export function darCodeCellData({darCode = '- -', darCollectionId, label = 'dar-
       fontWeight: '500'
     },
     label
+  };
+}
+
+//Redirect for admin review page, only used in admin manage dar collections table
+export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
+  return {
+    isComponent: true,
+    data: h(DarCollectionReviewLink, { darCollectionId, darCode }),
+    label,
+    id: darCollectionId,
+    value: darCode
   };
 }
 
@@ -121,13 +133,12 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
     id: collection.darCollectionId,
     style: {
       color: styles.color.actions,
-      fontSzie: styles.fontSize.actions
+      fontSize: styles.fontSize.actions
     },
     label: 'table-actions',
     data: actionComponent
   };
 }
-
 
 //Outdated, remove once older implementation has been removed/updated
 export function actionsCellData({collection, showConfirmationModal}) {
@@ -195,5 +206,6 @@ export default {
   datasetCountCellData,
   statusCellData,
   actionsCellData,
-  consoleActionsCellData
+  consoleActionsCellData,
+  darCodeAdminCellData
 };

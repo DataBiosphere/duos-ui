@@ -86,7 +86,6 @@ export default function MultiDatasetVoteSlab(props) {
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
-        //NOTE: review isFinal update, need to see what happens if adminPage is taken into consideration
         isFinal: isChair,
         isDisabled: adminPage || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,

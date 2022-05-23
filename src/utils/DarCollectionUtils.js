@@ -171,14 +171,6 @@ export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => 
   }
 
   return flatMap(memberVotes => memberVotes)(memberVotesArrays);
-
-  // return flow(
-  //   map(voteData => voteData.dataAccess),
-  //   filter((dataAccessData) => !isEmpty(dataAccessData)),
-  //   map(filteredData => filteredData.memberVotes),
-  //   filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
-  //   flatMap(memberVotes => memberVotes)
-  // )(votes);
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
@@ -201,13 +193,9 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair, admi
   output = flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    //flatMap and filter steps are the only things that need to be adjusted for adminPage
-    //flatMap only needs boolean adjustment to account for adminPage
-    //filter should not happen if admin page
     flatMap(filteredData => adminPage || isChair ?
       concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
       filteredData.memberVotes)
-    //filter(vote => vote.dacUserId === user.dacUserId)
   )(votes);
   output = !adminPage ?
     filter((vote) => vote.dacUserId === user.dacUserId)(output) :
