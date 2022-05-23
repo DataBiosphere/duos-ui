@@ -35,6 +35,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
 
   return {
     data: darCodeData,
+    value: darCode,
     id: darCollectionId,
     style: {
       color: styles.color.darCode,
@@ -48,7 +49,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
 const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   const hasOpenElections = includes('open')(toLower(status));
   const path = hasOpenElections ?
-    `/dar_collection_review/${darCollectionId}` :
+    `/dar_collection/${darCollectionId}` :
     `/dar_vote_review/${darCollectionId}`;
 
   return h(Link, { to: path }, [darCode]);

@@ -1,6 +1,6 @@
 import {div, h} from "react-hyperscript-helpers";
 import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from "lodash/fp";
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, toLower} from "lodash/fp";
 import {Storage} from "../../libs/storage";
 import {useEffect, useState} from "react";
 import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
@@ -73,7 +73,7 @@ export default function MultiDatasetVoteSlab(props) {
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
       filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(currentUserVotes))),
-      every(electionData => electionData.status === 'Open')
+      every(electionData => toLower(electionData.status) === 'open')
     )(bucket);
 
     return div({style: styles.voteInfo}, [
