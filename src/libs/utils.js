@@ -742,8 +742,13 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+//each item in the list is an array of metadata representing a single table row
+//the metadata for each cell needs a data (exactly what is displayed in the table)
+//or value (string or number alternative) property which determines sorting
 export const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
+  // eslint-disable-next-line no-debugger
+  debugger;
   if (!sort || sort.colIndex === undefined) {
     return list;
   }
