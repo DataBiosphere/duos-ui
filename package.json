@@ -53,7 +53,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "7.17.0",
     "@babel/eslint-plugin": "7.17.7",
-    "@babel/plugin-proposal-class-properties": "7.16.7",
+    "@babel/plugin-proposal-class-properties": "7.17.12",
     "@babel/preset-react": "7.17.12",
     "@cypress/react": "5.12.5",
     "@cypress/webpack-dev-server": "1.8.4",
