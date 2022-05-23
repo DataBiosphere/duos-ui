@@ -92,7 +92,7 @@ export default function NewMemberConsole(props) {
       ],
       isLoading,
       relevantDatasets,
-      resubmitCollection: null,
+      reviseCollection: null,
       goToVote,
       consoleType: 'member'
     }),
