@@ -1,4 +1,4 @@
-import {isEmpty, isNil} from "lodash/fp";
+import {includes, isEmpty, isNil, toLower} from "lodash/fp";
 import {formatDate} from "../../libs/utils";
 import {h} from "react-hyperscript-helpers";
 import {styles} from "./DarCollectionTable";
@@ -6,8 +6,9 @@ import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
+import {Link} from "react-router-dom";
 
-export function projectTitleCellData({projectTitle = '- -', darCollectionId, label = 'project-title'}) {
+export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
     data: projectTitle,
     id: darCollectionId,
@@ -20,9 +21,20 @@ export function projectTitleCellData({projectTitle = '- -', darCollectionId, lab
   };
 }
 
-export function darCodeCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
+export function darCodeCellData({darCode = '- -', darCollectionId, status, consoleType, label = 'dar-code'}) {
+  let darCodeData;
+
+  switch (consoleType) {
+    case 'chairperson':
+    case 'member' :
+      darCodeData = dacLinkToCollection(darCode, status, darCollectionId);
+      break;
+    default :
+      darCodeData = darCode;
+  }
+
   return {
-    data: darCode,
+    data: darCodeData,
     id: darCollectionId,
     style: {
       color: styles.color.darCode,
@@ -32,6 +44,15 @@ export function darCodeCellData({darCode = '- -', darCollectionId, label = 'dar-
     label
   };
 }
+
+const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
+  const hasOpenElections = includes('open')(toLower(status));
+  const path = hasOpenElections ?
+    `/dar_collection_review/${darCollectionId}` :
+    `/dar_vote_review/${darCollectionId}`;
+
+  return h(Link, { to: path }, [darCode]);
+};
 
 export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
   return {
