@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useState} from "react";
-import {button} from "react-hyperscript-helpers";
-import {votingColors} from "../../pages/dar_collection_review/MultiDatasetVotingTab";
+import {useCallback, useEffect, useState} from 'react';
+import {button} from 'react-hyperscript-helpers';
+import {votingColors} from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 const styles = {
   baseStyle: {

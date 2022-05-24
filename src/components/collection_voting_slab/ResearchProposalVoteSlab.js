@@ -1,18 +1,18 @@
-import {useEffect, useState} from "react";
-import {a, div, h, span} from "react-hyperscript-helpers";
-import {DataUseTranslation} from "../../libs/dataUseTranslation";
-import {isEmpty, isNil, flatMap, map, keys} from "lodash/fp";
-import DataUsePill from "./DataUsePill";
-import DataUseAlertBox from "./DataUseAlertBox";
-import {AnimatePresence, motion} from "framer-motion";
-import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
-import {Storage} from "../../libs/storage";
+import {useEffect, useState} from 'react';
+import {a, div, h, span} from 'react-hyperscript-helpers';
+import {DataUseTranslation} from '../../libs/dataUseTranslation';
+import {isEmpty, isNil, flatMap, map, keys} from 'lodash/fp';
+import DataUsePill from './DataUsePill';
+import DataUseAlertBox from './DataUseAlertBox';
+import {AnimatePresence, motion} from 'framer-motion';
+import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
+import {Storage} from '../../libs/storage';
 import {
   collapseVotesByUser, extractDacRPVotesFromBucket,
   extractUserRPVotesFromBucket,
-} from "../../utils/DarCollectionUtils";
-import VotesPieChart from "../common/VotesPieChart";
-import VoteSummaryTable from "../vote_summary_table/VoteSummaryTable";
+} from '../../utils/DarCollectionUtils';
+import VotesPieChart from '../common/VotesPieChart';
+import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 
 const styles = {

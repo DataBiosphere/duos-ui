@@ -1,19 +1,19 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import CollectionSubmitVoteBox from "../../../src/components/collection_vote_box/CollectionSubmitVoteBox";
-import {mount} from "@cypress/react";
+import CollectionSubmitVoteBox from '../../../src/components/collection_vote_box/CollectionSubmitVoteBox';
+import {mount} from '@cypress/react';
 import {Votes} from '../../../src/libs/ajax';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const votesMatch = [
-  {vote: true, voteId: 1, rationale: "test"},
-  {vote: true, voteId: 2, rationale: "test"},
-  {vote: true, voteId: 3, rationale: "test"}
+  {vote: true, voteId: 1, rationale: 'test'},
+  {vote: true, voteId: 2, rationale: 'test'},
+  {vote: true, voteId: 3, rationale: 'test'}
 ];
 
 const votesMixed = [
-  {vote: true, voteId: 1, rationale: "test1"},
-  {vote: false, voteId: 2, rationale: "test2"},
+  {vote: true, voteId: 1, rationale: 'test1'},
+  {vote: false, voteId: 2, rationale: 'test2'},
 ];
 
 
@@ -23,7 +23,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
@@ -35,7 +35,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -47,7 +47,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={[{voteId: 4}]}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
@@ -60,7 +60,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={[]}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
@@ -72,7 +72,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     mount(
       <CollectionSubmitVoteBox
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
@@ -85,7 +85,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', 'test');
@@ -96,7 +96,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('not.contain.text');
@@ -107,7 +107,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', 'test');
@@ -129,7 +129,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -148,7 +148,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', '');
@@ -165,7 +165,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
@@ -183,7 +183,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
@@ -203,7 +203,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
@@ -218,7 +218,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isLoading={true}
       />
     );
@@ -235,7 +235,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={true}
       />
     );
@@ -252,7 +252,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={false}
         isApprovalDisabled={true}
       />
@@ -271,7 +271,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={false}
         isApprovalDisabled={true}
       />

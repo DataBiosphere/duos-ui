@@ -1,10 +1,10 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {mount} from "@cypress/react";
-import MultiDatasetVoteSlab from "../../../src/components/collection_voting_slab/MultiDatasetVoteSlab";
-import {Storage} from "../../../src/libs/storage";
-import {Votes} from "../../../src/libs/ajax";
-import {votingColors} from "../../../src/pages/dar_collection_review/MultiDatasetVotingTab";
+import {mount} from '@cypress/react';
+import MultiDatasetVoteSlab from '../../../src/components/collection_voting_slab/MultiDatasetVoteSlab';
+import {Storage} from '../../../src/libs/storage';
+import {Votes} from '../../../src/libs/ajax';
+import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
