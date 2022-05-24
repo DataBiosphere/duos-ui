@@ -284,4 +284,17 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
     cy.get('textarea').should('not.be.disabled');
   });
+
+  it('renders a different heading if user is viewing from the admin page', () => {
+    mount(<CollectionSubmitVoteBox
+      votes={votesMixed}
+      isFinal={false}
+      question={'question'}
+      isDisabled={false}
+      isApprovalDisabled={true}
+      adminPage={true}
+    />);
+    const heading = cy.get('.vote-subsection-heading');
+    expect(heading).to.exist;
+  });
 });

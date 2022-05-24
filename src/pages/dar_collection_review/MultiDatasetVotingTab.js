@@ -97,6 +97,7 @@ export default function MultiDatasetVotingTab(props) {
         bucket: rpBucket,
         isChair,
         isLoading,
+        adminPage
       }),
       DatasetVoteSlabs()
     ])

@@ -100,7 +100,7 @@ export default function CollectionSubmitVoteBox(props) {
     const heading = isFinal ?
       `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
       'Your Vote*';
-    return span([heading]);
+    return span({className: 'vote-subsection-heading'},[heading]);
   };
 
   return (

@@ -121,6 +121,7 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
 
   return a({
     style: styles.link,
+    id: 'expand-rp-vote-button',
     onClick: () => setExpanded(!expanded),
   }, [linkMessage]);
 };
@@ -171,14 +172,13 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading} = props;
+  const {darInfo, bucket, isChair, isLoading, adminPage} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
-
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacRPVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair));
-  }, [bucket, isChair]);
+    setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage));
+    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
+  }, [bucket, isChair, adminPage]);
 
 
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
@@ -203,8 +203,9 @@ export default function ResearchProposalVoteSlab(props) {
                 question: 'Was the research purpose accurately converted to a structured format?',
                 votes: currentUserVotes,
                 isFinal: false,
-                isDisabled: isEmpty(currentUserVotes),
-                isLoading
+                isDisabled: adminPage || isEmpty(currentUserVotes),
+                isLoading,
+                adminPage
               }),
               h(ChairVoteInfo, {dacVotes, isChair, isLoading})
             ]),

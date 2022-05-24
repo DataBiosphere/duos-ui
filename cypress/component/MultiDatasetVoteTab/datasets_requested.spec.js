@@ -259,4 +259,18 @@ describe('DatasetsRequestedPanel - Tests', function () {
     cy.get('.text-placeholder').should('exist');
     cy.get('[datacy=dataset-list]').should('not.exist');
   });
+
+  it('shows all datasets if the viewing on the admin page', () => {
+    mount(
+      <DatasetsRequestedPanel
+        bucketDatasetIds={[1,2,3,4,5,6]}
+        dacDatasetIds={[1]}
+        collectionDatasets={collectionDatasets}
+        isLoading={false}
+        adminPage={true}
+      />
+    );
+    cy.get('.dataset-list-item').should('have.length', 5);
+    cy.get('[datacy=collapse-expand-link]').contains('View 1 more');
+  });
 });

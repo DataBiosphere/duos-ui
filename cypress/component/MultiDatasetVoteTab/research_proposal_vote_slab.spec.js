@@ -4,6 +4,8 @@ import {mount} from "@cypress/react";
 import ResearchProposalVoteSlab from "../../../src/components/collection_voting_slab/ResearchProposalVoteSlab";
 import {Votes} from "../../../src/libs/ajax";
 import {Storage} from "../../../src/libs/storage";
+import chaiColors from 'chai-colors';
+chai.use(chaiColors);
 
 const darInfoPrimaryUseManualReviewFalse = {
   "rus": "test",
@@ -512,5 +514,18 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
+  });
+
+  it('shows the RP vote decision on the admin review page', () => {
+    mount(<ResearchProposalVoteSlab
+      bucket={{
+        votes: [votesForElection2],
+      }}
+      isChair={false}
+      adminPage={true}
+    />);
+    cy.get('#expand-rp-vote-button').click();
+    cy.get('[datacy=no-collection-vote-button').should('have.css', 'background-color').and('be.colored, #DA0003');
+    cy.get('[datacy=yes-collection-vote-button').should('have.css', 'background-color').and('be.colored', '#ffffff');
   });
 });
