@@ -6,7 +6,7 @@ import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
-import {Link} from "react-router-dom";
+import {Link} from 'react-router-dom';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
