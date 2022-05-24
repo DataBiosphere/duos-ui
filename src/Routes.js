@@ -38,9 +38,9 @@ import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
-import HomeResearcherInfo from "./pages/HomeResearcherInfo";
+import HomeResearcherInfo from './pages/HomeResearcherInfo';
 import BackgroundSignIn from './pages/BackgroundSignIn';
-import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
+import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from "./pages/DatasetStatistics";
@@ -51,7 +51,7 @@ import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
-import DarVoteReview from "./pages/dar_collection_review/DarVoteReview";
+import DarVoteReview from './pages/dar_collection_review/DarVoteReview';
 
 const Routes = (props) => (
   <Switch>
