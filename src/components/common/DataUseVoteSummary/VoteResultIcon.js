@@ -1,6 +1,7 @@
 import {CheckCircle, Cancel, Autorenew, RemoveCircle} from '@material-ui/icons';
 import {h, div} from 'react-hyperscript-helpers';
-import {filter, isEmpty, isNil} from "lodash/fp";
+import {filter, isEmpty, isNil} from 'lodash/fp';
+import {votingColors} from '../../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 const iconFontStyle = {
   fontSize: '3.5rem',
@@ -40,25 +41,25 @@ export default function VoteResultIcon({propKey, votes}) {
     true: [
       h(CheckCircle, {
         className: `vote-result-yes-icon-${propKey}`,
-        style: Object.assign({color: '#1FA371'}, iconFontStyle),
+        style: Object.assign({color: votingColors.yes}, iconFontStyle),
       })
     ],
     false: [
       h(Cancel, {
         className: `vote-result-no-icon-${propKey}`,
-        style: Object.assign({color: '#DA0003'}, iconFontStyle),
+        style: Object.assign({color: votingColors.no}, iconFontStyle),
       })
     ],
     underReview: [
       h(Autorenew, {
         className: `vote-result-under-review-icon-${propKey}`,
-        style: Object.assign({color: '#A3ADBF'}, iconFontStyle),
+        style: Object.assign({color: votingColors.other}, iconFontStyle),
       })
     ],
     mixed: [
       h(RemoveCircle, {
         className: `vote-result-mixed-icon-${propKey}`,
-        style: Object.assign({color: '#A3ADBF'}, iconFontStyle),
+        style: Object.assign({color: votingColors.other}, iconFontStyle),
         'data-tip':
           'Mixed outcome stems from varying election results within this Data Use categorization.',
       })

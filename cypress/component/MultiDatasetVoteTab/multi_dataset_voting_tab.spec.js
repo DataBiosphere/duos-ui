@@ -3,7 +3,7 @@ import React from 'react';
 import {mount} from "@cypress/react";
 import {Storage} from "../../../src/libs/storage";
 import {User} from "../../../src/libs/ajax";
-import MultiDatasetVotingTab from "../../../src/pages/dar_collection_review/MultiDatasetVotingTab";
+import MultiDatasetVotingTab, {votingColors} from "../../../src/pages/dar_collection_review/MultiDatasetVotingTab";
 import {filterBucketsForUser} from "../../../src/pages/dar_collection_review/DarCollectionReview";
 
 const darInfo = {
@@ -145,8 +145,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.contains("GRU");
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
   });
 
   it('Renders multiple dataset voting slabs', function () {

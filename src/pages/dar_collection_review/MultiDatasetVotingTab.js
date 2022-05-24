@@ -6,6 +6,12 @@ import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {User} from "../../libs/ajax";
 import {Alert} from "../../components/Alert";
 
+export const votingColors = {
+  yes: 'rgb(31, 163, 113)',
+  no: 'rgb(218, 0, 3)',
+  other: 'rgb(151, 151, 151)',
+  default: 'rgb(255, 255, 255)'
+};
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
