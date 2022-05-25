@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { getSearchFilterFunctions, formatDate, darCollectionUtils } from '../../../src/libs/utils';
+import {getSearchFilterFunctions, formatDate, darCollectionUtils, processElectionStatus} from '../../../src/libs/utils';
 import {cloneDeep, toLower} from 'lodash/fp';
 import { forEach } from 'lodash';
 const { determineCollectionStatus } = darCollectionUtils;
@@ -493,5 +493,135 @@ describe('Dar Collection determineCollectionStatus', () => {
     const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
     const status = determineCollectionStatus(collectionWithSameElectionStatus, relevantDatasets);
     expect(toLower(status)).equals('denied');
+  });
+});
+
+describe('processElectionStatus utils - tests', () => {
+  it('Returns Unreviewed when election has a null status', () => {
+    const election = {status: null};
+    const status = processElectionStatus(election, null, false);
+    expect(toLower(status)).equals('unreviewed');
+  });
+
+  it('Returns Approved when election is closed and has an approving final vote', () => {
+    const election = {
+      status: 'Closed'
+    };
+    const votes = [
+      {
+        type: 'FINAL',
+        vote: true
+      }
+    ];
+    const status = processElectionStatus(election, votes, false);
+    expect(toLower(status)).equals('approved');
+  });
+
+  it('Returns Approved when election is final and has an approving final vote', () => {
+    const election = {
+      status: 'Final'
+    };
+    const votes = [
+      {
+        type: 'FINAL',
+        vote: true
+      }
+    ];
+    const status = processElectionStatus(election, votes, false);
+    expect(toLower(status)).equals('approved');
+  });
+
+  it('Returns Denied when election is closed and there are no approving final votes', () => {
+    const election = {
+      status: 'Closed'
+    };
+    const votes = [
+      {
+        type: 'DAC',
+        vote: true
+      },
+      {
+        type: 'FINAL',
+        vote: false
+      }
+    ];
+    const status = processElectionStatus(election, votes, false);
+    expect(toLower(status)).equals('denied');
+  });
+  it('Returns Denied when election is final and there are no approving final votes', () => {
+    const election = {
+      status: 'Final'
+    };
+    const votes = [
+      {
+        type: 'DAC',
+        vote: true
+      },
+      {
+        type: 'FINAL',
+        vote: false
+      }
+    ];
+    const status = processElectionStatus(election, votes, false);
+    expect(toLower(status)).equals('denied');
+  });
+
+  it('Returns Open when election is open and contains votes', () => {
+    const election = {
+      status: 'Open',
+      electionId: 1
+    };
+    const votes = [
+      {
+        type: 'DAC',
+        electionId: 1
+      }
+    ];
+    const status = processElectionStatus(election, votes, false);
+    expect(toLower(status)).equals('open');
+  });
+
+  it('Returns Open with vote counts when election is open, contains votes, and showVotes is true', () => {
+    const election = {
+      status: 'Open',
+      electionId: 1
+    };
+    const votes = [
+      {
+        type: 'DAC',
+        electionId: 1
+      },
+      {
+        type: 'DAC',
+        vote: false,
+        createDate: 1651241829000,
+        electionId: 1
+      }
+    ];
+    const status = processElectionStatus(election, votes, true);
+    expect(toLower(status)).equals('open(1 / 2 votes)');
+  });
+
+  it('Vote counts for open election only considers DAC votes with electionId that matches the election', () => {
+    const election = {
+      status: 'Open',
+      electionId: 1
+    };
+    const votes = [
+      {
+        type: 'FINAL',
+        vote: true,
+        createDate: 1651241829000,
+        electionId: 1
+      },
+      {
+        type: 'DAC',
+        vote: true,
+        createDate: 1651241829000,
+        electionId: 2
+      }
+    ];
+    const status = processElectionStatus(election, votes, true);
+    expect(toLower(status)).equals('open(0 / 0 votes)');
   });
 });
