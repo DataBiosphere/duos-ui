@@ -289,13 +289,29 @@ describe('CollectionSubmitVoteBox - Tests', function() {
   it('renders a different heading if user is viewing from the admin page', () => {
     mount(<CollectionSubmitVoteBox
       votes={votesMixed}
-      isFinal={false}
+      isFinal={true}
       question={'question'}
       isDisabled={false}
       isApprovalDisabled={true}
       adminPage={true}
     />);
-    const heading = cy.get('.vote-subsection-heading');
-    expect(heading).to.exist;
+    cy.get('.vote-subsection-heading').should('exist');
+  });
+
+  it('shows the final vote and renders the compnent read-only for admin page', () => {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMatch}
+        isFinal={true}
+        question={'question'}
+        isDisabled={false}
+        isApprovalDisabled={true}
+        adminPage={true}
+      />
+    );
+
+    cy.get('[datacy=no-collection-vote-button').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=yes-collection-vote-button').should('have.css', 'background-color', votingColors.yes);
+    cy.get('textarea').should('be.disabled');
   });
 });
