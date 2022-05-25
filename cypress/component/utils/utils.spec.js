@@ -18,6 +18,53 @@ const collectionsSkeleton = [
   }
 ];
 
+const collectionWithMixedElectionStatuses = {
+  dars: {
+    0: {
+      elections: {
+        0: {
+          status: 'Closed',
+          electionType: 'DataAccess',
+          dataSetId: 100
+        }
+      }
+    },
+    1: {
+      elections: {
+        1: {
+          status: 'Open',
+          electionType: 'DataAccess',
+          dataSetId: 200,
+          votes: {0: {type: 'DAC'}}
+        }
+      }
+    }
+  }
+};
+
+const collectionWithSameElectionStatus = {
+  dars: {
+    0: {
+      elections: {
+        0: {
+          status: 'Closed',
+          electionType: 'DataAccess',
+          dataSetId: 100
+        }
+      }
+    },
+    1: {
+      elections: {
+        1: {
+          status: 'Closed',
+          electionType: 'DataAccess',
+          dataSetId: 200
+        }
+      }
+    }
+  }
+};
+
 const collectionsWithElection = [
   {
     dars: {
@@ -358,18 +405,19 @@ describe('Dar Collection determineCollectionStatus', () => {
         0: {data: {datasetIds: [100]}}
       }
     };
-    const status = determineCollectionStatus(collection, [100]);
+    const relevantDatasets = [{dataSetId: 100}];
+    const status = determineCollectionStatus(collection, relevantDatasets);
     expect(toLower(status)).equals('unreviewed');
   });
 
-  it('Returns an Unreviewed status when there are no elections and the collection does not contains relevant datasets', () => {
+  it('Returns empty string when there are no elections and the collection does not contains relevant datasets', () => {
     const collection = {
       dars: {
         0: {data: {datasetIds: [100]}}
       }
     };
     const status = determineCollectionStatus(collection);
-    expect(toLower(status)).equals('unreviewed');
+    expect(toLower(status)).equals('');
   });
 
   it('Filters out RP elections when determining collection status and relevant datasets is null', () => {
@@ -414,144 +462,36 @@ describe('Dar Collection determineCollectionStatus', () => {
         }
       }
     };
-    const status = determineCollectionStatus(collection, [100, 200]);
-    expect(toLower(status)).equals('closed');
+    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const status = determineCollectionStatus(collection, relevantDatasets);
+    expect(toLower(status)).equals('denied');
   });
 
   it('Only considers DARs for relevant datasets when determining collection status', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Closed',
-              electionType: 'DataAccess',
-              dataSetId: 100
-            }
-          }
-        },
-        1: {
-          elections: {
-            1: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 200
-            }
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection, [100]);
-    expect(toLower(status)).equals('closed');
+    const relevantDatasets = [{dataSetId: 100}];
+    const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
+    expect(toLower(status)).equals('denied');
   });
 
   it('Does not limit DARs used to determine collection status when relevant datasets is null', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Closed',
-              electionType: 'DataAccess',
-              dataSetId: 100
-            }
-          }
-        },
-        1: {
-          elections: {
-            1: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 200
-            }
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection);
+    const status = determineCollectionStatus(collectionWithMixedElectionStatuses);
     expect(toLower(status)).equals('closed: 1\nopen: 1');
   });
 
   it('Increases status count when relevant datasets is null and multiple elections have the same status', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 100
-            }
-          }
-        },
-        1: {
-          elections: {
-            1: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 200
-            }
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection);
-    expect(toLower(status)).equals('open: 2');
+    const status = determineCollectionStatus(collectionWithSameElectionStatus);
+    expect(toLower(status)).equals('closed: 2');
   });
 
   it('Appends together statuses when relevant datasets is non-null and elections have different statuses', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Closed',
-              electionType: 'DataAccess',
-              dataSetId: 100
-            }
-          }
-        },
-        1: {
-          elections: {
-            1: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 200
-            }
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection, [100, 200]);
-    expect(toLower(status)).equals('closed, open');
+    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
+    expect(toLower(status)).equals('denied, open');
   });
 
-  it('Does not repeat status text when relevant datasets is non-null and multiple elections have the same status', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 100,
-              votes: {0: {type: 'DAC'}}
-            }
-          }
-        },
-        1: {
-          elections: {
-            1: {
-              status: 'Open',
-              electionType: 'DataAccess',
-              dataSetId: 200,
-              votes: {0: {type: 'DAC'}}
-            }
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection, [100, 200]);
-    expect(toLower(status)).equals('open');
+  it('Only returns unique statuses when relevant datasets is non-null and multiple elections have the same status', () => {
+    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const status = determineCollectionStatus(collectionWithSameElectionStatus, relevantDatasets);
+    expect(toLower(status)).equals('denied');
   });
 });
