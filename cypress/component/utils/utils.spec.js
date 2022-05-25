@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
-import { getSearchFilterFunctions, formatDate } from '../../../src/libs/utils';
-import { cloneDeep } from 'lodash/fp';
+import { getSearchFilterFunctions, formatDate, darCollectionUtils } from '../../../src/libs/utils';
+import {cloneDeep, toLower} from 'lodash/fp';
 import { forEach } from 'lodash';
+const { determineCollectionStatus } = darCollectionUtils;
 
 const collectionsSkeleton = [
   {
@@ -47,8 +48,8 @@ const collectionsWithProjectTitleAndInstitution = [
     dars: {
       1: {
         data: {
-          institution: "broad institute",
-          projectTitle: "Project: test",
+          institution: 'broad institute',
+          projectTitle: 'Project: test',
         },
         elections: {
           1: {
@@ -120,30 +121,30 @@ beforeEach(() => {
 
 describe('Dar Collection Search Filter', () => {
   it('filters succssfully with missing institution, project title, elections, datasets, dar, and institution', () => {
-    const filteredList = collectionSearchFn("DAR-2", collectionsSkeleton);
+    const filteredList = collectionSearchFn('DAR-2', collectionsSkeleton);
     expect(filteredList).to.be.empty;
   });
 
   it('filters on status with elections present', () => {
-    const filteredList = collectionSearchFn("open", collectionsWithElection);
+    const filteredList = collectionSearchFn('open', collectionsWithElection);
     expect(filteredList).to.not.be.empty;
     const emptyFilteredList = collectionSearchFn('closed', collectionsWithElection);
     expect(emptyFilteredList).to.be.empty;
   });
 
-  it(`filters on status with datasets present`, () => {
+  it('filters on status with datasets present', () => {
     const collectionsWithDatasets = cloneDeep(collectionsSkeleton);
     collectionsWithDatasets[0].datasets = [{1: {}}];
-    const filteredList = collectionSearchFn("1", collectionsWithDatasets);
+    const filteredList = collectionSearchFn('1', collectionsWithDatasets);
     expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn("4", collectionsWithDatasets);
+    const emptyList = collectionSearchFn('4', collectionsWithDatasets);
     expect(emptyList).to.be.empty;
   });
 
   it('filters on projectTitle', () => {
-    const filteredList = collectionSearchFn("project", collectionsWithProjectTitleAndInstitution);
+    const filteredList = collectionSearchFn('project', collectionsWithProjectTitleAndInstitution);
     expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn("invalid", collectionsWithProjectTitleAndInstitution);
+    const emptyList = collectionSearchFn('invalid', collectionsWithProjectTitleAndInstitution);
     expect(emptyList).to.be.empty;
   });
 
@@ -151,7 +152,7 @@ describe('Dar Collection Search Filter', () => {
     const institutionTerm = Object.values(collectionsWithProjectTitleAndInstitution[0].dars)[0].data.institution;
     const filteredList = collectionSearchFn(institutionTerm, collectionsWithProjectTitleAndInstitution);
     expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn("invalid", collectionsWithProjectTitleAndInstitution);
+    const emptyList = collectionSearchFn('invalid', collectionsWithProjectTitleAndInstitution);
     expect(emptyList).to.be.empty;
   });
 
@@ -161,7 +162,7 @@ describe('Dar Collection Search Filter', () => {
     collectionsWithDarCode[0].darCode = 'DAR-1';
     const filteredList = collectionSearchFn(darTerm, collectionsWithDarCode);
     expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn("invalid", collectionsWithDarCode);
+    const emptyList = collectionSearchFn('invalid', collectionsWithDarCode);
     expect(emptyList).to.be.empty;
   });
 
@@ -347,5 +348,210 @@ describe('Researcher Search Filter (SO Console)', () => {
     forEach(originalResearcher, (value, key) => {
       expect(filteredResearcher[key]).equals(value);
     });
+  });
+});
+
+describe('Dar Collection determineCollectionStatus', () => {
+  it('Returns an Unreviewed status when there are no elections but the collection contains relevant datasets', () => {
+    const collection = {
+      dars: {
+        0: {data: {datasetIds: [100]}}
+      }
+    };
+    const status = determineCollectionStatus(collection, [100]);
+    expect(toLower(status)).equals('unreviewed');
+  });
+
+  it('Returns an Unreviewed status when there are no elections and the collection does not contains relevant datasets', () => {
+    const collection = {
+      dars: {
+        0: {data: {datasetIds: [100]}}
+      }
+    };
+    const status = determineCollectionStatus(collection);
+    expect(toLower(status)).equals('unreviewed');
+  });
+
+  it('Filters out RP elections when determining collection status and relevant datasets is null', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Closed',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            },
+            1: {
+              status: 'Open',
+              electionType: 'RP',
+              dataSetId: 100
+            },
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection);
+    expect(toLower(status)).equals('closed: 1');
+  });
+
+  it('Filters out RP elections when determining collection status and relevant datasets is non-null', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Closed',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            },
+            1: {
+              status: 'Open',
+              electionType: 'RP',
+              dataSetId: 100
+            },
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection, [100, 200]);
+    expect(toLower(status)).equals('closed');
+  });
+
+  it('Only considers DARs for relevant datasets when determining collection status', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Closed',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            }
+          }
+        },
+        1: {
+          elections: {
+            1: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 200
+            }
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection, [100]);
+    expect(toLower(status)).equals('closed');
+  });
+
+  it('Does not limit DARs used to determine collection status when relevant datasets is null', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Closed',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            }
+          }
+        },
+        1: {
+          elections: {
+            1: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 200
+            }
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection);
+    expect(toLower(status)).equals('closed: 1\nopen: 1');
+  });
+
+  it('Increases status count when relevant datasets is null and multiple elections have the same status', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            }
+          }
+        },
+        1: {
+          elections: {
+            1: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 200
+            }
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection);
+    expect(toLower(status)).equals('open: 2');
+  });
+
+  it('Appends together statuses when relevant datasets is non-null and elections have different statuses', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Closed',
+              electionType: 'DataAccess',
+              dataSetId: 100
+            }
+          }
+        },
+        1: {
+          elections: {
+            1: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 200
+            }
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection, [100, 200]);
+    expect(toLower(status)).equals('closed, open');
+  });
+
+  it('Does not repeat status text when relevant datasets is non-null and multiple elections have the same status', () => {
+    const collection = {
+      dars: {
+        0: {
+          elections: {
+            0: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 100,
+              votes: {0: {type: 'DAC'}}
+            }
+          }
+        },
+        1: {
+          elections: {
+            1: {
+              status: 'Open',
+              electionType: 'DataAccess',
+              dataSetId: 200,
+              votes: {0: {type: 'DAC'}}
+            }
+          }
+        }
+      }
+    };
+    const status = determineCollectionStatus(collection, [100, 200]);
+    expect(toLower(status)).equals('open');
   });
 });
