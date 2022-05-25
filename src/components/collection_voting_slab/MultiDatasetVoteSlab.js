@@ -56,7 +56,6 @@ export default function MultiDatasetVoteSlab(props) {
   useEffect(() => {
     const user = Storage.getCurrentUser();
     setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
-    //admin view will require the admin to be able to see all votes rather than filtering them out based on dac id
     setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
   }, [bucket, isChair, adminPage]);
