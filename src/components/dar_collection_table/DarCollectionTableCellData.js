@@ -1,16 +1,15 @@
-import {isEmpty, isNil} from "lodash/fp";
-import {formatDate, isCollectionCanceled} from "../../libs/utils";
-import {div, h} from "react-hyperscript-helpers";
-import CancelCollectionButton from "./CancelCollectionButton";
-import ResubmitCollectionButton from "./ResubmitCollectionButton";
+import {includes, isEmpty, isNil, toLower} from "lodash/fp";
+import {formatDate} from "../../libs/utils";
+import {h} from "react-hyperscript-helpers";
 import {styles} from "./DarCollectionTable";
 import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
 import DarCollectionReviewLink from './DarCollectionReviewLink';
+import {Link} from 'react-router-dom';
 
-export function projectTitleCellData({projectTitle = '- -', darCollectionId, label = 'project-title'}) {
+export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
     data: projectTitle,
     id: darCollectionId,
@@ -23,9 +22,21 @@ export function projectTitleCellData({projectTitle = '- -', darCollectionId, lab
   };
 }
 
-export function darCodeCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
+export function darCodeCellData({darCode = '- -', darCollectionId, status, consoleType, label = 'dar-code'}) {
+  let darCodeData;
+
+  switch (consoleType) {
+    case 'chairperson':
+    case 'member' :
+      darCodeData = dacLinkToCollection(darCode, status, darCollectionId);
+      break;
+    default :
+      darCodeData = darCode;
+  }
+
   return {
-    data: darCode,
+    data: darCodeData,
+    value: darCode,
     id: darCollectionId,
     style: {
       color: styles.color.darCode,
@@ -46,6 +57,14 @@ export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 
     value: darCode
   };
 }
+const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
+  const hasOpenElections = includes('open')(toLower(status));
+  const path = hasOpenElections ?
+    `/dar_collection/${darCollectionId}` :
+    `/dar_vote_review/${darCollectionId}`;
+
+  return h(Link, { to: path }, [darCode]);
+};
 
 export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
   return {
@@ -110,7 +129,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, openCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets}) {
+export function consoleActionsCellData({collection, openCollection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets}) {
   let actionComponent;
 
   switch (consoleType) {
@@ -123,8 +142,9 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
     case 'member':
       actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal, goToVote});
       break;
+    case 'researcher':
     default:
-      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal});
+      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal, reviewCollection});
       break;
   }
 
@@ -140,63 +160,6 @@ export function consoleActionsCellData({collection, openCollection, goToVote, sh
   };
 }
 
-//Outdated, remove once older implementation has been removed/updated
-export function actionsCellData({collection, showConfirmationModal}) {
-  const { darCollectionId } = collection;
-  const cancel = {
-    isComponent: true,
-    id: darCollectionId,
-    style: {
-      color: styles.color.actions,
-      fontSize: styles.fontSize.actions
-    },
-    label: 'cancel-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `cancel-collection-cell-${darCollectionId}`
-      },
-      [h(CancelCollectionButton, {collection, showConfirmationModal})]
-    )};
-  const revise = {
-    isComponent: true,
-    id: darCollectionId,
-    style: {
-      color: styles.color.actions,
-      fontSize: styles.fontSize.actions
-    },
-    label: 'resubmit-button',
-    data: div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'left'
-        },
-        key: `resubmit-collection-cell-${darCollectionId}`
-      },
-      [h(ResubmitCollectionButton, {collection, showConfirmationModal})]
-    )
-  };
-
-  return isCollectionCanceled(collection) ? revise : cancel;
-}
-
-export function collectionConsoleActionsData({props, ActionComponent}) {
-  return {
-    isComponent: true,
-    id: props.collection.darCollectionId,
-    style: {
-      color: styles.color.actions,
-      fontSize: styles.fontSize.actions
-    },
-    label: `admin-actions`,
-    data: h(ActionComponent, {...props})
-  };
-}
-
 export default {
   projectTitleCellData,
   darCodeCellData,
@@ -205,7 +168,6 @@ export default {
   institutionCellData,
   datasetCountCellData,
   statusCellData,
-  actionsCellData,
   consoleActionsCellData,
   darCodeAdminCellData
 };

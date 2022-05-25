@@ -38,15 +38,15 @@ import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
-import HomeResearcherInfo from "./pages/HomeResearcherInfo";
+import HomeResearcherInfo from './pages/HomeResearcherInfo';
 import BackgroundSignIn from './pages/BackgroundSignIn';
-import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
+import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
-import DatasetStatistics from "./pages/DatasetStatistics";
+import DatasetStatistics from './pages/DatasetStatistics';
 import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
-import {AdminEditUser} from "./pages/AdminEditUser";
+import {AdminEditUser} from './pages/AdminEditUser';
 import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
@@ -89,7 +89,7 @@ const Routes = (props) => (
         : ''
     }
     {
-      props.env === 'dev' ? <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+      props.env === 'dev' ? <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member]}/>
         : ''
     }
     {
@@ -100,6 +100,8 @@ const Routes = (props) => (
       props.env === 'dev' ? <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
         : ''
     }
+    <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({}, props, {readOnly: true})}
+      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
     <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />

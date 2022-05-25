@@ -83,7 +83,7 @@ export default function AdminManageDarCollections() {
       ],
       isLoading,
       cancelCollection,
-      resubmitCollection: null,
+      reviseCollection: null,
       openCollection,
       consoleType: 'admin'
     }),

@@ -1,18 +1,19 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import CollectionSubmitVoteBox from "../../../src/components/collection_vote_box/CollectionSubmitVoteBox";
-import {mount} from "@cypress/react";
+import CollectionSubmitVoteBox from '../../../src/components/collection_vote_box/CollectionSubmitVoteBox';
+import {mount} from '@cypress/react';
 import {Votes} from '../../../src/libs/ajax';
+import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const votesMatch = [
-  {vote: true, voteId: 1, rationale: "test"},
-  {vote: true, voteId: 2, rationale: "test"},
-  {vote: true, voteId: 3, rationale: "test"}
+  {vote: true, voteId: 1, rationale: 'test'},
+  {vote: true, voteId: 2, rationale: 'test'},
+  {vote: true, voteId: 3, rationale: 'test'}
 ];
 
 const votesMixed = [
-  {vote: true, voteId: 1, rationale: "test1"},
-  {vote: false, voteId: 2, rationale: "test2"},
+  {vote: true, voteId: 1, rationale: 'test1'},
+  {vote: false, voteId: 2, rationale: 'test2'},
 ];
 
 
@@ -22,11 +23,11 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('does not render any buttons as selected if vote values are different', function() {
@@ -34,11 +35,11 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('does not render any buttons as selected if vote values are null', function() {
@@ -46,12 +47,12 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={[{voteId: 4}]}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('does not render any buttons as selected if list of votes is empty', function() {
@@ -59,24 +60,24 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={[]}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('does not render any buttons as selected if list of votes is null', function() {
     mount(
       <CollectionSubmitVoteBox
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('[datacy=collection-vote-box]').should('exist');
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('renders existing rationale if rationale is the same for all votes', function() {
@@ -84,7 +85,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', 'test');
@@ -95,7 +96,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('not.contain.text');
@@ -106,7 +107,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', 'test');
@@ -117,7 +118,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('textarea').blur();
     cy.get('textarea').should('have.text', 'testsample text hello');
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
     cy.get('textarea').type('{backspace}{backspace}');
     cy.get('textarea').blur();
     cy.get('textarea').should('have.text', 'testsample text hel');
@@ -128,17 +129,17 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
       />
     );
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
 
   });
 
@@ -147,7 +148,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.get('textarea').should('have.text', '');
@@ -164,7 +165,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
@@ -182,19 +183,19 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('can not vote if votes already have vote value when vote is final', function() {
@@ -202,14 +203,14 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMatch}
         isFinal={true}
-        question={"question"}
+        question={'question'}
       />
     );
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('disables vote buttons and text area if page is loading', function () {
@@ -217,15 +218,15 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isLoading={true}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('be.disabled');
   });
 
@@ -234,15 +235,15 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={true}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('be.disabled');
   });
 
@@ -251,18 +252,18 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={false}
         isApprovalDisabled={true}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
 
   it('does not disable no vote button if isApprovalDisabled is true', function () {
@@ -270,18 +271,18 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       <CollectionSubmitVoteBox
         votes={votesMixed}
         isFinal={false}
-        question={"question"}
+        question={'question'}
         isDisabled={false}
         isApprovalDisabled={true}
       />
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
     cy.get('textarea').should('not.be.disabled');
   });
 

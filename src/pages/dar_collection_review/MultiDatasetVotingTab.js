@@ -1,11 +1,17 @@
-import MultiDatasetVoteSlab from "../../components/collection_voting_slab/MultiDatasetVoteSlab";
-import {div, h} from "react-hyperscript-helpers";
-import ResearchProposalVoteSlab from "../../components/collection_voting_slab/ResearchProposalVoteSlab";
-import {useEffect, useState} from "react";
+import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab';
+import {div, h} from 'react-hyperscript-helpers';
+import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
+import {useEffect, useState} from 'react';
 import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
-import {User} from "../../libs/ajax";
-import {Alert} from "../../components/Alert";
+import {User} from '../../libs/ajax';
+import {Alert} from '../../components/Alert';
 
+export const votingColors = {
+  yes: 'rgb(31, 163, 113)',
+  no: 'rgb(218, 0, 3)',
+  other: 'rgb(151, 151, 151)',
+  default: 'rgb(255, 255, 255)'
+};
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
@@ -31,7 +37,7 @@ export default function MultiDatasetVotingTab(props) {
   const [dataBuckets, setDataBuckets] = useState([]);
   const [collectionDatasets, setCollectionDatasets] = useState([]);
   const [dacDatasetIds, setDacDatasetIds] = useState([]);
-  const {darInfo, buckets, collection, isChair, isLoading, adminPage} = props;
+  const {darInfo, buckets, collection, isChair, isLoading, readOnly, adminPage} = props;
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n' +
     (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '');
 
@@ -68,6 +74,7 @@ export default function MultiDatasetVotingTab(props) {
         collectionDatasets,
         isChair,
         isApprovalDisabled,
+        readOnly,
         key: bucket.key,
         adminPage
       });
@@ -84,7 +91,7 @@ export default function MultiDatasetVotingTab(props) {
   };
 
   return div({style: styles.baseStyle}, [
-    div({style: styles.title}, ["Research Proposal"]),
+    div({style: styles.title}, ['Research Proposal']),
     Alert({
       type: 'danger',
       title: missingLibraryCardMessage,
@@ -97,6 +104,7 @@ export default function MultiDatasetVotingTab(props) {
         bucket: rpBucket,
         isChair,
         isLoading,
+        readOnly,
         adminPage
       }),
       DatasetVoteSlabs()
