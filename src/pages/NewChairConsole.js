@@ -99,7 +99,10 @@ export default function NewChairConsole(props) {
       reviseCollection: null,
       openCollection,
       goToVote,
-      consoleType: 'chairperson'
+      consoleType: 'chairperson',
+      init: {
+        sort: { colIndex: 2, dir: -1 }
+      }
     }),
   ]);
 }

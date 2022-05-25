@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find, flow, get, isEqual} from 'lodash/fp';
+import {isNil, isEmpty, find, flow, get, getOr, isEqual} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
@@ -192,7 +192,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
+  const [sort, setSort] = useState(getOr({ colIndex: 0, dir: 1 }, 'init.sort', props));
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
