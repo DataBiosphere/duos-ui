@@ -6,7 +6,7 @@ import AdminActions from "./AdminActions";
 import ChairActions from "./ChairActions";
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
-import DarCollectionReviewLink from './DarCollectionReviewLink';
+import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
@@ -51,7 +51,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
 export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
   return {
     isComponent: true,
-    data: h(DarCollectionReviewLink, { darCollectionId, darCode }),
+    data: h(DarCollectionAdminReviewLink, { darCollectionId, darCode }),
     label,
     id: darCollectionId,
     value: darCode
