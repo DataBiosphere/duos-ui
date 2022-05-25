@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
 import './SearchSelect.css';
 
@@ -45,9 +45,9 @@ export const SearchSelect = (props) => {
     div({ className: 'dropdown select-dropdown', id, name: label }, [
       a({
         className: 'btn select-btn btn-secondary dropdown-toggle',
-        role: "button",
-        id: "dropdownMenuLink",
-        'data-toggle': "dropdown",
+        role: 'button',
+        id: 'dropdownMenuLink',
+        'data-toggle': 'dropdown',
         'aria-haspopup': true,
         'aria-expanded': false
       }, [

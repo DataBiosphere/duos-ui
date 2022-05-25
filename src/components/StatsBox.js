@@ -1,6 +1,6 @@
 import { PureComponent } from 'react';
 import { div, button, span, hh, h, hr, h4 } from 'react-hyperscript-helpers';
-import { Chart } from "react-google-charts";
+import { Chart } from 'react-google-charts';
 
 export const StatsBox = hh(class StatsBox extends PureComponent {
 
@@ -102,27 +102,27 @@ export const StatsBox = hh(class StatsBox extends PureComponent {
     let buttonTag = null;
 
     if (clickHandler !== undefined) {
-      buttonTag = div({ className: "no-padding f-right display-inline-block" }, [
-        button({ id: id + "_btnDownload", onClick: clickHandler, className: "btn-secondary btn-reminder " + options + "-color" }, [buttonLabel]),
+      buttonTag = div({ className: 'no-padding f-right display-inline-block' }, [
+        button({ id: id + '_btnDownload', onClick: clickHandler, className: 'btn-secondary btn-reminder ' + options + '-color' }, [buttonLabel]),
       ]);
     }
 
     return (
-      div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats" }, [
-        h4({ id: id + "_title", className: "cm-results-subtitle" }, [subtitle]),
+      div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats' }, [
+        h4({ id: id + '_title', className: 'cm-results-subtitle' }, [subtitle]),
         buttonTag,
-        hr({ className: "box-separator-white" }),
-        div({ className: "row no-margin", style: { 'marginTop': '10px' } }, [
+        hr({ className: 'box-separator-white' }),
+        div({ className: 'row no-margin', style: { 'marginTop': '10px' } }, [
           h(Chart, {
-            chartType: "PieChart",
+            chartType: 'PieChart',
             data: data,
-            loader: "Loading...",
+            loader: 'Loading...',
             options: this.chartOptions[options],
           })
         ]),
-        h4({ className: "cm-results-amount" }, [
-          "Amount of cases: ",
-          span({ className: "bold " + options + "-color" }, [total])
+        h4({ className: 'cm-results-amount' }, [
+          'Amount of cases: ',
+          span({ className: 'bold ' + options + '-color' }, [total])
         ]
         )
       ])

@@ -1,6 +1,6 @@
 import React from 'react';
 import * as ld from 'lodash';
-import { div, span, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from 'react-hyperscript-helpers';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import { Theme } from '../libs/theme';
 

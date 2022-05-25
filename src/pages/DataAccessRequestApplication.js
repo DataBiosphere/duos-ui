@@ -12,13 +12,13 @@ import { PageHeading } from '../components/PageHeading';
 import { DAR, DataSet, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { Navigation } from "../libs/utils";
+import { Navigation } from '../libs/utils';
 import * as fp from 'lodash/fp';
 import { isEmpty, isNil, assign, get } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
-import {getPropertyValuesFromUser} from "../libs/utils";
+import {getPropertyValuesFromUser} from '../libs/utils';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -207,13 +207,13 @@ class DataAccessRequestApplication extends Component {
       Storage.removeData('dar_application');
     }
     let rpProperties = getPropertyValuesFromUser(researcher);
-    formData.researcher = isNil(researcher) ? "" : researcher.displayName;
+    formData.researcher = isNil(researcher) ? '' : researcher.displayName;
     formData.investigator = rpProperties.piName;
 
     formData.linkedIn = rpProperties.linkedIn;
     formData.researcherGate = rpProperties.researcherGate;
     formData.orcid = rpProperties.orcid;
-    formData.institution = isNil(researcher)  || isNil(researcher.institution)? "" : researcher.institution.name;
+    formData.institution = isNil(researcher)  || isNil(researcher.institution)? '' : researcher.institution.name;
     formData.department = rpProperties.department;
     formData.division = rpProperties.division;
     formData.address1 = rpProperties.address1;
@@ -246,7 +246,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   formatDatasetForAutocomplete = (dataset) => {
-    const nameProp = fp.find({"propertyName":"Dataset Name"})(dataset.properties);
+    const nameProp = fp.find({'propertyName':'Dataset Name'})(dataset.properties);
     return {
       key: dataset.dataSetId,
       value: dataset.dataSetId,
@@ -499,7 +499,7 @@ class DataAccessRequestApplication extends Component {
           if ((formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter')) {
             //keys follow the syntax of 'uploaded{irbDocument|collaborationLetter} (for newly uploaded files)
             const newlyUploadedFileKey = `uploaded${formDataKey[0].toUpperCase()}${formDataKey.slice(1)}`;
-            //keys follow the syntax of "{irbDocument | collaborationLetter}Location" (for previously saved files)
+            //keys follow the syntax of '{irbDocument | collaborationLetter}Location' (for previously saved files)
             const currentFileLocationKey = `${formDataKey}Location`;
             //use the establhed key to assign the newly uploaded file to a variable
             const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];

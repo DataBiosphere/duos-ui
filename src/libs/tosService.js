@@ -2,7 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import React from 'react';
 import {ToS} from './ajax';
-import homeHeaderBackground from "../images/home_header_background.png";
+import homeHeaderBackground from '../images/home_header_background.png';
 
 
 export const TosService = {

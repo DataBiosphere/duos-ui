@@ -36,7 +36,7 @@ const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
 //Column component that renders the column row based on column headers
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header, colIndex) => {
+  return div({style: rowStyle, key: 'column-row-container', role:'row'}, columnHeaders.map((header, colIndex) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
@@ -44,7 +44,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
       header.sortable && onSort
         ? div({
           style: Styles.TABLE.HEADER_SORT,
-          key: "data_id_cell",
+          key: 'data_id_cell',
           className: 'cell-sort',
           onClick: () => {
             onSort({
@@ -75,7 +75,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         //assume component is in hyperscript format
         //wrap component in dive with columnWidth applied
         if (isComponent) {
-          output = div({role: "cell", style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
+          output = div({role: 'cell', style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
         //if there is no onClick function, render as simple cell
         } else if (isNil(onClick)) {
           output = h(SimpleTextCell, { text: data, style: appliedStyle, keyProp: `filtered-list-${id}-${label}`, cellIndex });

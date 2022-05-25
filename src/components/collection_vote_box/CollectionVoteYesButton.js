@@ -1,6 +1,6 @@
-import {h, span} from "react-hyperscript-helpers";
-import CollectionVoteButton from "./CollectionVoteButton";
-import {CheckCircleOutlined} from "@material-ui/icons";
+import {h, span} from 'react-hyperscript-helpers';
+import CollectionVoteButton from './CollectionVoteButton';
+import {CheckCircleOutlined} from '@material-ui/icons';
 
 export default function CollectionVoteYesButton(props) {
   const {onClick, disabled, isSelected} = props;

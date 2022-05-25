@@ -9,10 +9,10 @@ import Creatable from 'react-select/creatable';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
-const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
-const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
+const profileUnsubmitted = span(['Please submit ', profileLink, ' to be able to create a Data Access Request']);
+const profileSubmitted = span(['Please make sure ', profileLink, ' is updated as it will be used to pre-populate parts of the Data Access Request']);
 const libraryCardLink = a({href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs', style: linkStyle, target: '_blank'}, ['Library Card']);
-const missingLibraryCard = span(["You must submit ", profileLink, " and obtain a ", libraryCardLink, " from your Signing Official before you can submit a Data Access Request"]);
+const missingLibraryCard = span(['You must submit ', profileLink, ' and obtain a ', libraryCardLink, ' from your Signing Official before you can submit a Data Access Request']);
 
 export default function ResearcherInfo(props) {
   const {
@@ -85,13 +85,13 @@ export default function ResearcherInfo(props) {
   const cloudRadioGroup = div({
     className: 'radio-inline',
     style: {
-      marginBottom: "2rem",
-      backgroundColor: showValidationMessages && isAnvilUseInvalid ? "rgba(243, 73, 73, 0.19)" : "inherit"
+      marginBottom: '2rem',
+      backgroundColor: showValidationMessages && isAnvilUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
     }
   }, [
     [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
       label({
-        className: "radio-wrapper",
+        className: 'radio-wrapper',
         key: `anvil-use-option-${option.value}`,
         id: `lbl-anvil-use-option-${option.value}`,
         htmlFor: `rad-anvil-use-option-${option.value}`
@@ -104,15 +104,15 @@ export default function ResearcherInfo(props) {
           value: option.value,
           onChange: () => (formFieldChange({name: 'anvilUse', value: option.value}))
         }),
-        span({ className: "radio-check"}),
-        span({ className: "radio-label"}, [option.label])
+        span({ className: 'radio-check'}),
+        span({ className: 'radio-label'}, [option.label])
       ])
     )
   ]);
 
   const cloudInputStyle = (input) => {
     return {
-      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? "rgba(243, 73, 73, 0.19)" :
+      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? 'rgba(243, 73, 73, 0.19)' :
         isEmpty(darCode) ? 'inherit' : '#eee'
     };
   };
@@ -280,7 +280,7 @@ export default function ResearcherInfo(props) {
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: "control-label rp-title-question"}, [
+              label({className: 'control-label rp-title-question'}, [
                 '1.4 Internal Lab Staff',
                 span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
                 that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
@@ -303,7 +303,7 @@ export default function ResearcherInfo(props) {
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: "control-label rp-title-question"}, [
+              label({className: 'control-label rp-title-question'}, [
                 '1.5 Internal Collaborators',
                 span([
                   `Please add Internal Collaborators here Internal Collaborators are defined as individuals who are not under the direct supervision of 
@@ -330,18 +330,18 @@ export default function ResearcherInfo(props) {
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: "control-label rp-title-question"}, [
+              label({className: 'control-label rp-title-question'}, [
                 '1.6 Institutional Signing Official*',
                 span(['I certify the individual listed below is my Institutional Signing Official.'])
               ])
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               h(Creatable, {
-                key: "selectSO",
+                key: 'selectSO',
                 isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
                 required: true,
                 isDisabled: !isNil(darCode),
-                placeholder: "Select from the list or type your SO's full name if it is not present. Clear selection with the Backspace key or the 'X' at the end of this input box",
+                placeholder: 'Select from the list or type your SO\'s full name if it is not present. Clear selection with the Backspace key or the \'X\' at the end of this input box',
                 onChange: (option) => {
                   const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
                   formFieldChange({name: 'signingOfficial', value});
@@ -375,7 +375,7 @@ export default function ResearcherInfo(props) {
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: "control-label rp-title-question"}, [
+              label({className: 'control-label rp-title-question'}, [
                 '1.7 Information Technology (IT) Director*',
                 span(['I certify the individual listed below is my IT Director.'])
               ])
@@ -399,14 +399,14 @@ export default function ResearcherInfo(props) {
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: "control-label rp-title-question"}, [
+              label({className: 'control-label rp-title-question'}, [
                 '1.8 Cloud Use Statement*',
                 span([
                   'Will you perform all of your data storage and analysis for this project on the ',
                   a({
-                    rel: "noopener noreferrer",
-                    href: "https://anvil.terra.bio/",
-                    target: "_blank"
+                    rel: 'noopener noreferrer',
+                    href: 'https://anvil.terra.bio/',
+                    target: '_blank'
                   }, ['AnVIL']),
                   '?'
                 ]),
@@ -418,13 +418,13 @@ export default function ResearcherInfo(props) {
               ]),
             ]),
             div({
-              isRendered: !anvilUse && anvilUse !== "",
+              isRendered: !anvilUse && anvilUse !== '',
               className: 'computing-use-container',
               style: {
-                backgroundColor: showValidationMessages && isCloudUseInvalid ? "rgba(243, 73, 73, 0.19)" : "inherit"
+                backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
               }
             }, [
-              div({className: "row no-margin"}, [
+              div({className: 'row no-margin'}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                   input({
                     type: 'checkbox',
@@ -441,7 +441,7 @@ export default function ResearcherInfo(props) {
                   )
                 ])
               ]),
-              div({className: "row no-margin"}, [
+              div({className: 'row no-margin'}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                   input({
                     type: 'checkbox',
@@ -459,8 +459,8 @@ export default function ResearcherInfo(props) {
                 ])
               ]),
             ]),
-            div({className: "row no-margin", isRendered: cloudUse === true}, [
-              div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
+            div({className: 'row no-margin', isRendered: cloudUse === true}, [
+              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
                 label({className: 'control-label'}, ['Name of Cloud Provider']),
                 input({
                   style: cloudInputStyle(cloudProvider),
@@ -473,7 +473,7 @@ export default function ResearcherInfo(props) {
                   onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
                 })
               ]),
-              div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
+              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
                 label({className: 'control-label'}, ['Type of Cloud Provider']),
                 input({
                   style: cloudInputStyle(cloudProviderType),
@@ -488,7 +488,7 @@ export default function ResearcherInfo(props) {
               ])
             ]),
             div({className: 'row no-margin', isRendered: cloudUse === true}, [
-              div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group"}, [
+              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                 textarea({
                   style: {
                     backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
@@ -514,7 +514,7 @@ export default function ResearcherInfo(props) {
         div({ className: 'form-group'}, [
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              label({ className: "control-label rp-title-question" }, [
+              label({ className: 'control-label rp-title-question' }, [
                 '1.9 External Collaborators',
                 span([
                   `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work

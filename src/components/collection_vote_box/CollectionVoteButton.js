@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useState} from "react";
-import {button} from "react-hyperscript-helpers";
+import {useCallback, useEffect, useState} from 'react';
+import {button} from 'react-hyperscript-helpers';
 
 const styles = {
   baseStyle: {

@@ -3,7 +3,7 @@ import { div, h, img, a, span } from 'react-hyperscript-helpers';
 import { Institution } from '../libs/ajax';
 import { Styles} from '../libs/theme';
 import { Notifications } from '../libs/utils';
-import manageInstitutionsIcon from "../images/icon_manage_dac.png";
+import manageInstitutionsIcon from '../images/icon_manage_dac.png';
 import SearchBar from '../components/SearchBar';
 import InstitutionTable from '../components/institution_table/InstitutionTable';
 import AddInstitutionModal from '../components/modals/AddInstitutionModal';
@@ -84,8 +84,8 @@ export default function AdminManageInstitutions(props) {
 
   return (
     div({style: Styles.PAGE}, [
-      div({ style: {display: "flex", justifyContent: "space-between"}}, [
-        div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+      div({ style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
@@ -94,8 +94,8 @@ export default function AdminManageInstitutions(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ["Manage Institutions"]),
-            div({style: Styles.SMALL}, ["Select and manage Institutions"])
+            div({style: Styles.TITLE}, ['Manage Institutions']),
+            div({style: Styles.SMALL}, ['Select and manage Institutions'])
           ]),
         ]),
         h(SearchBar, {handleSearchChange, currentPage})
@@ -118,9 +118,9 @@ export default function AdminManageInstitutions(props) {
         onOKRequest: modalSave,
         onCloseRequest: closeAddInstitutionModal
       }),
-      div({ style: {display: "flex", justifyContent: "space-between"}}, [
-        div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, []),
-        div({className: "right-header-section", style: {
+      div({ style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, []),
+        div({className: 'right-header-section', style: {
           display: 'flex',
           alignItems: 'flex-end'
         }}, [

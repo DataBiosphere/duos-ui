@@ -28,7 +28,7 @@ export default function NewChairConsole(props) {
     const init = async() => {
       try {
         const [collections, datasets] = await Promise.all([
-          Collections.getCollectionsByRoleName("chairperson"),
+          Collections.getCollectionsByRoleName('chairperson'),
           User.getUserRelevantDatasets()
         ]);
         setCollections(collections);

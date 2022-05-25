@@ -1,6 +1,6 @@
 import {CheckCircle, Cancel, Autorenew, RemoveCircle} from '@material-ui/icons';
 import {h, div} from 'react-hyperscript-helpers';
-import {filter, isEmpty, isNil} from "lodash/fp";
+import {filter, isEmpty, isNil} from 'lodash/fp';
 
 const iconFontStyle = {
   fontSize: '3.5rem',

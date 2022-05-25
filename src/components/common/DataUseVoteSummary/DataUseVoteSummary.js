@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
 import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
-import VoteResultBox from "./VoteResultBox";
+import VoteResultBox from './VoteResultBox';
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {

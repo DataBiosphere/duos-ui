@@ -1,9 +1,9 @@
-import {isEmpty, isNil} from "lodash/fp";
-import {formatDate} from "../../libs/utils";
-import {h} from "react-hyperscript-helpers";
-import {styles} from "./DarCollectionTable";
-import AdminActions from "./AdminActions";
-import ChairActions from "./ChairActions";
+import {isEmpty, isNil} from 'lodash/fp';
+import {formatDate} from '../../libs/utils';
+import {h} from 'react-hyperscript-helpers';
+import {styles} from './DarCollectionTable';
+import AdminActions from './AdminActions';
+import ChairActions from './ChairActions';
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
 

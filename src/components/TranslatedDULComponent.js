@@ -59,27 +59,27 @@ export default function TranslatedDULComponent(props) {
 
   //panel formats differ depending on whether or not its used in DAR vs DUL
 
-  const DARTemplate = div({ className: "data-use-container" }, [
-    div({ className: "panel-heading cm-boxhead dul-color" }, [
-      h4({}, ["Data Use Limitations"]),
+  const DARTemplate = div({ className: 'data-use-container' }, [
+    div({ className: 'panel-heading cm-boxhead dul-color' }, [
+      h4({}, ['Data Use Limitations']),
     ]),
-    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none', marginTop: '0.8rem'}}, [translatedDULStatements]),
-    div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
+    ul({ id: 'panel_dataUseLimitations', className: 'panel-body cm-boxbody translated-restriction', style: {listStyle: 'none', marginTop: '0.8rem'}}, [translatedDULStatements]),
+    div({id: 'panel_mrlLink panel-body', className: 'panel-body cm-boxbody translated-restriction', isRendered: !isNil(props.mrDUL)},[machineReadableLink])
   ]);
 
   const DULTemplate =
     div({style: DULContainer}, [
-      div({className: "data-use-panel", style: DULPanel}, [
-        div({ className: "panel-heading cm-boxhead dul-color" }, [
-          h4({}, ["Data Use Limitations"]),
+      div({className: 'data-use-panel', style: DULPanel}, [
+        div({ className: 'panel-heading cm-boxhead dul-color' }, [
+          h4({}, ['Data Use Limitations']),
         ]),
-        div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
+        div({id: 'panel_mrlLink panel-body', className: 'panel-body cm-boxbody translated-restriction', isRendered: !isNil(props.mrDUL)},[machineReadableLink])
       ]),
-      div({ className: "data-use-panel", style: DULPanel }, [
-        div({ className: "panel-heading cm-boxhead dul-color" }, [
-          h4({}, ["Structured Limitations"]),
+      div({ className: 'data-use-panel', style: DULPanel }, [
+        div({ className: 'panel-heading cm-boxhead dul-color' }, [
+          h4({}, ['Structured Limitations']),
         ]),
-        ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
+        ul({ id: 'panel_dataUseLimitations', className: 'panel-body cm-boxbody translated-restriction', style: {listStyle: 'none'}}, [translatedDULStatements]),
       ])
     ]);
 

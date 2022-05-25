@@ -1,9 +1,9 @@
-import SimpleTable from "../SimpleTable";
-import {h} from "react-hyperscript-helpers";
-import {Styles} from "../../libs/theme";
-import {isNil} from "lodash/fp";
-import {useCallback, useEffect, useState} from "react";
-import {sortVisibleTable} from "../../libs/utils";
+import SimpleTable from '../SimpleTable';
+import {h} from 'react-hyperscript-helpers';
+import {Styles} from '../../libs/theme';
+import {isNil} from 'lodash/fp';
+import {useCallback, useEffect, useState} from 'react';
+import {sortVisibleTable} from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -68,7 +68,7 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 
 function voteCellData({vote, voteId, label = 'vote'}) {
   return {
-    data: isNil(vote) ? "- -" : vote ? "Yes" : "No",
+    data: isNil(vote) ? '- -' : vote ? 'Yes' : 'No',
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label
@@ -117,7 +117,7 @@ export default function VoteSummaryTable(props) {
       })
     );
     changeTableSize(visibleVotes.length);
-  }, [sort, dacVotes]);
+  }, [sort, dacVotes, changeTableSize, visibleVotes]);
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -127,8 +127,8 @@ export default function VoteSummaryTable(props) {
 
   return h(SimpleTable, {
     isLoading,
-    "rowData": visibleVotes,
-    "columnHeaders": columnHeaderData(),
+    'rowData': visibleVotes,
+    'columnHeaders': columnHeaderData(),
     tableSize,
     styles,
     sort,

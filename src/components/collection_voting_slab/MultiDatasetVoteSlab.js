@@ -1,16 +1,16 @@
-import {div, h} from "react-hyperscript-helpers";
-import CollectionSubmitVoteBox from "../collection_vote_box/CollectionSubmitVoteBox";
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from "lodash/fp";
-import {Storage} from "../../libs/storage";
-import {useEffect, useState} from "react";
-import DatasetsRequestedPanel from "./DatasetsRequestedPanel";
-import {ChairVoteInfo, dataUsePills} from "./ResearchProposalVoteSlab";
+import {div, h} from 'react-hyperscript-helpers';
+import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from 'lodash/fp';
+import {Storage} from '../../libs/storage';
+import {useEffect, useState} from 'react';
+import DatasetsRequestedPanel from './DatasetsRequestedPanel';
+import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
 
 import {
   extractDacDataAccessVotesFromBucket,
   extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
-} from "../../utils/DarCollectionUtils";
-import {Alert} from "../Alert";
+} from '../../utils/DarCollectionUtils';
+import {Alert} from '../Alert';
 
 const styles = {
   baseStyle: {
