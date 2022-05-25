@@ -132,7 +132,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}}) => {
+export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}, adminPage = false}) => {
   return div(
     {
       style: styles.chairVoteInfo,
@@ -152,6 +152,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
         [
           h(VotesPieChart, {
             votes: dacVotes,
+            title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)"
           }),
           h(CollectionAlgorithmDecision, {
             algorithmResult,
@@ -159,10 +160,11 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           }),
         ]
       ),
-      div(["My DAC's Votes (detail)"]),
+      div([adminPage ? 'DAC Votes' : "My DAC's Votes (detail)"]),
       h(VoteSummaryTable, {
         dacVotes: collapseVotesByUser(dacVotes),
         isLoading,
+        adminPage
       }),
     ]
   );
@@ -196,7 +198,7 @@ export default function ResearchProposalVoteSlab(props) {
         h(motion.section, animationAttributes, [
           div({datacy: 'srp-expanded', style: styles.expandedData}, [
             div({datacy: 'research-purpose'}, [
-              span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
+              span({style: styles.researchPurposeTitle}, ['Research Purpose']),
               h(ResearchPurposeSummary, {darInfo}),
               h(DataUseAlertBox, {translatedDataUse}),
               h(CollectionSubmitVoteBox, {
@@ -207,7 +209,7 @@ export default function ResearchProposalVoteSlab(props) {
                 isLoading,
                 adminPage
               }),
-              h(ChairVoteInfo, {dacVotes, isChair, isLoading})
+              h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
             ]),
           ]),
         ])

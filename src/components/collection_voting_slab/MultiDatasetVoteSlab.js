@@ -91,7 +91,7 @@ export default function MultiDatasetVoteSlab(props) {
         isLoading,
         adminPage
       }),
-      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult})
+      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})
     ]);
   };
 
