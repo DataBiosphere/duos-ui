@@ -190,7 +190,7 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
   }
 };
 
-const getInitialSort = (columns) => {
+const getInitialSort = (columns = []) => {
   const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) || {
     field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
     dir: -1
