@@ -267,10 +267,7 @@ export default function NewResearcherConsole(props) {
         cancelCollection,
         reviseCollection,
         reviewCollection,
-        consoleType: 'researcher',
-        init: {
-          sort: { colIndex: 2, dir: -1 }
-        },
+        consoleType: 'researcher'
       }),
       h(DarDraftTable, {
         isRendered: selectedTab === tabNames.darDrafts,

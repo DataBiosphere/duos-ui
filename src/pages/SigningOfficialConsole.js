@@ -135,10 +135,7 @@ export default function SigningOfficialConsole(props) {
           isLoading,
           cancelCollection: null,
           reviseCollection: null,
-          actionsDisabled: true,
-          init: {
-            sort: { colIndex: 2, dir: -1 }
-          }
+          actionsDisabled: true
         }, [])
       ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [

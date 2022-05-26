@@ -1,9 +1,11 @@
+import get from 'lodash/fp/get';
+import set from 'lodash/fp/set';
 
 // Storage Variables
-
 const CurrentUser = "CurrentUser"; // System user
 const GoogleUser = "Gapi"; // Google user info, including token
 const UserIsLogged = "isLogged"; // User log status flag
+const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 
 export const Storage = {
   clearStorage: () => {
@@ -20,6 +22,22 @@ export const Storage = {
 
   getCurrentUserRoles: () => {
     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)).roles : null;
+  },
+
+  getCurrentUserSettings: (key) => {
+    const id = Storage.getCurrentUser()?.dacUserId || '';
+    const userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
+    return get([id, key], userSettings);
+  },
+
+  setCurrentUserSettings: (key, value) => {
+    const id = Storage.getCurrentUser()?.dacUserId || '';
+    let userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
+    if (!userSettings[id]) {
+      userSettings[id] = {};
+    }
+    userSettings[id][key] = value;
+    sessionStorage.setItem(UserSettings, JSON.stringify(userSettings));
   },
 
   setGoogleData: data => {

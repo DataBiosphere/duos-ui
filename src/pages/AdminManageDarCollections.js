@@ -85,10 +85,7 @@ export default function AdminManageDarCollections() {
       cancelCollection,
       reviseCollection: null,
       openCollection,
-      consoleType: 'admin',
-      init: {
-        sort: { colIndex: 2, dir: -1 }
-      }
+      consoleType: 'admin'
     }),
   ]);
 }

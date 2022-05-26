@@ -94,10 +94,7 @@ export default function NewMemberConsole(props) {
       relevantDatasets,
       reviseCollection: null,
       goToVote,
-      consoleType: 'member',
-      init: {
-        sort: { colIndex: 2, dir: -1 }
-      }
+      consoleType: 'member'
     }),
   ]);
 }
