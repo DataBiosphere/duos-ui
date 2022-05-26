@@ -109,6 +109,12 @@ export default function VoteSummaryTable(props) {
   const [tableSize, setTableSize] = useState(5);
   const { dacVotes, isLoading } = props;
 
+  const changeTableSize = useCallback((value) => {
+    if (value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  }, []);
+
   useEffect(() => {
     setVisibleVotes(
       sortVisibleTable({
@@ -118,12 +124,6 @@ export default function VoteSummaryTable(props) {
     );
     changeTableSize(visibleVotes.length);
   }, [sort, dacVotes, changeTableSize, visibleVotes]);
-
-  const changeTableSize = useCallback((value) => {
-    if (value > 0 && !isNaN(parseInt(value))) {
-      setTableSize(value);
-    }
-  }, []);
 
   return h(SimpleTable, {
     isLoading,
