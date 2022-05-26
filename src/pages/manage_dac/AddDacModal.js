@@ -14,7 +14,7 @@ import addDACIcon from '../../images/icon_add_dac.png';
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
-const ADMIN = "Admin";
+const ADMIN = 'Admin';
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -60,7 +60,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200');
       if (!ld.isEmpty(errorCodes)) {
-        this.handleErrors("There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.");
+        this.handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.');
       }
       this.props.onOKRequest('addDac');
     } else {

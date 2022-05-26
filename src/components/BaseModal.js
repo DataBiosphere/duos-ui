@@ -46,21 +46,21 @@ export const BaseModal = hh(class BaseModal extends Component {
           onAfterOpen: this.props.afterOpen,
           onRequestClose: this.props.onRequestClose,
           style: customStyles,
-          contentLabel: "Modal"
+          contentLabel: 'Modal'
         }, [
-          div({ className: "modal-header" }, [
+          div({ className: 'modal-header' }, [
             h(CloseIconComponent, {closeFn: this.props.onRequestClose}),
             PageSubHeading({ id: this.props.id, imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
           ]),
 
-          div({ className: "modal-content" }, [
+          div({ className: 'modal-content' }, [
             this.props.children
           ]),
 
-          div({ className: "modal-footer" }, [
-            button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background",
+          div({ className: 'modal-footer' }, [
+            button({ id: 'btn_action', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ' + this.props.color + '-background',
               onClick: this.props.action.handler, disabled: disableOkBtn }, [this.props.action.label]),
-            button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.props.onRequestClose }, ["Cancel"]),
+            button({ isRendered: this.props.type !== 'informative', id: 'btn_cancel', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background', onClick: this.props.onRequestClose }, ['Cancel']),
           ]),
         ])
       ])

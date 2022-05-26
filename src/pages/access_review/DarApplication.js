@@ -34,7 +34,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
       voteString = processMatchData(matchData);
       return div({style: SECTION}, [
         div({style: HEADER_BOLD},['DUOS Algorithm Decision: ']),
-        div({style: {...HEADER, paddingLeft: "5px"}}, [voteString])
+        div({style: {...HEADER, paddingLeft: '5px'}}, [voteString])
       ]);
     };
 
@@ -46,15 +46,15 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
       if (!isEmpty(chairVotes)) {
         const posVotes = filter((v) => v.vote.vote === true)(chairVotes).length;
         const negVotes = filter((v) => v.vote.vote === false)(chairVotes).length;
-        return posVotes > negVotes ? "Yes" : "No";
+        return posVotes > negVotes ? 'Yes' : 'No';
       } else {
         const memberVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'DAC')(rpVotes);
         const posVotes = filter((v) => v.vote.vote === true)(memberVotes).length;
         const negVotes = filter((v) => v.vote.vote === false)(memberVotes).length;
         if (posVotes === 0 && negVotes === 0) {
-          return "No decision";
+          return 'No decision';
         } else {
-          return posVotes > negVotes ? "Yes" : "No";
+          return posVotes > negVotes ? 'Yes' : 'No';
         }
       }
     };
@@ -68,7 +68,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     const agreement = finalDecision === voteString ? 'Yes' : 'No';
     const rpVotes = isNil(rpElectionReview) ? null : get( 'reviewVote')(rpElectionReview);
     const rpDecision = isNil(rpElectionReview) || isNil(rpElectionReview.election) || isNil(rpElectionReview.election.finalVote) ? 'No decision': determineRpResult(rpVotes);
-    const datasetName = isNil(datasets) ? "" : (find({propertyName: "Dataset Name"})(datasets[0].properties)).propertyValue;
+    const datasetName = isNil(datasets) ? '' : (find({propertyName: 'Dataset Name'})(datasets[0].properties)).propertyValue;
     //only render the page if the data has been populated to avoid errors downstream
     return !isNil(datasets) && !isNil(researcherProfile) ?
       div([
@@ -82,23 +82,23 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           ])
         ]),
         div({style: SECTION}, [
-          span({style: HEADER_BOLD}, ["Dataset: "]),
-          span({style: {...HEADER, paddingLeft: "5px"}}, [datasetName])
+          span({style: HEADER_BOLD}, ['Dataset: ']),
+          span({style: {...HEADER, paddingLeft: '5px'}}, [datasetName])
         ]),
         div({style: SECTION, isRendered: isAdmin }, [
-          span({ style: HEADER_BOLD }, ["DAC Final DAR Decision: "]),
-          span({ style: {...HEADER, paddingLeft: "5px"}}, [finalDecision])
+          span({ style: HEADER_BOLD }, ['DAC Final DAR Decision: ']),
+          span({ style: {...HEADER, paddingLeft: '5px'}}, [finalDecision])
         ]),
         div({ isRendered: isAdmin }, [
           formattedMatch
         ]),
         div({style: SECTION, isRendered: isAdmin }, [
-          span({ style: HEADER_BOLD }, ["DAC vs. DUOS Algorithm Agreement: "]),
-          span({ style: {...HEADER, paddingLeft: "5px"}}, [agreement])
+          span({ style: HEADER_BOLD }, ['DAC vs. DUOS Algorithm Agreement: ']),
+          span({ style: {...HEADER, paddingLeft: '5px'}}, [agreement])
         ]),
         div({style: SECTION, isRendered: isAdmin }, [
-          span({ style: HEADER_BOLD }, ["Research Purpose Accurate: "]),
-          span({ style: {...HEADER, paddingLeft: "5px"}}, [rpDecision])
+          span({ style: HEADER_BOLD }, ['Research Purpose Accurate: ']),
+          span({ style: {...HEADER, paddingLeft: '5px'}}, [rpDecision])
         ]),
         VoteSummary({
           isRendered: voteAsChair && !isNil(accessVotes),

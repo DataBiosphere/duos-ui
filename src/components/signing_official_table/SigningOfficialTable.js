@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useCallback, useRef, Fragment } from "react";
-import { Styles, Theme } from "../../libs/theme";
-import { h, div, img } from "react-hyperscript-helpers";
+import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { Styles, Theme } from '../../libs/theme';
+import { h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
-import SimpleTable from "../SimpleTable";
-import SimpleButton from "../SimpleButton";
-import PaginationBar from "../PaginationBar";
-import SearchBar from "../SearchBar";
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from 'lodash/fp';
+import SimpleTable from '../SimpleTable';
+import SimpleButton from '../SimpleButton';
+import PaginationBar from '../PaginationBar';
+import SearchBar from '../SearchBar';
 import {
   Notifications,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
-} from "../../libs/utils";
-import LibraryCardFormModal from "../modals/LibraryCardFormModal";
-import ConfirmationModal from "../modals/ConfirmationModal";
-import { LibraryCard } from "../../libs/ajax";
+} from '../../libs/utils';
+import LibraryCardFormModal from '../modals/LibraryCardFormModal';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import { LibraryCard } from '../../libs/ajax';
 import ReactMarkdown from 'react-markdown';
 import DOMPurify from 'dompurify';
 import LcaMarkdown from '../../assets/LCA.md';
@@ -205,7 +205,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState('delete');
   const { signingOfficial, unregisteredResearchers, isLoading } = props;
-  const [lcaText, setLcaText] = useState("");
+  const [lcaText, setLcaText] = useState('');
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms) => {
@@ -396,7 +396,7 @@ export default function SigningOfficialTable(props) {
             style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             }),
-          },["My Institution's Researchers. Issue or Remove Researcher privileges below.",]),
+          },['My Institution\'s Researchers. Issue or Remove Researcher privileges below.']),
         ]),
       ]),
       h(SearchBar, { handleSearchChange, searchRef }),

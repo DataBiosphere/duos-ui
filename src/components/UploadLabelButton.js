@@ -56,7 +56,7 @@ const filenameStyle = {
   borderTopLeftRadius: '2rem',
   borderBottomLeftRadius: '2rem',
   maxWidth: '30rem',
-  boxShadow: "-4px 6px 9px 0px #e8e5e5",
+  boxShadow: '-4px 6px 9px 0px #e8e5e5',
   transition: fileNameColor.transition,
 };
 const uploadFileInput = {
@@ -118,7 +118,7 @@ export default function UploadLabelButton(props) {
     fontSize: '1.4rem',
     transition: 'background 0.3s ease',
     margin: 0,
-    boxShadow: "-4px 6px 9px 0px #e8e5e5",
+    boxShadow: '-4px 6px 9px 0px #e8e5e5',
     opacity: darCode ? 0.75 : 1
   };
 
@@ -129,7 +129,7 @@ export default function UploadLabelButton(props) {
     flex: 1,
     borderBottomRightRadius: '2rem',
     borderTopRightRadius: '2rem',
-    boxShadow: "-4px 6px 9px 0px #e8e5e5",
+    boxShadow: '-4px 6px 9px 0px #e8e5e5',
     transition: fileClearColor.transition,
     maxWidth: '3rem',
     cursor: !darCode ? 'pointer' : 'not-allowed',

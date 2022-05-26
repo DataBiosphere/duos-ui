@@ -4,7 +4,7 @@ import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
 import {find, isEmpty, isNil} from 'lodash/fp';
 import CloseIconComponent from '../CloseIconComponent';
-import {useEffect, useState} from "react";
+import {useEffect, useState} from 'react';
 
 const ModalDetailRow = (props) => {
   return (
@@ -21,13 +21,13 @@ const getDatasets = (darDetails, datasets) => {
 
 const returnPIName = (researcher) => {
   const properties = researcher.researcherProperties;
-  const isThePI = !isNil(find({propertyKey: "isThePI", propertyValue: true})(properties));
-  const havePI = !isNil(find({propertyKey: "havePI", propertyValue: true})(properties));
+  const isThePI = !isNil(find({propertyKey: 'isThePI', propertyValue: true})(properties));
+  const havePI = !isNil(find({propertyKey: 'havePI', propertyValue: true})(properties));
   let returnName;
   if (isThePI) {
     returnName = researcher.displayName;
   } else if (havePI) {
-    const piNameProp = find({propertyKey: "piName"})(properties);
+    const piNameProp = find({propertyKey: 'piName'})(properties);
     returnName = piNameProp.propertyValue;
   }
   return returnName || researcher.displayName;
@@ -86,7 +86,7 @@ const DarModal = (props) => {
     div({style: Styles.MODAL.CONTENT}, [
       h(CloseIconComponent, {closeFn: closeModal}),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
-      div({style: {borderBottom: "1px solid #1F3B50"}}, []),
+      div({style: {borderBottom: '1px solid #1F3B50'}}, []),
       h(ModalDetailRow, {
         label: 'Data Access Request Id',
         detail: darDetails.darCode

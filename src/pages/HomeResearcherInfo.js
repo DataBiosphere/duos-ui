@@ -1,6 +1,6 @@
 import {Component} from 'react';
 import {div, h1, h3, a, p, span, h} from 'react-hyperscript-helpers';
-import Mailto from "react-protected-mailto";
+import Mailto from 'react-protected-mailto';
 
 class HomeResearcherInfo extends Component {
 

@@ -2,7 +2,7 @@ import { Storage } from './storage';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Config } from './config';
 import * as ld from 'lodash';
-import { isNil } from "lodash/fp";
+import { isNil } from 'lodash/fp';
 
 const errorHandler = new StackdriverErrorReporter();
 

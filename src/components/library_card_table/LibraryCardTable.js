@@ -12,7 +12,7 @@ import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import { LibraryCard } from '../../libs/ajax';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import {Delete, Update} from "@material-ui/icons";
+import {Delete, Update} from '@material-ui/icons';
 import TableIconButton from '../TableIconButton';
 import SimpleButton from '../SimpleButton';
 
@@ -36,7 +36,7 @@ const styles = {
     institution: '27%',
     eraCommonsId: '15%',
     createDate: '12%',
-    actions: "5%"
+    actions: '5%'
   },
 };
 
@@ -123,7 +123,7 @@ const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfir
     setLibraryCards(libraryCardsCopy);
     setShowConfirmation(false);
   } catch(error) {
-    Notifications.showError("Error: Failed to delete library card");
+    Notifications.showError('Error: Failed to delete library card');
   }
 };
 

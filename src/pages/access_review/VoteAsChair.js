@@ -63,7 +63,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   render() {
     const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen, libraryCards } = this.props;
     const hasLibraryCard = !isNil(head(libraryCards));
-    const errorMessage = "The Researcher must have a Library Card before data access can be granted. You can still deny this request and/or vote on question 2.";
+    const errorMessage = 'The Researcher must have a Library Card before data access can be granted. You can still deny this request and/or vote on question 2.';
     const accessVoteQuestion = isNil(vote) ?
       div({}, []) :
       VoteQuestion({

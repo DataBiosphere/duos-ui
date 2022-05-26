@@ -1,21 +1,21 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from "react";
-import { Styles, Theme } from "../../libs/theme";
-import { h, div, img } from "react-hyperscript-helpers";
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { Styles, Theme } from '../../libs/theme';
+import { h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from "lodash/fp";
-import SimpleTable from "../SimpleTable";
-import SimpleButton from "../SimpleButton";
-import PaginationBar from "../PaginationBar";
-import SearchBar from "../SearchBar";
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
+import SimpleTable from '../SimpleTable';
+import SimpleButton from '../SimpleButton';
+import PaginationBar from '../PaginationBar';
+import SearchBar from '../SearchBar';
 import {
   Notifications,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
-} from "../../libs/utils";
-import ConfirmationModal from "../modals/ConfirmationModal";
-import DataCustodianFormModal from "../modals/DataCustodianFormModal";
+} from '../../libs/utils';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import DataCustodianFormModal from '../modals/DataCustodianFormModal';
 
 //Styles specific to this table
 const styles = {
@@ -366,7 +366,7 @@ export default function DataCustodianTable(props) {
                 }),
               },
               [
-                "Your Institution's Data Submitters. Issue or remove Data Submitter privileges below.",
+                'Your Institution\'s Data Submitters. Issue or remove Data Submitter privileges below.',
               ]
             ),
           ]),

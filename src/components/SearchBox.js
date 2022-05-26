@@ -29,8 +29,8 @@ export class SearchBox extends Component {
   render() {
     return (
       input({
-        type: "text",
-        placeholder: "Enter search terms",
+        type: 'text',
+        placeholder: 'Enter search terms',
         onChange: this.changeHandler,
         ref: this.myRef,
         style: {

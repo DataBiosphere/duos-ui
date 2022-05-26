@@ -6,7 +6,7 @@ import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
-import CollectionConfirmationModal from "./CollectionConfirmationModal";
+import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
@@ -137,7 +137,7 @@ const columnHeaderConfig = {
     label: 'Institution',
     cellStyle: { width: styles.cellWidth.institution },
     cellDataFn: (props) => {
-      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? "- -" : props.createUser.institution.name;
+      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? '- -' : props.createUser.institution.name;
       return cellData.institutionCellData(props);
     },
     sortable: true
@@ -253,11 +253,11 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": visibleCollection,
-      "columnHeaders": columnHeaderData(columns),
+      'rowData': visibleCollection,
+      'columnHeaders': columnHeaderData(columns),
       styles,
       tableSize: tableSize,
-      "paginationBar": h(PaginationBar, {
+      'paginationBar': h(PaginationBar, {
         pageCount,
         currentPage,
         tableSize,

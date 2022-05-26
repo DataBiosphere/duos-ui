@@ -264,7 +264,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
         await this.submitVote(chairAgreementVote);
       } else {
-        await StackdriverReporter.report("Invalid Chair Agreement vote for Chair Access Vote: " + JSON.stringify(chairAccessVote));
+        await StackdriverReporter.report('Invalid Chair Agreement vote for Chair Access Vote: ' + JSON.stringify(chairAccessVote));
       }
     }
   };
