@@ -1,22 +1,23 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {mount} from "@cypress/react";
-import ResearchProposalVoteSlab from "../../../src/components/collection_voting_slab/ResearchProposalVoteSlab";
-import {Votes} from "../../../src/libs/ajax";
-import {Storage} from "../../../src/libs/storage";
+import {mount} from '@cypress/react';
+import ResearchProposalVoteSlab from '../../../src/components/collection_voting_slab/ResearchProposalVoteSlab';
+import {Votes} from '../../../src/libs/ajax';
+import {Storage} from '../../../src/libs/storage';
+import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const darInfoPrimaryUseManualReviewFalse = {
-  "rus": "test",
-  "diseases": true
+  'rus': 'test',
+  'diseases': true
 };
 
 const darInfoSecondaryUseManualReviewTrue = {
-  "stigmatizedDiseases": true
+  'stigmatizedDiseases': true
 };
 
 const darInfoPrimarySecondaryUse = {
-  "diseases": true,
-  "illegalBehavior": true
+  'diseases': true,
+  'illegalBehavior': true
 };
 
 const votesForElection1 = {
@@ -83,8 +84,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.contains("primary");
-    cy.get("secondary").should('not.exist');
+    cy.contains('primary');
+    cy.get('secondary').should('not.exist');
   });
 
   it('Renders secondary data use pill', function() {
@@ -93,8 +94,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />
     );
-    cy.contains("secondary");
-    cy.get("primary").should('not.exist');
+    cy.contains('secondary');
+    cy.get('primary').should('not.exist');
   });
 
   it('Renders primary and secondary data use pills', function() {
@@ -103,8 +104,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimarySecondaryUse}
       />
     );
-    cy.contains("primary");
-    cy.contains("secondary");
+    cy.contains('primary');
+    cy.contains('secondary');
   });
 
   it('Renders link to expand when collapsed', function() {
@@ -135,8 +136,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.contains("primary");
-    cy.contains("secondary");
+    cy.contains('primary');
+    cy.contains('secondary');
   });
 
   it('Renders research purpose when expanded', function() {
@@ -200,8 +201,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isLoading={true}
       />
     );
-    cy.get("primary").should('not.exist');
-    cy.get("secondary").should('not.exist');
+    cy.get('primary').should('not.exist');
+    cy.get('secondary').should('not.exist');
   });
 
   it('Does not render link to expand/collapse when loading', function() {
@@ -250,11 +251,11 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -273,11 +274,11 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(218, 0, 3)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -296,11 +297,11 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -319,11 +320,11 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(31, 163, 113)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
   });
 
@@ -342,11 +343,35 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', 'rgb(255, 255, 255)');
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('textarea').should('be.disabled');
+  });
+
+  it('Renders a disabled vote button readOnly is true', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        bucket={{
+          votes: [votesForElection1, votesForElection2]
+        }}
+        isChair={false}
+        readOnly={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Votes, 'updateVotesByIds');
+
+    const link = cy.contains('Expand to view Research Purpose and Vote');
+    link.click();
+
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
+    cy.get('[datacy=yes-collection-vote-button]').click();
+    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
     cy.get('textarea').should('be.disabled');
   });
 

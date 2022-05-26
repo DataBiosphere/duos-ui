@@ -151,10 +151,7 @@ const columnHeaderConfig = {
   status: {
     label: 'Status',
     cellStyle: { width: styles.cellWidth.status },
-    cellDataFn: (props) => {
-      props.status = determineCollectionStatus(props.collection, props.relevantDatasets);
-      return cellData.statusCellData(props);
-    },
+    cellDataFn: cellData.statusCellData,
     sortable: true
   },
   actions: {
@@ -178,9 +175,10 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
+      const status = determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          collection, darCollectionId, datasets, darCode,
+          collection, darCollectionId, datasets, darCode, status,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
           openCollection, goToVote, reviewCollection, relevantDatasets

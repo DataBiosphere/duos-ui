@@ -742,6 +742,9 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+//each item in the list is an array of metadata representing a single table row
+//the metadata for each cell needs a data (exactly what is displayed in the table)
+//or value (string or number alternative) property which determines sorting
 export const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
   if (!sort || sort.colIndex === undefined) {
@@ -749,8 +752,8 @@ export const sortVisibleTable = ({ list = [], sort }) => {
   }
   else {
     return list.sort((a, b) => {
-      const aVal = a[sort.colIndex].data;
-      const bVal = b[sort.colIndex].data;
+      const aVal = a[sort.colIndex].value || a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].value || b[sort.colIndex].data;
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {

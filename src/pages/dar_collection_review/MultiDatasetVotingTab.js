@@ -6,6 +6,12 @@ import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import {User} from '../../libs/ajax';
 import {Alert} from '../../components/Alert';
 
+export const votingColors = {
+  yes: 'rgb(31, 163, 113)',
+  no: 'rgb(218, 0, 3)',
+  other: 'rgb(151, 151, 151)',
+  default: 'rgb(255, 255, 255)'
+};
 const styles = {
   baseStyle: {
     backgroundColor: '#FFFFFF',
@@ -31,7 +37,7 @@ export default function MultiDatasetVotingTab(props) {
   const [dataBuckets, setDataBuckets] = useState([]);
   const [collectionDatasets, setCollectionDatasets] = useState([]);
   const [dacDatasetIds, setDacDatasetIds] = useState([]);
-  const {darInfo, buckets, collection, isChair, isLoading} = props;
+  const {darInfo, buckets, collection, isChair, readOnly, isLoading} = props;
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n' +
     'You can still deny this request and/or vote on the Structured Research Purpose.';
 
@@ -68,6 +74,7 @@ export default function MultiDatasetVotingTab(props) {
         collectionDatasets,
         isChair,
         isApprovalDisabled,
+        readOnly,
         key: bucket.key,
       });
     })(dataBuckets);
@@ -95,6 +102,7 @@ export default function MultiDatasetVotingTab(props) {
         darInfo,
         bucket: rpBucket,
         isChair,
+        readOnly,
         isLoading
       }),
       DatasetVoteSlabs()

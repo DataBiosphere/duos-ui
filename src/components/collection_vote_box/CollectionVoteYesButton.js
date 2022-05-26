@@ -1,6 +1,7 @@
 import {h, span} from 'react-hyperscript-helpers';
 import CollectionVoteButton from './CollectionVoteButton';
 import {CheckCircleOutlined} from '@material-ui/icons';
+import {votingColors} from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 export default function CollectionVoteYesButton(props) {
   const {onClick, disabled, isSelected} = props;
@@ -28,7 +29,7 @@ export default function CollectionVoteYesButton(props) {
     datacy: 'yes-collection-vote-button',
     label: h(Label),
     onClick: () => onClick(),
-    baseColor: '#1FA371',
+    baseColor: votingColors.yes,
     disabled,
     isSelected
   });

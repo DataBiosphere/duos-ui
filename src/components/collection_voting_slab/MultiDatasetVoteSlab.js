@@ -1,11 +1,10 @@
 import {div, h} from 'react-hyperscript-helpers';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
-import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every} from 'lodash/fp';
+import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, toLower} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {useEffect, useState} from 'react';
 import DatasetsRequestedPanel from './DatasetsRequestedPanel';
 import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
-
 import {
   extractDacDataAccessVotesFromBucket,
   extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
@@ -51,7 +50,7 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading} = props;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, readOnly, isLoading} = props;
   const {algorithmResult} = bucket;
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export default function MultiDatasetVoteSlab(props) {
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
       filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(currentUserVotes))),
-      every(electionData => electionData.status === 'Open')
+      every(electionData => toLower(electionData.status) === 'open')
     )(bucket);
 
     return div({style: styles.voteInfo}, [
@@ -86,7 +85,7 @@ export default function MultiDatasetVoteSlab(props) {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
         isFinal: isChair,
-        isDisabled: isEmpty(currentUserVotes) || !allOpenElections,
+        isDisabled: readOnly || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
         isLoading
       }),

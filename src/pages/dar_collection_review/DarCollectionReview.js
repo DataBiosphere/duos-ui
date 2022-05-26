@@ -210,6 +210,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: false,
+        readOnly: props.readOnly,
         isLoading
       }),
       h(MultiDatasetVotingTab, {
@@ -218,6 +219,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: true,
+        readOnly: props.readOnly,
         isLoading
       })
     ])
