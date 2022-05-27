@@ -1,7 +1,8 @@
 import { isNil } from 'lodash/fp';
-import { div, h, span } from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
+import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 
 //Component that renders skeleton loader on loading
 const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
@@ -54,7 +55,10 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
           }
         }, [
           label,
-          span({ className: 'glyphicon sort-icon glyphicon-sort' })
+          div({className: 'sort-container'}, [
+            h(ArrowDropUp, { className: `sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}` }),
+            h(ArrowDropDown, { className: `sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active': ''}` })
+          ])
         ])
         : label
     ]);
