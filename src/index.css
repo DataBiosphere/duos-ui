@@ -630,6 +630,28 @@ small {
   color: #2FA4E7;
 }
 
+.cell-sort .sort-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.cell-sort .sort-container .sort-icon {
+  font-size: 20px;
+  opacity: 0.4;
+}
+
+.cell-sort .sort-container .sort-icon.active {
+  opacity: 1;
+}
+
+.cell-sort .sort-container .sort-icon.sort-icon-up {
+  transform: translateY(7px);
+}
+
+.cell-sort .sort-container .sort-icon.sort-icon-down {
+  transform: translateY(-7px);
+}
+
 .cell-sort .sort-icon {
   color: #777777;
   font-size: 10px;
