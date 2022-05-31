@@ -1,7 +1,7 @@
 import { h } from 'react-hyperscript-helpers';
 import TableTextButton from '../TableTextButton';
 import { Styles } from '../../libs/theme';
-import { isNil } from "lodash/fp";
+import { isNil } from 'lodash/fp';
 
 export default function VoteButton(props) {
   //targetVotes are the votes for this user and this election, defined on DarTableActions line 98

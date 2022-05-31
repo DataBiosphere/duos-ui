@@ -18,7 +18,7 @@ export default function SearchBar(props) {
     fontSize: '1.5rem'
   };
 
-  return div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+  return div({className: 'right-header-section', style: Styles.RIGHT_HEADER_SECTION}, [
     input({
       type: 'text',
       placeholder: 'Enter search terms',

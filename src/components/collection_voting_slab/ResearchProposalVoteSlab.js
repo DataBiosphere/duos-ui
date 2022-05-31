@@ -86,7 +86,7 @@ const animationAttributes = {
 
 const SlabTitle = () => {
   return div({style: styles.slabTitle}, [
-    "Structured Research Purpose"
+    'Structured Research Purpose'
   ]);
 };
 

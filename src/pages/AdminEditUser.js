@@ -6,7 +6,7 @@ import {User} from '../libs/ajax';
 import {USER_ROLES} from '../libs/utils';
 import {ResearcherReview} from './ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
-import {PageHeading} from "../components/PageHeading";
+import {PageHeading} from '../components/PageHeading';
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
@@ -138,19 +138,19 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   render() {
     const {displayName, email, displayNameValid} = this.state;
     return (
-      div({className: "container container-wide"}, [
-        div({className: "row no-margin"}, [
-          div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
+      div({className: 'container container-wide'}, [
+        div({className: 'row no-margin'}, [
+          div({className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding'}, [
             PageHeading({
-              id: "editUser",
+              id: 'editUser',
               imgSrc: editUserIcon,
-              iconSize: "medium",
-              color: "common",
-              title: "Edit User",
-              description: "Edit a User in the system"
+              iconSize: 'medium',
+              color: 'common',
+              title: 'Edit User',
+              description: 'Edit a User in the system'
             }),
           ]),
-          div({className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding"}, [
+          div({className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'}, [
 
             form({
               className: 'form-horizontal css-form ',

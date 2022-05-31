@@ -11,7 +11,7 @@ export default function OpenButton(props) {
     key: `${label}-election-dar-${dar.referenceId}`,
     label,
     disabled,
-    dataTip: disabled ? "You do not have permission to open this election" : "Open Election",
+    dataTip: disabled ? 'You do not have permission to open this election' : 'Open Election',
     style: Object.assign({}, baseStyle, addBaseStyle),
     hoverStyle: Styles.TABLE.TABLE_BUTTON_TEXT_HOVER_SUCCESS
   });

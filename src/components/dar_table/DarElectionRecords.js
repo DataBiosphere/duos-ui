@@ -50,7 +50,7 @@ export default function DarElectionRecords(props) {
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election, votes} = electionInfo;
-    const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
+    const borderStyle = index > 0 ? {borderTop: '1px solid rgba(109,110,112,0.2)'} : {};
     return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
       div({
         style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),

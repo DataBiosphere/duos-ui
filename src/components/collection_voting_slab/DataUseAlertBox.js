@@ -1,5 +1,5 @@
-import {div, span} from "react-hyperscript-helpers";
-import {isEmpty, filter, keys, flatMap, map} from "lodash/fp";
+import {div, span} from 'react-hyperscript-helpers';
+import {isEmpty, filter, keys, flatMap, map} from 'lodash/fp';
 
 const styles = {
   box: {

@@ -4,7 +4,7 @@ import { Notifications } from './utils';
 
 export const srpTranslations = {
   hmb: {
-    code: "HMB",
+    code: 'HMB',
     description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
     manualReview: false
   },
@@ -34,7 +34,7 @@ export const srpTranslations = {
   other: (otherText) => {
     return {
       code: 'OTHER',
-      description: isEmpty(otherText) ? "Other: Not provided" : otherText,
+      description: isEmpty(otherText) ? 'Other: Not provided' : otherText,
       manualReview: true
     };
   },

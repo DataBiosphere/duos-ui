@@ -80,7 +80,7 @@ class AdminConsole extends Component {
     switch (name) {
       case 'addUser':
         this.setState({showAddUserModal: false});
-        this.props.history.push(`admin_manage_users`);
+        this.props.history.push('admin_manage_users');
         break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
@@ -108,23 +108,23 @@ class AdminConsole extends Component {
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
 
     const consoleBoxPlaceholder = div({
-      style: { margin: "10px", padding: "0px", display: "inline-block" },
-      className: "col-lg-6 col-md-6 col-sm-12 col-xs-12" }, []);
+      style: { margin: '10px', padding: '0px', display: 'inline-block' },
+      className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12' }, []);
 
     return (
 
       div({}, [
 
-        div({ className: "container" }, [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-            PageHeading({ id: "adminConsole", color: "common", title: "Welcome to your Admin Console, " + currentUser.displayName + "!", description: "What would you like to do today?" }),
-            hr({ className: "section-separator" })
+        div({ className: 'container' }, [
+          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+            PageHeading({ id: 'adminConsole', color: 'common', title: 'Welcome to your Admin Console, ' + currentUser.displayName + '!', description: 'What would you like to do today?' }),
+            hr({ className: 'section-separator' })
           ]),
 
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
 
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDUL',
                   url: '/admin_manage_dul',
@@ -136,7 +136,7 @@ class AdminConsole extends Component {
                   unreviewedCases: dulUnreviewedCases
                 }),
               ]),
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageInstitutions',
                   url: '/admin_manage_institutions',
@@ -149,8 +149,8 @@ class AdminConsole extends Component {
               ])
             ]),
 
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageUsers',
                   url: '/admin_manage_users',
@@ -162,7 +162,7 @@ class AdminConsole extends Component {
                 }),
               ]),
 
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_addUser',
                   clickHandler: this.addUser,
@@ -182,11 +182,11 @@ class AdminConsole extends Component {
               ]),
             ]),
 
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
               // TODO: `admin_manage_access` will be fully deprecated with MDV
               div({
                 isRendered: (this.state.env !== 'dev'),
-                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
                   url: '/admin_manage_access',
@@ -200,7 +200,7 @@ class AdminConsole extends Component {
               ]),
               div({
                 isRendered: (this.state.env === 'dev'),
-                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
                   url: '/admin_manage_dar_collections',
@@ -212,7 +212,7 @@ class AdminConsole extends Component {
                 })
               ]),
 
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
                   url: '/admin_manage_lc',
@@ -225,8 +225,8 @@ class AdminConsole extends Component {
               ])
             ]),
 
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAC',
                   url: '/manage_dac',
@@ -240,7 +240,7 @@ class AdminConsole extends Component {
               div({
                 // TODO: We won't need this box when MDV is complete
                 isRendered: (this.state.env !== 'dev'),
-                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
                   url: '/admin_manage_dar_collections',
@@ -253,8 +253,8 @@ class AdminConsole extends Component {
               ]),
             ]),
 
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_electionTimeout',
                   clickHandler: this.electionTimeout,

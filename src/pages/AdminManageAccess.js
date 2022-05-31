@@ -9,7 +9,7 @@ import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { consoleTypes } from "../components/dar_table/DarTableActions";
+import { consoleTypes } from '../components/dar_table/DarTableActions';
 
 export default function AdminManageAccess(props) {
   const [electionList, setElectionList] = useState([]);
@@ -44,8 +44,8 @@ export default function AdminManageAccess(props) {
 
   return (
     div({style: Styles.PAGE}, [
-      div({ style: {display: "flex", justifyContent: "space-between"}}, [
-        div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+      div({ style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
@@ -54,8 +54,8 @@ export default function AdminManageAccess(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ["Manage Data Access Request"]),
-            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, ["Select and manage Data Access Requests for DAC review"])
+            div({style: Styles.TITLE}, ['Manage Data Access Request']),
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, ['Select and manage Data Access Requests for DAC review'])
           ]),
         ]),
         h(SearchBar, {handleSearchChange, currentPage})

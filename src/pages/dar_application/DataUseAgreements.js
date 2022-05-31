@@ -10,7 +10,7 @@ const StepAlertTemplate = (props) => {
     display: 'block',
     fontSize: '1.8rem',
     marginLeft: '7%',
-    marginTop: "1.5%"
+    marginTop: '1.5%'
   };
 
   return (

@@ -297,7 +297,7 @@ export default function DatasetCatalog(props) {
         className: 'enabled'
       }, ['Link']);
     } catch (e) {
-      return span({}, ["--"]);
+      return span({}, ['--']);
     }
   };
 
@@ -328,7 +328,7 @@ export default function DatasetCatalog(props) {
               iconSize: 'large',
               color: 'dataset',
               title: 'Dataset Catalog',
-              description: "Search and select datasets then click 'Apply for Access' to request access"
+              description: 'Search and select datasets then click \'Apply for Access\' to request access'
             }),
           ]),
           div({ className: 'right'}, [
@@ -643,7 +643,7 @@ export default function DatasetCatalog(props) {
           alertMessage: errorMessage,
           alertTitle: errorTitle,
           action: { label: 'Yes', handler: () => dialogHandlerDisable }
-        }, [div({ className: 'dialog-description' }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
+        }, [div({ className: 'dialog-description' }, ['If you disable a Dataset, Researchers won\'t be able to request access on it from now on. New Access elections related to this dataset won\'t be available but opened ones will continue.']),]),
 
         ConfirmationDialog({
           title: 'Enable Dataset Confirmation?',

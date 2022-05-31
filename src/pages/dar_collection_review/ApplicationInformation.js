@@ -1,5 +1,5 @@
 import { div, label, span } from 'react-hyperscript-helpers';
-import {chunk, filter, isEmpty} from "lodash/fp";
+import {chunk, filter, isEmpty} from 'lodash/fp';
 
 const styles = {
   flexRowElement: {
@@ -76,7 +76,7 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, clou
 
   const labelArray = labels.map(label => {
     if (typeof label.value === 'boolean') {
-      // Inject "Yes" / "No" for booleans
+      // Inject 'Yes' / 'No' for booleans
       return generateLabelSpanContents(label.title, label.key, (label.value ? 'Yes' : 'No'), loading);
     } else {
       return generateLabelSpanContents(label.title, label.key, label.value, loading);
@@ -141,7 +141,7 @@ export default function ApplicationInformation(props) {
   return (
     div({className: 'application-information-page', style: {padding: '2% 3%', backgroundColor: 'white'}}, [
       div({className: 'applicant-information-container', style: { margin: '0 0 2.5rem 0'}}, [
-        div({className: 'applicant-information-subheader', style: styles.title}, ["Applicant Information"]),
+        div({className: 'applicant-information-subheader', style: styles.title}, ['Applicant Information']),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
@@ -158,7 +158,7 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
         ])
       ]),
-      !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.subheader}, ["Non-Technical Summary"])
+      !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.subheader}, ['Non-Technical Summary'])
         : div({className: 'text-placeholder', key: 'non-technical-summary-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
       div({className: 'non-technical-summary-container'}, [
         !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.textBox}, [nonTechSummary])
@@ -167,7 +167,7 @@ export default function ApplicationInformation(props) {
           }})
       ]),
       div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
-        div({className: 'application-details-subheader', style: styles.subheader}, ["Application Details"]),
+        div({className: 'application-details-subheader', style: styles.subheader}, ['Application Details']),
         dynamicRowGeneration(2, appDetailLabels, isLoading, cloudComputing),
         (cloudComputing) ?
           div({className: 'cloud-provider-description-container'}, [

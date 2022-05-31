@@ -1,5 +1,5 @@
 import {div, h, span} from 'react-hyperscript-helpers';
-import VoteResultIcon from "./VoteResultIcon";
+import VoteResultIcon from './VoteResultIcon';
 
 const labelContainerStyle = {
   display: 'flex',

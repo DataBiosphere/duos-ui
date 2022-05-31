@@ -17,7 +17,7 @@ import {
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
-import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
+import MultiDatasetVotingTab from './MultiDatasetVotingTab';
 
 const tabContainerColor = 'rgb(115,154,164)';
 

@@ -51,7 +51,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
     let nonOpenReleventElectionPresent = false;
     let openRelevantElectionPresent = false;
     let userHasVote = false;
-    let label = "Vote";
+    let label = 'Vote';
 
     //iterate through elections, push open and non-open elections into their respective arrays
     //also for each election, see if user has a vote and whether or not they've already voted
@@ -61,7 +61,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
       isElectionOpen ? openRelevantElectionPresent = true : nonOpenReleventElectionPresent = true;
       forEach(vote => {
         if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
-        if(!isNil(vote.vote)) { label = "Update Vote"; }
+        if(!isNil(vote.vote)) { label = 'Update Vote'; }
       })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open

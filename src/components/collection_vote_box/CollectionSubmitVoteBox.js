@@ -1,10 +1,10 @@
-import {div, h, span, textarea} from "react-hyperscript-helpers";
-import {useEffect, useState} from "react";
-import {isEmpty, isNil, map, every} from "lodash/fp";
-import CollectionVoteYesButton from "./CollectionVoteYesButton";
-import CollectionVoteNoButton from "./CollectionVoteNoButton";
-import {Notifications} from "../../libs/utils";
-import {Votes} from "../../libs/ajax";
+import {div, h, span, textarea} from 'react-hyperscript-helpers';
+import {useEffect, useState} from 'react';
+import {isEmpty, isNil, map, every} from 'lodash/fp';
+import CollectionVoteYesButton from './CollectionVoteYesButton';
+import CollectionVoteNoButton from './CollectionVoteNoButton';
+import {Notifications} from '../../libs/utils';
+import {Votes} from '../../libs/ajax';
 
 const styles = {
   baseStyle: {
@@ -97,7 +97,7 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   const VoteSubsectionHeading = () => {
-    const heading = isFinal ?
+    const heading = (isFinal || adminPage) ?
       `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
       'Your Vote*';
     return span({className: 'vote-subsection-heading'},[heading]);

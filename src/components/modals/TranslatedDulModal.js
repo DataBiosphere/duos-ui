@@ -31,18 +31,18 @@ export default function TranslatedDulModal(props) {
 
   return (
     BaseModal({
-      id: "translatedDulModal",
+      id: 'translatedDulModal',
       showModal: props.showModal,
       onRequestClose: closeHandler,
-      color: "dataset",
-      type: "informative",
+      color: 'dataset',
+      type: 'informative',
       iconSize: 'none',
-      title: "More information",
+      title: 'More information',
       description: 'Translated Use Restriction',
-      action: { label: "Close", handler: OKHandler }
+      action: { label: 'Close', handler: OKHandler }
     },
     [
-      ul({style: listStyle, id: "txt_translatedRestrictions", className: "row no-margin translated-restriction"}, translatedDULList),
+      ul({style: listStyle, id: 'txt_translatedRestrictions', className: 'row no-margin translated-restriction'}, translatedDULList),
     ])
   );
 }

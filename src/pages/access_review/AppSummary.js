@@ -7,9 +7,9 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-import {isNil, isEmpty} from "lodash/fp";
-import {findPropertyValue} from "../../libs/utils";
-import {UserProperties} from "../../libs/utils";
+import {isNil, isEmpty} from 'lodash/fp';
+import {findPropertyValue} from '../../libs/utils';
+import {UserProperties} from '../../libs/utils';
 
 const ROOT = {
   fontFamily: 'Arial',

@@ -39,7 +39,7 @@ export const Models = {
       controls: false,
       population: false,
       other: false,
-      otherText: "",
+      otherText: '',
       ontologies: [],
       forProfit: false,
       oneGender: false,

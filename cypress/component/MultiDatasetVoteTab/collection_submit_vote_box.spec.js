@@ -286,7 +286,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('textarea').should('not.be.disabled');
   });
 
-  it('renders a different heading if user is viewing from the admin page', () => {
+  it('renders a different heading if user is viewing from the admin page (Dataset)', () => {
     mount(<CollectionSubmitVoteBox
       votes={votesMixed}
       isFinal={true}
@@ -295,7 +295,19 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       isApprovalDisabled={true}
       adminPage={true}
     />);
-    cy.get('.vote-subsection-heading').should('exist');
+    cy.get('.vote-subsection-heading').should('exist').contains('Vote*');
+  });
+
+  it('renders a different heading if user is viewing from the admin page (RP)', () => {
+    mount(<CollectionSubmitVoteBox
+      votes={votesMixed}
+      isFinal={false}
+      question={'question'}
+      isDisabled={false}
+      isApprovalDisabled={true}
+      adminPage={true}
+    />);
+    cy.get('.vote-subsection-heading').should('exist').contains('Vote*');
   });
 
   it('shows the final vote and renders the compnent read-only for admin page', () => {
