@@ -112,14 +112,14 @@ export const DAC = {
 
   create: async (name, description) => {
     const url = `${await Config.getApiUrl()}/api/dac`;
-    const dac = { "name": name, "description": description };
+    const dac = { 'name': name, 'description': description };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
     return res.json();
   },
 
   update: async (dacId, name, description) => {
     const url = `${await Config.getApiUrl()}/api/dac`;
-    const dac = { "dacId": dacId, "name": name, "description": description };
+    const dac = { 'dacId': dacId, 'name': name, 'description': description };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
     return res.json();
   },
@@ -243,7 +243,7 @@ export const DAR = {
     darInfo.researcherId = rawDar.userId;
     darInfo.darCode = rawDar.darCode;
     darInfo.projectTitle = rawDar.projectTitle;
-    darInfo.institution = isNil(researcher.institution) ? "" : researcher.institution.name;
+    darInfo.institution = isNil(researcher.institution) ? '' : researcher.institution.name;
     darInfo.department = rawDar.department;
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
@@ -393,7 +393,7 @@ export const DAR = {
       let authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
       let formData = new FormData();
-      formData.append("file", file);
+      formData.append('file', file);
       const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);
     }
@@ -696,12 +696,12 @@ export const Support = {
 
   },
   createSupportRequest: async (ticket) => {
-    const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/requests.json`, fp.mergeAll([Config.jsonBody(ticket), { method: 'POST' }]));
+    const res = await fetchAny('https://broadinstitute.zendesk.com/api/v2/requests.json', fp.mergeAll([Config.jsonBody(ticket), { method: 'POST' }]));
     return await res;
   },
 
   uploadAttachment: async (file) => {
-    const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
+    const res = await fetchAny('https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment', fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
     return (await res.json()).upload;
   },
 };
@@ -1059,18 +1059,18 @@ export const AuthenticateNIH = {
     const instituteProp = find({'propertyKey': 'institution'})(properties);
     const piProp = find({'propertyKey' : 'havePi'});
     const isPiProp = find({'propertyKey' : 'isPi'});
-    const isPi = isNil(isPiProp) ? "n/a" : Storage.getCurrentUser().displayName;
+    const isPi = isNil(isPiProp) ? 'n/a' : Storage.getCurrentUser().displayName;
     fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.title = "DUOS Researcher";
+    fireCloudProfileObj.title = 'DUOS Researcher';
     fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
     fireCloudProfileObj.institute = isNil(instituteProp) ? '' : getOr('', 'propertyValue')(instituteProp);
-    fireCloudProfileObj.institutionalProgram = "n/a";
-    fireCloudProfileObj.programLocationCity = "n/a";
-    fireCloudProfileObj.programLocationState = "n/a";
-    fireCloudProfileObj.programLocationCountry = "n/a";
-    fireCloudProfileObj.pi = isNil(piProp) ? isPi : getOr( "n/a", 'propertyValue')(piProp);
-    fireCloudProfileObj.nonProfitStatus = "n/a";
+    fireCloudProfileObj.institutionalProgram = 'n/a';
+    fireCloudProfileObj.programLocationCity = 'n/a';
+    fireCloudProfileObj.programLocationState = 'n/a';
+    fireCloudProfileObj.programLocationCountry = 'n/a';
+    fireCloudProfileObj.pi = isNil(piProp) ? isPi : getOr( 'n/a', 'propertyValue')(piProp);
+    fireCloudProfileObj.nonProfitStatus = 'n/a';
     return fireCloudProfileObj;
   },
 
@@ -1171,11 +1171,11 @@ export const ToS = {
    * See https://consent.dsde-prod.broadinstitute.org/#/Sam/get_api_sam_register_self_diagnostics
    * for more info.
    * {
-   *   "adminEnabled": false,
-   *   "enabled": false,
-   *   "inAllUsersGroup": true,
-   *   "inGoogleProxyGroup": false,
-   *   "tosAccepted": true
+   *   'adminEnabled': false,
+   *   'enabled': false,
+   *   'inAllUsersGroup': true,
+   *   'inGoogleProxyGroup': false,
+   *   'tosAccepted': true
    * }
    * @returns {Promise<any>}
    */

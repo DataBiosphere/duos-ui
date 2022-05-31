@@ -4,8 +4,8 @@ import {AccessReviewHeader} from './access_review/AccessReviewHeader';
 import {Election} from '../libs/ajax';
 import {getDarData, Notifications} from '../libs/utils';
 import {isNil} from 'lodash/fp';
-import {DarApplication} from "./access_review/DarApplication";
-import {Match} from "../libs/ajax";
+import {DarApplication} from './access_review/DarApplication';
+import {Match} from '../libs/ajax';
 
 const SECTION = {
   margin: '20px',

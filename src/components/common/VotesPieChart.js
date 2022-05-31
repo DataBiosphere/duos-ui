@@ -11,15 +11,15 @@ const pieSliceColors = {
 };
 
 const processVotes = (votes) => {
-  const headerData = ["Vote", "Total Votes"];
+  const headerData = ['Vote', 'Total Votes'];
   const decisionMap = {
-    "Yes" : 0,
-    "No": 0,
-    "Not submitted" : 0
+    'Yes' : 0,
+    'No': 0,
+    'Not submitted' : 0
   };
 
   votes.forEach((v) => {
-    const value = v.vote ? "Yes" : !isNil(v.vote) ? "No" : "Not submitted";
+    const value = v.vote ? 'Yes' : !isNil(v.vote) ? 'No' : 'Not submitted';
     decisionMap[value]++;
   });
   const decisionDataArray = map(decisionMap, (count, key) => [key, count]);
@@ -30,10 +30,10 @@ export default function VotesPieChart(props) {
   const {
     votes = [],
     keyString,
-    title = props.title || "My DAC's Votes (summary)",
+    title = props.title || 'My DAC\'s Votes (summary)',
     pieHole = 0.3,
     height = 'inherit',
-    width = "100%",
+    width = '100%',
     style = { padding: '20px 0', display: 'flex', flex: 1, }
   } = props;
 
@@ -55,7 +55,7 @@ export default function VotesPieChart(props) {
   }
   return div({style}, [
     h(Chart, {
-      chartType: "PieChart",
+      chartType: 'PieChart',
       data: processedVotes,
       options: options,
       width,

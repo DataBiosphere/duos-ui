@@ -86,7 +86,7 @@ const animationAttributes = {
 
 const SlabTitle = () => {
   return div({style: styles.slabTitle}, [
-    "Structured Research Purpose"
+    'Structured Research Purpose'
   ]);
 };
 
@@ -158,7 +158,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           }),
         ]
       ),
-      div(["My DAC's Votes (detail)"]),
+      div(['My DAC\'s Votes (detail)']),
       h(VoteSummaryTable, {
         dacVotes: collapseVotesByUser(dacVotes),
         isLoading,
@@ -196,7 +196,7 @@ export default function ResearchProposalVoteSlab(props) {
         h(motion.section, animationAttributes, [
           div({datacy: 'srp-expanded', style: styles.expandedData}, [
             div({datacy: 'research-purpose'}, [
-              span({style: styles.researchPurposeTitle}, ["Research Purpose"]),
+              span({style: styles.researchPurposeTitle}, ['Research Purpose']),
               h(ResearchPurposeSummary, {darInfo}),
               h(DataUseAlertBox, {translatedDataUse}),
               h(CollectionSubmitVoteBox, {

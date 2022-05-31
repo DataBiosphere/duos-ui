@@ -1,10 +1,9 @@
 import get from 'lodash/fp/get';
-import set from 'lodash/fp/set';
 
 // Storage Variables
-const CurrentUser = "CurrentUser"; // System user
-const GoogleUser = "Gapi"; // Google user info, including token
-const UserIsLogged = "isLogged"; // User log status flag
+const CurrentUser = 'CurrentUser'; // System user
+const GoogleUser = 'Gapi'; // Google user info, including token
+const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 
 export const Storage = {

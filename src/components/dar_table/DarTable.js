@@ -7,88 +7,88 @@ import { Notifications, getDatasetNames } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import DarModal from '../modals/DarModal';
 import PaginationBar from '../PaginationBar';
-import ConfirmationModal from "../modals/ConfirmationModal";
+import ConfirmationModal from '../modals/ConfirmationModal';
 import DarElectionRecords from './DarElectionRecords';
 import ReactTooltip from 'react-tooltip';
 import * as Utils from '../../libs/utils';
-import {consoleTypes} from "./DarTableActions";
+import {consoleTypes} from './DarTableActions';
 
 ////////////////////
 //EXPORTED PARTIAL//
 ////////////////////
 export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType) => {
   return [
-    div({style: Styles.TABLE.DATA_ID_CELL, key: "data_id_cell", className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATA_ID_CELL, key: 'data_id_cell', className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.darCode',
       descendantOrder: descOrder
     })}, [
-      "DAR ID",
+      'DAR ID',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.TITLE_CELL, key: "project_title_cell", className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.TITLE_CELL, key: 'project_title_cell', className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.projectTitle',
       descendantOrder: descOrder
     })}, [
-      "Title",
+      'Title',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DATASET_CELL, key: "dataset_name_cell", className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATASET_CELL, key: 'dataset_name_cell', className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, a.dar.data.datasetIds) : '- -';
       },
       descendantOrder: descOrder
     })}, [
-      "Dataset Name",
+      'Dataset Name',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, key: "submission_date_cell", className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, key: 'submission_date_cell', className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return Utils.getElectionDate(a.election);
       },
       descendantOrder: descOrder
     })}, [
-      "Last Updated",
+      'Last Updated',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DAC_CELL, key: "dac_name_cell", className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DAC_CELL, key: 'dac_name_cell', className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dac.name',
       descendantOrder: descOrder
     })}, [
-      "DAC",
+      'DAC',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: "election_status_cell" }, [
-      "Status"
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: 'election_status_cell' }, [
+      'Status'
     ]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: 'election_actions_cell', isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ['Action'])
   ];
 };
 
 export const tableHeaderTemplate = (consoleType) =>  {
   return [
     div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
-      "DAR ID",
+      'DAR ID',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
-      "Title",
+      'Title',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
-      "Dataset Name",
+      'Dataset Name',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort'}, [
-      "Last Updated",
+      'Last Updated',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
     div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort'}, [
-      "DAC",
+      'DAC',
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ["Status"]),
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ['Status']),
     div({style: Styles.TABLE.ELECTION_ACTIONS_CELL,
-      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Action"])
+      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ['Action'])
   ];
 };
 
@@ -174,7 +174,7 @@ export default function DarTable(props) {
       setShowConfirmation(true);
       setCreateElectionInfo({id, name: darData.darCode, index});
     } else {
-      Notifications.showError({text:"Cannot open this election. Please contact us for support."});
+      Notifications.showError({text:'Cannot open this election. Please contact us for support.'});
     }
   }, []);
 
@@ -207,7 +207,7 @@ export default function DarTable(props) {
       } catch(error) {
         const errorReturn = {text: 'Error: Failed to create election!'};
         if(error.status === 500) {
-          errorReturn.text = "Email Service Error! The election was created but the participants couldnt be notified by Email.";
+          errorReturn.text = 'Email Service Error! The election was created but the participants couldnt be notified by Email.';
         }
         Notifications.showError(errorReturn);
       }
@@ -236,8 +236,8 @@ export default function DarTable(props) {
     h(ConfirmationModal, {
       showConfirmation,
       closeConfirmation,
-      title: "Open Election?",
-      message: "Are you sure you want the DAC to vote on this data access request?",
+      title: 'Open Election?',
+      message: 'Are you sure you want the DAC to vote on this data access request?',
       header: createElectionInfo.name,
       onConfirm: () => createElection(createElectionInfo.id, createElectionInfo.index)
     }),

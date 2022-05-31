@@ -3,7 +3,7 @@ import { div, i, span, b, a, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election } from '../libs/ajax';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
-import dulIcon from "../images/icon_dul.png";
+import dulIcon from '../images/icon_dul.png';
 
 class DulPreview extends Component {
 
@@ -44,8 +44,8 @@ class DulPreview extends Component {
 
   render() {
 
-    const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe", isRendered: this.state.consentPreview.groupName }, [this.state.consentPreview.groupName]),
+    const consentData = span({ className: 'consent-data' }, [
+      b({ className: 'pipe', isRendered: this.state.consentPreview.groupName }, [this.state.consentPreview.groupName]),
       this.state.consentPreview.name
     ]);
 
@@ -53,32 +53,32 @@ class DulPreview extends Component {
 
     return (
 
-      div({ className: "container container-wide" }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
+      div({ className: 'container container-wide' }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding' }, [
             PageHeading({
-              id: "previewDul",
+              id: 'previewDul',
               imgSrc: dulIcon,
-              iconSize: "medium",
-              color: "dul",
-              title: "Data Use Limitations Congruence Preview",
+              iconSize: 'medium',
+              color: 'dul',
+              title: 'Data Use Limitations Congruence Preview',
               description: consentData
             }),
           ]),
-          div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
+          div({ className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
             a({
-              id: "btn_back",
+              id: 'btn_back',
               onClick: this.back,
-              className: "btn-primary btn-back"
+              className: 'btn-primary btn-back'
             }, [
-              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
             ])
           ]),
         ]),
 
-        div({ className: "accordion-title dul-color" },
-          ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
-        hr({ className: "section-separator" }),
+        div({ className: 'accordion-title dul-color' },
+          ['Were the data use limitations in the Data Use Letter accurately converted to structured limitations?']),
+        hr({ className: 'section-separator' }),
         translatedDULStatements
       ])
     );

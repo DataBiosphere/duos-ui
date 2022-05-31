@@ -1,8 +1,8 @@
-import {isNil} from "lodash/fp";
-import {h} from "react-hyperscript-helpers";
-import ConfirmationModal from "../modals/ConfirmationModal";
-import {isCollectionCanceled} from "../../libs/utils";
-import {getProjectTitle} from "./DarCollectionTable";
+import {isNil} from 'lodash/fp';
+import {h} from 'react-hyperscript-helpers';
+import ConfirmationModal from '../modals/ConfirmationModal';
+import {isCollectionCanceled} from '../../libs/utils';
+import {getProjectTitle} from './DarCollectionTable';
 
 export default function CollectionConfirmationModal(props) {
   const {collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction} = props;

@@ -9,29 +9,29 @@ import {User} from './ajax';
 import {Config} from './config';
 
 export const UserProperties = {
-  ACADEMIC_EMAIL: "academicEmail",
-  ADDRESS1: "address1",
-  ADDRESS2: "address2",
-  CHECK_NOTIFICATIONS: "checkNotifications",
-  CITY: "city",
-  COMPLETED: "completed",
-  COUNTRY: "country",
-  DEPARTMENT: "department",
-  DIVISION: "division",
-  ERA_AUTHORIZED: "eraAuthorized",
-  ERA_EXPIRATION: "eraExpiration",
-  HAVE_PI: "havePI",
-  IS_THE_PI: "isThePI",
-  LINKEDIN : "linkedIn",
-  ORCID: "orcid",
-  PI_EMAIL: "piEmail",
-  PI_NAME: "piName",
-  PI_ERA_COMMONS_ID: "piERACommonsID",
-  PUBMED_ID: "pubmedID",
-  RESEARCHER_GATE: "researcherGate",
-  SCIENTIFIC_URL: "scientificURL",
-  STATE: "state",
-  ZIPCODE: "zipcode"
+  ACADEMIC_EMAIL: 'academicEmail',
+  ADDRESS1: 'address1',
+  ADDRESS2: 'address2',
+  CHECK_NOTIFICATIONS: 'checkNotifications',
+  CITY: 'city',
+  COMPLETED: 'completed',
+  COUNTRY: 'country',
+  DEPARTMENT: 'department',
+  DIVISION: 'division',
+  ERA_AUTHORIZED: 'eraAuthorized',
+  ERA_EXPIRATION: 'eraExpiration',
+  HAVE_PI: 'havePI',
+  IS_THE_PI: 'isThePI',
+  LINKEDIN : 'linkedIn',
+  ORCID: 'orcid',
+  PI_EMAIL: 'piEmail',
+  PI_NAME: 'piName',
+  PI_ERA_COMMONS_ID: 'piERACommonsID',
+  PUBMED_ID: 'pubmedID',
+  RESEARCHER_GATE: 'researcherGate',
+  SCIENTIFIC_URL: 'scientificURL',
+  STATE: 'state',
+  ZIPCODE: 'zipcode'
 };
 
 ///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
@@ -66,9 +66,10 @@ export const darCollectionUtils = {
             }
             return [];
           } else {
-            //if elections exist, filer out elections based on relevant ids
+            //if elections exist, filter out elections based on relevant ids
+            //only Data Access elections impact the status of the collection
             //NOTE: Admin does not have relevantIds, DAC roles do
-            const electionArr = Object.values(elections);
+            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
             if(isNil(relevantDatasets)) {
               return electionArr;
             } else {
@@ -82,13 +83,11 @@ export const darCollectionUtils = {
 
       if(isNil(relevantDatasets)) {
         each(election => {
-          const {status, electionType} = election;
-          if(toLower(electionType) === 'dataaccess') {
-            if(isNil(electionStatusCount[status])) {
-              electionStatusCount[status] = 0;
-            }
-            electionStatusCount[status]++;
+          const {status} = election;
+          if(isNil(electionStatusCount[status])) {
+            electionStatusCount[status] = 0;
           }
+          electionStatusCount[status]++;
         })(targetElections);
         output = nonFPMap(electionStatusCount, (value, key) => {
           return `${key}: ${value}`;
@@ -112,7 +111,7 @@ export const findPropertyValue = (propName, researcher) => {
   const prop = isNil(researcher.researcherProperties) ?
     null
     : find({ propertyKey: propName })(researcher.researcherProperties);
-  return isNil(prop) ? "" : prop.propertyValue;
+  return isNil(prop) ? '' : prop.propertyValue;
 };
 
 export const getPropertyValuesFromUser = (user) => {
@@ -133,8 +132,8 @@ export const getPropertyValuesFromUser = (user) => {
     isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
     linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
     orcid: findPropertyValue(UserProperties.ORCID, user),
-    piName: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
-    piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
+    piName: findPropertyValue(UserProperties.IS_THE_PI, user) === 'true' ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
+    piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === 'true' ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
     piERACommonsID: findPropertyValue(UserProperties.PI_ERA_COMMONS_ID, user),
     pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
     researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
@@ -157,13 +156,13 @@ export const highlightExactMatches = (highlightedWords, content) => {
   const regexWords = highlightedWords.map(w => '\\b' + w + '\\b');
   const regexString = '(' + regexWords.join('|') + ')';
   const regex = new RegExp(regexString, 'gi');
-  return content.replace(regex, "<span style=\"background-color: yellow\">$1</span>");
+  return content.replace(regex, '<span style=\'background-color: yellow\'>$1</span>');
 };
 
 //currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
 //go through the list of datasets and get the name of the dataset whose id is in the datasetId list
 export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
-  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({"value" : first(datasetId).toString()})(datasets) : null;
+  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({'value' : first(datasetId).toString()})(datasets) : null;
   return isNil(data) ? '- -' : getDatasetNames([data]);
 };
 
@@ -221,7 +220,7 @@ export const getDatasets = async (darDetails) => {
     datasets = resp;
   });
   datasets = datasets.map((dataset) => {
-    return find({"propertyName":"Dataset Name"})(dataset.properties);
+    return find({'propertyName':'Dataset Name'})(dataset.properties);
   });
   datasets = map(prop => prop.propertyValue)(datasets);
   return datasets;
@@ -363,7 +362,7 @@ export const Notifications = {
 
 export const NavigationUtils = {
   accessReviewPath: () => {
-    return "access_review";
+    return 'access_review';
   }
 };
 
@@ -471,18 +470,18 @@ export const wasVoteSubmitted =(vote) => {
 export const wasFinalVoteTrue = (voteData) => {
   const {type, vote} = voteData;
   //vote status capitalizes final, election status does not
-  return type === 'FINAL' && vote === true;
+  return toLower(type) === 'final' && vote === true;
 };
 
 export const processElectionStatus = (election, votes, showVotes) => {
   let output;
-  const electionStatus = election ? election.status : null;
+  const electionStatus = !isNil(get('status')(election))  ? toLower(election.status) : null;
   if (isNil(electionStatus)) {
     output = 'Unreviewed';
-  } else if(electionStatus === 'Open') {
+  } else if(electionStatus === 'open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
+      const dacVotes = filter((vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
       output = `Open${showVotes ? outputSuffix : ''}`;
@@ -490,7 +489,7 @@ export const processElectionStatus = (election, votes, showVotes) => {
   //some elections have electionStatus === Final, others have electionStatus === Closed
   //both are, in this step of the process, technically referring to a closed election
   //therefore both values must be checked for
-  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
+  } else if (electionStatus === 'final' || electionStatus === 'closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Approved' : 'Denied';
   } else {
@@ -613,7 +612,7 @@ export const getSearchFilterFunctions = () => {
           const { projectTitle = '', institution = '' } = data;
           const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
           const matched = find((phrase) => {
-            const termArr = lowerCaseTerm.split(" ");
+            const termArr = lowerCaseTerm.split(' ');
             return find(term => includes(term, phrase))(termArr);
           })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
           return !isNil(matched);
@@ -624,7 +623,7 @@ export const getSearchFilterFunctions = () => {
       const { partialDarCode, projectTitle } = data;
       const matched = find((phrase) =>
         includes(lowerCaseTerm, toLower(phrase))
-      )([partialDarCode, ...(projectTitle.split(" ")), (updateDate || createDate)]);
+      )([partialDarCode, ...(projectTitle.split(' ')), (updateDate || createDate)]);
       return !isNil(matched) && (draft !== false || draft !== 'false');
     })(targetList)
   };
@@ -698,12 +697,12 @@ export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
   let attributes;
   if(!disabled) {
-    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip, key, id: key};
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, key, id: key};
   } else {
-    attributes = {style, disabled, "data-tip": dataTip, key};
+    attributes = {style, disabled, 'data-tip': dataTip, key};
   }
   if(!isEmpty(dataTip)) {
-    attributes["data-tip"] = dataTip;
+    attributes['data-tip'] = dataTip;
   }
   return attributes;
 };
@@ -801,7 +800,7 @@ export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFil
 export const getBooleanFromEventHtmlDataValue = (e) => {
   if (!isNil(e)) {
     if (!isNil(e.target)) {
-      const dataValue = e.target.getAttribute("data-value");
+      const dataValue = e.target.getAttribute('data-value');
       if (!isNil(dataValue)) {
         return dataValue.toLowerCase() === 'true';
       }
@@ -811,7 +810,7 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
 };
 
 export const evaluateTrueString = (boolString) => {
-  return !isEmpty(boolString) && toLower(boolString) === "true";
+  return !isEmpty(boolString) && toLower(boolString) === 'true';
 };
 
 //helper method for ResearcherInfo component in DAR application page

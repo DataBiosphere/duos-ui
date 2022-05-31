@@ -82,7 +82,7 @@ export default function NewResearcherConsole(props) {
         fetchedCollections,
         setResearcherCollections,
         errorMsg,
-        'Failed to fetch DAR Collection "\n"'
+        'Failed to fetch DAR Collection \n'
       );
       handlePromise(
         fetchedDrafts,
@@ -128,7 +128,7 @@ export default function NewResearcherConsole(props) {
         head
       )(darCollection);
       if (isNil(referenceId)) {
-        throw new Error("Error: Could not find target Data Access Request");
+        throw new Error('Error: Could not find target Data Access Request');
       }
       history.push(`/dar_application/${referenceId}`);
     } catch (error) {
@@ -146,7 +146,7 @@ export default function NewResearcherConsole(props) {
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target Data Access Request");
+        throw new Error('Error: Could not find target Data Access Request');
       }
       const clonedCollections = cloneDeep(researcherCollections);
       clonedCollections[targetIndex] = canceledCollection;
@@ -167,7 +167,7 @@ export default function NewResearcherConsole(props) {
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
-        throw new Error("Error: Could not find target Data Access Request");
+        throw new Error('Error: Could not find target Data Access Request');
       }
       //add resubmitted collection to DAR Draft table
       const updatedDrafts = concat([draftCollection])(researcherDrafts);

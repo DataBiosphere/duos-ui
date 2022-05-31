@@ -39,7 +39,7 @@ export const SupportRequestModal = hh(
 
     closeHandler = () => {
       Notifications.showInformation({
-        text: `Support request canceled`,
+        text: 'Support request canceled',
         layout: 'topRight',
         timeout: 1500,
       });
@@ -90,7 +90,7 @@ export const SupportRequestModal = hh(
         const response = await Support.createSupportRequest(ticket);
         if (response.status === 201) {
           Notifications.showSuccess(
-            {text: `Sent Successfully`, layout: 'topRight', timeout: 1500}
+            {text: 'Sent Successfully', layout: 'topRight', timeout: 1500}
           );
           await this.setState(prev => {
             prev.type = 'question';

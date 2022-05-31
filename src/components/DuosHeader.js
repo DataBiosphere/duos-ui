@@ -243,7 +243,7 @@ class DuosHeader extends Component {
     }
 
     const hasTwoOrMoreRoles = () => {
-      const roleNames = uniq(map("name")(currentUser.roles));
+      const roleNames = uniq(map('name')(currentUser.roles));
       return roleNames.length >= 2;
     };
 
@@ -297,7 +297,7 @@ class DuosHeader extends Component {
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
-      id: "btn_applyAcces",
+      id: 'btn_applyAcces',
       style: {
         color: this.state.hover ? '#2FA4E7' : '#ffffff',
         fontSize: '14px',
@@ -311,7 +311,7 @@ class DuosHeader extends Component {
       onMouseEnter: this.toggleHover,
       onMouseLeave: this.toggleHover,
       onClick: this.supportRequestModal,
-      "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
+      'data-tip': 'Need help? Contact us for some assistance', 'data-for': 'tip_requestAccess'
     }, [contactUsIcon, contactUsText]);
 
     const supportrequestModal = SupportRequestModal({

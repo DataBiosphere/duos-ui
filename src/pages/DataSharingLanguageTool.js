@@ -1,11 +1,11 @@
-import {Styles} from "../libs/theme";
-import {a, br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
-import {RadioButton} from "../components/RadioButton";
-import AsyncSelect from "react-select/async/dist/react-select.esm";
-import {isNil, isEmpty, head} from "lodash/fp";
-import {Notifications, searchOntologies} from "../libs/utils";
-import {DataUseTranslation} from "../libs/dataUseTranslation";
-import {useState} from "react";
+import {Styles} from '../libs/theme';
+import {a, br, button, div, h, input, label, span, textarea} from 'react-hyperscript-helpers';
+import {RadioButton} from '../components/RadioButton';
+import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import {isNil, isEmpty, head} from 'lodash/fp';
+import {Notifications, searchOntologies} from '../libs/utils';
+import {DataUseTranslation} from '../libs/dataUseTranslation';
+import {useState} from 'react';
 
 const buttonStyle = { marginBottom: '2rem', color: '#777' };
 const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
@@ -16,7 +16,7 @@ export default function DataSharingLanguageTool() {
   const [diseases, setDiseases] = useState(false);
   const [ontologies, setOntologies] = useState([]);
   const [other, setOther] = useState(false);
-  const [otherText, setOtherText] = useState("");
+  const [otherText, setOtherText] = useState('');
   const [nmds, setNmds] = useState(false);
   const [gso, setGso] = useState(false);
   const [pub, setPub] = useState(false);
@@ -24,20 +24,20 @@ export default function DataSharingLanguageTool() {
   const [irb, setIrb] = useState(false);
   const [gs, setGs] = useState(false);
   const [npu, setNpu] = useState(false);
-  const [sdsl, setSdsl] = useState("");
+  const [sdsl, setSdsl] = useState('');
 
   const isTypeOfResearchValid = () => {
     return (general || hmb || (diseases && (!isNil(head(ontologies)))) || (other && (!isEmpty(otherText))));
   };
 
   const clearOtherTextBox = () => {
-    document.getElementById('other_text').value = "";
+    document.getElementById('other_text').value = '';
   };
 
   const generate = () => {
     isTypeOfResearchValid() ?
       generateHelper()
-      : Notifications.showError({text: "Please complete question 1"});
+      : Notifications.showError({text: 'Please complete question 1'});
   };
 
   const generateHelper = async () => {
@@ -54,8 +54,8 @@ export default function DataSharingLanguageTool() {
     let translatedDataUse = await DataUseTranslation.translateDataUseRestrictions(dataUse);
     translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
-        sdsl.push(" " + sentence.description)
-        : sdsl.push(" " + sentence);
+        sdsl.push(' ' + sentence.description)
+        : sdsl.push(' ' + sentence);
     });
     setSdsl(sdsl);
   };
@@ -63,23 +63,23 @@ export default function DataSharingLanguageTool() {
   return (
     div({style: {...Styles.PAGE, color: '#1f3b50' }}, [
       div({style: {...Styles.TITLE, marginTop: '3.5rem'}}, [
-        "Standardized Data Sharing Language Tool"
+        'Standardized Data Sharing Language Tool'
       ]),
       div({style: {...Styles.SMALL, marginTop: '1rem'}}, [
-        "This tool is made publicly available by the DUOS team for anyone" +
-        " interested in leveraging standardized data sharing language in their" +
-        " consent forms. The tool leverages the Global Alliance for Genomics " +
-        "and Health’s (GA4GH) companion standards of the ",
-        a({href: 'https://github.com/EBISPOT/DUO' , target:"_blank", rel:"noopener noreferrer"
-        }, ["Data Use Ontology (DUO)"]),
-        " and ",
+        'This tool is made publicly available by the DUOS team for anyone' +
+        ' interested in leveraging standardized data sharing language in their' +
+        ' consent forms. The tool leverages the Global Alliance for Genomics ' +
+        'and Health’s (GA4GH) companion standards of the ',
+        a({href: 'https://github.com/EBISPOT/DUO' , target:'_blank', rel:'noopener noreferrer'
+        }, ['Data Use Ontology (DUO)']),
+        ' and ',
         a({href: 'https://drive.google.com/file/d/102_I0_phOGs9YSmPx7It9CSt1sHFJ87C/view', target: '_blank', rel: 'noreferrer noopener'
         }, ['Machine Readable Consent Guidance (MRCG)']),
-        ". The DUO is a structured vocabulary describing permitted data uses and " +
-        "the MRCG is a suggested representation of those uses in consent form language. " +
-        "This tool enables users to easily define what types of data use they would " +
-        "like permitted in their consent forms and then suggests corresponding text " +
-        "for the consent form below, based on the MRCG."
+        '. The DUO is a structured vocabulary describing permitted data uses and ' +
+        'the MRCG is a suggested representation of those uses in consent form language. ' +
+        'This tool enables users to easily define what types of data use they would ' +
+        'like permitted in their consent forms and then suggests corresponding text ' +
+        'for the consent form below, based on the MRCG.'
       ]),
       div({className: 'form-group', style: {marginTop: '1rem'}}, [
         label({style: Styles.MEDIUM}, [
@@ -275,7 +275,7 @@ export default function DataSharingLanguageTool() {
             style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
             className: 'button',
             onClick: () => generate(),
-          }, ["Generate Standardized Data Sharing Language"]),
+          }, ['Generate Standardized Data Sharing Language']),
           textarea({
             defaultValue: sdsl,
             className: 'form-control',

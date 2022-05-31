@@ -1,9 +1,9 @@
-import {includes, isEmpty, isNil, toLower} from "lodash/fp";
-import {formatDate} from "../../libs/utils";
-import {h} from "react-hyperscript-helpers";
-import {styles} from "./DarCollectionTable";
-import AdminActions from "./AdminActions";
-import ChairActions from "./ChairActions";
+import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
+import {formatDate} from '../../libs/utils';
+import {h} from 'react-hyperscript-helpers';
+import {styles} from './DarCollectionTable';
+import AdminActions from './AdminActions';
+import ChairActions from './ChairActions';
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
 import {Link} from 'react-router-dom';

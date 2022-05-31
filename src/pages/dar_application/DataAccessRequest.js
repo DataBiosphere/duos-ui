@@ -33,7 +33,7 @@ const uploadFileDescription = {
   paddingBottom: '1.5rem'
 };
 
-const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
+const errorBackgroundColor = 'rgba(243, 73, 73, 0.19)';
 
 //NOTE: need to change props to account for file locations for previous uploaded file
 export default function DataAccessRequest(props) {
@@ -606,7 +606,7 @@ export default function DataAccessRequest(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
               span({className: 'rp-choice-questions',style: uploadFileDescription
               }, [
-                `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
+                'One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.'
               ])
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
