@@ -6,7 +6,7 @@ import './App.css';
 import { Config } from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
-import DuosNavigation from './components/DuosNavigation';
+import DuosHeaderOld from './components/DuosHeaderOld';
 import {useHistory} from 'react-router-dom';
 import loadingImage from './images/loading-indicator.svg';
 
@@ -75,8 +75,8 @@ function App() {
 
   // TODO: Remove this when all the new navigation features are available
   const header = localStorage.getItem('feature-flag:navstyle') === 'DUOS-1668'
-    ? h(DuosNavigation, { onSignOut: signOut })
-    : h(DuosHeader, { onSignOut: signOut });
+    ? h(DuosHeader, { onSignOut: signOut })
+    : h(DuosHeaderOld, { onSignOut: signOut });
 
   return (
     div({ className: 'body' }, [
