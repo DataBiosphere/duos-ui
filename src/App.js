@@ -74,7 +74,7 @@ function App() {
   };
 
   // TODO: Remove this when all the new navigation features are available
-  const header = localStorage.getItem('feature-flag:navstyle') === 'DUOS-1668'
+  const header = localStorage.getItem('feature-flag:navstyle') === 'DUOS-1668' //eslint-disable-line
     ? h(DuosHeader, { onSignOut: signOut })
     : h(DuosHeaderOld, { onSignOut: signOut });
 
