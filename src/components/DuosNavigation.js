@@ -1,4 +1,4 @@
-import {Component, Fragment, useState} from 'react';
+import {Component, Fragment, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
@@ -182,8 +182,13 @@ const NavigationTabsComponent = (props) => {
     contactUsButton, supportrequestModal,
     tabs, initialTab, initialSubTab
   } = props;
-  const [selectedMenuTab, setSelectedMenuTab] = useState(initialTab !== -1 ? initialTab : false);
-  const [selectedSubTab, setSelectedSubTab] = useState(initialSubTab !== -1 ? initialSubTab : false);
+  const [selectedMenuTab, setSelectedMenuTab] = useState(false);
+  const [selectedSubTab, setSelectedSubTab] = useState(false);
+
+  useEffect(() => {
+    setSelectedMenuTab(initialTab === -1 ? false : initialTab);
+    setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab);
+  }, [initialTab, initialSubTab]);
 
   return (div({
     isRendered: true, className: 'navbar-logged'
