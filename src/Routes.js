@@ -101,6 +101,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
+    {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
