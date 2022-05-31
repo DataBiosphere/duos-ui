@@ -1,21 +1,21 @@
-import {useState, useEffect, useCallback} from "react";
-import {Notifications} from "../libs/utils";
-import {div, a, h, img} from "react-hyperscript-helpers";
-import {Styles} from "../libs/theme";
-import SigningOfficialTable from "../components/signing_official_table/SigningOfficialTable";
-import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
-import SelectableText from "../components/SelectableText";
-import {tableHeaderTemplate, tableRowLoadingTemplate} from "../components/dar_table/DarTable";
-import DarTable from "../components/dar_table/DarTable";
-import lockIcon from "../images/lock-icon.png";
-import SearchBar from "../components/SearchBar";
-import {darSearchHandler, processElectionStatus, getElectionDate, updateLists as updateListsInit} from "../libs/utils";
-import {User, DAR, Collections} from "../libs/ajax";
-import {consoleTypes} from "../components/dar_table/DarTableActions";
-import { USER_ROLES } from "../libs/utils";
-import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
-import { Config } from "../libs/config";
-import { DarCollectionTableColumnOptions, DarCollectionTable } from "../components/dar_collection_table/DarCollectionTable";
+import {useState, useEffect, useCallback} from 'react';
+import {Notifications} from '../libs/utils';
+import {div, a, h, img} from 'react-hyperscript-helpers';
+import {Styles} from '../libs/theme';
+import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
+import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
+import SelectableText from '../components/SelectableText';
+import {tableHeaderTemplate, tableRowLoadingTemplate} from '../components/dar_table/DarTable';
+import DarTable from '../components/dar_table/DarTable';
+import lockIcon from '../images/lock-icon.png';
+import SearchBar from '../components/SearchBar';
+import {darSearchHandler, processElectionStatus, getElectionDate, updateLists as updateListsInit} from '../libs/utils';
+import {User, DAR, Collections} from '../libs/ajax';
+import {consoleTypes} from '../components/dar_table/DarTableActions';
+import { USER_ROLES } from '../libs/utils';
+import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
+import { Config } from '../libs/config';
+import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 
 const tabs = {
   custodian: 'Data Submitter',
@@ -83,13 +83,13 @@ export default function SigningOfficialConsole(props) {
 
   return (
     div({style: Styles.PAGE}, [
-      div({ isRendered: !isLoading, style: {display: "flex"}}, [
-        div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
-          div({style: Styles.TITLE}, ["Welcome " +signingOfficial.displayName+ "!"]),
+      div({ isRendered: !isLoading, style: {display: 'flex'}}, [
+        div({style: {...Styles.HEADER_CONTAINER, paddingTop: '3rem', paddingBottom: '2rem'}}, [
+          div({style: Styles.TITLE}, ['Welcome ' +signingOfficial.displayName+ '!']),
           div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, [
-            "Your researchers and their submitted Data Access requests are below. ",
+            'Your researchers and their submitted Data Access requests are below. ',
             a({
-              rel: "noopener noreferrer",
+              rel: 'noopener noreferrer',
               href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
               target: '_blank',
               id: 'so-console-info-link'},
@@ -138,8 +138,8 @@ export default function SigningOfficialConsole(props) {
           actionsDisabled: true
         }, [])
       ]),
-      div({style: {display: 'flex', justifyContent: "space-between"}}, [
-        div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
@@ -148,9 +148,9 @@ export default function SigningOfficialConsole(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ["Data Access Requests"]),
+            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ['Data Access Requests']),
             div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
-              "Your Institution's DARs: Records from all current and closed data access requests.",
+              'Your Institution\'s DARs: Records from all current and closed data access requests.',
             ]),
           ])
         ]),

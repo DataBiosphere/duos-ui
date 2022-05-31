@@ -4,13 +4,13 @@ import {a, div, fieldset, form, h, h3, hr, input, label, span, textarea} from 'r
 import Select from 'react-select';
 import {PageHeading} from '../components/PageHeading';
 import AsyncSelect from 'react-select/async';
-import {Styles} from "../libs/theme";
+import {Styles} from '../libs/theme';
 import addDatasetIcon from '../images/icon_dataset_add.png';
-import {Theme} from "../libs/theme";
-import {useState, useEffect} from "react";
-import { searchOntologies } from "../libs/utils";
-import DataProviderAgreement from "../assets/Data_Provider_Agreement.pdf";
-import eraIcon from "../images/era-commons-logo.png";
+import {Theme} from '../libs/theme';
+import {useState, useEffect} from 'react';
+import { searchOntologies } from '../libs/utils';
+import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
+import eraIcon from '../images/era-commons-logo.png';
 
 export default function NIHICWebform() {
   const [multicenter, setMulticenter] = useState();
@@ -18,14 +18,14 @@ export default function NIHICWebform() {
   const [gsrControlledAccess, setGsrControlledAccess] = useState();
   const [altDataSharing, setAltDataSharing] = useState();
   const [consentGroups, setConsentGroups] = useState([]);
-  const [currentConsentName, setCurrentConsentName] = useState("");
+  const [currentConsentName, setCurrentConsentName] = useState('');
   const [currentConsentGeneral, setCurrentConsentGeneral] = useState();
   const [currentConsentHmb, setCurrentConsentHmb] = useState();
   const [currentConsentDisease, setCurrentConsentDisease] = useState();
   const [currentConsentOntologies, setCurrentConsentOntologies] = useState();
   const [currentConsentPoa, setCurrentConsentPoa] = useState();
   const [currentConsentOther, setCurrentConsentOther] = useState();
-  const [currentConsentOtherText, setCurrentConsentOtherText] = useState("");
+  const [currentConsentOtherText, setCurrentConsentOtherText] = useState('');
   const [currentConsentNMDS, setCurrentConsentNMDS] = useState();
   const [currentConsentGSO, setCurrentConsentGSO] = useState();
   const [currentConsentPUB, setCurrentConsentPUB] = useState();
@@ -36,7 +36,7 @@ export default function NIHICWebform() {
   const [currentConsentNPOA, setCurrentConsentNPOA] = useState();
   const [currentConsentNPU, setCurrentConsentNPU] = useState();
   const [currentConsentOther2, setCurrentConsentOther2] = useState();
-  const [currentConsentOtherText2, setCurrentConsentOtherText2] = useState("");
+  const [currentConsentOtherText2, setCurrentConsentOtherText2] = useState('');
   const [submissionThreeMonths, setSubmissionThreeMonths] = useState();
   const [submissionBatches, setSubmissionBatches] = useState();
   const [meetTimelines, setMeetTimelines] = useState();
@@ -59,27 +59,27 @@ export default function NIHICWebform() {
   };
 
 
-  const nihCenterList = ["National Cancer Institute (NCI)",
-    "National Eye Institute (NEI)",
-    "National Heart, Lung, and Blood Institute (NHLBI)",
-    "National Human Genome Research Institute (NHGRI)",
-    "National Institute on Aging (NIA)",
-    "National Institute on Alcohol Abuse and Alcoholism (NIAAA)",
-    "National Institute of Allergy and Infectious Diseases (NIAID)",
-    "National Institute of Arthritis and Musculoskeletal and Skin Diseases (NIAMS)",
-    "National Institute of Biomedical Imaging and Bioengineering (NIBIB)",
-    "Eunice Kennedy Shriver National Institute of Child Health and Human Development (NICHD)",
-    "National Institute on Deafness and Other Communication Disorders (NIDCD)",
-    "National Institute of Dental and Craniofacial Research (NIDCR)",
-    "National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK)",
-    "National Institute on Drug Abuse (NIDA)",
-    "National Institute of Environmental Health Sciences (NIEHS)",
-    "National Institute of General Medical Sciences (NIGMS)",
-    "National Institute of Mental Health (NIMH)",
-    "National Institute on Minority Health and Health Disparities (NIMHD)",
-    "National Institute of Neurological Disorders and Stroke (NINDS)",
-    "National Institute of Nursing Research (NINR)",
-    "National Library of Medicine (NLM)"];
+  const nihCenterList = ['National Cancer Institute (NCI)',
+    'National Eye Institute (NEI)',
+    'National Heart, Lung, and Blood Institute (NHLBI)',
+    'National Human Genome Research Institute (NHGRI)',
+    'National Institute on Aging (NIA)',
+    'National Institute on Alcohol Abuse and Alcoholism (NIAAA)',
+    'National Institute of Allergy and Infectious Diseases (NIAID)',
+    'National Institute of Arthritis and Musculoskeletal and Skin Diseases (NIAMS)',
+    'National Institute of Biomedical Imaging and Bioengineering (NIBIB)',
+    'Eunice Kennedy Shriver National Institute of Child Health and Human Development (NICHD)',
+    'National Institute on Deafness and Other Communication Disorders (NIDCD)',
+    'National Institute of Dental and Craniofacial Research (NIDCR)',
+    'National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK)',
+    'National Institute on Drug Abuse (NIDA)',
+    'National Institute of Environmental Health Sciences (NIEHS)',
+    'National Institute of General Medical Sciences (NIGMS)',
+    'National Institute of Mental Health (NIMH)',
+    'National Institute on Minority Health and Health Disparities (NIMHD)',
+    'National Institute of Neurological Disorders and Stroke (NINDS)',
+    'National Institute of Nursing Research (NINR)',
+    'National Library of Medicine (NLM)'];
 
   const nihCenterOptions = nihCenterList.map(function(item) {
     return {
@@ -88,8 +88,8 @@ export default function NIHICWebform() {
     };
   });
 
-  const studyTypesList = ["Collection", "Longitudinal", "Case-control", "Case set", "Control set",
-    "Parent-offspring trios", "Cohort"];
+  const studyTypesList = ['Collection', 'Longitudinal', 'Case-control', 'Case set', 'Control set',
+    'Parent-offspring trios', 'Cohort'];
 
   const studyTypeOptions = studyTypesList.map(function(item) {
     return {
@@ -107,20 +107,20 @@ export default function NIHICWebform() {
       setCurrentConsentOntologies([]);
       setCurrentConsentPoa(false);
       setCurrentConsentOther(false);
-      setCurrentConsentOtherText("");
-      if (primaryUse === "GRU") {
+      setCurrentConsentOtherText('');
+      if (primaryUse === 'GRU') {
         setCurrentConsentGeneral(true);
       }
-      if (primaryUse === "HMB") {
+      if (primaryUse === 'HMB') {
         setCurrentConsentHmb(true);
       }
-      if (primaryUse === "DIS") {
+      if (primaryUse === 'DIS') {
         setCurrentConsentDisease(true);
       }
-      if (primaryUse === "POA") {
+      if (primaryUse === 'POA') {
         setCurrentConsentPoa(true);
       }
-      if (primaryUse === "Other") {
+      if (primaryUse === 'Other') {
         setCurrentConsentOther(true);
       }
     }
@@ -128,23 +128,23 @@ export default function NIHICWebform() {
 
   const createConsent = () => {
     const getPrimaryUse = () => {
-      var primaryUse = "";
+      var primaryUse = '';
       if (currentConsentGeneral) {
-        primaryUse = primaryUse.concat("General Research Use: use is permitted for any research purpose");
+        primaryUse = primaryUse.concat('General Research Use: use is permitted for any research purpose');
       }
       if (currentConsentHmb) {
-        primaryUse = primaryUse.concat("Health/Medical/Biomedical Use: use is permitted for any health, medical, or biomedical purpose");
+        primaryUse = primaryUse.concat('Health/Medical/Biomedical Use: use is permitted for any health, medical, or biomedical purpose');
       }
       if (currentConsentDisease) {
-        primaryUse = primaryUse.concat("Disease-related studies: use is permitted for research on the specified diseases [");
+        primaryUse = primaryUse.concat('Disease-related studies: use is permitted for research on the specified diseases [');
         (currentConsentOntologies).forEach((ont) => primaryUse = primaryUse.concat(ont.label));
-        primaryUse = primaryUse.concat("]");
+        primaryUse = primaryUse.concat(']');
       }
       if (currentConsentPoa) {
-        primaryUse = primaryUse.concat("Populations, Origins, Ancestry Use: use is permitted exclusively for populations, origins, or ancestry research");
+        primaryUse = primaryUse.concat('Populations, Origins, Ancestry Use: use is permitted exclusively for populations, origins, or ancestry research');
       }
       if (currentConsentOther) {
-        primaryUse = primaryUse.concat("Other Use: permitted research use is defined as follows: ");
+        primaryUse = primaryUse.concat('Other Use: permitted research use is defined as follows: ');
         primaryUse = primaryUse.concat(currentConsentOtherText);
       }
       return primaryUse;
@@ -153,37 +153,37 @@ export default function NIHICWebform() {
     const getSecondaryUse = () => {
       var secondaryUse = [];
       if (currentConsentNMDS) {
-        secondaryUse.push("No methods development or validation studies (NMDS)");
+        secondaryUse.push('No methods development or validation studies (NMDS)');
       }
       if (currentConsentGSO) {
-        secondaryUse.push("Genetic Studies Only (GSO)");
+        secondaryUse.push('Genetic Studies Only (GSO)');
       }
       if (currentConsentPUB) {
-        secondaryUse.push("Publication Required (PUB)");
+        secondaryUse.push('Publication Required (PUB)');
       }
       if (currentConsentCOL) {
-        secondaryUse.push("Collaboration Required (COL)");
+        secondaryUse.push('Collaboration Required (COL)');
       }
       if (currentConsentIRB) {
-        secondaryUse.push("Ethics Approval Required (IRB)");
+        secondaryUse.push('Ethics Approval Required (IRB)');
       }
       if (currentConsentGS) {
-        secondaryUse.push("Geographic Restriction (GS-)");
+        secondaryUse.push('Geographic Restriction (GS-)');
       }
       if (currentConsentMOR) {
-        secondaryUse.push("Publication Moratorium (MOR)");
+        secondaryUse.push('Publication Moratorium (MOR)');
       }
       if (currentConsentNPOA) {
-        secondaryUse.push("No Populations Origins or Ancestry Research (NPOA)");
+        secondaryUse.push('No Populations Origins or Ancestry Research (NPOA)');
       }
       if (currentConsentNPU) {
-        secondaryUse.push("Non-Profit Use Only (NPU)");
+        secondaryUse.push('Non-Profit Use Only (NPU)');
       }
       if (currentConsentOther2) {
-        secondaryUse.push("Other Secondary Use Terms: ");
+        secondaryUse.push('Other Secondary Use Terms: ');
         secondaryUse.push(currentConsentOtherText2);
       }
-      secondaryUse = secondaryUse.join(", ");
+      secondaryUse = secondaryUse.join(', ');
       return secondaryUse;
     };
 
@@ -195,14 +195,14 @@ export default function NIHICWebform() {
 
     const groups = consentGroups;
     groups.push(consent);
-    setCurrentConsentName("");
+    setCurrentConsentName('');
     setCurrentConsentGeneral(false);
     setCurrentConsentHmb(false);
     setCurrentConsentDisease(false);
     setCurrentConsentOntologies([]);
     setCurrentConsentPoa(false);
     setCurrentConsentOther(false);
-    setCurrentConsentOtherText("");
+    setCurrentConsentOtherText('');
     setCurrentConsentNMDS(false);
     setCurrentConsentGSO(false);
     setCurrentConsentPUB(false);
@@ -213,7 +213,7 @@ export default function NIHICWebform() {
     setCurrentConsentNPOA(false);
     setCurrentConsentNPU(false);
     setCurrentConsentOther2(false);
-    setCurrentConsentOtherText2("");
+    setCurrentConsentOtherText2('');
     setConsentGroups(groups);
   };
 
@@ -617,7 +617,7 @@ export default function NIHICWebform() {
                         isClearable: true,
                         isMulti: false,
                         isSearchable: true,
-                        options: [{value: "Valentina Di Francesco", label: "Valentina Di Francesco"}, {value:"Ken Wiley", label: "Ken Wiley"}],
+                        options: [{value: 'Valentina Di Francesco', label: 'Valentina Di Francesco'}, {value:'Ken Wiley', label: 'Ken Wiley'}],
                         placeholder: 'Select a Program Officer...',
                         className: '',
                         required: true,
@@ -671,7 +671,7 @@ export default function NIHICWebform() {
                         isClearable: true,
                         isMulti: false,
                         isSearchable: true,
-                        options: [{value:"Jennifer Strasburger", label:"Jennifer Strasburger"}],
+                        options: [{value:'Jennifer Strasburger', label:'Jennifer Strasburger'}],
                         placeholder: 'Select a Genomic Program Administrator...',
                         className: '',
                         required: true,
@@ -930,7 +930,7 @@ export default function NIHICWebform() {
                               },
                               id: 'checkGeneral',
                               defaultChecked: currentConsentGeneral,
-                              onClick: () => setPrimaryUse("GRU", currentConsentGeneral),
+                              onClick: () => setPrimaryUse('GRU', currentConsentGeneral),
                               label: 'General Research Use: ',
                               description: 'use is permitted for any research purpose',
                               disabled: false,
@@ -943,7 +943,7 @@ export default function NIHICWebform() {
                               id: 'checkHmb',
                               label: 'Health/Medical/Biomedical Use: ',
                               defaultChecked: currentConsentHmb,
-                              onClick: () => setPrimaryUse("HMB", currentConsentHmb),
+                              onClick: () => setPrimaryUse('HMB', currentConsentHmb),
                               description: 'use is permitted for any health, medical, or biomedical purpose',
                               disabled: false,
                             }),
@@ -954,7 +954,7 @@ export default function NIHICWebform() {
                               },
                               id: 'checkDisease',
                               defaultChecked: currentConsentDisease,
-                              onClick: () => setPrimaryUse("DIS", currentConsentDisease),
+                              onClick: () => setPrimaryUse('DIS', currentConsentDisease),
                               label: 'Disease-related studies: ',
                               description: 'use is permitted for research on the specified disease',
                               disabled: false,
@@ -983,7 +983,7 @@ export default function NIHICWebform() {
                             },
                             id: 'checkPoa',
                             defaultChecked: currentConsentPoa,
-                            onClick: () => setPrimaryUse("POA", currentConsentPoa),
+                            onClick: () => setPrimaryUse('POA', currentConsentPoa),
                             label: 'Populations, Origins, Ancestry Use: ',
                             description: 'use is permitted exclusively for populations, origins, or ancestry research',
                             disabled: false,
@@ -995,7 +995,7 @@ export default function NIHICWebform() {
                             },
                             id: 'checkOther',
                             defaultChecked: currentConsentOther,
-                            onClick: () => setPrimaryUse("Other", currentConsentOther),
+                            onClick: () => setPrimaryUse('Other', currentConsentOther),
                             label: 'Other Use:',
                             description: 'permitted research use is defined as follows: ',
                             disabled: false

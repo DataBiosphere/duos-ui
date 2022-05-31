@@ -27,7 +27,7 @@ export default function TermsOfServiceAcceptance(props) {
   }, [history]);
 
   const acceptButton = h(SimpleButton, {
-    keyProp: `tos-accept`,
+    keyProp: 'tos-accept',
     label: 'Accept Terms of Service',
     isRendered: true,
     onClick: acceptToS,
@@ -47,7 +47,7 @@ export default function TermsOfServiceAcceptance(props) {
   };
 
   const rejectButton = h(SimpleButton, {
-    keyProp: `tos-accept`,
+    keyProp: 'tos-accept',
     label: 'Reject Terms of Service',
     isRendered: true,
     onClick: signOut,

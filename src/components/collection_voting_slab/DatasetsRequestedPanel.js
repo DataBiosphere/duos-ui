@@ -1,6 +1,6 @@
-import {a, div, h, span} from "react-hyperscript-helpers";
-import {useCallback, useEffect, useState} from "react";
-import {isNil, filter, includes, map} from "lodash/fp";
+import {a, div, h, span} from 'react-hyperscript-helpers';
+import {useCallback, useEffect, useState} from 'react';
+import {isNil, filter, includes, map} from 'lodash/fp';
 
 const styles = {
   baseStyle: {

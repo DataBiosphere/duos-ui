@@ -1,7 +1,7 @@
-import { h, div } from "react-hyperscript-helpers";
+import { h, div } from 'react-hyperscript-helpers';
 import { useEffect, useState } from 'react';
-import { toLower, isEmpty, flow, flatMap, map, filter, toUpper, any, isNil } from "lodash/fp";
-import { Storage } from "../../libs/storage";
+import { toLower, isEmpty, flow, flatMap, map, filter, toUpper, any, isNil } from 'lodash/fp';
+import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
 const duosBlue = '#0948B7';

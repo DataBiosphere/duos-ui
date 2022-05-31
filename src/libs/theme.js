@@ -74,8 +74,8 @@ export const Styles = {
     }
   },
   PAGE: {
-    width: "90%",
-    margin: "0 auto"
+    width: '90%',
+    margin: '0 auto'
   },
   TITLE: {
     fontFamily: targetFont,
@@ -158,7 +158,7 @@ export const Styles = {
   },
   HEADER_CONTAINER: {
     display: 'flex',
-    flexDirection: "column"
+    flexDirection: 'column'
   },
   ICON_CONTAINER: {
     flexBasis: '76px',
@@ -173,7 +173,7 @@ export const Styles = {
   LEFT_HEADER_SECTION: {
     display: 'flex',
     flexDirection: 'row',
-    paddingTop: "3rem"
+    paddingTop: '3rem'
   },
   TABLE: {
     CONTAINER: {
@@ -218,79 +218,79 @@ export const Styles = {
       backgroundColor: '#e2eef9'
     },
     DATA_REQUEST_TEXT: {
-      color: "#00609F",
+      color: '#00609F',
       fontWeight: Theme.font.weight.semibold
     },
     //NOTE: play around with the cell measurements
     TITLE_CELL: {
-      width: "18%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '18%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
       wordBreak: 'break-word',
-      margin: "0 1%"
+      margin: '0 1%'
     },
     DATASET_CELL: {
-      width: "18%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center"
+      width: '18%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center'
     },
     DATA_ID_CELL: {
-      width: "14%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center"
+      width: '14%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center'
     },
     SUBMISSION_DATE_CELL: {
-      width: "12%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '12%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     DAC_CELL: {
-      width: "8%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '8%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     ELECTION_STATUS_CELL: {
       color: '#7B7B7B',
       fontWeight: Theme.font.weight.medium,
-      width: "12%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '12%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     ELECTION_ACTIONS_CELL: {
-      width: "16%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '16%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     ID_CELL: {
-      width: "2%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      width: '2%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     INSTITUTION_CELL: {
-      maxWidth: "25%",
-      minWidth: "25%",
-      margin: "0 1%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
+      maxWidth: '25%',
+      minWidth: '25%',
+      margin: '0 1%',
+      display: 'flex',
+      justifyContent: 'left',
+      alignItems: 'center',
     },
     FOOTER: {
-      backgroundColor: "#f3f6f7",
+      backgroundColor: '#f3f6f7',
       fontSize: '14px',
       fontFamily: targetFont,
       display: 'flex',
@@ -301,7 +301,7 @@ export const Styles = {
       borderBottomRightRadius: 'inherit'
     },
     FOOTER_SECTION: {
-      width: "100%",
+      width: '100%',
       display: 'flex',
       justifyContent: 'center'
     },
@@ -412,19 +412,19 @@ export const Styles = {
   },
   MODAL: {
     CONTENT: {
-      height: "auto",
-      top: "20%",
-      bottom: "20%",
-      left: "20%",
-      right: "20%",
+      height: 'auto',
+      top: '20%',
+      bottom: '20%',
+      left: '20%',
+      right: '20%',
       fontFamily: targetFont,
-      padding: "2%"
+      padding: '2%'
     },
     CONFIRMATION: {
-      height: "250px",
-      inset: "20%",
+      height: '250px',
+      inset: '20%',
       fontFamily: targetFont,
-      padding: "2%"
+      padding: '2%'
     },
     DAR_SUBHEADER: {
       display: 'flex',
@@ -432,7 +432,7 @@ export const Styles = {
       fontSize: '16px',
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
-      color: "#1F3B50"
+      color: '#1F3B50'
     },
     TITLE_HEADER: {
       display: 'flex',
@@ -441,7 +441,7 @@ export const Styles = {
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
       marginBottom: '4%',
-      color: "#1F3B50"
+      color: '#1F3B50'
     },
     DAR_DETAIL_ROW: {
       padding: '0 3%',
@@ -450,20 +450,20 @@ export const Styles = {
       justifyContent: 'space-between'
     },
     DAR_LABEL: {
-      color: "#1F3B50",
+      color: '#1F3B50',
       fontSize: '14px',
       fontWeight: Theme.font.weight.semibold,
-      width: "25%",
+      width: '25%',
       textAlign: 'right'
     },
     DAR_DETAIL: {
       fontSize: '16px',
       fontWeight: Theme.font.weight.regular,
-      width: "70%"
+      width: '70%'
     }
   },
   ALERT: {
-    fontSize: "15px",
-    textAlign: "center"
+    fontSize: '15px',
+    textAlign: 'center'
   }
 };

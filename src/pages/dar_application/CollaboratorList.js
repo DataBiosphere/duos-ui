@@ -94,7 +94,7 @@ export default function CollaboratorList(props) {
           div({
             isRendered: !deleteBoolArray[index],
             className: 'btn btn-danger',
-            role: "button",
+            role: 'button',
             onClick: () => toggleDeleteBool(index, true)
           }, [
             i({className: 'glyphicon glyphicon-trash'})
@@ -103,14 +103,14 @@ export default function CollaboratorList(props) {
             isRendered: deleteBoolArray[index],
             className: 'confirm-delete-btn btn btn-danger',
             style: confirmDeleteButtonStyle,
-            role: "button",
+            role: 'button',
             onClick: () => removeCollaborator(index)
           },['Delete Member']),
           div({
             isRendered: deleteBoolArray[index],
             className: 'cancel-delete-btn btn',
             style: cancelDeleteButtonStyle,
-            role: "button",
+            role: 'button',
             onClick: () => toggleDeleteBool(index, false)
           }, ['Cancel'])
         ])
@@ -171,32 +171,32 @@ export default function CollaboratorList(props) {
       div({ className: 'row', isRendered: showApproval }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
           p({ className: 'control-label rp-choice-questions'},[
-            `Are you requesting permission for this member of the Internal Lab Staff to be given "Designated Download/Approval" status? This
+            `Are you requesting permission for this member of the Internal Lab Staff to be given 'Designated Download/Approval' status? This
             indication should be limited to individuals who the PI designates to download data and/or share the requested data with other Internal
             Lab Staff (i.e., staff members and trainees under the direct supervision of the PI)`
           ]),
           div({className: 'radio-inline'}, [
             [{label:'Yes', value: true}, {label:'No', value: false}].map((option) =>
               label({
-                className: "radio-wrapper",
+                className: 'radio-wrapper',
                 key: `collaborator-${collaborator.uuid}-option-${option.value}`,
                 id: `lbl-collaborator-${collaborator.uuid}-option-${option.value}`,
                 htmlFor: `rad-collaborator-${collaborator.uuid}-option-${option.value}`
               }, [
                 input({
-                  type: "radio",
+                  type: 'radio',
                   id: `rad-collaborator-${collaborator.uuid}-option-${option.value}`,
                   checked: collaborator.approverStatus === option.value,
                   name: `collaborator-${collaborator.uuid}-approver-status`,
                   value: option.value,
                   onChange: () => updateAttribute(index, 'approverStatus', option.value)
                 }),
-                span({ className: "radio-check"}),
+                span({ className: 'radio-check'}),
                 span({ className: 'radio-label '}, [option.label])
               ])
             )
           ]),
-          p({className: 'control-label rp-choice-questions'}, [`Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as their Internal Lab Staff.`])
+          p({className: 'control-label rp-choice-questions'}, ['Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as their Internal Lab Staff.'])
         ])
       ]),
     ])
@@ -206,12 +206,12 @@ export default function CollaboratorList(props) {
     div({className: 'collaborator-list-component'}, [
       ListItems,
       div({className: 'row no-margin'}, [
-        div({className: 'col-lg-12 col-md-12 col-sm-12-col-xs-12', style: {marginTop: "1rem"}}, [
+        div({className: 'col-lg-12 col-md-12 col-sm-12-col-xs-12', style: {marginTop: '1rem'}}, [
           a({
             id: 'add-collaborator-btn access-background',
             onClick: () => !props.disabled && addCollaborator(),
             className: 'btn-primary f-right access-background',
-            role: "button",
+            role: 'button',
             disabled: props.disabled
           },[
             span({ className: 'glyphicon glyphicon-plus', 'aria-hidden': 'true'}),

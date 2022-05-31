@@ -5,12 +5,12 @@ import { SubmitTriVoteBox } from '../components/SubmitTriVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
 import { DAR, DataSet, Consent, Votes } from '../libs/ajax';
-import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import datasetReviewIcon from "../images/icon_dataset_review.png";
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import datasetReviewIcon from '../images/icon_dataset_review.png';
 
-const APPROVE = "1";
-const DISAPPROVE = "0";
-const HAS_CONCERNS = "2";
+const APPROVE = '1';
+const DISAPPROVE = '0';
+const HAS_CONCERNS = '2';
 
 class DataOwnerReview extends Component {
 
@@ -254,23 +254,23 @@ class DataOwnerReview extends Component {
 
     return (
 
-      div({ className: "container container-wide" }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "dataOwnerReview", imgSrc: datasetReviewIcon, iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
+      div({ className: 'container container-wide' }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
+            PageHeading({ id: 'dataOwnerReview', imgSrc: datasetReviewIcon, iconSize: 'large', color: 'dataset', title: 'Dataset Access Request Review', description: 'Should data access be granted to this applicant?' }),
           ]),
         ]),
-        hr({ className: "section-separator" }),
+        hr({ className: 'section-separator' }),
 
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+        div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dataset-color" }, [
-              h4({}, ["Research Purpose",
+          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
+            div({ className: 'panel-heading cm-boxhead dataset-color' }, [
+              h4({}, ['Research Purpose',
                 a({
-                  className: "enabled hover-color application-link",
+                  className: 'enabled hover-color application-link',
                   onClick: this.openApplication
-                }, ["Application summary"]),
+                }, ['Application summary']),
               ]),
               ApplicationSummaryModal({
                 dataRequestId: this.props.match.params.referenceId,
@@ -279,13 +279,13 @@ class DataOwnerReview extends Component {
                 onCloseRequest: this.closeApplicationSummaryModal
               }),
             ]),
-            div({ id: "rp", className: "panel-body cm-boxbody" }, [this.state.darFields.rus]),
+            div({ id: 'rp', className: 'panel-body cm-boxbody' }, [this.state.darFields.rus]),
           ]),
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dataset-color" }, [
-              h4({}, ["Data Use Limitations",
-                a({ className: "enabled hover-color application-link", onClick: this.openDataset }, ["Dataset summary"]),
+          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
+            div({ className: 'panel-heading cm-boxhead dataset-color' }, [
+              h4({}, ['Data Use Limitations',
+                a({ className: 'enabled hover-color application-link', onClick: this.openDataset }, ['Dataset summary']),
               ]),
               DatasetSummaryModal({
                 isRendered: this.state.showDatasetSummaryModal,
@@ -298,21 +298,21 @@ class DataOwnerReview extends Component {
           ])
         ]),
 
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-          div({ className: "jumbotron box-vote" }, [
+        div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12' }, [
+          div({ className: 'jumbotron box-vote' }, [
             SubmitTriVoteBox({
-              id: "dataOwnerReview",
-              color: "dataset",
-              title: "Your Vote",
+              id: 'dataOwnerReview',
+              color: 'dataset',
+              title: 'Your Vote',
               isDisabled: this.state.isFormDisabled,
               voteStatus: this.fixValue(this.state.vote.vote),
-              radioType: "multiple",
-              radioLabels: ['Approve', "Disapprove", "Raise a concern"],
+              radioType: 'multiple',
+              radioLabels: ['Approve', 'Disapprove', 'Raise a concern'],
               radioValues: ['1', '0', '2'],
               showAlert: this.state.showError,
-              alertMessage: "Error updating vote.",
+              alertMessage: 'Error updating vote.',
               rationale: this.state.vote.rationale,
-              action: { label: "Vote", handler: this.submitVote },
+              action: { label: 'Vote', handler: this.submitVote },
               key: this.state.vote.voteId
             }),
           ]),
@@ -323,11 +323,11 @@ class DataOwnerReview extends Component {
           showModal: this.state.showConfirmDialog,
           type: 'informative',
           action: {
-            label: "Ok",
+            label: 'Ok',
             handler: this.dialogHandlerCreate
           }
         }, [
-          div({className: "dialog-description"}, [span({}, [this.state.alertMessage]),
+          div({className: 'dialog-description'}, [span({}, [this.state.alertMessage]),
           ])
         ]),
       ])

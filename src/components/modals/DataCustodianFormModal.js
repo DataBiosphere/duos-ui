@@ -42,7 +42,7 @@ const FormFieldRow = (props) => {
       });
     }
     setFilteredDropdown(filteredCopy);
-    if (action !== 'input-blur' && action !== `menu-close`) {
+    if (action !== 'input-blur' && action !== 'menu-close') {
       setUser(Object.assign({}, user, { email: searchTerm }));
     }
   };

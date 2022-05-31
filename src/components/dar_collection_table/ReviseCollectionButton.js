@@ -1,6 +1,6 @@
-import {h} from "react-hyperscript-helpers";
-import SimpleButton from "../SimpleButton";
-import {Theme} from "../../libs/theme";
+import {h} from 'react-hyperscript-helpers';
+import SimpleButton from '../SimpleButton';
+import {Theme} from '../../libs/theme';
 
 export default function ReviseCollectionButton(props) {
   const { collection } = props;

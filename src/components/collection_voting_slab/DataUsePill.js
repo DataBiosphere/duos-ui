@@ -1,5 +1,5 @@
-import {div, span} from "react-hyperscript-helpers";
-import {isNil} from "lodash";
+import {div, span} from 'react-hyperscript-helpers';
+import {isNil} from 'lodash';
 
 const styles = {
   baseStyle: {

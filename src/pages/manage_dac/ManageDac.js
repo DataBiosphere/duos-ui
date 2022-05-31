@@ -11,15 +11,15 @@ import {DAC} from '../../libs/ajax';
 import {Storage} from '../../libs/storage';
 import {contains, filter, reverse, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
-import TableIconButton from "../../components/TableIconButton";
-import {Delete} from "@material-ui/icons";
-import {Notifications} from "../../libs/utils";
-import {Styles} from "../../libs/theme";
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import TableIconButton from '../../components/TableIconButton';
+import {Delete} from '@material-ui/icons';
+import {Notifications} from '../../libs/utils';
+import {Styles} from '../../libs/theme';
 
 const limit = 10;
-const CHAIR = "Chairperson";
-const ADMIN = "Admin";
+const CHAIR = 'Chairperson';
+const ADMIN = 'Admin';
 const actionButtonStyle = { width: '40%', marginRight: '1rem' };
 
 class ManageDac extends Component {
@@ -139,7 +139,7 @@ class ManageDac extends Component {
       status = resp.status;
     });
     if (status === 200) {
-      Notifications.showSuccess({text: "DAC successfully deleted."});
+      Notifications.showSuccess({text: 'DAC successfully deleted.'});
       this.setState(prev => {
         prev.showConfirmationModal = false;
         prev.currentPage = 1;
@@ -147,7 +147,7 @@ class ManageDac extends Component {
       });
       await this.fetchDacList();
     } else {
-      Notifications.showError({text: "DAC could not be deleted."});
+      Notifications.showError({text: 'DAC could not be deleted.'});
     }
   };
 
@@ -350,7 +350,7 @@ class ManageDac extends Component {
                       onClick: () => this.editDac(dac)
                     }, ['Edit']),
                     h(TableIconButton, {
-                      key: `delete-dac-icon`,
+                      key: 'delete-dac-icon',
                       dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
                       isRendered: userRole === ADMIN,
                       disabled: disabled,
@@ -400,8 +400,8 @@ class ManageDac extends Component {
           h(ConfirmationModal, {
             showConfirmation: this.state.showConfirmationModal,
             closeConfirmation: this.closeConfirmation,
-            title: "Delete DAC?",
-            message: "Are you sure you want to delete this Data Access Committee?",
+            title: 'Delete DAC?',
+            message: 'Are you sure you want to delete this Data Access Committee?',
             header: this.state.selectedDac.name,
             onConfirm: () => this.handleDeleteDac(),
           }),

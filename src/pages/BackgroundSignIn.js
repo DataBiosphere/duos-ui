@@ -11,7 +11,7 @@ export default function BackgroundSignIn(props) {
   const location = useLocation();
   const history = useHistory();
   const queryParams = new URLSearchParams(location.search);
-  let token = queryParams.get("token");
+  let token = queryParams.get('token');
   let { onSignIn, onError, bearerToken } = props;
   token = bearerToken || (token || '');
   let [loading, setLoading] = useState(token && token !== '');
@@ -103,7 +103,7 @@ export default function BackgroundSignIn(props) {
       }
     }, [
       div({ className: 'form-group' }, [
-        div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
+        div({ className: 'col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold' }, [
           div({
             isRendered: invalidToken,
             style: { backgroundColor: '#FCEDEB', color: '#D13B07' },

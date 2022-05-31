@@ -156,7 +156,7 @@ export const highlightExactMatches = (highlightedWords, content) => {
   const regexWords = highlightedWords.map(w => '\\b' + w + '\\b');
   const regexString = '(' + regexWords.join('|') + ')';
   const regex = new RegExp(regexString, 'gi');
-  return content.replace(regex, '<span style="background-color: yellow">$1</span>');
+  return content.replace(regex, '<span style=\'background-color: yellow\'>$1</span>');
 };
 
 //currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
@@ -741,6 +741,9 @@ export const getColumnSort = (getList, callback) => {
   };
 };
 
+//each item in the list is an array of metadata representing a single table row
+//the metadata for each cell needs a data (exactly what is displayed in the table)
+//or value (string or number alternative) property which determines sorting
 export const sortVisibleTable = ({ list = [], sort }) => {
   // Sort: { dir, colIndex }
   if (!sort || sort.colIndex === undefined) {
@@ -748,8 +751,8 @@ export const sortVisibleTable = ({ list = [], sort }) => {
   }
   else {
     return list.sort((a, b) => {
-      const aVal = a[sort.colIndex].data;
-      const bVal = b[sort.colIndex].data;
+      const aVal = a[sort.colIndex].value || a[sort.colIndex].data;
+      const bVal = b[sort.colIndex].value || b[sort.colIndex].data;
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {

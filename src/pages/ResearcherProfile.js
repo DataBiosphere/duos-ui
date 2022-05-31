@@ -81,7 +81,7 @@ export default function ResearcherProfile(props) {
   useEffect(() => {
     const isValidState = (value) => {
       const stateSelected = (!isNil(value) && !isEmpty(value));
-      const inUS = (profile.country === "United States of America" || profile.country === "");
+      const inUS = (profile.country === 'United States of America' || profile.country === '');
       if (inUS && stateSelected) {
         return true;
       }
@@ -286,8 +286,8 @@ export default function ResearcherProfile(props) {
   };
 
   const generateCountryNames = () => {
-    const USA = option({ value: "United States of America"}, ["United States of America"]);
-    const empty = option({ value: ""}, [""]);
+    const USA = option({ value: 'United States of America'}, ['United States of America']);
+    const empty = option({ value: ''}, ['']);
     const countryNames = getNames().map((name) => option({value: name}, [name]));
     const index = countryNames.indexOf(USA);
     countryNames.splice(index, 1);
@@ -297,9 +297,9 @@ export default function ResearcherProfile(props) {
   };
 
   const generateStateNames = () => {
-    const empty = option({ value: ""}, [""]);
+    const empty = option({ value: ''}, ['']);
     const UsaStates = require('usa-states').UsaStates;
-    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    const stateNames = (new UsaStates().arrayOf('names')).map((name) => option({value: name}, [name]));
     stateNames.splice(0, 0, empty);
     setStateNames(stateNames);
   };
@@ -429,7 +429,7 @@ export default function ResearcherProfile(props) {
                 }),
                 span({
                   className: 'cancel-color required-field-error-span',
-                  isRendered: (!isNil(profile.additionalEmail) && profile.additionalEmail !== "" && !isEmailAddress(profile.additionalEmail))
+                  isRendered: (!isNil(profile.additionalEmail) && profile.additionalEmail !== '' && !isEmailAddress(profile.additionalEmail))
                 }, ['Email Address has invalid format'])
               ])
             ]),
@@ -504,8 +504,8 @@ export default function ResearcherProfile(props) {
                   span({
                     className: 'glyphicon glyphicon-question-sign tooltip-icon',
                     'data-tip': (isSigningOfficial && !isNil(profile.institutionId)) ?
-                      'As a "Signing Official", your institution cannot be changed here. Please submit a support request via the "Contact Us" form to have it changed.' :
-                      'If your preferred institution cannot be found, please submit a support request via the "Contact Us" form to have it added.',
+                      'As a \'Signing Official\', your institution cannot be changed here. Please submit a support request via the \'Contact Us\' form to have it changed.' :
+                      'If your preferred institution cannot be found, please submit a support request via the \'Contact Us\' form to have it added.',
                     'data-for': 'tip_profileState',
                   })
                 ]),

@@ -23,7 +23,7 @@ const styles = {
     fontWeight: 400
   },
   darCode: {
-    borderRight: "2px solid black",
+    borderRight: '2px solid black',
     paddingRight: '0.5rem'
   },
   containerRow: {
@@ -53,7 +53,7 @@ export default function ReviewHeader(props) {
     h(Fragment, {}, [
       div({className: 'header-container', isRendered: !isLoading}, [
         div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
-          span({style: styles.header}, ["Data Access Request Review"]),
+          span({style: styles.header}, ['Data Access Request Review']),
           redirectLink
         ]),
         div({className: 'secondary-header-row', style: styles.containerRow}, [

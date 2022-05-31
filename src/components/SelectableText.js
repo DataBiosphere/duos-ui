@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { div } from "react-hyperscript-helpers";
+import { useState, useEffect, useMemo } from 'react';
+import { div } from 'react-hyperscript-helpers';
 
 const defaultUnselectedStyle = {
   fontSize: '1.8rem',

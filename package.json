@@ -5,7 +5,7 @@
   "dependencies": {
     "@material-ui/core": "4.12.4",
     "@material-ui/icons": "4.11.3",
-    "@react-pdf/renderer": "^2.1.1",
+    "@react-pdf/renderer": "^2.1.2",
     "axios": "^0.27.2",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
@@ -51,7 +51,7 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "7.17.0",
+    "@babel/eslint-parser": "7.18.2",
     "@babel/eslint-plugin": "7.17.7",
     "@babel/plugin-proposal-class-properties": "7.17.12",
     "@babel/preset-react": "7.17.12",

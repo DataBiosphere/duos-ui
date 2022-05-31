@@ -60,7 +60,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
 
     return div({style: HEADING}, [
       img({
-        id: this.props.id + "_icon",
+        id: this.props.id + '_icon',
         isRendered: this.props.imgSrc !== undefined,
         src: this.props.imgSrc,
         alt: this.props.title,
@@ -68,11 +68,11 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
       }),
       div({style: MARGINS}, [
         h2({
-          id: this.props.id + "_title",
-          className: this.props.color + "-color",
+          id: this.props.id + '_title',
+          className: this.props.color + '-color',
           style: TITLE
         }, [this.props.title]),
-        span({id: this.props.id + "_description", style: DESCRIPTION}, [this.props.description]),
+        span({id: this.props.id + '_description', style: DESCRIPTION}, [this.props.description]),
       ])
     ]);
   }

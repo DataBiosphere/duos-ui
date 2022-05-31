@@ -14,7 +14,7 @@ import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
-import { searchOntologies } from "../libs/utils";
+import { searchOntologies } from '../libs/utils';
 import { searchOntology, extractDOIDFromUrl } from '../libs/ontologyService';
 
 class DatasetRegistration extends Component {
@@ -82,7 +82,7 @@ class DatasetRegistration extends Component {
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.getDatasets();
     const allDatasetNames = allDatasets.map(d => {
-      let name = d.properties.find(p => p.propertyName === "Dataset Name");
+      let name = d.properties.find(p => p.propertyName === 'Dataset Name');
       return name.propertyValue;
     });
     const dacs = await DAC.list();
@@ -131,16 +131,16 @@ class DatasetRegistration extends Component {
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
-    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
-    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
-    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
-    let species = fp.find({propertyName: "Species"})(dataset.properties);
-    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
-    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
-    let description = fp.find({propertyName: "Description"})(dataset.properties);
-    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
-    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
-    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
+    let name = fp.find({propertyName: 'Dataset Name'})(dataset.properties);
+    let collectionId = fp.find({propertyName: 'Sample Collection ID'})(dataset.properties);
+    let dataType = fp.find({propertyName: 'Data Type'})(dataset.properties);
+    let species = fp.find({propertyName: 'Species'})(dataset.properties);
+    let phenotype = fp.find({propertyName: 'Phenotype/Indication'})(dataset.properties);
+    let nrParticipants = fp.find({propertyName: '# of participants'})(dataset.properties);
+    let description = fp.find({propertyName: 'Description'})(dataset.properties);
+    let datasetRepoUrl = fp.find({propertyName: 'dbGAP'})(dataset.properties);
+    let researcher = fp.find({propertyName: 'Data Depositor'})(dataset.properties);
+    let pi = fp.find({propertyName: 'Principal Investigator(PI)'})(dataset.properties);
     let needsApproval = dataset.needsApproval;
     let dac = fp.find({dacId: dataset.dacId})(this.state.dacList);
 
@@ -317,7 +317,7 @@ class DatasetRegistration extends Component {
     }
     // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
-      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
+      let updateDatasetName = fp.find(p => p.propertyName === 'Dataset Name', this.state.updateDataset.properties).propertyValue;
       if (name === updateDatasetName) {
         return 'form-control';
       }
@@ -544,34 +544,34 @@ class DatasetRegistration extends Component {
     let formData = this.state.datasetData;
 
     if (formData.datasetName) {
-      properties.push({"propertyName": "Dataset Name", "propertyValue": formData.datasetName});
+      properties.push({'propertyName': 'Dataset Name', 'propertyValue': formData.datasetName});
     }
     if (formData.collectionId) {
-      properties.push({"propertyName": "Sample Collection ID", "propertyValue": formData.collectionId});
+      properties.push({'propertyName': 'Sample Collection ID', 'propertyValue': formData.collectionId});
     }
     if (formData.dataType) {
-      properties.push({"propertyName": "Data Type", "propertyValue": formData.dataType});
+      properties.push({'propertyName': 'Data Type', 'propertyValue': formData.dataType});
     }
     if (formData.species) {
-      properties.push({"propertyName": "Species", "propertyValue": formData.species});
+      properties.push({'propertyName': 'Species', 'propertyValue': formData.species});
     }
     if (formData.phenotype) {
-      properties.push({"propertyName": "Phenotype/Indication", "propertyValue": formData.phenotype});
+      properties.push({'propertyName': 'Phenotype/Indication', 'propertyValue': formData.phenotype});
     }
     if (formData.nrParticipants) {
-      properties.push({"propertyName": "# of participants", "propertyValue": formData.nrParticipants});
+      properties.push({'propertyName': '# of participants', 'propertyValue': formData.nrParticipants});
     }
     if (formData.description) {
-      properties.push({"propertyName": "Description", "propertyValue": formData.description});
+      properties.push({'propertyName': 'Description', 'propertyValue': formData.description});
     }
     if (formData.datasetRepoUrl) {
-      properties.push({"propertyName": "dbGAP", "propertyValue": formData.datasetRepoUrl});
+      properties.push({'propertyName': 'dbGAP', 'propertyValue': formData.datasetRepoUrl});
     }
     if (formData.researcher) {
-      properties.push({"propertyName": "Data Depositor", "propertyValue": formData.researcher});
+      properties.push({'propertyName': 'Data Depositor', 'propertyValue': formData.researcher});
     }
     if (formData.principalInvestigator) {
-      properties.push({"propertyName": "Principal Investigator(PI)", "propertyValue": formData.principalInvestigator});
+      properties.push({'propertyName': 'Principal Investigator(PI)', 'propertyValue': formData.principalInvestigator});
     }
 
     return properties;
@@ -752,7 +752,7 @@ class DatasetRegistration extends Component {
                   div({ isRendered: problemLoadingUpdateDataset, className: 'rp-alert' }, [
                     Alert({
                       id: 'problemLoadingUpdateDataset', type: 'danger',
-                      title: "The Dataset you were trying to access either does not exist or you do not have permission to edit it."
+                      title: 'The Dataset you were trying to access either does not exist or you do not have permission to edit it.'
                     })
                   ]),
                   h3({ className: 'rp-form-title dataset-color' }, ['1. Dataset Information']),

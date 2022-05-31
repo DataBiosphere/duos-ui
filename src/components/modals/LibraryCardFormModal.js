@@ -35,14 +35,14 @@ const FormFieldRow = (props) => {
       });
     }
     setFilteredDropdown(filteredCopy);
-    if(action !== 'input-blur' && action !== `menu-close`) {
+    if(action !== 'input-blur' && action !== 'menu-close') {
       setCard(Object.assign({}, card, { email: searchTerm }));
     }
   };
 
   if(!isNil(updateInstitution)) {
     //first template for institution selection
-    template = div({style: {marginBottom: "2%"}}, [
+    template = div({style: {marginBottom: '2%'}}, [
       label({}, ['Institution']),
       h(SearchSelect, {
         id: `${label}-form-field`,
@@ -68,7 +68,7 @@ const FormFieldRow = (props) => {
           options: dropdownOptions,
           placeholder: 'Select or type a new user email',
           isOptionSelected: () => false, //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-          getOptionLabel: (option) => `${option.displayName || 'New User'} (${option.email || "No email provided"})` || option.email
+          getOptionLabel: (option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email
         })
       ]);
     } else {

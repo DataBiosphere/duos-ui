@@ -17,7 +17,7 @@ import {
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
-import MultiDatasetVotingTab from "./MultiDatasetVotingTab";
+import MultiDatasetVotingTab from './MultiDatasetVotingTab';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -210,6 +210,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: false,
+        readOnly: props.readOnly,
         isLoading
       }),
       h(MultiDatasetVotingTab, {
@@ -218,6 +219,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: true,
+        readOnly: props.readOnly,
         isLoading
       })
     ])

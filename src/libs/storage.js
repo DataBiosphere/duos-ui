@@ -1,9 +1,9 @@
 
 // Storage Variables
 
-const CurrentUser = "CurrentUser"; // System user
-const GoogleUser = "Gapi"; // Google user info, including token
-const UserIsLogged = "isLogged"; // User log status flag
+const CurrentUser = 'CurrentUser'; // System user
+const GoogleUser = 'Gapi'; // Google user info, including token
+const UserIsLogged = 'isLogged'; // User log status flag
 
 export const Storage = {
   clearStorage: () => {

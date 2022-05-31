@@ -6,7 +6,7 @@ import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
-import CollectionConfirmationModal from "./CollectionConfirmationModal";
+import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
@@ -137,7 +137,7 @@ const columnHeaderConfig = {
     label: 'Institution',
     cellStyle: { width: styles.cellWidth.institution },
     cellDataFn: (props) => {
-      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? "- -" : props.createUser.institution.name;
+      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? '- -' : props.createUser.institution.name;
       return cellData.institutionCellData(props);
     },
     sortable: true
@@ -151,10 +151,7 @@ const columnHeaderConfig = {
   status: {
     label: 'Status',
     cellStyle: { width: styles.cellWidth.status },
-    cellDataFn: (props) => {
-      props.status = determineCollectionStatus(props.collection, props.relevantDatasets);
-      return cellData.statusCellData(props);
-    },
+    cellDataFn: cellData.statusCellData,
     sortable: true
   },
   actions: {
@@ -178,9 +175,10 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
+      const status = determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          collection, darCollectionId, datasets, darCode,
+          collection, darCollectionId, datasets, darCode, status,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
           openCollection, goToVote, reviewCollection, relevantDatasets
@@ -255,11 +253,11 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   return h(Fragment, {}, [
     h(SimpleTable, {
       isLoading,
-      "rowData": visibleCollection,
-      "columnHeaders": columnHeaderData(columns),
+      'rowData': visibleCollection,
+      'columnHeaders': columnHeaderData(columns),
       styles,
       tableSize: tableSize,
-      "paginationBar": h(PaginationBar, {
+      'paginationBar': h(PaginationBar, {
         pageCount,
         currentPage,
         tableSize,
