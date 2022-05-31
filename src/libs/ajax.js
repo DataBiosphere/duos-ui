@@ -369,11 +369,12 @@ export const DAR = {
     return res.data;
   },
 
-  getDarModalSummary: async (darId) => {
-    const url = `${await Config.getApiUrl()}/api/dar/modalSummary/${darId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
+  // TODO: Deprecate API!!!!!
+  // getDarModalSummary: async (darId) => {
+  //   const url = `${await Config.getApiUrl()}/api/dar/modalSummary/${darId}`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return await res.json();
+  // },
 
   requiresManualReview: (object) => {
     var manualReview = false;
@@ -525,10 +526,11 @@ export const Election = {
     return await res.json();
   },
 
-  downloadDatasetVotesForDARElection: async (requestId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election/dataSetVotes`;
-    return getFile(url, 'datasetVotesSummary.txt');
-  },
+  // TODO: Deprecate API!!!!!
+  // downloadDatasetVotesForDARElection: async (requestId) => {
+  //   const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election/dataSetVotes`;
+  //   return getFile(url, 'datasetVotesSummary.txt');
+  // },
 
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/api/electionReview?referenceId=${referenceId}&type=${type}`;
@@ -777,11 +779,12 @@ export const PendingCases = {
     return await res.json();
   },
 
-  findDataOwnerUnReviewed: async (dataOwnerId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
+  // TODO: Deprecate API!!!!!
+  // findDataOwnerUnReviewed: async (dataOwnerId) => {
+  //   const url = `${await Config.getApiUrl()}/api/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return await res.json();
+  // },
 
   findSummary: async () => {
     const consentUrl = `${await Config.getApiUrl()}/api/consent/cases/summary`;
@@ -988,11 +991,12 @@ export const Votes = {
     return await res.json();
   },
 
-  getDarVote: async (requestId, voteId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
+  // TODO: Deprecate API!!!!!
+  // getDarVote: async (requestId, voteId) => {
+  //   const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/${voteId}`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return res.json();
+  // },
 
   postDarVote: async (requestId, vote) => {
     const postObject = {};
