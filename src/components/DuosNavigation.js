@@ -194,7 +194,7 @@ const NavigationTabsComponent = (props) => {
     isRendered: true, className: 'navbar-logged'
   }, [
     ul({ className: 'navbar-main' }, [
-      div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start' } }, [
+      div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
         makeNotifications(),
         h(Link, {
           id: 'link_logo',
@@ -245,7 +245,7 @@ const NavigationTabsComponent = (props) => {
               ]
             ),
           ]),
-          li({ style: { padding: 0 } }, [
+          li({}, [
             a(
               {
                 id: 'link_help',
@@ -269,7 +269,7 @@ const NavigationTabsComponent = (props) => {
 
       // Navbar right side
       div({ isRendered: isLogged, style: { display: 'flex', alignItems: 'center' } }, [
-        li({ className: 'dropdown help-li', style: { marginRight: 100 } }, [
+        li({ className: 'dropdown help-li', style: { marginRight: 100, padding: 0 } }, [
           a(
             {
               id: 'sel_requestHelp',
@@ -472,7 +472,7 @@ class DuosHeader extends Component {
     const duosLogoImage = {
       height: '50px',
       padding: '0',
-      margin: '12px 64px 0 0',
+      marginRight: 30,
       cursor: 'pointer'
     };
 

@@ -24,6 +24,14 @@
   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
 }
 
+.navbar-duos.navbar-duos-new .navbar-brand {
+  margin: 0;
+}
+
+.navbar-duos.navbar-duos-new li {
+  padding: 0;
+}
+
 /* ------------------------------------- */
 /*    MUI Overrides                      */
 /* ------------------------------------- */
