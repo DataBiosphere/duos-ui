@@ -2,6 +2,7 @@ import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import {isNil, isEmpty, find, flow, get, isEqual} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
+import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
@@ -9,6 +10,7 @@ import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const { determineCollectionStatus } = darCollectionUtils;
+const storageDarCollectionSort = 'storageDarCollectionSort';
 export const getProjectTitle = ((collection) => {
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
@@ -188,11 +190,26 @@ const processCollectionRowData = ({ collections, openCollection, showConfirmatio
   }
 };
 
+const getInitialSort = (columns = []) => {
+  const sort = Storage.getCurrentUserSettings(storageDarCollectionSort) || {
+    field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    dir: -1
+  };
+  const sortIndex = columns.indexOf(sort.field);
+
+  if (sortIndex !== -1) {
+    return { colIndex: sortIndex, dir: sort.dir};
+  }
+  else {
+    return { colIndex: 0, dir: 1 };
+  }
+};
+
 export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
+  const [sort, setSort] = useState(getInitialSort(props.columns));
   const [tableSize, setTableSize] = useState(10);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState({});
@@ -201,6 +218,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
     openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
   } = props;
+
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -265,7 +283,13 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         changeTableSize
       }),
       sort,
-      onSort: setSort
+      onSort: (sort) => {
+        Storage.setCurrentUserSettings(storageDarCollectionSort, {
+          field: columns[sort.colIndex],
+          dir: sort.dir
+        });
+        setSort(sort);
+      }
     }),
     /*
       Modal needs to be more flexible
