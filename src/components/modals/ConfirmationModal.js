@@ -8,30 +8,33 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 
 const ConfirmationModal = (props) => {
-  const {showConfirmation, closeConfirmation, title, message, header, onConfirm} = props;
+  const {showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {}} = props;
   const closeFn = () => closeConfirmation();
+
+  const duosBlue = 'rgb(0, 96, 159)';
+  const duosBlueHover = 'rgb(9,72,183)';
 
   const SecondaryButton = styled(Button)(() => ({
     fontFamily: 'Montserrat, sans-serif',
-    color: 'rgb(0, 96, 159)',
+    color: duosBlue,
     backgroundColor: 'white',
     borderRadius: '4px',
     fontSize: '1.45rem',
-    borderColor: 'rgb(0, 96, 159)',
+    borderColor: duosBlue,
     '&:hover': {
-      borderColor: 'rgb(52,156,224)',
-      color: 'rgb(52,156,224)'
+      borderColor: duosBlueHover,
+      color: duosBlueHover
     },
   }));
 
   const PrimaryButton = styled(Button)(({theme}) => ({
     fontFamily: 'Montserrat, sans-serif',
-    color: theme.palette.getContrastText('rgb(0, 96, 159)'),
-    backgroundColor: 'rgb(0, 96, 159)',
+    color: theme.palette.getContrastText(duosBlue),
+    backgroundColor: duosBlue,
     borderRadius: '4px',
     fontSize: '1.45rem',
     '&:hover': {
-      backgroundColor: 'rgb(52,156,224)',
+      backgroundColor: duosBlueHover,
     },
   }));
 
@@ -43,7 +46,8 @@ const ConfirmationModal = (props) => {
   return h(Modal, {
     isOpen: showConfirmation,
     shouldCloseOnOverlayClick: true,
-    className: 'confirmation-modal'
+    className: 'confirmation-modal',
+    style: styleOverride
   }, [
     div({}, [
       h(CloseIconComponent, {closeFn}),
