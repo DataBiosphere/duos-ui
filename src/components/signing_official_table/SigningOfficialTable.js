@@ -436,7 +436,7 @@ export default function SigningOfficialTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      styleOverride: {minWidth: '700px', minHeight: '450px'},
+      styleOverride: {minWidth: '725px', minHeight: '475px'},
       message:
         confirmType === 'delete'
           ? div({}, [confirmationModalMsg])
