@@ -62,17 +62,14 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const rpBucket = flow(
-    filter(bucket => get('isRP')(bucket)),
-    filter (bucket => !isEmpty(extractUserRPVotesFromBucket(bucket, user, false)))
-  )(buckets);
+  const containsUserRpVote = (bucket) => {
+    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
+  };
+  const containsUserDataAccessVote = (bucket) => {
+    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+  };
 
-  const dataAccessBuckets = flow(
-    filter(bucket => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false))),
-    sortBy(bucket => get('key')(bucket))
-  )(buckets);
-
-  return [...rpBucket, ...dataAccessBuckets];
+  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
 export default function DarCollectionReview(props) {
