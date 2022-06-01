@@ -31,7 +31,7 @@ const styles = {
     padding: '0 25px',
     fontSize: '16px',
     textTransform: 'none',
-    fontFamily: '\'Montserrat\', sans-serif',
+    fontFamily: 'Montserrat, sans-serif',
     minHeight: '80px',
     color: 'rgba(255, 255, 255, 0.7)',
   },
