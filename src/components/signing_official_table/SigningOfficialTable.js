@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import { h, div, img } from 'react-hyperscript-helpers';
+import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
@@ -396,7 +396,15 @@ export default function SigningOfficialTable(props) {
             style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             }),
-          },['My Institution\'s Researchers. Issue or Remove Researcher privileges below.']),
+          },[
+            'My Institution\'s Researchers. Issue or Remove Researcher privileges below. ',
+            a({
+              rel: 'noopener noreferrer',
+              href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
+              target: '_blank',
+              id: 'so-console-info-link'},
+            ['Click Here for more information'])
+          ]),
         ]),
       ]),
       h(SearchBar, { handleSearchChange, searchRef }),

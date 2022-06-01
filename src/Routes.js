@@ -3,7 +3,6 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import { USER_ROLES } from './libs/utils';
-import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
@@ -27,7 +26,10 @@ import ResearcherConsole from './pages/ResearcherConsole';
 import NewResearcherConsole from './pages/NewResearcherConsole';
 import ResearcherProfile from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
-import SigningOfficialConsole from './pages/SigningOfficialConsole';
+import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
+import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
+import SigningOfficialDarCollections from './pages/SigningOfficialDarCollections';
+import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
 import ReviewedCases from './pages/ReviewedCases';
 import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
@@ -66,7 +68,6 @@ const Routes = (props) => (
     <Route path="/tos" component={TermsOfService} />
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
-    <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_edit_user/:dacUserId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
@@ -100,7 +101,10 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/researchers" component={SigningOfficialResearchers} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/dar_requests" component={SigningOfficialDarRequests} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/dar_collections" component={SigningOfficialDarCollections} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={SigningOfficialDataSubmitters} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
