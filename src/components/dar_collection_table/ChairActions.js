@@ -136,7 +136,8 @@ export default function ChairActions(props) {
       const { dacUserId } = user;
       const elections = flow(
         map((dar) => dar.elections),
-        flatMap((electionMap) => Object.values(electionMap))
+        flatMap((electionMap) => Object.values(electionMap)),
+        filter((election) => toLower(election.electionType) === 'dataaccess')
       )(dars);
       init({ dars, dacUserId, elections, relevantDatasets });
     } catch (error) {
