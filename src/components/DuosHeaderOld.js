@@ -82,7 +82,7 @@ const DropdownComponent = (props) => {
     return keys.map((label) => {
       const linkData = links[label];
       return h(MenuItem, {
-        onClick: () => goToLink(linkData.link),
+        onClick: () => goToLink(linkData.link), // eslint-disable-line
         alignItems: 'center',
         id: `menu-link-${label}`,
         isRendered: linkData.isRendered,
