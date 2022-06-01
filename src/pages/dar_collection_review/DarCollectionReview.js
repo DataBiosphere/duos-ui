@@ -9,7 +9,7 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets
@@ -62,14 +62,9 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const containsUserRpVote = (bucket) => {
-    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
-  };
-  const containsUserDataAccessVote = (bucket) => {
-    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
-  };
+  const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
 
-  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
+  return filter(bucket => get('isRP')(bucket) || containsVotesByUser(bucket))(buckets);
 };
 
 export default function DarCollectionReview(props) {
