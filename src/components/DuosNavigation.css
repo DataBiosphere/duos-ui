@@ -1,7 +1,9 @@
-.navbar-duos.navbar-duos-new {
-  padding: 0;
-  box-shadow: none;
-  background: transparent;
+@media screen and (min-width: 1280px) {
+  .navbar-duos.navbar-duos-new {
+    padding: 0;
+    box-shadow: none;
+    background: transparent;
+  }
 }
 
 .navbar-duos .navbar-main {
@@ -37,4 +39,18 @@
 /* ------------------------------------- */
 .duos-navigation-box .MuiTabs-indicator {
   height: 5px;
+}
+
+.duos-navigation-box.navbar-main .MuiTabs-scrollButtons .MuiSvgIcon-root {
+  color: white;
+  height: 2rem;
+  width: 2rem;
+  font-weight: bold;
+}
+
+.duos-navigation-box.navbar-sub .MuiTabs-scrollButtons .MuiSvgIcon-root {
+  color: #00609f;
+  height: 2rem;
+  width: 2rem;
+  font-weight: bold;
 }

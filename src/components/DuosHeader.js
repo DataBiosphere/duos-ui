@@ -206,10 +206,10 @@ const NavigationTabsComponent = (props) => {
         h(Box, { isRendered: isLogged, className: 'duos-navigation-box' }, [
           h(Tabs, {
             value: selectedMenuTab,
+            variant: 'scrollable',
+            scrollButtons: 'auto',
             TabIndicatorProps: {
-              style: {
-                background: '#2BBD9B'
-              }
+              style: { background: '#2BBD9B' }
             }
           }, tabs.map((tab, tabIndex) => {
             return h(Tab, {
@@ -321,6 +321,8 @@ const NavigationTabsComponent = (props) => {
     tabs[selectedMenuTab]?.children && h(Box, { className: 'duos-navigation-box navbar-sub' }, [
       h(Tabs, {
         value: selectedSubTab,
+        variant: 'scrollable',
+        scrollButtons: 'auto',
         TabIndicatorProps: {
           style: { background: '#00609f' }
         }
@@ -520,7 +522,17 @@ class DuosHeader extends Component {
           { label: 'DACs', link: '/manage_dac' },
           { label: 'Statistics', link: '/summary_votes' },
           { label: 'Users', link: '/admin_manage_users' },
-          { label: 'Institutions', link: '/admin_manage_institutions' }
+          { label: 'Institutions', link: '/admin_manage_institutions' },
+          { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
+          { label: 'Dataset Catalog', link: '/dataset_catalog' },
+          { label: 'DACs', link: '/manage_dac' },
+          { label: 'Statistics', link: '/summary_votes' },
+          { label: 'Users', link: '/admin_manage_users' },{ label: 'DAR Requests', link: '/admin_manage_dar_collections' },
+          { label: 'Dataset Catalog', link: '/dataset_catalog' },
+          { label: 'DACs', link: '/manage_dac' },
+          { label: 'Statistics', link: '/summary_votes' },
+          { label: 'Users', link: '/admin_manage_users' },
+
         ]
       },
       isSigningOfficial && {
@@ -550,7 +562,7 @@ class DuosHeader extends Component {
       }
       if (tab.children) {
         initialSubTab = tab.children.findIndex((subtab) => {
-          return subtab.link === location.pathname;
+          return subtab.link === location.pathname || location.pathname.includes(subtab.search);
         });
 
         return initialSubTab !== -1;
@@ -584,6 +596,7 @@ class DuosHeader extends Component {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
+              alignItems: 'center'
             },
           },
           [
