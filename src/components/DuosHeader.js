@@ -261,7 +261,7 @@ const NavigationTabsComponent = (props) => {
 
       // Navbar right side
       div({ isRendered: isLogged, style: { display: 'flex', alignItems: 'center' } }, [
-        li({ className: 'dropdown help-li', style: { marginRight: 100, padding: 0 } }, [
+        li({ className: 'dropdown help-li', style: { margin: '0 40px', padding: 0 } }, [
           a(
             {
               id: 'sel_requestHelp',
@@ -522,17 +522,7 @@ class DuosHeader extends Component {
           { label: 'DACs', link: '/manage_dac' },
           { label: 'Statistics', link: '/summary_votes' },
           { label: 'Users', link: '/admin_manage_users' },
-          { label: 'Institutions', link: '/admin_manage_institutions' },
-          { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-          { label: 'Dataset Catalog', link: '/dataset_catalog' },
-          { label: 'DACs', link: '/manage_dac' },
-          { label: 'Statistics', link: '/summary_votes' },
-          { label: 'Users', link: '/admin_manage_users' },{ label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-          { label: 'Dataset Catalog', link: '/dataset_catalog' },
-          { label: 'DACs', link: '/manage_dac' },
-          { label: 'Statistics', link: '/summary_votes' },
-          { label: 'Users', link: '/admin_manage_users' },
-
+          { label: 'Institutions', link: '/admin_manage_institutions' }
         ]
       },
       isSigningOfficial && {

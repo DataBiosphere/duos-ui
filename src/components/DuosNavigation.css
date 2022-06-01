@@ -41,7 +41,7 @@
   height: 5px;
 }
 
-.duos-navigation-box.navbar-main .MuiTabs-scrollButtons .MuiSvgIcon-root {
+.navbar-main .duos-navigation-box .MuiTabs-scrollButtons .MuiSvgIcon-root {
   color: white;
   height: 2rem;
   width: 2rem;
