@@ -17,9 +17,10 @@ const nonVoteableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 2
+          1: {dacUserId: 2}
         }
       }
     },
@@ -31,6 +32,7 @@ const votableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: {dacUserId: 2}
@@ -43,6 +45,7 @@ const votableDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           2: {dacUserId: 1}
@@ -58,9 +61,10 @@ const nonOpenDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 1
       },
@@ -70,9 +74,10 @@ const nonOpenDars = {
   2: {
     elections: {
       2: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 2
       }
@@ -91,9 +96,10 @@ const missingElectionSet = {
   2: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 2
+          1: {dacUserId: 2}
         },
         referenceId: 2
       }
@@ -106,9 +112,10 @@ const cancelableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 1
       }
@@ -121,9 +128,10 @@ const nonCancelableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 1
       }
@@ -133,9 +141,10 @@ const nonCancelableDars = {
   2: {
     elections: {
       2: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 2
       }
