@@ -1,35 +1,56 @@
-import {button, div, h} from 'react-hyperscript-helpers';
-import {Styles} from '../../libs/theme';
+import React from 'react';
+import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import CloseIconComponent from '../CloseIconComponent';
+import './ConfirmationModal.css';
+import {styled} from '@mui/material/styles';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 const ConfirmationModal = (props) => {
-  const {showConfirmation, closeConfirmation, title, message, header, onConfirm, styleOverride = {}} = props;
+  const {showConfirmation, closeConfirmation, title, message, header, onConfirm} = props;
   const closeFn = () => closeConfirmation();
 
-  const confirmButton = button({className: 'cell-button hover-color', onClick: onConfirm}, ['Confirm']);
-  const computedStyle = Object.assign({}, Styles.MODAL.CONFIRMATION, styleOverride);
+  const SecondaryButton = styled(Button)(() => ({
+    fontFamily: 'Montserrat, sans-serif',
+    color: 'rgb(0, 96, 159)',
+    backgroundColor: 'white',
+    borderRadius: '4px',
+    fontSize: '1.45rem',
+    borderColor: 'rgb(0, 96, 159)',
+    '&:hover': {
+      borderColor: 'rgb(52,156,224)',
+      color: 'rgb(52,156,224)'
+    },
+  }));
+
+  const PrimaryButton = styled(Button)(({theme}) => ({
+    fontFamily: 'Montserrat, sans-serif',
+    color: theme.palette.getContrastText('rgb(0, 96, 159)'),
+    backgroundColor: 'rgb(0, 96, 159)',
+    borderRadius: '4px',
+    fontSize: '1.45rem',
+    '&:hover': {
+      backgroundColor: 'rgb(52,156,224)',
+    },
+  }));
+
+  const actionButtons = <Stack spacing={2} direction={'row'}>
+    <SecondaryButton variant={'outlined'} className={'confirmation-modal-secondary-button'} onClick={closeFn}>Cancel</SecondaryButton>
+    <PrimaryButton variant={'contained'} className={'confirmation-modal-primary-button'} onClick={onConfirm}>Confirm</PrimaryButton>
+  </Stack>;
 
   return h(Modal, {
     isOpen: showConfirmation,
     shouldCloseOnOverlayClick: true,
-    style: {
-      content: computedStyle
-    }
+    className: 'confirmation-modal'
   }, [
-    div({style: Styles.MODAL.CONFIRMATION}, [
+    div({}, [
       h(CloseIconComponent, {closeFn}),
-      div({style: Styles.MODAL.DAR_SUBHEADER}, [header]),
-      div({style: Styles.MODAL.TITLE_HEADER}, [title]),
-      div({style: Styles.MODAL.DAR_DETAIL}, [message]),
-      div({style: {width: '40%', float: 'right'}}, [
-        div({style: {width: '45%', float: 'left'}}, [
-          button({className: 'cell-button cancel-color', onClick: closeFn }, ['Cancel'])
-        ]),
-        div({style: {width: '45%', float: 'right'}}, [
-          confirmButton
-        ])
-      ])
+      div({className: 'confirmation-modal-header'}, [header]),
+      div({className: 'confirmation-modal-title'}, [title]),
+      div({className: 'confirmation-modal-message'}, [message]),
+      div({className: 'confirmation-modal-actions'}, [actionButtons])
     ])
   ]);
 };

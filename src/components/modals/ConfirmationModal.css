@@ -1,0 +1,40 @@
+
+.confirmation-modal {
+    height: 250px;
+    inset: 20%;
+    font-family: Montserrat, sans-serif;
+    padding: 2%;
+    position: absolute;
+    background-color: white;
+    border: 1px solid lightgrey;
+    border-radius: 4px;
+}
+
+.confirmation-modal-header {
+    display: flex;
+    font-size: 16px;
+    font-weight: 600;
+    justify-content: left;
+    color: #1F3B50;
+}
+
+.confirmation-modal-title {
+    display: flex;
+    font-size: 28px;
+    font-weight: 600;
+    justify-content: left;
+    margin-bottom: 4%;
+    color: #1F3B50;
+}
+
+.confirmation-modal-message {
+    font-size: 16px;
+    font-weight: 400;
+    width: 70%;
+}
+
+.confirmation-modal-actions {
+    margin-top: 2rem;
+    float: right;
+}
+
