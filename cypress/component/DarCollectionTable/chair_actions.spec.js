@@ -153,6 +153,23 @@ const nonCancelableDars = {
   }
 };
 
+const darsWithRpElection = {
+  1: {
+    elections: {
+      1: {
+        electionType: 'RP',
+        status: 'Open',
+        votes: {
+          1: {dacUserId: 1}
+        },
+        dataSetId: 1
+      }
+    },
+    data: {}
+  }
+};
+
+
 const user = {
   dacUserId: 1,
   roles: [
@@ -227,24 +244,32 @@ describe('Chair Actions - Close Button', () => {
     propCopy.collection.dars = cancelableDars;
     propCopy.relevantDatasets = [{ dataSetId: 1 }, { dataSetId: 2 }];
     mount(<ChairActions {...propCopy} />);
-    const openButton = cy.get(`#chair-cancel-${collectionId}`);
-    openButton.should('exist');
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('exist');
   });
 
   it('should not render if there is no valid election for canceling (no open elections)', () => {
     propCopy.collection.dars = nonOpenDars;
     propCopy.relevantDatasets = [];
     mount(<ChairActions {...propCopy} />);
-    const openButton = cy.get(`#chair-cancel-${collectionId}`);
-    openButton.should('not.exist');
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
   });
 
   it('should not render if there are any closed elections (mixed open and closed)', () => {
     propCopy.collection.dars = nonCancelableDars;
     propCopy.relevantDatasets = [];
     mount(<ChairActions {...propCopy} />);
-    const openButton = cy.get(`#chair-cancel-${collectionId}`);
-    openButton.should('not.exist');
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
+  });
+
+  it('should not consider RP elections when determining if close button is rendered', () => {
+    propCopy.collection.dars = darsWithRpElection;
+    propCopy.relevantDatasets = [];
+    mount(<ChairActions {...propCopy} />);
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
   });
 });
 
@@ -285,6 +310,13 @@ describe('Chair Actions - Vote Button', () => {
     mount(<ChairActions {...propCopy}/>);
     const voteButton = cy.get(`#chair-vote-${collectionId}`);
     voteButton.should('exist');
+  });
+  it('should not consider RP elections when determining if vote buttons renders', () => {
+    propCopy.collection.dars = darsWithRpElection;
+    propCopy.relevantDatasets = [{ dataSetId: 1 }, { dataSetId: 2 }];
+    mount(<ChairActions {...propCopy} />);
+    const voteButton = cy.get(`#chair-vote-${collectionId}`);
+    voteButton.should('not.exist');
   });
 });
 
