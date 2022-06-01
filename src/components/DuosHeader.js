@@ -176,7 +176,7 @@ const DropdownComponent = (props) => {
 
 const NavigationTabsComponent = (props) => {
   const {
-    makeNotifications, goToLink,
+    makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
     currentUser, signOut, isLogged,
     contactUsButton, supportrequestModal,
@@ -515,7 +515,6 @@ class DuosHeader extends Component {
       isAdmin && {
         label: 'Admin Console',
         link: '/admin_manage_dar_collections',
-        defaultChild: 0,
         children: [
           { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
           { label: 'Dataset Catalog', link: '/dataset_catalog' },
@@ -549,7 +548,7 @@ class DuosHeader extends Component {
     let initialSubTab = false;
     const initialTab = tabs.findIndex((tab) => {
       if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
-        initialSubTab = tab.defaultChild;
+        initialSubTab = 0;
         return true;
       }
       if (tab.children) {
