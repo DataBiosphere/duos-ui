@@ -601,34 +601,36 @@ export const Election = {
     return res.json();
   },
 
-  isDataSetElectionOpen: async () => {
-    const url = `${await Config.getApiUrl()}/api/election/checkdataset`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
+  // TODO: Deprecate APIs
+  // isDataSetElectionOpen: async () => {
+  //   const url = `${await Config.getApiUrl()}/api/election/checkdataset`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return await res.json();
+  // },
 
 };
 
-export const ElectionTimeout = {
-
-  findApprovalExpirationTime: async () => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  updateApprovalExpirationTime: async (approvalExpirationTime) => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime/${approvalExpirationTime.id}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
-    return res;
-  },
-
-  createApprovalExpirationTime: async (approvalExpirationTime) => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'POST' }]));
-    return await res.json();
-  }
-};
+// TODO: Deprecate APIs
+// export const ElectionTimeout = {
+//
+//   findApprovalExpirationTime: async () => {
+//     const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
+//     const res = await fetchOk(url, Config.authOpts());
+//     return await res.json();
+//   },
+//
+//   updateApprovalExpirationTime: async (approvalExpirationTime) => {
+//     const url = `${await Config.getApiUrl()}/api/approvalExpirationTime/${approvalExpirationTime.id}`;
+//     const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
+//     return res;
+//   },
+//
+//   createApprovalExpirationTime: async (approvalExpirationTime) => {
+//     const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
+//     const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'POST' }]));
+//     return await res.json();
+//   }
+// };
 
 export const Email = {
 

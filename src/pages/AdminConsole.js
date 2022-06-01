@@ -3,8 +3,7 @@ import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
-import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
+import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 class AdminConsole extends Component {
@@ -18,14 +17,12 @@ class AdminConsole extends Component {
       currentUser: currentUser,
       showModal: false,
       showAddUserModal: false,
-      showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
       timeOut: {},
       isDataSetElection: {},
       env: props.env
     };
-    this.electionTimeout = this.electionTimeout.bind(this);
   }
 
   componentDidMount() {
@@ -63,18 +60,6 @@ class AdminConsole extends Component {
     });
   };
 
-  async electionTimeout() {
-    const timeOut = await ElectionTimeout.findApprovalExpirationTime();
-    const isDataSetElection = await Election.isDataSetElectionOpen();
-
-    this.setState(prev => {
-      prev.showElectionTimeoutModal = true;
-      prev.timeOut = timeOut;
-      prev.isDataSetElection = isDataSetElection;
-      return prev;
-    });
-  }
-
   okModal = (name) => {
 
     switch (name) {
@@ -82,7 +67,6 @@ class AdminConsole extends Component {
         this.setState({showAddUserModal: false});
         this.props.history.push('admin_manage_users');
         break;
-      case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
   };
@@ -90,7 +74,6 @@ class AdminConsole extends Component {
   closeModal = (name) => {
     switch (name) {
       case 'addUser': this.setState({ showAddUserModal: false }); break;
-      case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
   };
@@ -98,7 +81,6 @@ class AdminConsole extends Component {
   afterModalOpen = (name) => {
     switch (name) {
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
-      case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
   };
@@ -106,10 +88,6 @@ class AdminConsole extends Component {
   render() {
 
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
-
-    const consoleBoxPlaceholder = div({
-      style: { margin: '10px', padding: '0px', display: 'inline-block' },
-      className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12' }, []);
 
     return (
 
@@ -252,30 +230,6 @@ class AdminConsole extends Component {
                 })
               ]),
             ]),
-
-            div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-              div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
-                AdminConsoleBox({
-                  id: 'btn_electionTimeout',
-                  clickHandler: this.electionTimeout,
-                  color: 'common',
-                  title: 'Set Data Owner election Timeout',
-                  description: 'Manage Data Owner election expiration time',
-                  iconName: 'manage-timeout',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                }),
-                ElectionTimeoutModal({
-                  timeOut: this.state.timeOut,
-                  isDataSetElection: this.state.isDataSetElection,
-                  showModal: this.state.showElectionTimeoutModal,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
-                })
-              ]),
-              consoleBoxPlaceholder
-            ])
           ])
         ])
       ])
