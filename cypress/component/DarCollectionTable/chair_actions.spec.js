@@ -114,6 +114,21 @@ const cancelableDars = {
       }
     },
     data: {}
+  }
+};
+
+const nonCancelableDars = {
+  1: {
+    elections: {
+      1: {
+        status: 'Open',
+        votes: {
+          dacUserId: 1
+        },
+        dataSetId: 1
+      }
+    },
+    data: {}
   },
   2: {
     elections: {
@@ -199,7 +214,7 @@ describe('Chair Actions - Open Button', () => {
 });
 
 describe('Chair Actions - Close Button', () => {
-  it('should render if there is a valid election for canceling', () => {
+  it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.collection.dars = cancelableDars;
     propCopy.relevantDatasets = [{ dataSetId: 1 }, { dataSetId: 2 }];
     mount(<ChairActions {...propCopy} />);
@@ -207,8 +222,16 @@ describe('Chair Actions - Close Button', () => {
     openButton.should('exist');
   });
 
-  it('should not render if there is no valid election for canceling', () => {
+  it('should not render if there is no valid election for canceling (no open elections)', () => {
     propCopy.collection.dars = nonOpenDars;
+    propCopy.relevantDatasets = [];
+    mount(<ChairActions {...propCopy} />);
+    const openButton = cy.get(`#chair-cancel-${collectionId}`);
+    openButton.should('not.exist');
+  });
+
+  it('should not render if there are any closed elections (mixed open and closed)', () => {
+    propCopy.collection.dars = nonCancelableDars;
     propCopy.relevantDatasets = [];
     mount(<ChairActions {...propCopy} />);
     const openButton = cy.get(`#chair-cancel-${collectionId}`);
