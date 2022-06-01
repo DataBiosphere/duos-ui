@@ -5,7 +5,6 @@ import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
-import {merge} from 'lodash/fp';
 
 const darInfo = {
   rus: 'test',
@@ -163,9 +162,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
-    cy.contains('GROUP 1');
     cy.contains('GRU');
-    cy.contains('GROUP 2');
     cy.contains('HMB');
   });
 
@@ -249,7 +246,18 @@ describe('filterBucketsForUser - Tests', function() {
 
   it('Does not filter out buckets with votes by the current user', function () {
     const currentUser = {dacUserId: 200};
-    const rpBucket = merge({isRP: true, key: 'RP Vote'}, bucket2);
+    const rpBucket = {
+      isRP: true,
+      votes: [
+        {
+          rp: {
+            memberVotes: [
+              {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+            ],
+          }
+        }
+      ]
+    };
     const prefilteredBuckets = [rpBucket, bucket1];
 
     const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
