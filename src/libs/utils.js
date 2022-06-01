@@ -66,9 +66,10 @@ export const darCollectionUtils = {
             }
             return [];
           } else {
-            //if elections exist, filer out elections based on relevant ids
+            //if elections exist, filter out elections based on relevant ids
+            //only Data Access elections impact the status of the collection
             //NOTE: Admin does not have relevantIds, DAC roles do
-            const electionArr = Object.values(elections);
+            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
             if(isNil(relevantDatasets)) {
               return electionArr;
             } else {
@@ -82,13 +83,11 @@ export const darCollectionUtils = {
 
       if(isNil(relevantDatasets)) {
         each(election => {
-          const {status, electionType} = election;
-          if(toLower(electionType) === 'dataaccess') {
-            if(isNil(electionStatusCount[status])) {
-              electionStatusCount[status] = 0;
-            }
-            electionStatusCount[status]++;
+          const {status} = election;
+          if(isNil(electionStatusCount[status])) {
+            electionStatusCount[status] = 0;
           }
+          electionStatusCount[status]++;
         })(targetElections);
         output = nonFPMap(electionStatusCount, (value, key) => {
           return `${key}: ${value}`;
@@ -471,18 +470,18 @@ export const wasVoteSubmitted =(vote) => {
 export const wasFinalVoteTrue = (voteData) => {
   const {type, vote} = voteData;
   //vote status capitalizes final, election status does not
-  return type === 'FINAL' && vote === true;
+  return toLower(type) === 'final' && vote === true;
 };
 
 export const processElectionStatus = (election, votes, showVotes) => {
   let output;
-  const electionStatus = election ? election.status : null;
+  const electionStatus = !isNil(get('status')(election))  ? toLower(election.status) : null;
   if (isNil(electionStatus)) {
     output = 'Unreviewed';
-  } else if(electionStatus === 'Open') {
+  } else if(electionStatus === 'open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
+      const dacVotes = filter((vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
       output = `Open${showVotes ? outputSuffix : ''}`;
@@ -490,7 +489,7 @@ export const processElectionStatus = (election, votes, showVotes) => {
   //some elections have electionStatus === Final, others have electionStatus === Closed
   //both are, in this step of the process, technically referring to a closed election
   //therefore both values must be checked for
-  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
+  } else if (electionStatus === 'final' || electionStatus === 'closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Approved' : 'Denied';
   } else {
