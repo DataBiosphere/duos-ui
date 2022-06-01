@@ -199,21 +199,13 @@ const NavigationTabsComponent = (props) => {
         h(Link, {
           id: 'link_logo',
           to: '/home',
-          className: 'navbar-brand',
-          onClick: () => {
-            setSelectedMenuTab(false);
-            setSelectedSubTab(false);
-          }
+          className: 'navbar-brand'
         }, [
           img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo' }),
         ]),
         h(Box, { isRendered: isLogged, className: 'duos-navigation-box' }, [
           h(Tabs, {
             value: selectedMenuTab,
-            onChange: (event, newValue) => {
-              setSelectedMenuTab(newValue);
-              setSelectedSubTab(tabs[newValue].defaultChild);
-            },
             TabIndicatorProps: {
               style: {
                 background: '#2BBD9B'
@@ -329,7 +321,6 @@ const NavigationTabsComponent = (props) => {
     tabs[selectedMenuTab]?.children && h(Box, { className: 'duos-navigation-box navbar-sub' }, [
       h(Tabs, {
         value: selectedSubTab,
-        onChange: (event, newValue) => setSelectedSubTab(newValue),
         TabIndicatorProps: {
           style: { background: '#00609f' }
         }
