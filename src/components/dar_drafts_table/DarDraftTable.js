@@ -243,7 +243,6 @@ export default function DarDraftTable(props) {
     }),
     h(ConfirmationModal, {
       showConfirmation,
-      styleOverrise: { height: '35%' },
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Delete Draft DAR',
       message: `Are you sure you want to delete DAR draft ${getIdentifier({id: selectedDraft.id, data: selectedDraft.data})}`,
