@@ -514,15 +514,16 @@ class DuosHeader extends Component {
     const tabs = [
       isAdmin && {
         label: 'Admin Console',
-        link: '/admin_console',
-        defaultChild: false,
+        link: '/admin_manage_dar_collections',
+        defaultChild: 0,
         children: [
           { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
           { label: 'Dataset Catalog', link: '/dataset_catalog' },
           { label: 'DACs', link: '/manage_dac' },
           { label: 'Statistics', link: '/summary_votes' },
           { label: 'Users', link: '/admin_manage_users' },
-          { label: 'Institutions', link: '/admin_manage_institutions' }
+          { label: 'Institutions', link: '/admin_manage_institutions' },
+          { label: 'Library Cards', link: '/admin_manage_lc' }
         ]
       },
       isSigningOfficial && {
@@ -548,6 +549,7 @@ class DuosHeader extends Component {
     let initialSubTab = false;
     const initialTab = tabs.findIndex((tab) => {
       if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
+        initialSubTab = tab.defaultChild;
         return true;
       }
       if (tab.children) {
