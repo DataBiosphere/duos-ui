@@ -215,7 +215,8 @@ const NavigationTabsComponent = (props) => {
             return h(Tab, {
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
-              onClick: () => goToLink(tab.link)
+              to: tab.link,
+              component: Link
             });
           }))
         ]),
@@ -329,8 +330,9 @@ const NavigationTabsComponent = (props) => {
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
         return h(Tab, {
           label: tab.label,
-          style: selectedMenuTab === tabIndex ? styles.subTabActive : styles.subTab,
-          onClick: () => goToLink(tab.link)
+          style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
+          to: tab.link,
+          component: Link
         });
       }))
     ])
@@ -428,7 +430,6 @@ class DuosHeader extends Component {
     let isMember = false;
     let isAdmin = false;
     let isResearcher = false;
-    let isDataOwner = false;
     let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -439,7 +440,6 @@ class DuosHeader extends Component {
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
-      isDataOwner = currentUser.isDataOwner;
       isSigningOfficial = currentUser.isSigningOfficial;
     }
 
@@ -666,12 +666,6 @@ class DuosHeader extends Component {
                     applyPointer,
                     targetLink: this.state.researcherPath,
                     label: 'Researcher Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isDataOwner,
-                    applyPointer,
-                    targetLink: '/data_owner_console',
-                    label: 'Data Owner Console',
                   }),
                   h(BasicListItem, {
                     isRendered: isResearcher,

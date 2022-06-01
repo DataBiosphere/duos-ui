@@ -11,7 +11,6 @@ import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 
 export default function SignIn(props) {
-
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState({});
   const {onSignIn, history, customStyle} = props;

@@ -9,8 +9,6 @@ import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
-import DataOwnerConsole from './pages/DataOwnerConsole';
-import DataOwnerReview from './pages/DataOwnerReview';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
 import DulCollect from './pages/DulCollect';
@@ -19,9 +17,6 @@ import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import Home from './pages/Home';
-import HomeAbout from './pages/HomeAbout';
-import HomeSigningOfficial from './pages/HomeSigningOfficial';
-import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
 import MemberConsole from './pages/MemberConsole';
 import ChairConsole from './pages/ChairConsole';
@@ -38,7 +33,6 @@ import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
-import HomeResearcherInfo from './pages/HomeResearcherInfo';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
@@ -65,10 +59,6 @@ const Routes = (props) => (
             : <NotFound />
           : <div />
     } />
-    <Route path="/home_about" component={HomeAbout} />
-    <Route path="/home_signing_official" component={HomeSigningOfficial} />
-    <Route path="/home_dac_info" component={HomeDacInfo} />
-    <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
@@ -103,9 +93,6 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
-    <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />
-    <AuthenticatedRoute path="/data_owner_review/:voteId/:referenceId/:dataSetId" component={DataOwnerReview} props={props}
-      rolesAllowed={[USER_ROLES.dataOwner]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
