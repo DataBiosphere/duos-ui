@@ -7,9 +7,9 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, get, sortBy} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket,
+  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets
@@ -62,9 +62,17 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+  const rpBucket = flow(
+    filter(bucket => get('isRP')(bucket)),
+    filter (bucket => !isEmpty(extractUserRPVotesFromBucket(bucket, user, false)))
+  )(buckets);
 
-  return filter(bucket => get('isRP')(bucket) || containsVotesByUser(bucket))(buckets);
+  const dataAccessBuckets = flow(
+    filter(bucket => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false))),
+    sortBy(bucket => get('key')(bucket))
+  )(buckets);
+
+  return [...rpBucket, ...dataAccessBuckets];
 };
 
 export default function DarCollectionReview(props) {

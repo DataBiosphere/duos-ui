@@ -44,10 +44,7 @@ export default function MultiDatasetVotingTab(props) {
   useEffect( () => {
     setCollectionDatasets(get('datasets')(collection));
     setRpBucket(find(bucket => get('isRP')(bucket))(buckets));
-    setDataBuckets(flow(
-      filter(bucket => get('isRP')(bucket) !== true),
-      sortBy(bucket => get('key')(bucket))
-    )(buckets));
+    setDataBuckets(filter(bucket => get('isRP')(bucket) !== true)(buckets));
   }, [buckets, collection]);
 
   useEffect(() => {
@@ -64,11 +61,9 @@ export default function MultiDatasetVotingTab(props) {
 
   const DatasetVoteSlabs = () => {
     const isApprovalDisabled = dataAccessApprovalDisabled();
-    let index = 0;
     return map(bucket => {
-      index++;
       return h(MultiDatasetVoteSlab,{
-        title: `GROUP ${index}`,
+        title: bucket.key,
         bucket,
         dacDatasetIds,
         collectionDatasets,
