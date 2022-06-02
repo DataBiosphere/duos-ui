@@ -32,7 +32,6 @@ export default function CollectionConfirmationModal(props) {
   const cancelModal =
     h(ConfirmationModal, {
       showConfirmation,
-      styleOverride: {height: '35%'},
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Cancel DAR Collection',
       message: `Are you sure you want to cancel ${collection.darCode}?`,
