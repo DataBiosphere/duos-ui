@@ -543,10 +543,6 @@ class DuosHeader extends Component {
         label: 'DAC Member Console',
         link: this.state.dacMemberPath,
         search: 'member_console'
-      },
-      isChairPerson && {
-        label: 'Data Owner Console',
-        link: '/data_owner_console'
       }
     ].filter((data) => !!data);
 
