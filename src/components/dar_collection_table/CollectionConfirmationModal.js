@@ -52,7 +52,6 @@ export default function CollectionConfirmationModal(props) {
 
   const openModal = h(ConfirmationModal, {
     showConfirmation,
-    styleOverride: { height: '35%' },
     closeConfirmation: () => setShowConfirmation(false),
     title: 'Open DAR Collection',
     message: `Are you sure you want to open ${collection.darCode}?`,
