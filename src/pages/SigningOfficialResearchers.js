@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {Notifications} from '../libs/utils';
-import {div, a, h} from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import {Styles} from '../libs/theme';
 import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
 import {User} from '../libs/ajax';

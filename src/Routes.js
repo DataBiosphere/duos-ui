@@ -28,7 +28,6 @@ import ResearcherProfile from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
-import SigningOfficialDarCollections from './pages/SigningOfficialDarCollections';
 import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
 import ReviewedCases from './pages/ReviewedCases';
 import ReviewResults from './pages/ReviewResults';
@@ -103,7 +102,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={SigningOfficialResearchers} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={SigningOfficialDarRequests} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/dar_collections" component={SigningOfficialDarCollections} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/data_submitters" component={SigningOfficialDataSubmitters} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

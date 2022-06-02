@@ -531,8 +531,7 @@ class DuosHeader extends Component {
         children: [
           { label: 'Researchers', link: '/signing_official_console/researchers' },
           { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-          { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
-          { label: 'DAR Collections', link: '/signing_official_console/dar_collections' }
+          { label: 'Data Submitters', link: '/signing_official_console/data_submitters' }
         ]
       },
       isResearcher && {
