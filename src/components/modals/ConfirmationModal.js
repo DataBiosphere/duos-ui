@@ -45,6 +45,8 @@ const ConfirmationModal = (props) => {
 
   return h(Modal, {
     isOpen: showConfirmation,
+    onRequestClose: closeFn,
+    shouldCloseOnEsc: true,
     shouldCloseOnOverlayClick: true,
     className: 'confirmation-modal',
     style: { content: styleOverride }
