@@ -1,5 +1,5 @@
-import {Component} from 'react';
-import {a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
+import { Component } from 'react';
+import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
@@ -11,14 +11,14 @@ import {
   Navigation,
   Notifications as NotyUtil
 } from '../libs/utils';
-import {TypeOfResearch} from './dar_application/TypeOfResearch';
-import {ConfirmationDialog} from '../components/ConfirmationDialog';
-import {Notification} from '../components/Notification';
-import {PageHeading} from '../components/PageHeading';
-import {Collections, DAR, DataSet, User} from '../libs/ajax';
-import {NotificationService} from '../libs/notificationService';
-import {Storage} from '../libs/storage';
-import {any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy} from 'lodash/fp';
+import { TypeOfResearch } from './dar_application/TypeOfResearch';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { Notification } from '../components/Notification';
+import { PageHeading } from '../components/PageHeading';
+import { Collections, DAR, DataSet, User } from '../libs/ajax';
+import { NotificationService } from '../libs/notificationService';
+import { Storage } from '../libs/storage';
+import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 
