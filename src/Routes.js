@@ -98,7 +98,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_review/:collection_id" component={DataAccessRequestApplication} props={props}
+    <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
