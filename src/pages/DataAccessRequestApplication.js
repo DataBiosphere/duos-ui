@@ -15,10 +15,10 @@ import {TypeOfResearch} from './dar_application/TypeOfResearch';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import {Notification} from '../components/Notification';
 import {PageHeading} from '../components/PageHeading';
-import {DAR, DataSet, User} from '../libs/ajax';
+import {Collections, DAR, DataSet, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {any, assign, cloneDeep, find, get, getOr, isEmpty, isNil, map, merge, pickBy} from 'lodash/fp';
+import {any, assign, cloneDeep, find, get, getOr, isEmpty, isNil, keys, map, merge, pickBy} from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 
@@ -198,7 +198,21 @@ class DataAccessRequestApplication extends Component {
       prev.allSigningOfficials = signingOfficials;
       return prev;
     });
-    if (!isNil(dataRequestId)) {
+
+    if(!isNil(collectionId)) {
+      // Review DAR application for collection - retrieves all datasets in the collection
+      // Besides the datasets, DARs split off from the collection should have the same formData
+      const collection = await Collections.getCollectionById(collectionId);
+      const { dars, datasets } = collection;
+      const darReferenceId = keys(dars)[0];
+      formData = await DAR.getPartialDarRequest(darReferenceId);
+      formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
+      formData.datasets =  map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+
+      // eslint-disable-next-line no-debugger
+      debugger;
+    }
+    else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
@@ -208,10 +222,10 @@ class DataAccessRequestApplication extends Component {
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
       Storage.removeData('dar_application');
     }
+
     let rpProperties = getPropertyValuesFromUser(researcher);
     formData.researcher = isNil(researcher) ? '' : researcher.displayName;
     formData.investigator = rpProperties.piName;
-
     formData.linkedIn = rpProperties.linkedIn;
     formData.researcherGate = rpProperties.researcherGate;
     formData.orcid = rpProperties.orcid;
@@ -628,7 +642,6 @@ class DataAccessRequestApplication extends Component {
           darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
         }
         let updatedFormData = assign(formattedFormData, darPartialResponse);
-
         await DAR.postDar(updatedFormData);
         this.setState({
           showDialogSubmit: false
