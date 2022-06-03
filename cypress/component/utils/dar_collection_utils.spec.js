@@ -691,7 +691,7 @@ describe('getMatchDataForBuckets', () => {
         const {algorithmResult} = bucket;
         expect(algorithmResult).to.not.be.empty;
         expect(algorithmResult.result).to.equal('N/A');
-        expect(algorithmResult.createDate).to.equal('N/A');
+        expect(algorithmResult.createDate).to.equal(undefined);
         expect(algorithmResult.id).to.equal(bucket.key);
       }
     });

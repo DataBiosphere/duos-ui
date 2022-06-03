@@ -97,7 +97,7 @@ const ResumeDraftButton = (props) => {
 
 //helper function to create id string for error messages
 const getIdentifier = ({id, data}) => {
-  return !isEmpty(data) ? (data.projectTitle || data.tempDarCode) : id;
+  return !isEmpty(data) ? (data.projectTitle || data.partialDarCode) : id;
 };
 
 //sub-component that renders draft delete button
@@ -243,7 +243,6 @@ export default function DarDraftTable(props) {
     }),
     h(ConfirmationModal, {
       showConfirmation,
-      styleOverrise: { height: '35%' },
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Delete Draft DAR',
       message: `Are you sure you want to delete DAR draft ${getIdentifier({id: selectedDraft.id, data: selectedDraft.data})}`,

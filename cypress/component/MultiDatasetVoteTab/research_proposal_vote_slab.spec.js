@@ -538,4 +538,18 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
   });
+
+  it('shows the RP vote decision on the admin review page', () => {
+    mount(<ResearchProposalVoteSlab
+      bucket={{
+        votes: [votesForElection2],
+      }}
+      isChair={false}
+      adminPage={true}
+    />);
+    cy.get('#expand-rp-vote-button').click();
+    cy.get('[datacy=no-collection-vote-button').should('have.css', 'background-color', votingColors.no);
+    cy.get('[datacy=yes-collection-vote-button').should('have.css', 'background-color', votingColors.default);
+    cy.get('textarea').should('be.disabled');
+  });
 });

@@ -9,7 +9,7 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket,
+  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets
@@ -62,9 +62,14 @@ const userHasRole = (user, roleId) => {
 };
 
 export const filterBucketsForUser = (user, buckets) => {
-  const containsVotesByUser = (bucket) => !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+  const containsUserRpVote = (bucket) => {
+    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
+  };
+  const containsUserDataAccessVote = (bucket) => {
+    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+  };
 
-  return filter(bucket => get('isRP')(bucket) || containsVotesByUser(bucket))(buckets);
+  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
 export default function DarCollectionReview(props) {
@@ -79,8 +84,15 @@ export default function DarCollectionReview(props) {
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
+  const {adminPage = false} = props;
 
-  const tabsForUser = useCallback((user, buckets) => {
+  const tabsForUser = useCallback((user, buckets, adminPage = false) => {
+    if(adminPage) {
+      return {
+        applicationInformation: 'Application Information',
+        chairVote: 'Chair Vote'
+      };
+    }
     const dataAccessBucketsForUser = filter(bucket => get('isRP')(bucket) !== true)(buckets);
     const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
 
@@ -115,14 +127,14 @@ export default function DarCollectionReview(props) {
           processDataUseBuckets,
         ])({ dars, datasets });
         await getMatchDataForBuckets(processedBuckets);
-        const filteredBuckets = filterBucketsForUser(user, processedBuckets);
+        const filteredBuckets = adminPage ? processedBuckets : filterBucketsForUser(user, processedBuckets);
         setResearcherProperties(researcherProperties);
         setDataUseBuckets(filteredBuckets);
         setCollection(collection);
         setCurrentUser(user);
         setDarInfo(darInfo);
         setResearcherProfile(researcherProfile);
-        setTabs(tabsForUser(user, filteredBuckets));
+        setTabs(tabsForUser(user, filteredBuckets, adminPage));
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
@@ -136,7 +148,7 @@ export default function DarCollectionReview(props) {
     } catch(error) {
       Notifications.showError({text: 'Failed to initialize collection'});
     }
-  }, [collectionId, props.history, tabsForUser]);
+  }, [collectionId, props.history, tabsForUser, adminPage]);
 
   useEffect(() => {
     setSubcomponentLoading(true);
@@ -205,7 +217,7 @@ export default function DarCollectionReview(props) {
         cloudProviderDescription: darInfo.cloudProviderDescription
       }),
       h(MultiDatasetVotingTab, {
-        isRendered: selectedTab === tabs.memberVote,
+        isRendered: !adminPage && selectedTab === tabs.memberVote,
         darInfo,
         collection,
         buckets: dataUseBuckets,
@@ -219,8 +231,9 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: true,
-        readOnly: props.readOnly,
-        isLoading
+        isLoading,
+        adminPage,
+        readOnly: props.readOnly
       })
     ])
   ]);
