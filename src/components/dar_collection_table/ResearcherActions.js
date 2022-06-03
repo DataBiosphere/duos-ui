@@ -84,6 +84,32 @@ export default function ResearcherActions(props) {
     icon: Block
   };
 
+  const resumeButtonAttributes = {
+    keyProp: `resume-draft-${collectionId}`,
+    isRendered: collection.isDraft,
+    onClick: () => history.push(`/dar_application/${collectionId}`),
+    label: 'Resume',
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      width: '30%',
+      padding: '2%',
+      marginRight: '2%',
+      fontSize: '1.45rem',
+    },
+  };
+
+  const deleteButtonAttributes = {
+    keyProp: `delete-draft-${collectionId}`,
+    label: 'Delete',
+    baseColor: Theme.palette.error,
+    additionalStyle: {
+      width: '30%',
+      padding: '2%',
+      fontSize: '1.45rem',
+    },
+    onClick: () => showConfirmationModal(collection, 'delete'),
+  };
+
   return div(
     {
       className: 'researcher-actions',
@@ -101,7 +127,9 @@ export default function ResearcherActions(props) {
     [
       h(ReviseCollectionButton, {isRendered: reviseEnabled, showConfirmationModal, collection}),
       h(SimpleButton, reviewButtonAttributes),
-      h(TableIconButton, cancelButtonAttributes)
+      h(TableIconButton, cancelButtonAttributes),
+      h(SimpleButton, resumeButtonAttributes), //NOTE: check to see if this works
+      h(SimpleButton, deleteButtonAttributes) //NOTE: check to see if this works
     ]
   );
 }

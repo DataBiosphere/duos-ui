@@ -171,17 +171,18 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, openCollection, deleteDraft, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      const status = determineCollectionStatus(collection, relevantDatasets);
+      const status = collection.isDraft ? 'Unsubmitted' : determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode, status,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
-          openCollection, goToVote, reviewCollection, relevantDatasets
+          openCollection, goToVote, reviewCollection, relevantDatasets,
+          deleteDraft
         });
       });
     });
@@ -199,7 +200,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [consoleAction, setConsoleAction] = useState();
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
+    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft
   } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
@@ -287,6 +288,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       cancelCollection,
       reviseCollection,
       openCollection,
+      deleteDraft,
       consoleAction
     })
   ]);

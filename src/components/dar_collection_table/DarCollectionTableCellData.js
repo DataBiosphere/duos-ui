@@ -56,8 +56,10 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 };
 
 export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
+  const dateString = isNil(createDate) ? '- -' :
+    toLower(createDate) === 'unsubmitted' ? createDate : formatDate(createDate);
   return {
-    data: isNil(createDate) ? '- - ' : formatDate(createDate),
+    data: dateString,
     id: darCollectionId,
     style: {
       color: '#354052',
@@ -92,9 +94,9 @@ export function institutionCellData({institution = '- -', darCollectionId, label
   };
 }
 
-export function datasetCountCellData({datasets = '- -', darCollectionId, label = 'datasets'}) {
+export function datasetCountCellData({datasets = [], darCollectionId, label = 'datasets'}) {
   return {
-    data: datasets.length,
+    data: datasets.length > 0 ? datasets.length : '- -',
     id: darCollectionId,
     style: {
       color: '#333F52',
@@ -133,7 +135,7 @@ export function consoleActionsCellData({collection, openCollection, reviewCollec
       break;
     case 'researcher':
     default:
-      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal, reviewCollection});
+      actionComponent = h(ResearcherActions, {collection, showConfirmationModal, reviewCollection});
       break;
   }
 
