@@ -208,9 +208,6 @@ class DataAccessRequestApplication extends Component {
       formData = await DAR.getPartialDarRequest(darReferenceId);
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
       formData.datasets =  map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
-
-      // eslint-disable-next-line no-debugger
-      debugger;
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
