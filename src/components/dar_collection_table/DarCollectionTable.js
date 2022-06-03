@@ -1,37 +1,22 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find, flow, get, isEqual} from 'lodash/fp';
+import {isNil, isEmpty, find} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
+import { getPI } from '../../utils/DarCollectionUtils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const { determineCollectionStatus } = darCollectionUtils;
 export const getProjectTitle = ((collection) => {
+  if(collection.isDraft){return collection.projectTitle;}
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
     return darData.projectTitle;
   }
 });
-
-const getPI = (createUser) => {
-  const createUserIsPI = flow(
-    get('properties'),
-    find(property => property.propertyKey === 'isThePI'),
-    get('propertyValue'),
-    isEqual('true')
-  )(createUser);
-
-  const piName = flow(
-    get('properties'),
-    find(property => property.propertyKey === 'piName'),
-    get('propertyValue')
-  )(createUser);
-
-  return createUserIsPI ? createUser.displayName : piName;
-};
 
 export const styles = {
   baseStyle: {
@@ -60,8 +45,8 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '8%',
-    projectTitle: '20%',
+    darCode: '10%',
+    projectTitle: '18%',
     submissionDate: '12.5%',
     pi: '10%',
     institution: '12.5%',
@@ -175,7 +160,7 @@ const processCollectionRowData = ({ collections, openCollection, deleteDraft, sh
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      const status = collection.isDraft ? 'Unsubmitted' : determineCollectionStatus(collection, relevantDatasets);
+      const status = collection.isDraft ? 'Draft' : determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode, status,

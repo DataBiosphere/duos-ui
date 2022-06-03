@@ -16,7 +16,8 @@ import {
   concat,
   findIndex,
   cloneDeep,
-  groupBy
+  groupBy,
+  isEqual
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
@@ -391,6 +392,22 @@ export const openCollectionFn = ({updateCollections}) =>
     }
   };
 
+export const getPI = (createUser) => {
+  const createUserIsPI = flow(
+    get('properties'),
+    find(property => toLower(property.propertyKey) === 'isthepi'),
+    get('propertyValue'),
+    isEqual('true')
+  )(createUser);
+
+  const piName = flow(
+    get('properties'),
+    find(property => toLower(property.propertyKey) === 'piname'),
+    get('propertyValue')
+  )(createUser);
+  return createUserIsPI ? createUser.displayName : piName;
+};
+
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
@@ -399,5 +416,6 @@ export default {
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
-  collapseVotesByUser
+  collapseVotesByUser,
+  getPI
 };

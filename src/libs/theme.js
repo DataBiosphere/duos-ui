@@ -63,7 +63,7 @@ export const Theme = {
   },
 };
 
-const targetFont  = 'Arial';
+const targetFont  = 'Montserrat';
 
 export const Styles = {
   NAVBAR: {

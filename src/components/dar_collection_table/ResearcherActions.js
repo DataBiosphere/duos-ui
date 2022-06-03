@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {Styles, Theme} from '../../libs/theme';
-import ReviseCollectionButton from './ReviseCollectionButton';
 import { h, div } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Block } from '@material-ui/icons';
@@ -56,11 +55,6 @@ export default function ResearcherActions(props) {
     setReviseEnabled(isRevisable);
   }, [dars]);
 
-  //NOTE: minimal placeholder, adjust as needed for console implementation
-  const cancelOnClick = (collection) => {
-    showConfirmationModal(collection, 'cancel');
-  };
-
   const reviewButtonAttributes = {
     keyProp: `researcher-review-${collectionId}`,
     label: 'Review',
@@ -68,16 +62,18 @@ export default function ResearcherActions(props) {
     onClick: () => reviewCollection(collection),
     baseColor: Theme.palette.secondary,
     additionalStyle: {
-      padding: '5px 10px',
-      fontSize: '1.45rem'
+      padding: '3%',
+      fontSize: '1.45rem',
+      fontWeight: 600,
+      color: 'white'
     },
   };
 
   const cancelButtonAttributes = {
     keyProp: `researcher-cancel-${collectionId}`,
     label: 'Cancel',
-    isRendered: cancelEnabled,
-    onClick: () => cancelOnClick(collection),
+    isRendered: cancelEnabled && !collection.isDraft,
+    onClick: () => showConfirmationModal(collection, 'cancel'),
     dataTip: 'Cancel Collection',
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
@@ -89,25 +85,43 @@ export default function ResearcherActions(props) {
     isRendered: collection.isDraft,
     onClick: () => history.push(`/dar_application/${collectionId}`),
     label: 'Resume',
-    baseColor: Theme.palette.secondary,
+    baseColor: 'white',
     additionalStyle: {
-      width: '30%',
-      padding: '2%',
+      width: '50%',
+      padding: '3%',
       marginRight: '2%',
       fontSize: '1.45rem',
+      fontWeight: 600,
+      border: `1px solid ${Theme.palette.secondary}`,
+      color: Theme.palette.secondary
     },
   };
 
   const deleteButtonAttributes = {
     keyProp: `delete-draft-${collectionId}`,
     label: 'Delete',
+    isRendered: collection.isDraft === true,
     baseColor: Theme.palette.error,
     additionalStyle: {
       width: '30%',
-      padding: '2%',
+      padding: '3%',
       fontSize: '1.45rem',
+      fontWeight: 600
     },
     onClick: () => showConfirmationModal(collection, 'delete'),
+  };
+
+  const reviseButtonAttributes = {
+    keyProp: `revise-collection-${collectionId}`,
+    label: 'Revise',
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      padding: '3%',
+      fontSize: '1.45rem',
+      fontWeight: 600
+    },
+    isRendered: reviseEnabled,
+    onClick: () => showConfirmationModal(collection, 'revise')
   };
 
   return div(
@@ -119,17 +133,16 @@ export default function ResearcherActions(props) {
         display: 'flex',
         padding: '10px 5px',
         justifyContent: 'flex-start',
-        alignItems: 'end',
+        alignItems: 'center',
         columnGap: '1rem'
       }
     },
     //placeholder template, adjust for console implementation
     [
-      h(ReviseCollectionButton, {isRendered: reviseEnabled, showConfirmationModal, collection}),
-      h(SimpleButton, reviewButtonAttributes),
-      h(TableIconButton, cancelButtonAttributes),
-      h(SimpleButton, resumeButtonAttributes), //NOTE: check to see if this works
-      h(SimpleButton, deleteButtonAttributes) //NOTE: check to see if this works
+      h(SimpleButton, collection.isDraft ? resumeButtonAttributes : reviewButtonAttributes),
+      h(SimpleButton, reviseButtonAttributes), //NOTE: figure out when this should be rendered
+      h(SimpleButton, deleteButtonAttributes),
+      h(TableIconButton, cancelButtonAttributes)
     ]
   );
 }

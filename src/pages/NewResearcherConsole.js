@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
 import {cloneDeep, map, findIndex, isEmpty, get, flow, keys, isNil, head, concat, replace} from 'lodash/fp';
 import { Styles } from '../libs/theme';
@@ -8,71 +8,74 @@ import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 
+const createPropertiesForDraft = (keys, values) =>
+  keys.map((propertyKey, index) => ({
+    propertyKey,
+    propertyValue: values[index],
+  }));
+
+const formatDraft = (draft) => {
+  const { data, referenceId, id } = draft;
+  const {
+    partialDarCode,
+    projectTitle,
+    datasets,
+    isThePi,
+    piName,
+    institution,
+    investigator,
+  } = data;
+
+  const keys = ['isThePi', 'piName'];
+  const values = [isThePi, piName];
+  const output =  {
+    darCode: replace('temp', 'DRAFT')(partialDarCode),
+    referenceId,
+    darCollectionId: id,
+    projectTitle,
+    isDraft: true,
+    createDate: 'Unsubmitted',
+    datasets,
+    institution,
+    createUser: {
+      displayName: investigator,
+      properties: createPropertiesForDraft(keys, values),
+    },
+  };
+  return output;
+};
+
+const filterFn = getSearchFilterFunctions().darCollections;
+
+const redirectByReferenceId = (darCollection, history) => {
+  const referenceId = darCollection.referenceId || flow(
+    get('dars'),
+    keys,
+    head
+  )(darCollection);
+  history.push(`/dar_application/${referenceId}`);
+  if (isNil(referenceId)) {
+    throw new Error('Error: Could not find target Data Access Request');
+  }
+  return referenceId;
+};
+
 export default function NewResearcherConsole(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [researcherCollections, setResearcherCollections] = useState();
-  // const [researcherDrafts, setResearcherDrafts] = useState();
   const [filteredList, setFilteredList] = useState();
   const searchRef = useRef('');
 
-  const filterFn = getSearchFilterFunctions().darCollections;
   const { history } = props;
-
-  // const tabNames = {
-  //   darCollections: 'DAR Collections',
-  //   darDrafts: 'DAR Drafts'
-  // };
-
-  // //memoized references for tab-specific data and filter function
-  // //keys correspond with tab constants that are used to designated the selected tab
-  // const dataStructs = useMemo(() => ({
-  //   [tabNames.darCollections]: {
-  //     filterFn: getSearchFilterFunctions().darCollections,
-  //     data: researcherCollections
-  //   },
-  //   [tabNames.darDrafts]: {
-  //     filterFn: getSearchFilterFunctions().darDrafts,
-  //     data: researcherDrafts
-  //   }
-  // }), [researcherCollections, researcherDrafts, tabNames.darCollections, tabNames.darDrafts]);
 
   //basic helper to process promises for collections and drafts in init
   const handlePromise = (promise, targetArray, errorMsg, newError) => {
     if(promise.status === 'rejected') {
-      errorMsg.push(newError)
+      errorMsg.push(newError);
     } else {
       return concat(targetArray, promise.value);
     }
   };
-
-  const formatDraft = (draft) => {
-    const { data, referenceId } = draft;
-    const {
-      partialDarCode,
-      projectTitle,
-      datasets,
-      isThePi,
-      piName,
-      investigator,
-    } = data;
-    return {
-      darCode: replace('temp', 'DRAFT')(partialDarCode),
-      referenceId,
-      title: projectTitle,
-      isDraft: true,
-      createDate: undefined,
-      datasets,
-      createUser: {
-        displayName: investigator,
-        properties: {
-          isThePi,
-          piName,
-        },
-      },
-    };
-  };
-
-  const formatDrafts = useMemo(() => map(formatDraft), []);
 
   //callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
@@ -80,7 +83,7 @@ export default function NewResearcherConsole(props) {
     researcherCollections,
     filterFn,
     setFilteredList
-  ), [researcherCollections, filterFn]);
+  ), [researcherCollections]);
 
 
   //sequence of init events on component load
@@ -95,20 +98,19 @@ export default function NewResearcherConsole(props) {
       //Need some extra formatting steps for drafts due to different payload format
       const fetchedDrafts = {
         status: fetchedDraftsPayload.status,
-        // value: (fetchedDraftsPayload.value || []).map((draftPayload) => draftPayload.dar)
         value: flow(
           map((draftPayload) => draftPayload.dar),
-          formatDrafts
-        )(fetchedDraftsPayload.value || []) //NOTE: check to see if this works
+          map(formatDraft),
+        )(fetchedDraftsPayload.value || [])
       };
       let collectionArray = [];
-      handlePromise(
+      collectionArray = handlePromise(
         fetchedCollections,
         collectionArray,
         errorMsg,
         'Failed to fetch DAR Collection'
       );
-      handlePromise(
+      collectionArray = handlePromise(
         fetchedDrafts,
         collectionArray,
         errorMsg,
@@ -122,7 +124,7 @@ export default function NewResearcherConsole(props) {
       setIsLoading(false);
     };
     init();
-  }, [formatDrafts]);
+  }, []);
 
   //sequence of events when user switches tab or data is updated (perform new filter based on search query)
   useEffect(() => {
@@ -132,20 +134,12 @@ export default function NewResearcherConsole(props) {
       filterFn,
       setFilteredList
     );
-  }, [researcherCollections, filterFn]);
+  }, [researcherCollections]);
 
   //review collection function, passed to collections table to be used in buttons
-  const reviewCollection = (darCollection) => {
+  const redirectToDARApplication = (darCollection) => {
     try {
-      const referenceId = flow(
-        get('dars'),
-        keys,
-        head
-      )(darCollection);
-      if (isNil(referenceId)) {
-        throw new Error('Error: Could not find target Data Access Request');
-      }
-      history.push(`/dar_application/${referenceId}`);
+      redirectByReferenceId(darCollection, history);
     } catch (error) {
       Notifications.showError({
         text: 'Error: Cannot view target Data Access Request'
@@ -221,7 +215,7 @@ export default function NewResearcherConsole(props) {
   };
 
   return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', margin: '0px -3%' } }, [
       div(
         { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
         [
@@ -262,7 +256,8 @@ export default function NewResearcherConsole(props) {
         isLoading,
         cancelCollection,
         reviseCollection,
-        reviewCollection,
+        reviewCollection: redirectToDARApplication,
+        resumeCollection: redirectToDARApplication,
         deleteDraft,
         consoleType: 'researcher',
       })
