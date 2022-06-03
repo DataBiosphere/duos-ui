@@ -18,7 +18,7 @@ import {PageHeading} from '../components/PageHeading';
 import {Collections, DAR, DataSet, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {any, assign, cloneDeep, find, get, getOr, isEmpty, isNil, keys, map, merge, pickBy} from 'lodash/fp';
+import {any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy} from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 
@@ -204,7 +204,7 @@ class DataAccessRequestApplication extends Component {
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
-      const darReferenceId = keys(dars)[0];
+      const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
       formData.datasets =  map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
