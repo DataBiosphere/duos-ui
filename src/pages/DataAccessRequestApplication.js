@@ -1,23 +1,26 @@
-import { Component } from 'react';
-import { a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
+import {Component} from 'react';
+import {a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
-import {completedResearcherInfoCheck, Notifications as NotyUtil } from '../libs/utils';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { Notification } from '../components/Notification';
-import { PageHeading } from '../components/PageHeading';
-import { DAR, DataSet, User } from '../libs/ajax';
-import { NotificationService } from '../libs/notificationService';
-import { Storage } from '../libs/storage';
-import { Navigation } from '../libs/utils';
-import {isEmpty, isNil, assign, get, map, any, merge, pickBy, cloneDeep} from 'lodash/fp';
-import { isFileEmpty } from '../libs/utils';
+import {
+  completedResearcherInfoCheck,
+  getPropertyValuesFromUser,
+  isFileEmpty,
+  Navigation,
+  Notifications as NotyUtil
+} from '../libs/utils';
+import {TypeOfResearch} from './dar_application/TypeOfResearch';
+import {ConfirmationDialog} from '../components/ConfirmationDialog';
+import {Notification} from '../components/Notification';
+import {PageHeading} from '../components/PageHeading';
+import {DAR, DataSet, User} from '../libs/ajax';
+import {NotificationService} from '../libs/notificationService';
+import {Storage} from '../libs/storage';
+import {any, assign, cloneDeep, find, get, getOr, isEmpty, isNil, map, merge, pickBy} from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
-import {getPropertyValuesFromUser} from '../libs/utils';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -254,7 +257,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   formatOntologyItems = (ontologies) => {
-    const ontologyItems = map((ontology) => {
+    return map((ontology) => {
       return {
         //item being referenced as a way to backfill older ontologies that don't have a proper label attributes
         id: ontology.id || ontology.item.id,
@@ -264,7 +267,6 @@ class DataAccessRequestApplication extends Component {
         item: ontology.item
       };
     })(ontologies);
-    return ontologyItems;
   };
 
   updateShowValidationMessages = (value) => {
@@ -578,7 +580,7 @@ class DataAccessRequestApplication extends Component {
     let irbUpdate, collaborationUpdate;
     irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
     collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
-    return assign({}, irbUpdate.data, collaborationUpdate.data);
+    return assign(irbUpdate.data, collaborationUpdate.data);
   };
 
   updateDraftResponse = (formattedFormData, referenceId) => {
@@ -625,7 +627,8 @@ class DataAccessRequestApplication extends Component {
         if(activeDULQuestions.ethicsApprovalRequired || activeDULQuestions.collaboratorRequired) {
           darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
         }
-        let updatedFormData = assign({}, formattedFormData, darPartialResponse);
+        let updatedFormData = assign(formattedFormData, darPartialResponse);
+
         await DAR.postDar(updatedFormData);
         this.setState({
           showDialogSubmit: false
@@ -702,7 +705,7 @@ class DataAccessRequestApplication extends Component {
         darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       this.setState(prev => {
-        prev.formData = assign({}, prev.formData, darPartialResponse);
+        prev.formData = assign(prev.formData, darPartialResponse);
         prev.showDialogSave = false;
         prev.disableOkBtn = false;
         return prev;
@@ -725,7 +728,7 @@ class DataAccessRequestApplication extends Component {
       return null;
     }
 
-    let datasetPromises = currentDatasets.map((partialDataset) => {
+    let datasetPromises = map((partialDataset) => {
       let mappedDataset;
       if (isNil(partialDataset.dataUse)) {
         mappedDataset = DataSet.getDataSetsByDatasetId(partialDataset.value);
@@ -733,7 +736,7 @@ class DataAccessRequestApplication extends Component {
         mappedDataset = Promise.resolve(partialDataset);
       }
       return mappedDataset;
-    });
+    })(currentDatasets);
 
     let dataUseArray = await Promise.all(datasetPromises);
     dataUseArray.forEach((datasetRecord, index) => {
@@ -897,7 +900,7 @@ class DataAccessRequestApplication extends Component {
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(get([], this.state.researcher, 'libraryCards')) && !checkNihDataOnly;
+    const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
