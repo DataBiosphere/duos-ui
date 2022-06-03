@@ -540,9 +540,14 @@ class DuosHeader extends Component {
         search: 'researcher_console'
       },
       isMember && {
-        label: 'DAC Member Console',
+        label: 'DAC Console',
         link: this.state.dacMemberPath,
-        search: 'member_console'
+        search: 'member_console',
+        children: [
+          { label: 'DAR Requests', link: this.state.dacMemberPath },
+          { label: 'Datasets', link: '/dataset_catalog' },
+          { label: 'DAC Members', link: '/manage_dac' }
+        ]
       }
     ].filter((data) => !!data);
 
