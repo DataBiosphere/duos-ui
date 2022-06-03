@@ -2,7 +2,7 @@ import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiD
 import {div, h} from 'react-hyperscript-helpers';
 import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
 import {useEffect, useState} from 'react';
-import {find, get, filter, flow, sortBy, map, isNil, isEmpty} from 'lodash/fp';
+import {find, get, filter, flow, map, isNil, isEmpty} from 'lodash/fp';
 import {User} from '../../libs/ajax';
 import {Alert} from '../../components/Alert';
 
@@ -44,10 +44,7 @@ export default function MultiDatasetVotingTab(props) {
   useEffect( () => {
     setCollectionDatasets(get('datasets')(collection));
     setRpBucket(find(bucket => get('isRP')(bucket))(buckets));
-    setDataBuckets(flow(
-      filter(bucket => get('isRP')(bucket) !== true),
-      sortBy(bucket => get('key')(bucket))
-    )(buckets));
+    setDataBuckets(filter(bucket => get('isRP')(bucket) !== true)(buckets));
   }, [buckets, collection]);
 
   useEffect(() => {
@@ -64,11 +61,9 @@ export default function MultiDatasetVotingTab(props) {
 
   const DatasetVoteSlabs = () => {
     const isApprovalDisabled = dataAccessApprovalDisabled();
-    let index = 0;
     return map(bucket => {
-      index++;
       return h(MultiDatasetVoteSlab,{
-        title: `GROUP ${index}`,
+        title: bucket.key,
         bucket,
         dacDatasetIds,
         collectionDatasets,
