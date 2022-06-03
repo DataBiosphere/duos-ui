@@ -13,8 +13,7 @@ import { DAR, DataSet, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from '../libs/utils';
-import * as fp from 'lodash/fp';
-import { isEmpty, isNil, assign, get } from 'lodash';
+import {isEmpty, isNil, assign, get, map, any, merge, pickBy, cloneDeep} from 'lodash/fp';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
@@ -174,11 +173,11 @@ class DataAccessRequestApplication extends Component {
   }
 
   async getDatasets(formData) {
-    const dsIds = fp.get('datasetIds')(formData);
+    const dsIds = get('datasetIds')(formData);
     let datasets;
-    if (!fp.isNil(dsIds)) {
-      datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-      datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+    if (!isNil(dsIds)) {
+      datasets = await Promise.all(map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+      datasets = map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
     } else {
       datasets = [];
     }
@@ -187,7 +186,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    const { dataRequestId } = this.props.match.params;
+    const { dataRequestId, collectionId } = this.props.match.params;
     let formData = {};
     const researcher = await User.getMe();
     const signingOfficials = await User.getSOsForCurrentUser();
@@ -196,7 +195,7 @@ class DataAccessRequestApplication extends Component {
       prev.allSigningOfficials = signingOfficials;
       return prev;
     });
-    if (!fp.isNil(dataRequestId)) {
+    if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
@@ -232,21 +231,21 @@ class DataAccessRequestApplication extends Component {
     formData.userId = researcher.dacUserId;
 
     let completed = false;
-    if (!fp.isNil(formData.darCode)) {
+    if (!isNil(formData.darCode)) {
       completed = '';
     } else if (rpProperties.completed !== '') {
       completed = completedResearcherInfoCheck(rpProperties);
     }
     this.setState(prev => {
       prev.completed = completed;
-      prev.formData = fp.merge(prev.formData, formData);
+      prev.formData = merge(prev.formData, formData);
       return prev;
     });
 
   }
 
   formatDatasetForAutocomplete = (dataset) => {
-    const nameProp = fp.find({'propertyName':'Dataset Name'})(dataset.properties);
+    const nameProp = find({'propertyName':'Dataset Name'})(dataset.properties);
     return {
       key: dataset.dataSetId,
       value: dataset.dataSetId,
@@ -255,7 +254,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   formatOntologyItems = (ontologies) => {
-    const ontologyItems = ontologies.map((ontology) => {
+    const ontologyItems = map((ontology) => {
       return {
         //item being referenced as a way to backfill older ontologies that don't have a proper label attributes
         id: ontology.id || ontology.item.id,
@@ -264,7 +263,7 @@ class DataAccessRequestApplication extends Component {
         label: ontology.label || ontology.item.label,
         item: ontology.item
       };
-    });
+    })(ontologies);
     return ontologyItems;
   };
 
@@ -477,7 +476,7 @@ class DataAccessRequestApplication extends Component {
   verifyStep2() {
     //defined attribute keys for dynamic DUL based questions
     const dulInvalidCheck = () => {
-      const activeQuestions = fp.pickBy((isActive) => isActive)(this.state.formData.activeDULQuestions);
+      const activeQuestions = pickBy((isActive) => isActive)(this.state.formData.activeDULQuestions);
       let result = false;
       //mapping of ontology keys to dar established keys
       const dulQuestionMap = {
@@ -490,7 +489,7 @@ class DataAccessRequestApplication extends Component {
 
       if (!isNil(activeQuestions) && !isEmpty(activeQuestions)) {
         const formData = this.state.formData;
-        const uncappedAny = fp.any.convert({cap: false});
+        const uncappedAny = any.convert({cap: false});
         //uncappedAny will look for the first instance in which the dataset is false (or nil/empty) for early termination
         result = uncappedAny((value, question) => {
           const formDataKey = dulQuestionMap[question];
@@ -520,11 +519,11 @@ class DataAccessRequestApplication extends Component {
     };
 
     const dulInvalid = dulInvalidCheck();
-    const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
-    const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
+    const datasetsInvalid = isEmpty(this.state.formData.datasets);
+    const titleInvalid = isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
+    const rusInvalid = isEmpty(this.state.formData.rus);
+    const summaryInvalid = isEmpty(this.state.formData.nonTechRus);
     return dulInvalid || datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   }
 
@@ -596,7 +595,7 @@ class DataAccessRequestApplication extends Component {
     if (answer === true) {
       const userId = Storage.getCurrentUser().dacUserId;
       const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
-      let formattedFormData = fp.cloneDeep(this.state.formData);
+      let formattedFormData = cloneDeep(this.state.formData);
       const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
 
       if (ontologies.length > 0) {
@@ -607,7 +606,7 @@ class DataAccessRequestApplication extends Component {
           formattedFormData[key] = undefined;
         }
       }
-      formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
+      formattedFormData.datasetIds = map('value')(formattedFormData.datasets);
       formattedFormData.userId = userId;
 
       try {
@@ -669,7 +668,7 @@ class DataAccessRequestApplication extends Component {
     });
     if (answer === true) {
       // DAR datasetIds needs to be a list of ids
-      const datasetIds = fp.map('value')(this.state.formData.datasets);
+      const datasetIds = map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
       const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
       this.setState(prev => {
@@ -683,9 +682,9 @@ class DataAccessRequestApplication extends Component {
   };
 
   saveDarDraft = async () => {
-    let formattedFormData = fp.cloneDeep(this.state.formData);
+    let formattedFormData = cloneDeep(this.state.formData);
     // DAR datasetIds needs to be a list of ids
-    formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
+    formattedFormData.datasetIds = map('value')(formattedFormData.datasets);
     const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
@@ -693,7 +692,7 @@ class DataAccessRequestApplication extends Component {
       let referenceId = formattedFormData.referenceId;
       let darPartialResponse = await this.updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
-      if(fp.isNil(dataRequestId)) {
+      if(isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
       }
       //execute saveDARDocuments method only if documents are required for the DAR
@@ -728,7 +727,7 @@ class DataAccessRequestApplication extends Component {
 
     let datasetPromises = currentDatasets.map((partialDataset) => {
       let mappedDataset;
-      if (fp.isNil(partialDataset.dataUse)) {
+      if (isNil(partialDataset.dataUse)) {
         mappedDataset = DataSet.getDataSetsByDatasetId(partialDataset.value);
       } else {
         mappedDataset = Promise.resolve(partialDataset);
@@ -746,7 +745,7 @@ class DataAccessRequestApplication extends Component {
   onDatasetsChange = async (currentDatasets) => {
     let updatedDatasets = null;
     if(!isNil(currentDatasets) && !isEmpty(currentDatasets)) {
-      updatedDatasets = await this.addDataUseToDataset(fp.cloneDeep(currentDatasets));
+      updatedDatasets = await this.addDataUseToDataset(cloneDeep(currentDatasets));
     }
     this.setState(prev => {
       prev.formData.datasets = updatedDatasets;
@@ -762,8 +761,8 @@ class DataAccessRequestApplication extends Component {
     const valid = (
       this.state.formData.hmb === true ||
       this.state.formData.poa === true ||
-      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
-      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+      (this.state.formData.diseases === true && !isEmpty(this.state.formData.ontologies)) ||
+      (this.state.formData.other === true && !isEmpty(this.state.formData.otherText))
     );
     return !valid;
   };
@@ -806,7 +805,7 @@ class DataAccessRequestApplication extends Component {
       other: false,
       otherText: ''
     };
-    if(!fp.isEmpty(e.target.value)) {
+    if(!isEmpty(e.target.value)) {
       applyToState.hmb = false;
       applyToState.diseases = true;
     } else {
@@ -815,7 +814,7 @@ class DataAccessRequestApplication extends Component {
       applyToState.ontologies = [];
     }
     this.setState(prev => {
-      prev.formData = fp.assign(prev.formData, applyToState);
+      prev.formData = assign(prev.formData, applyToState);
       return prev;
     });
   };
@@ -891,14 +890,14 @@ class DataAccessRequestApplication extends Component {
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
-    const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
+    const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(get(this.state.researcher, 'libraryCards', [])) && !checkNihDataOnly;
+    const libraryCardInvalid = isEmpty(get([], this.state.researcher, 'libraryCards')) && !checkNihDataOnly;
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
@@ -940,8 +939,7 @@ class DataAccessRequestApplication extends Component {
             Notification({notificationData: this.state.notificationData}),
             div({
               className: (this.state.formData.darCode !== null ?
-                'col-lg-10 col-md-9 col-sm-9 ' :
-                this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
+                'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')
             }, [
               PageHeading({
                 id: 'requestApplication', imgSrc: headingIcon, iconSize: 'medium', color: 'access',
