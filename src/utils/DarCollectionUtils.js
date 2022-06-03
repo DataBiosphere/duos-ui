@@ -156,6 +156,7 @@ export const processDataUseBuckets = async(buckets) => {
 };
 
 //Gets data access votes from this bucket by members of this user's DAC
+//Note that filtering by DAC does not occur if user is viewing on admin review page
 export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
@@ -178,6 +179,7 @@ export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => 
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
+//Note that filtering by DAC does not occur for users viewing throgh admin review page
 export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
   let rpVotes = flow(
@@ -198,6 +200,7 @@ export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
+//Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
   let output = flow(
@@ -213,6 +216,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
 };
 
 //Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
+//Note that filtering by DAC does not occur when viewing through th eadmin raview page
 export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
