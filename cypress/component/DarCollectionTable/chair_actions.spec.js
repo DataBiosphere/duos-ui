@@ -17,9 +17,10 @@ const nonVoteableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 2
+          1: {dacUserId: 2}
         }
       }
     },
@@ -31,6 +32,7 @@ const votableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: {dacUserId: 2}
@@ -43,6 +45,7 @@ const votableDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           2: {dacUserId: 1}
@@ -58,9 +61,10 @@ const nonOpenDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 1
       },
@@ -70,9 +74,10 @@ const nonOpenDars = {
   2: {
     elections: {
       2: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 2
       }
@@ -91,9 +96,10 @@ const missingElectionSet = {
   2: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 2
+          1: {dacUserId: 2}
         },
         referenceId: 2
       }
@@ -106,9 +112,26 @@ const cancelableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
+        },
+        dataSetId: 1
+      }
+    },
+    data: {}
+  }
+};
+
+const nonCancelableDars = {
+  1: {
+    elections: {
+      1: {
+        electionType: 'DataAccess',
+        status: 'Open',
+        votes: {
+          1: {dacUserId: 1}
         },
         dataSetId: 1
       }
@@ -118,9 +141,10 @@ const cancelableDars = {
   2: {
     elections: {
       2: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
-          dacUserId: 1
+          1: {dacUserId: 1}
         },
         dataSetId: 2
       }
@@ -128,6 +152,23 @@ const cancelableDars = {
     data: {}
   }
 };
+
+const darsWithRpElection = {
+  1: {
+    elections: {
+      1: {
+        electionType: 'RP',
+        status: 'Open',
+        votes: {
+          1: {dacUserId: 1}
+        },
+        dataSetId: 1
+      }
+    },
+    data: {}
+  }
+};
+
 
 const user = {
   dacUserId: 1,
@@ -199,20 +240,36 @@ describe('Chair Actions - Open Button', () => {
 });
 
 describe('Chair Actions - Close Button', () => {
-  it('should render if there is a valid election for canceling', () => {
+  it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.collection.dars = cancelableDars;
     propCopy.relevantDatasets = [{ dataSetId: 1 }, { dataSetId: 2 }];
     mount(<ChairActions {...propCopy} />);
-    const openButton = cy.get(`#chair-cancel-${collectionId}`);
-    openButton.should('exist');
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('exist');
   });
 
-  it('should not render if there is no valid election for canceling', () => {
+  it('should not render if there is no valid election for canceling (no open elections)', () => {
     propCopy.collection.dars = nonOpenDars;
     propCopy.relevantDatasets = [];
     mount(<ChairActions {...propCopy} />);
-    const openButton = cy.get(`#chair-cancel-${collectionId}`);
-    openButton.should('not.exist');
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
+  });
+
+  it('should not render if there are any closed elections (mixed open and closed)', () => {
+    propCopy.collection.dars = nonCancelableDars;
+    propCopy.relevantDatasets = [];
+    mount(<ChairActions {...propCopy} />);
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
+  });
+
+  it('should not consider RP elections when determining if close button is rendered', () => {
+    propCopy.collection.dars = darsWithRpElection;
+    propCopy.relevantDatasets = [];
+    mount(<ChairActions {...propCopy} />);
+    const closeButton = cy.get(`#chair-cancel-${collectionId}`);
+    closeButton.should('not.exist');
   });
 });
 
@@ -253,6 +310,13 @@ describe('Chair Actions - Vote Button', () => {
     mount(<ChairActions {...propCopy}/>);
     const voteButton = cy.get(`#chair-vote-${collectionId}`);
     voteButton.should('exist');
+  });
+  it('should not consider RP elections when determining if vote buttons renders', () => {
+    propCopy.collection.dars = darsWithRpElection;
+    propCopy.relevantDatasets = [{ dataSetId: 1 }, { dataSetId: 2 }];
+    mount(<ChairActions {...propCopy} />);
+    const voteButton = cy.get(`#chair-vote-${collectionId}`);
+    voteButton.should('not.exist');
   });
 });
 
