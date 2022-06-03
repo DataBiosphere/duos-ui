@@ -155,6 +155,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           h(CollectionAlgorithmDecision, {
             algorithmResult,
             styleOverride: { borderLeft: '1px solid #333F52' },
+            isRendered: !isEmpty(algorithmResult)
           }),
         ]
       ),
