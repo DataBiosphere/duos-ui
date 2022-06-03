@@ -200,7 +200,7 @@ class DataAccessRequestApplication extends Component {
     });
 
     if(!isNil(collectionId)) {
-      // Review DAR application for collection - retrieves all datasets in the collection
+      // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
