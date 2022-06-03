@@ -89,7 +89,7 @@ const Routes = (props) => (
       props.env === 'dev' ? <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
         : ''
     }
-    <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({}, props, {readOnly: true})}
+    <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
@@ -97,6 +97,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path="/dar_application_review/:collection_id" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
