@@ -285,4 +285,45 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
     cy.get('textarea').should('not.be.disabled');
   });
+
+  it('renders a different heading if user is viewing from the admin page (Dataset)', () => {
+    mount(<CollectionSubmitVoteBox
+      votes={votesMixed}
+      isFinal={true}
+      question={'question'}
+      isDisabled={false}
+      isApprovalDisabled={true}
+      adminPage={true}
+    />);
+    cy.get('.vote-subsection-heading').should('exist').contains('Vote*');
+  });
+
+  it('renders a different heading if user is viewing from the admin page (RP)', () => {
+    mount(<CollectionSubmitVoteBox
+      votes={votesMixed}
+      isFinal={false}
+      question={'question'}
+      isDisabled={false}
+      isApprovalDisabled={true}
+      adminPage={true}
+    />);
+    cy.get('.vote-subsection-heading').should('exist').contains('Vote*');
+  });
+
+  it('shows the final vote and renders the compnent read-only for admin page', () => {
+    mount(
+      <CollectionSubmitVoteBox
+        votes={votesMatch}
+        isFinal={true}
+        question={'question'}
+        isDisabled={false}
+        isApprovalDisabled={true}
+        adminPage={true}
+      />
+    );
+
+    cy.get('[datacy=no-collection-vote-button').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=yes-collection-vote-button').should('have.css', 'background-color', votingColors.yes);
+    cy.get('textarea').should('be.disabled');
+  });
 });

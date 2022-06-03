@@ -121,6 +121,7 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
 
   return a({
     style: styles.link,
+    id: 'expand-rp-vote-button',
     onClick: () => setExpanded(!expanded),
   }, [linkMessage]);
 };
@@ -131,7 +132,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}}) => {
+export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}, adminPage = false}) => {
   return div(
     {
       style: styles.chairVoteInfo,
@@ -151,6 +152,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
         [
           h(VotesPieChart, {
             votes: dacVotes,
+            title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)"
           }),
           h(CollectionAlgorithmDecision, {
             algorithmResult,
@@ -159,10 +161,11 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           }),
         ]
       ),
-      div(['My DAC\'s Votes (detail)']),
+      div([adminPage ? 'DAC Votes' : "My DAC's Votes (detail)"]),
       h(VoteSummaryTable, {
         dacVotes: collapseVotesByUser(dacVotes),
         isLoading,
+        adminPage
       }),
     ]
   );
@@ -172,14 +175,13 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, readOnly, isLoading} = props;
+  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
-
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacRPVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair));
-  }, [bucket, isChair]);
+    setDacVotes(extractDacRPVotesFromBucket(bucket, user, adminPage));
+    setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
+  }, [bucket, isChair, adminPage]);
 
 
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
@@ -204,10 +206,11 @@ export default function ResearchProposalVoteSlab(props) {
                 question: 'Was the research purpose accurately converted to a structured format?',
                 votes: currentUserVotes,
                 isFinal: false,
-                isDisabled: readOnly || isEmpty(currentUserVotes),
-                isLoading
+                isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
+                isLoading,
+                adminPage
               }),
-              h(ChairVoteInfo, {dacVotes, isChair, isLoading})
+              h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
             ]),
           ]),
         ])

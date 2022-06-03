@@ -45,7 +45,7 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isVotingDisabled, setIsVotingDisabled] = useState(false);
-  const {question, votes, isFinal, isApprovalDisabled, isLoading} = props;
+  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage} = props;
 
   useEffect(() => {
     setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
@@ -97,10 +97,10 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   const VoteSubsectionHeading = () => {
-    const heading = isFinal ?
-      'Your Vote* (Vote and Rationale cannot be updated after submitting)' :
+    const heading = (isFinal || adminPage) ?
+      `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
       'Your Vote*';
-    return span([heading]);
+    return span({className: 'vote-subsection-heading'},[heading]);
   };
 
   return (
