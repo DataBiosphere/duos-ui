@@ -50,15 +50,15 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, readOnly, isLoading} = props;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage} = props;
   const {algorithmResult} = bucket;
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
-    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user));
-    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair));
+    setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
+    setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage));
     setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
-  }, [bucket, isChair]);
+  }, [bucket, isChair, adminPage]);
 
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
@@ -79,17 +79,18 @@ export default function MultiDatasetVoteSlab(props) {
       h(Alert, {
         title: 'Voting is disabled since not all elections are open.',
         type: 'danger',
-        isRendered: !allOpenElections
+        isRendered: !adminPage && !allOpenElections
       }),
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
         votes: currentUserVotes,
         isFinal: isChair,
-        isDisabled: readOnly || isEmpty(currentUserVotes) || !allOpenElections,
+        isDisabled: adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
-        isLoading
+        isLoading,
+        adminPage
       }),
-      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult})
+      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})
     ]);
   };
 
@@ -98,7 +99,8 @@ export default function MultiDatasetVoteSlab(props) {
       dacDatasetIds,
       bucketDatasetIds,
       collectionDatasets,
-      isLoading
+      isLoading,
+      adminPage
     });
   };
 
