@@ -540,7 +540,7 @@ class DuosHeader extends Component {
         search: 'researcher_console'
       },
       isChairPerson && {
-        label: 'DAC Console',
+        label: 'DAC Chair Console',
         link: this.state.dacChairPath,
         search: 'chair_console',
         children: [
