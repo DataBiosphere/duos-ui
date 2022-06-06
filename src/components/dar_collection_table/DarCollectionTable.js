@@ -156,7 +156,7 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, deleteDraft, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, openCollection, deleteDraft, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, resumeCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -167,7 +167,7 @@ const processCollectionRowData = ({ collections, openCollection, deleteDraft, sh
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
           openCollection, goToVote, reviewCollection, relevantDatasets,
-          deleteDraft
+          deleteDraft, resumeCollection
         });
       });
     });
@@ -185,7 +185,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [consoleAction, setConsoleAction] = useState();
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft
+    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft,
+    resumeCollection
   } = props;
   /*
     NOTE: This component will most likely be used in muliple consoles
@@ -211,6 +212,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
+        resumeCollection,
         reviewCollection,
         relevantDatasets
       }),
@@ -220,7 +222,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, reviewCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, resumeCollection, reviewCollection]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);

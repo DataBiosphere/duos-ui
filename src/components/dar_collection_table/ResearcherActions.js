@@ -14,8 +14,21 @@ import SimpleButton from '../SimpleButton';
   to do the sort of validations that are seen on the Chair or member actions.
 */
 
-const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center', marginLeft: '4%'});
+const hoverCancelButtonStyle = {
+  backgroundColor: 'red',
+  color: 'white'
+};
+
+const hoverPrimaryButtonStyle = {
+  backgroundColor: 'rgb(38 138 204)',
+  color: 'white'
+};
+
+const hoverSecondaryButtonStyle = {
+  backgroundColor: Theme.palette.secondary,
+  color: 'white'
+};
 
 //Function to determine if collection is revisable
 //Should only show up if all of the DARs have a canceled status
@@ -41,7 +54,7 @@ const allCanceledDars = (dars = {}) => {
 };
 
 export default function ResearcherActions(props) {
-  const { collection, showConfirmationModal, reviewCollection } = props;
+  const { collection, showConfirmationModal, reviewCollection, resumeCollection } = props;
   const collectionId = collection.darCollectionId;
   const { dars } = collection;
 
@@ -61,11 +74,15 @@ export default function ResearcherActions(props) {
     isRendered: true,
     onClick: () => reviewCollection(collection),
     baseColor: 'white',
+    fontColor: Theme.palette.secondary,
+    hoverStyle: {
+      backgroundColor: Theme.palette.secondary,
+      color: 'white'
+    },
     additionalStyle: {
       padding: '3%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      color: Theme.palette.secondary,
       border: `1px solid ${Theme.palette.secondary}`
     },
   };
@@ -84,9 +101,11 @@ export default function ResearcherActions(props) {
   const resumeButtonAttributes = {
     keyProp: `resume-draft-${collectionId}`,
     isRendered: collection.isDraft,
-    onClick: () => history.push(`/dar_application/${collectionId}`),
+    onClick: () => resumeCollection(collection),
     label: 'Resume',
     baseColor: 'white',
+    fontColor: Theme.palette.secondary,
+    hoverStyle: hoverSecondaryButtonStyle,
     additionalStyle: {
       width: '37%',
       padding: '3%',
@@ -94,7 +113,6 @@ export default function ResearcherActions(props) {
       fontSize: '1.45rem',
       fontWeight: 600,
       border: `1px solid ${Theme.palette.secondary}`,
-      color: Theme.palette.secondary
     },
   };
 
@@ -109,6 +127,7 @@ export default function ResearcherActions(props) {
       fontSize: '1.45rem',
       fontWeight: 600
     },
+    hoverStyle: hoverCancelButtonStyle,
     onClick: () => showConfirmationModal(collection, 'delete'),
   };
 
@@ -119,10 +138,11 @@ export default function ResearcherActions(props) {
     additionalStyle: {
       padding: '3%',
       fontSize: '1.45rem',
-      fontWeight: 600
+      fontWeight: 600,
     },
+    hoverStyle: hoverPrimaryButtonStyle,
     isRendered: !collection.isDraft && reviseEnabled,
-    onClick: () => showConfirmationModal(collection, 'revise')
+    onClick: () => showConfirmationModal(collection, 'revise'),
   };
 
   return div(
