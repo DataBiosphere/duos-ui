@@ -395,7 +395,7 @@ export default function SigningOfficialTable(props) {
             src: userIcon,
           }),
         ]),
-        div({ style: Styles.HEADER_CONTAINER }, [
+        div({ style: { ...Styles.HEADER_CONTAINER , marginRight: 15 }}, [
           div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, ['Researchers',]),
           div({
             style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
@@ -409,12 +409,11 @@ export default function SigningOfficialTable(props) {
               target: '_blank',
               id: 'so-console-info-link'},
             ['Click Here for more information'])
-          ]),
+          ])
         ]),
       ]),
       h(SearchBar, { handleSearchChange, searchRef }),
-      div({style: {
-      }}, [
+      div({style: { marginLeft: 15 }}, [
         h(SimpleButton, {
           onClick: () => showModalOnClick(),
           baseColor: Theme.palette.secondary,
