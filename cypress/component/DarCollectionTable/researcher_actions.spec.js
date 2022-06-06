@@ -50,6 +50,22 @@ const darsWithNoElections = {
   }
 };
 
+const mixedCancelElectionDars = {
+  1: {
+    data: {
+      status: 'Canceled'
+    },
+    elections: {
+      1: { status: 'Closed'}
+    }
+  },
+  2: {
+    data: {
+      status: 'Canceled'
+    }
+  }
+};
+
 const props = {
   collection: collectionSkeleton,
   showConfirmationModal: () => {},
@@ -64,8 +80,7 @@ describe('Researcher Actions - Container', () => {
   it('renders the actions container div', () => {
     propCopy.collection.dars = canceledDars;
     mount(<ResearcherActions {...propCopy}/>);
-    const container = cy.get('.researcher-actions');
-    container.should('exist');
+    cy.get('.researcher-actions').should('exist');
   });
 });
 
@@ -73,29 +88,17 @@ describe('Researcher Actions - Cancel Button', () => {
   it('renders the cancel button if the collection is cancelable', () => {
     propCopy.collection.dars = darsWithNoElections;
     mount(<ResearcherActions {...propCopy} />);
-    const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
-    cancelButton.should('exist');
+    cy.get(`#researcher-cancel-${collectionId}`).should('exist');
   });
   it('does not render if the election is already canceled', () => {
     propCopy.collection.dars = canceledDars;
     mount(<ResearcherActions {...propCopy} />);
-    const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
-    cancelButton.should('not.exist');
+    cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
   });
   it('does not render cancel button is collection has elections on it', () => {
     propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
-    const cancelButton = cy.get(`#researcher-cancel-${collectionId}`);
-    cancelButton.should('not.exist');
-  });
-});
-
-describe('Researcher Actions - Review Button', () => {
-  it('renders the review action button', () => {
-    propCopy.collection.dars = canceledDars;
-    mount(<ResearcherActions {...propCopy} />);
-    const reviewButton = cy.get(`#researcher-review-${collectionId}`);
-    reviewButton.should('exist');
+    cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
   });
 });
 
@@ -103,14 +106,67 @@ describe('Researcher Actions - Revise Button', () => {
   it('renders the revise button if all of the DARs are cancelled', () => {
     propCopy.collection.dars = canceledDars;
     mount(<ResearcherActions {...propCopy} />);
-    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
-    reviseButton.should('exist');
+    cy.get(`#revise-collection-${collectionId}`).should('exist');
   });
 
-  it('does not render the revise button if there are open elections present', () => {
+  it('does not render the revise button if there are elections present', () => {
+    propCopy.collection.dars = mixedCancelElectionDars;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#revise-collection-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Review Button', () => {
+  it('renders the review button if the DAR has been submitted', () => {
     propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
-    const reviseButton = cy.get(`#revise-collection-${collectionId}`);
-    reviseButton.should('not.exist');
+    cy.get(`#researcher-review-${collectionId}`).should('exist');
+  });
+
+  it('hides the review button if the collection is in draft status', () => {
+    propCopy.collection.isDraft = true;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-review-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Resume Button', () => {
+  it('renders the resume button if the collection is in draft status', () => {
+    propCopy.collection.dars = canceledDars;
+    propCopy.collection.isDraft = true;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-resume-${collectionId}`).should('exist');
+  });
+
+  it('hides the resume button if the collection is not in draft status', () => {
+    propCopy.collection.dars = {1: {data: {}}};
+    propCopy.collection.isDraft = false;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-resume-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Cancel Button', () => {
+  it('renders the cancel button if the collection is not in draft status', () => {
+    propCopy.collection.dars = darsWithNoElections;
+    propCopy.collection.isDraft = false;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-cancel-${collectionId}`).should('exist');
+  });
+
+  it('hides the cancel button if the collection is in draft status', () => {
+    propCopy.collection.dars = darsWithNoElections;
+    propCopy.collection.isDraft = true;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
+  });
+
+  it('hides the cancel button if the collection already has elections created', () => {
+    it('hides the cancel button if the collection is in draft status', () => {
+      propCopy.collection.dars = darsWithElections;
+      propCopy.collection.isDraft = true;
+      mount(<ResearcherActions {...propCopy} />);
+      cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
+    });
   });
 });

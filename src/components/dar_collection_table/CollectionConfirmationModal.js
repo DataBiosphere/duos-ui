@@ -32,7 +32,7 @@ export default function CollectionConfirmationModal(props) {
   const deleteOnClick = async() => {
     await deleteDraft(collection);
     setShowConfirmation(false);
-  }
+  };
 
   const cancelModal =
     h(ConfirmationModal, {

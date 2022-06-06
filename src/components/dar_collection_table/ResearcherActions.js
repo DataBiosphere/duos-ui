@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {Styles, Theme} from '../../libs/theme';
 import { h, div } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
-import { Block } from '@material-ui/icons';
+import { Block, Delete } from '@material-ui/icons';
 import { every, lowerCase, flow, map, filter, flatMap, isEmpty } from 'lodash/fp';
 import SimpleButton from '../SimpleButton';
 
@@ -25,15 +25,13 @@ const hoverPrimaryButtonStyle = {
   color: 'white'
 };
 
-const hoverSecondaryButtonStyle = {
-  backgroundColor: Theme.palette.secondary,
-  color: 'white'
-};
-
 //Function to determine if collection is revisable
 //Should only show up if all of the DARs have a canceled status
 const isCollectionRevisable = (dars = {}) => {
-  return allCanceledDars(dars);
+  const elections = flow(
+    flatMap(dar => !isEmpty(dar.elections) ? Object.values(dar.elections) : [])
+  )(dars);
+  return isEmpty(elections) && allCanceledDars(dars);
 };
 
 //Function to determine if collection is cancelable
@@ -98,14 +96,25 @@ export default function ResearcherActions(props) {
     icon: Block
   };
 
+  const deleteButtonAttributes = {
+    keyProp: `researcher-delete-${collectionId}`,
+    label: 'Delete',
+    isRendered: collection.isDraft === true,
+    onClick: () => showConfirmationModal(collection, 'delete'),
+    dataTip: 'Delete Collection Draft',
+    style: baseCancelButtonStyle,
+    hoverStyle: hoverCancelButtonStyle,
+    icon: Delete,
+  };
+
   const resumeButtonAttributes = {
-    keyProp: `resume-draft-${collectionId}`,
+    keyProp: `researcher-resume-${collectionId}`,
     isRendered: collection.isDraft,
     onClick: () => resumeCollection(collection),
     label: 'Resume',
-    baseColor: 'white',
-    fontColor: Theme.palette.secondary,
-    hoverStyle: hoverSecondaryButtonStyle,
+    baseColor: Theme.palette.secondary,
+    fontColor: 'white',
+    hoverStyle: hoverPrimaryButtonStyle,
     additionalStyle: {
       width: '37%',
       padding: '3%',
@@ -114,21 +123,6 @@ export default function ResearcherActions(props) {
       fontWeight: 600,
       border: `1px solid ${Theme.palette.secondary}`,
     },
-  };
-
-  const deleteButtonAttributes = {
-    keyProp: `delete-draft-${collectionId}`,
-    label: 'Delete',
-    isRendered: collection.isDraft === true,
-    baseColor: Theme.palette.error,
-    additionalStyle: {
-      width: '37%',
-      padding: '3%',
-      fontSize: '1.45rem',
-      fontWeight: 600
-    },
-    hoverStyle: hoverCancelButtonStyle,
-    onClick: () => showConfirmationModal(collection, 'delete'),
   };
 
   const reviseButtonAttributes = {
@@ -159,9 +153,9 @@ export default function ResearcherActions(props) {
       }
     },
     [
+      h(SimpleButton, reviseButtonAttributes),
       h(SimpleButton, collection.isDraft ? resumeButtonAttributes : reviewButtonAttributes),
-      h(SimpleButton, reviseButtonAttributes), //NOTE: figure out when this should be rendered
-      h(SimpleButton, deleteButtonAttributes),
+      h(TableIconButton, deleteButtonAttributes),
       h(TableIconButton, cancelButtonAttributes)
     ]
   );
