@@ -15,7 +15,7 @@ import SimpleButton from '../SimpleButton';
 */
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
-const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center'});
+const baseCancelButtonStyle = Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON, {alignItems: 'center', marginLeft: '4%'});
 
 //Function to determine if collection is revisable
 //Should only show up if all of the DARs have a canceled status
@@ -60,12 +60,13 @@ export default function ResearcherActions(props) {
     label: 'Review',
     isRendered: true,
     onClick: () => reviewCollection(collection),
-    baseColor: Theme.palette.secondary,
+    baseColor: 'white',
     additionalStyle: {
       padding: '3%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      color: 'white'
+      color: Theme.palette.secondary,
+      border: `1px solid ${Theme.palette.secondary}`
     },
   };
 
@@ -87,7 +88,7 @@ export default function ResearcherActions(props) {
     label: 'Resume',
     baseColor: 'white',
     additionalStyle: {
-      width: '50%',
+      width: '37%',
       padding: '3%',
       marginRight: '2%',
       fontSize: '1.45rem',
@@ -103,7 +104,7 @@ export default function ResearcherActions(props) {
     isRendered: collection.isDraft === true,
     baseColor: Theme.palette.error,
     additionalStyle: {
-      width: '30%',
+      width: '37%',
       padding: '3%',
       fontSize: '1.45rem',
       fontWeight: 600
@@ -120,7 +121,7 @@ export default function ResearcherActions(props) {
       fontSize: '1.45rem',
       fontWeight: 600
     },
-    isRendered: reviseEnabled,
+    isRendered: !collection.isDraft && reviseEnabled,
     onClick: () => showConfirmationModal(collection, 'revise')
   };
 
@@ -137,7 +138,6 @@ export default function ResearcherActions(props) {
         columnGap: '1rem'
       }
     },
-    //placeholder template, adjust for console implementation
     [
       h(SimpleButton, collection.isDraft ? resumeButtonAttributes : reviewButtonAttributes),
       h(SimpleButton, reviseButtonAttributes), //NOTE: figure out when this should be rendered

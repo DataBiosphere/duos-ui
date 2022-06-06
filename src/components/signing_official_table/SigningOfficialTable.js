@@ -61,7 +61,10 @@ const DeactivateLibraryCardButton = (props) => {
     keyProp: `deactivate-card-${card.id}`,
     label: 'Deactivate',
     baseColor: Theme.palette.error,
-    hoverColor: 'rgb(194, 38,11)',
+    hoverStyle: {
+      backgroundColor: 'rgb(194, 38,11)',
+      color: 'white'
+    },
     additionalStyle: {
       width: '30%',
       padding: '2.25% 5%',

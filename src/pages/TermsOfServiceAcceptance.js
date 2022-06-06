@@ -52,7 +52,10 @@ export default function TermsOfServiceAcceptance(props) {
     isRendered: true,
     onClick: signOut,
     baseColor: 'darkgray',
-    hoverColor: '#d13b07',
+    hoverStyle: {
+      backgroundColor: '#d13b07',
+      color: 'white'
+    },
     additionalStyle: {
       textTransform: 'none',
       padding: '5px 10px',
