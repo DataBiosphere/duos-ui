@@ -95,6 +95,7 @@ export const styles = {
 
 export const DarCollectionTableColumnOptions = {
   DAR_CODE: 'darCode',
+  DAR_CODE_ADMIN: 'darCodeAdmin', //temp key for admin, will switch out once collection review page is implemented for all users
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
   PI: 'pi',
@@ -109,6 +110,12 @@ const columnHeaderConfig = {
     label: 'DAR Code',
     cellStyle: { width: styles.cellWidth.darCode },
     cellDataFn: cellData.darCodeCellData,
+    sortable: true
+  },
+  darCodeAdmin: {
+    label: 'DAR Code',
+    cellStyle: {width: styles.cellWidth.darCode},
+    cellDataFn: cellData.darCodeAdminCellData,
     sortable: true
   },
   name: {

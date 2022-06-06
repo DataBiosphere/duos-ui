@@ -47,18 +47,22 @@ export default function DatasetsRequestedPanel(props) {
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const collapsedDatasetCapacity = 5;
-  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading} = props;
-
+  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading, adminPage} = props;
 
   const requestedDatasetIds = useCallback(() => {
-    const datasetsForDacInBucket =  filter(bucketDatasetId => {
-      return includes(bucketDatasetId)(dacDatasetIds);
-    })(bucketDatasetIds);
+    if(adminPage) {
+      return filter(dataset =>
+        includes(dataset.dataSetId)(bucketDatasetIds)
+      )(collectionDatasets);
+    }
+    const datasetsForDacInBucket = filter(bucketDatasetId =>
+      includes(bucketDatasetId)(dacDatasetIds)
+    )(bucketDatasetIds);
 
-    return filter(dataset => {
-      return includes(dataset.dataSetId)(datasetsForDacInBucket);
-    })(collectionDatasets);
-  }, [bucketDatasetIds, collectionDatasets, dacDatasetIds]);
+    return filter(dataset =>
+      includes(dataset.dataSetId)(datasetsForDacInBucket)
+    )(collectionDatasets);
+  }, [bucketDatasetIds, collectionDatasets, dacDatasetIds, adminPage]);
 
   useEffect(() => {
     const datasets = requestedDatasetIds();
@@ -90,7 +94,7 @@ export default function DatasetsRequestedPanel(props) {
 
   const DatasetList = () => {
     const datasetRows = map(dataset => {
-      return div({style: {display: 'flex'}, key: dataset.dataSetId}, [
+      return div({style: {display: 'flex'}, key: dataset.dataSetId, className: 'dataset-list-item'}, [
         div({style: {width: '12.5%'}}, [datasetId(dataset)]),
         div({style: {width: '75%'}}, [datasetName(dataset)])
       ]);
