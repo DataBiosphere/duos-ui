@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
+import {chunk, map, flatMap, isEmpty, range, flatten} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
+import {filterVoteArraysForUsersDac} from "../../../utils/DarCollectionUtils";
 
 export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
   useEffect(() => {
@@ -45,13 +46,25 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     return map.convert({cap: false})((bucket, index) => {
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
-      const { key, votes = {}, isRP } = bucket;
-      const targetAttr = isRP ? 'rp' : 'dataAccess';
-      const finalVotes = flatMap((voteObj) =>
-        !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
-      )(votes);
+      const { key } = bucket;
+      const finalVotes = extractFinalVotes(bucket, isAdmin);
       return h(VoteResultBox, { label: key, votes: finalVotes, additionalLabelStyle }, []);
     })(row);
+  };
+
+  //on the admin view, all final votes for each bucket are used to determine vote result
+  //on DAC (chair and member) views, only final votes from their DAC are included
+  const extractFinalVotes = (bucket, isAdmin) => {
+    const { votes = {}, isRP } = bucket;
+    const targetAttr = isRP ? 'rp' : 'dataAccess';
+    let finalVoteArrays = map((voteObj) =>
+      !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
+    )(votes);
+
+    if(!isAdmin) {
+      finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, user);
+    }
+    return flatten(finalVoteArrays);
   };
 
   //convert is once again used here to provide unique key identifier for the row
