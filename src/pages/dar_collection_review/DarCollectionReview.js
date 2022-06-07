@@ -179,7 +179,7 @@ export default function DarCollectionReview(props) {
           history: props.history,
         }),
       }),
-      h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
+      h(DataUseVoteSummary, { dataUseBuckets, isLoading, adminPage }),
     ]),
     div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
       h(TabControl, {

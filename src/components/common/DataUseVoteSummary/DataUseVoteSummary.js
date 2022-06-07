@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
 import {filterVoteArraysForUsersDac} from "../../../utils/DarCollectionUtils";
 
-export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
+export default function DataUseVoteSummary({dataUseBuckets, isLoading, adminPage}) {
   useEffect(() => {
     ReactTooltip.rebuild();
   });
@@ -47,21 +47,21 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
       const { key } = bucket;
-      const finalVotes = extractFinalVotes(bucket, isAdmin);
+      const finalVotes = extractFinalVotes(bucket, adminPage);
       return h(VoteResultBox, { label: key, votes: finalVotes, additionalLabelStyle }, []);
     })(row);
   };
 
   //on the admin view, all final votes for each bucket are used to determine vote result
   //on DAC (chair and member) views, only final votes from their DAC are included
-  const extractFinalVotes = (bucket, isAdmin) => {
+  const extractFinalVotes = (bucket, adminPage) => {
     const { votes = {}, isRP } = bucket;
     const targetAttr = isRP ? 'rp' : 'dataAccess';
     let finalVoteArrays = map((voteObj) =>
       !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
     )(votes);
 
-    if(!isAdmin) {
+    if(!adminPage) {
       finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, user);
     }
     return flatten(finalVoteArrays);
