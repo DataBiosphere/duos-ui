@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import {chunk, map, flatMap, isEmpty, range, flatten} from 'lodash/fp';
+import {chunk, map, isEmpty, range, flatten} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
-import {filterVoteArraysForUsersDac} from "../../../utils/DarCollectionUtils";
+import {filterVoteArraysForUsersDac} from '../../../utils/DarCollectionUtils';
 
-export default function DataUseVoteSummary({dataUseBuckets, isLoading, adminPage}) {
+export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoading, adminPage}) {
   useEffect(() => {
     ReactTooltip.rebuild();
   });
@@ -37,6 +37,13 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading, adminPage
     borderRight: dividerStyle
   };
 
+
+  //convert is once again used here to provide unique key identifier for the row
+  //necessary for React when rendering elements provided by an array
+  const rowTemplate = map.convert({cap:false})((row, index) =>
+    div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
+  );
+
   const elementTemplate = (row = []) => {
     const elementLength = row.length;
     //lodash-fp caps its normal lodash definitions to one argument (value)
@@ -52,8 +59,8 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading, adminPage
     })(row);
   };
 
-  //on the admin view, all final votes for each bucket are used to determine vote result
-  //on DAC (chair and member) views, only final votes from their DAC are included
+  //on the admin page, all final votes from the bucket are used to determine the vote result
+  //on DAC (chair and member) pages, only final votes from the current user's DAC are included
   const extractFinalVotes = (bucket, adminPage) => {
     const { votes = {}, isRP } = bucket;
     const targetAttr = isRP ? 'rp' : 'dataAccess';
@@ -62,16 +69,10 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading, adminPage
     )(votes);
 
     if(!adminPage) {
-      finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, user);
+      finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, currentUser);
     }
     return flatten(finalVoteArrays);
   };
-
-  //convert is once again used here to provide unique key identifier for the row
-  //necessary for React when rendering elements provided by an array
-  const rowTemplate = map.convert({cap:false})((row, index) =>
-    div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
-  );
 
   const loadingTemplate = div({
     className: 'vote-summary-loading-placeholder',
