@@ -180,14 +180,15 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
-      const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
+      const { darCollectionId, darCode, createDate, createUser } = collection;
+      const relevantDatasets = collection.datasets;
       const status = determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          collection, darCollectionId, datasets, darCode, status,
+          collection, darCollectionId, darCode, status,
           createDate, createUser, actionsDisabled,
           showConfirmationModal, consoleType,
           openCollection, goToVote, reviewCollection, relevantDatasets
