@@ -622,6 +622,11 @@ small {
   font-weight: 500;
 }
 
+.cell-sort {
+  display: flex;
+  align-items: center;
+}
+
 .cell-sort:hover {
   cursor: pointer;
 }
