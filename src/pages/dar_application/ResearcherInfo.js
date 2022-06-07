@@ -123,21 +123,6 @@ export default function ResearcherInfo(props) {
       className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
 
-        div({
-          datacy: 'researcher-info-missing-library-cards',
-          isRendered: !libraryCardReqSatisfied, className: 'rp-alert' }, [
-          Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
-        ]),
-        div({
-          datacy: 'researcher-info-profile-unsubmitted',
-          isRendered: (completed === false && libraryCardReqSatisfied), className: 'rp-alert' }, [
-          Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
-        ]),
-        div({
-          datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
-          Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
-        ]),
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
           input({
             type: 'checkbox',
@@ -275,6 +260,22 @@ export default function ResearcherInfo(props) {
               }, ['Required field, ensure your Profile has a PI listed, or that you are selected as the PI'])
             ])
           ])
+        ]),
+
+        div({
+          datacy: 'researcher-info-missing-library-cards',
+          isRendered: !libraryCardReqSatisfied, className: 'rp-alert' }, [
+          Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
+        ]),
+        div({
+          datacy: 'researcher-info-profile-unsubmitted',
+          isRendered: (completed === false && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
+        ]),
+        div({
+          datacy: 'researcher-info-profile-submitted',
+          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 
         div({className: 'form-group'}, [
