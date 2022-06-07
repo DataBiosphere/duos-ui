@@ -550,7 +550,7 @@ class DuosHeader extends Component {
         ]
       },
       isMember && {
-        label: 'DAC Console',
+        label: 'DAC Member Console',
         link: this.state.dacMemberPath,
         search: 'member_console',
         children: [
