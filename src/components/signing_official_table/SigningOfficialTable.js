@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import { h, div, img } from 'react-hyperscript-helpers';
+import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
@@ -53,6 +53,12 @@ const columnHeaderFormat = {
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 };
 
+// Used to determine which modal type to use for either issuing or deleting a Library Card.
+const confirmModalType = {
+  issue: 'issue',
+  delete: 'delete'
+};
+
 const DeactivateLibraryCardButton = (props) => {
   const {card = {}, showConfirmationModal} = props;
   const message = 'Are you sure you want to deactivate this library card?';
@@ -66,13 +72,12 @@ const DeactivateLibraryCardButton = (props) => {
       color: 'white'
     },
     additionalStyle: {
-      width: '30%',
       padding: '2.25% 5%',
       fontSize: '1.45rem',
       fontWeight: 600,
       fontFamily: 'Montserrat'
     },
-    onClick: () => showConfirmationModal({card, message, title, confirmType: 'delete'})
+    onClick: () => showConfirmationModal({card, message, title, confirmType: confirmModalType.delete})
   });
 };
 
@@ -97,7 +102,7 @@ const IssueLibraryCardButton = (props) => {
       fontWeight: 600,
       fontFamily: 'Montserrat'
     },
-    onClick: () => showConfirmationModal({ card, message, title, confirmType: 'issue' }),
+    onClick: () => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue }),
   });
 };
 
@@ -206,7 +211,7 @@ export default function SigningOfficialTable(props) {
   const searchRef = useRef('');
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
-  const [confirmType, setConfirmType] = useState('delete');
+  const [confirmType, setConfirmType] = useState(confirmModalType.delete);
   const { signingOfficial, unregisteredResearchers, isLoading } = props;
   const [lcaText, setLcaText] = useState('');
 
@@ -393,18 +398,25 @@ export default function SigningOfficialTable(props) {
             src: userIcon,
           }),
         ]),
-        div({ style: Styles.HEADER_CONTAINER }, [
+        div({ style: { ...Styles.HEADER_CONTAINER , marginRight: 15 }}, [
           div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, ['Researchers',]),
           div({
             style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             }),
-          },['My Institution\'s Researchers. Issue or Remove Researcher privileges below.']),
+          },[
+            'My Institution\'s Researchers. Issue or Remove Researcher privileges below. ',
+            a({
+              rel: 'noopener noreferrer',
+              href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
+              target: '_blank',
+              id: 'so-console-info-link'},
+            ['Click Here for more information'])
+          ])
         ]),
       ]),
       h(SearchBar, { handleSearchChange, searchRef }),
-      div({style: {
-      }}, [
+      div({style: { marginLeft: 15 }}, [
         h(SimpleButton, {
           onClick: () => showModalOnClick(),
           baseColor: Theme.palette.secondary,
@@ -439,9 +451,10 @@ export default function SigningOfficialTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      styleOverride: {minWidth: '700px', minHeight: '450px'},
+      // The issue modal requires a larger view than normal
+      styleOverride: confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
       message:
-        confirmType === 'delete'
+        confirmType === confirmModalType.delete
           ? div({}, [confirmationModalMsg])
           // Library Card Agreement Text
           : div({}, [div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]), confirmationModalMsg]),
@@ -449,7 +462,7 @@ export default function SigningOfficialTable(props) {
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,
       onConfirm: () =>
-        confirmType === 'delete'
+        confirmType === confirmModalType.delete
           ? deactivateLibraryCard(selectedCard, researchers)
           : issueLibraryCard(selectedCard, researchers)
     }),

@@ -11,6 +11,8 @@
 
 # IDE
 ./idea
+*.models.json
+models.json
 
 # testing
 /coverage

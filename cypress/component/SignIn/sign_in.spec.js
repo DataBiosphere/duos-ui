@@ -5,7 +5,7 @@ import {mount} from '@cypress/react';
 import SignIn from '../../../src/components/SignIn';
 import { Config } from '../../../src/libs/config';
 
-const signInText = "Sign-in";
+const signInText = 'Sign-in';
 
 // Note that we do not want to click the signin button
 // in tests as that would trigger an auth-flow we cannot

@@ -157,57 +157,82 @@ export const processDataUseBuckets = async(buckets) => {
 };
 
 //Gets data access votes from this bucket by members of this user's DAC
-export const extractDacDataAccessVotesFromBucket = (bucket, user) => {
+//Note that filtering by DAC does not occur if user is viewing on admin review page
+export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
-  return flow(
-    map(voteData => voteData.dataAccess),
+  let memberVotesArrays = flow(
+    map((voteData) => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    map(filteredData => filteredData.memberVotes),
-    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
-    flatMap(memberVotes => memberVotes)
+    map((filteredData) => filteredData.memberVotes)
   )(votes);
+
+  if(!adminPage) {
+    memberVotesArrays = filter(
+      (memberVotes) => includes(
+        user.dacUserId,
+        map(memberVote => memberVote.dacUserId)(memberVotes)
+      )
+    )(memberVotesArrays);
+  }
+  memberVotesArrays = flatMap((memberVotes) => memberVotes)(memberVotesArrays);
+  return memberVotesArrays;
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
-export const extractDacRPVotesFromBucket = (bucket, user) => {
+//Note that filtering by DAC does not occur for users viewing throgh admin review page
+export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
-
-  return flow(
+  let rpVotes = flow(
     map(voteData => voteData.rp),
     filter((rpData) => !isEmpty(rpData)),
-    map(filteredData => filteredData.memberVotes),
-    filter(memberVotes => includes(user.dacUserId, map(memberVote => memberVote.dacUserId)(memberVotes))),
-    flatMap(memberVotes => memberVotes)
+    map(filteredData => filteredData.memberVotes)
   )(votes);
+
+  if(!adminPage) {
+    rpVotes = filter(
+      memberVotes => includes(
+        user.dacUserId,
+        map(memberVote => memberVote.dacUserId)(memberVotes)
+      )
+    )(rpVotes);
+  }
+  return flatMap(memberVotes => memberVotes)(rpVotes);
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
-export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair) => {
+//Note that filtering by DAC does not occur for users viewing through admin review page
+export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
-
-  return flow(
+  let output = flow(
     map(voteData => voteData.dataAccess),
     filter((dataAccessData) => !isEmpty(dataAccessData)),
-    flatMap(filteredData => isChair ?
+    flatMap(filteredData => adminPage || isChair ?
       concat(filteredData.finalVotes, filteredData.chairpersonVotes) :
-      filteredData.memberVotes),
-    filter(vote => vote.dacUserId === user.dacUserId)
+      filteredData.memberVotes)
   )(votes);
+  return !adminPage ?
+    filter((vote) => vote.dacUserId === user.dacUserId)(output) :
+    filter((vote) => !isNil(vote.vote))(output);
 };
 
 //Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
-export const extractUserRPVotesFromBucket = (bucket, user, isChair) => {
+//Note that filtering by DAC does not occur when viewing through th eadmin raview page
+export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
-  return flow(
+  let output = flow(
     map(voteData => voteData.rp),
     filter((rpData) => !isEmpty(rpData)),
-    flatMap(filteredData => isChair ?
+    flatMap(filteredData => adminPage || isChair ?
       filteredData.chairpersonVotes :
-      filteredData.memberVotes),
-    filter(vote => vote.dacUserId === user.dacUserId)
+      filteredData.memberVotes)
   )(votes);
+
+  output = !adminPage ?
+    filter(vote => vote.dacUserId === user.dacUserId)(output) :
+    filter(vote => !isNil(vote.vote))(output);
+  return output;
 };
 
 export const getMatchDataForBuckets = async (buckets) => {
@@ -228,7 +253,7 @@ export const getMatchDataForBuckets = async (buckets) => {
         idsArr.push(dataAccessReferenceId);
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
-      bucket.algorithmResult = {result: 'N/A', createDate: 'N/A', id: key};
+      bucket.algorithmResult = {result: 'N/A', createDate: undefined, id: key};
     }
   })(buckets);
 

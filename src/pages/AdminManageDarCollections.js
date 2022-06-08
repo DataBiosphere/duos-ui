@@ -41,7 +41,7 @@ export default function AdminManageDarCollections() {
   const openCollection = openCollectionFn({updateCollections});
 
   return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
       div(
         { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
         [
@@ -53,14 +53,19 @@ export default function AdminManageDarCollections() {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: { ...Styles.TITLE} }, [
-              'Data Access Request Collections',
+            div({ style: {
+              fontFamily: 'Montserrat',
+              fontWeight: 600,
+              fontSize: '2.8rem'
+            } }, [
+              'Manage Data Access Request Collections',
             ]),
             div(
               {
-                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-                  fontSize: '16px',
-                }),
+                style: {
+                  fontFamily: 'Montserrat',
+                  fontSize: '1.6rem'
+                },
               },
               ['List of all DAR Collections saved in DUOS']
             ),
@@ -72,7 +77,7 @@ export default function AdminManageDarCollections() {
     h(DarCollectionTable, {
       collections: filteredList,
       columns: [
-        DarCollectionTableColumnOptions.DAR_CODE,
+        DarCollectionTableColumnOptions.DAR_CODE_ADMIN,
         DarCollectionTableColumnOptions.NAME,
         DarCollectionTableColumnOptions.SUBMISSION_DATE,
         DarCollectionTableColumnOptions.PI,

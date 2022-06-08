@@ -9,8 +9,6 @@ import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
-import DataOwnerConsole from './pages/DataOwnerConsole';
-import DataOwnerReview from './pages/DataOwnerReview';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
 import DulCollect from './pages/DulCollect';
@@ -19,9 +17,6 @@ import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import Home from './pages/Home';
-import HomeAbout from './pages/HomeAbout';
-import HomeSigningOfficial from './pages/HomeSigningOfficial';
-import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
 import MemberConsole from './pages/MemberConsole';
 import ChairConsole from './pages/ChairConsole';
@@ -33,12 +28,14 @@ import NewResearcherConsole from './pages/NewResearcherConsole';
 import ResearcherProfile from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
+import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
+import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
+import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
 import ReviewedCases from './pages/ReviewedCases';
 import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
-import HomeResearcherInfo from './pages/HomeResearcherInfo';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
@@ -65,10 +62,6 @@ const Routes = (props) => (
             : <NotFound />
           : <div />
     } />
-    <Route path="/home_about" component={HomeAbout} />
-    <Route path="/home_signing_official" component={HomeSigningOfficial} />
-    <Route path="/home_dac_info" component={HomeDacInfo} />
-    <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
@@ -77,6 +70,7 @@ const Routes = (props) => (
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/admin_review_collection/:collectionId" component={DarCollectionReview} props={Object.assign({adminPage: true}, props)} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_edit_user/:dacUserId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
@@ -99,20 +93,22 @@ const Routes = (props) => (
       props.env === 'dev' ? <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
         : ''
     }
-    <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({}, props, {readOnly: true})}
+    <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
-    <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />
-    <AuthenticatedRoute path="/data_owner_review/:voteId/:referenceId/:dataSetId" component={DataOwnerReview} props={props}
-      rolesAllowed={[USER_ROLES.dataOwner]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/signing_official_console/researchers" component={SigningOfficialResearchers} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/dar_requests" component={SigningOfficialDarRequests} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={SigningOfficialDataSubmitters} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

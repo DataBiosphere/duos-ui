@@ -1,5 +1,5 @@
-import {Component, Fragment, useEffect, useState} from 'react';
-import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
+import {Component, Fragment, useState} from 'react';
+import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import {IconButton, List, ListItem, Menu, MenuItem} from '@material-ui/core';
@@ -8,59 +8,21 @@ import MenuIcon from '@material-ui/icons/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
-import './DuosNavigation.css';
+import './DuosHeader.css';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from './Notification';
 import { Styles } from '../libs/theme';
 import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
-import { isNil } from 'lodash/fp';
+import { isNil, map, uniq } from 'lodash/fp';
 import {Config} from '../libs/config';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
 
 const styles = {
   drawerPaper: {
     backgroundColor: '#00243c',
     color: 'white',
     fontFamily: 'Montserrat'
-  },
-  mainTab: {
-    padding: '0 25px',
-    fontSize: '16px',
-    textTransform: 'none',
-    fontFamily: 'Montserrat, sans-serif',
-    minHeight: '80px',
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  mainTabActive: {
-    padding: '0 25px',
-    fontSize: '16px',
-    fontFamily: '\'Montserrat\', sans-serif',
-    minHeight: '80px',
-    textTransform: 'none',
-    color: 'white',
-    background: 'rgba(255, 255, 255, 0.1)',
-    fontWeight: 'bold'
-  },
-  subTab: {
-    padding: '0 25px',
-    fontSize: '15px',
-    textTransform: 'none',
-    fontFamily: '\'Montserrat\', sans-serif',
-    color: '#00609f',
-    minHeight: '65px'
-  },
-  subTabActive: {
-    padding: '0 25px',
-    fontSize: '15px',
-    textTransform: 'none',
-    fontFamily: '\'Montserrat\', sans-serif',
-    color: '#00609f',
-    minHeight: '65px',
-    fontWeight: 'bold'
   }
 };
 
@@ -120,7 +82,7 @@ const DropdownComponent = (props) => {
     return keys.map((label) => {
       const linkData = links[label];
       return h(MenuItem, {
-        onClick: () => goToLink(linkData.link),
+        onClick: () => goToLink(linkData.link), // eslint-disable-line
         alignItems: 'center',
         id: `menu-link-${label}`,
         isRendered: linkData.isRendered,
@@ -172,171 +134,6 @@ const DropdownComponent = (props) => {
       }, MenuItemTemplates(linkLabels, dropdownLinks, onMouseEnter))
     ])
   );
-};
-
-const NavigationTabsComponent = (props) => {
-  const {
-    makeNotifications,
-    navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
-    currentUser, signOut, isLogged,
-    contactUsButton, supportrequestModal,
-    tabs, initialTab, initialSubTab
-  } = props;
-  const [selectedMenuTab, setSelectedMenuTab] = useState(false);
-  const [selectedSubTab, setSelectedSubTab] = useState(false);
-
-  useEffect(() => {
-    setSelectedMenuTab(initialTab === -1 ? false : initialTab);
-    setSelectedSubTab(initialSubTab === -1 ? false : initialSubTab);
-  }, [initialTab, initialSubTab]);
-
-  return (div({
-    isRendered: true, className: 'navbar-logged'
-  }, [
-    ul({ className: 'navbar-main' }, [
-      div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
-        makeNotifications(),
-        h(Link, {
-          id: 'link_logo',
-          to: '/home',
-          className: 'navbar-brand'
-        }, [
-          img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo' }),
-        ]),
-        h(Box, { isRendered: isLogged, className: 'duos-navigation-box' }, [
-          h(Tabs, {
-            value: selectedMenuTab,
-            variant: 'scrollable',
-            scrollButtons: 'auto',
-            TabIndicatorProps: {
-              style: { background: '#2BBD9B' }
-            }
-          }, tabs.map((tab, tabIndex) => {
-            return h(Tab, {
-              label: tab.label,
-              style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
-              to: tab.link,
-              component: Link
-            });
-          }))
-        ]),
-        ul({ isRendered: !isLogged, className: 'navbar-public' }, [
-          li({}, [
-            a(
-              {
-                id: 'link_about',
-                className: 'navbar-duos-link',
-                href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
-                target: '_blank',
-              },
-              [
-                div({
-                  className: 'navbar-duos-icon-about',
-                  style: navbarDuosIcon,
-                }),
-                span({ style: navbarDuosText }, ['About']),
-              ]
-            ),
-          ]),
-          li({}, [
-            a(
-              {
-                id: 'link_help',
-                className: 'navbar-duos-link',
-                href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                target: '_blank',
-              },
-              [
-                div({
-                  className: 'navbar-duos-icon-help',
-                  style: navbarDuosIcon,
-                }),
-                span({ style: navbarDuosText }, ['FAQs']),
-              ]
-            ),
-          ]),
-          contactUsButton,
-          supportrequestModal,
-        ]),
-      ]),
-
-      // Navbar right side
-      div({ isRendered: isLogged, style: { display: 'flex', alignItems: 'center' } }, [
-        li({ className: 'dropdown help-li', style: { margin: '0 40px', padding: 0 } }, [
-          a(
-            {
-              id: 'sel_requestHelp',
-              role: 'button',
-              className: 'dropdown-toggle',
-              'data-toggle': 'dropdown',
-            },
-            [
-              div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-                'Request Help',
-                span({ className: 'caret caret-margin' }),
-              ])
-            ]
-          ),
-          ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-            li([
-              h(Link, { id: '', to: '/profile' }, [
-                'Unknown Help',
-              ]),
-            ])
-          ]),
-        ]),
-
-        li({ className: 'dropdown user-li' }, [
-          a(
-            {
-              id: 'sel_dacUser',
-              role: 'button',
-              className: 'dropdown-toggle',
-              'data-toggle': 'dropdown',
-            },
-            [
-              div({ id: 'dacUser' }, [
-                currentUser.displayName,
-                span({ className: 'caret caret-margin' }),
-              ]),
-              small({ id: 'dacUserMail' }, [currentUser.email]),
-            ]
-          ),
-          ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-            li([
-              h(Link, { id: 'link_profile', to: '/profile' }, [
-                'Your Profile',
-              ]),
-            ]),
-            li({}, [
-              a({ id: 'link_signOut', onClick: signOut }, [
-                'Sign out',
-              ]),
-            ]),
-          ]),
-        ]),
-      ])
-    ]),
-
-    // Sub Tabs
-    tabs[selectedMenuTab]?.children && h(Box, { className: 'duos-navigation-box navbar-sub' }, [
-      h(Tabs, {
-        value: selectedSubTab,
-        variant: 'scrollable',
-        scrollButtons: 'auto',
-        TabIndicatorProps: {
-          style: { background: '#00609f' }
-        }
-      }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
-        return h(Tab, {
-          label: tab.label,
-          style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
-          to: tab.link,
-          component: Link
-        });
-      }))
-    ])
-  ]));
 };
 
 class DuosHeader extends Component {
@@ -424,12 +221,13 @@ class DuosHeader extends Component {
   };
 
   render() {
-    const { classes, location } = this.props;
+    const { classes } = this.props;
 
     let isChairPerson = false;
     let isMember = false;
     let isAdmin = false;
     let isResearcher = false;
+    let isDataOwner = false;
     let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -440,8 +238,14 @@ class DuosHeader extends Component {
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
+      isDataOwner = currentUser.isDataOwner;
       isSigningOfficial = currentUser.isSigningOfficial;
     }
+
+    const hasTwoOrMoreRoles = () => {
+      const roleNames = uniq(map('name')(currentUser.roles));
+      return roleNames.length >= 2;
+    };
 
     const dropdownLinks = {
       statistics: {
@@ -465,7 +269,7 @@ class DuosHeader extends Component {
     const duosLogoImage = {
       height: '50px',
       padding: '0',
-      marginRight: 30,
+      margin: '12px 64px 0 0',
       cursor: 'pointer'
     };
 
@@ -481,6 +285,12 @@ class DuosHeader extends Component {
     const navbarDuosText = {
       display: 'inline',
       verticalAlign: 'text-bottom'
+    };
+
+    const hrStyle = {
+      float: 'right',
+      margin: '0',
+      width: '100%'
     };
 
     const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
@@ -511,83 +321,265 @@ class DuosHeader extends Component {
       url: this.props.location.pathname
     });
 
-    const tabs = [
-      isAdmin && {
-        label: 'Admin Console',
-        link: '/admin_manage_dar_collections',
-        children: [
-          { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-          { label: 'Dataset Catalog', link: '/dataset_catalog' },
-          { label: 'DACs', link: '/manage_dac' },
-          { label: 'Statistics', link: '/summary_votes' },
-          { label: 'Users', link: '/admin_manage_users' },
-          { label: 'Institutions', link: '/admin_manage_institutions' },
-          { label: 'Library Cards', link: '/admin_manage_lc' }
-        ]
-      },
-      isSigningOfficial && {
-        label: 'SO Console',
-        link: '/signing_official_console/researchers',
-        children: [
-          { label: 'Researchers', link: '/signing_official_console/researchers' },
-          { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-          { label: 'Data Submitters', link: '/signing_official_console/data_submitters' }
-        ]
-      },
-      isResearcher && {
-        label: 'Researcher Console',
-        link: this.state.researcherPath,
-        search: 'researcher_console'
-      },
-      isChairPerson && {
-        label: 'DAC Chair Console',
-        link: this.state.dacChairPath,
-        search: 'chair_console',
-        children: [
-          { label: 'Manage DARs', link: this.state.dacChairPath },
-          { label: 'Datasets', link: '/dataset_catalog' },
-          { label: 'DAC Members', link: '/manage_dac' }
-        ]
-      },
-      isMember && {
-        label: 'DAC Member Console',
-        link: this.state.dacMemberPath,
-        search: 'member_console',
-        children: [
-          { label: 'DAR Requests', link: this.state.dacMemberPath },
-          { label: 'Datasets', link: '/dataset_catalog' },
-        ]
-      }
-    ].filter((data) => !!data);
+    const adminLink = (inDropDown) => li({ isRendered: inDropDown ? isAdmin : isAdmin && !hasTwoOrMoreRoles()}, [
+      h(Link, { id: 'link_adminConsole', to: '/admin_console' }, [
+        'Admin Console',
+      ]),
+    ]);
 
-    let initialSubTab = false;
-    const initialTab = tabs.findIndex((tab) => {
-      if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
-        initialSubTab = 0;
-        return true;
-      }
-      if (tab.children) {
-        initialSubTab = tab.children.findIndex((subtab) => {
-          return subtab.link === location.pathname || location.pathname.includes(subtab.search);
-        });
+    const signingOfficialLink = (inDropDown)  => li({ isRendered:  inDropDown ? isSigningOfficial : isSigningOfficial && !hasTwoOrMoreRoles()}, [
+      h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
+    ]);
 
-        return initialSubTab !== -1;
-      }
-      return tab.children ? tab.children.indexOf((subtab) => subtab.link === location.pathname) !== -1 : false;
-    });
+    const chairpersonDropDown = li({ className: 'dropdown', isRendered: isChairPerson && !hasTwoOrMoreRoles()}, [
+      a(
+        {
+          role: 'button',
+          className: 'dropdown-toggle',
+          'data-toggle': 'dropdown',
+        },
+        [
+          div({}, [
+            'DAC Chair Console',
+            span({ className: 'caret caret-margin' }, []),
+          ]),
+        ]
+      ),
+      ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
+        li({}, [
+          h(
+            Link,
+            { id: 'link_chairConsole', to: this.state.dacChairPath },
+            ['Manage DARs']
+          ),
+        ]),
+        hr({ style: hrStyle }),
+        li({}, [
+          h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
+            'Manage DACs',
+          ]),
+        ]),
+      ]),
+    ]);
 
-    return nav({ className: 'navbar-duos navbar-duos-new', role: 'navigation' }, [
+    const chairSubHeader =
+      li({ isRendered: isChairPerson, style: {marginTop: '10px', marginBottom: '5px'} }, [
+        span({style: { fontSize: '12px', fontWeight: '600', padding: '10px 15px'}}, ['DAC Chair Console'])
+      ]);
+
+    const chairManageDACsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px', paddingBottom: '0 !important'} }, [
+        h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
+          'Manage DACs',
+        ]),
+      ]);
+    const chairManageDARsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px'} }, [
+        h( Link, { id: 'link_chairConsole', to: this.state.dacChairPath },
+          ['Manage DARs']
+        ),
+      ]);
+
+    const memberLink = (inDropDown) =>
+      li({ isRendered: inDropDown ? isMember : isMember && !hasTwoOrMoreRoles() }, [
+        h(Link, { id: 'link_memberConsole', to: this.state.dacMemberPath }, [
+          'DAC Member Console',
+        ]),
+      ]);
+
+    const researcherLink = (inDropDown) => li({ isRendered: inDropDown ? isResearcher : isResearcher && !hasTwoOrMoreRoles() }, [
+      h(
+        Link,
+        { id: 'link_researcherConsole', to: this.state.researcherPath },
+        ['Researcher Console']
+      ),
+    ]);
+
+    const dataOwnerLink = (inDropDown) => li({ isRendered: inDropDown ? isDataOwner :  isDataOwner && !hasTwoOrMoreRoles() }, [
+      h(
+        Link,
+        { id: 'link_dataOwnerConsole', to: '/data_owner_console' },
+        ['Data Owner Console']
+      ),
+    ]);
+
+    return nav({ className: 'navbar-duos', role: 'navigation' }, [
       h(Hidden, { mdDown: true }, [
-        div({ className: 'row no-margin', style: { width: '100%' } }, [
+        this.makeNotifications(),
+        h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+          img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo' }),
+        ]),
+        div({ className: 'row no-margin' }, [
           //Standard navbar for medium sized displays and higher (pre-existing navbar)
-          h(NavigationTabsComponent, {
-            goToLink: this.goToLink,
-            makeNotifications: this.makeNotifications,
-            duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
-            currentUser, isLogged, signOut: this.signOut,
-            contactUsButton, supportrequestModal,
-            tabs, initialTab, initialSubTab
-          })
+          div({}, [
+            ul({ isRendered: isLogged, className: 'navbar-logged' }, [
+              li({ className: 'dropdown user-li' }, [
+                a(
+                  {
+                    id: 'sel_dacUser',
+                    role: 'button',
+                    className: 'dropdown-toggle',
+                    'data-toggle': 'dropdown',
+                  },
+                  [
+                    div({ id: 'dacUser' }, [
+                      currentUser.displayName,
+                      span({ className: 'caret caret-margin' }),
+                    ]),
+                    small({ id: 'dacUserMail' }, [currentUser.email]),
+                  ]
+                ),
+                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
+                  li([
+                    h(Link, { id: 'link_profile', to: '/profile' }, [
+                      'Your Profile',
+                    ]),
+                  ]),
+                  li({}, [
+                    a({ id: 'link_signOut', onClick: this.signOut }, [
+                      'Sign out',
+                    ]),
+                  ]),
+                ]),
+              ]),
+
+              li({ className: 'dropdown', isRendered: hasTwoOrMoreRoles() }, [
+                a(
+                  {
+                    role: 'button',
+                    className: 'dropdown-toggle',
+                    'data-toggle': 'dropdown',
+                  },
+                  [
+                    div({}, [
+                      'Your Consoles',
+                      span({ className: 'caret caret-margin' }, []),
+                    ]),
+                  ]
+                ),
+                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
+                  adminLink(true),
+                  signingOfficialLink(true),
+                  chairSubHeader,
+                  chairManageDARsLink,
+                  chairManageDACsLink,
+                  memberLink(true),
+                  researcherLink(true),
+                  dataOwnerLink(true)
+                ]),
+              ]),
+
+              adminLink(false),
+              signingOfficialLink(false),
+              chairpersonDropDown,
+              memberLink(false),
+              researcherLink(false),
+              dataOwnerLink(false),
+
+              li({ isRendered: isResearcher }, [
+                h(
+                  Link,
+                  { id: 'link_requestApplication', to: '/dar_application' },
+                  ['Request Application']
+                ),
+              ]),
+
+              li({ className: 'dropdown', isRendered: isAdmin }, [
+                a(
+                  {
+                    id: 'sel_statistics',
+                    role: 'button',
+                    className: 'dropdown-toggle',
+                    'data-toggle': 'dropdown',
+                  },
+                  [
+                    div({}, [
+                      'Statistics',
+                      span({ className: 'caret caret-margin' }, []),
+                    ]),
+                  ]
+                ),
+                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
+                  li({}, [
+                    h(Link, { id: 'link_statistics', to: '/summary_votes' }, [
+                      'Votes Statistics',
+                    ]),
+                  ]),
+                  hr({ style: hrStyle }),
+                  li({}, [
+                    h(
+                      Link,
+                      {
+                        id: 'link_reviewedCases',
+                        to: '/reviewed_cases',
+                      },
+                      ['Reviewed Cases Record']
+                    ),
+                  ]),
+                ]),
+              ]),
+
+              li({}, [
+                h(
+                  Link,
+                  {
+                    id: 'link_datasetCatalog',
+                    isRendered: isLogged,
+                    to: '/dataset_catalog',
+                  },
+                  ['Dataset Catalog']
+                ),
+              ]),
+              li({}, [
+                a({
+                  id: 'link_help',
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                  target: '_blank'
+                }, ['FAQs']),
+              ]),
+              contactUsButton,
+              supportrequestModal,
+            ]),
+
+            ul({ isRendered: !isLogged, className: 'navbar-public' }, [
+              li({}, [
+                a(
+                  {
+                    id: 'link_about',
+                    className: 'navbar-duos-link',
+                    href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
+                    target: '_blank',
+                  },
+                  [
+                    div({
+                      className: 'navbar-duos-icon-about',
+                      style: navbarDuosIcon,
+                    }),
+                    span({ style: navbarDuosText }, ['About']),
+                  ]
+                ),
+              ]),
+              li({}, [
+                a(
+                  {
+                    id: 'link_help',
+                    className: 'navbar-duos-link',
+                    href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                    target: '_blank',
+                  },
+                  [
+                    div({
+                      className: 'navbar-duos-icon-help',
+                      style: navbarDuosIcon,
+                    }),
+                    span({ style: navbarDuosText }, ['FAQs']),
+                  ]
+                ),
+              ]),
+              contactUsButton,
+              supportrequestModal,
+            ]),
+          ]),
         ]),
       ]),
       //NOTE: old navbar style is heavily dependent on css styles with element specific styles
@@ -602,7 +594,6 @@ class DuosHeader extends Component {
               display: 'flex',
               flexDirection: 'row',
               justifyContent: 'space-between',
-              alignItems: 'center'
             },
           },
           [
@@ -680,6 +671,12 @@ class DuosHeader extends Component {
                     applyPointer,
                     targetLink: this.state.researcherPath,
                     label: 'Researcher Console',
+                  }),
+                  h(BasicListItem, {
+                    isRendered: isDataOwner,
+                    applyPointer,
+                    targetLink: '/data_owner_console',
+                    label: 'Data Owner Console',
                   }),
                   h(BasicListItem, {
                     isRendered: isResearcher,

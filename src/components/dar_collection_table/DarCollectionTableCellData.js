@@ -6,6 +6,7 @@ import AdminActions from './AdminActions';
 import ChairActions from './ChairActions';
 import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
+import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
@@ -46,6 +47,16 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
   };
 }
 
+//Redirect for admin review page, only used in admin manage dar collections table
+export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
+  return {
+    isComponent: true,
+    data: h(DarCollectionAdminReviewLink, { darCollectionId, darCode }),
+    label,
+    id: darCollectionId,
+    value: darCode
+  };
+}
 const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   const hasOpenElections = includes('open')(toLower(status));
   const path = hasOpenElections ?
@@ -159,5 +170,6 @@ export default {
   institutionCellData,
   datasetCountCellData,
   statusCellData,
-  consoleActionsCellData
+  consoleActionsCellData,
+  darCodeAdminCellData
 };

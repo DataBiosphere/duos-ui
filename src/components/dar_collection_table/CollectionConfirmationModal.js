@@ -37,11 +37,10 @@ export default function CollectionConfirmationModal(props) {
   const cancelModal =
     h(ConfirmationModal, {
       showConfirmation,
-      styleOverride: {height: '35%'},
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Cancel DAR Collection',
       message: `Are you sure you want to cancel ${collection.darCode}?`,
-      header: getModalHeader,
+      header: getModalHeader(),
       onConfirm: cancelOnClick
     });
 
@@ -52,17 +51,16 @@ export default function CollectionConfirmationModal(props) {
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Revise DAR Collection',
       message: `Are you sure you want to revise ${collection.darCode}?`,
-      header: getModalHeader,
+      header: getModalHeader(),
       onConfirm: reviseOnClick
     });
 
   const openModal = h(ConfirmationModal, {
     showConfirmation,
-    styleOverride: { height: '35%' },
     closeConfirmation: () => setShowConfirmation(false),
     title: 'Open DAR Collection',
     message: `Are you sure you want to open ${collection.darCode}?`,
-    header: getModalHeader,
+    header: getModalHeader(),
     onConfirm: openOnClick,
   });
 

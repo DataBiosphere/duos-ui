@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, get, flow, keys, isNil, head, concat, replace} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, flow, concat, replace, get, head, keys, isNil} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
@@ -46,19 +46,6 @@ const formatDraft = (draft) => {
 };
 
 const filterFn = getSearchFilterFunctions().darCollections;
-
-const redirectByReferenceId = (darCollection, history) => {
-  const referenceId = darCollection.referenceId || flow(
-    get('dars'),
-    keys,
-    head
-  )(darCollection);
-  history.push(`/dar_application/${referenceId}`);
-  if (isNil(referenceId)) {
-    throw new Error('Error: Could not find target Data Access Request');
-  }
-  return referenceId;
-};
 
 export default function NewResearcherConsole(props) {
   const [isLoading, setIsLoading] = useState(true);
@@ -139,12 +126,18 @@ export default function NewResearcherConsole(props) {
   //review collection function, passed to collections table to be used in buttons
   const redirectToDARApplication = (darCollection) => {
     try {
-      redirectByReferenceId(darCollection, history);
+      const { darCollectionId } = darCollection;
+      history.push(`/dar_application_review/${darCollectionId}`);
     } catch (error) {
       Notifications.showError({
         text: 'Error: Cannot view target Data Access Request'
       });
     }
+  };
+
+  const resumeDARApplication = (darCollection) => {
+    const referenceId = darCollection.referenceId || flow(get('dars'), keys, head)(darCollection);
+    history.push(`/dar_application/${referenceId}`);
   };
 
   //cancel collection function, passed to collections table to be used in buttons
@@ -256,7 +249,7 @@ export default function NewResearcherConsole(props) {
         cancelCollection,
         reviseCollection,
         reviewCollection: redirectToDARApplication,
-        resumeCollection: redirectToDARApplication,
+        resumeCollection: resumeDARApplication,
         deleteDraft,
         consoleType: 'researcher',
       })

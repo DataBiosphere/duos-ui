@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as nonFPMap} from 'lodash';
 import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
-import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick } from 'lodash/fp';
+import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 import {Config} from './config';
 import { getPI } from '../utils/DarCollectionUtils';
@@ -67,9 +67,10 @@ export const darCollectionUtils = {
             }
             return [];
           } else {
-            //if elections exist, filer out elections based on relevant ids
+            //if elections exist, filter out elections based on relevant ids
+            //only Data Access elections impact the status of the collection
             //NOTE: Admin does not have relevantIds, DAC roles do
-            const electionArr = Object.values(elections);
+            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
             if(isNil(relevantDatasets)) {
               return electionArr;
             } else {
@@ -83,13 +84,11 @@ export const darCollectionUtils = {
 
       if(isNil(relevantDatasets)) {
         each(election => {
-          const {status, electionType} = election;
-          if(toLower(electionType) === 'dataaccess') {
-            if(isNil(electionStatusCount[status])) {
-              electionStatusCount[status] = 0;
-            }
-            electionStatusCount[status]++;
+          const {status} = election;
+          if(isNil(electionStatusCount[status])) {
+            electionStatusCount[status] = 0;
           }
+          electionStatusCount[status]++;
         })(targetElections);
         output = nonFPMap(electionStatusCount, (value, key) => {
           return `${key}: ${value}`;
@@ -201,7 +200,6 @@ export const USER_ROLES = {
   member: 'Member',
   researcher: 'Researcher',
   alumni: 'Alumni',
-  dataOwner: 'DataOwner',
   signingOfficial: 'SigningOfficial',
   all: 'All'
 };
@@ -245,7 +243,6 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
   user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
   user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-  user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
   user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
   Storage.setCurrentUser(user);
@@ -258,7 +255,7 @@ export const Navigation = {
     let page;
     if (env === 'dev') {
       page =
-        user.isAdmin ? '/admin_console'
+        user.isAdmin ? '/admin_manage_dar_collections'
           :user.isChairPerson ? '/new_chair_console'
             : user.isMember ? '/new_member_console'
               : user.isResearcher ? '/dataset_catalog'
@@ -267,7 +264,7 @@ export const Navigation = {
                     : '/';
     } else {
       page =
-        user.isAdmin ? '/admin_console'
+        user.isAdmin ? '/admin_manage_dar_collections'
           :user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
               : user.isResearcher ? '/dataset_catalog'
@@ -283,7 +280,7 @@ export const Navigation = {
     let page;
     if (env === 'dev') {
       page =
-        user.isAdmin ? '/admin_console'
+        user.isAdmin ? '/admin_manage_dar_collections'
           : user.isChairPerson ? '/new_chair_console'
             : user.isMember ? '/new_member_console'
               : user.isResearcher ? '/new_researcher_console'
@@ -292,7 +289,7 @@ export const Navigation = {
                     : '/';
     } else {
       page =
-        user.isAdmin ? '/admin_console'
+        user.isAdmin ? '/admin_manage_dar_collections'
           : user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
               : user.isResearcher ? '/researcher_console'
@@ -474,18 +471,18 @@ export const wasVoteSubmitted =(vote) => {
 export const wasFinalVoteTrue = (voteData) => {
   const {type, vote} = voteData;
   //vote status capitalizes final, election status does not
-  return type === 'FINAL' && vote === true;
+  return toLower(type) === 'final' && vote === true;
 };
 
 export const processElectionStatus = (election, votes, showVotes) => {
   let output;
-  const electionStatus = election ? election.status : null;
+  const electionStatus = !isNil(get('status')(election))  ? toLower(election.status) : null;
   if (isNil(electionStatus)) {
     output = 'Unreviewed';
-  } else if(electionStatus === 'Open') {
+  } else if(electionStatus === 'open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
+      const dacVotes = filter((vote) => toLower(vote.type) === 'dac' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
       output = `Open${showVotes ? outputSuffix : ''}`;
@@ -493,11 +490,11 @@ export const processElectionStatus = (election, votes, showVotes) => {
   //some elections have electionStatus === Final, others have electionStatus === Closed
   //both are, in this step of the process, technically referring to a closed election
   //therefore both values must be checked for
-  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
+  } else if (electionStatus === 'final' || electionStatus === 'closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Approved' : 'Denied';
   } else {
-    output = electionStatus;
+    output = capitalize(electionStatus);
   }
   return output;
 };
@@ -648,7 +645,8 @@ export const getSearchFilterFunctions = () => {
 export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelName) => {
   const filterFnMap = getSearchFilterFunctions();
   return (searchTerms) => {
-    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    const rawSearchTerms = getOr(searchTerms, 'current.value', searchTerms);
+    const searchTermValues = toLower(rawSearchTerms).split(/\s|,/);
     if(isEmpty(searchTermValues)) {
       setFilteredList(list);
     } else {

@@ -7,8 +7,8 @@ import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collec
 import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
 
 const darInfo = {
-  "rus": "test",
-  "diseases": true
+  rus: 'test',
+  diseases: true
 };
 
 const bucket1 = {
@@ -127,8 +127,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
 
     cy.get('[datacy=srp-slab]').should('be.visible');
     cy.get('[datacy=srp-expanded]').should('not.exist');
-    cy.contains("primary");
-    cy.contains("DS");
+    cy.contains('primary');
+    cy.contains('DS');
   });
 
   it('Renders dataset voting slab with vote button selected', function () {
@@ -144,7 +144,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
-    cy.contains("GRU");
+    cy.contains('GRU');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
   });
@@ -162,10 +162,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
-    cy.contains("GROUP 1");
-    cy.contains("GRU");
-    cy.contains("GROUP 2");
-    cy.contains("HMB");
+    cy.contains('GRU');
+    cy.contains('HMB');
   });
 
   it('Renders vote summary tables if isChair is true', function () {
@@ -236,24 +234,36 @@ describe('MultiDatasetVoteTab - Tests', function() {
 describe('filterBucketsForUser - Tests', function() {
   it('Filters out buckets if current user has no votes in it', function () {
     const currentUser = {dacUserId: 100};
-    const prefilteredBuckets = [bucket1, bucket2];
+    const rpBucket = {isRP: true, key: 'RP Vote'};
+    const prefilteredBuckets = [rpBucket, bucket1, bucket2];
 
     const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
     expect(filteredBuckets).to.have.lengthOf(1);
     expect(filteredBuckets).to.deep.include(bucket1);
     expect(filteredBuckets).to.not.deep.include(bucket2);
+    expect(filteredBuckets).to.not.deep.include(rpBucket);
   });
 
-  it('Does not filter out rp buckets or buckets with votes by the current user', function () {
+  it('Does not filter out buckets with votes by the current user', function () {
     const currentUser = {dacUserId: 200};
-    const rpBucket = {isRP: true, key: 'RP Vote'};
-    const prefilteredBuckets = [rpBucket, bucket1, bucket2];
+    const rpBucket = {
+      isRP: true,
+      votes: [
+        {
+          rp: {
+            memberVotes: [
+              {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+            ],
+          }
+        }
+      ]
+    };
+    const prefilteredBuckets = [rpBucket, bucket1];
 
     const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
-    expect(filteredBuckets).to.have.lengthOf(3);
+    expect(filteredBuckets).to.have.lengthOf(2);
     expect(filteredBuckets).to.deep.include(rpBucket);
     expect(filteredBuckets).to.deep.include(bucket1);
-    expect(filteredBuckets).to.deep.include(bucket2);
   });
 });
 

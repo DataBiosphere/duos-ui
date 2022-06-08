@@ -369,12 +369,6 @@ export const DAR = {
     return res.data;
   },
 
-  getDarModalSummary: async (darId) => {
-    const url = `${await Config.getApiUrl()}/api/dar/modalSummary/${darId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
@@ -525,11 +519,6 @@ export const Election = {
     return await res.json();
   },
 
-  downloadDatasetVotesForDARElection: async (requestId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election/dataSetVotes`;
-    return getFile(url, 'datasetVotesSummary.txt');
-  },
-
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/api/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -599,34 +588,6 @@ export const Election = {
     const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res.json();
-  },
-
-  isDataSetElectionOpen: async () => {
-    const url = `${await Config.getApiUrl()}/api/election/checkdataset`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-};
-
-export const ElectionTimeout = {
-
-  findApprovalExpirationTime: async () => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  updateApprovalExpirationTime: async (approvalExpirationTime) => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime/${approvalExpirationTime.id}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
-    return res;
-  },
-
-  createApprovalExpirationTime: async (approvalExpirationTime) => {
-    const url = `${await Config.getApiUrl()}/api/approvalExpirationTime`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'POST' }]));
-    return await res.json();
   }
 };
 
@@ -773,12 +734,6 @@ export const PendingCases = {
 
   findDARUnReviewed: async () => {
     const url = `${await Config.getApiUrl()}/api/dar/cases/unreviewed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findDataOwnerUnReviewed: async (dataOwnerId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -986,12 +941,6 @@ export const Votes = {
     const url = `${await Config.getApiUrl()}/api/consent/${consentId}/vote/${vote.voteId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteToUpdate), { method: 'PUT' }]));
     return await res.json();
-  },
-
-  getDarVote: async (requestId, voteId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
   },
 
   postDarVote: async (requestId, vote) => {

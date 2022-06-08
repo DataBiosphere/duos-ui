@@ -66,17 +66,17 @@
   margin: 0 0 0 20px !important;
 }
 
-.user-dropdown {
+.navbar-dropdown {
   margin: 0 !important;
   padding: 0 !important;
   width: auto;
 }
 
-.user-dropdown li {
+.navbar-dropdown li {
   padding: 0!important;
 }
 
-.user-dropdown li a {
+.navbar-dropdown li a {
   margin: 0 !important;
   padding: 10px 15px 10px 15px !important;
   color: #00609f !important;
@@ -85,7 +85,7 @@
   cursor: pointer;
 }
 
-.user-dropdown li:hover a {
+.navbar-dropdown li:hover a {
   background: #fff !important;
   color: #2FA4E7 !important;
   cursor: pointer;
