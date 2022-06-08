@@ -70,7 +70,7 @@ export default function CollectionConfirmationModal(props) {
     closeConfirmation: () => setShowConfirmation(false),
     title: 'Delete DAR Collection Draft',
     message: `Are you sure you want to delete ${collection.darCode}?`,
-    header: getModalHeader,
+    header: getModalHeader(),
     onConfirm: deleteOnClick,
   });
 
