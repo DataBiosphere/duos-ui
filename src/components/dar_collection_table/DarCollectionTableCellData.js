@@ -10,7 +10,7 @@ import {Link} from 'react-router-dom';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
-    data: projectTitle,
+    data: isEmpty(projectTitle) ? '- -' : projectTitle,
     id: darCollectionId,
     style : {
       color: '#354052',

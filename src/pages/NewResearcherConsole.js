@@ -126,7 +126,7 @@ export default function NewResearcherConsole(props) {
     init();
   }, []);
 
-  //sequence of events when user switches tab or data is updated (perform new filter based on search query)
+  //sequence of events when data is updated (perform new filter based on search query)
   useEffect(() => {
     searchOnFilteredList(
       searchRef.current.value,
@@ -169,7 +169,6 @@ export default function NewResearcherConsole(props) {
   };
 
   //revise collection function, passed to collections table to be used in buttons
-  //NOTE: check if logic holds, write tests if needed
   const reviseCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
@@ -234,7 +233,7 @@ export default function NewResearcherConsole(props) {
                   fontSize: '18px',
                 }),
               },
-              [`Select and manage DAR Collections below`]
+              [`Select and manage DAR Collections and Drafts below`]
             ),
           ]),
         ]

@@ -95,7 +95,7 @@ describe('Researcher Actions - Cancel Button', () => {
     mount(<ResearcherActions {...propCopy} />);
     cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
   });
-  it('does not render cancel button is collection has elections on it', () => {
+  it('does not render the cancel button if the collection has elections on it', () => {
     propCopy.collection.dars = darsWithElections;
     mount(<ResearcherActions {...propCopy} />);
     cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
@@ -162,11 +162,9 @@ describe('Researcher Actions - Cancel Button', () => {
   });
 
   it('hides the cancel button if the collection already has elections created', () => {
-    it('hides the cancel button if the collection is in draft status', () => {
-      propCopy.collection.dars = darsWithElections;
-      propCopy.collection.isDraft = true;
-      mount(<ResearcherActions {...propCopy} />);
-      cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
-    });
+    propCopy.collection.dars = darsWithElections;
+    propCopy.collection.isDraft = true;
+    mount(<ResearcherActions {...propCopy} />);
+    cy.get(`#researcher-cancel-${collectionId}`).should('not.exist');
   });
 });
