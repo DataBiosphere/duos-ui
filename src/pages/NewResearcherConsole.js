@@ -122,15 +122,8 @@ export default function NewResearcherConsole(props) {
   //review collection function, passed to collections table to be used in buttons
   const reviewCollection = (darCollection) => {
     try {
-      const referenceId = flow(
-        get('dars'),
-        keys,
-        head
-      )(darCollection);
-      if (isNil(referenceId)) {
-        throw new Error('Error: Could not find target Data Access Request');
-      }
-      history.push(`/dar_application/${referenceId}`);
+      const { darCollectionId } = darCollection;
+      history.push(`/dar_application_review/${darCollectionId}`);
     } catch (error) {
       Notifications.showError({
         text: 'Error: Cannot view target Data Access Request'

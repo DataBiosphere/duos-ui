@@ -630,7 +630,8 @@ export const getSearchFilterFunctions = () => {
 export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelName) => {
   const filterFnMap = getSearchFilterFunctions();
   return (searchTerms) => {
-    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    const rawSearchTerms = getOr(searchTerms, 'current.value', searchTerms);
+    const searchTermValues = toLower(rawSearchTerms).split(/\s|,/);
     if(isEmpty(searchTermValues)) {
       setFilteredList(list);
     } else {
