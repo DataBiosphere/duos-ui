@@ -173,7 +173,7 @@ export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => 
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
-//Note that filtering by DAC does not occur for users viewing throgh admin review page
+//Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
   let rpVoteArrays = flow(
@@ -188,9 +188,25 @@ export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   return flatten(rpVoteArrays);
 };
 
+
+//Gets final votes from this bucket by members of this user's DAC
+//Note that filtering by DAC does not occur for users viewing through admin review page
+export const extractDacFinalVotesFromBucket = (bucket, user, adminPage) => {
+  const { votes = {}, isRP } = bucket;
+  const targetAttr = isRP ? 'rp' : 'dataAccess';
+  let finalVoteArrays = map((voteObj) =>
+    !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
+  )(votes);
+
+  if(!adminPage) {
+    finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, user);
+  }
+  return flatten(finalVoteArrays);
+};
+
 // Applies filter to arrays of votes grouped by election and
 // only keeps arrays where at least one vote has the dacUserId of the provided user
-export const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
+const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   const userIdsOfVotes = (votes) => {
     return map(vote => vote.dacUserId)(votes);
   };
@@ -422,7 +438,7 @@ export default {
   processDataUseBuckets,
   extractDacDataAccessVotesFromBucket,
   extractDacRPVotesFromBucket,
-  filterVoteArraysForUsersDac,
+  extractDacFinalVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,

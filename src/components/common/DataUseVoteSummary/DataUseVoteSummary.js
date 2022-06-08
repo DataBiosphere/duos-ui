@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import {chunk, map, isEmpty, range, flatten} from 'lodash/fp';
+import {chunk, map, range} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
-import {filterVoteArraysForUsersDac} from '../../../utils/DarCollectionUtils';
+import {extractDacFinalVotesFromBucket} from '../../../utils/DarCollectionUtils';
 
 export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoading, adminPage}) {
   useEffect(() => {
@@ -54,24 +54,9 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
       const { key } = bucket;
-      const finalVotes = extractFinalVotes(bucket, adminPage);
+      const finalVotes = extractDacFinalVotesFromBucket(bucket, currentUser, adminPage);
       return h(VoteResultBox, { label: key, votes: finalVotes, additionalLabelStyle }, []);
     })(row);
-  };
-
-  //on the admin page, all final votes from the bucket are used to determine the vote result
-  //on DAC (chair and member) pages, only final votes from the current user's DAC are included
-  const extractFinalVotes = (bucket, adminPage) => {
-    const { votes = {}, isRP } = bucket;
-    const targetAttr = isRP ? 'rp' : 'dataAccess';
-    let finalVoteArrays = map((voteObj) =>
-      !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
-    )(votes);
-
-    if(!adminPage) {
-      finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, currentUser);
-    }
-    return flatten(finalVoteArrays);
   };
 
   const loadingTemplate = div({
