@@ -16,7 +16,8 @@ import {
   concat,
   findIndex,
   cloneDeep,
-  groupBy, flatten
+  groupBy,
+  flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
