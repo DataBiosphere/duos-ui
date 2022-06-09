@@ -79,7 +79,7 @@ export default function MultiDatasetVoteSlab(props) {
       h(Alert, {
         title: 'Voting is disabled since not all elections are open.',
         type: 'danger',
-        isRendered: !adminPage && !allOpenElections
+        isRendered: !adminPage && !allOpenElections && !readOnly
       }),
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
