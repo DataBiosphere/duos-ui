@@ -7,7 +7,7 @@ import TabControl from '../../components/TabControl';
 import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, get, cloneDeep, flatMap, includes} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
@@ -72,6 +72,25 @@ export const filterBucketsForUser = (user, buckets) => {
   return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
+const updateVoteFn = ({dataUseBuckets, setDataUseBuckets, voteIds, voteDecision, rationale, date}) => {
+  const clonedBuckets = cloneDeep(dataUseBuckets);
+  const targetVotes = flow([
+    flatMap((bucket) => bucket.votes),
+    flatMap((voteObj) => Object.values(voteObj)),
+    flatMap((voteCategories) => voteCategories.memberVotes),
+    filter((vote) => includes(vote.voteId)(voteIds))
+  ])(clonedBuckets);
+  if (!isEmpty(targetVotes)) {
+    targetVotes.forEach((vote) => {
+      vote.vote = voteDecision !== undefined ? voteDecision : vote.vote;
+      (vote.rationale = rationale), (vote.updateDate = date);
+    });
+    setDataUseBuckets(clonedBuckets);
+  } else {
+    throw new Error('Error: Could not find votes in collection');
+  }
+};
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
@@ -85,6 +104,10 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
   const {adminPage = false} = props;
+
+  const updateMemberVote = useCallback(({voteDecision, voteIds, rationale, date}) => {
+    updateVoteFn({dataUseBuckets, setDataUseBuckets, voteDecision, voteIds, rationale, date});
+  }, [dataUseBuckets, setDataUseBuckets]);
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if(adminPage) {
@@ -222,6 +245,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: false,
+        updateMemberVote,
         readOnly: props.readOnly,
         isLoading
       }),

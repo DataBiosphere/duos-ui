@@ -175,7 +175,7 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage} = props;
+  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateMemberVote} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -205,6 +205,8 @@ export default function ResearchProposalVoteSlab(props) {
               h(CollectionSubmitVoteBox, {
                 question: 'Was the research purpose accurately converted to a structured format?',
                 votes: currentUserVotes,
+                isChair,
+                updateMemberVote,
                 isFinal: false,
                 isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
                 isLoading,
