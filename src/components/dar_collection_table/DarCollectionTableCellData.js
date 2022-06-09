@@ -11,7 +11,7 @@ import {Link} from 'react-router-dom';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
-    data: projectTitle,
+    data: isEmpty(projectTitle) ? '- -' : projectTitle,
     id: darCollectionId,
     style : {
       color: '#354052',
@@ -67,8 +67,10 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 };
 
 export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
+  const dateString = isNil(createDate) ? '- -' :
+    toLower(createDate) === 'unsubmitted' ? createDate : formatDate(createDate);
   return {
-    data: isNil(createDate) ? '- - ' : formatDate(createDate),
+    data: dateString,
     id: darCollectionId,
     style: {
       color: '#354052',
@@ -103,9 +105,9 @@ export function institutionCellData({institution = '- -', darCollectionId, label
   };
 }
 
-export function datasetCountCellData({datasets = '- -', darCollectionId, label = 'datasets'}) {
+export function datasetCountCellData({datasets = [], darCollectionId, label = 'datasets'}) {
   return {
-    data: datasets.length,
+    data: datasets.length > 0 ? datasets.length : '- -',
     id: darCollectionId,
     style: {
       color: '#333F52',
@@ -129,7 +131,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, openCollection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection}) {
   let actionComponent;
 
   switch (consoleType) {
@@ -140,11 +142,11 @@ export function consoleActionsCellData({collection, openCollection, reviewCollec
       actionComponent = h(ChairActions, {collection, showConfirmationModal, goToVote, relevantDatasets});
       break;
     case 'member':
-      actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal, goToVote});
+      actionComponent = h(MemberActions, {collection, showConfirmationModal, goToVote});
       break;
     case 'researcher':
     default:
-      actionComponent = h(ResearcherActions, {collection, openCollection, showConfirmationModal, reviewCollection});
+      actionComponent = h(ResearcherActions, {collection, showConfirmationModal, reviewCollection, resumeCollection});
       break;
   }
 

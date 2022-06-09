@@ -67,7 +67,10 @@ export default function MemberActions(props) {
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
     baseColor: duosBlue,
-    hoverColor: duosBlue,
+    hoverStyle: {
+      backgroundColor: duosBlue,
+      color: 'white'
+    },
     additionalStyle: {
       padding: '3% 10%',
       fontSize: '1.45rem',
