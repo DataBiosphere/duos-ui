@@ -5,6 +5,7 @@ import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
+import {cloneDeep} from "lodash/fp";
 
 const darInfo = {
   rus: 'test',
@@ -112,6 +113,11 @@ const collectionMissingLibraryCard = {
   }
 };
 
+beforeEach(() => {
+  cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+  cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
+});
+
 describe('MultiDatasetVoteTab - Tests', function() {
   it('Renders srp slab', function () {
     mount(
@@ -122,8 +128,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=srp-slab]').should('be.visible');
     cy.get('[datacy=srp-expanded]').should('not.exist');
@@ -140,8 +144,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.contains('GRU');
@@ -158,8 +160,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.contains('GRU');
@@ -175,8 +175,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
@@ -193,8 +191,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.table-data').should('not.exist');
@@ -209,8 +205,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[id=missing_lc_alert]').should('be.visible');
   });
@@ -224,8 +218,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
-    cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 
     cy.get('[id=missing_lc_alert]').should('not.exist');
   });
