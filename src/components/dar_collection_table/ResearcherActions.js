@@ -5,6 +5,24 @@ import TableIconButton from '../TableIconButton';
 import { Block, Delete } from '@material-ui/icons';
 import { every, lowerCase, flow, map, filter, flatMap, isEmpty } from 'lodash/fp';
 import SimpleButton from '../SimpleButton';
+import { useHistory } from 'react-router-dom';
+import { Notifications } from '../../libs/utils';
+
+//redirect function on researcher collections to view the collection's initial DAR application
+const redirectToDARApplication = (darCollectionId, history) => {
+  try {
+    history.push(`/dar_application_review/${darCollectionId}`);
+  } catch (error) {
+    Notifications.showError({
+      text: 'Error: Cannot view target Data Access Request'
+    });
+  }
+};
+
+//redirect function on DAR draft to resume DAR application
+const resumeDARApplication = (referenceId, history) => {
+  history.push(`/dar_application/${referenceId}`);
+};
 
 /*
   Researcher -> Review: go to dar application page with disabled fields
@@ -52,9 +70,10 @@ const allCanceledDars = (dars = {}) => {
 };
 
 export default function ResearcherActions(props) {
-  const { collection, showConfirmationModal, reviewCollection, resumeCollection } = props;
+  const { collection, showConfirmationModal } = props;
   const collectionId = collection.darCollectionId;
   const { dars } = collection;
+  const history = useHistory();
 
   const [cancelEnabled, setCancelEnabled] = useState(false);
   const [reviseEnabled, setReviseEnabled] = useState(false);
@@ -70,7 +89,7 @@ export default function ResearcherActions(props) {
     keyProp: `researcher-review-${collectionId}`,
     label: 'Review',
     isRendered: true,
-    onClick: () => reviewCollection(collection),
+    onClick: () => redirectToDARApplication(collectionId, history),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -110,7 +129,7 @@ export default function ResearcherActions(props) {
   const resumeButtonAttributes = {
     keyProp: `researcher-resume-${collectionId}`,
     isRendered: collection.isDraft,
-    onClick: () => resumeCollection(collection),
+    onClick: () => resumeDARApplication(collection.referenceId, history),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',

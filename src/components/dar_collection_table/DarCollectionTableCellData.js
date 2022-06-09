@@ -131,7 +131,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, openCollection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection}) {
   let actionComponent;
 
   switch (consoleType) {
@@ -142,7 +142,7 @@ export function consoleActionsCellData({collection, openCollection, reviewCollec
       actionComponent = h(ChairActions, {collection, showConfirmationModal, goToVote, relevantDatasets});
       break;
     case 'member':
-      actionComponent = h(MemberActions, {collection, openCollection, showConfirmationModal, goToVote});
+      actionComponent = h(MemberActions, {collection, showConfirmationModal, goToVote});
       break;
     case 'researcher':
     default:

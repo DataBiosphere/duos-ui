@@ -165,7 +165,7 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, deleteDraft, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, resumeCollection, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, showConfirmationModal, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, resumeCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
@@ -173,10 +173,10 @@ const processCollectionRowData = ({ collections, openCollection, deleteDraft, sh
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode, status,
-          createDate, createUser, actionsDisabled,
+          createDate, createUser,
           showConfirmationModal, consoleType,
-          openCollection, goToVote, reviewCollection, relevantDatasets,
-          deleteDraft, resumeCollection
+          goToVote, reviewCollection, relevantDatasets,
+          resumeCollection
         });
       });
     });
@@ -208,9 +208,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [selectedCollection, setSelectedCollection] = useState({});
   const [consoleAction, setConsoleAction] = useState();
   const {
-    collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
+    collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft,
-    resumeCollection
   } = props;
 
   /*
@@ -237,8 +236,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
-        resumeCollection,
-        reviewCollection,
         relevantDatasets
       }),
       currentPage,
@@ -247,7 +244,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, resumeCollection, reviewCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets/*, resumeCollection, reviewCollection*/]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);
