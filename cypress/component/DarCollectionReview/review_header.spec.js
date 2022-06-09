@@ -28,7 +28,7 @@ describe('Application Information', () => {
       />
     );
 
-    cy.get('.primary-header-row').should('contain.text', 'Data Access Request Review (read-only)');
+    cy.get('.header-container').should('contain.text', 'Data Access Request Review (read-only)');
   });
 
   it('Does not render read-only text in Review Header when readOnly prop is false', function () {
