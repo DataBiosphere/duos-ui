@@ -3,8 +3,8 @@ import { React } from 'react';
 import { mount } from '@cypress/react';
 import ReviewHeader from '../../../src/pages/dar_collection_review/ReviewHeader';
 
-describe('Application Information', () => {
-  it('renders the header', () => {
+describe('ReviewHeader - Tests', () => {
+  it('Renders the header', () => {
     mount(
       <ReviewHeader
         darCode={'DAR-100'}
