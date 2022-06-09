@@ -227,7 +227,6 @@ class DuosHeader extends Component {
     let isMember = false;
     let isAdmin = false;
     let isResearcher = false;
-    let isDataOwner = false;
     let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -238,7 +237,6 @@ class DuosHeader extends Component {
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
-      isDataOwner = currentUser.isDataOwner;
       isSigningOfficial = currentUser.isSigningOfficial;
     }
 
@@ -395,14 +393,6 @@ class DuosHeader extends Component {
       ),
     ]);
 
-    const dataOwnerLink = (inDropDown) => li({ isRendered: inDropDown ? isDataOwner :  isDataOwner && !hasTwoOrMoreRoles() }, [
-      h(
-        Link,
-        { id: 'link_dataOwnerConsole', to: '/data_owner_console' },
-        ['Data Owner Console']
-      ),
-    ]);
-
     return nav({ className: 'navbar-duos', role: 'navigation' }, [
       h(Hidden, { mdDown: true }, [
         this.makeNotifications(),
@@ -464,8 +454,7 @@ class DuosHeader extends Component {
                   chairManageDARsLink,
                   chairManageDACsLink,
                   memberLink(true),
-                  researcherLink(true),
-                  dataOwnerLink(true)
+                  researcherLink(true)
                 ]),
               ]),
 
@@ -474,7 +463,6 @@ class DuosHeader extends Component {
               chairpersonDropDown,
               memberLink(false),
               researcherLink(false),
-              dataOwnerLink(false),
 
               li({ isRendered: isResearcher }, [
                 h(
@@ -671,12 +659,6 @@ class DuosHeader extends Component {
                     applyPointer,
                     targetLink: this.state.researcherPath,
                     label: 'Researcher Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isDataOwner,
-                    applyPointer,
-                    targetLink: '/data_owner_console',
-                    label: 'Data Owner Console',
                   }),
                   h(BasicListItem, {
                     isRendered: isResearcher,
