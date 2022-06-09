@@ -239,7 +239,7 @@ export const getMatchDataForBuckets = async (buckets) => {
   const idsArr = [];
 
   forEach((bucket) => {
-    const {key, elections = []} = bucket;
+    const {key, elections = [], dars} = bucket;
     let dataAccessReferenceId;
     if(toLower(key) !== 'rp vote') {
       elections.every((darElections = []) => {
@@ -248,10 +248,16 @@ export const getMatchDataForBuckets = async (buckets) => {
         ).referenceId;
         return isNil(dataAccessReferenceId);
       });
+
       if(!isNil(dataAccessReferenceId)) {
         idsArr.push(dataAccessReferenceId);
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
+
+      dars.forEach((dar) => {
+        idsArr.push(dar.referenceId);
+      });
+
       bucket.algorithmResult = {result: 'N/A', createDate: undefined, id: key};
     }
   })(buckets);
