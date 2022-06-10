@@ -112,13 +112,14 @@ export default function CollectionSubmitVoteBox(props) {
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
-              disabled: isVotingDisabled || isApprovalDisabled,
-              isSelected: vote === true
+              disabled: isApprovalDisabled,
+              isSelected: vote === true,
+              isRendered: !isVotingDisabled
             }),
             h(CollectionVoteNoButton, {
               onClick: () => updateVote(false),
-              disabled: isVotingDisabled,
               isSelected: vote === false,
+              isRendered: !isVotingDisabled
             })
           ])
         ]),
