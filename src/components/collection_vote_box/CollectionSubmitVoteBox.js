@@ -83,10 +83,9 @@ export default function CollectionSubmitVoteBox(props) {
       //if it doesn't work, move setVote and setSubmitted outside the if block for local component update
       if(!isFinal && !isChair) {
         updateMemberVote({ voteIds, voteDecision: newVote, rationale, date });
-      } else {
-        setVote(newVote);
-        setSubmitted(true);
       }
+      setVote(newVote);
+      setSubmitted(true);
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote'});

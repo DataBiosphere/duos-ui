@@ -98,6 +98,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
           elections: [openElection1, openElection2],
           votes: [votesForOpenElection1, votesForOpenElection2]
         }}
+        updateMemberVote={() => {}}
         dacDatasetIds={[10, 20]}
         isChair={false}
       />
