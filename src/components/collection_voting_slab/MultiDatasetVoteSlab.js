@@ -77,7 +77,7 @@ export default function MultiDatasetVoteSlab(props) {
 
     return div({style: styles.voteInfo}, [
       h(Alert, {
-        title: 'Voting is disabled since not all elections are open.',
+        title: 'Voting is disabled since this election is not open.',
         type: 'danger',
         isRendered: !adminPage && !allOpenElections
       }),
