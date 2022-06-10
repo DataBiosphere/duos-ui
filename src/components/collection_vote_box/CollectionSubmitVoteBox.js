@@ -79,8 +79,6 @@ export default function CollectionSubmitVoteBox(props) {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       const date = new Date();
-      //NOTE: check if this works. Idea is that by updating the source of truth the vote should trickle down to the sub-component
-      //if it doesn't work, move setVote and setSubmitted outside the if block for local component update
       if(!isFinal && !isChair) {
         updateMemberVote({ voteIds, voteDecision: newVote, rationale, date });
       }
