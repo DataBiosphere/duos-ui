@@ -243,7 +243,6 @@ describe('ResearchProposalVoteSlab - Tests', function() {
           votes: [votesForElection1, votesForElection2]
         }}
         isChair={false}
-        updateMemberVote={() => {}}
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
