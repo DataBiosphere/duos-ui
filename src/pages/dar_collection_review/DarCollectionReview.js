@@ -72,7 +72,7 @@ export const filterBucketsForUser = (user, buckets) => {
   return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
-const updateVoteFn = ({dataUseBuckets, setDataUseBuckets, voteIds, voteDecision, rationale, date}) => {
+export const updateVoteFn = ({dataUseBuckets, setDataUseBuckets, voteIds, voteDecision, rationale, date}) => {
   const clonedBuckets = cloneDeep(dataUseBuckets);
   const targetVotes = flow([
     flatMap((bucket) => bucket.votes),
@@ -83,9 +83,11 @@ const updateVoteFn = ({dataUseBuckets, setDataUseBuckets, voteIds, voteDecision,
   if (!isEmpty(targetVotes)) {
     targetVotes.forEach((vote) => {
       vote.vote = voteDecision !== undefined ? voteDecision : vote.vote;
-      (vote.rationale = rationale), (vote.updateDate = date);
+      vote.rationale = rationale;
+      vote.updateDate = date;
     });
     setDataUseBuckets(clonedBuckets);
+    return clonedBuckets;
   } else {
     throw new Error('Error: Could not find votes in collection');
   }
