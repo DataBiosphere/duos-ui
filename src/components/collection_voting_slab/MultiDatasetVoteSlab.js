@@ -50,7 +50,7 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage, updateMemberVote} = props;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage} = props;
   const {algorithmResult} = bucket;
 
   useEffect(() => {
@@ -88,8 +88,7 @@ export default function MultiDatasetVoteSlab(props) {
         isDisabled: adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
         isLoading,
-        adminPage,
-        updateMemberVote
+        adminPage
       }),
       ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})
     ]);
@@ -105,10 +104,17 @@ export default function MultiDatasetVoteSlab(props) {
     });
   };
 
-  return div({style: styles.baseStyle, datacy: 'dataset-vote-slab'}, [
-    div({style: styles.slabTitle}, [title]),
-    DataUseSummary(),
-    VoteInfoSubsection(),
-    DatasetsRequested()
+  return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
+    div({ style: styles.slabTitle }, [title]),
+    div({ isRendered: !isLoading }, [
+      DataUseSummary(),
+      VoteInfoSubsection(),
+      DatasetsRequested(),
+    ]),
+    div({
+      isRendered: isLoading,
+      className: 'text-placeholder',
+      style: { height: '100px' },
+    })
   ]);
 }

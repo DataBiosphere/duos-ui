@@ -175,7 +175,7 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateMemberVote} = props;
+  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -183,40 +183,40 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
-    div({style: styles.collapsedData}, [
-      isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
-      h(CollapseExpandLink, {
-        expanded,
-        setExpanded,
-        isRendered: !isLoading
-      })
-    ]),
-    h(AnimatePresence, {initial:false}, [
-      expanded && (
-        h(motion.section, animationAttributes, [
-          div({datacy: 'srp-expanded', style: styles.expandedData}, [
-            div({datacy: 'research-purpose'}, [
-              span({style: styles.researchPurposeTitle}, ['Research Purpose']),
-              h(ResearchPurposeSummary, {darInfo}),
-              h(DataUseAlertBox, {translatedDataUse}),
-              h(CollectionSubmitVoteBox, {
-                question: 'Was the research purpose accurately converted to a structured format?',
-                votes: currentUserVotes,
-                isChair,
-                updateMemberVote,
-                isFinal: false,
-                isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
-                isLoading,
-                adminPage
-              }),
-              h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
+    div({isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}}),
+    div({isRendered: !isLoading}, [
+      div({style: styles.collapsedData}, [
+        isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
+        h(CollapseExpandLink, {
+          expanded,
+          setExpanded,
+          isRendered: !isLoading
+        })
+      ]),
+      h(AnimatePresence, {initial:false}, [
+        expanded && (
+          h(motion.section, animationAttributes, [
+            div({datacy: 'srp-expanded', style: styles.expandedData}, [
+              div({datacy: 'research-purpose'}, [
+                span({style: styles.researchPurposeTitle}, ['Research Purpose']),
+                h(ResearchPurposeSummary, {darInfo}),
+                h(DataUseAlertBox, {translatedDataUse}),
+                h(CollectionSubmitVoteBox, {
+                  question: 'Was the research purpose accurately converted to a structured format?',
+                  votes: currentUserVotes,
+                  isFinal: false,
+                  isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
+                  isLoading,
+                  adminPage
+                }),
+                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
+              ]),
             ]),
-          ]),
-        ])
-      )
+          ])
+        )
+      ])
     ])
   ]);
 }
