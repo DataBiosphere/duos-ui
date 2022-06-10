@@ -7,6 +7,7 @@ import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 import {Config} from './config';
+import { getPI } from '../utils/DarCollectionUtils';
 
 export const UserProperties = {
   ACADEMIC_EMAIL: 'academicEmail',
@@ -170,6 +171,8 @@ export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
   }
+
+  if(toLower(dateval) === 'unsubmitted') {return dateval;}
 
   let dateFormat = new Date(dateval);
   let year = dateFormat.getFullYear();
@@ -602,17 +605,29 @@ export const getSearchFilterFunctions = () => {
       isEmpty(term) ? targetList :
         filter(collection => {
           if(isEmpty(term)) {return true;}
+          let projectTitle, institution, createDate;
+          if(collection.isDraft) {
+            projectTitle = collection.projectTitle;
+            createDate = collection.createDate;
+            institution = collection.institution;
+          } else {
+            const referenceDar = find((dar) => !isEmpty(dar.data))(
+              collection.dars
+            );
+            const { data } = referenceDar;
+            projectTitle = data.projectTitle;
+            institution = data.institution;
+          }
           const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
           const lowerCaseTerm = toLower(term);
-          const { darCode, createDate } = collection;
-          const referenceDar = find((dar) => !isEmpty(dar.data))(collection.dars);
-          const { data } = referenceDar;
-          const { projectTitle = '', institution = '' } = data;
-          const status = toLower(darCollectionUtils.determineCollectionStatus(collection)) || '';
+          createDate = formatDate(collection.createDate);
+          const { darCode, isDraft, createUser } = collection;
+          const piName = getPI(createUser);
+          const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
           const matched = find((phrase) => {
             const termArr = lowerCaseTerm.split(' ');
             return find(term => includes(term, phrase))(termArr);
-          })([datasetCount, toLower(darCode), formatDate(createDate), toLower(projectTitle), toLower(status), toLower(institution)]);
+          })([datasetCount, toLower(darCode), toLower(createDate), toLower(projectTitle), toLower(status), toLower(institution), toLower(piName)]);
           return !isNil(matched);
         })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {

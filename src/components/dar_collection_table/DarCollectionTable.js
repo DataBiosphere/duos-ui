@@ -1,10 +1,11 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find, flow, get, isEqual} from 'lodash/fp';
+import {isNil, isEmpty, find} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
+import { getPI } from '../../utils/DarCollectionUtils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
@@ -12,28 +13,12 @@ import CollectionConfirmationModal from './CollectionConfirmationModal';
 const { determineCollectionStatus } = darCollectionUtils;
 const storageDarCollectionSort = 'storageDarCollectionSort';
 export const getProjectTitle = ((collection) => {
+  if(collection.isDraft){return collection.projectTitle;}
   if(!isNil(collection) && !isEmpty(collection.dars)) {
     const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
     return darData.projectTitle;
   }
 });
-
-const getPI = (createUser) => {
-  const createUserIsPI = flow(
-    get('properties'),
-    find(property => property.propertyKey === 'isThePI'),
-    get('propertyValue'),
-    isEqual('true')
-  )(createUser);
-
-  const piName = flow(
-    get('properties'),
-    find(property => property.propertyKey === 'piName'),
-    get('propertyValue')
-  )(createUser);
-
-  return createUserIsPI ? createUser.displayName : piName;
-};
 
 export const styles = {
   baseStyle: {
@@ -62,8 +47,8 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '8%',
-    projectTitle: '20%',
+    darCode: '10%',
+    projectTitle: '18%',
     submissionDate: '12.5%',
     pi: '10%',
     institution: '12.5%',
@@ -180,17 +165,18 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
-const processCollectionRowData = ({ collections, openCollection, showConfirmationModal, actionsDisabled, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, relevantDatasets}) => {
+const processCollectionRowData = ({ collections, showConfirmationModal, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, resumeCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
       const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      const status = determineCollectionStatus(collection, relevantDatasets);
+      const status = collection.isDraft ? 'Draft' : determineCollectionStatus(collection, relevantDatasets);
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasets, darCode, status,
-          createDate, createUser, actionsDisabled,
+          createDate, createUser,
           showConfirmationModal, consoleType,
-          openCollection, goToVote, reviewCollection, relevantDatasets
+          goToVote, reviewCollection, relevantDatasets,
+          resumeCollection
         });
       });
     });
@@ -222,8 +208,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [selectedCollection, setSelectedCollection] = useState({});
   const [consoleAction, setConsoleAction] = useState();
   const {
-    collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
+    collections, columns, isLoading, cancelCollection, reviseCollection,
+    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft,
   } = props;
 
   /*
@@ -250,7 +236,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
-        reviewCollection,
         relevantDatasets
       }),
       currentPage,
@@ -259,7 +244,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, reviewCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets/*, resumeCollection, reviewCollection*/]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);
@@ -318,6 +303,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       cancelCollection,
       reviseCollection,
       openCollection,
+      deleteDraft,
       consoleAction
     })
   ]);
