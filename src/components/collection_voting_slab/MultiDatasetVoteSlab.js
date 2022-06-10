@@ -68,10 +68,11 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const VoteInfoSubsection = () => {
+    const electionIds = map(vote => vote.electionId)(currentUserVotes);
     const allOpenElections = flow(
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
-      filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(currentUserVotes))),
+      filter(electionData => includes(electionData.electionId)(electionIds)),
       every(electionData => toLower(electionData.status) === 'open')
     )(bucket);
 
