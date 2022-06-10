@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import { chunk, map, flatMap, isEmpty, range } from 'lodash/fp';
+import {chunk, map, range} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
+import {extractDacFinalVotesFromBucket} from '../../../utils/DarCollectionUtils';
 
-export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
+export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoading, adminPage}) {
   useEffect(() => {
     ReactTooltip.rebuild();
   });
@@ -36,6 +37,13 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     borderRight: dividerStyle
   };
 
+
+  //convert is once again used here to provide unique key identifier for the row
+  //necessary for React when rendering elements provided by an array
+  const rowTemplate = map.convert({cap:false})((row, index) =>
+    div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
+  );
+
   const elementTemplate = (row = []) => {
     const elementLength = row.length;
     //lodash-fp caps its normal lodash definitions to one argument (value)
@@ -45,20 +53,11 @@ export default function DataUseVoteSummary({dataUseBuckets, isLoading}) {
     return map.convert({cap: false})((bucket, index) => {
       const additionalLabelStyle = index === 0 && elementLength > 1? startElementStyle :
         index === elementLength - 1 && elementLength > 1 ? endElementStyle : middleElementStyle;
-      const { key, votes = {}, isRP } = bucket;
-      const targetAttr = isRP ? 'rp' : 'dataAccess';
-      const finalVotes = flatMap((voteObj) =>
-        !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
-      )(votes);
+      const { key } = bucket;
+      const finalVotes = extractDacFinalVotesFromBucket(bucket, currentUser, adminPage);
       return h(VoteResultBox, { label: key, votes: finalVotes, additionalLabelStyle }, []);
     })(row);
   };
-
-  //convert is once again used here to provide unique key identifier for the row
-  //necessary for React when rendering elements provided by an array
-  const rowTemplate = map.convert({cap:false})((row, index) =>
-    div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
-  );
 
   const loadingTemplate = div({
     className: 'vote-summary-loading-placeholder',

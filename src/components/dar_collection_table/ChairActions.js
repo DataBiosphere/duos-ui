@@ -161,7 +161,10 @@ export default function ChairActions(props) {
     isRendered: openEnabled,
     onClick: () => openOnClick(collection),
     baseColor: duosBlue,
-    hoverColor: duosBlue,
+    hoverStyle: {
+      backgroundColor: duosBlue,
+      color: 'white'
+    },
     additionalStyle: {
       padding: '3% 7%',
       fontSize: '1.45rem',
@@ -187,7 +190,10 @@ export default function ChairActions(props) {
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
     baseColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
-    hoverColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    hoverStyle: {
+      backgroundColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+      color: 'white'
+    },
     additionalStyle: {
       padding: '3% 7%',
       fontSize: '1.45rem',

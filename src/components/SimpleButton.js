@@ -1,11 +1,11 @@
 import { button } from 'react-hyperscript-helpers';
 import { useState, useEffect } from 'react';
 
-const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', additionalStyle = {}, pointerBool, disabled, baseColor, setStyle}) => {
+const updateStyle = ({backgroundColor, fontColor, additionalStyle = {}, pointerBool, disabled, setStyle}) => {
   const baseStyle = {
-    backgroundColor,
     color: fontColor, //make this a hex or rgba value
-    border: `1px ${baseColor} solid`,
+    backgroundColor,
+    border: `1px ${backgroundColor} solid`,
     borderRadius: '4px',
     display: 'flex',
     alignItems: 'center',
@@ -15,7 +15,6 @@ const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', addition
     cursor: pointerBool ? 'pointer' : 'default',
     textTransform: 'uppercase'
   };
-
   const newStyle = Object.assign({}, baseStyle, additionalStyle);
   if (disabled) {
     newStyle.opacity = '0.5';
@@ -24,12 +23,13 @@ const updateStyle = ({backgroundColor = '#0948B7', fontColor = 'white', addition
 };
 
 export default function SimpleButton(props) {
-  const { onClick, label, disabled, baseColor, additionalStyle, keyProp, hoverColor = 'rgb(9, 72, 183)', fontColor} = props;
-  const backgroundColor = props.backgroundColor || baseColor;
+  const { onClick, label, disabled, baseColor, additionalStyle, keyProp, hoverStyle = {}} = props;
+  const backgroundColor = props.backgroundColor || baseColor || 'rgb(0, 96, 159)';
+  const fontColor = props.fontColor || 'white';
   const [style, setStyle] = useState({});
 
   useEffect(() => {
-    updateStyle({backgroundColor, baseColor, fontColor, additionalStyle, pointerBool: false, disabled, setStyle});
+    updateStyle({backgroundColor, fontColor, additionalStyle, pointerBool: false, disabled, setStyle});
   }, [baseColor, additionalStyle, disabled, fontColor, backgroundColor]);
 
   const getDivAttributes = (disabled) => {
@@ -39,7 +39,7 @@ export default function SimpleButton(props) {
       id: keyProp || `${label}-button`,
       onClick: () => !disabled && onClick(),
       onMouseEnter: () =>
-        !disabled && updateStyle({backgroundColor: hoverColor, fontColor, baseColor: hoverColor, additionalStyle, pointerBool: true, disabled, setStyle}),
+        !disabled && updateStyle({backgroundColor: hoverStyle.backgroundColor || backgroundColor, fontColor: hoverStyle.color || fontColor, additionalStyle, pointerBool: true, disabled, setStyle}),
       onMouseLeave: () =>
         !disabled && updateStyle({backgroundColor, fontColor, baseColor, additionalStyle, pointerBool: false, disabled, setStyle}),
     };

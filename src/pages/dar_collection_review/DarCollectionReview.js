@@ -195,7 +195,7 @@ export default function DarCollectionReview(props) {
             history: props.history,
           }),
         }),
-        h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
+        h(DataUseVoteSummary, { dataUseBuckets, isLoading, currentUser, adminPage }),
       ]
     ),
     div(
