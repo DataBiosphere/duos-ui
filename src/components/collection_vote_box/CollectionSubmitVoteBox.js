@@ -48,10 +48,10 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   let heading;
   if (adminPage) {
     heading = isNil(vote) ?
-      'The vote for this bucket has not been finalized' :
-      `The final vote for this bucket is: ${voteResultText}`;
+      'The vote has not been finalized' :
+      `The final vote is: ${voteResultText}`;
   } else if (isVotingDisabled) {
-    heading = `Your vote for this bucket is: ${voteResultText}`;
+    heading = `Your Vote: ${voteResultText}`;
   } else {
     heading = isFinal ?
       'Your Vote* (Vote and Rationale cannot be updated after submitting)' :
