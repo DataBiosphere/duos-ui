@@ -11,7 +11,6 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:3000/',
   },
   component: {
-    setupNodeEvents(on, config) {},
     src: ['./src/components/common', './cypress/component/'],
     specPattern: '**/*.spec.js',
     devServer: {
