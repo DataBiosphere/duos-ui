@@ -9,7 +9,7 @@ const buckets = [
     isRP: true,
     votes: [{
       rp: {
-        finalVotes: [{ vote: true }, { vote: true }],
+        finalVotes: [{ dacUserId: 1, vote: true }, { dacUserId: 2, vote: true }]
       },
     }],
   },
@@ -18,7 +18,63 @@ const buckets = [
     isRP: false,
     votes: [{
       dataAccess: {
-        finalVotes: [{ vote: false }, { vote: false }],
+        finalVotes: [{ dacUserId: 1, vote: false }, { dacUserId: 2, vote: false }]
+      },
+    }],
+  },
+];
+
+const bucketsWithMultipleElections = [
+  {
+    key: 'RP Vote',
+    isRP: true,
+    votes: [
+      {
+        rp: {
+          finalVotes: [{ dacUserId: 1, vote: true }, { dacUserId: 2, vote: true }]
+        },
+      },
+      {
+        rp: {
+          finalVotes: [{ dacUserId: 3, vote: false }, { dacUserId: 4, vote: false }]
+        },
+      }
+    ],
+  },
+  {
+    key: 'Bucket 2',
+    isRP: false,
+    votes: [
+      {
+        dataAccess: {
+          finalVotes: [{ dacUserId: 1, vote: true }, { dacUserId: 2, vote: true }]
+        },
+      },
+      {
+        dataAccess: {
+          finalVotes: [{ dacUserId: 3, vote: false }, { dacUserId: 4, vote: false }]
+        },
+      }
+    ],
+  },
+];
+
+const bucketsWithMixedVotes = [
+  {
+    key: 'RP Vote',
+    isRP: true,
+    votes: [{
+      rp: {
+        finalVotes: [{ dacUserId: 1, vote: true }, { dacUserId: 2, vote: false }]
+      },
+    }],
+  },
+  {
+    key: 'Bucket 2',
+    isRP: false,
+    votes: [{
+      dataAccess: {
+        finalVotes: [{ dacUserId: 1, vote: true }, { dacUserId: 2, vote: false }]
       },
     }],
   },
@@ -29,6 +85,7 @@ describe('DataUseVoteSummary - Tests', function() {
     mount(
       <DataUseVoteSummary
         dataUseBuckets={buckets}
+        currentUser={{dacUserId: 1}}
         isLoading={false}
       />
     );
@@ -41,14 +98,58 @@ describe('DataUseVoteSummary - Tests', function() {
     const bucketResult2 = cy.get('.vote-result-box-text-Bucket-2');
     bucketResult2.should('exist');
   });
+
   it('should not render if isLoading is true', function() {
     mount(
       <DataUseVoteSummary
         dataUseBuckets={buckets}
+        currentUser={{dacUserId: 1}}
         isLoading={true}
       />
     );
     const component = cy.get('.vote-summary-header-component');
     component.should('not.exist');
+  });
+
+  it('filters out final votes outside of the current user\'s DAC if adminPage is false', function() {
+    mount(
+      <DataUseVoteSummary
+        dataUseBuckets={bucketsWithMixedVotes}
+        isLoading={false}
+        currentUser={{dacUserId: 1}}
+        adminPage={false}
+      />
+    );
+
+    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
+  });
+
+  it('includes final votes by other members of the current user\'s DAC when adminPage is false', function() {
+    mount(
+      <DataUseVoteSummary
+        dataUseBuckets={bucketsWithMultipleElections}
+        isLoading={false}
+        currentUser={{dacUserId: 1}}
+        adminPage={true}
+      />
+    );
+
+    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
+  });
+
+  it('includes all final votes to determine vote result if adminPage is true', function() {
+    mount(
+      <DataUseVoteSummary
+        dataUseBuckets={bucketsWithMultipleElections}
+        isLoading={false}
+        currentUser={{dacUserId: 1}}
+        adminPage={true}
+      />
+    );
+
+    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 });

@@ -84,7 +84,7 @@ export default function DarCollectionReview(props) {
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
-  const {adminPage = false} = props;
+  const {adminPage = false, readOnly = false} = props;
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if(adminPage) {
@@ -178,10 +178,11 @@ export default function DarCollectionReview(props) {
           user: currentUser,
           history: props.history,
         }),
+        readOnly: readOnly || adminPage
       }),
-      h(DataUseVoteSummary, { dataUseBuckets, isLoading }),
+      h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
     ]),
-    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor} }, [ //TODO: take the margin measurements and apply as padding here
+    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor} }, [
       h(TabControl, {
         labels: Object.values(tabs),
         selectedTab,
@@ -222,7 +223,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: false,
-        readOnly: props.readOnly,
+        readOnly,
         isLoading
       }),
       h(MultiDatasetVotingTab, {
@@ -233,7 +234,7 @@ export default function DarCollectionReview(props) {
         isChair: true,
         isLoading,
         adminPage,
-        readOnly: props.readOnly
+        readOnly
       })
     ])
   ]);

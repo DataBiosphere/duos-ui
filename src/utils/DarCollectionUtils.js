@@ -16,7 +16,9 @@ import {
   concat,
   findIndex,
   cloneDeep,
-  groupBy
+  groupBy,
+  isEqual,
+  flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {formatDate, Notifications} from '../libs/utils';
@@ -167,36 +169,53 @@ export const extractDacDataAccessVotesFromBucket = (bucket, user, adminPage) => 
   )(votes);
 
   if(!adminPage) {
-    memberVotesArrays = filter(
-      (memberVotes) => includes(
-        user.dacUserId,
-        map(memberVote => memberVote.dacUserId)(memberVotes)
-      )
-    )(memberVotesArrays);
+    memberVotesArrays = filterVoteArraysForUsersDac(memberVotesArrays, user);
   }
-  memberVotesArrays = flatMap((memberVotes) => memberVotes)(memberVotesArrays);
-  return memberVotesArrays;
+  return flatten(memberVotesArrays);
 };
 
 //Gets rp votes from this bucket by members of this user's DAC
-//Note that filtering by DAC does not occur for users viewing throgh admin review page
+//Note that filtering by DAC does not occur for users viewing through admin review page
 export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
-  let rpVotes = flow(
+  let rpVoteArrays = flow(
     map(voteData => voteData.rp),
     filter((rpData) => !isEmpty(rpData)),
     map(filteredData => filteredData.memberVotes)
   )(votes);
 
   if(!adminPage) {
-    rpVotes = filter(
-      memberVotes => includes(
-        user.dacUserId,
-        map(memberVote => memberVote.dacUserId)(memberVotes)
-      )
-    )(rpVotes);
+    rpVoteArrays = filterVoteArraysForUsersDac(rpVoteArrays, user);
   }
-  return flatMap(memberVotes => memberVotes)(rpVotes);
+  return flatten(rpVoteArrays);
+};
+
+
+//Gets final votes from this bucket by members of this user's DAC
+//Note that filtering by DAC does not occur for users viewing through admin review page
+export const extractDacFinalVotesFromBucket = (bucket, user, adminPage) => {
+  const { votes = {}, isRP } = bucket;
+  const targetAttr = isRP ? 'rp' : 'dataAccess';
+  let finalVoteArrays = map((voteObj) =>
+    !isEmpty(voteObj) ? voteObj[targetAttr].finalVotes : []
+  )(votes);
+
+  if(!adminPage) {
+    finalVoteArrays = filterVoteArraysForUsersDac(finalVoteArrays, user);
+  }
+  return flatten(finalVoteArrays);
+};
+
+// Applies filter to arrays of votes grouped by election and
+// only keeps arrays where at least one vote has the dacUserId of the provided user
+const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
+  const userIdsOfVotes = (votes) => {
+    return map(vote => vote.dacUserId)(votes);
+  };
+
+  return filter(
+    voteArray => includes(user.dacUserId, userIdsOfVotes(voteArray))
+  )(voteArrays);
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
@@ -416,13 +435,31 @@ export const openCollectionFn = ({updateCollections}) =>
     }
   };
 
+export const getPI = (createUser) => {
+  const createUserIsPI = flow(
+    get('properties'),
+    find(property => toLower(property.propertyKey) === 'isthepi'),
+    get('propertyValue'),
+    isEqual('true')
+  )(createUser);
+
+  const piName = flow(
+    get('properties'),
+    find(property => toLower(property.propertyKey) === 'piname'),
+    get('propertyValue')
+  )(createUser);
+  return createUserIsPI ? createUser.displayName : piName;
+};
+
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
   extractDacDataAccessVotesFromBucket,
   extractDacRPVotesFromBucket,
+  extractDacFinalVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
-  collapseVotesByUser
+  collapseVotesByUser,
+  getPI
 };

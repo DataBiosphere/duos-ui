@@ -91,7 +91,7 @@ export default function MultiDatasetVotingTab(props) {
       type: 'danger',
       title: missingLibraryCardMessage,
       id: 'missing_lc',
-      isRendered: dataAccessApprovalDisabled()
+      isRendered: dataAccessApprovalDisabled() && !readOnly
     }),
     div({style: styles.slabs}, [
       h(ResearchProposalVoteSlab, {
