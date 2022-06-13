@@ -40,6 +40,27 @@ const styles = {
   }
 };
 
+const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) => {
+  const voteResultText = isNil(vote) ?
+    'NOT SELECTED' :
+    vote ? 'YES' : 'NO';
+
+  let heading;
+  if (adminPage) {
+    heading = isNil(vote) ?
+      'The vote for this bucket has not been finalized' :
+      `The final vote for this bucket is: ${voteResultText}`;
+  } else if (isVotingDisabled) {
+    heading = `Your vote for this bucket is: ${voteResultText}`;
+  } else {
+    heading = isFinal ?
+      'Your Vote* (Vote and Rationale cannot be updated after submitting)' :
+      'Your Vote*';
+  }
+
+  return span({className: 'vote-subsection-heading'},[heading]);
+};
+
 export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
@@ -96,19 +117,12 @@ export default function CollectionSubmitVoteBox(props) {
     }
   };
 
-  const VoteSubsectionHeading = () => {
-    const heading = (isFinal || adminPage) ?
-      `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
-      'Your Vote*';
-    return span({className: 'vote-subsection-heading'},[heading]);
-  };
-
   return (
     div({style: Object.assign({paddingBottom: '2%'}, styles.baseStyle), datacy: 'collection-vote-box'}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div({style: styles.subsection}, [
-          h(VoteSubsectionHeading),
+          h(VoteSubsectionHeading, { vote, adminPage, isFinal, isVotingDisabled }),
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
