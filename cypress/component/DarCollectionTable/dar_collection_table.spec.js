@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../../../src/components/dar_collection_table/DarCollectionTable';
 
 const collections = [

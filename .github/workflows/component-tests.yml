@@ -7,11 +7,11 @@ jobs:
       - name: Log Actor
         run: echo "${{ github.actor }}"
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: NPM Install
         run: npm ci
       - name : Cypress run component tests
         uses: cypress-io/github-action@v2
         with:
           install: false
-          command: npx cypress run-ct -p 8080
+          command: npx cypress run --component

@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {mount} from "@cypress/react";
-import DatasetsRequestedPanel from "../../../src/components/collection_voting_slab/DatasetsRequestedPanel";
+import { mount } from 'cypress/react';
+import DatasetsRequestedPanel from '../../../src/components/collection_voting_slab/DatasetsRequestedPanel';
 
 const dataset = (id) => {
   return {
