@@ -264,7 +264,7 @@ export const Navigation = {
                     : '/';
     } else {
       page =
-        user.isAdmin ? '/admin_manage_dar_collections'
+        user.isAdmin ? '/admin_console'
           :user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
               : user.isResearcher ? '/dataset_catalog'
@@ -289,7 +289,7 @@ export const Navigation = {
                     : '/';
     } else {
       page =
-        user.isAdmin ? '/admin_manage_dar_collections'
+        user.isAdmin ? '/admin_console'
           : user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
               : user.isResearcher ? '/researcher_console'
