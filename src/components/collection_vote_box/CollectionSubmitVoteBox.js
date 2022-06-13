@@ -58,7 +58,7 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
       'Your Vote*';
   }
 
-  return span({className: 'vote-subsection-heading'},[heading]);
+  return span({datacy: 'vote-subsection-heading'},[heading]);
 };
 
 export default function CollectionSubmitVoteBox(props) {
@@ -69,7 +69,7 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage} = props;
 
   useEffect(() => {
-    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
+    setIsVotingDisabled( props.isDisabled || (isFinal && submitted));
   }, [props.isDisabled, isFinal, submitted, isLoading]);
 
   useEffect(() => {
@@ -126,12 +126,13 @@ export default function CollectionSubmitVoteBox(props) {
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true),
-              disabled: isApprovalDisabled,
+              disabled: isApprovalDisabled || isLoading,
               isSelected: vote === true,
               isRendered: !isVotingDisabled
             }),
             h(CollectionVoteNoButton, {
               onClick: () => updateVote(false),
+              disabled: isLoading,
               isSelected: vote === false,
               isRendered: !isVotingDisabled
             })
@@ -147,7 +148,7 @@ export default function CollectionSubmitVoteBox(props) {
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
-            disabled: isVotingDisabled
+            disabled: isVotingDisabled || isLoading
           }),
         ])
       ]),
