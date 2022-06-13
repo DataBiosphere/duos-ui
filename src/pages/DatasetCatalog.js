@@ -52,7 +52,6 @@ export default function DatasetCatalog(props) {
     const init = async() => {
       setCurrentUser(Storage.getCurrentUser());
       await getDatasets();
-      await getDacs();
       ReactTooltip.rebuild();
     };
     init();
@@ -70,6 +69,7 @@ export default function DatasetCatalog(props) {
 
   const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
+    let localDacs = await getDacs();
     datasets = map((row, index) => {
       row.checked = false;
       row.ix = index;
@@ -78,7 +78,7 @@ export default function DatasetCatalog(props) {
 
       // Extracting these fields to make sorting easier
       row['Dataset Id'] = row.alias;
-      row['Data Access Committee'] = findDacName(dacs, row);
+      row['Data Access Committee'] = findDacName(localDacs, row);
       row['Disease Studied'] = findPropertyValue(row, 'Phenotype/Indication');
       row['Principal Investigator (PI)'] = findPropertyValue(row, 'Principal Investigator(PI)');
       row['# of Participants'] = findPropertyValue(row, '# of participants');
@@ -88,7 +88,7 @@ export default function DatasetCatalog(props) {
     })(datasets);
     setDatasetList(datasets);
     applyDatasetSort(sort, datasets);
-  }, [applyDatasetSort, sort, dacs]);
+  }, [applyDatasetSort, sort]);
 
   const getDacs = async () => {
     let dacs = await DAC.list(false);
@@ -96,6 +96,7 @@ export default function DatasetCatalog(props) {
       return {id: dac.dacId, name: dac.name};
     });
     setDacs(dacs);
+    return dacs;
   };
 
   const downloadList = (dataset) => {
