@@ -84,7 +84,7 @@ export default function DarCollectionReview(props) {
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
-  const {adminPage = false} = props;
+  const {adminPage = false, readOnly = false} = props;
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if(adminPage) {
@@ -178,6 +178,7 @@ export default function DarCollectionReview(props) {
           user: currentUser,
           history: props.history,
         }),
+        readOnly: readOnly || adminPage
       }),
       h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
     ]),
@@ -222,7 +223,7 @@ export default function DarCollectionReview(props) {
         collection,
         buckets: dataUseBuckets,
         isChair: false,
-        readOnly: props.readOnly,
+        readOnly,
         isLoading
       }),
       h(MultiDatasetVotingTab, {
@@ -233,7 +234,7 @@ export default function DarCollectionReview(props) {
         isChair: true,
         isLoading,
         adminPage,
-        readOnly: props.readOnly
+        readOnly
       })
     ])
   ]);

@@ -47,13 +47,14 @@ export default function ReviewHeader(props) {
     projectTitle,
     downloadLink,
     redirectLink,
+    readOnly = false,
     isLoading
   } = props;
   return (
     h(Fragment, {}, [
       div({className: 'header-container', isRendered: !isLoading}, [
         div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
-          span({style: styles.header}, ['Data Access Request Review']),
+          span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`]),
           redirectLink
         ]),
         div({className: 'secondary-header-row', style: styles.containerRow}, [
