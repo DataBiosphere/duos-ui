@@ -16,7 +16,7 @@ describe('Authentication', function() {
       cy.visit('/backgroundsignin');
       cy.get('textarea').type(credentials.access_token, {delay: 0});
       cy.get('form').submit();
-      cy.contains('Manage Data Access Request Collections');
+      cy.contains('Admin Console');
       cy.get('[id="collapsed-navigation-icon-button"]').click();
       cy.contains('Sign Out').click();
     });
