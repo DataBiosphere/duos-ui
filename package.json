@@ -78,6 +78,7 @@
     "not op_mini all"
   ],
   "overrides": {
-    "minimist": "1.2.6"
+    "react": "$react",
+    "react-dom": "$react-dom"
   }
 }
