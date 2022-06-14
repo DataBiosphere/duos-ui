@@ -144,12 +144,12 @@ export default function ApplicationInformation(props) {
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
-          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span for alignment
+          generateLabelSpanContents('Institution', 'institution', institution, isLoading)
         ]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('City', 'city', city, isLoading),
           generateLabelSpanContents('Country', 'country', country, isLoading),
-          generateLabelSpanContents('Institution', 'institution', institution, isLoading)
+          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span for alignment
         ]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Principal Investigator', 'principal-investigator', pi, isLoading),
