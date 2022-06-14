@@ -194,7 +194,7 @@ export default function DarCollectionReview(props) {
         isRendered: selectedTab === tabs.applicationInformation,
         pi: researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName,
         institution: researcherProperties.institution,
-        researcher: researcherProperties.profileName,
+        researcher: researcherProperties.profileName || collection.createUser.displayName,
         email: researcherProperties.academicEmail,
         piEmail: researcherProperties.isThePI === 'true' ? researcherProperties.academicEmail : researcherProperties.piEmail,
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
