@@ -9,10 +9,12 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
-  getMatchDataForBuckets, getPI,
-  processDataUseBuckets
+  getMatchDataForBuckets,
+  processDataUseBuckets,
+  getPI
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
