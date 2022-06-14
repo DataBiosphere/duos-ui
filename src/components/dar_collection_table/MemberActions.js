@@ -1,20 +1,20 @@
-import { h, div } from 'react-hyperscript-helpers';
-import { useEffect, useState } from 'react';
-import { toLower, isEmpty, flow, flatMap, map, filter, toUpper, any, isNil } from 'lodash/fp';
-import { Storage } from '../../libs/storage';
+import {div, h} from 'react-hyperscript-helpers';
+import {useEffect, useState} from 'react';
+import {any, filter, flatMap, flow, isEmpty, isNil, map, toLower, toUpper} from 'lodash/fp';
+import {Storage} from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
 const duosBlue = '#0948B7';
 
 const findRelevantVotes = ({ dars = {}, userId}) => {
-  const relevantVotes = flow(
+  return flow(
     map((dar) => dar.elections),
     flatMap((electionMap) => Object.values(electionMap)),
+    filter((election) => toLower(election.electionType) === 'dataaccess'),
     filter((election) => toLower(election.status) === 'open' && !isEmpty(election.votes)),
     flatMap((election) => Object.values(election.votes)),
     filter((vote) => vote.dacUserId === userId)
   )(dars);
-  return relevantVotes;
 };
 
 
