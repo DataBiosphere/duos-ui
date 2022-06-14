@@ -200,7 +200,6 @@ export default function DarCollectionReview(props) {
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
         country: researcherProperties.country,
         nonTechSummary: darInfo.nonTechRus,
-        department: researcherProperties.department,
         isLoading: subcomponentLoading,
         collection: collection,
         dataUseBuckets: dataUseBuckets,
