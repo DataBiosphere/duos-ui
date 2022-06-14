@@ -193,8 +193,8 @@ export default function DarCollectionReview(props) {
       h(ApplicationInformation, {
         isRendered: selectedTab === tabs.applicationInformation,
         pi: getPI(collection.createUser),
-        institution: researcherProperties.institution,
-        researcher: researcherProperties.profileName || get('createUser.displayName')(collection),
+        institution: get('institution.name')(researcherProfile),
+        researcher: researcherProfile.displayName,
         email: researcherProperties.academicEmail,
         piEmail: researcherProperties.isThePI === 'true' ? researcherProperties.academicEmail : researcherProperties.piEmail,
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
