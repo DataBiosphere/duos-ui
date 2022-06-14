@@ -7,8 +7,7 @@ const labelContainerStyle = {
   backgroundColor: '#F3F5F8',
   textAlign: 'center',
   alignItems: 'center',
-  justifyContent: 'space-between',
-  width: '10%'
+  justifyContent: 'space-between'
 };
 
 const labelFontStyle = {
