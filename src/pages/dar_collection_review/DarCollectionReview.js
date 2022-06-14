@@ -11,7 +11,7 @@ import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
-  getMatchDataForBuckets,
+  getMatchDataForBuckets, getPI,
   processDataUseBuckets
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
@@ -192,9 +192,9 @@ export default function DarCollectionReview(props) {
       }),
       h(ApplicationInformation, {
         isRendered: selectedTab === tabs.applicationInformation,
-        pi: researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName,
+        pi: getPI(collection.createUser),
         institution: researcherProperties.institution,
-        researcher: researcherProperties.profileName || collection.createUser.displayName,
+        researcher: researcherProperties.profileName || get('createUser.displayName')(collection),
         email: researcherProperties.academicEmail,
         piEmail: researcherProperties.isThePI === 'true' ? researcherProperties.academicEmail : researcherProperties.piEmail,
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
