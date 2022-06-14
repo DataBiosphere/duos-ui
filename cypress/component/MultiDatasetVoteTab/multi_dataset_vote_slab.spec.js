@@ -113,7 +113,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('textarea').should('not.be.disabled');
   });
 
-  it('Renders a disabled selected vote button when all current user votes match (Chair)', function() {
+  it('Replaces vote buttons with vote result text when all current user votes match (Chair)', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -128,11 +128,9 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -177,13 +175,14 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=no-collection-vote-button]').click();
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders unselected disabled vote buttons if no votes for current user in bucket', function() {
+  it('Renders NOT SELECTED vote result text if no votes for current user in bucket', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -198,15 +197,13 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders unselected disabled vote buttons if some elections are closed and current votes do not match', function() {
+  it('Renders NOT SELECTED vote result text if some elections are closed and current votes do not match', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -221,15 +218,13 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders selected disabled vote buttons if some elections are closed and current votes do match', function() {
+  it('Renders vote result text if some elections are closed and current votes do match', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -244,15 +239,13 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders a disabled vote button when readOnly is true', function() {
+  it('Replaces vote buttons with vote result text when readOnly is true', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -268,11 +261,9 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 

@@ -43,7 +43,9 @@ const styles = {
 const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) => {
   const voteResultText = isNil(vote) ?
     'NOT SELECTED' :
-    vote ? 'YES' : 'NO';
+    vote ?
+      'YES' :
+      'NO';
 
   let heading;
   if (adminPage) {
@@ -69,7 +71,7 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage} = props;
 
   useEffect(() => {
-    setIsVotingDisabled( props.isDisabled || (isFinal && submitted));
+    setIsVotingDisabled( props.isDisabled || (isFinal && submitted) || adminPage);
   }, [props.isDisabled, isFinal, submitted, isLoading]);
 
   useEffect(() => {
