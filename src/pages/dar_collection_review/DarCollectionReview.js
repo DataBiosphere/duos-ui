@@ -192,11 +192,11 @@ export default function DarCollectionReview(props) {
       }),
       h(ApplicationInformation, {
         isRendered: selectedTab === tabs.applicationInformation,
-        pi: researcherProperties.isThePI ? researcherProperties.profileName : researcherProperties.piName,
+        pi: researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName,
         institution: researcherProperties.institution,
         researcher: researcherProperties.profileName,
         email: researcherProperties.academicEmail,
-        piEmail: researcherProperties.isThePI ? researcherProperties.academicEmail : researcherProperties.piEmail,
+        piEmail: researcherProperties.isThePI === 'true' ? researcherProperties.academicEmail : researcherProperties.piEmail,
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
         country: researcherProperties.country,
         nonTechSummary: darInfo.nonTechRus,
