@@ -11,7 +11,7 @@ jobs:
       - name: NPM Install
         run: npm ci
       - name : Cypress run component tests
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         with:
           install: false
           command: npx cypress run --component

@@ -16,7 +16,7 @@ jobs:
       - name: NPM Build
         run: CI=false npm run build --silent
       - name: Cypress run integration tests
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN_SA }}
           CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR_SA }}
