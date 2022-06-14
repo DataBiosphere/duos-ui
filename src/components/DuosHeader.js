@@ -530,14 +530,27 @@ class DuosHeader extends Component {
         link: '/signing_official_console/researchers',
         children: [
           { label: 'Researchers', link: '/signing_official_console/researchers' },
-          { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-          { label: 'Data Submitters', link: '/signing_official_console/data_submitters' }
+          { label: 'DAR Requests', link: '/signing_official_console/dar_requests' }
         ]
       },
       isResearcher && {
         label: 'Researcher Console',
         link: this.state.researcherPath,
-        search: 'researcher_console'
+        search: 'researcher_console',
+        children: [
+          { label: 'DAR Requests', link: this.state.researcherPath },
+          { label: 'Data Catalog', link: '/dataset_catalog' }
+        ]
+      },
+      isChairPerson && {
+        label: 'DAC Chair Console',
+        link: this.state.dacChairPath,
+        search: 'chair_console',
+        children: [
+          { label: 'Manage DARs', link: this.state.dacChairPath },
+          { label: 'Datasets', link: '/dataset_catalog' },
+          { label: 'DAC Members', link: '/manage_dac' }
+        ]
       },
       isChairPerson && {
         label: 'DAC Chair Console',
@@ -550,7 +563,7 @@ class DuosHeader extends Component {
         ]
       },
       isMember && {
-        label: 'DAC Member Console',
+        label: 'DAC Console',
         link: this.state.dacMemberPath,
         search: 'member_console',
         children: [
