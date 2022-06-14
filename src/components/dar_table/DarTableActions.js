@@ -6,10 +6,12 @@ import DarTableOpenButton from './DarTableOpenButton';
 import DarTableCancelButton from './DarTableCancelButton';
 
 export const consoleTypes = {
+  ADMIN: 'admin',
   MEMBER: 'member',
   MANAGE_ACCESS: 'manageAccess',
   CHAIR: 'chair',
-  SIGNING_OFFICIAL: 'signingOfficial'
+  SIGNING_OFFICIAL: 'signingOfficial',
+  RESEARCHER: 'researcher'
 };
 
 export default function DarTableActions(props) {
