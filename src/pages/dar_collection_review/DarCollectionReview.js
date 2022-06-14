@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { Notifications } from '../../libs/utils';
+import {evaluateTrueString, Notifications} from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
@@ -198,7 +198,7 @@ export default function DarCollectionReview(props) {
         institution: get('institution.name')(researcherProfile),
         researcher: researcherProfile.displayName,
         email: researcherProperties.academicEmail,
-        piEmail: researcherProperties.isThePI === 'true' ? researcherProperties.academicEmail : researcherProperties.piEmail,
+        piEmail: evaluateTrueString(researcherProperties.isThePI) ? researcherProperties.academicEmail : researcherProperties.piEmail,
         city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
         country: researcherProperties.country,
         nonTechSummary: darInfo.nonTechRus,
