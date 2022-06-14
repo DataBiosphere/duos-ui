@@ -3,7 +3,7 @@ import {h} from 'react-hyperscript-helpers';
 import {Styles} from '../../libs/theme';
 import {isNil, isEmpty} from 'lodash/fp';
 import {useEffect, useState} from 'react';
-import {sortVisibleTable, formatDate} from '../../libs/utils';
+import {sortVisibleTable} from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -54,12 +54,12 @@ const columnHeaderData = () => {
 const processVoteSummaryRowData = ({ dacVotes }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
-      const { vote, displayName, voteId, createDate, updateDate, rationale } =
+      const { vote, displayName, voteId, lastUpdated, rationale } =
         dacVote;
       return [
         voteCellData({ vote, voteId }),
         nameCellData({ name: displayName, voteId }),
-        dateCellData({ date: updateDate || createDate, voteId }),
+        dateCellData({ date: lastUpdated, voteId }),
         rationaleCellData({ rationale, voteId }),
       ];
     });
@@ -87,7 +87,7 @@ function nameCellData({name = '- -', voteId, label = 'name'}) {
 
 function dateCellData({date, voteId, label = 'date'}) {
   return {
-    data: formatDate(date),
+    data: date,
     id: voteId,
     cellStyle: { width: styles.cellWidths.date },
     label
