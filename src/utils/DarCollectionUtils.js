@@ -258,7 +258,7 @@ export const getMatchDataForBuckets = async (buckets) => {
   const idsArr = [];
 
   forEach((bucket) => {
-    const {key, elections = [], dars = []} = bucket;
+    const {key, elections = []} = bucket;
     let dataAccessReferenceId;
     if(toLower(key) !== 'rp vote') {
       elections.every((darElections = []) => {
