@@ -4,7 +4,6 @@ import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
-import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
@@ -174,10 +173,6 @@ export default function DarCollectionReview(props) {
           datasets: collection.datasets || [],
         }),
         isLoading,
-        redirectLink: h(RedirectLink, {
-          user: currentUser,
-          history: props.history,
-        }),
         readOnly: readOnly || adminPage
       }),
       h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
