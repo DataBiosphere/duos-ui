@@ -267,15 +267,17 @@ export const getMatchDataForBuckets = async (buckets) => {
         ).referenceId;
         return isNil(dataAccessReferenceId);
       });
+
       if(!isNil(dataAccessReferenceId)) {
         idsArr.push(dataAccessReferenceId);
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
+
       bucket.algorithmResult = {result: 'N/A', createDate: undefined, id: key};
     }
   })(buckets);
 
-  const matchData = await Match.findMatchBatch(idsArr);
+  const matchData = idsArr.length > 0 ? await Match.findMatchBatch(idsArr) : [];
   matchData.forEach((match) => {
     const { purpose, createDate, id } = match;
     const targetBucket = electionIdBucketMap[purpose];

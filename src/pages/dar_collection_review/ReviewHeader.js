@@ -46,7 +46,6 @@ export default function ReviewHeader(props) {
     darCode,
     projectTitle,
     downloadLink,
-    redirectLink,
     readOnly = false,
     isLoading
   } = props;
@@ -54,8 +53,7 @@ export default function ReviewHeader(props) {
     h(Fragment, {}, [
       div({className: 'header-container', isRendered: !isLoading}, [
         div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
-          span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`]),
-          redirectLink
+          span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`])
         ]),
         div({className: 'secondary-header-row', style: styles.containerRow}, [
           span({style: styles.secondaryHeader}, [darCode]),
