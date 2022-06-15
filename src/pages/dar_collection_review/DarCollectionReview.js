@@ -189,10 +189,6 @@ export default function DarCollectionReview(props) {
             datasets: collection.datasets || [],
           }),
           isLoading,
-          redirectLink: h(RedirectLink, {
-            user: currentUser,
-            history: props.history
-          }),
           readOnly: readOnly || adminPage
         }),
         h(DataUseVoteSummary, { dataUseBuckets, isLoading, currentUser, adminPage }),
