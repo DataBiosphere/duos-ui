@@ -21,7 +21,7 @@ import {
   flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
-import {formatDate, Notifications} from '../libs/utils';
+import {evaluateTrueString, formatDate, Notifications} from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
 import { processMatchData } from './VoteUtils';
 
@@ -442,7 +442,7 @@ export const getPI = (createUser) => {
     get('properties'),
     find(property => toLower(property.propertyKey) === 'isthepi'),
     get('propertyValue'),
-    isEqual('true')
+    evaluateTrueString
   )(createUser);
 
   const piName = flow(
