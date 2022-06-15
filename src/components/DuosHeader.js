@@ -61,6 +61,12 @@ const styles = {
     color: '#00609f',
     minHeight: '65px',
     fontWeight: 'bold'
+  },
+  navButton: {
+    background: 'transparent',
+    color: 'white',
+    border: 'none',
+    minHeight: '80px'
   }
 };
 
@@ -179,7 +185,7 @@ const NavigationTabsComponent = (props) => {
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
     currentUser, signOut, isLogged,
-    contactUsButton, supportrequestModal,
+    contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab
   } = props;
   const [selectedMenuTab, setSelectedMenuTab] = useState(false);
@@ -262,29 +268,17 @@ const NavigationTabsComponent = (props) => {
 
       // Navbar right side
       div({ isRendered: isLogged, style: { display: 'flex', alignItems: 'center' } }, [
-        li({ className: 'dropdown help-li', style: { margin: '0 40px', padding: 0 } }, [
-          a(
-            {
-              id: 'sel_requestHelp',
-              role: 'button',
-              className: 'dropdown-toggle',
-              'data-toggle': 'dropdown',
-            },
-            [
-              div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-                'Request Help',
-                span({ className: 'caret caret-margin' }),
-              ])
-            ]
-          ),
-          ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-            li([
-              h(Link, { id: '', to: '/profile' }, [
-                'Unknown Help',
-              ]),
-            ])
-          ]),
+
+        button({
+          onClick: showRequestModal,
+          style: styles.navButton
+        }, [
+          div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
+            'Request Help',
+            span({ className: 'caret caret-margin' }),
+          ])
         ]),
+        supportrequestModal,
 
         li({ className: 'dropdown user-li' }, [
           a(
@@ -599,6 +593,7 @@ class DuosHeader extends Component {
             duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
             currentUser, isLogged, signOut: this.signOut,
             contactUsButton, supportrequestModal,
+            showRequestModal: this.supportRequestModal,
             tabs, initialTab, initialSubTab
           })
         ]),

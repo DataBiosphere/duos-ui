@@ -25,7 +25,6 @@ export default function DatasetCatalog(props) {
   // Data states
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
-  const [dacs, setDacs] = useState([]);
   const [sort, setSort] = useState({ field: 'alias', dir: 1 });
 
   // Selection States
@@ -95,7 +94,6 @@ export default function DatasetCatalog(props) {
     dacs = dacs.map(dac => {
       return {id: dac.dacId, name: dac.name};
     });
-    setDacs(dacs);
     return dacs;
   };
 
