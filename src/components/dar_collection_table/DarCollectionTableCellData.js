@@ -68,7 +68,7 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 
 export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
   const dateString = isNil(createDate) ? '- -' :
-    toLower(createDate) === 'unsubmitted' ? createDate : formatDate(createDate);
+    toLower(createDate) === 'unsubmitted' ? '- -' : formatDate(createDate);
   return {
     data: dateString,
     id: darCollectionId,
