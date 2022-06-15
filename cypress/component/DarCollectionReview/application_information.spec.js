@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import ApplicationInformation from '../../../src/pages/dar_collection_review/ApplicationInformation';
 
 describe('Application Information', () => {

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { React } from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import MemberActions from '../../../src/components/dar_collection_table/MemberActions';
 import { cloneDeep } from 'lodash/fp';
 import { Storage } from '../../../src/libs/storage';
