@@ -26,12 +26,12 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-Cypress.Commands.add("auth", async (roleName) => {
-  const {auth} = require('google-auth-library');
+Cypress.Commands.add('auth', async (roleName) => {
+  const { auth } = require('google-auth-library');
   const keys = Cypress.env(roleName);
   const client = auth.fromJSON(keys);
   client.scopes = ['email', 'profile'];
   const url = `http://localhost:3000`;
-  await client.request({url});
+  await client.request({ url });
   return client.credentials;
 });

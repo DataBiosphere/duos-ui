@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {mount} from '@cypress/react';
+import { mount } from 'cypress/react';
 import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';

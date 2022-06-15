@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import VoteSummaryTable from "../../../src/components/vote_summary_table/VoteSummaryTable";
 
 const dacVotes = [
