@@ -4,7 +4,6 @@ import { Notifications } from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
-import RedirectLink from '../../components/RedirectLink';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';

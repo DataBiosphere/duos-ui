@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import CollectionAlgorithmDecision from '../../../src/components/CollectionAlgorithmDecision';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import React from 'react';
 import {formatDate} from '../../../src/libs/utils';
 
