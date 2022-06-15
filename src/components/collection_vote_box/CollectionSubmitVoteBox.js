@@ -72,7 +72,7 @@ export default function CollectionSubmitVoteBox(props) {
 
   useEffect(() => {
     setIsVotingDisabled( props.isDisabled || (isFinal && submitted) || adminPage);
-  }, [props.isDisabled, isFinal, submitted, isLoading]);
+  }, [props.isDisabled, isFinal, submitted, adminPage]);
 
   useEffect(() => {
     if (!isEmpty(votes)) {
