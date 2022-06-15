@@ -8,6 +8,7 @@ import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
+import { consoleTypes } from '../dar_table/DarTableActions';
 
 export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
   return {
@@ -26,8 +27,9 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
   let darCodeData;
 
   switch (consoleType) {
-    case 'chairperson':
-    case 'member' :
+    case consoleTypes.CHAIR:
+    case consoleTypes.MEMBER:
+    case consoleTypes.SIGNING_OFFICIAL:
       darCodeData = dacLinkToCollection(darCode, status, darCollectionId);
       break;
     default :
@@ -135,16 +137,16 @@ export function consoleActionsCellData({collection, reviewCollection, goToVote, 
   let actionComponent;
 
   switch (consoleType) {
-    case 'admin':
+    case consoleTypes.ADMIN:
       actionComponent = h(AdminActions, {collection, showConfirmationModal});
       break;
-    case 'chairperson':
+    case consoleTypes.CHAIR:
       actionComponent = h(ChairActions, {collection, showConfirmationModal, goToVote, relevantDatasets});
       break;
-    case 'member':
+    case consoleTypes.MEMBER:
       actionComponent = h(MemberActions, {collection, showConfirmationModal, goToVote});
       break;
-    case 'researcher':
+    case consoleTypes.RESEARCHER:
     default:
       actionComponent = h(ResearcherActions, {collection, showConfirmationModal, reviewCollection, resumeCollection});
       break;
