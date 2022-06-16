@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { Notifications } from '../../libs/utils';
+import {evaluateTrueString, Notifications} from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
@@ -8,10 +8,12 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
-  processDataUseBuckets
+  processDataUseBuckets,
+  getPI
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
