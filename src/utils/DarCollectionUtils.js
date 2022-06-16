@@ -315,6 +315,7 @@ const collapseVotes = ({votes}) => {
   const collapsedVotes = {};
   forEach( vote => {
     const matchingVote = collapsedVotes[`${vote.vote}`];
+    const lastUpdate = vote.updateDate || vote.createDate;
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
         dacUserId: vote.dacUserId,
@@ -322,12 +323,12 @@ const collapseVotes = ({votes}) => {
         voteId: vote.voteId,
         displayName: vote.displayName,
         rationales: !isNil(vote.rationale) ? [vote.rationale] : [],
-        createDates: !isNil(vote.createDate) ? [vote.createDate] : []
+        lastUpdates: !isNil(lastUpdate) ? [lastUpdate] : []
       };
     }
     else {
       addIfUnique(vote.rationale, matchingVote.rationales);
-      addIfUnique(vote.createDate, matchingVote.createDates);
+      addIfUnique(lastUpdate, matchingVote.lastUpdates);
     }
   })(votes);
   return collapsedVotes;
@@ -338,7 +339,7 @@ const convertToVoteObjects = ({collapsedVotes}) => {
   return map( key => {
     const collapsedVote = collapsedVotes[key];
     const collapsedRationale = appendAll(collapsedVote.rationales);
-    const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.createDates));
+    const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.lastUpdates));
 
     return {
       dacUserId: collapsedVote.dacUserId,
@@ -346,7 +347,7 @@ const convertToVoteObjects = ({collapsedVotes}) => {
       voteId: collapsedVote.voteId,
       displayName: collapsedVote.displayName,
       rationale: collapsedRationale,
-      createDate: collapsedDate
+      lastUpdated: collapsedDate
     };
   })(Object.keys(collapsedVotes));
 };
