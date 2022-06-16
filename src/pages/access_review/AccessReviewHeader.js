@@ -1,11 +1,8 @@
 import React from 'react';
-import { div, img, h, hh, a, span } from 'react-hyperscript-helpers';
+import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { isNil } from 'lodash/fp';
-import {Navigation} from '../../libs/utils';
-import {Storage} from '../../libs/storage';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -59,13 +56,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ isRendered: !isNil(message), style: SUBHEADER }, message )
             ])
           ]
-        ),
-        div({ style: {marginRight: '10px', anchor: 'right' }}, [
-          a({onClick: () => {Navigation.back(Storage.getCurrentUser(), this.props.history);}, style: {fontSize: '22px'}}, [
-            h(ArrowBackIcon, {style: {marginRight: '8px', marginBottom: '-4px', fontSize: '22px'}}),
-            span('Return to Console')
-          ])
-        ])
+        )
       ]);
   }
 });

@@ -26,7 +26,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-dropzone": "14.2.1",
-    "react-ga": "3.3.0",
+    "react-ga": "3.3.1",
     "react-google-charts": "4.0.0",
     "react-google-login": "5.2.2",
     "react-hyperscript-helpers": "2.0.0",
@@ -59,9 +59,7 @@
     "@babel/eslint-plugin": "7.17.7",
     "@babel/plugin-proposal-class-properties": "7.17.12",
     "@babel/preset-react": "7.17.12",
-    "@cypress/react": "5.12.5",
-    "@cypress/webpack-dev-server": "1.8.4",
-    "cypress": "9.7.0",
+    "cypress": "10.1.0",
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "7.0.0",
     "eslint-plugin-react": "7.30.0",
@@ -79,6 +77,7 @@
     "not op_mini all"
   ],
   "overrides": {
-    "minimist": "1.2.6"
+    "react": "$react",
+    "react-dom": "$react-dom"
   }
 }

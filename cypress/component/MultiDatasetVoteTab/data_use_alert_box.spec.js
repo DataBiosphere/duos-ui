@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import DataUseAlertBox from "../../../src/components/collection_voting_slab/DataUseAlertBox";
 
 const dataUseManualReviewTrue = {

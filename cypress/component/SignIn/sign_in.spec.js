@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
 import React from 'react';
-import {mount} from '@cypress/react';
+import { mount } from 'cypress/react';
 import SignIn from '../../../src/components/SignIn';
 import { Config } from '../../../src/libs/config';
 

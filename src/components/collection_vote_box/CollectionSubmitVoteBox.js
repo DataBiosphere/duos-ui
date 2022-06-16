@@ -20,7 +20,8 @@ const styles = {
   },
   content: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    columnGap: '5rem',
     padding: '0 15px'
   },
   subsection: {
@@ -98,9 +99,12 @@ export default function CollectionSubmitVoteBox(props) {
 
   const VoteSubsectionHeading = () => {
     const heading = (isFinal || adminPage) ?
-      `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
+      `${!adminPage ? 'Your Vote*' : 'Vote*'}` :
       'Your Vote*';
-    return span({className: 'vote-subsection-heading'},[heading]);
+    return div([
+      span({className: 'vote-subsection-heading'},[heading]),
+      !adminPage && span({ style: { marginLeft: 5, fontWeight: 'normal' } }, ['(Vote and Rationale cannot be updated after submitting)'])
+    ]);
   };
 
   return (

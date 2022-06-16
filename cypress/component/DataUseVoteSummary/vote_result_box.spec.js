@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import VoteResultIcon from '../../../src/components/common/DataUseVoteSummary/VoteResultBox';
 
 const propKey = 'Test-Label';

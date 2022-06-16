@@ -10,7 +10,7 @@ import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 import { isNil } from 'lodash/fp';
-import {consoleTypes} from '../components/dar_table/DarTableActions';
+import { consoleTypes } from '../components/dar_table/DarTableActions';
 
 export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);

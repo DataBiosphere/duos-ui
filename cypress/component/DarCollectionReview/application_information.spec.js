@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import ApplicationInformation from '../../../src/pages/dar_collection_review/ApplicationInformation';
 
 describe('Application Information', () => {
@@ -32,17 +32,6 @@ describe('Application Information', () => {
     const value = cy.get(`#researcher-email-span`);
     expect(value).to.exist;
     value.contains('test email');
-  });
-
-  it('renders department information', () => {
-    const props = {department: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#department-label`);
-    expect(label).to.exist;
-    label.contains('Department');
-    const value = cy.get(`#department-span`);
-    expect(value).to.exist;
-    value.contains('test');
   });
 
   it('renders city information', () => {

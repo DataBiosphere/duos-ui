@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { React } from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import ChairActions from '../../../src/components/dar_collection_table/ChairActions';
 import {cloneDeep} from 'lodash/fp';
 import { Navigation } from '../../../src/libs/utils';
