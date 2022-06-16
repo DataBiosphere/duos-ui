@@ -11,7 +11,6 @@ import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../uti
 export default function NewChairConsole(props) {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
-  const [relevantDatasets, setRelevantDatasets] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
@@ -31,7 +30,6 @@ export default function NewChairConsole(props) {
           Collections.getCollectionsByRoleName('chairperson')
         ]);
         setCollections(collections);
-        setRelevantDatasets(collections);
         setFilteredList(collections);
         setIsLoading(false);
       } catch(error) {
@@ -93,7 +91,6 @@ export default function NewChairConsole(props) {
         DarCollectionTableColumnOptions.ACTIONS,
       ],
       isLoading,
-      relevantDatasets,
       cancelCollection,
       reviseCollection: null,
       openCollection,

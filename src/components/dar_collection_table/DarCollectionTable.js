@@ -224,7 +224,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [consoleAction, setConsoleAction] = useState();
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection, reviewCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets
+    openCollection, actionsDisabled, goToVote, consoleType
   } = props;
 
   /*
@@ -251,8 +251,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         consoleType,
         openCollection,
         goToVote,
-        reviewCollection,
-        relevantDatasets
+        reviewCollection
       }),
       currentPage,
       setPageCount,
@@ -260,7 +259,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets, reviewCollection]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, reviewCollection]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);

@@ -10,7 +10,6 @@ import { DarCollectionTable, DarCollectionTableColumnOptions } from '../componen
 export default function NewMemberConsole(props) {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
-  const [relevantDatasets, setRelevantDatasets] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
@@ -25,12 +24,10 @@ export default function NewMemberConsole(props) {
   useEffect(() => {
     const init = async () => {
       try {
-        const [collections, datasets] = await Promise.all([
-          Collections.getCollectionsByRoleName('member'),
-          User.getUserRelevantDatasets(), //still need this on this console for status cell
+        const [collections] = await Promise.all([
+          Collections.getCollectionsByRoleName('member')
         ]);
         setCollections(collections);
-        setRelevantDatasets(datasets);
         setFilteredList(collections);
         setIsLoading(false);
       } catch (error) {
@@ -91,7 +88,6 @@ export default function NewMemberConsole(props) {
         DarCollectionTableColumnOptions.ACTIONS,
       ],
       isLoading,
-      relevantDatasets,
       reviseCollection: null,
       goToVote,
       consoleType: 'member'
