@@ -20,7 +20,7 @@ const defaultSelectedStyle = {
 
 const defaultHoverStyle = {fontWeight: 600, cursor: 'pointer'};
 
-export default function SelectableText({label, setSelected, selectedType, styleOverride = {}}) {
+export default function SelectableText({label, setSelected, selectedType, styleOverride = {}, isDisabled = false}) {
 
   const {baseStyle, tabSelected, tabUnselected, tabHover} = styleOverride;
   const [style, setStyle] = useState(utilizedUnselectedStyle);
@@ -56,7 +56,7 @@ export default function SelectableText({label, setSelected, selectedType, styleO
       style,
       onMouseEnter: addHoverEffect,
       onMouseLeave: removeHoverEffect,
-      onClick: () => setSelected(label),
+      onClick: () => !isDisabled && setSelected(label),
       className: `tab-selection-${label}`
     }, [label])
   );

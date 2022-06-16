@@ -8,7 +8,7 @@ const defaultTabContainerStyle = {
   border: '0px',
 };
 
-const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOverride = {}}) => {
+const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOverride = {}, isDisabled}) => {
   return labels.map((label) =>
     !isLoading ?
       h(SelectableText, {
@@ -18,7 +18,8 @@ const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOver
         componentType: label,
         setSelected: setSelectedTab,
         selectedType: selectedTab,
-        styleOverride
+        styleOverride,
+        isDisabled
       }) :
       div({
         className: 'text-placeholder',
@@ -37,7 +38,7 @@ export default function TabControl(props) {
   //  1) Style on select
   //  2) Style for unselected
   //  3) Style for hover (if you don't want to change styles on hover just simply inherit )
-  const { labels, selectedTab, setSelectedTab, isLoading = false, styleOverride = {} } = props;
+  const { labels, selectedTab, setSelectedTab, isLoading = false, styleOverride = {}, isDisabled } = props;
 
   const tabContainerStyle = useMemo(() => {
     const containerOverride = styleOverride.tabContainer;
@@ -49,7 +50,7 @@ export default function TabControl(props) {
       style: tabContainerStyle,
       className: 'tab-list',
     }, [
-      tabTemplates({labels, selectedTab, setSelectedTab, isLoading, styleOverride})
+      tabTemplates({labels, selectedTab, setSelectedTab, isLoading, styleOverride, isDisabled})
     ])
   );
 }

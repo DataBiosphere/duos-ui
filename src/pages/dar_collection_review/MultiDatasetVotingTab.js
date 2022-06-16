@@ -71,7 +71,8 @@ export default function MultiDatasetVotingTab(props) {
         isApprovalDisabled,
         readOnly,
         key: bucket.key,
-        adminPage
+        adminPage,
+        isLoading
       });
     })(dataBuckets);
   };
@@ -100,7 +101,7 @@ export default function MultiDatasetVotingTab(props) {
         isChair,
         isLoading,
         readOnly,
-        adminPage
+        adminPage,
       }),
       DatasetVoteSlabs()
     ])

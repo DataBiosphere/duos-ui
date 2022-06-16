@@ -34,17 +34,6 @@ describe('Application Information', () => {
     value.contains('test email');
   });
 
-  it('renders department information', () => {
-    const props = {department: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#department-label`);
-    expect(label).to.exist;
-    label.contains('Department');
-    const value = cy.get(`#department-span`);
-    expect(value).to.exist;
-    value.contains('test');
-  });
-
   it('renders city information', () => {
     const props = {city: 'test'};
     mount(<ApplicationInformation {...props} />);

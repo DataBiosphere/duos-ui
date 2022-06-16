@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { Notifications } from '../../libs/utils';
+import {evaluateTrueString, Notifications} from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
@@ -8,15 +8,18 @@ import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket, extractUserRPVotesFromBucket,
+  extractUserDataAccessVotesFromBucket,
+  extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
-  processDataUseBuckets
+  processDataUseBuckets,
+  getPI
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
+import { toLower } from 'lodash';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -77,26 +80,67 @@ export default function DarCollectionReview(props) {
   const [darInfo, setDarInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
-  const [tabs, setTabs] = useState({applicationInformation: 'Application Information'});
+  const [tabs, setTabs] = useState({
+    applicationInformation: 'Application Information',
+  });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
-  const {adminPage = false, readOnly = false} = props;
+  const { adminPage = false, readOnly = false } = props;
+
+  const init = useCallback(async () => {
+    const user = Storage.getCurrentUser();
+    try {
+      const collection = await Collections.getCollectionById(collectionId);
+      const { dars, datasets } = collection;
+      const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
+      const researcherProfile = await User.getById(collection.createUserId);
+      const researcherProperties = {};
+      researcherProfile.researcherProperties.forEach((property) => {
+        const { propertyKey, propertyValue } = property;
+        researcherProperties[propertyKey] = propertyValue;
+      });
+      const processedBuckets = await flow([
+        generatePreProcessedBucketData,
+        processDataUseBuckets,
+      ])({ dars, datasets });
+      await getMatchDataForBuckets(processedBuckets);
+      const filteredBuckets = adminPage
+        ? processedBuckets
+        : filterBucketsForUser(user, processedBuckets);
+      setResearcherProperties(researcherProperties);
+      setDataUseBuckets(filteredBuckets);
+      setCollection(collection);
+      setCurrentUser(user);
+      setDarInfo(darInfo);
+      setResearcherProfile(researcherProfile);
+      setTabs(tabsForUser(user, filteredBuckets, adminPage));
+      setIsLoading(false);
+      setSubcomponentLoading(false);
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error initializing DAR collection page. You have been redirected to your console',
+      });
+      Navigation.console(user, props.history);
+    }
+  }, [adminPage, props.history, tabsForUser, collectionId]);
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
-    if(adminPage) {
+    if (adminPage) {
       return {
         applicationInformation: 'Application Information',
-        chairVote: 'Chair Vote'
+        chairVote: 'Chair Vote',
       };
     }
-    const dataAccessBucketsForUser = filter(bucket => get('isRP')(bucket) !== true)(buckets);
+    const dataAccessBucketsForUser = filter(
+      (bucket) => get('isRP')(bucket) !== true
+    )(buckets);
     const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
 
-    const updatedTabs = {applicationInformation: 'Application Information'};
-    if(userHasVotesForCollection) {
+    const updatedTabs = { applicationInformation: 'Application Information' };
+    if (userHasVotesForCollection) {
       if (userHasRole(user, chairpersonRoleId)) {
         updatedTabs.memberVote = 'Member Vote';
         updatedTabs.chairVote = 'Chair Vote';
@@ -109,128 +153,116 @@ export default function DarCollectionReview(props) {
   }, []);
 
   useEffect(() => {
-    const init = async () => {
-      const user = Storage.getCurrentUser();
-      try {
-        const collection = await Collections.getCollectionById(collectionId);
-        const { dars, datasets } = collection;
-        const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
-        const researcherProfile = await User.getById(collection.createUserId);
-        const researcherProperties = {};
-        researcherProfile.researcherProperties.forEach((property) => {
-          const { propertyKey, propertyValue } = property;
-          researcherProperties[propertyKey] = propertyValue;
-        });
-        const processedBuckets = await flow([
-          generatePreProcessedBucketData,
-          processDataUseBuckets,
-        ])({ dars, datasets });
-        await getMatchDataForBuckets(processedBuckets);
-        const filteredBuckets = adminPage ? processedBuckets : filterBucketsForUser(user, processedBuckets);
-        setResearcherProperties(researcherProperties);
-        setDataUseBuckets(filteredBuckets);
-        setCollection(collection);
-        setCurrentUser(user);
-        setDarInfo(darInfo);
-        setResearcherProfile(researcherProfile);
-        setTabs(tabsForUser(user, filteredBuckets, adminPage));
-        setIsLoading(false);
-      } catch(error) {
-        Notifications.showError({text: 'Error initializing DAR collection page. You have been redirected to your console'});
-        Navigation.console(user, props.history);
-      }
-    };
-
     try {
       setIsLoading(true);
+      setSubcomponentLoading(true);
       init();
-    } catch(error) {
-      Notifications.showError({text: 'Failed to initialize collection'});
+    } catch (error) {
+      Notifications.showError({ text: 'Failed to initialize collection' });
     }
-  }, [collectionId, props.history, tabsForUser, adminPage]);
+  }, [init]);
 
   useEffect(() => {
-    setSubcomponentLoading(true);
-  }, [selectedTab]);
-
-  useEffect(() => {
-    if(subcomponentLoading && !isLoading) {
-      const timeout = setTimeout(() => {
-        setSubcomponentLoading(false);
-        clearTimeout(timeout);
-      }, 500);
+    try {
+      if (toLower(selectedTab) === 'chair vote') {
+        setSubcomponentLoading(true);
+        init();
+      }
+    } catch (error) {
+      Notifications.showError({
+        text: 'Failed to initialize collection for chair tab',
+      });
     }
-  }, [subcomponentLoading, isLoading]);
+  }, [selectedTab, init]);
 
-  return div({className: 'collection-review-page'}, [
-    div({className: 'review-page-header', style: { width: '90%', margin: '0 auto 3% auto' }}, [
-      h(ReviewHeader, {
-        darCode: collection.darCode || '- -',
-        projectTitle: darInfo.projectTitle || '- -',
-        downloadLink: h(ApplicationDownloadLink, {
-          darInfo,
-          researcherProfile,
-          datasets: collection.datasets || [],
+  return div({ className: 'collection-review-page' }, [
+    div(
+      {
+        className: 'review-page-header',
+        style: { width: '90%', margin: '0 auto 3% auto' },
+      },
+      [
+        h(ReviewHeader, {
+          darCode: collection.darCode || '- -',
+          projectTitle: darInfo.projectTitle || '- -',
+          downloadLink: h(ApplicationDownloadLink, {
+            darInfo,
+            researcherProfile,
+            datasets: collection.datasets || [],
+          }),
+          isLoading,
+          readOnly: readOnly || adminPage
         }),
-        isLoading,
-        readOnly: readOnly || adminPage
-      }),
-      h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
-    ]),
-    div({ className: 'review-page-body', style: {padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor} }, [
-      h(TabControl, {
-        labels: Object.values(tabs),
-        selectedTab,
-        setSelectedTab,
-        isLoading,
-        styleOverride: tabStyleOverride
-      }),
-      h(ApplicationInformation, {
-        isRendered: selectedTab === tabs.applicationInformation,
-        pi: researcherProperties.isThePI ? researcherProperties.profileName : researcherProperties.piName,
-        institution: researcherProperties.institution,
-        researcher: researcherProperties.profileName,
-        email: researcherProperties.academicEmail,
-        piEmail: researcherProperties.isThePI ? researcherProperties.academicEmail : researcherProperties.piEmail,
-        city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
-        country: researcherProperties.country,
-        nonTechSummary: darInfo.nonTechRus,
-        department: researcherProperties.department,
-        isLoading: subcomponentLoading,
-        collection: collection,
-        dataUseBuckets: dataUseBuckets,
-        externalCollaborators: darInfo.externalCollaborators,
-        internalCollaborators: darInfo.internalCollaborators,
-        signingOfficial: darInfo.signingOfficial,
-        itDirector: darInfo.itDirector,
-        signingOfficialEmail: darInfo.signingOfficial, //todo
-        itDirectorEmail: darInfo.itDirector, //todo
-        internalLabStaff: darInfo.labCollaborators,
-        anvilStorage: darInfo.anvilUse,
-        localComputing: darInfo.localUse,
-        cloudComputing: darInfo.cloudUse,
-        cloudProvider: darInfo.cloudProvider,
-        cloudProviderDescription: darInfo.cloudProviderDescription
-      }),
-      h(MultiDatasetVotingTab, {
-        isRendered: !adminPage && selectedTab === tabs.memberVote,
-        darInfo,
-        collection,
-        buckets: dataUseBuckets,
-        isChair: false,
-        readOnly,
-        isLoading
-      }),
-      h(MultiDatasetVotingTab, {
-        isRendered: selectedTab === tabs.chairVote,
-        darInfo,
-        collection,
-        buckets: dataUseBuckets,
-        isChair: true,
-        isLoading,
-        adminPage,
-        readOnly
-      })
-    ])
+        h(DataUseVoteSummary, { dataUseBuckets, isLoading, currentUser, adminPage }),
+      ]
+    ),
+    div(
+      {
+        className: 'review-page-body',
+        style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },
+      },
+      [
+        h(TabControl, {
+          labels: Object.values(tabs),
+          selectedTab,
+          setSelectedTab,
+          isLoading,
+          styleOverride: tabStyleOverride,
+          isDisabled: isLoading || subcomponentLoading
+        }),
+        h(ApplicationInformation, {
+          isRendered: selectedTab === tabs.applicationInformation,
+          pi: researcherProperties.isThePI
+            ? researcherProperties.profileName
+            : researcherProperties.piName,
+          institution: researcherProperties.institution,
+          researcher: researcherProperties.profileName,
+          email: researcherProperties.academicEmail,
+          piEmail: researcherProperties.isThePI
+            ? researcherProperties.academicEmail
+            : researcherProperties.piEmail,
+          city: `${researcherProperties.city}${
+            !researcherProperties.state ? '' : ', ' + researcherProperties.state
+          }`,
+          country: researcherProperties.country,
+          nonTechSummary: darInfo.nonTechRus,
+          department: researcherProperties.department,
+          isLoading: subcomponentLoading,
+          collection: collection,
+          dataUseBuckets: dataUseBuckets,
+          externalCollaborators: darInfo.externalCollaborators,
+          internalCollaborators: darInfo.internalCollaborators,
+          signingOfficial: darInfo.signingOfficial,
+          itDirector: darInfo.itDirector,
+          signingOfficialEmail: darInfo.signingOfficial, //todo
+          itDirectorEmail: darInfo.itDirector, //todo
+          internalLabStaff: darInfo.labCollaborators,
+          anvilStorage: darInfo.anvilUse,
+          localComputing: darInfo.localUse,
+          cloudComputing: darInfo.cloudUse,
+          cloudProvider: darInfo.cloudProvider,
+          cloudProviderDescription: darInfo.cloudProviderDescription,
+        }),
+        h(MultiDatasetVotingTab, {
+          isRendered: !adminPage && selectedTab === tabs.memberVote,
+          darInfo,
+          collection,
+          buckets: dataUseBuckets,
+          isChair: false,
+          readOnly,
+          isLoading: isLoading || subcomponentLoading
+        }),
+        h(MultiDatasetVotingTab, {
+          isRendered: selectedTab === tabs.chairVote,
+          darInfo,
+          collection,
+          buckets: dataUseBuckets,
+          isChair: true,
+          isLoading: isLoading || subcomponentLoading,
+          adminPage,
+          readOnly
+        }),
+      ]
+    ),
   ]);
 }

@@ -6,6 +6,7 @@ import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
+import { consoleTypes } from '../components/dar_table/DarTableActions';
 
 export default function NewMemberConsole(props) {
   const [collections, setCollections] = useState([]);
@@ -94,7 +95,7 @@ export default function NewMemberConsole(props) {
       relevantDatasets,
       reviseCollection: null,
       goToVote,
-      consoleType: 'member'
+      consoleType: consoleTypes.MEMBER
     }),
   ]);
 }

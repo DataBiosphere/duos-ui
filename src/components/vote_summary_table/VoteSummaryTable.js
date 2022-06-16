@@ -54,12 +54,13 @@ const columnHeaderData = () => {
 const processVoteSummaryRowData = ({ dacVotes }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
-      const { vote, displayName, voteId, createDate, updateDate, rationale } = dacVote;
+      const { vote, displayName, voteId, lastUpdated, rationale } =
+        dacVote;
       return [
-        voteCellData({vote, voteId}),
-        nameCellData({name: displayName, voteId}),
-        dateCellData({date: updateDate || createDate, voteId}),
-        rationaleCellData({rationale, voteId})
+        voteCellData({ vote, voteId }),
+        nameCellData({ name: displayName, voteId }),
+        dateCellData({ date: lastUpdated, voteId }),
+        rationaleCellData({ rationale, voteId }),
       ];
     });
   }
