@@ -274,8 +274,7 @@ const NavigationTabsComponent = (props) => {
           style: styles.navButton
         }, [
           div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-            'Request Help',
-            span({ className: 'caret caret-margin' }),
+            'Request Help'
           ])
         ]),
         supportrequestModal,
