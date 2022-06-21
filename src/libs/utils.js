@@ -237,9 +237,9 @@ export const removeTextHover = (e, color) => {
   e.target.style.color = color;
 };
 
-//helper function to generate keys for rendered elements
+//helper function to generate keys for rendered elements; splits on commas and whitespace
 export const convertLabelToKey = (label = '') => {
-  return label.split(' ').join('-');
+  return label.split(/[\s,]+/) .join('-');
 };
 
 export const setUserRoleStatuses = (user, Storage) => {
