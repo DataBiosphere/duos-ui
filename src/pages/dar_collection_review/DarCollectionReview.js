@@ -256,7 +256,8 @@ export default function DarCollectionReview(props) {
           isLoading: isLoading || subcomponentLoading,
           adminPage,
           readOnly
-        })
-      ])
+        }),
+      ]
+    )
   ]);
 }
