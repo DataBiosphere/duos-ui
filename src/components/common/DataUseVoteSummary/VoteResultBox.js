@@ -34,7 +34,7 @@ export default function VoteResultBox({ label, votes, additionalLabelStyle = {} 
     },
     [
       h(ScrollButton, {
-        to : `#${propKey}`,
+        to: `#${propKey}`,
         additionalStyle: labelFontStyle
       }, [
         label

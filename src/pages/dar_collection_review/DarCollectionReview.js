@@ -87,7 +87,7 @@ export default function DarCollectionReview(props) {
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
-  const {adminPage = false, readOnly = false} = props;
+  const { adminPage = false, readOnly = false } = props;
 
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser();
@@ -175,7 +175,7 @@ export default function DarCollectionReview(props) {
     }
   }, [selectedTab, init]);
 
-  return div({className: 'collection-review-page'}, [
+  return div({ className: 'collection-review-page' }, [
     div(
       {
         className: 'review-page-header',
@@ -194,7 +194,8 @@ export default function DarCollectionReview(props) {
           readOnly: readOnly || adminPage
         }),
         h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
-      ]),
+      ]
+    ),
     div(
       {
         className: 'review-page-body',
@@ -221,7 +222,6 @@ export default function DarCollectionReview(props) {
           }`,
           country: researcherProperties.country,
           nonTechSummary: darInfo.nonTechRus,
-          department: researcherProperties.department,
           isLoading: subcomponentLoading,
           collection: collection,
           dataUseBuckets: dataUseBuckets,
