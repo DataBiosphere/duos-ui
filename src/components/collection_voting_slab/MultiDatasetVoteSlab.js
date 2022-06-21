@@ -108,7 +108,7 @@ export default function MultiDatasetVoteSlab(props) {
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
     div({ style: styles.slabTitle }, [
       title,
-      h(ScrollToTopButton, {to: '#back-to-top-anchor'})
+      h(ScrollToTopButton, {to: '#vote-summary-header-component'})
     ]),
     div({ isRendered: !isLoading }, [
       DataUseSummary(),

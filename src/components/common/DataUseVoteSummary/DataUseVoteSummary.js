@@ -81,7 +81,7 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
     div({
       className: 'vote-summary-header-component',
       style: {margin: '1% 0'},
-      id: 'back-to-top-anchor'
+      id: 'vote-summary-header-component'
     }, [
       rowTemplate(chunkedBuckets),
       h(ReactTooltip, {
