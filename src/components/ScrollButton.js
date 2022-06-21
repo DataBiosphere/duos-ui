@@ -28,7 +28,6 @@ export function ScrollToTopButton(props) {
 
   return h(ScrollButton, {
     to,
-    additionalStyle: {marginLeft: '2rem'},
     verticalAlignment: 'center'
   }, [
     h(KeyboardArrowUp)

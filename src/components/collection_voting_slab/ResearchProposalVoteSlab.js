@@ -32,7 +32,8 @@ const styles = {
     borderRadius: '4px 4px 0 0',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    columnGap: '2rem'
   },
   dataUseCategoryLabel: {
     fontWeight: 'bold',
