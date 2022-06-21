@@ -11,9 +11,7 @@ export function ScrollButton(props) {
     const anchor = (event.target.ownerDocument || document).querySelector(to);
 
     if (anchor) {
-      anchor.scrollIntoView({
-        block: 'center',
-      });
+      anchor.scrollIntoView();
     }
   };
 
