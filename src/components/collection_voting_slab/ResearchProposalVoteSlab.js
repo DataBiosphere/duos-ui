@@ -94,7 +94,7 @@ const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div([
+    return div({key: `data-use-${key}-container`}, [
       label,
       dataUsePills(dataUses)
     ]);
@@ -175,7 +175,8 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage} = props;
+  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
+  const bucketKey = bucket.key;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -208,7 +209,10 @@ export default function ResearchProposalVoteSlab(props) {
                 isFinal: false,
                 isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
                 isLoading,
-                adminPage
+                adminPage,
+                bucketKey,
+                updateFinalVote,
+                key: bucketKey
               }),
               h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
             ]),

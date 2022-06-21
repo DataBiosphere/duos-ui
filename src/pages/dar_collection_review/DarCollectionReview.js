@@ -13,7 +13,8 @@ import {
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  getPI
+  getPI,
+  updateFinalVote
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
@@ -86,6 +87,10 @@ export default function DarCollectionReview(props) {
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const [researcherProperties, setResearcherProperties] = useState({});
   const {adminPage = false, readOnly = false} = props;
+
+  const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
+    return updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
+  }, [dataUseBuckets]);
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if(adminPage) {
@@ -230,7 +235,9 @@ export default function DarCollectionReview(props) {
         isChair: true,
         isLoading,
         adminPage,
-        readOnly
+        readOnly,
+        //NOTE:new function, see if it works
+        updateFinalVote: updateFinalVoteFn
       })
     ])
   ]);

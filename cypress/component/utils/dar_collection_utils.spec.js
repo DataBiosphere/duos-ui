@@ -698,4 +698,13 @@ describe('getMatchDataForBuckets', () => {
   });
 });
 
+describe('updateFinalVote()', () => {
+  it('updates votes for the target bucket in the source collection (non-RP)', () => {
+    const voteIds = [1,2,3];
+    const votePayload = {vote: true, rationale: 'test rationale'};
+    const key = 'targetKey';
+    let dataUseBuckets = [{key: 'targetKey', votes: [{dataAccess: {finalVotes: [{voteId: 1}, {voteId: 2}, {voteId: 3}]}}]}];
+  });
+});
+
 

@@ -17,13 +17,14 @@ import {
   findIndex,
   cloneDeep,
   groupBy,
-  isEqual,
   flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {evaluateTrueString, formatDate, Notifications} from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
 import { processMatchData } from './VoteUtils';
+
+export const rpVoteKey = 'RP Vote';
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
@@ -149,7 +150,7 @@ export const processDataUseBuckets = async(buckets) => {
   ])(processedBuckets);
 
   const rpVoteData = {
-    key: 'RP Vote',
+    key: rpVoteKey,
     votes: rpVotes,
     isRP: true,
   };
@@ -453,6 +454,27 @@ export const getPI = (createUser) => {
   return createUserIsPI ? createUser.displayName : piName;
 };
 
+//helper function used in DarCollectionReview to update final vote on source of truth
+//done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
+//NOTE: write tests for this new helper function
+export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets}) => {
+  if(!isEmpty(votePayload)) {
+    const clonedBuckets = cloneDeep(dataUseBuckets);
+    const targetBucket = find((bucket) => toLower(bucket.key) === toLower(key))(clonedBuckets);
+    const votes = toLower(key) === toLower(rpVoteKey) ? targetBucket.votes : flatMap((voteObj) => voteObj.dataAccess.finalVotes);
+    const targetVotes = flow([
+      filter((vote => includes(vote.voteId, voteIds))),
+      forEach((currentVote) => {
+        const {rationale, vote} = votePayload;
+        currentVote.rationale = rationale;
+        currentVote.vote = vote;
+      })
+    ])(votes);
+    setDataUseBuckets(clonedBuckets);
+    return targetVotes;
+  }
+};
+
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
@@ -463,5 +485,7 @@ export default {
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
   collapseVotesByUser,
-  getPI
+  getPI,
+  updateFinalVote,
+  rpVoteKey
 };

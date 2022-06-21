@@ -46,7 +46,7 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isVotingDisabled, setIsVotingDisabled] = useState(false);
-  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage} = props;
+  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote} = props;
 
   useEffect(() => {
     setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
@@ -75,11 +75,11 @@ export default function CollectionSubmitVoteBox(props) {
     })(values);
   };
 
-  const updateVote = async (newVote) => {
+  const updateVote = async (newVote, isFinal) => {
     try {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
-      setVote(newVote);
+      isFinal ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
       setSubmitted(true);
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
@@ -112,7 +112,7 @@ export default function CollectionSubmitVoteBox(props) {
           h(VoteSubsectionHeading),
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
-              onClick: () => updateVote(true),
+              onClick: () => updateVote(true, isFinal),
               disabled: isVotingDisabled || isApprovalDisabled,
               isSelected: vote === true
             }),
