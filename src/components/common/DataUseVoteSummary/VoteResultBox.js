@@ -1,6 +1,6 @@
 import {div, h} from 'react-hyperscript-helpers';
 import VoteResultIcon from './VoteResultIcon';
-import {ScrollButton} from './ScrollButton';
+import {ScrollButton} from '../../ScrollButton';
 
 const labelContainerStyle = {
   display: 'flex',

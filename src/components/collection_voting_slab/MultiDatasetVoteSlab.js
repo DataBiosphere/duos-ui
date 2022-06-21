@@ -7,10 +7,11 @@ import DatasetsRequestedPanel from './DatasetsRequestedPanel';
 import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
 import {
   extractDacDataAccessVotesFromBucket,
-  extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  extractUserDataAccessVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
-import {ScrollToTopButton} from '../common/DataUseVoteSummary/ScrollButton';
+import {ScrollToTopButton} from '../ScrollButton';
 
 const styles = {
   baseStyle: {
