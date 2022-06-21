@@ -1,8 +1,6 @@
-import {div, h, span} from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import VoteResultIcon from './VoteResultIcon';
-import {Fab, Fade, Link, useScrollTrigger} from '@mui/material';
-import Box from '@mui/material/Box';
-import {KeyboardArrowUp} from '@material-ui/icons';
+import {ScrollButton} from './ScrollButton';
 
 const labelContainerStyle = {
   display: 'flex',
@@ -30,21 +28,6 @@ const convertLabelToKey = (label) => {
 };
 
 
-function ScrollTop(props) {
-  const { children, to } = props;
-
-  const handleClick = (event) => {
-    const anchor = (event.target.ownerDocument || document).querySelector(to);
-
-    if (anchor) {
-      anchor.scrollIntoView({
-        block: 'center',
-      });
-    }
-  };
-
-  return h(Box, {onClick: handleClick}, [children]);
-}
 
 export default function VoteResultBox({ label, votes, additionalLabelStyle = {} }) {
   const propKey = convertLabelToKey(label);
@@ -57,13 +40,13 @@ export default function VoteResultBox({ label, votes, additionalLabelStyle = {} 
       'data-for': 'vote-result'
     },
     [
-      span({style: labelFontStyle}, [label]),
-      h(VoteResultIcon, { propKey, votes }),
-      h(ScrollTop, {to: '#back-to-top-anchor'}, [
-        h(Fab, {size: 'small', ariaLabel:'scroll to top'}, [
-          h(KeyboardArrowUp)
-        ])
-      ])
+      h(ScrollButton, {
+        to : `#${propKey}`,
+        additionalStyle: labelFontStyle
+      }, [
+        label
+      ]),
+      h(VoteResultIcon, { propKey, votes })
     ]
   );
 }

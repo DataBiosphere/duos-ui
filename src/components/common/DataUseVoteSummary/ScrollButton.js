@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import {KeyboardArrowUp} from '@material-ui/icons';
 
 export function ScrollButton(props) {
-  const { children, to, additionalStyle } = props;
+  const { children, to, additionalStyle = {}, verticalAlignment = 'start' } = props;
 
   const style = Object.assign({cursor: 'pointer'}, additionalStyle);
 
@@ -11,7 +11,10 @@ export function ScrollButton(props) {
     const anchor = (event.target.ownerDocument || document).querySelector(to);
 
     if (anchor) {
-      anchor.scrollIntoView();
+      anchor.scrollIntoView({
+        block: verticalAlignment,
+        behavior: 'smooth'
+      });
     }
   };
 
@@ -23,12 +26,11 @@ export function ScrollButton(props) {
 export function ScrollToTopButton(props) {
   const { to } = props;
 
-  return h(ScrollButton, { to, additionalStyle: {marginLeft: '2rem'} }, [
+  return h(ScrollButton, {
+    to,
+    additionalStyle: {marginLeft: '2rem'},
+    verticalAlignment: 'center'
+  }, [
     h(KeyboardArrowUp)
   ]);
-}
-
-export default {
-  ScrollButton,
-  ScrollToTopButton
 }

@@ -80,8 +80,7 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
   return !isLoading ?
     div({
       className: 'vote-summary-header-component',
-      style: {margin: '1% 0'},
-      id: 'vote-summary-header-component'
+      style: {margin: '1% 0'}
     }, [
       rowTemplate(chunkedBuckets),
       h(ReactTooltip, {
