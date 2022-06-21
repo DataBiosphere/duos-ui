@@ -19,8 +19,7 @@ const labelFontStyle = {
   fontWeight: 600,
   whiteSpace: 'nowrap',
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  color: '#333'
+  textOverflow: 'ellipsis'
 };
 
 export default function VoteResultBox({ label, votes, additionalLabelStyle = {} }) {
