@@ -258,6 +258,6 @@ export default function DarCollectionReview(props) {
           readOnly
         }),
       ]
-    )
+    ),
   ]);
 }
