@@ -1,6 +1,7 @@
 import {div, h} from 'react-hyperscript-helpers';
 import VoteResultIcon from './VoteResultIcon';
 import {ScrollButton} from '../../ScrollButton';
+import {convertLabelToKey} from '../../../libs/utils';
 
 const labelContainerStyle = {
   display: 'flex',
@@ -21,13 +22,6 @@ const labelFontStyle = {
   textOverflow: 'ellipsis',
   color: '#333'
 };
-
-//helper function to generate keys for rendered elements
-const convertLabelToKey = (label) => {
-  return label.split(' ').join('-');
-};
-
-
 
 export default function VoteResultBox({ label, votes, additionalLabelStyle = {} }) {
   const propKey = convertLabelToKey(label);

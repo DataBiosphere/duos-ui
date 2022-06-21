@@ -237,6 +237,11 @@ export const removeTextHover = (e, color) => {
   e.target.style.color = color;
 };
 
+//helper function to generate keys for rendered elements
+export const convertLabelToKey = (label = '') => {
+  return label.split(' ').join('-');
+};
+
 export const setUserRoleStatuses = (user, Storage) => {
   const currentUserRoles = user.roles.map(roles => roles.name);
   user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;

@@ -12,6 +12,7 @@ import {
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
 import {ScrollToTopButton} from '../ScrollButton';
+import {convertLabelToKey} from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -53,7 +54,7 @@ export default function MultiDatasetVoteSlab(props) {
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
   const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage} = props;
-  const {algorithmResult, key} = bucket;
+  const {algorithmResult} = bucket;
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -107,7 +108,7 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
-    div({ style: styles.slabTitle, id: key.split(' ').join('-') }, [
+    div({ style: styles.slabTitle, id: convertLabelToKey(title) }, [
       title,
       h(ScrollToTopButton, {to: '.header-container'})
     ]),

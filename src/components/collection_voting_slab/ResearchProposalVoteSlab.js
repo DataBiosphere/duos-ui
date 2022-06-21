@@ -14,6 +14,8 @@ import {
 import VotesPieChart from '../common/VotesPieChart';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
+import {convertLabelToKey} from "../../libs/utils";
+
 
 const styles = {
   baseStyle: {
@@ -82,12 +84,6 @@ const animationAttributes = {
     expanded: {opacity: 1, height: 'auto', y: 0, overflow: 'hidden'}
   },
   transition:{duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
-};
-
-const SlabTitle = () => {
-  return div({style: styles.slabTitle}, [
-    'Structured Research Purpose'
-  ]);
 };
 
 const DataUseSummary = ({translatedDataUse}) => {
@@ -184,7 +180,9 @@ export default function ResearchProposalVoteSlab(props) {
   }, [bucket, isChair, adminPage]);
 
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
-    h(SlabTitle, {}),
+    div({style: styles.slabTitle, id: convertLabelToKey(bucket.key)}, [
+      'Structured Research Purpose'
+    ]),
     div({isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}}),
     div({isRendered: !isLoading}, [
       div({style: styles.collapsedData}, [
