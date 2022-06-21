@@ -14,8 +14,8 @@ import {
 import VotesPieChart from '../common/VotesPieChart';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
-import {convertLabelToKey} from "../../libs/utils";
-import {ScrollToTopButton} from "../ScrollButton";
+import {convertLabelToKey} from '../../libs/utils';
+import {ScrollToTopButton} from '../ScrollButton';
 
 
 const styles = {
