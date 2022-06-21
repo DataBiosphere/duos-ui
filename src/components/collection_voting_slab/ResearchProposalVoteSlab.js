@@ -15,6 +15,7 @@ import VotesPieChart from '../common/VotesPieChart';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 import {convertLabelToKey} from "../../libs/utils";
+import {ScrollToTopButton} from "../ScrollButton";
 
 
 const styles = {
@@ -29,6 +30,9 @@ const styles = {
     width: 'fit-content',
     padding: '1.2rem',
     borderRadius: '4px 4px 0 0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   dataUseCategoryLabel: {
     fontWeight: 'bold',
@@ -181,7 +185,8 @@ export default function ResearchProposalVoteSlab(props) {
 
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
     div({style: styles.slabTitle, id: convertLabelToKey(bucket.key)}, [
-      'Structured Research Purpose'
+      'Structured Research Purpose',
+      h(ScrollToTopButton, {to: '.header-container'})
     ]),
     div({isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}}),
     div({isRendered: !isLoading}, [
