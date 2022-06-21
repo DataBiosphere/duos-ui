@@ -10,6 +10,7 @@ import {
   extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
+import {ScrollToTopButton} from '../common/DataUseVoteSummary/ScrollButton';
 
 const styles = {
   baseStyle: {
@@ -105,7 +106,10 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
-    div({ style: styles.slabTitle }, [title]),
+    div({ style: styles.slabTitle }, [
+      title,
+      h(ScrollToTopButton, {to: '#back-to-top-anchor'})
+    ]),
     div({ isRendered: !isLoading }, [
       DataUseSummary(),
       VoteInfoSubsection(),
