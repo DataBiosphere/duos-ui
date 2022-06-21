@@ -109,7 +109,7 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
-    div({ style: styles.slabTitle, id: convertLabelToKey(bucket.key) }, [
+    div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
       title,
       h(ScrollToTopButton, {to: '.header-container'})
     ]),
