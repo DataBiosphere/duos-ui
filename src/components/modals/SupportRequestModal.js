@@ -185,6 +185,7 @@ export const SupportRequestModal = hh(
           width: '400px',
           height: this.state.height,
           padding: '0px 450px 700px 0px',
+          zIndex: 10000
         },
 
         content: {
@@ -244,7 +245,7 @@ export const SupportRequestModal = hh(
                 id: 'SupportRequestModal',
                 imgSrc: addHelpIcon,
                 color: 'common',
-                title: 'Contact Us',
+                title: 'Request Help',
               }),
             ]),
             div({
