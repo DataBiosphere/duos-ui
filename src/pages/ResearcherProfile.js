@@ -504,8 +504,8 @@ export default function ResearcherProfile(props) {
                   span({
                     className: 'glyphicon glyphicon-question-sign tooltip-icon',
                     'data-tip': (isSigningOfficial && !isNil(profile.institutionId)) ?
-                      'As a \'Signing Official\', your institution cannot be changed here. Please submit a support request via the \'Contact Us\' form to have it changed.' :
-                      'If your preferred institution cannot be found, please submit a support request via the \'Contact Us\' form to have it added.',
+                      'As a \'Signing Official\', your institution cannot be changed here. Please submit a support request via the \'Request Help\' form to have it changed.' :
+                      'If your preferred institution cannot be found, please submit a support request via the \'Request Help\' form to have it added.',
                     'data-for': 'tip_profileState',
                   })
                 ]),
