@@ -64,7 +64,7 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   const votableChairView = !adminPage && !isVotingDisabled && isFinal;
 
   return div({ datacy: 'vote-subsection-heading' }, [
-    span([heading]),
+    heading,
     votableChairView && span({ style: { marginLeft: 5, fontWeight: 'normal' } }, ['(Vote and Rationale cannot be updated after submitting)'])
   ]);
 };
