@@ -460,18 +460,27 @@ export const getPI = (createUser) => {
 export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets}) => {
   if(!isEmpty(votePayload)) {
     const clonedBuckets = cloneDeep(dataUseBuckets);
+    //Votes will have to be updated on the chairperson and the final vote side of things
+    //will need to make a reference array that concatenates the two arrays
+    //updates to vote references will be reflected in the source (clonedBuckets)
+    //NOTE: write out comments for this code block to clarify what is happening here
+    const isRPBucket = toLower(key) === toLower(rpVoteKey);
     const targetBucket = find((bucket) => toLower(bucket.key) === toLower(key))(clonedBuckets);
-    const votes = toLower(key) === toLower(rpVoteKey) ? targetBucket.votes : flatMap((voteObj) => voteObj.dataAccess.finalVotes);
-    const targetVotes = flow([
-      filter((vote => includes(vote.voteId, voteIds))),
+    const voteObjectCallback = isRPBucket ? map((voteObj) => voteObj.rp) : map((voteObj) => voteObj.dataAccess);
+    const votes = flow([
+      voteObjectCallback,
+      flatMap((voteObj) => concat(voteObj.finalVotes, voteObj.chairpersonVotes))
+    ])(targetBucket.votes);
+    flow([
+      filter((vote) => includes(vote.voteId, voteIds)),
       forEach((currentVote) => {
-        const {rationale, vote} = votePayload;
+        const { rationale, vote } = votePayload;
         currentVote.rationale = rationale;
         currentVote.vote = vote;
-      })
+      }),
     ])(votes);
     setDataUseBuckets(clonedBuckets);
-    return targetVotes;
+    return clonedBuckets;
   }
 };
 
