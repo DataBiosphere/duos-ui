@@ -196,7 +196,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote* (Vote and Rationale cannot be updated after submitting)');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote*(Vote and Rationale cannot be updated after submitting)');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
