@@ -49,18 +49,24 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
 
   let heading;
   if (adminPage) {
+    // read-only admin view; display statement describing the final vote
     heading = isNil(vote) ?
       'The vote has not been finalized' :
       `The final vote is: ${voteResultText}`;
-  } else if (isVotingDisabled) {
-    heading = `Your Vote: ${voteResultText}`;
   } else {
-    heading = isFinal ?
-      'Your Vote* (Vote and Rationale cannot be updated after submitting)' :
+    // if read-only, describe the vote in a statement; otherwise prompt the user to vote
+    heading = isVotingDisabled ?
+      `Your Vote: ${voteResultText}` :
       'Your Vote*';
   }
 
-  return span({datacy: 'vote-subsection-heading'},[heading]);
+  // determines if text is needed to remind the user that their vote will be final once submitting
+  const votableChairView = !adminPage && !isVotingDisabled && isFinal;
+
+  return div({ datacy: 'vote-subsection-heading' }, [
+    span([heading]),
+    votableChairView && span({ style: { marginLeft: 5, fontWeight: 'normal' } }, ['(Vote and Rationale cannot be updated after submitting)'])
+  ]);
 };
 
 export default function CollectionSubmitVoteBox(props) {
