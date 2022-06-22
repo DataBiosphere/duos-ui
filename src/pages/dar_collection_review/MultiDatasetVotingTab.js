@@ -71,7 +71,8 @@ export default function MultiDatasetVotingTab(props) {
         isApprovalDisabled,
         readOnly,
         key: bucket.key,
-        adminPage
+        adminPage,
+        isLoading
       });
     })(dataBuckets);
   };
@@ -91,7 +92,7 @@ export default function MultiDatasetVotingTab(props) {
       type: 'danger',
       title: missingLibraryCardMessage,
       id: 'missing_lc',
-      isRendered: dataAccessApprovalDisabled()
+      isRendered: dataAccessApprovalDisabled() && !readOnly
     }),
     div({style: styles.slabs}, [
       h(ResearchProposalVoteSlab, {
@@ -100,7 +101,7 @@ export default function MultiDatasetVotingTab(props) {
         isChair,
         isLoading,
         readOnly,
-        adminPage
+        adminPage,
       }),
       DatasetVoteSlabs()
     ])

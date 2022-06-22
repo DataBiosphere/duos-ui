@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {mount} from '@cypress/react';
+import { mount } from 'cypress/react';
 import ResearchProposalVoteSlab from '../../../src/components/collection_voting_slab/ResearchProposalVoteSlab';
 import {Votes} from '../../../src/libs/ajax';
 import {Storage} from '../../../src/libs/storage';

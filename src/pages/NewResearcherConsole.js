@@ -7,6 +7,7 @@ import { DarCollectionTableColumnOptions, DarCollectionTable } from '../componen
 import accessIcon from '../images/icon_access.png';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
+import { consoleTypes } from '../components/dar_table/DarTableActions';
 
 const createPropertiesForDraft = (keys, values) =>
   keys.map((propertyKey, index) => ({
@@ -230,7 +231,7 @@ export default function NewResearcherConsole() {
         cancelCollection,
         reviseCollection,
         deleteDraft,
-        consoleType: 'researcher',
+        consoleType: consoleTypes.RESEARCHER,
       })
     ]),
   ]);

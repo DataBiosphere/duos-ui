@@ -1,5 +1,5 @@
 import {filter, find, flow, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
-import {Fragment, useEffect, useState} from 'react';
+import {Fragment, useEffect, useState, useCallback } from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
@@ -13,6 +13,7 @@ import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
+import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -24,7 +25,7 @@ export default function DatasetCatalog(props) {
   // Data states
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
-  const [dacs, setDacs] = useState([]);
+  const [sort, setSort] = useState({ field: 'alias', dir: 1 });
 
   // Selection States
   const [allChecked, setAllChecked] = useState(false);
@@ -50,30 +51,50 @@ export default function DatasetCatalog(props) {
     const init = async() => {
       setCurrentUser(Storage.getCurrentUser());
       await getDatasets();
-      await getDacs();
       ReactTooltip.rebuild();
     };
     init();
+  }, [getDatasets]);
+
+  const applyDatasetSort = useCallback((sortParams, datasets) => {
+    const sortedList = datasets.sort((a, b) => {
+      const aVal = a[sortParams.field] || findPropertyValue(a, sortParams.field);
+      const bVal = b[sortParams.field] || findPropertyValue(b, sortParams.field);
+      return aVal.localeCompare(bVal, 'en', {numeric: true}) * sortParams.dir;
+    });
+    setSort(sortParams);
+    setDatasetList(sortedList);
   }, []);
 
-  const getDatasets = async () => {
+  const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
+    let localDacs = await getDacs();
     datasets = map((row, index) => {
       row.checked = false;
       row.ix = index;
       row.dbGapLink =
         getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
+
+      // Extracting these fields to make sorting easier
+      row['Dataset Id'] = row.alias;
+      row['Data Access Committee'] = findDacName(localDacs, row);
+      row['Disease Studied'] = findPropertyValue(row, 'Phenotype/Indication');
+      row['Principal Investigator (PI)'] = findPropertyValue(row, 'Principal Investigator(PI)');
+      row['# of Participants'] = findPropertyValue(row, '# of participants');
+      row['Data Custodian'] = findPropertyValue(row, 'Data Depositor');
+
       return row;
     })(datasets);
     setDatasetList(datasets);
-  };
+    applyDatasetSort(sort, datasets);
+  }, [applyDatasetSort, sort]);
 
   const getDacs = async () => {
     let dacs = await DAC.list(false);
     dacs = dacs.map(dac => {
       return {id: dac.dacId, name: dac.name};
     });
-    setDacs(dacs);
+    return dacs;
   };
 
   const downloadList = (dataset) => {
@@ -275,15 +296,11 @@ export default function DatasetCatalog(props) {
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
     const defaultValue = isNil(defaultVal) ? '' : defaultVal;
-    return span({}, [
-      getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties))
-    ]);
+    return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties));
   };
 
   const findDacName = (dacs, dataSet) => {
-    return span({}, [
-      getOr('')('name')(find({ id: dataSet.dacId })(dacs))
-    ]);
+    return getOr('')('name')(find({ id: dataSet.dacId })(dacs));
   };
 
   const getLinkDisplay = (dataSet, trIndex) => {
@@ -299,6 +316,25 @@ export default function DatasetCatalog(props) {
     } catch (e) {
       return span({}, ['--']);
     }
+  };
+
+  const getSortDisplay = ({field, label}) => {
+    return div({
+      className: 'cell-sort',
+      style: { transform: 'translateY(1rem)' },
+      onClick: () => {
+        let newSort = sort.field === field
+          ? { field, dir: sort.dir * -1 }
+          : { field, dir: 1 };
+        applyDatasetSort(newSort, datasetList);
+      }
+    }, [
+      label ? label : field,
+      div({className: 'sort-container'}, [
+        h(ArrowDropUp, { className: `sort-icon sort-icon-up ${sort.field === field && sort.dir === -1 ? 'active' : ''}` }),
+        h(ArrowDropDown, { className: `sort-icon sort-icon-down ${sort.field === field && sort.dir === 1? 'active': ''}` })
+      ])
+    ]);
   };
 
   const isEditDatasetEnabled = (dataset) => {
@@ -361,18 +397,18 @@ export default function DatasetCatalog(props) {
                 tr({}, [
                   th(),
                   th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
-                  th({ className: 'cell-size' }, ['Dataset ID']),
-                  th({ className: 'cell-size' }, ['Dataset Name']),
-                  th({ className: 'cell-size' }, ['Data Access Committee']),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'alias', label: 'Dataset Id' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Dataset Name' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Access Committee' })]),
                   th({ className: 'cell-size' }, ['Data Source']),
                   th({ className: 'cell-size' }, ['Structured Data Use Limitations']),
-                  th({ className: 'cell-size' }, ['Data Type']),
-                  th({ className: 'cell-size' }, ['Disease Studied']),
-                  th({ className: 'cell-size' }, ['Principal Investigator (PI)']),
-                  th({ className: 'cell-size' }, ['# of Participants']),
-                  th({ className: 'cell-size' }, ['Description']),
-                  th({ className: 'cell-size' }, ['Species']),
-                  th({ className: 'cell-size' }, ['Data Custodian']),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Type' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Disease Studied' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Principal Investigator (PI)' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: '# of Participants' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Description' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Species' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Custodian' })]),
                   th({ className: 'cell-size' }, ['Consent ID']),
                   th({ className: 'cell-size' }, ['SC-ID']),
                   th({ className: 'cell-size' }, ['Approved Requestors'])
@@ -465,7 +501,9 @@ export default function DatasetCatalog(props) {
                           id: dataset.alias + '_dataset', name: 'alias',
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
-                        }, [dataset.alias]),
+                        }, [
+                          dataset['Dataset Id']
+                        ]),
 
                         td({
                           id: trIndex + '_datasetName', name: 'datasetName',
@@ -485,7 +523,7 @@ export default function DatasetCatalog(props) {
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findDacName(dacs, dataset)
+                          dataset['Data Access Committee']
                         ]),
 
                         td({
@@ -519,14 +557,14 @@ export default function DatasetCatalog(props) {
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataset, 'Phenotype/Indication')
+                          dataset['Disease Studied']
                         ]),
 
                         td({
                           id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataset, 'Principal Investigator(PI)')
+                          dataset['Principal Investigator (PI)']
                         ]),
 
                         td({
@@ -534,7 +572,7 @@ export default function DatasetCatalog(props) {
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataset, '# of participants')
+                          dataset['# of Participants']
                         ]),
 
                         td({
@@ -558,7 +596,7 @@ export default function DatasetCatalog(props) {
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataset, 'Data Depositor')
+                          dataset['Data Custodian']
                         ]),
 
                         td({

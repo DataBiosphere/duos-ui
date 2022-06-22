@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import { React } from 'react';
-import { mount } from '@cypress/react';
+import { mount } from 'cypress/react';
 import MemberActions from '../../../src/components/dar_collection_table/MemberActions';
 import { cloneDeep } from 'lodash/fp';
 import { Storage } from '../../../src/libs/storage';
@@ -16,6 +16,7 @@ const votableDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: { dacUserId: 2 },
@@ -27,6 +28,7 @@ const votableDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           2: { dacUserId: 1 },
@@ -41,6 +43,7 @@ const submittedVoteDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: { dacUserId: 2, },
@@ -52,6 +55,7 @@ const submittedVoteDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           2: { dacUserId: 1, vote: true },
@@ -66,6 +70,7 @@ const closedDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: { dacUserId: 2 },
@@ -77,6 +82,7 @@ const closedDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Closed',
         votes: {
           2: { dacUserId: 1 },
@@ -91,6 +97,7 @@ const noVoteInDars = {
   1: {
     elections: {
       1: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {
           1: { dacUserId: 2 },
@@ -102,12 +109,29 @@ const noVoteInDars = {
   2: {
     elections: {
       3: {
+        electionType: 'DataAccess',
         status: 'Open',
         votes: {},
         datasetId: 2,
       },
     },
   },
+};
+
+const darsWithRpElection = {
+  1: {
+    elections: {
+      1: {
+        electionType: 'RP',
+        status: 'Open',
+        votes: {
+          1: {dacUserId: 1}
+        },
+        dataSetId: 1
+      }
+    },
+    data: {}
+  }
 };
 
 const user = {
@@ -177,5 +201,12 @@ describe('Member Actions - Vote Button', () => {
     const voteButton = cy.get(`#member-vote-${collectionId}`);
     voteButton.should('exist');
     voteButton.contains('UPDATE VOTE');
+  });
+
+  it('should not consider RP elections when determining if vote buttons renders', () => {
+    propCopy.collection.dars = darsWithRpElection;
+    mount(<MemberActions {...propCopy} />);
+    const voteButton = cy.get(`#member-vote-${collectionId}`);
+    voteButton.should('not.exist');
   });
 });

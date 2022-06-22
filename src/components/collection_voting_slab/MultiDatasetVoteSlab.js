@@ -80,7 +80,7 @@ export default function MultiDatasetVoteSlab(props) {
       h(Alert, {
         title: 'Voting is disabled since this election is not open.',
         type: 'danger',
-        isRendered: !adminPage && !allOpenElections
+        isRendered: !adminPage && !allOpenElections && !readOnly
       }),
       h(CollectionSubmitVoteBox, {
         question: 'Should data access be granted to this applicant?',
@@ -105,10 +105,17 @@ export default function MultiDatasetVoteSlab(props) {
     });
   };
 
-  return div({style: styles.baseStyle, datacy: 'dataset-vote-slab'}, [
-    div({style: styles.slabTitle}, [title]),
-    DataUseSummary(),
-    VoteInfoSubsection(),
-    DatasetsRequested()
+  return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
+    div({ style: styles.slabTitle }, [title]),
+    div({ isRendered: !isLoading }, [
+      DataUseSummary(),
+      VoteInfoSubsection(),
+      DatasetsRequested(),
+    ]),
+    div({
+      isRendered: isLoading,
+      className: 'text-placeholder',
+      style: { height: '100px' },
+    })
   ]);
 }

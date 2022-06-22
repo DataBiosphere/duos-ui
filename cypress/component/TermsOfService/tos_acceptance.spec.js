@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
 import React from 'react';
-import {mount} from '@cypress/react';
+import { mount } from 'cypress/react';
 import TermsOfServiceAcceptance from '../../../src/pages/TermsOfServiceAcceptance';
 import {ToS} from '../../../src/libs/ajax';
 import {Storage} from '../../../src/libs/storage';
