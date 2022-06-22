@@ -11,10 +11,9 @@ export default function CollectionAlgorithmDecision(props) {
     style: Object.assign(
       {
         padding: '4%',
-        flex: 1,
-        display: 'flex',
         justifyContent: 'space-around',
-        fontFamily: 'Montserrat'
+        fontFamily: 'Montserrat',
+        width: '50%'
       },
       styleOverride
     )

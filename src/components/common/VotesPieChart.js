@@ -34,7 +34,7 @@ export default function VotesPieChart(props) {
     pieHole = 0.3,
     height = 'inherit',
     width = '100%',
-    style = { padding: '20px 0', display: 'flex', flex: 1, }
+    style = { padding: '20px 0', width: '50%' }
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);
