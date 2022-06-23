@@ -237,6 +237,11 @@ export const removeTextHover = (e, color) => {
   e.target.style.color = color;
 };
 
+//helper function to generate keys for rendered elements; splits on commas and whitespace
+export const convertLabelToKey = (label = '') => {
+  return label.split(/[\s,]+/) .join('-');
+};
+
 export const setUserRoleStatuses = (user, Storage) => {
   const currentUserRoles = user.roles.map(roles => roles.name);
   user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;

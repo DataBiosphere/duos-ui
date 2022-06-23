@@ -6,7 +6,7 @@ import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
@@ -20,7 +20,6 @@ import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataU
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
-import { toLower } from 'lodash';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -82,7 +81,7 @@ export default function DarCollectionReview(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
-    applicationInformation: 'Application Information',
+    applicationInformation: 'Application Information'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
@@ -138,7 +137,7 @@ export default function DarCollectionReview(props) {
     if (adminPage) {
       return {
         applicationInformation: 'Application Information',
-        chairVote: 'Chair Vote',
+        chairVote: 'Chair Vote'
       };
     }
     const dataAccessBucketsForUser = filter(
@@ -186,7 +185,7 @@ export default function DarCollectionReview(props) {
     div(
       {
         className: 'review-page-header',
-        style: { width: '90%', margin: '0 auto 3% auto' },
+        style: { width: '90%', margin: '0 auto 3% auto' }
       },
       [
         h(ReviewHeader, {
@@ -200,7 +199,7 @@ export default function DarCollectionReview(props) {
           isLoading,
           readOnly: readOnly || adminPage
         }),
-        h(DataUseVoteSummary, { dataUseBuckets, isLoading, currentUser, adminPage }),
+        h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
       ]
     ),
     div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
