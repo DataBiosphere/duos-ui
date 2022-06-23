@@ -5,7 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "11.9.3",
-    "@mui/material": "5.8.4",
+    "@mui/material": "5.8.5",
     "@mui/styled-engine": "5.8.0",
     "@material-ui/core": "4.12.4",
     "@material-ui/icons": "4.11.3",
@@ -63,7 +63,7 @@
     "eslint": "7.32.0",
     "eslint-plugin-flowtype": "7.0.0",
     "eslint-plugin-react": "7.30.0",
-    "google-auth-library": "8.0.2",
+    "google-auth-library": "8.0.3",
     "html-webpack-plugin": "4.5.2",
     "react-error-overlay": "6.0.9",
     "react-scripts": "4.0.3",
