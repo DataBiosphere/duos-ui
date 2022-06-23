@@ -34,7 +34,8 @@ export default function VotesPieChart(props) {
     pieHole = 0.3,
     height = 'inherit',
     width = '100%',
-    style = { padding: '20px 0', display: 'flex', flex: 1, }
+    style = { padding: '20px 0', width: '50%' },
+    styleOverride,
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);
@@ -53,7 +54,7 @@ export default function VotesPieChart(props) {
   if(isEmpty(votes)) {
     return div({style, className: `${keyString}-pie-chart-no-data`}, [`No data for ${keyString}`]);
   }
-  return div({style}, [
+  return div({ style: { ...style, ...styleOverride }}, [
     h(Chart, {
       chartType: 'PieChart',
       data: processedVotes,
