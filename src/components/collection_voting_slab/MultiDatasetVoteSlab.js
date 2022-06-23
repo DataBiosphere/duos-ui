@@ -95,7 +95,6 @@ export default function MultiDatasetVoteSlab(props) {
         isLoading,
         adminPage,
         bucketKey: key,
-        //NOTE: pass in function to update final vote here
         updateFinalVote
       }),
       ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})

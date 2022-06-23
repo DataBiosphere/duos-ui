@@ -108,6 +108,7 @@ export default function CollectionSubmitVoteBox(props) {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
       setSubmitted(true);
+      //call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
       isChair ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
