@@ -20,8 +20,7 @@ const styles = {
   },
   content: {
     display: 'flex',
-    justifyContent: 'flex-start',
-    columnGap: '5rem',
+    justifyContent: 'space-between',
     padding: '0 15px'
   },
   subsection: {
@@ -41,6 +40,35 @@ const styles = {
   }
 };
 
+const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) => {
+  const voteResultText = isNil(vote) ?
+    'NOT SELECTED' :
+    vote ?
+      'YES' :
+      'NO';
+
+  let heading;
+  if (adminPage) {
+    // read-only admin view; display statement describing the final vote
+    heading = isNil(vote) ?
+      'The vote has not been finalized' :
+      `The final vote is: ${voteResultText}`;
+  } else {
+    // if read-only, describe the vote in a statement; otherwise prompt the user to vote
+    heading = isVotingDisabled ?
+      `Your Vote: ${voteResultText}` :
+      'Your Vote*';
+  }
+
+  // determines if text is needed to remind the user that their vote will be final once submitting
+  const votableChairView = !adminPage && !isVotingDisabled && isFinal;
+
+  return div({ datacy: 'vote-subsection-heading' }, [
+    heading,
+    votableChairView && span({ style: { marginLeft: 5, fontWeight: 'normal' } }, ['(Vote and Rationale cannot be updated after submitting)'])
+  ]);
+};
+
 export default function CollectionSubmitVoteBox(props) {
   const [vote, setVote] = useState();
   const [rationale, setRationale] = useState('');
@@ -49,8 +77,8 @@ export default function CollectionSubmitVoteBox(props) {
   const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote} = props;
 
   useEffect(() => {
-    setIsVotingDisabled(props.isDisabled || (isFinal && submitted) || isLoading);
-  }, [props.isDisabled, isFinal, submitted, isLoading]);
+    setIsVotingDisabled( props.isDisabled || (isFinal && submitted) || adminPage);
+  }, [props.isDisabled, isFinal, submitted, adminPage]);
 
   useEffect(() => {
     if (!isEmpty(votes)) {
@@ -97,29 +125,24 @@ export default function CollectionSubmitVoteBox(props) {
     }
   };
 
-  const VoteSubsectionHeading = () => {
-    const heading = (isFinal || adminPage) ?
-      `${!adminPage ? 'Your Vote* (Vote and Rationale cannot be updated after submitting)' : 'Vote*'}` :
-      'Your Vote*';
-    return span({className: 'vote-subsection-heading'},[heading]);
-  };
-
   return (
     div({style: Object.assign({paddingBottom: '2%'}, styles.baseStyle), datacy: 'collection-vote-box'}, [
       div({style: styles.question}, [question]),
       div({style: styles.content}, [
         div({style: styles.subsection}, [
-          h(VoteSubsectionHeading),
+          h(VoteSubsectionHeading, { vote, adminPage, isFinal, isVotingDisabled }),
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
               onClick: () => updateVote(true, !isNil(updateFinalVote)),
-              disabled: isVotingDisabled || isApprovalDisabled,
-              isSelected: vote === true
+              disabled: isVotingDisabled || isApprovalDisabled || isLoading,
+              isSelected: vote === true,
+              isRendered: !isVotingDisabled
             }),
             h(CollectionVoteNoButton, {
               onClick: () => updateVote(false, !isNil(updateFinalVote)),
-              disabled: isVotingDisabled,
+              disabled: isLoading || isVotingDisabled,
               isSelected: vote === false,
+              isRendered: !isVotingDisabled
             })
           ])
         ]),
@@ -133,7 +156,7 @@ export default function CollectionSubmitVoteBox(props) {
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
             rows: 4,
-            disabled: isVotingDisabled
+            disabled: isVotingDisabled || isLoading
           }),
         ])
       ]),

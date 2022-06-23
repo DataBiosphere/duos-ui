@@ -563,9 +563,9 @@ describe('collapseVotesByUser', () => {
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, lastUpdated: null});
   });
 
   it('does not collapse votes by the same user with different vote values', () => {
@@ -577,9 +577,9 @@ describe('collapseVotesByUser', () => {
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, createDate: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, createDate: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, lastUpdated: null});
   });
 
   it('collapses votes by the same user without appending identical dates / rationales', () => {
@@ -596,7 +596,7 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       vote: true,
       rationale: 'rationale\n',
-      createDate: `${formatDate('20000')}\n`
+      lastUpdated: `${formatDate('20000')}\n`
     });
   });
 
@@ -605,7 +605,6 @@ describe('collapseVotesByUser', () => {
       {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
       {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000', voteId: 2},
     ];
-
     const collapsedVotes = collapseVotesByUser(votes);
     const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`;
 
@@ -616,7 +615,7 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       vote: true,
       rationale: 'rationale\n',
-      createDate: formattedDate
+      lastUpdated: formattedDate
     });
   });
 
@@ -634,7 +633,7 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       vote: true,
       rationale: 'rationale1\nrationale2\n',
-      createDate: `${formatDate('20000')}\n`
+      lastUpdated: `${formatDate('20000')}\n`
     });
   });
 
@@ -652,7 +651,7 @@ describe('collapseVotesByUser', () => {
       vote: true,
       displayName: 'John',
       rationale: 'rationale\n',
-      createDate: `${formatDate('20000')}\n`
+      lastUpdated: `${formatDate('20000')}\n`
     });
   });
 });

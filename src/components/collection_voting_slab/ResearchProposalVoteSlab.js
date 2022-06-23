@@ -183,7 +183,6 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-
   return div({datacy: 'srp-slab', style: styles.baseStyle}, [
     h(SlabTitle, {}),
     div({style: styles.collapsedData}, [
@@ -215,7 +214,7 @@ export default function ResearchProposalVoteSlab(props) {
               }),
               h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
             ]),
-          ]),
+          ])
         ])
       )
     ])

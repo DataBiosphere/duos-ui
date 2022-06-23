@@ -12,8 +12,7 @@ const darInfo = {
 };
 
 const bucket1 = {
-  key: 'RP Vote',
-  isRP: true,
+  key: 'bucket1',
   elections: [
     [
       {dataSetId: 300, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -125,7 +124,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
-        buckets={[bucket1]}
+        buckets={[bucket1, bucket2]}
         collection={collection}
         isChair={false}
       />
@@ -141,7 +140,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
-        buckets={[bucket2]}
+        buckets={[bucket1, bucket2]}
         collection={collection}
         isChair={false}
       />

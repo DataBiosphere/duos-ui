@@ -293,7 +293,7 @@ class DuosHeader extends Component {
 
     const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
-    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
+    const contactUsText = isLogged ? 'Request Help': span({ style: navbarDuosText }, ['Request Help']);
     const contactUsButton = button({
       id: 'btn_applyAcces',
       style: {
@@ -704,7 +704,7 @@ class DuosHeader extends Component {
                       style: Styles.NAVBAR.DRAWER_LINK,
                       onClick: this.supportRequestModal,
                     },
-                    ['Contact Us']
+                    ['Request Help']
                   ),
                   //passing in signOut as goToLink argument to execute logout flow
                   h(BasicListItem, {

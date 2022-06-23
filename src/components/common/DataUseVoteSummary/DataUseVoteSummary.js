@@ -42,7 +42,7 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
   //convert is once again used here to provide unique key identifier for the row
   //necessary for React when rendering elements provided by an array
   const rowTemplate = map.convert({cap:false})((row, index) =>
-    div({ style: { display: 'flex', justifyContent: 'flex-start'}, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
+    div({ style: { display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap' }, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
   );
 
   const elementTemplate = (row = []) => {

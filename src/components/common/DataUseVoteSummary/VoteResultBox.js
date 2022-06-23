@@ -8,7 +8,7 @@ const labelContainerStyle = {
   textAlign: 'center',
   alignItems: 'center',
   justifyContent: 'space-between',
-  width: '10%'
+  maxWidth: 170
 };
 
 const labelFontStyle = {
