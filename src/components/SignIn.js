@@ -1,7 +1,7 @@
 import {isEmpty, isNil} from 'lodash/fp';
 import {useEffect, useState, useCallback} from 'react';
 import GoogleLogin from 'react-google-login';
-import {button, div, h, img, span} from 'react-hyperscript-helpers';
+import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
@@ -9,6 +9,7 @@ import {Storage} from '../libs/storage';
 import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
+import ReactTooltip from 'react-tooltip';
 
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');
@@ -23,6 +24,7 @@ export default function SignIn(props) {
       if (isSubscribed) {
         setClientId(`${await Config.getGoogleClientId()}`);
       }
+      ReactTooltip.rebuild();
     };
     init();
     return () => (isSubscribed = false);
@@ -117,15 +119,39 @@ export default function SignIn(props) {
     };
     return disabled ?
       Spinner :
-      h(GoogleLogin,
-        isNil(customStyle) ? defaultProps : {
-          render: (props) => button({
-            className: 'btn-primary',
-            onClick: props.onClick,
-            style: customStyle
-          }, 'Submit a Data Access Request'),
-          ...defaultProps
-        });
+      div({
+        style: {
+          display: 'flex'
+        }
+      }, [
+        h(GoogleLogin,
+          isNil(customStyle) ? defaultProps : {
+            render: (props) => button({
+              className: 'btn-primary',
+              onClick: props.onClick,
+              style: customStyle
+            }, 'Submit a Data Access Request'),
+            ...defaultProps
+          }),
+        a({
+          className: 'navbar-duos-icon-help',
+          style: {
+            color: 'white',
+            height: 16, width: 16,
+            marginLeft: 5
+          },
+          href: 'https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email',
+          'data-for': 'tip_google-help',
+          'data-tip': 'No Google account? Click here!'
+        }),
+        h(ReactTooltip, {
+          id: 'tip_google-help',
+          place: 'top',
+          effect: 'solid',
+          multiline: true,
+          className: 'tooltip-wrapper'
+        })
+      ]);
   };
 
   return (
