@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {a, div, h, span} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
-import {isEmpty, isNil, flatMap, map, keys} from 'lodash/fp';
+import {isEmpty, isNil, flatMap, map, keys, get} from 'lodash/fp';
 import DataUsePill from './DataUsePill';
 import DataUseAlertBox from './DataUseAlertBox';
 import {AnimatePresence, motion} from 'framer-motion';
@@ -14,6 +14,9 @@ import {
 import VotesPieChart from '../common/VotesPieChart';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
+import {convertLabelToKey} from '../../libs/utils';
+import {ScrollToTopButton} from '../ScrollButton';
+
 
 const styles = {
   baseStyle: {
@@ -27,6 +30,10 @@ const styles = {
     width: 'fit-content',
     padding: '1.2rem',
     borderRadius: '4px 4px 0 0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: '2rem'
   },
   dataUseCategoryLabel: {
     fontWeight: 'bold',
@@ -82,12 +89,6 @@ const animationAttributes = {
     expanded: {opacity: 1, height: 'auto', y: 0, overflow: 'hidden'}
   },
   transition:{duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
-};
-
-const SlabTitle = () => {
-  return div({style: styles.slabTitle}, [
-    'Structured Research Purpose'
-  ]);
 };
 
 const DataUseSummary = ({translatedDataUse}) => {
@@ -183,11 +184,14 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-  return div({datacy: 'srp-slab', style: styles.baseStyle}, [
-    h(SlabTitle, {}),
-    div({isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}}),
-    div({isRendered: !isLoading}, [
-      div({style: styles.collapsedData}, [
+  return div({ datacy: 'srp-slab', style: styles.baseStyle }, [
+    div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
+      'Structured Research Purpose',
+      h(ScrollToTopButton, {to: '.header-container'})
+    ]),
+    div({ isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}} ),
+    div({ isRendered: !isLoading }, [
+      div({ style: styles.collapsedData }, [
         isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
         h(CollapseExpandLink, {
           expanded,
@@ -195,12 +199,12 @@ export default function ResearchProposalVoteSlab(props) {
           isRendered: !isLoading
         })
       ]),
-      h(AnimatePresence, {initial:false}, [
+      h(AnimatePresence, { initial: false }, [
         expanded && (
           h(motion.section, animationAttributes, [
-            div({datacy: 'srp-expanded', style: styles.expandedData}, [
-              div({datacy: 'research-purpose'}, [
-                span({style: styles.researchPurposeTitle}, ['Research Purpose']),
+            div({ datacy: 'srp-expanded', style: styles.expandedData }, [
+              div({ datacy: 'research-purpose' }, [
+                span({ style: styles.researchPurposeTitle }, ['Research Purpose']),
                 h(ResearchPurposeSummary, {darInfo}),
                 h(DataUseAlertBox, {translatedDataUse}),
                 h(CollectionSubmitVoteBox, {

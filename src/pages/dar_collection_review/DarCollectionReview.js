@@ -6,7 +6,7 @@ import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get} from 'lodash/fp';
+import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
 import {
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
@@ -19,7 +19,6 @@ import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataU
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
-import { toLower } from 'lodash';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -81,7 +80,7 @@ export default function DarCollectionReview(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
-    applicationInformation: 'Application Information',
+    applicationInformation: 'Application Information'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [currentUser, setCurrentUser] = useState({});
@@ -127,11 +126,12 @@ export default function DarCollectionReview(props) {
     }
   }, [adminPage, props.history, tabsForUser, collectionId]);
 
+
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if (adminPage) {
       return {
         applicationInformation: 'Application Information',
-        chairVote: 'Chair Vote',
+        chairVote: 'Chair Vote'
       };
     }
     const dataAccessBucketsForUser = filter(
@@ -179,7 +179,7 @@ export default function DarCollectionReview(props) {
     div(
       {
         className: 'review-page-header',
-        style: { width: '90%', margin: '0 auto 3% auto' },
+        style: { width: '90%', margin: '0 auto 3% auto' }
       },
       [
         h(ReviewHeader, {
@@ -193,13 +193,13 @@ export default function DarCollectionReview(props) {
           isLoading,
           readOnly: readOnly || adminPage
         }),
-        h(DataUseVoteSummary, { dataUseBuckets, isLoading, currentUser, adminPage }),
+        h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
       ]
     ),
     div(
       {
         className: 'review-page-body',
-        style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },
+        style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }
       },
       [
         h(TabControl, {
@@ -212,21 +212,16 @@ export default function DarCollectionReview(props) {
         }),
         h(ApplicationInformation, {
           isRendered: selectedTab === tabs.applicationInformation,
-          pi: researcherProperties.isThePI
-            ? researcherProperties.profileName
-            : researcherProperties.piName,
-          institution: researcherProperties.institution,
-          researcher: researcherProperties.profileName,
+          pi: getPI(collection.createUser),
+          institution: get('institution.name')(researcherProfile),
+          researcher: researcherProfile.displayName,
           email: researcherProperties.academicEmail,
-          piEmail: researcherProperties.isThePI
-            ? researcherProperties.academicEmail
-            : researcherProperties.piEmail,
+          piEmail: evaluateTrueString(researcherProperties.isThePI) ? researcherProperties.academicEmail : researcherProperties.piEmail,
           city: `${researcherProperties.city}${
             !researcherProperties.state ? '' : ', ' + researcherProperties.state
           }`,
           country: researcherProperties.country,
           nonTechSummary: darInfo.nonTechRus,
-          department: researcherProperties.department,
           isLoading: subcomponentLoading,
           collection: collection,
           dataUseBuckets: dataUseBuckets,
@@ -241,7 +236,7 @@ export default function DarCollectionReview(props) {
           localComputing: darInfo.localUse,
           cloudComputing: darInfo.cloudUse,
           cloudProvider: darInfo.cloudProvider,
-          cloudProviderDescription: darInfo.cloudProviderDescription,
+          cloudProviderDescription: darInfo.cloudProviderDescription
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,

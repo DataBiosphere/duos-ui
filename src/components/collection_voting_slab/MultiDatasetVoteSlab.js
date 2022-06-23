@@ -7,9 +7,12 @@ import DatasetsRequestedPanel from './DatasetsRequestedPanel';
 import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
 import {
   extractDacDataAccessVotesFromBucket,
-  extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  extractUserDataAccessVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
+import {ScrollToTopButton} from '../ScrollButton';
+import {convertLabelToKey} from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -27,7 +30,8 @@ const styles = {
     borderRadius: '4px 4px 0 0',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    columnGap: '2rem'
   },
   dataUses: {
     color: '#333F52',
@@ -106,7 +110,10 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
-    div({ style: styles.slabTitle }, [title]),
+    div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
+      title,
+      h(ScrollToTopButton, {to: '.header-container'})
+    ]),
     div({ isRendered: !isLoading }, [
       DataUseSummary(),
       VoteInfoSubsection(),
