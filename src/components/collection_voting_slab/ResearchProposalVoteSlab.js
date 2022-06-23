@@ -152,7 +152,8 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
         [
           h(VotesPieChart, {
             votes: dacVotes,
-            title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)"
+            title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)",
+            styleOverride: { width: isEmpty(algorithmResult) ? '100%' : '50%' }
           }),
           h(CollectionAlgorithmDecision, {
             algorithmResult,
