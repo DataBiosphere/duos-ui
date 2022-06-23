@@ -545,18 +545,8 @@ class DuosHeader extends Component {
           { label: 'DAC Members', link: '/manage_dac' }
         ]
       },
-      isChairPerson && {
-        label: 'DAC Chair Console',
-        link: this.state.dacChairPath,
-        search: 'chair_console',
-        children: [
-          { label: 'Manage DARs', link: this.state.dacChairPath },
-          { label: 'Datasets', link: '/dataset_catalog' },
-          { label: 'DAC Members', link: '/manage_dac' }
-        ]
-      },
       isMember && {
-        label: 'DAC Console',
+        label: 'DAC Member Console',
         link: this.state.dacMemberPath,
         search: 'member_console',
         children: [
