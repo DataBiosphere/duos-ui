@@ -9,6 +9,7 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
   useEffect(() => {
     ReactTooltip.rebuild();
   });
+
   const rowElementMaxCount = 11;
   //chunking elements subdivides the entire bucket list to rows of max rowElementMaxCount size
   //Needed to provide predictable design, can't have a flexbox row of n elements with infinitesimal width

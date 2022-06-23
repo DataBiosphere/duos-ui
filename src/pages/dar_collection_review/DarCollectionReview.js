@@ -88,6 +88,8 @@ export default function DarCollectionReview(props) {
   const [researcherProperties, setResearcherProperties] = useState({});
   const {adminPage = false, readOnly = false} = props;
 
+  //Remember, votes are contained within buckets, so updating final votes will update the bucket
+  //define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
     return updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
   }, [dataUseBuckets]);
@@ -236,7 +238,6 @@ export default function DarCollectionReview(props) {
         isLoading,
         adminPage,
         readOnly,
-        //NOTE:new function, see if it works
         updateFinalVote: updateFinalVoteFn
       })
     ])

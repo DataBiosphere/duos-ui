@@ -72,7 +72,6 @@ export default function MultiDatasetVotingTab(props) {
         readOnly,
         key: bucket.key,
         adminPage,
-        //NOTE: new function, see if it works
         updateFinalVote
       });
     })(dataBuckets);
@@ -97,11 +96,10 @@ export default function MultiDatasetVotingTab(props) {
     }),
     div({style: styles.slabs}, [
       h(ResearchProposalVoteSlab, {
-        //NOTE: new function, see if it works
         updateFinalVote,
         darInfo,
         bucket: rpBucket,
-        key: rpBucket.key,
+        key: 'rp-vote',
         isChair,
         isLoading,
         readOnly,

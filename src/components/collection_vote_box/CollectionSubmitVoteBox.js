@@ -75,12 +75,12 @@ export default function CollectionSubmitVoteBox(props) {
     })(values);
   };
 
-  const updateVote = async (newVote, isFinal) => {
+  const updateVote = async (newVote, isChair) => {
     try {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
-      isFinal ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
       setSubmitted(true);
+      isChair ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote'});
@@ -112,12 +112,12 @@ export default function CollectionSubmitVoteBox(props) {
           h(VoteSubsectionHeading),
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
-              onClick: () => updateVote(true, isFinal),
+              onClick: () => updateVote(true, !isNil(updateFinalVote)),
               disabled: isVotingDisabled || isApprovalDisabled,
               isSelected: vote === true
             }),
             h(CollectionVoteNoButton, {
-              onClick: () => updateVote(false),
+              onClick: () => updateVote(false, !isNil(updateFinalVote)),
               disabled: isVotingDisabled,
               isSelected: vote === false,
             })

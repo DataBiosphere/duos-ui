@@ -176,7 +176,6 @@ export default function ResearchProposalVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
-  const bucketKey = bucket.key;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -210,9 +209,9 @@ export default function ResearchProposalVoteSlab(props) {
                 isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
                 isLoading,
                 adminPage,
-                bucketKey,
+                bucketKey: bucket.key,
                 updateFinalVote,
-                key: bucketKey
+                key: bucket.key
               }),
               h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
             ]),

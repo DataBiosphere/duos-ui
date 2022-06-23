@@ -456,21 +456,25 @@ export const getPI = (createUser) => {
 
 //helper function used in DarCollectionReview to update final vote on source of truth
 //done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
-//NOTE: write tests for this new helper function
 export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets}) => {
   if(!isEmpty(votePayload)) {
+    //clone entire bucket to trigger page re-render on bucket update (setDataUseBuckets)
     const clonedBuckets = cloneDeep(dataUseBuckets);
-    //Votes will have to be updated on the chairperson and the final vote side of things
-    //will need to make a reference array that concatenates the two arrays
-    //updates to vote references will be reflected in the source (clonedBuckets)
-    //NOTE: write out comments for this code block to clarify what is happening here
     const isRPBucket = toLower(key) === toLower(rpVoteKey);
     const targetBucket = find((bucket) => toLower(bucket.key) === toLower(key))(clonedBuckets);
+    //source of votes will differ depending on the bucket (rp vs non-rp), so determine the callback function for flow here
     const voteObjectCallback = isRPBucket ? map((voteObj) => voteObj.rp) : map((voteObj) => voteObj.dataAccess);
+    //to keep local source of truth updated without a fetch, we will need to update both the final and the chairperson votes
+    //to make searching on the votes easier, concatenate and then flatten the finalVotes and chairpersonVotes into one array
+    //NOTE: For the RP bucket the chairperson votes and the final votes are the same (RP has no final vote)
+    //This was a conscious choice in order to keep processing the same between RP and non-RP buckets
     const votes = flow([
       voteObjectCallback,
       flatMap((voteObj) => concat(voteObj.finalVotes, voteObj.chairpersonVotes))
     ])(targetBucket.votes);
+
+    //perform in place update of vote and vote rationale based on voteIds arguments
+    //updates to the vote here will be reflected in clonedBuckets since the vote references are the same
     flow([
       filter((vote) => includes(vote.voteId, voteIds)),
       forEach((currentVote) => {
@@ -479,6 +483,7 @@ export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setD
         currentVote.vote = vote;
       }),
     ])(votes);
+    //set new bucket to trigger re-render, return clonedBuckets for debugging/testing efforts
     setDataUseBuckets(clonedBuckets);
     return clonedBuckets;
   }
