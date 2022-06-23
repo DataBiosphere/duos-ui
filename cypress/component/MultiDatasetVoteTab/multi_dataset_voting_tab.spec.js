@@ -124,7 +124,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
-        buckets={[bucket1, bucket2]}
+        buckets={[bucket1]}
         collection={collection}
         isChair={false}
       />
@@ -140,7 +140,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
-        buckets={[bucket1, bucket2]}
+        buckets={[bucket1]}
         collection={collection}
         isChair={false}
       />
