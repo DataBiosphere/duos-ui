@@ -17,7 +17,6 @@ import {
   findIndex,
   cloneDeep,
   groupBy,
-  isEqual,
   flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';

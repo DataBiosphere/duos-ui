@@ -328,7 +328,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('textarea').should('not.be.disabled');
   });
 
-  it('Renders unselected disabled vote buttons if no votes for current user in bucket', function() {
+  it('Renders NOT SELECTED vote result text if no votes for current user in bucket', function() {
     mount(
       <ResearchProposalVoteSlab
         bucket={{
@@ -343,15 +343,13 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
-  it('Renders a disabled vote button readOnly is true', function() {
+  it('Replaces vote buttons with vote result text when readOnly is true', function() {
     mount(
       <ResearchProposalVoteSlab
         bucket={{
@@ -367,11 +365,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
-    cy.get('[datacy=yes-collection-vote-button]').click();
-    cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
-    cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 
@@ -548,8 +544,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       adminPage={true}
     />);
     cy.get('#expand-rp-vote-button').click();
-    cy.get('[datacy=no-collection-vote-button').should('have.css', 'background-color', votingColors.no);
-    cy.get('[datacy=yes-collection-vote-button').should('have.css', 'background-color', votingColors.default);
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'The final vote is: NO');
+    cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
+    cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
   });
 });

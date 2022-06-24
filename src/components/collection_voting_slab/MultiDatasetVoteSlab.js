@@ -7,9 +7,12 @@ import DatasetsRequestedPanel from './DatasetsRequestedPanel';
 import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
 import {
   extractDacDataAccessVotesFromBucket,
-  extractDatasetIdsFromBucket, extractUserDataAccessVotesFromBucket,
+  extractDatasetIdsFromBucket,
+  extractUserDataAccessVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
+import {ScrollToTopButton} from '../ScrollButton';
+import {convertLabelToKey} from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -27,7 +30,8 @@ const styles = {
     borderRadius: '4px 4px 0 0',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    columnGap: '2rem'
   },
   dataUses: {
     color: '#333F52',
@@ -68,16 +72,17 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   const VoteInfoSubsection = () => {
+    const electionIds = map(vote => vote.electionId)(currentUserVotes);
     const allOpenElections = flow(
       get('elections'),
       flatMap(election => flatMap(electionData => electionData)(election)),
-      filter(electionData => includes(electionData.electionId)(map(vote => vote.electionId)(currentUserVotes))),
+      filter(electionData => includes(electionData.electionId)(electionIds)),
       every(electionData => toLower(electionData.status) === 'open')
     )(bucket);
 
     return div({style: styles.voteInfo}, [
       h(Alert, {
-        title: 'Voting is disabled since not all elections are open.',
+        title: 'Voting is disabled since this election is not open.',
         type: 'danger',
         isRendered: !adminPage && !allOpenElections && !readOnly
       }),
@@ -105,7 +110,10 @@ export default function MultiDatasetVoteSlab(props) {
   };
 
   return div({ style: styles.baseStyle, datacy: 'dataset-vote-slab' }, [
-    div({ style: styles.slabTitle }, [title]),
+    div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
+      title,
+      h(ScrollToTopButton, {to: '.header-container'})
+    ]),
     div({ isRendered: !isLoading }, [
       DataUseSummary(),
       VoteInfoSubsection(),
