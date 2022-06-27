@@ -648,7 +648,7 @@ class DataAccessRequestApplication extends Component {
           showDialogSubmit: false
         });
         NotyUtil.showError({
-          text: 'Error: DAR submission failed'
+          text: 'Error: Data Access Request submission failed'
         });
       }
     } else {
@@ -726,7 +726,7 @@ class DataAccessRequestApplication extends Component {
         prev.disableOkBtn = false;
         return prev;
       });
-      NotyUtil.showError('Error saving partial DAR update');
+      NotyUtil.showError('Error saving partial Data Access Request update');
     }
   };
 

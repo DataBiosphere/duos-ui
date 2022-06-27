@@ -244,8 +244,8 @@ export default function DarDraftTable(props) {
     h(ConfirmationModal, {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
-      title: 'Delete Draft DAR',
-      message: `Are you sure you want to delete DAR draft ${getIdentifier({id: selectedDraft.id, data: selectedDraft.data})}`,
+      title: 'Delete Draft Data Access Request',
+      message: `Are you sure you want to delete Data Access Request draft ${getIdentifier({id: selectedDraft.id, data: selectedDraft.data})}`,
       header: getModalHeader(),
       onConfirm: deleteOnClick
     })

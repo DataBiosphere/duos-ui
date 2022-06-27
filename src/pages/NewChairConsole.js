@@ -66,7 +66,7 @@ export default function NewChairConsole(props) {
               fontWeight: 600,
               fontSize: '2.8rem'
             } }, [
-              'Manage Data Access Request Collections',
+              `My DAC's Data Access Requests`,
             ]),
             div(
               {

@@ -183,8 +183,8 @@ class AdminConsole extends Component {
                   id: 'btn_manageDarCollections',
                   url: '/admin_manage_dar_collections',
                   color: 'access',
-                  title: 'Manage DAR Collection',
-                  description: 'Select and access DAR Collections for review',
+                  title: 'Manage Data Access Request',
+                  description: 'Select and access Data Access Request Collections for review',
                   iconName: 'manage-access',
                   iconSize: 'large',
                 })
