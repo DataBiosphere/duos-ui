@@ -7,6 +7,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: install dependencies
-        run: npm ci
+        run: npm install
       - name: npm audit
         run: npm audit --production
