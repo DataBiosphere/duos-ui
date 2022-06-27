@@ -95,7 +95,7 @@ const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
     const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div([
+    return div({ key: `data-use-summary-${key}` }, [
       label,
       dataUsePills(dataUses)
     ]);
