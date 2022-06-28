@@ -74,7 +74,7 @@ export default function CollectionSubmitVoteBox(props) {
   const [rationale, setRationale] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isVotingDisabled, setIsVotingDisabled] = useState(false);
-  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage} = props;
+  const {question, votes, isFinal, isApprovalDisabled, isLoading, adminPage, bucketKey, updateFinalVote} = props;
 
   useEffect(() => {
     setIsVotingDisabled( props.isDisabled || (isFinal && submitted) || adminPage);
@@ -103,12 +103,13 @@ export default function CollectionSubmitVoteBox(props) {
     })(values);
   };
 
-  const updateVote = async (newVote) => {
+  const updateVote = async (newVote, isChair) => {
     try {
       const voteIds = map(v => v.voteId)(votes);
       await Votes.updateVotesByIds(voteIds, {vote: newVote, rationale});
-      setVote(newVote);
       setSubmitted(true);
+      //call updateFinalVote for chairs in order to update source collection's votes and trigger sub-component re-render
+      isChair ? updateFinalVote(bucketKey, {vote: newVote, rationale}, voteIds) : setVote(newVote);
       Notifications.showSuccess({text: 'Successfully updated vote'});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to update vote'});
@@ -133,14 +134,14 @@ export default function CollectionSubmitVoteBox(props) {
           h(VoteSubsectionHeading, { vote, adminPage, isFinal, isVotingDisabled }),
           div({style: styles.voteButtons}, [
             h(CollectionVoteYesButton, {
-              onClick: () => updateVote(true),
-              disabled: isApprovalDisabled || isLoading,
+              onClick: () => updateVote(true, !isNil(updateFinalVote)),
+              disabled: isVotingDisabled || isApprovalDisabled || isLoading,
               isSelected: vote === true,
               isRendered: !isVotingDisabled
             }),
             h(CollectionVoteNoButton, {
-              onClick: () => updateVote(false),
-              disabled: isLoading,
+              onClick: () => updateVote(false, !isNil(updateFinalVote)),
+              disabled: isLoading || isVotingDisabled,
               isSelected: vote === false,
               isRendered: !isVotingDisabled
             })

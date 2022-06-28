@@ -12,6 +12,7 @@ const darInfo = {
 };
 
 const bucket1 = {
+  key: 'bucket1',
   elections: [
     [
       {dataSetId: 300, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -54,6 +55,7 @@ const bucket1 = {
 };
 
 const bucket2 = {
+  key: 'bucket2',
   elections: [
     [
       {dataSetId: 400, electionId: 101, status: 'Open', electionType: 'DataAccess'},
