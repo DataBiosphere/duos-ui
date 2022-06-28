@@ -86,7 +86,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           span({style: {...HEADER, paddingLeft: '5px'}}, [datasetName])
         ]),
         div({style: SECTION, isRendered: isAdmin }, [
-          span({ style: HEADER_BOLD }, ['DAC Final DAR Decision: ']),
+          span({ style: HEADER_BOLD }, ['DAC Final Data Access Request Decision: ']),
           span({ style: {...HEADER, paddingLeft: '5px'}}, [finalDecision])
         ]),
         div({ isRendered: isAdmin }, [

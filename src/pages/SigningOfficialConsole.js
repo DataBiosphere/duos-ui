@@ -150,7 +150,7 @@ export default function SigningOfficialConsole(props) {
           div({style: Styles.HEADER_CONTAINER}, [
             div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ['Data Access Requests']),
             div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
-              'Your Institution\'s DARs: Records from all current and closed data access requests.',
+              'Your Institution\'s Data Access Requests: Records from all current and closed data access requests.',
             ]),
           ])
         ]),
