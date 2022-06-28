@@ -13,7 +13,8 @@ import {
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  getPI
+  getPI,
+  updateFinalVote
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
@@ -126,6 +127,11 @@ export default function DarCollectionReview(props) {
     }
   }, [adminPage, props.history, tabsForUser, collectionId]);
 
+  //Remember, votes are contained within buckets, so updating final votes will update the bucket
+  //define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
+  const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
+    return updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
+  }, [dataUseBuckets]);
 
   const tabsForUser = useCallback((user, buckets, adminPage = false) => {
     if (adminPage) {
@@ -196,11 +202,7 @@ export default function DarCollectionReview(props) {
         h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
       ]
     ),
-    div(
-      {
-        className: 'review-page-body',
-        style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }
-      },
+    div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
       [
         h(TabControl, {
           labels: Object.values(tabs),
@@ -217,9 +219,7 @@ export default function DarCollectionReview(props) {
           researcher: researcherProfile.displayName,
           email: researcherProperties.academicEmail,
           piEmail: evaluateTrueString(researcherProperties.isThePI) ? researcherProperties.academicEmail : researcherProperties.piEmail,
-          city: `${researcherProperties.city}${
-            !researcherProperties.state ? '' : ', ' + researcherProperties.state
-          }`,
+          city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
           country: researcherProperties.country,
           nonTechSummary: darInfo.nonTechRus,
           isLoading: subcomponentLoading,
@@ -255,7 +255,8 @@ export default function DarCollectionReview(props) {
           isChair: true,
           isLoading: isLoading || subcomponentLoading,
           adminPage,
-          readOnly
+          readOnly,
+          updateFinalVote: updateFinalVoteFn
         }),
       ]
     ),

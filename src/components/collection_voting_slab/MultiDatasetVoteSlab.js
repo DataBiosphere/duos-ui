@@ -54,8 +54,8 @@ export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
   const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage} = props;
-  const {algorithmResult} = bucket;
+  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage, updateFinalVote} = props;
+  const {algorithmResult, key} = bucket;
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
@@ -93,7 +93,9 @@ export default function MultiDatasetVoteSlab(props) {
         isDisabled: adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections,
         isApprovalDisabled,
         isLoading,
-        adminPage
+        adminPage,
+        bucketKey: key,
+        updateFinalVote
       }),
       ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})
     ]);
