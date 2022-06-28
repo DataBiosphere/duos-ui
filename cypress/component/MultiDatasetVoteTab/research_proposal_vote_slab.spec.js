@@ -121,6 +121,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
+        bucket={{key: 'test'}}
       />
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -132,6 +133,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimarySecondaryUse}
+        bucket={{ key: 'test' }}
       />
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -144,6 +146,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
+        bucket={{key: 'test'}}
       />
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -166,6 +169,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoSecondaryUseManualReviewTrue}
+        bucket={{ key: 'test' }}
       />
     );
 
@@ -178,6 +182,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     mount(
       <ResearchProposalVoteSlab
         darInfo={darInfoPrimaryUseManualReviewFalse}
+        bucket={{ key: 'test' }}
       />
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');

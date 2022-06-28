@@ -8,11 +8,15 @@ import {
   extractDacDataAccessVotesFromBucket,
   extractDacRPVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket, collapseVotesByUser, getMatchDataForBuckets
+  extractUserRPVotesFromBucket,
+  collapseVotesByUser,
+  getMatchDataForBuckets,
+  updateFinalVote,
+  rpVoteKey
 } from '../../../src/utils/DarCollectionUtils';
 import {Collections, Match} from '../../../src/libs/ajax';
 import {formatDate, Notifications} from '../../../src/libs/utils';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep, forEach, includes, concat} from 'lodash/fp';
 
 const openableAndClosableDars = {
   1: {
@@ -694,6 +698,64 @@ describe('getMatchDataForBuckets', () => {
         expect(algorithmResult.id).to.equal(bucket.key);
       }
     });
+  });
+});
+
+describe('updateFinalVote()', () => {
+  it('updates votes for the target bucket in the source collection (non-RP)', () => {
+    const voteIds = [1,2,3];
+    const votePayload = {vote: true, rationale: 'test rationale'};
+    const key = 'targetKey';
+    let dataUseBuckets = [{key, votes: [{dataAccess: {
+      finalVotes: [{voteId: 1}, {voteId: 2}, {voteId: 4}],
+      chairpersonVotes: [{voteId: 3}]
+    }}]}];
+    const setDataUseBuckets = (newBucketArray) => dataUseBuckets = newBucketArray;
+    const updatedBuckets = updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
+
+    forEach((bucket) => {
+      const voteObj = bucket.votes[0].dataAccess;
+      const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes);
+      forEach((vote) => {
+        if(includes(vote.voteId)(voteIds)) {
+          expect(vote.vote).to.equal(votePayload.vote);
+          expect(vote.rationale).to.equal(votePayload.rationale);
+        } else {
+          expect(vote.vote).to.equal(undefined);
+          expect(vote.rationale).to.equal(undefined);
+        }
+      })(votes);
+    })(updatedBuckets);
+
+    expect(dataUseBuckets).to.deep.equal(updatedBuckets);
+  });
+
+  it('updates votes for the target bucket in the source collection (rp votes)', () => {
+    const voteIds = [1,2,3];
+    const votePayload = {vote: false, rationale: 'false rationale'};
+    const key = rpVoteKey;
+    let dataUseBuckets = [{key, votes: [{rp: {
+      finalVotes: [{voteId: 1}, {voteId: 2}, {voteId: 4}],
+      chairpersonVotes: [{voteId: 1}, {voteId: 2}, {voteId: 4}]
+    }}]}];
+    const setDataUseBuckets = (newBucketArray) => dataUseBuckets = newBucketArray;
+    const updatedBuckets = updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
+
+    forEach((bucket) => {
+      const voteObj = bucket.votes[0].rp;
+      const votes = concat(voteObj.finalVotes, voteObj.chairpersonVotes);
+      forEach((vote) => {
+        if (includes(vote.voteId)(voteIds)) {
+          expect(vote.vote).to.equal(votePayload.vote);
+          expect(vote.rationale).to.equal(votePayload.rationale);
+        } else {
+          expect(vote.vote).to.equal(undefined);
+          expect(vote.rationale).to.equal(undefined);
+        }
+      })(votes);
+    })(updatedBuckets);
+
+    expect(dataUseBuckets).to.deep.equal(updatedBuckets);
   });
 });
 
