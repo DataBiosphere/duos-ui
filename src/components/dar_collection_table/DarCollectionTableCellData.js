@@ -82,18 +82,6 @@ export function submissionDateCellData({createDate, darCollectionId, label = 'su
   };
 }
 
-export function piCellData({piName, darCollectionId, label = 'pi'}) {
-  return {
-    data: !isEmpty(piName) ? piName : '- -',
-    id: darCollectionId,
-    style: {
-      color: '#354052',
-      fontSize: styles.fontSize.pi
-    },
-    label
-  };
-}
-
 export function researcherCellData({researcherName = '- -', darCollectionId, label = 'researcher'}) {
   return {
     data: researcherName,
@@ -180,7 +168,6 @@ export default {
   projectTitleCellData,
   darCodeCellData,
   submissionDateCellData,
-  piCellData,
   researcherCellData,
   institutionCellData,
   datasetCountCellData,
