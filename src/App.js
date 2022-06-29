@@ -74,7 +74,7 @@ function App() {
   };
 
   // TODO: Remove this when all the new navigation features are available
-  const header = env === 'dev' || env === 'staging'
+  const header = env !== 'prod'
     ? h(DuosHeader, { onSignOut: signOut })
     : h(DuosHeaderOld, { onSignOut: signOut });
 
