@@ -18,6 +18,7 @@ describe('Authentication', function() {
       cy.get('textarea').type(credentials.access_token, {delay: 0});
       cy.get('form').submit();
       cy.contains('Admin Console');
+      cy.get('[id="sel_dacUser"]').click();
       cy.contains('Sign Out').click();
     });
   });
