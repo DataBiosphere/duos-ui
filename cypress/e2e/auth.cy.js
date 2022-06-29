@@ -19,7 +19,7 @@ describe('Authentication', function() {
       cy.get('form').submit();
       cy.contains('Admin Console');
       cy.get('[id="sel_dacUser"]').click();
-      cy.contains('Sign Out').click();
+      cy.contains('Sign out').click();
     });
   });
 });
