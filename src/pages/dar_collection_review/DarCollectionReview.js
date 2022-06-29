@@ -219,8 +219,6 @@ export default function DarCollectionReview(props) {
           researcher: researcherProfile.displayName,
           email: researcherProperties.academicEmail,
           piEmail: evaluateTrueString(researcherProperties.isThePI) ? researcherProperties.academicEmail : researcherProperties.piEmail,
-          city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
-          country: researcherProperties.country,
           nonTechSummary: darInfo.nonTechRus,
           isLoading: subcomponentLoading,
           collection: collection,

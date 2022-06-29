@@ -34,26 +34,6 @@ describe('Application Information', () => {
     value.contains('test email');
   });
 
-  it('renders city information', () => {
-    const props = {city: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#city-label`);
-    expect(label).to.exist;
-    label.contains('City');
-    const value = cy.get(`#city-span`);
-    value.contains('test');
-  });
-
-  it('renders country information', () => {
-    const props = {country: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#country-label`);
-    expect(label).to.exist;
-    label.contains('Country');
-    const value = cy.get(`#country-span`);
-    value.contains('test');
-  });
-
   it('renders institution information', () => {
     const props = {institution: 'test'};
     mount(<ApplicationInformation {...props} />);

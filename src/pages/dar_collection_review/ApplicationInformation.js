@@ -99,8 +99,6 @@ export default function ApplicationInformation(props) {
   const {
     researcher = '- -',
     email = '- -',
-    city = '- -',
-    country = '- -',
     institution = '- -',
     pi = '- -',
     piEmail = '- -',
@@ -145,11 +143,6 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
           generateLabelSpanContents('Institution', 'institution', institution, isLoading)
-        ]),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('City', 'city', city, isLoading),
-          generateLabelSpanContents('Country', 'country', country, isLoading),
-          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span for alignment
         ]),
         div({className: 'information-row', style: styles.row}, [
           generateLabelSpanContents('Principal Investigator', 'principal-investigator', pi, isLoading),
