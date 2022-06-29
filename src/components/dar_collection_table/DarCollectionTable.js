@@ -1,11 +1,10 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find} from 'lodash/fp';
+import {isNil, isEmpty, find, get} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
-import { getPI } from '../../utils/DarCollectionUtils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
@@ -122,8 +121,8 @@ const columnHeaderConfig = {
     label: 'Researcher',
     cellStyle: { width: styles.cellWidth.researcher },
     cellDataFn: (props) => {
-      props.piName = getPI(props.createUser);
-      return cellData.piCellData(props);
+      props.researcherName = get('displayName')(props.createUser);
+      return cellData.researcherCellData(props);
     },
     sortable: true
   },

@@ -94,6 +94,18 @@ export function piCellData({piName, darCollectionId, label = 'pi'}) {
   };
 }
 
+export function researcherCellData({researcherName = '- -', darCollectionId, label = 'researcher'}) {
+  return {
+    data: researcherName,
+    id: darCollectionId,
+    style: {
+      color: '#354052',
+      fontSize: styles.fontSize.researcher
+    },
+    label
+  };
+}
+
 export function institutionCellData({institution = '- -', darCollectionId, label = 'institution'}) {
   return {
     data: institution,
@@ -169,6 +181,7 @@ export default {
   darCodeCellData,
   submissionDateCellData,
   piCellData,
+  researcherCellData,
   institutionCellData,
   datasetCountCellData,
   statusCellData,
