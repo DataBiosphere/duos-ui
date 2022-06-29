@@ -101,7 +101,7 @@ export default function SigningOfficialConsole(props) {
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
       div({style: {}, className: 'signing-official-tabs'}, [
         //NOTE: placeholder styling for now, can come up with more definitive designs later
-        div({style: {display: 'flex'}, className: 'tab-selection-container', isRendered: env === 'prod'}, [
+        div({style: {display: 'flex'}, className: 'tab-selection-container'}, [
           h(SelectableText, {
             label: tabs.researcher,
             setSelected: setSelectedTag,
