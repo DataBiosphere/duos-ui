@@ -20,7 +20,7 @@ import {
   flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
-import {evaluateTrueString, formatDate, Notifications} from '../libs/utils';
+import { formatDate, Notifications } from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
 import { processMatchData } from './VoteUtils';
 
@@ -439,21 +439,6 @@ export const openCollectionFn = ({updateCollections}) =>
     }
   };
 
-export const getPI = (createUser) => {
-  const createUserIsPI = flow(
-    get('properties'),
-    find(property => toLower(property.propertyKey) === 'isthepi'),
-    get('propertyValue'),
-    evaluateTrueString
-  )(createUser);
-
-  const piName = flow(
-    get('properties'),
-    find(property => toLower(property.propertyKey) === 'piname'),
-    get('propertyValue')
-  )(createUser);
-  return createUserIsPI ? createUser.displayName : piName;
-};
 
 //helper function used in DarCollectionReview to update final vote on source of truth
 //done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
@@ -500,7 +485,6 @@ export default {
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
   collapseVotesByUser,
-  getPI,
   updateFinalVote,
   rpVoteKey
 };

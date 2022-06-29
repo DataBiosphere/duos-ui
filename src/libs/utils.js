@@ -7,7 +7,6 @@ import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 import {Config} from './config';
-import { getPI } from '../utils/DarCollectionUtils';
 
 export const UserProperties = {
   ACADEMIC_EMAIL: 'academicEmail',
@@ -627,12 +626,12 @@ export const getSearchFilterFunctions = () => {
           const lowerCaseTerm = toLower(term);
           createDate = formatDate(collection.createDate);
           const { darCode, isDraft, createUser } = collection;
-          const piName = getPI(createUser);
+          const researcherName = get('displayName')(createUser);
           const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
           const matched = find((phrase) => {
             const termArr = lowerCaseTerm.split(' ');
             return find(term => includes(term, phrase))(termArr);
-          })([datasetCount, toLower(darCode), toLower(createDate), toLower(projectTitle), toLower(status), toLower(institution), toLower(piName)]);
+          })([datasetCount, toLower(darCode), toLower(createDate), toLower(projectTitle), toLower(status), toLower(institution), toLower(researcherName)]);
           return !isNil(matched);
         })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
