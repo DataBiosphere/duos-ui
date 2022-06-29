@@ -167,7 +167,7 @@ beforeEach(() => {
 });
 
 describe('Dar Collection Search Filter', () => {
-  it('filters succssfully with missing institution, project title, elections, datasets, dar, and institution', () => {
+  it('filters successfully with missing institution, project title, elections, datasets, dar, and institution', () => {
     const filteredList = collectionSearchFn('DAR-2', collectionsSkeleton);
     expect(filteredList).to.be.empty;
   });
@@ -220,6 +220,16 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn('2020-04', collectionsWithCreateDate);
     expect(filteredList).to.not.be.empty;
     const emptyList = collectionSearchFn('invalid', collectionsWithCreateDate);
+    expect(emptyList).to.be.empty;
+  });
+
+  it('filters on researcher name', () => {
+    const researcherName = 'Name';
+    const collectionsWithResearcherName = cloneDeep(collectionsSkeleton);
+    collectionsWithResearcherName[0].createUser.displayName = researcherName;
+    const filteredList = collectionSearchFn('name', collectionsWithResearcherName);
+    expect(filteredList).to.not.be.empty;
+    const emptyList = collectionSearchFn('invalid', collectionsWithResearcherName);
     expect(emptyList).to.be.empty;
   });
 });
