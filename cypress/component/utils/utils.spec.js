@@ -224,9 +224,11 @@ describe('Dar Collection Search Filter', () => {
   });
 
   it('filters on researcher name', () => {
-    const researcherName = 'Name';
+    const createUser = {
+      displayName: 'Name'
+    };
     const collectionsWithResearcherName = cloneDeep(collectionsSkeleton);
-    collectionsWithResearcherName[0].createUser.displayName = researcherName;
+    collectionsWithResearcherName[0].createUser = createUser;
     const filteredList = collectionSearchFn('name', collectionsWithResearcherName);
     expect(filteredList).to.not.be.empty;
     const emptyList = collectionSearchFn('invalid', collectionsWithResearcherName);
