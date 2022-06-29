@@ -214,7 +214,21 @@ class AdminConsole extends Component {
                   iconName: 'manage-dac',
                   iconSize: 'large',
                 })
-              ])
+              ]),
+              div({
+                // TODO: We won't need this box when MDV is complete
+                isRendered: (this.state.env === 'prod'),
+                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
+                AdminConsoleBox({
+                  id: 'btn_manageDarCollections',
+                  url: '/admin_manage_dar_collections',
+                  color: 'access',
+                  title: 'Manage DAR Collection',
+                  description: 'Select and access DAR Collections for review',
+                  iconName: 'manage-access',
+                  iconSize: 'large',
+                })
+              ]),
             ]),
           ])
         ])

@@ -25,7 +25,6 @@ const tabs = {
 
 export default function SigningOfficialConsole(props) {
   const [env, setEnv] = useState();
-  console.log(env);
   const [signingOfficial, setSiginingOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
   const [unregisteredResearchers, setUnregisteredResearchers] = useState();
