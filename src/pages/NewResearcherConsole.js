@@ -222,7 +222,7 @@ export default function NewResearcherConsole() {
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.NAME,
           DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.PI,
+          DarCollectionTableColumnOptions.RESEARCHER,
           DarCollectionTableColumnOptions.DATASET_COUNT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,

@@ -81,7 +81,7 @@ export default function AdminManageDarCollections() {
         DarCollectionTableColumnOptions.DAR_CODE_ADMIN,
         DarCollectionTableColumnOptions.NAME,
         DarCollectionTableColumnOptions.SUBMISSION_DATE,
-        DarCollectionTableColumnOptions.PI,
+        DarCollectionTableColumnOptions.RESEARCHER,
         DarCollectionTableColumnOptions.INSTITUTION,
         DarCollectionTableColumnOptions.DATASET_COUNT,
         DarCollectionTableColumnOptions.STATUS,
