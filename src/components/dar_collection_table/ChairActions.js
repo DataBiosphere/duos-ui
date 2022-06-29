@@ -63,7 +63,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
       if(toLower(status) === 'closed') {closedRelevantElectionPresent = true;}
       forEach(vote => {
         if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
-        if(!isNil(vote.vote)) { label = 'Update Vote'; }
+        if(!isNil(vote.vote)) { label = 'Update'; }
       })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
@@ -189,16 +189,16 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    baseColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    baseColor: toLower(voteLabel) === 'update' ? 'white' : duosBlue,
     hoverStyle: {
-      backgroundColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+      backgroundColor: toLower(voteLabel) === 'update' ? 'white' : duosBlue,
       color: 'white'
     },
     additionalStyle: {
       padding: '3% 7%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      color: voteLabel === 'Update Vote' ? duosBlue : 'white',
+      color: toLower(voteLabel) === 'update' ? duosBlue : 'white',
       marginRight: '8%',
       border: `1px ${duosBlue} solid`,
     },

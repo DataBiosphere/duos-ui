@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES6"
+  },
+  "exclude": [
+    "node_modules",
+    "public",
+    "scripts",
+    "config",
+    "conf"
+  ]
+}
