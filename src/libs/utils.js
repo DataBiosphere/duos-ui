@@ -258,7 +258,7 @@ export const Navigation = {
   back: async (user, history) => {
     const env = await Config.getEnv();
     let page;
-    if (env === 'dev') {
+    if (env !== 'prod') {
       page =
         user.isAdmin ? '/admin_manage_dar_collections'
           :user.isChairPerson ? '/new_chair_console'
@@ -283,7 +283,7 @@ export const Navigation = {
   console: async (user, history) => {
     const env = await Config.getEnv();
     let page;
-    if (env === 'dev') {
+    if (env !== 'prod') {
       page =
         user.isAdmin ? '/admin_manage_dar_collections'
           : user.isChairPerson ? '/new_chair_console'
