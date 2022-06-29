@@ -18,7 +18,6 @@ describe('Authentication', function() {
       cy.get('textarea').type(credentials.access_token, {delay: 0});
       cy.get('form').submit();
       cy.contains('Admin Console');
-      cy.get('[id="collapsed-navigation-icon-button"]').click();
       cy.contains('Sign Out').click();
     });
   });
