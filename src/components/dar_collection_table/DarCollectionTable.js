@@ -1,11 +1,10 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find} from 'lodash/fp';
+import {isNil, isEmpty, find, get} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
-import { getPI } from '../../utils/DarCollectionUtils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
@@ -50,7 +49,7 @@ export const styles = {
     darCode: '10%',
     projectTitle: '18%',
     submissionDate: '12.5%',
-    pi: '10%',
+    researcher: '10%',
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
@@ -60,7 +59,7 @@ export const styles = {
     darCode: '#000000',
     projectTitle: '#000000',
     submissionDate: '#000000',
-    pi: '#000000',
+    researcher: '#000000',
     institution: '#354052',
     datasetCount: '#354052',
     status: '#000000',
@@ -70,7 +69,7 @@ export const styles = {
     darCode: '1.6rem',
     projectTitle: '1.4rem',
     submissionDate: '1.4rem',
-    pi: '1.4rem',
+    researcher: '1.4rem',
     institution: '1.4rem',
     datasetCount: '2.0rem',
     status: '1.6rem',
@@ -83,7 +82,7 @@ export const DarCollectionTableColumnOptions = {
   DAR_CODE_ADMIN: 'darCodeAdmin', //temp key for admin, will switch out once collection review page is implemented for all users
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
-  PI: 'pi',
+  RESEARCHER: 'researcher',
   INSTITUTION: 'institution',
   DATASET_COUNT: 'datasetCount',
   STATUS: 'status',
@@ -118,12 +117,12 @@ const columnHeaderConfig = {
     cellDataFn: cellData.submissionDateCellData,
     sortable: true
   },
-  pi: {
-    label: 'PI',
-    cellStyle: { width: styles.cellWidth.pi },
+  researcher: {
+    label: 'Researcher',
+    cellStyle: { width: styles.cellWidth.researcher },
     cellDataFn: (props) => {
-      props.piName = getPI(props.createUser);
-      return cellData.piCellData(props);
+      props.researcherName = get('displayName')(props.createUser);
+      return cellData.researcherCellData(props);
     },
     sortable: true
   },
