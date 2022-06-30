@@ -13,7 +13,6 @@ const props = {
   externalCollaborators: [],
   formFieldChange: () => {},
   internalCollaborators: [],
-  invalidInvestigator: false,
   invalidResearcher: false,
   labCollaborators: [],
   location: '',
