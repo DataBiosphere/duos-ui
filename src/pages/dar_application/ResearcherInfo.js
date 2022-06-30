@@ -215,7 +215,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.4 Internal Lab Staff',
+                '1.3 Internal Lab Staff',
                 span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
                 that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
                 level here.`])
@@ -238,7 +238,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.5 Internal Collaborators',
+                '1.4 Internal Collaborators',
                 span([
                   `Please add Internal Collaborators here Internal Collaborators are defined as individuals who are not under the direct supervision of 
                   the PI (e.g., not a member of the PI's laboratory) who assists with the PI's research project involving controlled-access data subject to 
@@ -265,7 +265,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.6 Institutional Signing Official*',
+                '1.5 Institutional Signing Official*',
                 span(['I certify the individual listed below is my Institutional Signing Official.'])
               ])
             ]),
@@ -310,7 +310,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.7 Information Technology (IT) Director*',
+                '1.6 Information Technology (IT) Director*',
                 span(['I certify the individual listed below is my IT Director.'])
               ])
             ]),
@@ -334,7 +334,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.8 Cloud Use Statement*',
+                '1.7 Cloud Use Statement*',
                 span([
                   'Will you perform all of your data storage and analysis for this project on the ',
                   a({
@@ -449,7 +449,7 @@ export default function ResearcherInfo(props) {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               label({ className: 'control-label rp-title-question' }, [
-                '1.9 External Collaborators',
+                '1.8 External Collaborators',
                 span([
                   `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work
                 at the same location as the PI, and consequently must be independently approved to access controlled-access data subject to the GDS 
