@@ -24,7 +24,6 @@ const formatDraft = (draft) => {
     isThePi,
     piName,
     institution,
-    investigator,
   } = data;
 
   const keys = ['isThePi', 'piName'];
@@ -39,7 +38,6 @@ const formatDraft = (draft) => {
     datasets,
     institution,
     createUser: {
-      displayName: investigator,
       properties: createPropertiesForDraft(keys, values),
     },
   };
