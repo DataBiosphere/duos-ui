@@ -34,26 +34,6 @@ describe('Application Information', () => {
     value.contains('test email');
   });
 
-  it('renders city information', () => {
-    const props = {city: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#city-label`);
-    expect(label).to.exist;
-    label.contains('City');
-    const value = cy.get(`#city-span`);
-    value.contains('test');
-  });
-
-  it('renders country information', () => {
-    const props = {country: 'test'};
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#country-label`);
-    expect(label).to.exist;
-    label.contains('Country');
-    const value = cy.get(`#country-span`);
-    value.contains('test');
-  });
-
   it('renders institution information', () => {
     const props = {institution: 'test'};
     mount(<ApplicationInformation {...props} />);
@@ -61,28 +41,6 @@ describe('Application Information', () => {
     expect(label).to.exist;
     label.contains('Institution');
     const value = cy.get(`#institution-span`);
-    expect(value).to.exist;
-    value.contains('test');
-  });
-
-  it('renders Principal Investigator information', () => {
-    const props = { pi: 'test' };
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#principal-investigator-label`);
-    expect(label).to.exist;
-    label.contains('Principal Investigator');
-    const value = cy.get(`#principal-investigator-span`);
-    expect(value).to.exist;
-    value.contains('test');
-  });
-
-  it('renders Principal Investigator Email information', () => {
-    const props = { piEmail: 'test' };
-    mount(<ApplicationInformation {...props} />);
-    const label = cy.get(`#pi-email-label`);
-    expect(label).to.exist;
-    label.contains('Principal Investigator Email');
-    const value = cy.get(`#pi-email-span`);
     expect(value).to.exist;
     value.contains('test');
   });

@@ -48,7 +48,7 @@ export default function SigningOfficialConsole() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        h(DataCustodianTable, {isRendered: env !== 'production', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(DataCustodianTable, {isRendered: env !== 'prod', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       ])
     ])
   );

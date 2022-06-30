@@ -9,25 +9,15 @@ import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '.
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_table/DarTableActions';
 
-const createPropertiesForDraft = (keys, values) =>
-  keys.map((propertyKey, index) => ({
-    propertyKey,
-    propertyValue: values[index],
-  }));
-
 const formatDraft = (draft) => {
   const { data, referenceId, id } = draft;
   const {
     partialDarCode,
     projectTitle,
     datasets,
-    isThePi,
-    piName,
     institution,
   } = data;
 
-  const keys = ['isThePi', 'piName'];
-  const values = [isThePi, piName];
   const output =  {
     darCode: replace('temp', 'DRAFT')(partialDarCode),
     referenceId,
@@ -38,7 +28,6 @@ const formatDraft = (draft) => {
     datasets,
     institution,
     createUser: {
-      properties: createPropertiesForDraft(keys, values),
     },
   };
   return output;
@@ -220,7 +209,6 @@ export default function NewResearcherConsole() {
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.NAME,
           DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.PI,
           DarCollectionTableColumnOptions.DATASET_COUNT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,

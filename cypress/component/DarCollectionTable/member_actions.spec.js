@@ -195,12 +195,12 @@ describe('Member Actions - Vote Button', () => {
     voteButton.contains('VOTE');
   });
 
-  it('shows "UPDATE VOTE" if the user has already voted but the election is still open', () => {
+  it('shows "UPDATE" if the user has already voted but the election is still open', () => {
     propCopy.collection.dars = submittedVoteDars;
     mount(<MemberActions {...propCopy} />);
     const voteButton = cy.get(`#member-vote-${collectionId}`);
     voteButton.should('exist');
-    voteButton.contains('UPDATE VOTE');
+    voteButton.contains('UPDATE');
   });
 
   it('should not consider RP elections when determining if vote buttons renders', () => {
