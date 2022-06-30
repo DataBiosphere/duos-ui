@@ -1,21 +1,19 @@
-import {Component, Fragment, useEffect, useState} from 'react';
+import {Component, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
-import {IconButton, List, ListItem, Menu, MenuItem} from '@material-ui/core';
+import {IconButton} from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
-import './DuosNavigation.css';
+import './DuosHeader.css';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from './Notification';
-import { Styles } from '../libs/theme';
 import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
-import { isNil } from 'lodash/fp';
 import {Config} from '../libs/config';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -23,7 +21,7 @@ import Box from '@mui/material/Box';
 
 const styles = {
   drawerPaper: {
-    backgroundColor: '#00243c',
+    backgroundColor: '#FFF',
     color: 'white',
     fontFamily: 'Montserrat'
   },
@@ -70,118 +68,9 @@ const styles = {
   }
 };
 
-const applyPointer = (e) => {
-  e.target.style.cursor = 'pointer';
-};
-
-const BasicListItem = (props) => {
-  const {isRendered, targetLink, label, applyPointer, isHref, onClick} = props;
-
-  const onMouseEnter = applyPointer;
-
-  let attributes = {
-    isRendered,
-    alignItems: 'center',
-    id: `menu-link-${label}`,
-    style: Object.assign({color: 'white'}, Styles.NAVBAR.DRAWER_LINK),
-    onMouseEnter
-  };
-
-  if(isHref) {
-    attributes = {
-      ...attributes,
-      component: 'a',
-      href: targetLink,
-      target: '_blank'
-    };
-  } else if(!isNil(onClick)) {
-    attributes = {
-      ...attributes,
-      onClick
-    };
-  } else {
-    attributes = {
-      ...attributes,
-      component: Link,
-      to: targetLink,
-    };
-  }
-
-  return (
-    h(ListItem, attributes, [label])
-  );
-};
-
-/*
-  NOTE: I've made a dropdown component for statistics, but I'm willing to get rid of and use BasicListItem
-  Part of me feels like having the options as seperate items will be better for smaller devices since it'll be easier to click through
-  Note: user profile was split in this manner to show how that would work out
-*/
-const DropdownComponent = (props) => {
-  const {dropdownLinks, label, goToLink, isRendered, onMouseEnter, classes} = props;
-  const [anchorEl, setAnchorEl] = useState(null);
-  const linkLabels = Object.keys(dropdownLinks);
-
-  const MenuItemTemplates = (keys, links, onMouseEnter) => {
-    return keys.map((label) => {
-      const linkData = links[label];
-      return h(MenuItem, {
-        onClick: () => goToLink(linkData.link),
-        alignItems: 'center',
-        id: `menu-link-${label}`,
-        isRendered: linkData.isRendered,
-        style: Styles.NAVBAR.DRAWER_LINK,
-        onMouseEnter
-      }, [label]);
-    });
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const openDropdown = (e) => {
-    setAnchorEl(e.currentTarget);
-  };
-
-  const id = `${label}-menu-dropdown`;
-
-  return (
-    h(Fragment, {}, [
-      h(ListItem, {
-        'aria-haspopup': true,
-        'aria-controls': id,
-        isRendered,
-        alignItems: 'center',
-        style: Styles.NAVBAR.DRAWER_LINK,
-        onMouseEnter,
-        onClick: openDropdown
-      }, [label]),
-      h(Menu, {
-        id,
-        anchorEl,
-        keepMounted: true,
-        open: Boolean(anchorEl),
-        onClose: handleClose,
-        anchorOrigin: {
-          vertical: 'top',
-          horizontal: 'left'
-        },
-        transformOrigin: {
-          vertical: 'top',
-          horizontal: 'right'
-        },
-        MenuListProps: {
-          className: classes.drawerPaper
-        },
-        getContentAnchorEl: null
-      }, MenuItemTemplates(linkLabels, dropdownLinks, onMouseEnter))
-    ])
-  );
-};
-
 const NavigationTabsComponent = (props) => {
   const {
+    orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
     currentUser, signOut, isLogged,
@@ -197,12 +86,13 @@ const NavigationTabsComponent = (props) => {
   }, [initialTab, initialSubTab]);
 
   return (div({
-    isRendered: true, className: 'navbar-logged'
+    className: `navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`
   }, [
     ul({ className: 'navbar-main' }, [
       div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
         makeNotifications(),
         h(Link, {
+          isRendered: orientation === 'horizontal',
           id: 'link_logo',
           to: '/home',
           className: 'navbar-brand'
@@ -214,6 +104,7 @@ const NavigationTabsComponent = (props) => {
             value: selectedMenuTab,
             variant: 'scrollable',
             scrollButtons: 'auto',
+            orientation,
             TabIndicatorProps: {
               style: { background: '#2BBD9B' }
             }
@@ -267,8 +158,13 @@ const NavigationTabsComponent = (props) => {
       ]),
 
       // Navbar right side
-      div({ isRendered: isLogged, style: { display: 'flex', alignItems: 'center' } }, [
-
+      div({
+        isRendered: isLogged,
+        style: {
+          display: 'flex', alignItems: 'center',
+          flexDirection: orientation === 'vertical' ? 'column' : 'row'
+        }
+      }, [
         button({
           onClick: showRequestModal,
           style: styles.navButton
@@ -279,7 +175,10 @@ const NavigationTabsComponent = (props) => {
         ]),
         supportrequestModal,
 
-        li({ className: 'dropdown user-li' }, [
+        li({
+          className: 'dropdown user-li',
+          style: { listStyleType: 'none' }
+        }, [
           a(
             {
               id: 'sel_dacUser',
@@ -295,7 +194,14 @@ const NavigationTabsComponent = (props) => {
               small({ id: 'dacUserMail' }, [currentUser.email]),
             ]
           ),
-          ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
+          ul({
+            className: 'dropdown-menu navbar-dropdown',
+            role: 'menu',
+            style: {
+              top: -20,
+              left: 'calc(100% + 10px)'
+            }
+          }, [
             li([
               h(Link, { id: 'link_profile', to: '/profile' }, [
                 'Your Profile',
@@ -317,6 +223,7 @@ const NavigationTabsComponent = (props) => {
         value: selectedSubTab,
         variant: 'scrollable',
         scrollButtons: 'auto',
+        orientation,
         TabIndicatorProps: {
           style: { background: '#00609f' }
         }
@@ -436,25 +343,6 @@ class DuosHeader extends Component {
       isSigningOfficial = currentUser.isSigningOfficial;
     }
 
-    const dropdownLinks = {
-      statistics: {
-        'Votes Statistics': {
-          link: '/summary_votes'
-        },
-        'Reviewed Cases Record': {
-          link: '/reviewed_cases'
-        }
-      },
-      chair: {
-        'Manage DARs': {
-          link: this.state.dacChairPath
-        },
-        'Manage DACs': {
-          link: '/manage_dac'
-        }
-      }
-    };
-
     const duosLogoImage = {
       height: '50px',
       padding: '0',
@@ -572,7 +460,7 @@ class DuosHeader extends Component {
       return tab.children ? tab.children.indexOf((subtab) => subtab.link === location.pathname) !== -1 : false;
     });
 
-    return nav({ className: 'navbar-duos navbar-duos-new', role: 'navigation' }, [
+    return nav({ className: 'navbar-duos', role: 'navigation' }, [
       h(Hidden, { mdDown: true }, [
         div({ className: 'row no-margin', style: { width: '100%' } }, [
           //Standard navbar for medium sized displays and higher (pre-existing navbar)
@@ -583,7 +471,8 @@ class DuosHeader extends Component {
             currentUser, isLogged, signOut: this.signOut,
             contactUsButton, supportrequestModal,
             showRequestModal: this.supportRequestModal,
-            tabs, initialTab, initialSubTab
+            tabs, initialTab, initialSubTab,
+            orientation: 'horizontal'
           })
         ]),
       ]),
@@ -595,6 +484,7 @@ class DuosHeader extends Component {
         this.makeNotifications(),
         div(
           {
+            className: 'navbar-main',
             style: {
               display: 'flex',
               flexDirection: 'row',
@@ -632,106 +522,23 @@ class DuosHeader extends Component {
                 PaperProps: {
                   className: classes.drawerPaper,
                 },
+                className: 'navbar-duos',
                 style: {
                   // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
                 },
                 onClose: () => this.toggleDrawer(false),
               },
               [
-                h(List, {}, [
-                  //NOTE: create user component to show logged in status (as well as dropdown options)
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    targetLink: '/profile',
-                    label: 'Your Profile',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isAdmin,
-                    applyPointer,
-                    targetLink: '/admin_console',
-                    label: 'Admin Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isSigningOfficial,
-                    applyPointer,
-                    targetLink: '/signing_official_console',
-                    label: 'Signing Official Console',
-                  }),
-                  h(DropdownComponent, {
-                    isRendered: isChairPerson,
-                    label: 'DAC Chair Console',
-                    onMouseEnter: applyPointer,
-                    dropdownLinks: dropdownLinks.chair,
-                    goToLink: this.goToLink,
-                    classes,
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isMember,
-                    applyPointer,
-                    targetLink: this.state.dacMemberPath,
-                    label: 'DAC Member Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isResearcher,
-                    applyPointer,
-                    targetLink: this.state.researcherPath,
-                    label: 'Researcher Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isResearcher,
-                    applyPointer,
-                    targetLink: '/dar_application',
-                    label: 'Request Application',
-                  }),
-                  h(DropdownComponent, {
-                    isRendered: isAdmin,
-                    label: 'Statistics',
-                    onMouseEnter: applyPointer,
-                    dropdownLinks: dropdownLinks.statistics,
-                    goToLink: this.goToLink,
-                    classes,
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    targetLink: '/dataset_catalog',
-                    label: 'Dataset Catalog',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: !isLogged,
-                    applyPointer,
-                    targetLink:
-                      'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
-                    label: 'About',
-                    isHref: true,
-                  }),
-                  h(BasicListItem, {
-                    applyPointer,
-                    targetLink:
-                      'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                    isHref: true,
-                    label: 'FAQs',
-                  }),
-                  //contact us doesn't use the Basic List Item since it just makes the modal visible, which is different from the redirect functionality from basicList
-                  h(
-                    ListItem,
-                    {
-                      alignItems: 'center',
-                      onMouseEnter: applyPointer,
-                      style: Styles.NAVBAR.DRAWER_LINK,
-                      onClick: this.supportRequestModal,
-                    },
-                    ['Request Help']
-                  ),
-                  //passing in signOut as goToLink argument to execute logout flow
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    label: 'Sign Out',
-                    onClick: this.signOut,
-                  }),
-                ]),
+                h(NavigationTabsComponent, {
+                  goToLink: this.goToLink,
+                  makeNotifications: this.makeNotifications,
+                  duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
+                  currentUser, isLogged, signOut: this.signOut,
+                  contactUsButton, supportrequestModal,
+                  showRequestModal: this.supportRequestModal,
+                  tabs, initialTab, initialSubTab,
+                  orientation: 'vertical'
+                })
               ]
             ),
           ]
