@@ -27,8 +27,6 @@ const formatDraft = (draft) => {
     createDate: 'Unsubmitted',
     datasets,
     institution,
-    createUser: {
-    },
   };
   return output;
 };
