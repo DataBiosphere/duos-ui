@@ -24,18 +24,13 @@ export default function ResearcherInfo(props) {
     externalCollaborators,
     formFieldChange,
     internalCollaborators,
-    invalidInvestigator,
     invalidResearcher,
-    investigator,
     labCollaborators,
-    linkedIn,
     location,
     nihValid,
     onNihStatusUpdate,
-    orcid,
     partialSave,
     researcher,
-    researcherGate,
     showValidationMessages,
     nextPage,
     cloudProviderType,
@@ -180,7 +175,7 @@ export default function ResearcherInfo(props) {
               div({ isRendered: checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
               span({ className: 'default-color' },
                 ['Please authenticate with ',
-                  a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed. Your ORCID iD is optional.'
+                  a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
                 ])
             ])
           ]),
@@ -197,69 +192,7 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showValidationMessages
             }),
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
-              label({ className: 'control-label' }, ['LinkedIn Profile']),
-              input({
-                type: 'text',
-                name: 'linkedIn',
-                id: 'inputLinkedIn',
-                value: linkedIn,
-                disabled: true,
-                className: 'form-control',
-              })
-            ])
           ]),
-
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-              label({ className: 'control-label' }, ['ORCID iD']),
-              input({
-                type: 'text',
-                name: 'orcid',
-                id: 'inputOrcid',
-                value: orcid,
-                disabled: true,
-                className: 'form-control',
-              })
-            ]),
-
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-              label({ className: 'control-label' }, ['ResearchGate ID']),
-              input({
-                type: 'text',
-                name: 'researcherGate',
-                id: 'inputResearcherGate',
-                value: researcherGate,
-                disabled: true,
-                className: 'form-control',
-              })
-            ])
-          ])
-        ]),
-
-        div({ className: 'form-group' }, [
-          div( {className: 'row no-margin' }, [
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              label({ className: 'control-label rp-title-question' }, [
-                '1.3 Principal Investigator* ',
-                span({}, ['I certify that the principal investigator listed below is aware of this study'])
-              ])
-            ]),
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              input({
-                type: 'text',
-                name: 'investigator',
-                id: 'inputInvestigator',
-                value: investigator,
-                disabled: true,
-                className: invalidInvestigator && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                required: true
-              }),
-              span({
-                className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
-              }, ['Required field, ensure your Profile has a PI listed, or that you are selected as the PI'])
-            ])
-          ])
         ]),
 
         div({
