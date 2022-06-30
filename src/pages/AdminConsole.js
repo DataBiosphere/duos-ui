@@ -163,7 +163,7 @@ class AdminConsole extends Component {
             div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
               // TODO: `admin_manage_access` will be fully deprecated with MDV
               div({
-                isRendered: (this.state.env !== 'dev'),
+                isRendered: (this.props.env === 'prod'),
                 className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAR',
@@ -177,7 +177,7 @@ class AdminConsole extends Component {
                 }),
               ]),
               div({
-                isRendered: (this.state.env === 'dev'),
+                isRendered: (this.props.env !== 'prod'),
                 className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
@@ -217,7 +217,7 @@ class AdminConsole extends Component {
               ]),
               div({
                 // TODO: We won't need this box when MDV is complete
-                isRendered: (this.state.env !== 'dev'),
+                isRendered: (this.state.env === 'prod'),
                 className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
