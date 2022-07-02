@@ -135,7 +135,7 @@ export default function ChairActions(props) {
     try {
       const { dars } = collection;
       const user = Storage.getCurrentUser();
-      const { userId: userId } = user;
+      const { userId } = user;
       const elections = flow(
         map((dar) => dar.elections),
         flatMap((electionMap) => Object.values(electionMap)),

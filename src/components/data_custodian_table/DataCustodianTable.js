@@ -278,7 +278,7 @@ export default function DataCustodianTable(props) {
 
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName;
-    const {userId: userId, displayName} = selectedResearcher;
+    const {userId, displayName} = selectedResearcher;
     try {
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
@@ -310,7 +310,7 @@ export default function DataCustodianTable(props) {
   };
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
-    const { displayName, email, userId: userId } = selectedResearcher;
+    const { displayName, email, userId } = selectedResearcher;
     const searchableKey = !isNil(userId) ? 'dacUserId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;

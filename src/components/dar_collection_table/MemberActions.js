@@ -48,7 +48,7 @@ export default function MemberActions(props) {
       const { dars } = collection;
       const user = Storage.getCurrentUser();
       const userId = user.userId;
-      const relevantVotes = findRelevantVotes({dars, dacUserId: userId});
+      const relevantVotes = findRelevantVotes({dars, userId});
       if(!isEmpty(relevantVotes)) {
         const buttonLabel = determineButtonLabel({relevantVotes});
         setLabel(buttonLabel);
