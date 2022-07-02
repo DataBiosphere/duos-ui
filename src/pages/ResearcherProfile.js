@@ -263,7 +263,7 @@ export default function ResearcherProfile(props) {
 
   const updateUserProperties = async (profile) => {
     const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().dacUserId, researcherFieldsComplete, profileClone);
+    await Researcher.updateProperties(Storage.getCurrentUser().userId, researcherFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
@@ -276,7 +276,7 @@ export default function ResearcherProfile(props) {
     currentUserUpdate.roles = userRoles;
     currentUserUpdate.institutionId = profile.institutionId;
     const payload = { updatedUser: currentUserUpdate };
-    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
+    let updatedUser = await User.update(payload, currentUserUpdate.userId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
   };

@@ -102,7 +102,7 @@ export default function LibraryCardFormModal(props) {
   const updateUser = (value) => {
     let userEmail, userId, userName, eraCommonsId;
     if (isObject(value)) {
-      userId = value.dacUserId;
+      userId = value.userId;
       userEmail = value.email;
       userName = value.displayName;
       eraCommonsId = value.eraCommonsId;
