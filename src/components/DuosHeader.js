@@ -198,8 +198,7 @@ const NavigationTabsComponent = (props) => {
             className: 'dropdown-menu navbar-dropdown',
             role: 'menu',
             style: {
-              top: -20,
-              left: 'calc(100% + 10px)'
+              top: orientation === 'vertical' ? '-100%' : '100%'
             }
           }, [
             li([
