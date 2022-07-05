@@ -33,6 +33,11 @@
   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
 }
 
+.navbar-duos .navbar-public li {
+  display: inline-block;
+  margin-right: 30px;
+}
+
 /* ------------------------------------- */
 /*    Sub Components                    */
 /* ------------------------------------- */
@@ -86,6 +91,10 @@
   list-style: none;
   margin: 0;
   padding: 20px;
+}
+
+.navbar-vertical .navbar-public li {
+  display: block;
 }
 
 /* ------------------------------------- */
