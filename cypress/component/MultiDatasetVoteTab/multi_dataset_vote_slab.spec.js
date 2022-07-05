@@ -24,15 +24,15 @@ const closedElection =  [
 const votesForOpenElection1 = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: true, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     memberVotes: [
-      {dacUserId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
-      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
-      {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
     ]
   }
 };
@@ -40,15 +40,15 @@ const votesForOpenElection1 = {
 const votesForOpenElection2 = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: true, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     memberVotes: [
-      {dacUserId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
-      {dacUserId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
+      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
     ]
   }
 };
@@ -56,14 +56,14 @@ const votesForOpenElection2 = {
 const votesForClosedElection = {
   dataAccess: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
     ],
     memberVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
-      {dacUserId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
     ]
   }
 };
@@ -102,7 +102,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -125,7 +125,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
@@ -146,7 +146,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -169,7 +169,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -194,7 +194,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
@@ -215,7 +215,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
@@ -236,7 +236,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
@@ -258,7 +258,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         readOnly={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
@@ -279,7 +279,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
     cy.get('[datacy=chair-vote-info]').should('not.exist');
   });
@@ -296,7 +296,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     cy.get('[datacy=chair-vote-info]').should('not.exist');
   });
@@ -313,7 +313,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
     cy.get('[datacy=chair-vote-info]').should('exist');
   });
@@ -330,7 +330,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const component = cy.get('.table-data');
     component.should('exist');
@@ -351,7 +351,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
@@ -369,7 +369,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2');
@@ -387,7 +387,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
     cy.get('.table-data').should('exist').should('not.contain', 'undefined');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
@@ -405,7 +405,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'No');
@@ -424,7 +424,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');

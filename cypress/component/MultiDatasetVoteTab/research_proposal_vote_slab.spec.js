@@ -23,15 +23,15 @@ const darInfoPrimarySecondaryUse = {
 const votesForElection1 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
     ],
     memberVotes: [
-      {dacUserId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
-      {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
-      {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+      {userId: 100, displayName: 'Joe', rationale: 'test1', electionId: 101, voteId: 1, createDate: 1},
+      {userId: 200, displayName: 'Sarah', vote: false, rationale: 'test1', electionId: 101, voteId: 2, createDate: 1},
+      {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
     ]
   }
 };
@@ -39,15 +39,15 @@ const votesForElection1 = {
 const votesForElection2 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
     ],
     memberVotes: [
-      {dacUserId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
-      {dacUserId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
-      {dacUserId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
+      {userId: 100, displayName: 'Joe', rationale: 'test2', electionId: 102, voteId: 4, createDate: 2},
+      {userId: 200, displayName: 'Sarah',  vote: false, rationale: 'test1', electionId: 102, voteId: 5, createDate: 1},
+      {userId: 300, displayName: 'Matt', vote: false, electionId: 102, voteId: 6}
     ]
   }
 };
@@ -55,14 +55,14 @@ const votesForElection2 = {
 const votesForElection3 = {
   rp: {
     finalVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
     ],
     chairpersonVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 103, voteId: 7},
+      {userId: 200, displayName: 'Sarah', vote: true, electionId: 103, voteId: 7},
     ],
     memberVotes: [
-      {dacUserId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
-      {dacUserId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
+      {userId: 200, displayName: 'Sarah', vote: false, electionId: 103, voteId: 7},
+      {userId: 300, displayName: 'Matt', vote: true, rationale: 'test3', electionId: 103, voteId: 8}
     ]
   }
 };
@@ -250,7 +250,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -273,7 +273,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -296,7 +296,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -319,7 +319,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -342,7 +342,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -364,7 +364,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         readOnly={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
@@ -385,7 +385,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={false}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -402,7 +402,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -419,7 +419,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 300});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -436,7 +436,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -457,7 +457,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -475,7 +475,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -493,7 +493,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -511,7 +511,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
@@ -530,7 +530,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isChair={true}
       />
     );
-    cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 100});
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
