@@ -303,7 +303,7 @@ export const extractDatasetIdsFromBucket = (bucket) => {
 
 //collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
 export const collapseVotesByUser = (votes) => {
-  const votesGroupedByUser = groupBy(vote => vote.userId)(cloneDeep(votes));
+  const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(votes));
   return flatMap(userIdKey => {
     const votesByUser = votesGroupedByUser[userIdKey];
     const collapsedVotes = collapseVotes({votes: votesByUser});

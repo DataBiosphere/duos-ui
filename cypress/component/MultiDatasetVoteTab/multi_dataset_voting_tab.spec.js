@@ -23,28 +23,28 @@ const bucket1 = {
     {
       rp: {
         finalVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         chairpersonVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         memberVotes: [
-          {userId: 100, displayName: 'Joe', electionId: 100, voteId: 1, createDate: 1},
-          {userId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
-          {userId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
+          {dacUserId: 100, displayName: 'Joe', electionId: 100, voteId: 1, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
+          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
         ]
       },
       dataAccess: {
         finalVotes: [
-          {userId: 200, displayName: 'Sarah', vote: false},
+          {dacUserId: 200, displayName: 'Sarah', vote: false},
         ],
         chairpersonVotes: [
-          {userId: 200, displayName: 'Sarah', vote: false},
+          {dacUserId: 200, displayName: 'Sarah', vote: false},
         ],
         memberVotes: [
-          {userId: 100, displayName: 'Joe', rationale: 'test', electionId: 101, voteId: 1, createDate: 1},
-          {userId: 200, displayName: 'Sarah', vote: false, rationale: 'rationale', electionId: 101, voteId: 2, createDate: 1},
-          {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+          {dacUserId: 100, displayName: 'Joe', rationale: 'test', electionId: 101, voteId: 1, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'rationale', electionId: 101, voteId: 2, createDate: 1},
+          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
         ]
       }
     },
@@ -66,26 +66,26 @@ const bucket2 = {
     {
       rp: {
         finalVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         chairpersonVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         memberVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
-          {userId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
+          {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
+          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
         ]
       },
       dataAccess: {
         finalVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true},
+          {dacUserId: 200, displayName: 'Sarah', vote: true},
         ],
         chairpersonVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true},
+          {dacUserId: 200, displayName: 'Sarah', vote: true},
         ],
         memberVotes: [
-          {userId: 200, displayName: 'Sarah', vote: true, rationale: 'rationale2', electionId: 102, voteId: 4, createDate: 1},
-          {userId: 300, displayName: 'Matt', electionId: 102, voteId: 5, createDate: 1}
+          {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'rationale2', electionId: 102, voteId: 4, createDate: 1},
+          {dacUserId: 300, displayName: 'Matt', electionId: 102, voteId: 5, createDate: 1}
         ]
       }
     },
@@ -245,7 +245,7 @@ describe('filterBucketsForUser - Tests', function() {
         {
           rp: {
             memberVotes: [
-              {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+              {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
             ],
           }
         }
