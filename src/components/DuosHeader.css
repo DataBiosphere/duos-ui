@@ -82,6 +82,12 @@
   background: url('../images/close-icon.svg') no-repeat 0 0;
 }
 
+.navbar-vertical .navbar-public {
+  list-style: none;
+  margin: 0;
+  padding: 20px;
+}
+
 /* ------------------------------------- */
 /*    Links                              */
 /* ------------------------------------- */
