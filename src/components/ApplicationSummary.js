@@ -110,7 +110,7 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
               onClick: () => Utils.download('machine-readable-DAR.json', mrDAR),
               filename: 'machine-readable-DAR.json',
               value: mrDAR, className: 'italic hover-color'
-            }, ['Download DAR machine-readable format'])
+            }, ['Download Data Access Request machine-readable format'])
           ]),
 
           div({ className: 'row dar-summary' }, [

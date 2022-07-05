@@ -540,7 +540,7 @@ class DuosHeader extends Component {
         link: this.state.dacChairPath,
         search: 'chair_console',
         children: [
-          { label: 'Manage DARs', link: this.state.dacChairPath },
+          { label: 'DAR Requests', link: this.state.dacChairPath },
           { label: 'Datasets', link: '/dataset_catalog' },
           { label: 'DAC Members', link: '/manage_dac' }
         ]

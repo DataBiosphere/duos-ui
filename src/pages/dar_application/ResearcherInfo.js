@@ -523,7 +523,7 @@ export default function ResearcherInfo(props) {
                 Policy. External Collaborators must be at the PI or equivalent level and are not required to have a Library Card in order to access data,
                 although it is encouraged. Note: External Collaborators must submit an independent DAR approved by their signing Official
                 to collaborate on this project. External Collaborators will be able to add their Lab Staff, as needed, via their independent DAR. Approval of
-                this DAR does not indicate approval of the External Collaborators listed.`
+                this Data Access Request does not indicate approval of the External Collaborators listed.`
                 ])
               ])
             ]),

@@ -59,7 +59,7 @@ export default function AdminManageDarCollections() {
               fontWeight: 600,
               fontSize: '2.8rem'
             } }, [
-              'Manage Data Access Request Collections',
+              'All Data Access Requests',
             ]),
             div(
               {
@@ -68,7 +68,7 @@ export default function AdminManageDarCollections() {
                   fontSize: '1.6rem'
                 },
               },
-              ['List of all DAR Collections saved in DUOS']
+              ['List of all Data Access Requests saved in DUOS']
             ),
           ]),
         ]

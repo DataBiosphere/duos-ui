@@ -120,7 +120,7 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false);
     } catch (error) {
       Notifications.showError({
-        text: 'Error initializing DAR collection page. You have been redirected to your console',
+        text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
       Navigation.console(user, props.history);
     }
