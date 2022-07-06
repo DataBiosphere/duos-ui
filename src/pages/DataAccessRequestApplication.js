@@ -46,8 +46,6 @@ class DataAccessRequestApplication extends Component {
         checkNihDataOnly: false,
         rus: '',
         nonTechRus: '',
-        linkedIn: '',
-        orcid: '',
         oneGender: '',
         methods: '',
         controls: '',
@@ -69,14 +67,9 @@ class DataAccessRequestApplication extends Component {
         populationMigration: '',
         psychiatricTraits: '',
         notHealth: '',
-        investigator: '',
         researcher: '',
         projectTitle: '',
-        researcherGate: '',
-        isThePi: '',
-        havePi: '',
         profileName: '',
-        piName: '',
         pubmedId: '',
         scientificUrl: '',
         signingOfficial: '',
@@ -98,9 +91,6 @@ class DataAccessRequestApplication extends Component {
       },
       step1: {
         inputResearcher: {
-          invalid: false
-        },
-        inputInvestigator: {
           invalid: false
         },
         inputNih: {
@@ -222,10 +212,6 @@ class DataAccessRequestApplication extends Component {
 
     let rpProperties = getPropertyValuesFromUser(researcher);
     formData.researcher = isNil(researcher) ? '' : researcher.displayName;
-    formData.investigator = rpProperties.piName;
-    formData.linkedIn = rpProperties.linkedIn;
-    formData.researcherGate = rpProperties.researcherGate;
-    formData.orcid = rpProperties.orcid;
     formData.institution = isNil(researcher)  || isNil(researcher.institution)? '' : researcher.institution.name;
     formData.department = rpProperties.department;
     formData.division = rpProperties.division;
@@ -235,11 +221,7 @@ class DataAccessRequestApplication extends Component {
     formData.zipCode = rpProperties.zipCode;
     formData.country = rpProperties.country;
     formData.state = rpProperties.state;
-    formData.piName = rpProperties.piName;
     formData.academicEmail = rpProperties.academicEmail;
-    formData.piEmail = rpProperties.piEmail;
-    formData.isThePi = rpProperties.isThePI;
-    formData.havePi = rpProperties.havePI;
     formData.pubmedId = rpProperties.pubmedID;
     formData.scientificUrl = rpProperties.scientificURL;
     formData.userId = researcher.dacUserId;
@@ -362,7 +344,6 @@ class DataAccessRequestApplication extends Component {
   //NOTE: seperated out check functionality from state updates in original function to make it easier to follow
   step1InvalidChecks = () => {
     let isResearcherInvalid = false,
-      isInvestigatorInvalid = false,
       showValidationMessages = false,
       isSigningOfficialInvalid = false,
       isITDirectorInvalid = false,
@@ -375,18 +356,6 @@ class DataAccessRequestApplication extends Component {
 
     if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
-      showValidationMessages = true;
-    }
-    if (!this.isValid(this.state.formData.investigator)) {
-      isInvestigatorInvalid = true;
-      showValidationMessages = true;
-    }
-    if (this.state.formData.checkCollaborator !== true &&
-      !this.isValid(this.state.formData.linkedIn) &&
-      !this.isValid(this.state.formData.researcherGate) &&
-      !this.isValid(this.state.formData.orcid) &&
-      !this.state.nihValid) {
-      isNihInvalid = true;
       showValidationMessages = true;
     }
     // DUOS-565: checkCollaborator : false and nihValid : false is an invalid combination
@@ -423,7 +392,6 @@ class DataAccessRequestApplication extends Component {
 
     return {
       isResearcherInvalid,
-      isInvestigatorInvalid,
       showValidationMessages,
       isNihInvalid,
       isCloudUseInvalid,
@@ -439,7 +407,6 @@ class DataAccessRequestApplication extends Component {
     const checkCollaborator = this.state.formData.checkCollaborator;
     const {
       isResearcherInvalid,
-      isInvestigatorInvalid,
       showValidationMessages,
       isNihInvalid,
       isCloudUseInvalid,
@@ -450,7 +417,6 @@ class DataAccessRequestApplication extends Component {
     } = dataset;
 
     return isResearcherInvalid
-      || isInvestigatorInvalid
       || showValidationMessages
       || (!checkCollaborator && isNihInvalid)
       || isCloudUseInvalid
@@ -462,7 +428,6 @@ class DataAccessRequestApplication extends Component {
 
   verifyStep1() {
     const { isResearcherInvalid,
-      isInvestigatorInvalid,
       isNihInvalid,
       showValidationMessages,
       isCloudUseInvalid,
@@ -473,7 +438,6 @@ class DataAccessRequestApplication extends Component {
     } = this.step1InvalidChecks();
     this.setState(prev => {
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
-      prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
       prev.step1.inputNih.invalid = isNihInvalid;
       prev.isCloudUseInvalid = isCloudUseInvalid;
       prev.isCloudProviderInvalid = isCloudProviderInvalid;
@@ -865,8 +829,6 @@ class DataAccessRequestApplication extends Component {
 
   render() {
     const {
-      orcid = '',
-      researcherGate = '',
       checkCollaborator = false,
       checkNihDataOnly = false,
       darCode,
@@ -879,8 +841,6 @@ class DataAccessRequestApplication extends Component {
       forProfit = false,
       controls = false,
       methods = false,
-      linkedIn = '',
-      investigator = '',
       labCollaborators,
       internalCollaborators,
       externalCollaborators,
@@ -1033,21 +993,16 @@ class DataAccessRequestApplication extends Component {
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
                 formFieldChange: this.formFieldChange,
-                invalidInvestigator: step1.inputInvestigator.invalid,
                 invalidResearcher: step1.inputResearcher.invalid,
-                investigator: investigator,
-                linkedIn: linkedIn,
                 location: this.props.location,
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
-                orcid: orcid,
                 internalCollaborators,
                 labCollaborators,
                 externalCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherUser: this.state.researcher,
-                researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
                 allSigningOfficials: this.state.allSigningOfficials,

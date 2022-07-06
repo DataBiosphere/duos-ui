@@ -16,7 +16,6 @@ const formatDraft = (draft) => {
     projectTitle,
     datasets,
     institution,
-    investigator,
   } = data;
 
   const output =  {
@@ -28,9 +27,6 @@ const formatDraft = (draft) => {
     createDate: 'Unsubmitted',
     datasets,
     institution,
-    createUser: {
-      displayName: investigator
-    },
   };
   return output;
 };
