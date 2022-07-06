@@ -1036,7 +1036,6 @@ class DataAccessRequestApplication extends Component {
                 methods,
                 controls,
                 population,
-                forProfit,
                 rus: this.state.formData.rus,
                 nonTechRus: this.state.formData.nonTechRus,
                 gsoAcknowledgement,
