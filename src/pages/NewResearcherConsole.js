@@ -16,7 +16,6 @@ const formatDraft = (draft) => {
     projectTitle,
     datasets,
     institution,
-    investigator,
   } = data;
 
   const output =  {
@@ -28,9 +27,6 @@ const formatDraft = (draft) => {
     createDate: 'Unsubmitted',
     datasets,
     institution,
-    createUser: {
-      displayName: investigator
-    },
   };
   return output;
 };
@@ -83,13 +79,13 @@ export default function NewResearcherConsole() {
         fetchedCollections,
         collectionArray,
         errorMsg,
-        'Failed to fetch DAR Collection'
+        'Failed to fetch Data Access Request Collection'
       );
       collectionArray = handlePromise(
         fetchedDrafts,
         collectionArray,
         errorMsg,
-        'Failed to fetch DAR Drafts'
+        'Failed to fetch Data Access Request Drafts'
       );
       if(!isEmpty(errorMsg)) {
         Notifications.showError({text: errorMsg.join('\n')});
@@ -167,11 +163,11 @@ export default function NewResearcherConsole() {
       } else {
         collectionsClone.splice(targetIndex, 1);
         setResearcherCollections(collectionsClone);
-        Notifications.showSuccess({text: `Deleted DAR Draft ${identifier}`});
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
       }
     } catch (error) {
       Notifications.showError({
-        text: `Failed to delete DAR Draft ${identifier}`,
+        text: `Failed to delete Data Access Request Draft ${identifier}`,
       });
     }
 
@@ -190,14 +186,14 @@ export default function NewResearcherConsole() {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: Styles.TITLE }, ['Researcher Console']),
+            div({ style: Styles.TITLE }, ['My Data Access Requests']),
             div(
               {
                 style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
                   fontSize: '18px',
                 }),
               },
-              [`Select and manage DAR Collections and Drafts below`]
+              [`Select and manage Data Access Requests and Drafts below`]
             ),
           ]),
         ]
