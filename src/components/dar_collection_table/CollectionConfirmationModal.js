@@ -38,7 +38,7 @@ export default function CollectionConfirmationModal(props) {
     h(ConfirmationModal, {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
-      title: 'Cancel DAR Collection',
+      title: 'Cancel Data Access Request',
       message: `Are you sure you want to cancel ${collection.darCode}?`,
       header: getModalHeader(),
       onConfirm: cancelOnClick
@@ -49,7 +49,7 @@ export default function CollectionConfirmationModal(props) {
       showConfirmation,
       styleOverride: {height: '35%'},
       closeConfirmation: () => setShowConfirmation(false),
-      title: 'Revise DAR Collection',
+      title: 'Revise Data Access Request',
       message: `Are you sure you want to revise ${collection.darCode}?`,
       header: getModalHeader(),
       onConfirm: reviseOnClick
@@ -58,7 +58,7 @@ export default function CollectionConfirmationModal(props) {
   const openModal = h(ConfirmationModal, {
     showConfirmation,
     closeConfirmation: () => setShowConfirmation(false),
-    title: 'Open DAR Collection',
+    title: 'Open Data Access Request',
     message: `Are you sure you want to open ${collection.darCode}?`,
     header: getModalHeader(),
     onConfirm: openOnClick,
@@ -68,7 +68,7 @@ export default function CollectionConfirmationModal(props) {
     showConfirmation,
     styleOverride: { height: '35%' },
     closeConfirmation: () => setShowConfirmation(false),
-    title: 'Delete DAR Collection Draft',
+    title: 'Delete Data Access Request Draft',
     message: `Are you sure you want to delete ${collection.darCode}?`,
     header: getModalHeader(),
     onConfirm: deleteOnClick,

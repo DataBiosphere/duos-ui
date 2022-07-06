@@ -30,7 +30,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
   }
 
   async componentDidMount() {
-    const user = await User.getById(this.props.match.params.dacUserId);
+    const user = await User.getById(this.props.match.params.userId);
     const currentRoles = _.map(user.roles, (ur) => {
       return {'roleId': ur.roleId, 'name': ur.name};
     });
@@ -55,9 +55,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
     if (!this.state.displayNameValid) {
       return;
     }
-    const userId = this.state.user.dacUserId;
+    const userId = this.state.user.userId;
     let user = {
-      dacUserId: userId,
+      userId: userId,
       displayName: this.state.displayName,
       emailPreference: this.state.emailPreference,
     };

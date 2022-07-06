@@ -63,7 +63,7 @@ export default function NewMemberConsole(props) {
               fontWeight: 600,
               fontSize: '2.8rem'
             } }, [
-              'Manage Data Access Request Collections',
+              `My DAC's Data Access Requests`,
             ]),
             div(
               {
@@ -85,7 +85,7 @@ export default function NewMemberConsole(props) {
         DarCollectionTableColumnOptions.DAR_CODE,
         DarCollectionTableColumnOptions.NAME,
         DarCollectionTableColumnOptions.SUBMISSION_DATE,
-        DarCollectionTableColumnOptions.PI,
+        DarCollectionTableColumnOptions.RESEARCHER,
         DarCollectionTableColumnOptions.INSTITUTION,
         DarCollectionTableColumnOptions.DATASET_COUNT,
         DarCollectionTableColumnOptions.STATUS,

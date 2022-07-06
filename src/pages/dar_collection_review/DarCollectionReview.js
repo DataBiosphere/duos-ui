@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import {evaluateTrueString, Notifications} from '../../libs/utils';
+import {Notifications} from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
@@ -13,7 +13,6 @@ import {
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  getPI,
   updateFinalVote
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
@@ -121,7 +120,7 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false);
     } catch (error) {
       Notifications.showError({
-        text: 'Error initializing DAR collection page. You have been redirected to your console',
+        text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
       Navigation.console(user, props.history);
     }
@@ -214,13 +213,9 @@ export default function DarCollectionReview(props) {
         }),
         h(ApplicationInformation, {
           isRendered: selectedTab === tabs.applicationInformation,
-          pi: getPI(collection.createUser),
           institution: get('institution.name')(researcherProfile),
           researcher: researcherProfile.displayName,
           email: researcherProperties.academicEmail,
-          piEmail: evaluateTrueString(researcherProperties.isThePI) ? researcherProperties.academicEmail : researcherProperties.piEmail,
-          city: `${researcherProperties.city}${!researcherProperties.state ? '' : ', ' + researcherProperties.state}`,
-          country: researcherProperties.country,
           nonTechSummary: darInfo.nonTechRus,
           isLoading: subcomponentLoading,
           collection: collection,

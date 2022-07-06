@@ -171,7 +171,7 @@ const darsWithRpElection = {
 
 
 const user = {
-  dacUserId: 1,
+  userId: 1,
   roles: [
     {
       dacId: 2

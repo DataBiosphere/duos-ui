@@ -181,7 +181,7 @@ const NavigationTabsComponent = (props) => {
         }, [
           a(
             {
-              id: 'sel_dacUser',
+              id: 'sel_user',
               role: 'button',
               className: 'dropdown-toggle',
               'data-toggle': 'dropdown',
@@ -255,7 +255,7 @@ class DuosHeader extends Component {
 
   async componentDidMount() {
     const env = await Config.getEnv();
-    if (env === 'dev') {
+    if (env !== 'prod') {
       this.setState({dacChairPath: '/new_chair_console'});
       this.setState({dacMemberPath: '/new_member_console'});
       this.setState({researcherPath: '/new_researcher_console'});
@@ -427,7 +427,7 @@ class DuosHeader extends Component {
         link: this.state.dacChairPath,
         search: 'chair_console',
         children: [
-          { label: 'Manage DARs', link: this.state.dacChairPath },
+          { label: 'DAR Requests', link: this.state.dacChairPath },
           { label: 'Datasets', link: '/dataset_catalog' },
           { label: 'DAC Members', link: '/manage_dac' }
         ]

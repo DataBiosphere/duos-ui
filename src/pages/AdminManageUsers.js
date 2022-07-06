@@ -88,7 +88,7 @@ class AdminManageUsers extends Component {
   };
 
   editUser = (user) => () => {
-    this.props.history.push(`/admin_edit_user/${user.dacUserId}`);
+    this.props.history.push(`/admin_edit_user/${user.userId}`);
   };
 
   okModal = async () => {
@@ -166,11 +166,11 @@ class AdminManageUsers extends Component {
           hr({ className: 'table-head-separator' }),
 
           this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user) => {
-            return h(Fragment, { key: user.dacUserId }, [
-              div({ id: user.dacUserId, className: 'row no-margin tableRow' }, [
-                div({ id: user.dacUserId + '_name', name: 'userName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text' }, [user.displayName]),
-                div({ id: user.dacUserId + '_email', name: 'userEmail', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text' }, [user.email]),
-                div({ id: user.dacUserId + '_roles', name: 'userRoles', className: 'col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold' }, [
+            return h(Fragment, { key: user.userId }, [
+              div({ id: user.userId, className: 'row no-margin tableRow' }, [
+                div({ id: user.userId + '_name', name: 'userName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text' }, [user.displayName]),
+                div({ id: user.userId + '_email', name: 'userEmail', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text' }, [user.email]),
+                div({ id: user.userId + '_roles', name: 'userRoles', className: 'col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold' }, [
                   span({ className: 'admin-users-list'},
                     _.map(_.sortedUniq(_.map(user.roles, 'name')),
                       (n) => {return span({ className: 'enabled default-color'}, n);})
@@ -178,7 +178,7 @@ class AdminManageUsers extends Component {
                 ]),
                 div({ className: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center' }, [
                   button({
-                    id: user.dacUserId + '_btnEditUser',
+                    id: user.userId + '_btnEditUser',
                     name: 'btn_editUser',
                     className: 'cell-button hover-color',
                     onClick: this.editUser(user)

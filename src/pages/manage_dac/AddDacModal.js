@@ -92,8 +92,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * plus any chairs that are slated for removal
     const invalidChairs = ld.difference(
       ld.union(
-        ld.map(this.state.dac.chairpersons, 'dacUserId'),
-        ld.map(this.state.dac.members, 'dacUserId'),
+        ld.map(this.state.dac.chairpersons, 'userId'),
+        ld.map(this.state.dac.members, 'userId'),
         this.state.memberIdsToAdd),
       this.state.memberIdsToRemove,
       this.state.chairIdsToRemove);
@@ -109,8 +109,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * plus any chairs that are slated for removal
     const invalidMembers = ld.difference(
       ld.union(
-        ld.map(this.state.dac.members, 'dacUserId'),
-        ld.map(this.state.dac.chairpersons, 'dacUserId'),
+        ld.map(this.state.dac.members, 'userId'),
+        ld.map(this.state.dac.chairpersons, 'userId'),
         this.state.chairIdsToAdd),
       this.state.memberIdsToRemove,
       this.state.chairIdsToRemove);
@@ -120,11 +120,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   userSearch = (invalidUserIds, query, callback) => {
     DAC.autocompleteUsers(query).then(
       items => {
-        const filteredUsers = ld.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
+        const filteredUsers = ld.filter(items, item => { return !invalidUserIds.includes(item.userId); });
         const options = filteredUsers.map(function(item) {
           return {
-            key: item.dacUserId,
-            value: item.dacUserId,
+            key: item.userId,
+            value: item.userId,
             label: item.displayName + ' (' + item.email + ')',
             item: item
           };
@@ -138,7 +138,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
 
   onChairSearchChange = (data) => {
     this.setState(prev => {
-      prev.chairIdsToAdd = ld.map(data, 'item.dacUserId');
+      prev.chairIdsToAdd = ld.map(data, 'item.userId');
       prev.chairsSelectedOptions = data;
       prev.dirtyFlag = true;
       return prev;
@@ -147,7 +147,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
 
   onMemberSearchChange = (data) => {
     this.setState(prev => {
-      prev.memberIdsToAdd = ld.map(data, 'item.dacUserId');
+      prev.memberIdsToAdd = ld.map(data, 'item.userId');
       prev.membersSelectedOptions = data;
       prev.dirtyFlag = true;
       return prev;
@@ -196,33 +196,33 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   };
 
-  removeDacMember = (dacId, dacUserId, role) => {
+  removeDacMember = (dacId, userId, role) => {
     switch (role) {
       case CHAIR:
-        if (this.state.chairIdsToRemove.includes(dacUserId)) {
+        if (this.state.chairIdsToRemove.includes(userId)) {
           this.setState(prev => {
-            prev.chairIdsToRemove = ld.difference(prev.chairIdsToRemove, [dacUserId]);
+            prev.chairIdsToRemove = ld.difference(prev.chairIdsToRemove, [userId]);
             prev.dirtyFlag = true;
             return prev;
           });
         } else {
           this.setState(prev => {
-            prev.chairIdsToRemove = ld.union(prev.chairIdsToRemove, [dacUserId]);
+            prev.chairIdsToRemove = ld.union(prev.chairIdsToRemove, [userId]);
             prev.dirtyFlag = true;
             return prev;
           });
         }
         break;
       case MEMBER:
-        if (this.state.memberIdsToRemove.includes(dacUserId)) {
+        if (this.state.memberIdsToRemove.includes(userId)) {
           this.setState(prev => {
-            prev.memberIdsToRemove = ld.difference(prev.memberIdsToRemove, [dacUserId]);
+            prev.memberIdsToRemove = ld.difference(prev.memberIdsToRemove, [userId]);
             prev.dirtyFlag = true;
             return prev;
           });
         } else {
           this.setState(prev => {
-            prev.memberIdsToRemove = ld.union(prev.memberIdsToRemove, [dacUserId]);
+            prev.memberIdsToRemove = ld.union(prev.memberIdsToRemove, [userId]);
             prev.dirtyFlag = true;
             return prev;
           });

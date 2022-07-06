@@ -5,9 +5,9 @@ import { DarCollectionTableColumnOptions, DarCollectionTable } from '../../../sr
 
 const collections = [
   {
-    "darCollectionId": 211,
-    "darCode": "DAR-259",
-    "datasets": [{}, {}]
+    darCollectionId: 211,
+    darCode: 'DAR-259',
+    datasets: [{}, {}]
   }
 ];
 

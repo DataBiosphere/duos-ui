@@ -9,26 +9,15 @@ import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '.
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_table/DarTableActions';
 
-const createPropertiesForDraft = (keys, values) =>
-  keys.map((propertyKey, index) => ({
-    propertyKey,
-    propertyValue: values[index],
-  }));
-
 const formatDraft = (draft) => {
   const { data, referenceId, id } = draft;
   const {
     partialDarCode,
     projectTitle,
     datasets,
-    isThePi,
-    piName,
     institution,
-    investigator,
   } = data;
 
-  const keys = ['isThePi', 'piName'];
-  const values = [isThePi, piName];
   const output =  {
     darCode: replace('temp', 'DRAFT')(partialDarCode),
     referenceId,
@@ -38,10 +27,6 @@ const formatDraft = (draft) => {
     createDate: 'Unsubmitted',
     datasets,
     institution,
-    createUser: {
-      displayName: investigator,
-      properties: createPropertiesForDraft(keys, values),
-    },
   };
   return output;
 };
@@ -94,13 +79,13 @@ export default function NewResearcherConsole() {
         fetchedCollections,
         collectionArray,
         errorMsg,
-        'Failed to fetch DAR Collection'
+        'Failed to fetch Data Access Request Collection'
       );
       collectionArray = handlePromise(
         fetchedDrafts,
         collectionArray,
         errorMsg,
-        'Failed to fetch DAR Drafts'
+        'Failed to fetch Data Access Request Drafts'
       );
       if(!isEmpty(errorMsg)) {
         Notifications.showError({text: errorMsg.join('\n')});
@@ -178,11 +163,11 @@ export default function NewResearcherConsole() {
       } else {
         collectionsClone.splice(targetIndex, 1);
         setResearcherCollections(collectionsClone);
-        Notifications.showSuccess({text: `Deleted DAR Draft ${identifier}`});
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
       }
     } catch (error) {
       Notifications.showError({
-        text: `Failed to delete DAR Draft ${identifier}`,
+        text: `Failed to delete Data Access Request Draft ${identifier}`,
       });
     }
 
@@ -201,14 +186,14 @@ export default function NewResearcherConsole() {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: Styles.TITLE }, ['Researcher Console']),
+            div({ style: Styles.TITLE }, ['My Data Access Requests']),
             div(
               {
                 style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
                   fontSize: '18px',
                 }),
               },
-              [`Select and manage DAR Collections and Drafts below`]
+              [`Select and manage Data Access Requests and Drafts below`]
             ),
           ]),
         ]
@@ -222,7 +207,6 @@ export default function NewResearcherConsole() {
           DarCollectionTableColumnOptions.DAR_CODE,
           DarCollectionTableColumnOptions.NAME,
           DarCollectionTableColumnOptions.SUBMISSION_DATE,
-          DarCollectionTableColumnOptions.PI,
           DarCollectionTableColumnOptions.DATASET_COUNT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,

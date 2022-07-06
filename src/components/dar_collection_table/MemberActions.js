@@ -21,7 +21,7 @@ const findRelevantVotes = ({ dars = {}, userId}) => {
 
 const determineButtonLabel = ({relevantVotes}) => {
   const submittedVotePresent = any(vote => !isNil(vote.vote))(relevantVotes);
-  return submittedVotePresent ? 'Update Vote' : 'Vote';
+  return submittedVotePresent ? 'Update' : 'Vote';
 };
 
 export default function MemberActions(props) {
@@ -47,7 +47,7 @@ export default function MemberActions(props) {
     try {
       const { dars } = collection;
       const user = Storage.getCurrentUser();
-      const userId = user.dacUserId;
+      const userId = user.userId;
       const relevantVotes = findRelevantVotes({dars, userId});
       if(!isEmpty(relevantVotes)) {
         const buttonLabel = determineButtonLabel({relevantVotes});

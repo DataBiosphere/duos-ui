@@ -46,7 +46,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
+const calcComponentState = ({userId, relevantElections, relevantDarsNoElections}) => {
   try{
     let nonOpenRelevantElectionPresent = false;
     let closedRelevantElectionPresent = false;
@@ -62,8 +62,8 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
       isElectionOpen ? openRelevantElectionPresent = true : nonOpenRelevantElectionPresent = true;
       if(toLower(status) === 'closed') {closedRelevantElectionPresent = true;}
       forEach(vote => {
-        if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
-        if(!isNil(vote.vote)) { label = 'Update Vote'; }
+        if(vote.dacUserId === userId && isElectionOpen) {userHasVote = true;}
+        if(!isNil(vote.vote)) { label = 'Update'; }
       })(votes);
     })(relevantElections);
     //To determine open, see if empty dars exist or if any election is non-open
@@ -109,7 +109,7 @@ export default function ChairActions(props) {
   };
 
   useEffect(() => {
-    const init = ({ elections, dars, dacUserId, relevantDatasets }) => {
+    const init = ({ elections, dars, userId, relevantDatasets }) => {
       const { relevantDarsNoElections, relevantElections } =
         initUserData({
           dars,
@@ -118,7 +118,7 @@ export default function ChairActions(props) {
         });
       const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
         calcComponentState({
-          dacUserId,
+          userId,
           relevantElections,
           relevantDarsNoElections,
           setVoteLabel
@@ -135,13 +135,13 @@ export default function ChairActions(props) {
     try {
       const { dars } = collection;
       const user = Storage.getCurrentUser();
-      const { dacUserId } = user;
+      const { userId } = user;
       const elections = flow(
         map((dar) => dar.elections),
         flatMap((electionMap) => Object.values(electionMap)),
         filter((election) => toLower(election.electionType) === 'dataaccess')
       )(dars);
-      init({ dars, dacUserId, elections, relevantDatasets });
+      init({ dars, userId, elections, relevantDatasets });
     } catch (error) {
       updateStateOnFail();
     }
@@ -189,16 +189,16 @@ export default function ChairActions(props) {
     label: voteLabel,
     isRendered: voteEnabled,
     onClick: () => goToVote(collectionId),
-    baseColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
+    baseColor: toLower(voteLabel) === 'update' ? 'white' : duosBlue,
     hoverStyle: {
-      backgroundColor: voteLabel === 'Update Vote' ? 'white' : duosBlue,
-      color: 'white'
+      backgroundColor: toLower(voteLabel) === 'update' ? 'white' : duosBlue,
+      color: toLower(voteLabel) === 'update' ? duosBlue : 'white',
     },
     additionalStyle: {
       padding: '3% 7%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      color: voteLabel === 'Update Vote' ? duosBlue : 'white',
+      color: toLower(voteLabel) === 'update' ? duosBlue : 'white',
       marginRight: '8%',
       border: `1px ${duosBlue} solid`,
     },

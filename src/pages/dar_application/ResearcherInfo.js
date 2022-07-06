@@ -24,18 +24,13 @@ export default function ResearcherInfo(props) {
     externalCollaborators,
     formFieldChange,
     internalCollaborators,
-    invalidInvestigator,
     invalidResearcher,
-    investigator,
     labCollaborators,
-    linkedIn,
     location,
     nihValid,
     onNihStatusUpdate,
-    orcid,
     partialSave,
     researcher,
-    researcherGate,
     showValidationMessages,
     nextPage,
     cloudProviderType,
@@ -180,7 +175,7 @@ export default function ResearcherInfo(props) {
               div({ isRendered: checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
               span({ className: 'default-color' },
                 ['Please authenticate with ',
-                  a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed. Your ORCID iD is optional.'
+                  a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
                 ])
             ])
           ]),
@@ -197,69 +192,7 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showValidationMessages
             }),
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
-              label({ className: 'control-label' }, ['LinkedIn Profile']),
-              input({
-                type: 'text',
-                name: 'linkedIn',
-                id: 'inputLinkedIn',
-                value: linkedIn,
-                disabled: true,
-                className: 'form-control',
-              })
-            ])
           ]),
-
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-              label({ className: 'control-label' }, ['ORCID iD']),
-              input({
-                type: 'text',
-                name: 'orcid',
-                id: 'inputOrcid',
-                value: orcid,
-                disabled: true,
-                className: 'form-control',
-              })
-            ]),
-
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-              label({ className: 'control-label' }, ['ResearchGate ID']),
-              input({
-                type: 'text',
-                name: 'researcherGate',
-                id: 'inputResearcherGate',
-                value: researcherGate,
-                disabled: true,
-                className: 'form-control',
-              })
-            ])
-          ])
-        ]),
-
-        div({ className: 'form-group' }, [
-          div( {className: 'row no-margin' }, [
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              label({ className: 'control-label rp-title-question' }, [
-                '1.3 Principal Investigator* ',
-                span({}, ['I certify that the principal investigator listed below is aware of this study'])
-              ])
-            ]),
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              input({
-                type: 'text',
-                name: 'investigator',
-                id: 'inputInvestigator',
-                value: investigator,
-                disabled: true,
-                className: invalidInvestigator && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                required: true
-              }),
-              span({
-                className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
-              }, ['Required field, ensure your Profile has a PI listed, or that you are selected as the PI'])
-            ])
-          ])
         ]),
 
         div({
@@ -282,7 +215,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.4 Internal Lab Staff',
+                '1.3 Internal Lab Staff',
                 span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
                 that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
                 level here.`])
@@ -305,7 +238,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.5 Internal Collaborators',
+                '1.4 Internal Collaborators',
                 span([
                   `Please add Internal Collaborators here Internal Collaborators are defined as individuals who are not under the direct supervision of 
                   the PI (e.g., not a member of the PI's laboratory) who assists with the PI's research project involving controlled-access data subject to 
@@ -332,7 +265,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.6 Institutional Signing Official*',
+                '1.5 Institutional Signing Official*',
                 span(['I certify the individual listed below is my Institutional Signing Official.'])
               ])
             ]),
@@ -377,7 +310,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.7 Information Technology (IT) Director*',
+                '1.6 Information Technology (IT) Director*',
                 span(['I certify the individual listed below is my IT Director.'])
               ])
             ]),
@@ -401,7 +334,7 @@ export default function ResearcherInfo(props) {
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: 'control-label rp-title-question'}, [
-                '1.8 Cloud Use Statement*',
+                '1.7 Cloud Use Statement*',
                 span([
                   'Will you perform all of your data storage and analysis for this project on the ',
                   a({
@@ -516,14 +449,14 @@ export default function ResearcherInfo(props) {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               label({ className: 'control-label rp-title-question' }, [
-                '1.9 External Collaborators',
+                '1.8 External Collaborators',
                 span([
                   `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work
                 at the same location as the PI, and consequently must be independently approved to access controlled-access data subject to the GDS 
                 Policy. External Collaborators must be at the PI or equivalent level and are not required to have a Library Card in order to access data,
                 although it is encouraged. Note: External Collaborators must submit an independent DAR approved by their signing Official
                 to collaborate on this project. External Collaborators will be able to add their Lab Staff, as needed, via their independent DAR. Approval of
-                this DAR does not indicate approval of the External Collaborators listed.`
+                this Data Access Request does not indicate approval of the External Collaborators listed.`
                 ])
               ])
             ]),

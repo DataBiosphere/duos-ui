@@ -225,7 +225,7 @@ describe('extractDacDataAccessVotesFromBucket', () => {
         }
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.be.empty;
@@ -253,7 +253,7 @@ describe('extractDacDataAccessVotesFromBucket', () => {
         }
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(5);
@@ -279,7 +279,7 @@ describe('extractDacDataAccessVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
@@ -300,7 +300,7 @@ describe('extractDacDataAccessVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
@@ -322,7 +322,7 @@ describe('extractDacRPVotesFromBucket', () => {
         }
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.be.empty;
@@ -350,7 +350,7 @@ describe('extractDacRPVotesFromBucket', () => {
         }
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(5);
@@ -376,7 +376,7 @@ describe('extractDacRPVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
@@ -397,7 +397,7 @@ describe('extractDacRPVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
@@ -427,7 +427,7 @@ describe('extractUserDataAccessVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(2);
@@ -449,7 +449,7 @@ describe('extractUserDataAccessVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(1);
@@ -471,7 +471,7 @@ describe('extractUserDataAccessVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, true);
     expect(votes).to.have.lengthOf(2);
@@ -501,7 +501,7 @@ describe('extractUserRPVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserRPVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(2);
@@ -522,7 +522,7 @@ describe('extractUserRPVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserRPVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(1);
@@ -543,7 +543,7 @@ describe('extractUserRPVotesFromBucket', () => {
         },
       ]
     };
-    const user = {dacUserId: 1};
+    const user = {userId: 1};
 
     const votes = extractUserRPVotesFromBucket(bucket, user, true);
     expect(votes).to.have.lengthOf(1);

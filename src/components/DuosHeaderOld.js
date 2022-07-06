@@ -153,7 +153,7 @@ class DuosHeader extends Component {
 
   async componentDidMount() {
     const env = await Config.getEnv();
-    if (env === 'dev') {
+    if (env !== 'prod') {
       this.setState({dacChairPath: '/new_chair_console'});
       this.setState({dacMemberPath: '/new_member_console'});
       this.setState({researcherPath: '/new_researcher_console'});
@@ -406,7 +406,7 @@ class DuosHeader extends Component {
               li({ className: 'dropdown user-li' }, [
                 a(
                   {
-                    id: 'sel_dacUser',
+                    id: 'sel_user',
                     role: 'button',
                     className: 'dropdown-toggle',
                     'data-toggle': 'dropdown',

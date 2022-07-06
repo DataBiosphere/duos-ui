@@ -31,7 +31,7 @@ describe('SigningOfficialTable - Tests', function () {
       researchers={[
         {
           email: 'email',
-          dacUserId: 1,
+          userId: 1,
           displayName: 'researcher',
           roles: [{name: 'Researcher'}],
           libraryCards: []
@@ -55,7 +55,7 @@ describe('SigningOfficialTable - Tests', function () {
       researchers={[
         {
           email: 'email',
-          dacUserId: 1,
+          userId: 1,
           displayName: 'researcher',
           roles: [{name: 'Researcher'}],
           libraryCards: [{id: 1}]

@@ -5,6 +5,7 @@
 .idea/
 **/*.iml
 .vscode
+jsconfig.json
 
 # dependencies
 /node_modules

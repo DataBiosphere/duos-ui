@@ -99,11 +99,7 @@ export default function ApplicationInformation(props) {
   const {
     researcher = '- -',
     email = '- -',
-    city = '- -',
-    country = '- -',
     institution = '- -',
-    pi = '- -',
-    piEmail = '- -',
     nonTechSummary,
     isLoading = false,
     externalCollaborators = [],
@@ -145,16 +141,6 @@ export default function ApplicationInformation(props) {
           generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
           generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
           generateLabelSpanContents('Institution', 'institution', institution, isLoading)
-        ]),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('City', 'city', city, isLoading),
-          generateLabelSpanContents('Country', 'country', country, isLoading),
-          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span for alignment
-        ]),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('Principal Investigator', 'principal-investigator', pi, isLoading),
-          generateLabelSpanContents('Principal Investigator Email', 'pi-email', piEmail, isLoading),
-          generateLabelSpanContents('', 'row-three-blank', '', false) //blank span to keep row elements in line with those above
         ])
       ]),
       !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.subheader}, ['Non-Technical Summary'])

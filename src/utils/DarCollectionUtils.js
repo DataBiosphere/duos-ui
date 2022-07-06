@@ -20,7 +20,7 @@ import {
   flatten
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
-import {evaluateTrueString, formatDate, Notifications} from '../libs/utils';
+import { formatDate, Notifications } from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
 import { processMatchData } from './VoteUtils';
 
@@ -215,7 +215,7 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   };
 
   return filter(
-    voteArray => includes(user.dacUserId, userIdsOfVotes(voteArray))
+    voteArray => includes(user.userId, userIdsOfVotes(voteArray))
   )(voteArrays);
 };
 
@@ -231,7 +231,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
       filteredData.memberVotes)
   )(votes);
   return !adminPage ?
-    filter((vote) => vote.dacUserId === user.dacUserId)(output) :
+    filter((vote) => vote.dacUserId === user.userId)(output) :
     filter((vote) => !isNil(vote.vote))(output);
 };
 
@@ -249,7 +249,7 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, admi
   )(votes);
 
   output = !adminPage ?
-    filter(vote => vote.dacUserId === user.dacUserId)(output) :
+    filter(vote => vote.dacUserId === user.userId)(output) :
     filter(vote => !isNil(vote.vote))(output);
   return output;
 };
@@ -439,21 +439,6 @@ export const openCollectionFn = ({updateCollections}) =>
     }
   };
 
-export const getPI = (createUser) => {
-  const createUserIsPI = flow(
-    get('properties'),
-    find(property => toLower(property.propertyKey) === 'isthepi'),
-    get('propertyValue'),
-    evaluateTrueString
-  )(createUser);
-
-  const piName = flow(
-    get('properties'),
-    find(property => toLower(property.propertyKey) === 'piname'),
-    get('propertyValue')
-  )(createUser);
-  return createUserIsPI ? createUser.displayName : piName;
-};
 
 //helper function used in DarCollectionReview to update final vote on source of truth
 //done to trigger re-renders on parent and child components (vote summary bar, member tab, etc.)
@@ -500,7 +485,6 @@ export default {
   extractUserRPVotesFromBucket,
   extractDatasetIdsFromBucket,
   collapseVotesByUser,
-  getPI,
   updateFinalVote,
   rpVoteKey
 };

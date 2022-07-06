@@ -113,7 +113,7 @@ const LibraryCardCell = ({
   showConfirmationModal,
   institutionId
 }) => {
-  const id = researcher.dacUserId || researcher.email;
+  const id = researcher.userId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
     ? researcher.libraryCards[0]
     : null;
@@ -124,7 +124,7 @@ const LibraryCardCell = ({
     })
     : IssueLibraryCardButton({
       card: {
-        userId: researcher.dacUserId,
+        userId: researcher.userId,
         userEmail: researcher.email,
         institutionId: institutionId
       },
@@ -301,7 +301,7 @@ export default function SigningOfficialTable(props) {
       const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
-      const id = researcher.dacUserId || email;
+      const id = researcher.userId || email;
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
@@ -335,10 +335,10 @@ export default function SigningOfficialTable(props) {
       const listCopy = cloneDeep(researchers);
       const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
       const {userEmail, userName, userId} = newLibraryCard;
-      let targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
+      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.dacUserId)(props.unregisteredResearchers);
+        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
         const attributes = {
           email: userEmail,
           displayName: userName,
