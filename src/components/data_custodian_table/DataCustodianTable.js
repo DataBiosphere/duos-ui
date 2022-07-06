@@ -90,7 +90,7 @@ const CustodianCell = ({
   researcher,
   showConfirmationModal
 }) => {
-  const id = researcher.dacUserId || researcher.email;
+  const id = researcher.userId || researcher.email;
   const button = researcher.isCustodian
     ? RemoveDataCustodianButton({
       researcher,
@@ -278,15 +278,15 @@ export default function DataCustodianTable(props) {
 
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName;
-    const {dacUserId, displayName} = selectedResearcher;
+    const {userId, displayName} = selectedResearcher;
     try {
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
-        (researcher) => dacUserId === researcher.dacUserId
+        (researcher) => userId === researcher.userId
       )(listCopy);
       if (targetIndex === -1) {
         const targetResearcher = find(
-          (researcher) => dacUserId === researcher.dacUserId
+          (researcher) => userId === researcher.userId
         )(props.unregisteredResearchers) || selectedResearcher;
         targetResearcher.isCustodian = true;
         listCopy.unshift(targetResearcher);
@@ -310,8 +310,8 @@ export default function DataCustodianTable(props) {
   };
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
-    const { displayName, email, dacUserId } = selectedResearcher;
-    const searchableKey = !isNil(dacUserId) ? 'dacUserId' : 'email';
+    const { displayName, email, userId } = selectedResearcher;
+    const searchableKey = !isNil(userId) ? 'dacUserId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
     try {
@@ -319,7 +319,7 @@ export default function DataCustodianTable(props) {
         return !isNil(researcher) && selectedResearcher[searchableKey] === researcher[searchableKey];
       })(listCopy);
       if (
-        isNil(dacUserId) ||
+        isNil(userId) ||
         researchers[targetIndex].institutionId !== signingOfficial.institutionId
       ) {
         listCopy.splice(targetIndex, 1);

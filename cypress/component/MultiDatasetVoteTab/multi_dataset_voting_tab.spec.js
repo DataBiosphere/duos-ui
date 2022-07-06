@@ -115,7 +115,7 @@ const collectionMissingLibraryCard = {
 };
 
 beforeEach(() => {
-  cy.stub(Storage, 'getCurrentUser').returns({dacUserId: 200});
+  cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
   cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
 });
 
@@ -226,7 +226,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
 
 describe('filterBucketsForUser - Tests', function() {
   it('Filters out buckets if current user has no votes in it', function () {
-    const currentUser = {dacUserId: 100};
+    const currentUser = {userId: 100};
     const rpBucket = {isRP: true, key: 'RP Vote'};
     const prefilteredBuckets = [rpBucket, bucket1, bucket2];
 
@@ -238,7 +238,7 @@ describe('filterBucketsForUser - Tests', function() {
   });
 
   it('Does not filter out buckets with votes by the current user', function () {
-    const currentUser = {dacUserId: 200};
+    const currentUser = {userId: 200};
     const rpBucket = {
       isRP: true,
       votes: [

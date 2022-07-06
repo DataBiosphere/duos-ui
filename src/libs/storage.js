@@ -24,13 +24,13 @@ export const Storage = {
   },
 
   getCurrentUserSettings: (key) => {
-    const id = Storage.getCurrentUser()?.dacUserId || '';
+    const id = Storage.getCurrentUser()?.userId || '';
     const userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
     return get([id, key], userSettings);
   },
 
   setCurrentUserSettings: (key, value) => {
-    const id = Storage.getCurrentUser()?.dacUserId || '';
+    const id = Storage.getCurrentUser()?.userId || '';
     let userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
     if (!userSettings[id]) {
       userSettings[id] = {};

@@ -117,7 +117,7 @@ export default function DatasetCatalog(props) {
         datasetIdList.push(dataset.dataSetId);
       });
     const darBody = {
-      userId: Storage.getCurrentUser().dacUserId,
+      userId: Storage.getCurrentUser().userId,
       datasets: datasets,
       datasetId: datasetIdList
     };

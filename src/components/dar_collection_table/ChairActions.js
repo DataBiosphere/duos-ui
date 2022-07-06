@@ -46,7 +46,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
   }
 };
 
-const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElections}) => {
+const calcComponentState = ({userId, relevantElections, relevantDarsNoElections}) => {
   try{
     let nonOpenRelevantElectionPresent = false;
     let closedRelevantElectionPresent = false;
@@ -62,7 +62,7 @@ const calcComponentState = ({dacUserId, relevantElections, relevantDarsNoElectio
       isElectionOpen ? openRelevantElectionPresent = true : nonOpenRelevantElectionPresent = true;
       if(toLower(status) === 'closed') {closedRelevantElectionPresent = true;}
       forEach(vote => {
-        if(vote.dacUserId === dacUserId && isElectionOpen) {userHasVote = true;}
+        if(vote.dacUserId === userId && isElectionOpen) {userHasVote = true;}
         if(!isNil(vote.vote)) { label = 'Update'; }
       })(votes);
     })(relevantElections);
@@ -109,7 +109,7 @@ export default function ChairActions(props) {
   };
 
   useEffect(() => {
-    const init = ({ elections, dars, dacUserId, relevantDatasets }) => {
+    const init = ({ elections, dars, userId, relevantDatasets }) => {
       const { relevantDarsNoElections, relevantElections } =
         initUserData({
           dars,
@@ -118,7 +118,7 @@ export default function ChairActions(props) {
         });
       const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
         calcComponentState({
-          dacUserId,
+          userId,
           relevantElections,
           relevantDarsNoElections,
           setVoteLabel
@@ -135,13 +135,13 @@ export default function ChairActions(props) {
     try {
       const { dars } = collection;
       const user = Storage.getCurrentUser();
-      const { dacUserId } = user;
+      const { userId } = user;
       const elections = flow(
         map((dar) => dar.elections),
         flatMap((electionMap) => Object.values(electionMap)),
         filter((election) => toLower(election.electionType) === 'dataaccess')
       )(dars);
-      init({ dars, dacUserId, elections, relevantDatasets });
+      init({ dars, userId, elections, relevantDatasets });
     } catch (error) {
       updateStateOnFail();
     }

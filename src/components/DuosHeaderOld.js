@@ -406,7 +406,7 @@ class DuosHeader extends Component {
               li({ className: 'dropdown user-li' }, [
                 a(
                   {
-                    id: 'sel_dacUser',
+                    id: 'sel_user',
                     role: 'button',
                     className: 'dropdown-toggle',
                     'data-toggle': 'dropdown',

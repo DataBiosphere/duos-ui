@@ -215,7 +215,7 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   };
 
   return filter(
-    voteArray => includes(user.dacUserId, userIdsOfVotes(voteArray))
+    voteArray => includes(user.userId, userIdsOfVotes(voteArray))
   )(voteArrays);
 };
 
@@ -231,7 +231,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
       filteredData.memberVotes)
   )(votes);
   return !adminPage ?
-    filter((vote) => vote.dacUserId === user.dacUserId)(output) :
+    filter((vote) => vote.dacUserId === user.userId)(output) :
     filter((vote) => !isNil(vote.vote))(output);
 };
 
@@ -249,7 +249,7 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, admi
   )(votes);
 
   output = !adminPage ?
-    filter(vote => vote.dacUserId === user.dacUserId)(output) :
+    filter(vote => vote.dacUserId === user.userId)(output) :
     filter(vote => !isNil(vote.vote))(output);
   return output;
 };

@@ -40,11 +40,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     let datasetId = dataset.dataSetId;
     const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
     const availableClients = clients.not_associated_users.map(user => {
-      return { id: `'${user.dacUserId}'` , name: user.displayName+' : '+user.email};
+      return { id: `'${user.userId}'` , name: user.displayName+' : '+user.email};
     });
 
     const selectedClients = clients.associated_users.map(user => {
-      return { id: `'${user.dacUserId}'` , name: user.displayName+' : '+user.email};
+      return { id: `'${user.userId}'` , name: user.displayName+' : '+user.email};
     });
 
     this.setState(prev => {

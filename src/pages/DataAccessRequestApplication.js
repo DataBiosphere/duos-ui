@@ -224,7 +224,7 @@ class DataAccessRequestApplication extends Component {
     formData.academicEmail = rpProperties.academicEmail;
     formData.pubmedId = rpProperties.pubmedID;
     formData.scientificUrl = rpProperties.scientificURL;
-    formData.userId = researcher.dacUserId;
+    formData.userId = researcher.userId;
 
     let completed = false;
     if (!isNil(formData.darCode)) {
@@ -570,7 +570,7 @@ class DataAccessRequestApplication extends Component {
 
   submitDARFormData = async (answer) => {
     if (answer === true) {
-      const userId = Storage.getCurrentUser().dacUserId;
+      const userId = Storage.getCurrentUser().userId;
       const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
       let formattedFormData = cloneDeep(this.state.formData);
       const ontologies = this.formatOntologyItems(this.state.formData.ontologies);

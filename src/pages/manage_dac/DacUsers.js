@@ -19,19 +19,19 @@ export const DacUsers = hh(class DacUsers extends Component {
     };
   }
 
-  onRemove = (dacId, dacUserId, role) => {
-    if (this.state.removedIds.includes(dacUserId)) {
+  onRemove = (dacId, userId, role) => {
+    if (this.state.removedIds.includes(userId)) {
       this.setState(prev => {
-        prev.removedIds = ld.difference(prev.removedIds, [dacUserId]);
+        prev.removedIds = ld.difference(prev.removedIds, [userId]);
         return prev;
       });
     } else {
       this.setState(prev => {
-        prev.removedIds = ld.union(prev.removedIds, [dacUserId]);
+        prev.removedIds = ld.union(prev.removedIds, [userId]);
         return prev;
       });
     }
-    this.state.removeHandler(dacId, dacUserId, role);
+    this.state.removeHandler(dacId, userId, role);
   };
 
   columnClass = () => {
@@ -40,13 +40,13 @@ export const DacUsers = hh(class DacUsers extends Component {
 
   makeRow = (u, role) => {
     const roleTitle = (role === CHAIR) ? 'Chairperson' : 'Member';
-    const isRemoved = this.state.removedIds.includes(u.dacUserId);
+    const isRemoved = this.state.removedIds.includes(u.userId);
     const rowStyle = isRemoved ?
       { borderBottom: '1px solid white', padding: '.75rem 0 .75rem 0', backgroundColor: 'lightgray', opacity: .5, borderRadius: 5 } :
       { borderBottom: '1px solid lightgray', padding: '.75rem 0 .75rem 0' }
     ;
     const buttonMessage = isRemoved ? 'Pending Removal' : 'Remove';
-    return div({ key: 'chair_' + u.dacUserId, className: 'row', style: rowStyle }, [
+    return div({ key: 'chair_' + u.userId, className: 'row', style: rowStyle }, [
       div({ className: this.columnClass() }, [u.displayName + ' ' + u.email]),
       div({ className: this.columnClass() }, [roleTitle]),
       div({
@@ -57,7 +57,7 @@ export const DacUsers = hh(class DacUsers extends Component {
         a({
           style: { display: 'inline' },
           role: 'button',
-          onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, role),
+          onClick: () => this.onRemove(this.state.dac.dacId, u.userId, role),
           className: 'btn cell-button cancel-color'
         }, [buttonMessage])
       ])

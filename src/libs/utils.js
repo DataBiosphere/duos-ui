@@ -451,7 +451,7 @@ export const filterCollectionElectionsByUser = (collection, user) => {
     const voteMap = getOr({}, 'votes')(e);
     const voteUserIds = map('dacUserId')(values(voteMap));
     // If there is a vote for this user, then this is a valid election
-    return indexOf(user.dacUserId)(voteUserIds) >= 0;
+    return indexOf(user.userId)(voteUserIds) >= 0;
   })(electionValues);
 };
 

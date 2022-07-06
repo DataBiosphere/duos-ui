@@ -85,7 +85,7 @@ describe('DataUseVoteSummary - Tests', function() {
     mount(
       <DataUseVoteSummary
         dataUseBuckets={buckets}
-        currentUser={{dacUserId: 1}}
+        currentUser={{userId: 1}}
         isLoading={false}
       />
     );
@@ -103,7 +103,7 @@ describe('DataUseVoteSummary - Tests', function() {
     mount(
       <DataUseVoteSummary
         dataUseBuckets={buckets}
-        currentUser={{dacUserId: 1}}
+        currentUser={{userId: 1}}
         isLoading={true}
       />
     );
@@ -116,7 +116,7 @@ describe('DataUseVoteSummary - Tests', function() {
       <DataUseVoteSummary
         dataUseBuckets={bucketsWithMixedVotes}
         isLoading={false}
-        currentUser={{dacUserId: 1}}
+        currentUser={{userId: 1}}
         adminPage={false}
       />
     );
@@ -130,7 +130,7 @@ describe('DataUseVoteSummary - Tests', function() {
       <DataUseVoteSummary
         dataUseBuckets={bucketsWithMultipleElections}
         isLoading={false}
-        currentUser={{dacUserId: 1}}
+        currentUser={{userId: 1}}
         adminPage={true}
       />
     );
@@ -144,7 +144,7 @@ describe('DataUseVoteSummary - Tests', function() {
       <DataUseVoteSummary
         dataUseBuckets={bucketsWithMultipleElections}
         isLoading={false}
-        currentUser={{dacUserId: 1}}
+        currentUser={{userId: 1}}
         adminPage={true}
       />
     );

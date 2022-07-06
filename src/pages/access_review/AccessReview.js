@@ -74,10 +74,10 @@ class AccessReview extends React.PureComponent {
     const { history, match } = this.props;
 
     const currentUser = Storage.getCurrentUser();
-    const memberVotes = filter({ type: 'DAC', dacUserId: currentUser.dacUserId })(allVotes);
-    const chairVotes = filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
-    const finalVotes = filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
-    const agreementVotes = filter({ type: 'AGREEMENT', dacUserId: currentUser.dacUserId })(allVotes);
+    const memberVotes = filter({ type: 'DAC', dacUserId: currentUser.userId })(allVotes);
+    const chairVotes = filter({ type: 'Chairperson', dacUserId: currentUser.userId })(allVotes);
+    const finalVotes = filter({ type: 'FINAL', dacUserId: currentUser.userId })(allVotes);
+    const agreementVotes = filter({ type: 'AGREEMENT', dacUserId: currentUser.userId })(allVotes);
     const dacChairMessage = 'DAC Chairs can optionally vote as a member.';
     const libraryCards = isNil(researcherProfile) ? [] : researcherProfile.libraryCards;
 
