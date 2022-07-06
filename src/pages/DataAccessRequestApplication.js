@@ -838,7 +838,6 @@ class DataAccessRequestApplication extends Component {
       other = false,
       otherText = '',
       population = false,
-      forProfit = false,
       controls = false,
       methods = false,
       labCollaborators,
