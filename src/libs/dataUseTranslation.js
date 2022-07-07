@@ -159,6 +159,14 @@ export const consentTranslations = {
   geographicalRestrictions: {
     code: 'GS',
     description: 'Use is limited to within a certain geographic area'
+  },
+  gender: {
+    code: 'GEN',
+    description: 'Use is limited to gender studies only'  //This is a placeholder, give me a better phrase on the PR review
+  },
+  pediatric: {
+    code: 'PSO',
+    description: 'Use is limited to pediatric studies only' //This is a placeholder, give me a better phrase on the PR review
   }
 };
 
@@ -210,16 +218,15 @@ export const processDefinedLimitations = (
 ) => {
   const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
   const isHMBActive =
-    dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
-  const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
-  const isPOAActive =
-    !isGeneralUseActive && !isHMBActive && isEmpty(dataUse.diseaseRestrictions);
+    !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
+  const isPOAActive = !!dataUse.populationOriginsAncestry;
+  const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions);
   let statement;
   if (
     !targetKeys.includes(key) ||
     (key === 'hmbResearch' && isHMBActive) ||
     (key === 'populationOriginsAncestry' && isPOAActive) ||
-    (key === 'generalUse' && !isHMBActive)
+    (key === 'generalUse' && isGeneralUseActive)
   ) {
     statement = consentTranslations[key];
   }
