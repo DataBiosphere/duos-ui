@@ -64,6 +64,7 @@ export default function ResearchPurposeStatement(props) {
             ]),
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               YesNoRadioGroup({
+                optionLabels: ['Yes, exclusively or partially for a commercial purpose', 'No, non-profit purposes only'],
                 value: forProfit, onChange: handleRadioChange, id: 'forProfit', name: 'forProfit',
                 required: true
               })

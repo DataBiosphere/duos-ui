@@ -62,7 +62,6 @@ export default function DataAccessRequest(props) {
   const [methods, setMethods] = useState(props.methods);
   const [controls, setControls] = useState(props.controls);
   const [population, setPopulation] = useState(props.population);
-  const [forProfit, setForProfit] = useState(props.forProfit);
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
   const [datasets, setDatasets] = useState(props.datasets || []);
@@ -379,30 +378,6 @@ export default function DataAccessRequest(props) {
                   span({},
                     ['2.4.3 Population structure or normal variation studies: ']),
                   'The primary purpose of the research is to understand variation in the general population (e.g., genetic substructure of a population).',
-                ]),
-              ]),
-            ]),
-
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              div({className: 'checkbox'}, [
-                input({
-                  checked: forProfit,
-                  onChange: (e) => checkedStateChange({name: 'forProfit', value: e.target.checked}, setForProfit),
-                  id: 'checkForProfit',
-                  type: 'checkbox',
-                  disabled: !isNil(darCode),
-                  className: 'checkbox-inline rp-checkbox',
-                  name: 'forProfit',
-                }),
-                label({
-                  className: 'regular-checkbox rp-choice-questions',
-                  htmlFor: 'checkForProfit',
-                }, [
-                  span({},
-                    ['2.4.4 Commercial or For-Profit Purpose: ']),
-                  'The primary purpose of the research is exclusively or partially for a commercial purpose',
                 ]),
               ]),
             ]),
