@@ -1139,7 +1139,7 @@ export const ToS = {
     return res.data;
   },
   rejectToS: async () => {
-    const url = `${await Config.getApiUrl()}api/sam/register/self/tos`;
+    const url = `${await Config.getApiUrl()}/api/sam/register/self/tos`;
     const res = await axios.delete(url, Config.authOpts());
     return res.data;
   }

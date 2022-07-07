@@ -9,6 +9,7 @@ export default function TermsOfService(props) {
 
   const [tosText, setTosText] = useState('');
   const {history} = props;
+  const isLogged = Storage.userIsLogged();
 
   useEffect(() => {
     const init = async () => {
@@ -32,7 +33,7 @@ export default function TermsOfService(props) {
     div({style: TosService.getContainerStyle()}, [
       h1({style: {color: '#00609f', marginLeft: '25px'}}, ['DUOS Terms of Service']),
       div({style: TosService.getScrollableStyle(), className: 'markdown-body'}, [tosText]),
-      div({style: {display: 'flex', justifyContent: 'right', paddingRight: '5rem'}}, [
+      div({isRendered: isLogged, style: {display: 'flex', justifyContent: 'right', paddingRight: '5rem'}}, [
         h(SimpleButton, {
           keyProp: 'tos-accept',
           label: 'Reject Terms of Service',
