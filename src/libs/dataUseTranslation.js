@@ -53,6 +53,11 @@ export const srpTranslations = {
     description: 'The dataset will be used in a study related to a commercial purpose.',
     manualReview: false
   },
+  notForProfit: {
+    code: 'NPU',
+    description: 'This dataset will not be used in a study related to a commercial purpose.',
+    manualReview: false
+  },
   genderFemale: {
     code: 'POP-F',
     description: 'The dataset will be used for the study of females.',
@@ -295,6 +300,8 @@ export const DataUseTranslation = {
     let statementArray = [];
     if(darInfo.forProfit) {
       statementArray = concat(statementArray)(srpTranslations.forProfit);
+    } else {
+      statementArray = concat(statementArray)(srpTranslations.notForProfit);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
@@ -415,6 +422,8 @@ export const DataUseTranslation = {
     }
     if (darInfo.forProfit) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit);
+    } else {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notForProfit);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
