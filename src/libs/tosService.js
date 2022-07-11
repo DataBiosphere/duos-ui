@@ -52,4 +52,8 @@ export const TosService = {
     return await ToS.acceptToS();
   },
 
+  rejectTos: async () => {
+    return await ToS.rejectToS();
+  },
+
 };
