@@ -75,7 +75,8 @@ const NavigationTabsComponent = (props) => {
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
     currentUser, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
-    tabs, initialTab, initialSubTab
+    tabs, initialTab, initialSubTab,
+    onSubtabChange
   } = props;
   const [selectedMenuTab, setSelectedMenuTab] = useState(false);
   const [selectedSubTab, setSelectedSubTab] = useState(false);
@@ -225,7 +226,8 @@ const NavigationTabsComponent = (props) => {
         orientation,
         TabIndicatorProps: {
           style: { background: '#00609f' }
-        }
+        },
+        onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
         return h(Tab, {
           label: tab.label,
@@ -522,9 +524,6 @@ class DuosHeader extends Component {
                   className: classes.drawerPaper,
                 },
                 className: 'navbar-duos',
-                style: {
-                  // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
-                },
                 onClose: () => this.toggleDrawer(false),
               },
               [
@@ -536,7 +535,10 @@ class DuosHeader extends Component {
                   contactUsButton, supportrequestModal,
                   showRequestModal: this.supportRequestModal,
                   tabs, initialTab, initialSubTab,
-                  orientation: 'vertical'
+                  orientation: 'vertical',
+                  onSubtabChange: () => {
+                    this.toggleDrawer(false);
+                  }
                 })
               ]
             ),
