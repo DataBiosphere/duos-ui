@@ -17,7 +17,7 @@ describe('About', function() {
     cy.viewport(600, 600);
     cy.visit('');
     cy.get('#navbar-menu-icon').click();
-    cy.get('#menu-link-About').should(
+    cy.get('#link_about').should(
       'have.attr',
       'href',
       'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS'
