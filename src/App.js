@@ -73,12 +73,16 @@ function App() {
     await setIsLoggedIn(true);
   };
 
+  // TODO: Remove this when all the new navigation features are available
+  const header = env !== 'prod'
+    ? h(DuosHeader, { onSignOut: signOut })
+    : h(DuosHeaderOld, { onSignOut: signOut });
 
   return (
     div({ className: 'body' }, [
       div({ className: 'wrap' }, [
         div({ className: 'main' }, [
-          h(DuosHeader, { onSignOut: signOut }),
+          header,
           h(Spinner, {
             name: 'mainSpinner', group: 'duos', loadingImage
           }),
