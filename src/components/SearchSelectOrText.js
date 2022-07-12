@@ -14,15 +14,19 @@ export const SearchSelectOrText = (props) => {
   const searchTerms = useRef('');
 
   useEffect(() => {
-    setCurrentSelection(props.value);
-    const item = props.options.filter(i => i.key === props.value);
-    if (item && item.length) {
-      setCurrentDisplay(item[0].displayText);
+    if (props.value) {
+      setCurrentSelection(props.value);
+      const item = props.options.filter(i => i.key === props.value);
+      if (item && item.length) {
+        setCurrentDisplay(item[0].displayText);
+      }
+    } else {
+      setCurrentDisplay(props.freetextValue);
     }
 
     setFullList(props.options);
     setFilteredList(props.options);
-  }, [props.value, props.options]);
+  }, [props.value, props.freetextValue, props.options]);
 
   const setPresetDisplay = (selection) => {
     const item = options.filter(i => i.key === selection);
@@ -46,13 +50,13 @@ export const SearchSelectOrText = (props) => {
   const selectManual = (text) => {
     // check and see if the manually entered item is an option
     const presetOption = options.filter(i => i.key === text);
-    if (presetOption != null) {
-      select(presetOption);
+    if (presetOption.length != 0) {
+      select(presetOption[0]);
       return;
     }
 
     setManualDisplay(text);
-    onManualSelection(text)
+    onManualSelection(text);
   }
 
   const handleSearch = (searchTerm) => {
@@ -88,7 +92,7 @@ export const SearchSelectOrText = (props) => {
           onChange:() => handleSearch(searchTerms),
           onKeyDown: (e) => {
             if (e.key == "Enter") {
-              selectManual(searchTerms);
+              selectManual(searchTerms.current.value);
             }
           },
           ref: searchTerms
