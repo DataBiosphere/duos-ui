@@ -118,53 +118,63 @@ export const srpTranslations = {
 export const consentTranslations = {
   generalUse: {
     code: 'GRU',
-    description: 'Use is permitted for any research purpose'
+    description: 'Use is permitted for any research purpose',
   },
   hmbResearch: {
     code: 'HMB',
-    description: 'Use is permitted for a health, medical, or biomedical research purpose'
+    description: 'Use is permitted for a health, medical, or biomedical research purpose',
   },
   diseaseRestrictions: (restrictions) => {
-    if (isEmpty(restrictions)) { return 'Use is permitted for the specified disease(s): Not specified'; }
+    if (isEmpty(restrictions)) {
+      return 'Use is permitted for the specified disease(s): Not specified';
+    }
     const restrictionList = restrictions.join(', ');
     return {
       code: 'DS',
       alternateLabel: `DS ${restrictions.join('-')}`,
-      description: `Use is permitted for the specified disease(s): ${restrictionList}`
+      description: `Use is permitted for the specified disease(s): ${restrictionList}`,
     };
   },
   populationOriginsAncestry: {
     code: 'POA',
-    description: 'Use is limited to population, origin, or ancestry research'
+    description: 'Use is limited to population, origin, or ancestry research',
   },
   methodsResearch: {
     code: 'NMDS',
-    description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations'
+    description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations',
   },
   geneticStudiesOnly: {
     code: 'GSO',
-    description: 'Use is limited to genetic studies only'
+    description: 'Use is limited to genetic studies only',
   },
   commercialUse: {
     code: 'NPU',
-    description: 'Use is limited to non-profit and non-commercial research'
+    description: 'Use is limited to non-profit and non-commercial research',
   },
   publicationResults: {
     code: 'PUB',
-    description: 'Use requires users to make results of studies using the data available to the larger scientific community'
+    description: 'Use requires users to make results of studies using the data available to the larger scientific community',
   },
   collaboratorRequired: {
     code: 'COL',
-    description: 'Use requires users to collaborate with the primary study investigators'
+    description: 'Use requires users to collaborate with the primary study investigators',
   },
   ethicsApprovalRequired: {
     code: 'IRB',
-    description: 'Use requires users to provide documentation of local IRB/ERB approval'
+    description: 'Use requires users to provide documentation of local IRB/ERB approval',
   },
   geographicalRestrictions: {
     code: 'GS',
-    description: 'Use is limited to within a certain geographic area'
-  }
+    description: 'Use is limited to within a certain geographic area',
+  },
+  gender: {
+    code: 'RS-G',
+    description: 'Use is limited to research involving a particular gender',
+  },
+  pediatric: {
+    code: 'RS-PD',
+    description: 'Use is limited to pediatric research',
+  },
 };
 
 const getOntologyName = async(urls) => {
@@ -215,16 +225,15 @@ export const processDefinedLimitations = (
 ) => {
   const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
   const isHMBActive =
-    dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
-  const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
-  const isPOAActive =
-    !isGeneralUseActive && !isHMBActive && isEmpty(dataUse.diseaseRestrictions);
+    !!dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
+  const isPOAActive = !!dataUse.populationOriginsAncestry;
+  const isGeneralUseActive = !!dataUse.generalUse && !isHMBActive && !isPOAActive && isEmpty(dataUse.diseaseRestrictions);
   let statement;
   if (
     !targetKeys.includes(key) ||
     (key === 'hmbResearch' && isHMBActive) ||
     (key === 'populationOriginsAncestry' && isPOAActive) ||
-    (key === 'generalUse' && !isHMBActive)
+    (key === 'generalUse' && isGeneralUseActive)
   ) {
     statement = consentTranslations[key];
   }
