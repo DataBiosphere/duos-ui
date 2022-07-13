@@ -71,8 +71,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: this.state.emailPreference,
       institutionId: this.state.institutionId
     };
-    const payload = {updatedUser: user};
-    const updatedUser = await User.update(payload, userId);
+    const updatedUser = await User.update(user, userId);
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
     this.setState({
