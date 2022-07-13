@@ -385,334 +385,371 @@ class DuosHeader extends Component {
       ),
     ]);
 
-    return nav({ className: 'navbar-duos', role: 'navigation' }, [
-      h(Hidden, { mdDown: true }, [
-        this.makeNotifications(),
-        h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-          img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo' }),
-        ]),
-        div({ className: 'row no-margin' }, [
-          //Standard navbar for medium sized displays and higher (pre-existing navbar)
-          div({}, [
-            ul({ isRendered: isLogged, className: 'navbar-logged' }, [
-              li({ className: 'dropdown user-li' }, [
-                a(
-                  {
-                    id: 'sel_user',
-                    role: 'button',
-                    className: 'dropdown-toggle',
-                    'data-toggle': 'dropdown',
-                  },
-                  [
-                    div({ id: 'dacUser' }, [
-                      currentUser.displayName,
-                      span({ className: 'caret caret-margin' }),
-                    ]),
-                    small({ id: 'dacUserMail' }, [currentUser.email]),
-                  ]
-                ),
-                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-                  li([
-                    h(Link, { id: 'link_profile', to: '/profile' }, [
-                      'Your Profile',
-                    ]),
-                  ]),
-                  li({}, [
-                    a({ id: 'link_signOut', onClick: this.signOut }, [
-                      'Sign out',
-                    ]),
-                  ]),
+    return nav(
+      {
+        className: 'navbar-duos',
+        role: 'navigation',
+        style: {
+          backgroundColor: 'rgb(0 36 60)',
+          padding: '0 20px'
+        },
+      },
+      [
+        h(Hidden, { mdDown: true }, [
+          this.makeNotifications(),
+          h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+            img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo' }),
+          ]),
+          div({ className: 'row no-margin' }, [
+            //Standard navbar for medium sized displays and higher (pre-existing navbar)
+            div({}, [
+              ul({ isRendered: isLogged, className: 'navbar-logged' }, [
+                li({ className: 'dropdown user-li' }, [
+                  a(
+                    {
+                      id: 'sel_user',
+                      role: 'button',
+                      className: 'dropdown-toggle',
+                      'data-toggle': 'dropdown',
+                    },
+                    [
+                      div({ id: 'dacUser' }, [
+                        currentUser.displayName,
+                        span({ className: 'caret caret-margin' }),
+                      ]),
+                      small({ id: 'dacUserMail' }, [currentUser.email]),
+                    ]
+                  ),
+                  ul(
+                    {
+                      className: 'dropdown-menu navbar-dropdown',
+                      role: 'menu',
+                    },
+                    [
+                      li([
+                        h(Link, { id: 'link_profile', to: '/profile' }, [
+                          'Your Profile',
+                        ]),
+                      ]),
+                      li({}, [
+                        a({ id: 'link_signOut', onClick: this.signOut }, [
+                          'Sign out',
+                        ]),
+                      ]),
+                    ]
+                  ),
                 ]),
-              ]),
 
-              li({ className: 'dropdown', isRendered: hasTwoOrMoreRoles() }, [
-                a(
-                  {
-                    role: 'button',
-                    className: 'dropdown-toggle',
-                    'data-toggle': 'dropdown',
-                  },
-                  [
-                    div({}, [
-                      'Your Consoles',
-                      span({ className: 'caret caret-margin' }, []),
-                    ]),
-                  ]
-                ),
-                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-                  adminLink(true),
-                  signingOfficialLink(true),
-                  chairSubHeader,
-                  chairManageDARsLink,
-                  chairManageDACsLink,
-                  memberLink(true),
-                  researcherLink(true)
+                li({ className: 'dropdown', isRendered: hasTwoOrMoreRoles() }, [
+                  a(
+                    {
+                      role: 'button',
+                      className: 'dropdown-toggle',
+                      'data-toggle': 'dropdown',
+                    },
+                    [
+                      div({}, [
+                        'Your Consoles',
+                        span({ className: 'caret caret-margin' }, []),
+                      ]),
+                    ]
+                  ),
+                  ul(
+                    {
+                      className: 'dropdown-menu navbar-dropdown',
+                      role: 'menu',
+                    },
+                    [
+                      adminLink(true),
+                      signingOfficialLink(true),
+                      chairSubHeader,
+                      chairManageDARsLink,
+                      chairManageDACsLink,
+                      memberLink(true),
+                      researcherLink(true),
+                    ]
+                  ),
                 ]),
-              ]),
 
-              adminLink(false),
-              signingOfficialLink(false),
-              chairpersonDropDown,
-              memberLink(false),
-              researcherLink(false),
+                adminLink(false),
+                signingOfficialLink(false),
+                chairpersonDropDown,
+                memberLink(false),
+                researcherLink(false),
 
-              li({ isRendered: isResearcher }, [
-                h(
-                  Link,
-                  { id: 'link_requestApplication', to: '/dar_application' },
-                  ['Request Application']
-                ),
-              ]),
-
-              li({ className: 'dropdown', isRendered: isAdmin }, [
-                a(
-                  {
-                    id: 'sel_statistics',
-                    role: 'button',
-                    className: 'dropdown-toggle',
-                    'data-toggle': 'dropdown',
-                  },
-                  [
-                    div({}, [
-                      'Statistics',
-                      span({ className: 'caret caret-margin' }, []),
-                    ]),
-                  ]
-                ),
-                ul({ className: 'dropdown-menu navbar-dropdown', role: 'menu' }, [
-                  li({}, [
-                    h(Link, { id: 'link_statistics', to: '/summary_votes' }, [
-                      'Votes Statistics',
-                    ]),
-                  ]),
-                  hr({ style: hrStyle }),
-                  li({}, [
-                    h(
-                      Link,
-                      {
-                        id: 'link_reviewedCases',
-                        to: '/reviewed_cases',
-                      },
-                      ['Reviewed Cases Record']
-                    ),
-                  ]),
+                li({ isRendered: isResearcher }, [
+                  h(
+                    Link,
+                    { id: 'link_requestApplication', to: '/dar_application' },
+                    ['Request Application']
+                  ),
                 ]),
+
+                li({ className: 'dropdown', isRendered: isAdmin }, [
+                  a(
+                    {
+                      id: 'sel_statistics',
+                      role: 'button',
+                      className: 'dropdown-toggle',
+                      'data-toggle': 'dropdown',
+                    },
+                    [
+                      div({}, [
+                        'Statistics',
+                        span({ className: 'caret caret-margin' }, []),
+                      ]),
+                    ]
+                  ),
+                  ul(
+                    {
+                      className: 'dropdown-menu navbar-dropdown',
+                      role: 'menu',
+                    },
+                    [
+                      li({}, [
+                        h(
+                          Link,
+                          { id: 'link_statistics', to: '/summary_votes' },
+                          ['Votes Statistics']
+                        ),
+                      ]),
+                      hr({ style: hrStyle }),
+                      li({}, [
+                        h(
+                          Link,
+                          {
+                            id: 'link_reviewedCases',
+                            to: '/reviewed_cases',
+                          },
+                          ['Reviewed Cases Record']
+                        ),
+                      ]),
+                    ]
+                  ),
+                ]),
+
+                li({}, [
+                  h(
+                    Link,
+                    {
+                      id: 'link_datasetCatalog',
+                      isRendered: isLogged,
+                      to: '/dataset_catalog',
+                    },
+                    ['Dataset Catalog']
+                  ),
+                ]),
+                li({}, [
+                  a(
+                    {
+                      id: 'link_help',
+                      href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                      target: '_blank',
+                    },
+                    ['FAQs']
+                  ),
+                ]),
+                contactUsButton,
+                supportrequestModal,
               ]),
 
-              li({}, [
-                h(
-                  Link,
-                  {
-                    id: 'link_datasetCatalog',
-                    isRendered: isLogged,
-                    to: '/dataset_catalog',
-                  },
-                  ['Dataset Catalog']
-                ),
+              ul({ isRendered: !isLogged, className: 'navbar-public' }, [
+                li({}, [
+                  a(
+                    {
+                      id: 'link_about',
+                      className: 'navbar-duos-link',
+                      href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
+                      target: '_blank',
+                    },
+                    [
+                      div({
+                        className: 'navbar-duos-icon-about',
+                        style: navbarDuosIcon,
+                      }),
+                      span({ style: navbarDuosText }, ['About']),
+                    ]
+                  ),
+                ]),
+                li({}, [
+                  a(
+                    {
+                      id: 'link_help',
+                      className: 'navbar-duos-link',
+                      href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                      target: '_blank',
+                    },
+                    [
+                      div({
+                        className: 'navbar-duos-icon-help',
+                        style: navbarDuosIcon,
+                      }),
+                      span({ style: navbarDuosText }, ['FAQs']),
+                    ]
+                  ),
+                ]),
+                contactUsButton,
+                supportrequestModal,
               ]),
-              li({}, [
-                a({
-                  id: 'link_help',
-                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                  target: '_blank'
-                }, ['FAQs']),
-              ]),
-              contactUsButton,
-              supportrequestModal,
-            ]),
-
-            ul({ isRendered: !isLogged, className: 'navbar-public' }, [
-              li({}, [
-                a(
-                  {
-                    id: 'link_about',
-                    className: 'navbar-duos-link',
-                    href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
-                    target: '_blank',
-                  },
-                  [
-                    div({
-                      className: 'navbar-duos-icon-about',
-                      style: navbarDuosIcon,
-                    }),
-                    span({ style: navbarDuosText }, ['About']),
-                  ]
-                ),
-              ]),
-              li({}, [
-                a(
-                  {
-                    id: 'link_help',
-                    className: 'navbar-duos-link',
-                    href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                    target: '_blank',
-                  },
-                  [
-                    div({
-                      className: 'navbar-duos-icon-help',
-                      style: navbarDuosIcon,
-                    }),
-                    span({ style: navbarDuosText }, ['FAQs']),
-                  ]
-                ),
-              ]),
-              contactUsButton,
-              supportrequestModal,
             ]),
           ]),
         ]),
-      ]),
-      //NOTE: old navbar style is heavily dependent on css styles with element specific styles
-      //Hard to make that navbar flexible with material-ui's syntax
-      //For now I will use material-ui's hidden element to selectively render the two different navbars
-      //I'll look into rewriting the large navbar on a later PR
-      h(Hidden, { lgUp: true }, [
-        this.makeNotifications(),
-        div(
-          {
-            style: {
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            },
-          },
-          [
-            img({
-              style: duosLogoImage,
-              src: DuosLogo,
-              alt: 'DUOS Logo',
-              onClick: () => this.goToLink('/home'),
-            }),
-            h(
-              IconButton,
-              { id: 'collapsed-navigation-icon-button', size: 'small', onClick: () => this.toggleDrawer(true) },
-              [
-                h(
-                  MenuIcon,
-                  {
-                    id: 'navbar-menu-icon',
-                    style: { color: 'white', fontSize: '6rem', flex: 1 },
-                    anchor: 'right',
-                  },
-                  []
-                ),
-              ]
-            ),
-            h(
-              Drawer,
-              {
-                anchor: 'right',
-                open: this.state.openDrawer,
-                PaperProps: {
-                  className: classes.drawerPaper,
-                },
-                style: {
-                  // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
-                },
-                onClose: () => this.toggleDrawer(false),
+        //NOTE: old navbar style is heavily dependent on css styles with element specific styles
+        //Hard to make that navbar flexible with material-ui's syntax
+        //For now I will use material-ui's hidden element to selectively render the two different navbars
+        //I'll look into rewriting the large navbar on a later PR
+        h(Hidden, { lgUp: true }, [
+          this.makeNotifications(),
+          div(
+            {
+              style: {
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
               },
-              [
-                h(List, {}, [
-                  //NOTE: create user component to show logged in status (as well as dropdown options)
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    targetLink: '/profile',
-                    label: 'Your Profile',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isAdmin,
-                    applyPointer,
-                    targetLink: '/admin_console',
-                    label: 'Admin Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isSigningOfficial,
-                    applyPointer,
-                    targetLink: '/signing_official_console',
-                    label: 'Signing Official Console',
-                  }),
-                  h(DropdownComponent, {
-                    isRendered: isChairPerson,
-                    label: 'DAC Chair Console',
-                    onMouseEnter: applyPointer,
-                    dropdownLinks: dropdownLinks.chair,
-                    goToLink: this.goToLink,
-                    classes,
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isMember,
-                    applyPointer,
-                    targetLink: this.state.dacMemberPath,
-                    label: 'DAC Member Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isResearcher,
-                    applyPointer,
-                    targetLink: this.state.researcherPath,
-                    label: 'Researcher Console',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isResearcher,
-                    applyPointer,
-                    targetLink: '/dar_application',
-                    label: 'Request Application',
-                  }),
-                  h(DropdownComponent, {
-                    isRendered: isAdmin,
-                    label: 'Statistics',
-                    onMouseEnter: applyPointer,
-                    dropdownLinks: dropdownLinks.statistics,
-                    goToLink: this.goToLink,
-                    classes,
-                  }),
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    targetLink: '/dataset_catalog',
-                    label: 'Dataset Catalog',
-                  }),
-                  h(BasicListItem, {
-                    isRendered: !isLogged,
-                    applyPointer,
-                    targetLink:
-                      'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
-                    label: 'About',
-                    isHref: true,
-                  }),
-                  h(BasicListItem, {
-                    applyPointer,
-                    targetLink:
-                      'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                    isHref: true,
-                    label: 'FAQs',
-                  }),
-                  //contact us doesn't use the Basic List Item since it just makes the modal visible, which is different from the redirect functionality from basicList
+            },
+            [
+              img({
+                style: duosLogoImage,
+                src: DuosLogo,
+                alt: 'DUOS Logo',
+                onClick: () => this.goToLink('/home'),
+              }),
+              h(
+                IconButton,
+                {
+                  id: 'collapsed-navigation-icon-button',
+                  size: 'small',
+                  onClick: () => this.toggleDrawer(true),
+                },
+                [
                   h(
-                    ListItem,
+                    MenuIcon,
                     {
-                      alignItems: 'center',
-                      onMouseEnter: applyPointer,
-                      style: Styles.NAVBAR.DRAWER_LINK,
-                      onClick: this.supportRequestModal,
+                      id: 'navbar-menu-icon',
+                      style: { color: 'white', fontSize: '6rem', flex: 1 },
+                      anchor: 'right',
                     },
-                    ['Request Help']
+                    []
                   ),
-                  //passing in signOut as goToLink argument to execute logout flow
-                  h(BasicListItem, {
-                    isRendered: isLogged,
-                    applyPointer,
-                    label: 'Sign Out',
-                    onClick: this.signOut,
-                  }),
-                ]),
-              ]
-            ),
-          ]
-        ),
-        supportrequestModal,
-      ]),
-    ]);
+                ]
+              ),
+              h(
+                Drawer,
+                {
+                  anchor: 'right',
+                  open: this.state.openDrawer,
+                  PaperProps: {
+                    className: classes.drawerPaper,
+                  },
+                  style: {
+                    // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
+                  },
+                  onClose: () => this.toggleDrawer(false),
+                },
+                [
+                  h(List, {}, [
+                    //NOTE: create user component to show logged in status (as well as dropdown options)
+                    h(BasicListItem, {
+                      isRendered: isLogged,
+                      applyPointer,
+                      targetLink: '/profile',
+                      label: 'Your Profile',
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isAdmin,
+                      applyPointer,
+                      targetLink: '/admin_console',
+                      label: 'Admin Console',
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isSigningOfficial,
+                      applyPointer,
+                      targetLink: '/signing_official_console',
+                      label: 'Signing Official Console',
+                    }),
+                    h(DropdownComponent, {
+                      isRendered: isChairPerson,
+                      label: 'DAC Chair Console',
+                      onMouseEnter: applyPointer,
+                      dropdownLinks: dropdownLinks.chair,
+                      goToLink: this.goToLink,
+                      classes,
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isMember,
+                      applyPointer,
+                      targetLink: this.state.dacMemberPath,
+                      label: 'DAC Member Console',
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isResearcher,
+                      applyPointer,
+                      targetLink: this.state.researcherPath,
+                      label: 'Researcher Console',
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isResearcher,
+                      applyPointer,
+                      targetLink: '/dar_application',
+                      label: 'Request Application',
+                    }),
+                    h(DropdownComponent, {
+                      isRendered: isAdmin,
+                      label: 'Statistics',
+                      onMouseEnter: applyPointer,
+                      dropdownLinks: dropdownLinks.statistics,
+                      goToLink: this.goToLink,
+                      classes,
+                    }),
+                    h(BasicListItem, {
+                      isRendered: isLogged,
+                      applyPointer,
+                      targetLink: '/dataset_catalog',
+                      label: 'Dataset Catalog',
+                    }),
+                    h(BasicListItem, {
+                      isRendered: !isLogged,
+                      applyPointer,
+                      targetLink:
+                        'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
+                      label: 'About',
+                      isHref: true,
+                    }),
+                    h(BasicListItem, {
+                      applyPointer,
+                      targetLink:
+                        'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                      isHref: true,
+                      label: 'FAQs',
+                    }),
+                    //contact us doesn't use the Basic List Item since it just makes the modal visible, which is different from the redirect functionality from basicList
+                    h(
+                      ListItem,
+                      {
+                        alignItems: 'center',
+                        onMouseEnter: applyPointer,
+                        style: Styles.NAVBAR.DRAWER_LINK,
+                        onClick: this.supportRequestModal,
+                      },
+                      ['Request Help']
+                    ),
+                    //passing in signOut as goToLink argument to execute logout flow
+                    h(BasicListItem, {
+                      isRendered: isLogged,
+                      applyPointer,
+                      label: 'Sign Out',
+                      onClick: this.signOut,
+                    }),
+                  ]),
+                ]
+              ),
+            ]
+          ),
+          supportrequestModal,
+        ]),
+      ]
+    );
   }
 
 }
