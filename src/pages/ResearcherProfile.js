@@ -1,34 +1,27 @@
 import {useState, useEffect} from 'react';
-import {cloneDeep, find, isEmpty, isNil, isNumber, omit, trim} from 'lodash';
-import ReactTooltip from 'react-tooltip';
-import {button, div, form, h, hr, ul, li, input, label, span, p, textarea,} from 'react-hyperscript-helpers';
-import {LibraryCards} from '../components/LibraryCards';
+import {find, isEmpty, isNil, isNumber} from 'lodash';
+import {button, div, form, h, hr, input, label, p} from 'react-hyperscript-helpers';
 import {eRACommons} from '../components/eRACommons';
 import {PageHeading} from '../components/PageHeading';
-import {YesNoRadioGroup} from '../components/YesNoRadioGroup';
 import {Notification} from '../components/Notification';
 import {SearchSelectOrText} from '../components/SearchSelectOrText';
-import {AuthenticateNIH, Institution, Researcher, User} from '../libs/ajax';
+import {Institution, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
-import {Alert} from '../components/Alert';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, setUserRoleStatuses, USER_ROLES, isEmailAddress} from '../libs/utils';
+import {getPropertyValuesFromUser, USER_ROLES} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
     profileName: '',
     institutionId: undefined,
     suggestedInstitution: undefined,
-    selectedSigningOfficialId: undefined, 
+    selectedSigningOfficialId: undefined,
     suggestedSigningOfficial: undefined,
+    eraCommonsId: undefined,
     completed: undefined
   });
 
-  const [currentUser, setCurrentUser] = useState();
   const [userRoles, setUserRoles] = useState([]);
-  const [researcherFieldsComplete, setResearcherFieldsComplete] = useState(false);
-  const [incompleteFields, setIncompleteFields] = useState([]);
-  const [isNewProfile, setIsNewProfile] = useState(false);
 
   const [institutionList, setInstitutionList] = useState([]);
   const [signingOfficialList, setSigningOfficialList] = useState([]);
@@ -44,8 +37,6 @@ export default function ResearcherProfile(props) {
 
         props.history.push('profile');
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
-
-        setCurrentUser(Storage.getCurrentUser());
       } catch (error) {
         Notification.showError({text: 'Error: Unable to retrieve user data from server'});
       }
@@ -55,39 +46,24 @@ export default function ResearcherProfile(props) {
   }, [props.history]);
 
   useEffect(() => {
-    let incompletes = [];
-
-    if (!isValid(profile.profileName)) {
-      incompletes.push('Name');
-    }
-
-    if (!hasInstitution()) {
-      incompletes.push('Institution');
-    }
-
-    setIncompleteFields(incompletes);
-    setResearcherFieldsComplete(incompletes.length === 0);
-  }, [profile]);
-
-  useEffect(() => {
     if (profile.institutionId) {
       Institution.getById(profile.institutionId).then((institution) => {
         if (!institution) {
           return;
         }
-    
-        setSigningOfficialList((institution.signingOfficials ? institution.signingOfficials : []));    
+
+        setSigningOfficialList((institution.signingOfficials ? institution.signingOfficials : []));
       });
     }
-  }, [profile.institutionId])
-
-  const isValid = (value) => {
-    return !isEmpty(trim(value.toString()));
-  };
+  }, [profile.institutionId]);
 
   const hasInstitution = () => {
-    return (isNumber(profile.institutionId) && profile.institutionId !== 0) || (profile.suggestedInstitution !== undefined && profile.suggestedInstitution !== "");
-  }
+    return (isNumber(profile.institutionId) && profile.institutionId !== 0) || (profile.suggestedInstitution !== undefined && profile.suggestedInstitution !== '');
+  };
+
+  const isSigningOfficial = () => {
+    return Storage.getCurrentUser().isSigningOfficial;
+  };
 
   const getResearcherProfile = async () => {
     const user = await User.getMe();
@@ -100,14 +76,6 @@ export default function ResearcherProfile(props) {
       setUserRoles(user.roles);
     }
 
-    if (userProps.completed === undefined) {
-      setIsNewProfile(true);
-    }
-
-    let tempCompleted = false;
-    if(userProps.completed !== undefined && userProps.completed !== '') {
-      tempCompleted = JSON.parse(userProps.completed);
-    }
     setProfile({
       institutionId: userProps.institutionId,
       suggestedInstitution: userProps.suggestedInstitution,
@@ -126,41 +94,9 @@ export default function ResearcherProfile(props) {
     setProfile(newProfile);
   };
 
-  const handleCheckboxChange = (event) => {
-    setProfile(Object.assign({}, profile, {checkNotifications: event.target.checked}));
-  };
-
-  const eraValidate = async () => {
-    // Temporary fix until eRACommons.js is updated to share re-render info.
-
-    const user = await User.getMe();
-    const userProps = getPropertyValuesFromUser(user);
-    const expirationCount = isNil(userProps.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(userProps.eraExpiration);
-
-    return (!isNil(userProps.eraCommonsId) && userProps.eraAuthorized === 'true' && expirationCount >= 0);
-  };
-
   const submitForm = async (event) => {
     event.preventDefault();
 
-    const eraValid = await eraValidate();
-    const profileCompleted = researcherFieldsComplete && eraValid;
-
-    const newProfile = Object.assign({}, profile, {completed: profileCompleted});
-
-    await updateUser();
-    props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-  const createUserProperties = async (profile) => {
-    await Researcher.createProperties(profile);
-    await updateUser();
-    props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-  const updateUserProperties = async (profile) => {
-    const profileClone = cloneProfile(profile);
-    await Researcher.updateProperties(Storage.getCurrentUser().userId, researcherFieldsComplete, profileClone);
     await updateUser();
     props.history.push({ pathname: 'dataset_catalog' });
   };
@@ -171,30 +107,72 @@ export default function ResearcherProfile(props) {
     currentUserUpdate.displayName = profile.profileName;
     currentUserUpdate.roles = userRoles;
 
+    currentUserUpdate.eraCommonsId = profile.eraCommonsId;
     currentUserUpdate.institutionId = profile.institutionId;
     currentUserUpdate.suggestedInstitution = profile.suggestedInstitution;
     currentUserUpdate.selectedSigningOfficialId = profile.selectedSigningOfficialId;
     currentUserUpdate.suggestedSigningOfficial = profile.suggestedSigningOfficial;
 
     const payload = currentUserUpdate;
-    console.log("PAYLOAD", payload)
-    let updatedUser = await User.update(payload, currentUserUpdate.userId);
-    console.log("UPDATED",updatedUser)
-    console.log("UPDATED PROPS", getPropertyValuesFromUser(updatedUser));
 
-    //updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
+    let updatedUser = await User.update(payload, currentUserUpdate.userId);
     return updatedUser;
   };
 
-  const cloneProfile = (profile) => {
-    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
-  };
+  const generateInstitutionSelectionDisplay = () => {
 
-  const showIncompleteFields = () => {
-    const listIncompleteFields = incompleteFields.map((field) =>
-      li({ key: field }, [field])
-    );
-    return ul({}, [listIncompleteFields]);
+    if (!isSigningOfficial() || (isNil(profile.institutionId) && isNil(profile.suggestedInstitution))) {
+      return div({},
+        [
+          h(SearchSelectOrText, {
+            id: 'Institution',
+            label: 'institution',
+            onPresetSelection: async (selection) => {
+              setSigningOfficialList([]); // reset
+
+              setProfile(Object.assign({}, profile, {institutionId: selection, suggestedInstitution: undefined}));
+            },
+            onManualSelection: (selection) => {
+              if (selection == '') {
+                setProfile(Object.assign({}, profile, {institutionId: undefined, suggestedInstitution: undefined}));
+              } else {
+                setProfile(Object.assign({}, profile, {institutionId: null, suggestedInstitution: selection}));
+              }
+            },
+            options: institutionList.map(institution => {
+              return {
+                key: institution.id,
+                displayText: institution.name,
+              };
+            }),
+            value: profile.institutionId,
+            freetextValue: profile.suggestedInstitution,
+            placeholder: 'Please Select an Institution',
+            searchPlaceholder: 'Search for Institution...',
+            className: 'form-control'
+          })
+        ]
+      );
+    } else {
+      let institution = (profile.institutionId ? find(institutionList, {id: profile.institutionId}) : null);
+
+      const institutionName = (institution ? institution.name : profile.suggestedInstitution);
+
+
+      return div({
+        className: 'col-xs-12',
+        style: {padding: 0},
+      }, [
+        input({
+          id: 'profileInstitution',
+          name: 'institution',
+          type: 'text',
+          disabled: true,
+          className: 'form-control',
+          value: institutionName,
+        }),
+      ]);
+    }
   };
 
   const headerStyle = {
@@ -206,7 +184,7 @@ export default function ResearcherProfile(props) {
   };
 
   return (
-    div({ 
+    div({
       className: 'container' ,
       style: {
         color: '#333F52',
@@ -225,12 +203,12 @@ export default function ResearcherProfile(props) {
         ]),
         div({ className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding' }, [
           form({
-            name: 'researcherForm', 
+            name: 'researcherForm',
 
             // prevent enter from submitting the form, so that
             // users can hit enter on the institution search bar.
             onKeyDown: (e) => {
-              if (e.key == "Enter") {
+              if (e.key == 'Enter') {
                 e.preventDefault();
               }
             }
@@ -238,7 +216,7 @@ export default function ResearcherProfile(props) {
             div({ className: 'form-group' }, [
               div({ className: 'col-xs-12' }, [
                 label({
-                  id: 'lbl_profileName', 
+                  id: 'lbl_profileName',
                   className: 'control-label',
                   style: headerStyle,
                 }, ['Full Name*']),
@@ -254,7 +232,7 @@ export default function ResearcherProfile(props) {
             ]),
             div({ className: 'flex' }, [
               div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
-                label({ 
+                label({
                   className: 'control-label',
                   style: headerStyle,
                 }, [
@@ -276,53 +254,27 @@ export default function ResearcherProfile(props) {
               ]),
 
               div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
-                label({ 
-                  id: 'lbl_profileInstitution', 
+                label({
+                  id: 'lbl_profileInstitution',
                   className: 'control-label',
                   style: headerStyle,
                 }, [
                   'Institution* ',
                 ]),
                 p({}, ['Please select an institution or enter your institution name if not available from the dropdown.']),
-                div({},
-                  [
-                    h(SearchSelectOrText, {
-                      id: 'Institution',
-                      label: 'institution',
-                      onPresetSelection: async (selection) => {
-                        setSigningOfficialList([]); // reset
+                generateInstitutionSelectionDisplay(),
 
-                        setProfile(Object.assign({}, profile, {institutionId: selection, suggestedInstitution: undefined}));
-                      },
-                      onManualSelection: (selection) => {
-                        if (selection == "") {
-                          setProfile(Object.assign({}, profile, {institutionId: undefined, suggestedInstitution: undefined}));
-                        } else {
-                          setProfile(Object.assign({}, profile, {institutionId: undefined, suggestedInstitution: selection}));
-                        }
-                      },
-                      options: institutionList.map(institution => {
-                        return {
-                          key: institution.id,
-                          displayText: institution.name,
-                        };
-                      }),
-                      value: profile.institutionId,
-                      freetextValue: profile.suggestedInstitution,
-                      placeholder: 'Please Select an Institution',
-                      searchPlaceholder: 'Search for Institution...',
-                      className: 'form-control'
-                    })
-                  ]
-                ),
+
               ]),
-              div({ 
-                className: 'col-xs-12', 
+
+
+              div({
+                className: 'col-xs-12',
                 style: { 'marginTop': '20px' },
-                isRendered: hasInstitution(),
+                isRendered: hasInstitution() && !isSigningOfficial(),
               }, [
-                label({ 
-                  id: 'lbl_profileInstitution', 
+                label({
+                  id: 'lbl_profileInstitution',
                   className: 'control-label',
                   style: headerStyle,
                 }, [
@@ -330,33 +282,33 @@ export default function ResearcherProfile(props) {
                 ]),
                 p({}, ['Please select your Signing Official or enter your signing official’s email address.']),
                 div({},
-                [
-                  h(SearchSelectOrText, {
-                    id: 'SigningOfficial',
-                    label: 'SigningOfficial',
-                    onPresetSelection: (selection) => {
-                      setProfile(Object.assign({}, profile, {selectedSigningOfficialId: selection, suggestedSigningOfficial: undefined}));
-                    },
-                    onManualSelection: (selection) => {
-                      if (selection == "") {
-                        setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: undefined}));
-                      } else {
-                        setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: selection}));
-                      }
-                    },
-                    options: signingOfficialList.map(signingOfficial => {
-                      return {
-                        key: signingOfficial.userId,
-                        displayText: signingOfficial.displayName,
-                      };
-                    }),
-                    placeholder: 'Please Select a Signing Official',
-                    searchPlaceholder: 'Search for a Signing Official...',
-                    value: profile.selectedSigningOfficialId,
-                    freetextValue: profile.suggestedSigningOfficial,
-                    className: 'form-control'
-                  })
-                ]),
+                  [
+                    h(SearchSelectOrText, {
+                      id: 'SigningOfficial',
+                      label: 'SigningOfficial',
+                      onPresetSelection: (selection) => {
+                        setProfile(Object.assign({}, profile, {selectedSigningOfficialId: selection, suggestedSigningOfficial: undefined}));
+                      },
+                      onManualSelection: (selection) => {
+                        if (selection == '') {
+                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: undefined}));
+                        } else {
+                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: null, suggestedSigningOfficial: selection}));
+                        }
+                      },
+                      options: signingOfficialList.map(signingOfficial => {
+                        return {
+                          key: signingOfficial.userId,
+                          displayText: signingOfficial.displayName,
+                        };
+                      }),
+                      placeholder: 'Please Select a Signing Official',
+                      searchPlaceholder: 'Search for a Signing Official...',
+                      value: profile.selectedSigningOfficialId,
+                      freetextValue: profile.suggestedSigningOfficial,
+                      className: 'form-control'
+                    })
+                  ]),
                 div({
                   style: {
                     marginTop: '2rem',
@@ -368,22 +320,27 @@ export default function ResearcherProfile(props) {
                     style: {
                       marginTop: '1rem',
                     }
-                  }, ['Please feel free to contact your Signing Official to help advance this process.']),    
+                  }, ['Please feel free to contact your Signing Official to help advance this process.']),
                 ])
               ]),
 
 
 
-              div({ className: 'row margin-top-20' }, [
+              div({
+                className: 'row margin-top-20',
+              }, [
                 div({ className: 'col-lg-4 col-xs-6' }, [
                   div({ className: 'italic default-color' }, ['*Required field'])
                 ]),
-  
+
                 div({ className: 'col-lg-8 col-xs-6' }, [
                   button({
                     id: 'btn_submit',
                     onClick: submitForm,
-                    className: 'f-right btn-primary common-background'
+                    className: 'f-right btn-primary common-background',
+                    style: {
+                      marginTop: '2rem',
+                    }
                   }, ['Save']),
                 ])
               ])

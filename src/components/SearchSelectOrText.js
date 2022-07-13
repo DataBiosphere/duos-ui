@@ -37,7 +37,7 @@ export const SearchSelectOrText = (props) => {
 
   const setManualDisplay = (text) => {
     setCurrentDisplay(text);
-  }
+  };
 
   const select = (selection) => {
     return () => {
@@ -57,7 +57,7 @@ export const SearchSelectOrText = (props) => {
 
     setManualDisplay(text);
     onManualSelection(text);
-  }
+  };
 
   const handleSearch = (searchTerm) => {
     const filteredList = fullList.filter(kv => kv.displayText.toLowerCase().indexOf(searchTerm.current.value.toLowerCase()) > -1);
@@ -91,7 +91,7 @@ export const SearchSelectOrText = (props) => {
           className: 'search-bar',
           onChange:() => handleSearch(searchTerms),
           onKeyDown: (e) => {
-            if (e.key == "Enter") {
+            if (e.key == 'Enter') {
               selectManual(searchTerms.current.value);
             }
           },
