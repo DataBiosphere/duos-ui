@@ -38,6 +38,13 @@
   margin-right: 30px;
 }
 
+.navbar-duos li {
+  display: inline-block;
+  margin: 0 20px 0 0;
+  padding: 28px 0 14px 0;
+  text-decoration: none;
+}
+
 /* ------------------------------------- */
 /*    Sub Components                    */
 /* ------------------------------------- */
