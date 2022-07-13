@@ -860,6 +860,25 @@ export const User = {
     }
   },
 
+  updateSelf: async (user) => {
+    const url = `${await Config.getApiUrl()}/api/user/me`;
+    // We should not be updating the user's create date, associated institution, or library cards
+    let filteredUser = flow(
+      cloneDeep,
+      unset('updatedUser.createDate'),
+      unset('updatedUser.institution'),
+      unset('updatedUser.libraryCards')
+    )(user);
+    try {
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
+      if (res.ok) {
+        return res.json();
+      }
+    } catch (err) {
+      return false;
+    }
+  },
+
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards

@@ -115,7 +115,7 @@ export default function ResearcherProfile(props) {
 
     const payload = currentUserUpdate;
 
-    let updatedUser = await User.update(payload, currentUserUpdate.userId);
+    let updatedUser = await User.updateSelf(payload);
     return updatedUser;
   };
 
