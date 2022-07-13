@@ -25,8 +25,8 @@ const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOver
         className: 'text-placeholder',
         key: `${label}-placeholder`,
         style: {
-          width: '15%',
-          height: '1.8rem',
+          width: '23rem',
+          height: '5rem',
           marginRight: '2rem'
         }
       })
