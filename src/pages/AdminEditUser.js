@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {Component} from 'react';
-import {button, div, form, hh, input, label} from 'react-hyperscript-helpers';
-import {User} from '../libs/ajax';
+import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
+import {Institution, User} from '../libs/ajax';
 import {USER_ROLES} from '../libs/utils';
 import {ResearcherReview} from './ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from '../components/PageHeading';
+import {SearchSelect} from '../components/SearchSelect';
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
@@ -31,6 +32,12 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
   async componentDidMount() {
     const user = await User.getById(this.props.match.params.userId);
+    const institutionOptions = (await Institution.list()).map((institution) => {
+      return {
+        key: institution.id,
+        displayText: institution.name
+      };
+    });
     const currentRoles = _.map(user.roles, (ur) => {
       return {'roleId': ur.roleId, 'name': ur.name};
     });
@@ -40,7 +47,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       email: user.email,
       user: user,
       updatedRoles: updatedRoles,
-      emailPreference: user.emailPreference
+      emailPreference: user.emailPreference,
+      institutionOptions: institutionOptions,
+      institutionId: user.institutionId
     },
     () => {
       this.setState({
@@ -60,9 +69,9 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       userId: userId,
       displayName: this.state.displayName,
       emailPreference: this.state.emailPreference,
+      institutionId: this.state.institutionId
     };
-    const payload = {updatedUser: user};
-    const updatedUser = await User.update(payload, userId);
+    const updatedUser = await User.update(user, userId);
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
     this.setState({
@@ -136,7 +145,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
 
 
   render() {
-    const {displayName, email, displayNameValid} = this.state;
+    const {displayName, email, displayNameValid, institutionId, institutionOptions} = this.state;
     return (
       div({className: 'container container-wide'}, [
         div({className: 'row no-margin'}, [
@@ -193,6 +202,27 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                     required: true,
                     value: email,
                     disabled: true
+                  })
+                ])
+              ]),
+
+              div({className: 'form-group'}, [
+                label({
+                  id: 'lbl_institution',
+                  className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+                }, ['Institution']),
+                div({className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'}, [
+                  h(SearchSelect, {
+                    id: 'select_institution',
+                    label: 'institution',
+                    onSelection: (selection) => {
+                      this.setState({ institutionId: selection });
+                    },
+                    options: institutionOptions || [],
+                    placeholder: 'Please Select an Institution',
+                    searchPlaceholder: 'Search for Institution...',
+                    value: institutionId,
+                    className: 'form-control'
                   })
                 ])
               ]),
