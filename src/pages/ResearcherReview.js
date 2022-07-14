@@ -3,7 +3,6 @@ import { div, hh, label, form, textarea } from 'react-hyperscript-helpers';
 import {getPropertyValuesFromUser} from '../libs/utils';
 import {isNil} from 'lodash/fp';
 import { isEmpty } from 'lodash';
-
 export const ResearcherReview = hh(class ResearcherReview extends Component {
 
   constructor(props) {
@@ -70,13 +69,9 @@ export const ResearcherReview = hh(class ResearcherReview extends Component {
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding' }, [
           form({ name: 'researcherForm', noValidate: true }, [
             div({ className: 'row form-group margin-top-20' }, [
-              div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+              div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
                 label({ className: 'control-label' }, ['Full Name']),
                 div({ id: 'lbl_profileName', className: 'control-data', name: 'profileName', readOnly: true }, [user.displayName])
-              ]),
-              div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-                label({ className: 'control-label' }, ['Academic/Business Email Address']),
-                div({ id: 'lbl_profileAcademicEmail', className: 'control-data', name: 'profileAcademicEmail', readOnly: true}, [formData.academicEmail]),
               ])
             ]),
 

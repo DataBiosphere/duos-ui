@@ -202,7 +202,11 @@ const NavigationTabsComponent = (props) => {
             }
           }, [
             li([
-              h(Link, { id: 'link_profile', to: '/profile' }, [
+              h(Link, {
+                id: 'link_profile',
+                to: '/profile',
+                onClick: onSubtabChange
+              }, [
                 'Your Profile',
               ]),
             ]),
