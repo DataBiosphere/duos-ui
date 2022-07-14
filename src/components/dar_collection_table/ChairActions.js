@@ -3,7 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
+import { isEmpty, filter, head, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
@@ -26,8 +26,13 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       uniq
     )(relevantDatasets);
     const relevantDarsNoElections = filter(dar => {
-      const datasetId = !isEmpty(dar.data) ? dar.data.datasetIds[0] : undefined;
-      return includes(datasetId, relevantDatasetIds) ? isEmpty(dar.elections) : false;
+      const datasetIds = !isEmpty(dar.data) ? dar.data.datasetIds : [];
+      const relevant = flow(
+        map(id => { return includes(id, relevantDatasetIds) ? isEmpty(dar.elections) : false; }),
+        filter((bool) => { return bool; }),
+        head()
+      )(datasetIds);
+      return !isNil(relevant);
     })(dars);
     const relevantElections = filter((election) => {
       //NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
