@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-import {find, isEmpty, isNil, isNumber} from 'lodash';
-import {button, div, form, h, hr, input, label, p} from 'react-hyperscript-helpers';
+import {find, isNil, isNumber} from 'lodash';
+import {button, div, form, h, hr, input, label, p, a} from 'react-hyperscript-helpers';
 import {eRACommons} from '../components/eRACommons';
 import {PageHeading} from '../components/PageHeading';
 import {Notification} from '../components/Notification';
@@ -8,7 +8,7 @@ import {SearchSelectOrText} from '../components/SearchSelectOrText';
 import {Institution, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, USER_ROLES} from '../libs/utils';
+import {getPropertyValuesFromUser} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -20,8 +20,6 @@ export default function ResearcherProfile(props) {
     eraCommonsId: undefined,
     completed: undefined
   });
-
-  const [userRoles, setUserRoles] = useState([]);
 
   const [institutionList, setInstitutionList] = useState([]);
   const [signingOfficialList, setSigningOfficialList] = useState([]);
@@ -70,12 +68,6 @@ export default function ResearcherProfile(props) {
 
     const userProps = getPropertyValuesFromUser(user);
 
-    if (isEmpty(user.roles)) {
-      setUserRoles([{ 'roleId': 5, 'name': USER_ROLES.researcher }]);
-    } else {
-      setUserRoles(user.roles);
-    }
-
     setProfile({
       institutionId: userProps.institutionId,
       suggestedInstitution: userProps.suggestedInstitution,
@@ -102,18 +94,15 @@ export default function ResearcherProfile(props) {
   };
 
   const updateUser = async () => {
-    const currentUserUpdate = Storage.getCurrentUser();
-    delete currentUserUpdate.email;
-    currentUserUpdate.displayName = profile.profileName;
-    currentUserUpdate.roles = userRoles;
+    const payload = {
+      displayName: profile.profileName,
+      eraCommonsId: profile.eraCommonsId,
+      institutionId: profile.institutionId,
+      suggestedInstitution: profile.suggestedInstitution,
+      selectedSigningOfficialId: profile.selectedSigningOfficialId,
+      suggestedSigningOfficial: profile.suggestedSigningOfficial,
+    };
 
-    currentUserUpdate.eraCommonsId = profile.eraCommonsId;
-    currentUserUpdate.institutionId = profile.institutionId;
-    currentUserUpdate.suggestedInstitution = profile.suggestedInstitution;
-    currentUserUpdate.selectedSigningOfficialId = profile.selectedSigningOfficialId;
-    currentUserUpdate.suggestedSigningOfficial = profile.suggestedSigningOfficial;
-
-    const payload = currentUserUpdate;
 
     let updatedUser = await User.updateSelf(payload);
     return updatedUser;
@@ -238,7 +227,12 @@ export default function ResearcherProfile(props) {
                 }, [
                   'Researcher Identification*',
                 ]),
-                p({}, ['An eRA Commons ID will be required to submit a dar.'])
+                p({}, [
+                  'An ',
+                  a({href:'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'},
+                    ['eRA Commons ID']),
+                  ' will be required to submit a dar.'
+                ])
               ]),
 
               div({ className: 'col-xs-12 no-padding' }, [
