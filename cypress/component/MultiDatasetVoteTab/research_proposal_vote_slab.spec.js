@@ -74,8 +74,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.get('[datacy=srp-slab]').should('be.visible');
-    cy.get('[datacy=srp-expanded]').should('not.exist');
+    cy.get('[datacy=rp-slab]').should('be.visible');
+    cy.get('[datacy=rp-expanded]').should('not.exist');
   });
 
   it('Renders primary data use pill', function() {

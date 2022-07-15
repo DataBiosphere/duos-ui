@@ -185,9 +185,9 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-  return div({ datacy: 'srp-slab', style: styles.baseStyle }, [
+  return div({ datacy: 'rp-slab', style: styles.baseStyle }, [
     div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
-      'Structured Research Purpose',
+      'Research Use Statement (GA4GH DUO)',
       h(ScrollToTopButton, {to: '.header-container'})
     ]),
     div({ isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}} ),
@@ -203,9 +203,9 @@ export default function ResearchProposalVoteSlab(props) {
       h(AnimatePresence, { initial: false }, [
         expanded && (
           h(motion.section, animationAttributes, [
-            div({ datacy: 'srp-expanded', style: styles.expandedData }, [
+            div({ datacy: 'rp-expanded', style: styles.expandedData }, [
               div({ datacy: 'research-purpose' }, [
-                span({ style: styles.researchPurposeTitle }, ['Research Purpose']),
+                span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
                 h(ResearchPurposeSummary, {darInfo}),
                 h(DataUseAlertBox, {translatedDataUse}),
                 h(CollectionSubmitVoteBox, {

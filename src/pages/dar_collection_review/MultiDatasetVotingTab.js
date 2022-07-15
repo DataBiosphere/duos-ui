@@ -88,7 +88,7 @@ export default function MultiDatasetVotingTab(props) {
   };
 
   return div({style: styles.baseStyle}, [
-    div({style: styles.title}, ['Research Proposal']),
+    div({style: styles.title}, ['Research Use Statement']),
     Alert({
       type: 'danger',
       title: missingLibraryCardMessage,

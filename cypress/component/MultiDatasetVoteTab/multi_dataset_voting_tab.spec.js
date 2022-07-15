@@ -120,7 +120,7 @@ beforeEach(() => {
 });
 
 describe('MultiDatasetVoteTab - Tests', function() {
-  it('Renders srp slab', function () {
+  it('Renders rp slab', function () {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
@@ -130,8 +130,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
       />
     );
 
-    cy.get('[datacy=srp-slab]').should('be.visible');
-    cy.get('[datacy=srp-expanded]').should('not.exist');
+    cy.get('[datacy=rp-slab]').should('be.visible');
+    cy.get('[datacy=rp-expanded]').should('not.exist');
     cy.contains('primary');
     cy.contains('DS');
   });
