@@ -18,7 +18,6 @@ class AdminConsole extends Component {
       showModal: false,
       showAddUserModal: false,
       dulUnreviewedCases: 0,
-      darUnreviewedCases: 0,
       timeOut: {},
       isDataSetElection: {},
       env: props.env
@@ -40,14 +39,6 @@ class AdminConsole extends Component {
       duls => {
         this.setState({
           dulUnreviewedCases: duls.dulUnReviewedCases,
-        });
-      }
-    );
-
-    PendingCases.findDARUnReviewed().then(
-      dars => {
-        this.setState({
-          darUnreviewedCases: dars.darUnReviewedCases,
         });
       }
     );
@@ -87,7 +78,7 @@ class AdminConsole extends Component {
 
   render() {
 
-    const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
+    const { currentUser, dulUnreviewedCases } = this.state;
 
     return (
 
@@ -161,23 +152,7 @@ class AdminConsole extends Component {
             ]),
 
             div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-              // TODO: `admin_manage_access` will be fully deprecated with MDV
               div({
-                isRendered: (this.props.env === 'prod'),
-                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
-                AdminConsoleBox({
-                  id: 'btn_manageDAR',
-                  url: '/admin_manage_access',
-                  color: 'access',
-                  title: 'Manage Data Access Request',
-                  description: 'Select and manage Data Access Request for review',
-                  iconName: 'manage-access',
-                  iconSize: 'default',
-                  unreviewedCases: darUnreviewedCases
-                }),
-              ]),
-              div({
-                isRendered: (this.props.env !== 'prod'),
                 className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
                 AdminConsoleBox({
                   id: 'btn_manageDarCollections',
@@ -212,20 +187,6 @@ class AdminConsole extends Component {
                   title: 'Manage Data Access Committee',
                   description: 'Create and manage Data Access Committees',
                   iconName: 'manage-dac',
-                  iconSize: 'large',
-                })
-              ]),
-              div({
-                // TODO: We won't need this box when MDV is complete
-                isRendered: (this.state.env === 'prod'),
-                className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box' }, [
-                AdminConsoleBox({
-                  id: 'btn_manageDarCollections',
-                  url: '/admin_manage_dar_collections',
-                  color: 'access',
-                  title: 'Manage DAR Collection',
-                  description: 'Select and access DAR Collections for review',
-                  iconName: 'manage-access',
                   iconSize: 'large',
                 })
               ]),

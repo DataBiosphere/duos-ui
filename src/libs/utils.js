@@ -6,7 +6,6 @@ import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick, capitalize } from 'lodash/fp';
 import {User} from './ajax';
-import {Config} from './config';
 
 export const UserProperties = {
   ACADEMIC_EMAIL: 'academicEmail',
@@ -255,52 +254,23 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const env = await Config.getEnv();
-    let page;
-    if (env !== 'prod') {
-      page =
-        user.isAdmin ? '/admin_manage_dar_collections'
-          :user.isChairPerson ? '/new_chair_console'
-            : user.isMember ? '/new_member_console'
-              : user.isResearcher ? '/dataset_catalog'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    } else {
-      page =
-        user.isAdmin ? '/admin_console'
-          :user.isChairPerson ? '/chair_console'
-            : user.isMember ? '/member_console'
-              : user.isResearcher ? '/dataset_catalog'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    }
-
+    let page =
+      user.isAdmin ? '/admin_manage_dar_collections'
+        :user.isChairPerson ? '/new_chair_console'
+          : user.isMember ? '/new_member_console'
+            : user.isResearcher ? '/dataset_catalog'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
     history.push(page);
   },
   console: async (user, history) => {
-    const env = await Config.getEnv();
-    let page;
-    if (env !== 'prod') {
-      page =
-        user.isAdmin ? '/admin_manage_dar_collections'
-          : user.isChairPerson ? '/new_chair_console'
-            : user.isMember ? '/new_member_console'
-              : user.isResearcher ? '/new_researcher_console'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    } else {
-      page =
-        user.isAdmin ? '/admin_console'
-          : user.isChairPerson ? '/chair_console'
-            : user.isMember ? '/member_console'
-              : user.isResearcher ? '/researcher_console'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    }
+    let page =
+      user.isAdmin ? '/admin_manage_dar_collections'
+        : user.isChairPerson ? '/new_chair_console'
+          : user.isMember ? '/new_member_console'
+            : user.isResearcher ? '/new_researcher_console'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
     history.push(page);
   }
 };

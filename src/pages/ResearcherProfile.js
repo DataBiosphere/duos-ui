@@ -386,22 +386,6 @@ export default function ResearcherProfile(props) {
                 }),
               ]),
 
-              div({ className: 'col-xs-12' }, [
-                label({
-                  id: 'lbl_profileAcademicEmail',
-                  className: 'control-label'
-                }, ['Academic/Business Email Address']),
-                input({
-                  id: 'profileAcademicEmail',
-                  name: 'academicEmail',
-                  type: 'email',
-                  className: 'form-control',
-                  disabled: true,
-                  defaultValue: profile.academicEmail,
-                  onBlur: handleChange
-                })
-              ]),
-
               div({ className: 'col-xs-12 rp-group checkbox' }, [
                 input({
                   type: 'checkbox',
