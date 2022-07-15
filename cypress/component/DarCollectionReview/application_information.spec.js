@@ -55,7 +55,7 @@ describe('Application Information', () => {
     textbox.contains('test');
   });
 
-  it('renders the collaborator details container and sub-header if there are any to display', () => {
+  it('renders the collaborator details container and sub-header if any provided', () => {
     const props = {
       externalCollaborators: [{name: 'Person A'}, {name: 'Person B'}]
     };
@@ -72,11 +72,10 @@ describe('Application Information', () => {
     const props = {};
     mount(<ApplicationInformation {...props} />);
     const container = cy.get('.collaborator-details-container');
-    expect(container).to.exist;
+    expect(container).to.not.exist;
 
     const subheader = cy.get('.collaborator-details-subheader');
-    expect(subheader).to.exist;
-    subheader.contains('Collaborators');
+    expect(subheader).to.not.exist;
   });
 
   it('renders institution details container and sub-header', () => {
