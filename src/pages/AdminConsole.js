@@ -87,7 +87,7 @@ class AdminConsole extends Component {
 
   render() {
 
-    const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
+    const { currentUser, dulUnreviewedCases } = this.state;
 
     return (
 

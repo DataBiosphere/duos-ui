@@ -860,6 +860,19 @@ export const User = {
     }
   },
 
+  updateSelf: async (payload) => {
+    const url = `${await Config.getApiUrl()}/api/user`;
+    // We should not be updating the user's create date, associated institution, or library cards
+    try {
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(payload), { method: 'PUT' }]));
+      if (res.ok) {
+        return res.json();
+      }
+    } catch (err) {
+      return false;
+    }
+  },
+
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards
