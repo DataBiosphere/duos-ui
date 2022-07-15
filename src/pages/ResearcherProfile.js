@@ -63,6 +63,14 @@ export default function ResearcherProfile(props) {
     return Storage.getCurrentUser().isSigningOfficial;
   };
 
+  const profileNameIsValid = () => {
+    return profile.profileName.length >= 4;
+  };
+
+  const formIsValid = () => {
+    return profileNameIsValid();
+  };
+
   const getResearcherProfile = async () => {
     const user = await User.getMe();
 
@@ -215,8 +223,17 @@ export default function ResearcherProfile(props) {
                   type: 'text',
                   className: 'form-control',
                   defaultValue: profile.profileName,
-                  onBlur: handleChange
+                  onBlur: handleChange,
                 }),
+
+                p(
+                  {
+                    isRendered: !profileNameIsValid(),
+                    style: {
+                      fontStyle: 'italic',
+                    }
+                  },
+                  ['Profile name must be at least four characters.'])
               ]),
             ]),
             div({ className: 'flex' }, [
@@ -334,7 +351,8 @@ export default function ResearcherProfile(props) {
                     className: 'f-right btn-primary common-background',
                     style: {
                       marginTop: '2rem',
-                    }
+                    },
+                    disabled: !formIsValid(),
                   }, ['Save']),
                 ])
               ])
