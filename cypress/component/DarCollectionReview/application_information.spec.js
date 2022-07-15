@@ -71,11 +71,8 @@ describe('Application Information', () => {
   it('does not render collaborator details container and sub-header if none provided', () => {
     const props = {};
     mount(<ApplicationInformation {...props} />);
-    const container = cy.get('.collaborator-details-container');
-    expect(container).to.not.exist;
-
-    const subheader = cy.get('.collaborator-details-subheader');
-    expect(subheader).to.not.exist;
+    cy.get('.collaborator-details-container').should('not.be.visible');
+    cy.get('.collaborator-details-subheader').should('not.be.visible');
   });
 
   it('renders institution details container and sub-header', () => {
