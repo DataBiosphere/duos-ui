@@ -21,6 +21,7 @@ import {ScrollToTopButton} from '../ScrollButton';
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    paddingBottom: '35px'
   },
   slabTitle: {
     color: '#000000',

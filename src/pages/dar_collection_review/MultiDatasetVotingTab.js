@@ -28,7 +28,7 @@ const styles = {
     fontFamily: 'Montserrat',
     fontSize: '2.4rem',
     fontWeight: 'bold',
-    marginBottom: '10px'
+    paddingBottom: '20px'
   }
 };
 
@@ -41,7 +41,7 @@ export default function MultiDatasetVotingTab(props) {
   const missingLibraryCardMessage = 'The Researcher must have a Library Card before data access can be granted.\n' +
     (!adminPage ? 'You can still deny this request and/or vote on the Structured Research Purpose.' : '');
 
-  useEffect( () => {
+  useEffect(() => {
     setCollectionDatasets(get('datasets')(collection));
     setRpBucket(find(bucket => get('isRP')(bucket))(buckets));
     setDataBuckets(filter(bucket => get('isRP')(bucket) !== true)(buckets));
@@ -62,7 +62,7 @@ export default function MultiDatasetVotingTab(props) {
   const DatasetVoteSlabs = () => {
     const isApprovalDisabled = dataAccessApprovalDisabled();
     return map(bucket => {
-      return h(MultiDatasetVoteSlab,{
+      return h(MultiDatasetVoteSlab, {
         title: bucket.key,
         bucket,
         dacDatasetIds,
@@ -95,17 +95,18 @@ export default function MultiDatasetVotingTab(props) {
       id: 'missing_lc',
       isRendered: dataAccessApprovalDisabled() && !readOnly
     }),
+    h(ResearchProposalVoteSlab, {
+      updateFinalVote,
+      darInfo,
+      bucket: rpBucket,
+      key: 'rp-vote',
+      isChair,
+      isLoading,
+      readOnly,
+      adminPage,
+    }),
+    div({style: styles.title}, ['Datasets Requested by Data Use']),
     div({style: styles.slabs}, [
-      h(ResearchProposalVoteSlab, {
-        updateFinalVote,
-        darInfo,
-        bucket: rpBucket,
-        key: 'rp-vote',
-        isChair,
-        isLoading,
-        readOnly,
-        adminPage,
-      }),
       DatasetVoteSlabs()
     ])
   ]);
