@@ -7,16 +7,16 @@ const styles = {
     marginRight: '1rem'
   },
   secondaryHeader: {
-    fontSize: '2.2rem',
-    fontWeight: 400,
+    fontSize: '3rem',
+    fontWeight: 600,
     marginRight: '1rem',
+    marginBottom: '1.5rem',
     paddingRight: '1rem',
     borderRight: '1px solid black'
   },
   title: {
     fontSize: '3rem',
     fontWeight: 600,
-    marginBottom: '1.5rem'
   },
   default: {
     fontSize: '1.1rem',
@@ -55,12 +55,12 @@ export default function ReviewHeader(props) {
         div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
           span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`])
         ]),
+        div({style: styles.containerRow}, [
+          div({className: 'collection-project-title', style: styles.title}, [projectTitle])
+        ]),
         div({className: 'secondary-header-row', style: styles.containerRow}, [
           span({style: styles.secondaryHeader}, [darCode]),
           downloadLink
-        ]),
-        div({style: styles.containerRow}, [
-          div({className: 'collection-project-title', style: styles.title}, [projectTitle])
         ])
       ]),
       div({className: 'header-skeleton-loader', isRendered: isLoading}, [
