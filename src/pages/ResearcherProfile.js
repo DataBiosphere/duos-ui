@@ -8,7 +8,7 @@ import {SearchSelectOrText} from '../components/SearchSelectOrText';
 import {Institution, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser} from '../libs/utils';
+import {getPropertyValuesFromUser, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -17,8 +17,7 @@ export default function ResearcherProfile(props) {
     suggestedInstitution: undefined,
     selectedSigningOfficialId: undefined,
     suggestedSigningOfficial: undefined,
-    eraCommonsId: undefined,
-    completed: undefined
+    eraCommonsId: undefined
   });
 
   const [institutionList, setInstitutionList] = useState([]);
@@ -67,8 +66,12 @@ export default function ResearcherProfile(props) {
     return profile.profileName.length >= 4;
   };
 
+  const suggestSigningOfficialValid = () => {
+    return (isNil(profile.suggestedSigningOfficial)||'' == profile.suggestedSigningOfficial) || isEmailAddress(profile.suggestedSigningOfficial);
+  };
+
   const formIsValid = () => {
-    return profileNameIsValid();
+    return profileNameIsValid() && suggestSigningOfficialValid();
   };
 
   const getResearcherProfile = async () => {
@@ -231,6 +234,7 @@ export default function ResearcherProfile(props) {
                     isRendered: !profileNameIsValid(),
                     style: {
                       fontStyle: 'italic',
+                      color: '#D13B07',
                     }
                   },
                   ['Profile name must be at least four characters.'])
@@ -320,6 +324,15 @@ export default function ResearcherProfile(props) {
                       className: 'form-control'
                     })
                   ]),
+                p(
+                  {
+                    isRendered: !suggestSigningOfficialValid(),
+                    style: {
+                      fontStyle: 'italic',
+                      color: '#D13B07',
+                    }
+                  },
+                  ['Please provide your signing official\'s email.']),
                 div({
                   style: {
                     marginTop: '2rem',
