@@ -64,19 +64,20 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
     className: 'vote-summary-loading-placeholder',
     style: {
       display: 'flex',
-      justifyContent: 'space-between',
-      marginBottom: '2%'
+      justifyContent: 'start',
+      marginBottom: '2%',
+      columnGap: '0.5rem',
     }
   }, map((value) =>
     div({
       className: 'text-placeholder',
       key: `vote-result-${value}-placeholder`,
       style: {
-        height: '10rem',
-        width: '8.5%'
+        height: '4rem',
+        width: '15rem',
       }
     })
-  )(range(0, rowElementMaxCount)));
+  )(range(0, 2)));
 
   return !isLoading ?
     div({

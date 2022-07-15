@@ -65,13 +65,14 @@ export default function ReviewHeader(props) {
       ]),
       div({className: 'header-skeleton-loader', isRendered: isLoading}, [
         div({className: 'primary-header-skeleton', style: appliedPrimaryHeaderStyle}, [
-          div({className: 'text-placeholder', style: { width: '30%', height: '2.2rem'}}),
+          div({className: 'text-placeholder', style: { width: '35rem', height: '2.5rem', marginBottom: '0.5rem'}}),
         ]),
         div({className: 'secondary-header-skeleton', style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '15%', height: '2.5rem'}})
+          div({className: 'text-placeholder', style: {width: '10rem', height: '3rem', marginBottom: '0.5rem'}}),
+          div({className: 'text-placeholder', style: {width: '16rem', height: '3rem', marginBottom: '0.5rem'}})
         ]),
         div({style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '40%', height: '5rem', marginBottom: styles.title.marginBottom}})
+          div({className: 'text-placeholder', style: {width: '40rem', height: '4rem', marginBottom: '3.5rem'}})
         ])
       ])
     ])
