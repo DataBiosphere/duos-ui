@@ -95,11 +95,7 @@ const animationAttributes = {
 const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
-    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({key: `data-use-${key}-container`}, [
-      label,
-      dataUsePills(dataUses)
-    ]);
+    return dataUsePills(dataUses);
   })(keys(translatedDataUse));
 };
 
