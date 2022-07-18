@@ -2,10 +2,11 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import DataUseVoteSummary from '../../../src/components/common/DataUseVoteSummary/DataUseVoteSummary';
+import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
 
 const buckets = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [{
       rp: {
@@ -26,7 +27,7 @@ const buckets = [
 
 const bucketsWithMultipleElections = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [
       {
@@ -61,7 +62,7 @@ const bucketsWithMultipleElections = [
 
 const bucketsWithMixedVotes = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [{
       rp: {
