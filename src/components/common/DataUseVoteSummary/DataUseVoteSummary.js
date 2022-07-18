@@ -48,7 +48,7 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
         display: 'flex',
         justifyContent: 'flex-start',
         flexWrap: 'wrap',
-        margin: '1% 0'
+        margin: '0.5% 0'
       }
     },
     elementTemplate(row))
