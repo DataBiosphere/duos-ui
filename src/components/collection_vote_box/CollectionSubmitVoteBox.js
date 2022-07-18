@@ -20,7 +20,8 @@ const styles = {
   },
   content: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    columnGap: '5rem',
     padding: '0 15px'
   },
   subsection: {
@@ -53,11 +54,9 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
     heading = isNil(vote) ?
       'The vote has not been finalized' :
       `The final vote is: ${voteResultText}`;
-  } else {
-    // if read-only, describe the vote in a statement; otherwise prompt the user to vote
-    heading = isVotingDisabled ?
-      `Your Vote: ${voteResultText}` :
-      'Your Vote*';
+  } else if (isVotingDisabled) {
+    // if read-only, describe the vote in a statement
+    heading = `Your Vote: ${voteResultText}`;
   }
 
   // determines if text is needed to remind the user that their vote will be final once submitting
