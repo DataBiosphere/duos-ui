@@ -24,7 +24,7 @@ import { formatDate, Notifications } from '../libs/utils';
 import { Collections, Match } from '../libs/ajax';
 import { processMatchData } from './VoteUtils';
 
-export const rpVoteKey = 'RP Vote';
+export const rpVoteKey = 'RUS Vote';
 
 //Initial step, organizes raw data for further processing in later function/steps
 export const generatePreProcessedBucketData = async ({dars, datasets}) => {
