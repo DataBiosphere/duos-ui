@@ -18,7 +18,6 @@ class AdminConsole extends Component {
       showModal: false,
       showAddUserModal: false,
       dulUnreviewedCases: 0,
-      darUnreviewedCases: 0,
       timeOut: {},
       isDataSetElection: {},
       env: props.env
@@ -40,14 +39,6 @@ class AdminConsole extends Component {
       duls => {
         this.setState({
           dulUnreviewedCases: duls.dulUnReviewedCases,
-        });
-      }
-    );
-
-    PendingCases.findDARUnReviewed().then(
-      dars => {
-        this.setState({
-          darUnreviewedCases: dars.darUnReviewedCases,
         });
       }
     );

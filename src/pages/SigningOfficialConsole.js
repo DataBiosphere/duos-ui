@@ -14,7 +14,6 @@ import {User, DAR, Collections} from '../libs/ajax';
 import {consoleTypes} from '../components/dar_table/DarTableActions';
 import { USER_ROLES } from '../libs/utils';
 import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
-import { Config } from '../libs/config';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 
 const tabs = {
@@ -24,7 +23,6 @@ const tabs = {
 };
 
 export default function SigningOfficialConsole(props) {
-  const [env, setEnv] = useState();
   const [signingOfficial, setSiginingOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
   const [unregisteredResearchers, setUnregisteredResearchers] = useState();
@@ -44,9 +42,7 @@ export default function SigningOfficialConsole(props) {
     const init = async() => {
       try {
         setIsLoading(true);
-        //NOTE: Config.getEnv is async, can't just use it directly in isRendered
         //Need to assign to state variable on Component init for template reference
-        const envValue = await Config.getEnv();
         const soUser = await User.getMe();
         const soPromises = await Promise.all([
           User.list(USER_ROLES.signingOfficial),
@@ -64,7 +60,6 @@ export default function SigningOfficialConsole(props) {
         setDarList(darList);
         setCollectionList(collectionList);
         setFilteredDarList(darList);
-        setEnv(envValue);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
@@ -114,7 +109,8 @@ export default function SigningOfficialConsole(props) {
           })
         ]),
         h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
-        h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian && env !== 'prod', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        //NOTE: Links to this custodian table have been removed, we are retaining it with the intention of repurposing it for data submitters
+        h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
         h(DarCollectionTable, {
           isRendered: selectedTag === tabs.collections,
           collections: collectionList,
