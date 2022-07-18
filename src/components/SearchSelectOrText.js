@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
+import {isEqual} from 'lodash';
+
 import './SearchSelect.css';
 
-// Similar to SearchSelect, but allows the user to input free text
 export const SearchSelectOrText = (props) => {
   const { onPresetSelection, onManualSelection, placeholder, options, searchPlaceholder, id, label } = props;
   const [currentDisplay, setCurrentDisplay] = useState(placeholder || '');
@@ -16,17 +17,19 @@ export const SearchSelectOrText = (props) => {
   useEffect(() => {
     if (props.value) {
       setCurrentSelection(props.value);
-      const item = props.options.filter(i => i.key === props.value);
-      if (item && item.length) {
-        setCurrentDisplay(item[0].displayText);
+      const item = find(i => i.key === props.value)(props.options);
+      if (item) {
+        setCurrentDisplay(item.displayText);
       }
     } else {
       setCurrentDisplay(props.freetextValue);
     }
 
-    setFullList(props.options);
-    setFilteredList(props.options);
-  }, [props.value, props.freetextValue, props.options]);
+    if (!isEqual(props.options, fullList)) {
+      setFullList(props.options);
+      setFilteredList(props.options);
+    }
+  }, [props.value, props.freetextValue, props.options, fullList]);
 
   const setPresetDisplay = (selection) => {
     const item = options.filter(i => i.key === selection);
@@ -40,10 +43,8 @@ export const SearchSelectOrText = (props) => {
   };
 
   const select = (selection) => {
-    return () => {
-      setPresetDisplay(selection);
-      onPresetSelection(selection);
-    };
+    setPresetDisplay(selection);
+    onPresetSelection(selection);
   };
 
 
@@ -83,7 +84,10 @@ export const SearchSelectOrText = (props) => {
         ])
       ]),
       div({
-        className: 'dropdown-menu select-dropdown-menu'
+        className: 'dropdown-menu select-dropdown-menu',
+        onBlur: () => {
+          selectManual(searchTerms.current.value);
+        }
       }, [
         input({
           type: 'text',
@@ -105,7 +109,9 @@ export const SearchSelectOrText = (props) => {
             className: item.key === currentSelection
               ? 'dropdown-item select-dropdown-item active'
               : 'dropdown-item select-dropdown-item',
-            onClick: select(item.key),
+            onMouseUp: () => {
+              select(item.key);
+            },
           }, [item.displayText]);
         }))
       ])

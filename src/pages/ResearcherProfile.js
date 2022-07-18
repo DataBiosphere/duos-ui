@@ -8,7 +8,7 @@ import {SearchSelectOrText} from '../components/SearchSelectOrText';
 import {Institution, Support, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import { Notifications, getPropertyValuesFromUser} from '../libs/utils';
+import { Notifications, getPropertyValuesFromUser, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -23,7 +23,7 @@ export default function ResearcherProfile(props) {
     id: undefined
   });
 
-  const possibleActions = [
+  const possibleSupportRequests = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset'
@@ -42,7 +42,7 @@ export default function ResearcherProfile(props) {
     }
   ];
 
-  const [actions, setActions] = useState({
+  const [supportRequests, setSupportRequests] = useState({
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
     checkSOPermissions: false,
@@ -92,6 +92,18 @@ export default function ResearcherProfile(props) {
     return Storage.getCurrentUser().isSigningOfficial;
   };
 
+  const profileNameIsValid = () => {
+    return profile.profileName.length >= 4;
+  };
+
+  const suggestSigningOfficialValid = () => {
+    return (isNil(profile.suggestedSigningOfficial)||'' == profile.suggestedSigningOfficial) || isEmailAddress(profile.suggestedSigningOfficial);
+  };
+
+  const formIsValid = () => {
+    return profileNameIsValid() && suggestSigningOfficialValid();
+  };
+
   const getResearcherProfile = async () => {
     const user = await User.getMe();
 
@@ -117,20 +129,20 @@ export default function ResearcherProfile(props) {
     setProfile(newProfile);
   };
 
-  const handleActionsChange = (event) => {
+  const handleSupportRequestsChange = (event) => {
     let field = event.target.name;
     let value = event.target.type === 'checkbox'
       ? event.target.checked
       : event.target.value;
-    let newActions = Object.assign({}, actions, {[field]: value});
-    setActions(newActions);
+    let newSupportRequests = Object.assign({}, supportRequests, {[field]: value});
+    setSupportRequests(newSupportRequests);
   };
 
   const submitForm = async (event) => {
     event.preventDefault();
 
     await updateUser();
-    await sendActions();
+    await sendSupportRequests();
     props.history.push({ pathname: 'dataset_catalog' });
   };
 
@@ -144,23 +156,25 @@ export default function ResearcherProfile(props) {
       suggestedSigningOfficial: profile.suggestedSigningOfficial,
     };
 
-
     let updatedUser = await User.updateSelf(payload);
     return updatedUser;
   };
 
-  const sendActions = async () => {
-    const filteredActions = possibleActions
-      .map(action => {
-        const val = actions[action.key];
-        return val
-          ? `- ${action.label}`
-          : '';
-      })
-      .filter(x => !!x);
+  const processSupportRequests = () => {
+    const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key]);
+    return [
+      filteredRequests.length > 0,
+      filteredRequests
+        .map(x => `- ${x.label}`)
+        .join('\n')
+    ];
+  };
 
-    // if there are no actions, don't create a new support ticket
-    if (filteredActions.length === 0) {
+  const sendSupportRequests = async () => {
+    const [hasSupportRequests, requestText] = processSupportRequests();
+
+    // if there are no supportRequests, don't create a new support ticket
+    if (!hasSupportRequests) {
       return;
     }
 
@@ -169,8 +183,8 @@ export default function ResearcherProfile(props) {
       type: 'task',
       subject: `DUOS: User Request for ${profile.profileName}`,
       description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
-        + filteredActions.join('\n')
-        + (actions.extraRequest ? `\n- ${actions.extraRequest}` : '')
+        + requestText
+        + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : '')
     };
 
     const ticket = Support.createTicket(
@@ -301,111 +315,125 @@ export default function ResearcherProfile(props) {
                   type: 'text',
                   className: 'form-control',
                   defaultValue: profile.profileName,
-                  onBlur: handleChange
+                  onBlur: handleChange,
                 }),
+
+                p(
+                  {
+                    isRendered: !profileNameIsValid(),
+                    style: {
+                      fontStyle: 'italic',
+                      color: '#D13B07',
+                    }
+                  },
+                  ['Profile name must be at least four characters.'])
               ]),
             ]),
             div({ className: 'flex' }, [
-              div({ className: 'row no-margin' }, [
-                div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
-                  label({
-                    className: 'control-label',
-                    style: headerStyle,
-                  }, [
-                    'Researcher Identification*',
-                  ]),
-                  p({}, [
-                    'An ',
-                    a({href:'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'},
-                      ['eRA Commons ID']),
-                    ' will be required to submit a dar.'
-                  ])
-                ])
-              ]),
-
-              div({ className: 'row no-margin'}, [
-                div({ className: 'col-xs-12 no-padding' }, [
-                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    eRACommons({
-                      className: 'col-md-4 col-sm-6 col-xs-12',
-                      destination: 'profile',
-                      onNihStatusUpdate: () => {},
-                      location: props.location,
-                      header: false,
-                    }),
-                  ])
-                ])
-              ]),
-
-              div({ className: 'row no-margin'}, [
-                div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
-                  label({
-                    id: 'lbl_profileInstitution',
-                    className: 'control-label',
-                    style: headerStyle,
-                  }, [
-                    'Institution* ',
-                  ]),
-                  p({}, ['Please select an institution or enter your institution name if not available from the dropdown.']),
-                  generateInstitutionSelectionDisplay()
-                ])
-              ]),
-
-              div({ className: 'row no-margin'}, [
-                div({
-                  className: 'col-xs-12',
-                  style: { 'marginTop': '20px' },
-                  isRendered: hasInstitution() && !isSigningOfficial(),
+              div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
+                label({
+                  className: 'control-label',
+                  style: headerStyle,
                 }, [
-                  label({
-                    id: 'lbl_profileInstitution',
-                    className: 'control-label',
-                    style: headerStyle,
-                  }, [
-                    'Signing Official* ',
+                  'Researcher Identification*',
+                ]),
+                p({}, [
+                  'An ',
+                  a({href:'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'},
+                    ['eRA Commons ID']),
+                  ' will be required to submit a dar.'
+                ])
+              ]),
+
+              div({ className: 'col-xs-12 no-padding' }, [
+                div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                  eRACommons({
+                    className: 'col-md-4 col-sm-6 col-xs-12',
+                    destination: 'profile',
+                    onNihStatusUpdate: () => {},
+                    location: props.location,
+                    header: false,
+                  }),
+                ])
+              ]),
+
+              div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
+                label({
+                  id: 'lbl_profileInstitution',
+                  className: 'control-label',
+                  style: headerStyle,
+                }, [
+                  'Institution* ',
+                ]),
+                p({}, ['Please select an institution or enter your institution name if not available from the dropdown.']),
+                generateInstitutionSelectionDisplay(),
+
+
+              ]),
+
+
+              div({
+                className: 'col-xs-12',
+                style: { 'marginTop': '20px' },
+                isRendered: hasInstitution() && !isSigningOfficial(),
+              }, [
+                label({
+                  id: 'lbl_profileInstitution',
+                  className: 'control-label',
+                  style: headerStyle,
+                }, [
+                  'Signing Official* ',
+                ]),
+                p({}, ['Please select your Signing Official or enter your signing official’s email address.']),
+                div({},
+                  [
+                    h(SearchSelectOrText, {
+                      id: 'SigningOfficial',
+                      label: 'SigningOfficial',
+                      onPresetSelection: (selection) => {
+                        setProfile(Object.assign({}, profile, {selectedSigningOfficialId: selection, suggestedSigningOfficial: undefined}));
+                      },
+                      onManualSelection: (selection) => {
+                        if (selection == '') {
+                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: undefined}));
+                        } else {
+                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: null, suggestedSigningOfficial: selection}));
+                        }
+                      },
+                      options: signingOfficialList.map(signingOfficial => {
+                        return {
+                          key: signingOfficial.userId,
+                          displayText: signingOfficial.displayName,
+                        };
+                      }),
+                      placeholder: 'Please Select a Signing Official',
+                      searchPlaceholder: 'Search for a Signing Official...',
+                      value: profile.selectedSigningOfficialId,
+                      freetextValue: profile.suggestedSigningOfficial,
+                      className: 'form-control'
+                    })
                   ]),
-                  p({}, ['Please select your Signing Official or enter your signing official’s email address.']),
-                  div({},
-                    [
-                      h(SearchSelectOrText, {
-                        id: 'SigningOfficial',
-                        label: 'SigningOfficial',
-                        onPresetSelection: (selection) => {
-                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: selection, suggestedSigningOfficial: undefined}));
-                        },
-                        onManualSelection: (selection) => {
-                          if (selection == '') {
-                            setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: undefined}));
-                          } else {
-                            setProfile(Object.assign({}, profile, {selectedSigningOfficialId: null, suggestedSigningOfficial: selection}));
-                          }
-                        },
-                        options: signingOfficialList.map(signingOfficial => {
-                          return {
-                            key: signingOfficial.userId,
-                            displayText: signingOfficial.displayName,
-                          };
-                        }),
-                        placeholder: 'Please Select a Signing Official',
-                        searchPlaceholder: 'Search for a Signing Official...',
-                        value: profile.selectedSigningOfficialId,
-                        freetextValue: profile.suggestedSigningOfficial,
-                        className: 'form-control'
-                      })
-                    ]),
-                  div({
+                p(
+                  {
+                    isRendered: !suggestSigningOfficialValid(),
                     style: {
-                      marginTop: '2rem',
-                      marginBottom: '2rem'
+                      fontStyle: 'italic',
+                      color: '#D13B07',
                     }
-                  }, [
-                    p({}, ['If you are applying for data other than NIH data (ex. GTEx), and your Signing Official is not already registered, the DUOS team will reach out to your Signing Official to invite them to register and issue Library Card permissions so that you are able to submit a DAR.']),
-                    p({
-                      style: {
-                        marginTop: '1rem',
-                      }
-                    }, ['Please feel free to contact your Signing Official to help advance this process.']),
-                  ])
+                  },
+                  ['Please provide your signing official\'s email.']),
+                div({
+                  style: {
+                    marginTop: '2rem',
+                    marginBottom: '2rem'
+                  }
+                }, [
+                  p({}, ['If you are applying for data other than NIH data (ex. GTEx), and your Signing Official is not already registered, the DUOS team will reach out to your Signing Official to invite them to register and issue Library Card permissions so that you are able to submit a DAR.']),
+                  p({
+                    style: {
+                      marginTop: '1rem',
+                    }
+                  }, ['Please feel free to contact your Signing Official to help advance this process.']),
                 ])
               ]),
 
@@ -422,22 +450,22 @@ export default function ResearcherProfile(props) {
                   }
                 }, [
                   h2({
-                    id: 'lbl_actions',
+                    id: 'lbl_supportRequests',
                     style: { ...headerStyle, marginTop: 0 },
                   }, ['Which of the following are you looking to do?*']),
 
-                  possibleActions.map(action => {
-                    return div({ className: 'col-xs-12 checkbox', key: action.key }, [
+                  possibleSupportRequests.map(supportRequest => {
+                    return div({ className: 'col-xs-12 checkbox', key: supportRequest.key }, [
                       input({
                         type: 'checkbox',
-                        id: `chk_${action.key}`,
-                        name: action.key,
+                        id: `chk_${supportRequest.key}`,
+                        name: supportRequest.key,
                         className: 'checkbox-inline checkbox',
-                        checked: actions[action.id],
-                        onChange: handleActionsChange
+                        checked: supportRequests[supportRequest.id],
+                        onChange: handleSupportRequestsChange
                       }),
-                      label({ className: 'regular-checkbox', htmlFor: `chk_${action.key}` },
-                        [action.label])
+                      label({ className: 'regular-checkbox', htmlFor: `chk_${supportRequest.key}` },
+                        [supportRequest.label])
                     ]);
                   }),
 
@@ -447,11 +475,11 @@ export default function ResearcherProfile(props) {
                     ]),
 
                     textarea({
-                      value: actions.extraRequest,
-                      onChange: handleActionsChange,
+                      value: supportRequests.extraRequest,
+                      onChange: handleSupportRequestsChange,
                       className: 'form-control col-xs-12',
                       name: 'extraRequest',
-                      id: 'actions_extraRequest',
+                      id: 'supportRequests_extraRequest',
                       maxLength: '512',
                       rows: '3',
                       placeholder: 'Enter your request'
@@ -461,11 +489,11 @@ export default function ResearcherProfile(props) {
               ]),
 
 
+
+
               div({
                 className: 'row',
-                style: {
-                  margin: '20px 0'
-                }
+                style: { margin: '20px 0' }
               }, [
                 div({ className: 'col-lg-4 col-xs-6' }, [
                   div({ className: 'italic default-color' }, ['*Required field'])
@@ -478,7 +506,8 @@ export default function ResearcherProfile(props) {
                     className: 'f-right btn-primary common-background',
                     style: {
                       marginTop: '2rem',
-                    }
+                    },
+                    disabled: !formIsValid(),
                   }, ['Save']),
                 ])
               ])
