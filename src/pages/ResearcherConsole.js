@@ -1,6 +1,5 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
-import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
@@ -11,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
 import accessIcon from '../images/icon_access.png';
 import {find, getOr, isNil} from 'lodash/fp';
-import {USER_ROLES, wasFinalVoteTrue} from '../libs/utils';
+import {formatDate, getColumnSort, USER_ROLES, wasFinalVoteTrue} from '../libs/utils';
 
 class ResearcherConsole extends Component {
 
@@ -64,7 +63,7 @@ class ResearcherConsole extends Component {
     });
   };
 
-  sortDars = Utils.getColumnSort(() => { return this.state ? this.state.dars: []; }, (sortedData, descendantOrder) => {
+  sortDars = getColumnSort(() => { return this.state ? this.state.dars: []; }, (sortedData, descendantOrder) => {
     this.setState(prev => {
       prev.dars = sortedData;
       prev.darDescOrder = !descendantOrder;
@@ -72,7 +71,7 @@ class ResearcherConsole extends Component {
     });
   });
 
-  sortPartials = Utils.getColumnSort(() => { return this.state ? this.state.partialDars: []; }, (sortedData, descendantOrder) => {
+  sortPartials = getColumnSort(() => { return this.state ? this.state.partialDars: []; }, (sortedData, descendantOrder) => {
     this.setState(prev => {
       prev.partialDars = sortedData;
       prev.partialDescOrder = !descendantOrder;
@@ -238,7 +237,7 @@ class ResearcherConsole extends Component {
                   div({ key: darInfo.dar.data.darCode, id: darInfo.dar.data.darCode, className: 'row no-margin tableRow' }, [
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_darId', name: 'darId', className: 'col-xs-2' }, [darInfo.dar.data.darCode]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_projectTitle', name: 'projectTitle', className: 'col-xs-4' }, [darInfo.dar.data.projectTitle]),
-                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_createDate', name: 'createDate', className: 'col-xs-2' }, [Utils.formatDate(darInfo.dar.createDate)]),
+                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_createDate', name: 'createDate', className: 'col-xs-2' }, [formatDate(darInfo.dar.createDate)]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_electionStatus', name: 'electionStatus', className: 'col-xs-2 bold f-center' }, [
                       span({ isRendered: !opened && !canceled}, ['Submitted']),
                       span({ isRendered: opened && !canceled ? darInfo.election.status === 'Open' || darInfo.election.status === 'Final' || darInfo.election.status === 'PendingApproval' : false}, ['In review']),
@@ -312,10 +311,12 @@ class ResearcherConsole extends Component {
                 hr({ className: 'table-head-separator' }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, idx) => {
-                  return h(Fragment, { key: pdar.dar.data.partialDarCode + '_' + idx }, [
-                    div({ key: pdar.dar.data.partialDarCode, id: pdar.dar.data.partialDarCode, className: 'row no-margin tableRowPartial' }, [
+                  const formattedCreateDate = formatDate(pdar.dar.createDate);
+                  const partialDarCode = 'temp_DAR_' + formattedCreateDate;
+                  return h(Fragment, { key: partialDarCode + '_' + idx }, [
+                    div({ key: partialDarCode, id: partialDarCode, className: 'row no-margin tableRowPartial' }, [
                       a({
-                        id: pdar.dar.data.partialDarCode + '_btnDelete',
+                        id: partialDarCode + '_btnDelete',
                         name: 'btn_delete',
                         className: 'col-xs-1 cell-body delete-dar default-color',
                         onClick: this.deletePartialDar,
@@ -324,12 +325,12 @@ class ResearcherConsole extends Component {
                         span({ className: 'cm-icon-button glyphicon glyphicon-trash caret-margin', 'aria-hidden': 'true', value: pdar.dar.referenceId }),
                       ]),
 
-                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + '_partialId', name: 'partialId', className: 'col-xs-2' }, [pdar.dar.data.partialDarCode]),
-                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + '_partialTitle', name: 'partialTitle', className: 'col-xs-5' }, [pdar.dar.data.projectTitle]),
-                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + '_partialDate', name: 'partialDate', className: 'col-xs-2' }, [Utils.formatDate(pdar.dar.createDate)]),
+                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialId', name: 'partialId', className: 'col-xs-2' }, [partialDarCode]),
+                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialTitle', name: 'partialTitle', className: 'col-xs-5' }, [pdar.dar.data.projectTitle]),
+                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialDate', name: 'partialDate', className: 'col-xs-2' }, [formattedCreateDate]),
                       div({className: 'col-xs-2 cell-body f-center' }, [
                         button({
-                          id: pdar.dar.data.partialDarCode + '_btnResume',
+                          id: partialDarCode + '_btnResume',
                           name: 'btn_resume',
                           className: 'cell-button hover-color',
                         }, [
