@@ -157,7 +157,7 @@ export default function ApplicationDownloadLink(props) {
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
   const researcherProps = getPropertyValuesFromUser(researcherProfile);
-  const location = (researcherProps.city).concat(', ').concat(researcherProps.state);
+  const location = (researcherProps.city && researcherProps.state ? (researcherProps.city).concat(', ').concat(researcherProps.state) : '');
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
 
