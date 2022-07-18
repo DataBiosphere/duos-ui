@@ -312,7 +312,7 @@ class ResearcherConsole extends Component {
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, idx) => {
                   const formattedCreateDate = formatDate(pdar.dar.createDate);
-                  const partialDarCode = 'temp_DAR_' + formattedCreateDate;
+                  const partialDarCode = 'DRAFT_DAR_' + formattedCreateDate;
                   return h(Fragment, { key: partialDarCode + '_' + idx }, [
                     div({ key: partialDarCode, id: partialDarCode, className: 'row no-margin tableRowPartial' }, [
                       a({
