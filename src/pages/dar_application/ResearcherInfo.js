@@ -190,7 +190,8 @@ export default function ResearcherInfo(props) {
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: showValidationMessages
+              validationError: showValidationMessages,
+              header: true
             }),
           ]),
         ]),
