@@ -133,7 +133,6 @@ describe('MultiDatasetVoteTab - Tests', function() {
 
     cy.get('[datacy=rp-slab]').should('be.visible');
     cy.get('[datacy=rp-expanded]').should('not.exist');
-    cy.contains('primary');
     cy.contains('DS');
   });
 

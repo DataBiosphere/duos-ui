@@ -20,6 +20,9 @@ const darInfoPrimarySecondaryUse = {
   'illegalBehavior': true
 };
 
+const primaryUseCode = primaryUseCode;
+const secondaryUseCode = secondaryUseCode;
+
 const votesForElection1 = {
   rp: {
     finalVotes: [
@@ -84,8 +87,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.contains('primary');
-    cy.get('secondary').should('not.exist');
+    cy.contains(primaryUseCode);
+    cy.get(secondaryUseCode).should('not.exist');
   });
 
   it('Renders secondary data use pill', function() {
@@ -94,8 +97,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />
     );
-    cy.contains('secondary');
-    cy.get('primary').should('not.exist');
+    cy.contains(secondaryUseCode);
+    cy.get(primaryUseCode).should('not.exist');
   });
 
   it('Renders primary and secondary data use pills', function() {
@@ -104,8 +107,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimarySecondaryUse}
       />
     );
-    cy.contains('primary');
-    cy.contains('secondary');
+    cy.contains(primaryUseCode);
+    cy.contains(secondaryUseCode);
   });
 
   it('Renders link to expand when collapsed', function() {
@@ -138,8 +141,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.contains('primary');
-    cy.contains('secondary');
+    cy.contains(primaryUseCode);
+    cy.contains(secondaryUseCode);
   });
 
   it('Renders research purpose when expanded', function() {
@@ -206,8 +209,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isLoading={true}
       />
     );
-    cy.get('primary').should('not.exist');
-    cy.get('secondary').should('not.exist');
+    cy.get(primaryUseCode).should('not.exist');
+    cy.get(secondaryUseCode).should('not.exist');
   });
 
   it('Does not render link to expand/collapse when loading', function() {

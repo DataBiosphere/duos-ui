@@ -94,7 +94,7 @@ describe('DataUseVoteSummary - Tests', function() {
     component.should('exist');
     const rows = cy.get('.vote-summary-row');
     rows.should('have.length', 1);
-    const bucketResult1 = cy.get('.vote-result-box-text-RP-Vote');
+    const bucketResult1 = cy.get('.vote-result-box-text-RUS-Vote');
     bucketResult1.should('exist');
     const bucketResult2 = cy.get('.vote-result-box-text-Bucket-2');
     bucketResult2.should('exist');
@@ -122,7 +122,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 
@@ -136,7 +136,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 
@@ -150,7 +150,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 });
