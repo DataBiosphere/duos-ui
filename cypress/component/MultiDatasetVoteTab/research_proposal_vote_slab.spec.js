@@ -20,8 +20,8 @@ const darInfoPrimarySecondaryUse = {
   'illegalBehavior': true
 };
 
-const primaryUseCode = primaryUseCode;
-const secondaryUseCode = secondaryUseCode;
+const primaryUseCode = 'primaryUseCode';
+const secondaryUseCode = 'secondaryUseCode';
 
 const votesForElection1 = {
   rp: {

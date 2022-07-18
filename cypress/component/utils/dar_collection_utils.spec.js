@@ -675,7 +675,7 @@ describe('getMatchDataForBuckets', () => {
     const buckets = cloneDeep(mockBuckets);
     await getMatchDataForBuckets(buckets);
     buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== rpVoteKey) {
+      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
         const {algorithmResult} = bucket;
         expect(algorithmResult).to.not.be.empty;
         expect(algorithmResult.result).to.equal('Yes');
@@ -690,7 +690,7 @@ describe('getMatchDataForBuckets', () => {
     const buckets = cloneDeep(mockBuckets);
     await getMatchDataForBuckets(buckets);
     buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== rpVoteKey) {
+      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
         const {algorithmResult} = bucket;
         expect(algorithmResult).to.not.be.empty;
         expect(algorithmResult.result).to.equal('N/A');
