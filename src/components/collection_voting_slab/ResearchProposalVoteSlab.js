@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {a, div, h, span} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
-import {isEmpty, isNil, flatMap, map, keys, get} from 'lodash/fp';
-import {DataUsePill, DataUsePills} from './DataUsePill';
+import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
+import {DataUsePills} from './DataUsePill';
 import DataUseAlertBox from './DataUseAlertBox';
 import {AnimatePresence, motion} from 'framer-motion';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
