@@ -5,8 +5,6 @@ import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
 import {
-  completedResearcherInfoCheck,
-  getPropertyValuesFromUser,
   isFileEmpty,
   Navigation,
   Notifications as NotyUtil
@@ -32,7 +30,6 @@ class DataAccessRequestApplication extends Component {
       file: {
         name: ''
       },
-      completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
@@ -210,30 +207,11 @@ class DataAccessRequestApplication extends Component {
       Storage.removeData('dar_application');
     }
 
-    let rpProperties = getPropertyValuesFromUser(researcher);
     formData.researcher = isNil(researcher) ? '' : researcher.displayName;
     formData.institution = isNil(researcher)  || isNil(researcher.institution)? '' : researcher.institution.name;
-    formData.department = rpProperties.department;
-    formData.division = rpProperties.division;
-    formData.address1 = rpProperties.address1;
-    formData.address2 = rpProperties.address2;
-    formData.city = rpProperties.city;
-    formData.zipCode = rpProperties.zipCode;
-    formData.country = rpProperties.country;
-    formData.state = rpProperties.state;
-    formData.academicEmail = rpProperties.academicEmail;
-    formData.pubmedId = rpProperties.pubmedID;
-    formData.scientificUrl = rpProperties.scientificURL;
     formData.userId = researcher.userId;
 
-    let completed = false;
-    if (!isNil(formData.darCode)) {
-      completed = '';
-    } else if (rpProperties.completed !== '') {
-      completed = completedResearcherInfoCheck(rpProperties);
-    }
     this.setState(prev => {
-      prev.completed = completed;
       prev.formData = merge(prev.formData, formData);
       return prev;
     });

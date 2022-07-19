@@ -4,7 +4,6 @@ import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {isNil, isEmpty} from 'lodash/fp';
 import { Theme } from '../libs/theme';
 import {useEffect, useState} from 'react';
-import {getPropertyValuesFromUser} from '../libs/utils';
 
 const styles = StyleSheet.create({
   page: {
@@ -156,11 +155,9 @@ export default function ApplicationDownloadLink(props) {
   const internalCollaborators = getCollaborators(darInfo, 'internalCollaborators');
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
-  const researcherProps = getPropertyValuesFromUser(researcherProfile);
-  const location = (researcherProps.city && researcherProps.state ? (researcherProps.city).concat(', ').concat(researcherProps.state) : '');
+
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
-
   const document = h(Document, {}, [
     h(Page, {style: styles.page}, [ //Researcher Info Page
       h(View, {}, [
@@ -168,52 +165,11 @@ export default function ApplicationDownloadLink(props) {
         h(Text, {style: styles.subHeader}, ['Applicant Information']),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
-            label: 'NIH eRA Commons ID',
-            text: `${researcherProps.eraCommonsId}`,
-            style: {marginRight: 30}
-          }),
-          h(SmallLabelTextComponent, {
-            label: 'LinkedIn Profile',
-            text: `${researcherProps.linkedIn}`
-          })
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {
-            label: 'ORC ID',
-            text: `${researcherProps.orcid}`,
-            style: {marginRight: 30}
-          }),
-          h(SmallLabelTextComponent, {
-            label: 'ResearcherGate ID',
-            text: `${researcherProps.researcherGate}`
-          }),
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {
             label: 'Researcher',
             text: researcherProfile.displayName,
             style: {marginRight: 30}
           }),
-          h(SmallLabelTextComponent, {
-            label: 'Principal Investigator', text: `${researcherProps.piName}`
-          })
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: 'Institution', text: `${institution}`, style: {marginRight: 30}}),
-          h(SmallLabelTextComponent, {
-            label: 'Department',
-            text: `${researcherProps.department}`
-          })
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {
-            label: 'Location', text: `${location}`,
-            style: {marginRight: 30}
-          }),
-          h(SmallLabelTextComponent, {
-            label: 'Researcher Email',
-            text: `${researcherProps.academicEmail}`
-          }),
+          h(SmallLabelTextComponent, {label: 'Institution', text: `${institution}`}),
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
