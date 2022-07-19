@@ -6,25 +6,14 @@ const styles = {
     fontWeight: 600,
     marginRight: '1rem'
   },
-  secondaryHeader: {
-    fontSize: '2.2rem',
-    fontWeight: 400,
-    marginRight: '1rem',
-    paddingRight: '1rem',
-    borderRight: '1px solid black'
-  },
-  title: {
-    fontSize: '3rem',
-    fontWeight: 600,
-    marginBottom: '1.5rem'
-  },
   default: {
     fontSize: '1.1rem',
     fontWeight: 400
   },
   darCode: {
     borderRight: '2px solid black',
-    paddingRight: '0.5rem'
+    marginRight: '1rem',
+    paddingRight: '1rem',
   },
   containerRow: {
     margin: '0rem 1.2rem',
@@ -36,10 +25,15 @@ const styles = {
   primaryHeaderRow: {
     fontSize: '2.1rem',
     marginBottom: '3.2rem'
-  }
+  },
+  secondaryHeaderRow: {
+    fontSize: '3rem',
+    fontWeight: 600,
+  },
 };
 
 const appliedPrimaryHeaderStyle = Object.assign({}, styles.containerRow, styles.primaryHeaderRow);
+const appliedSecondaryHeaderStyle =  Object.assign({}, styles.containerRow, styles.secondaryHeaderRow);
 
 export default function ReviewHeader(props) {
   const {
@@ -51,16 +45,16 @@ export default function ReviewHeader(props) {
   } = props;
   return (
     h(Fragment, {}, [
-      div({className: 'header-container', isRendered: !isLoading}, [
+      div({className: 'header-container', isRendered: !isLoading, style: { marginBottom: '3rem' }}, [
         div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
           span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`])
         ]),
-        div({className: 'secondary-header-row', style: styles.containerRow}, [
-          span({style: styles.secondaryHeader}, [darCode]),
-          downloadLink
+        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
+          span({style: styles.darCode}, [darCode]),
+          div({className: 'collection-project-title'}, [projectTitle])
         ]),
         div({style: styles.containerRow}, [
-          div({className: 'collection-project-title', style: styles.title}, [projectTitle])
+          downloadLink
         ])
       ]),
       div({className: 'header-skeleton-loader', isRendered: isLoading}, [
@@ -68,11 +62,11 @@ export default function ReviewHeader(props) {
           div({className: 'text-placeholder', style: { width: '35rem', height: '2.5rem', marginBottom: '0.5rem'}}),
         ]),
         div({className: 'secondary-header-skeleton', style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '10rem', height: '3rem', marginBottom: '0.5rem'}}),
-          div({className: 'text-placeholder', style: {width: '16rem', height: '3rem', marginBottom: '0.5rem'}})
+          div({className: 'text-placeholder', style: {width: '15rem', height: '4rem', marginBottom: '0.5rem'}}),
+          div({className: 'text-placeholder', style: {width: '40rem', height: '4rem', marginBottom: '0.5rem'}})
         ]),
         div({style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '40rem', height: '4rem', marginBottom: '3.5rem'}})
+          div({className: 'text-placeholder', style: {width: '16rem', height: '3rem', marginBottom: '3.5rem'}})
         ])
       ])
     ])

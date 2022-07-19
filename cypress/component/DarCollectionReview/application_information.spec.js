@@ -55,15 +55,45 @@ describe('Application Information', () => {
     textbox.contains('test');
   });
 
-  it('renders the application details container and sub-header', () => {
-    const props = {};
+  it('renders the collaborator details container and sub-header if any provided', () => {
+    const props = {
+      externalCollaborators: [{name: 'Person A'}, {name: 'Person B'}]
+    };
     mount(<ApplicationInformation {...props} />);
-    const container = cy.get('.application-details-container');
+    const container = cy.get('.collaborator-details-container');
     expect(container).to.exist;
 
-    const subheader = cy.get('.application-details-subheader');
+    const subheader = cy.get('.collaborator-details-subheader');
     expect(subheader).to.exist;
-    subheader.contains('Application Details');
+    subheader.contains('Collaborators');
+  });
+
+  it('does not render collaborator details container and sub-header if none provided', () => {
+    const props = {};
+    mount(<ApplicationInformation {...props} />);
+    cy.get('.collaborator-details-container').should('not.be.visible');
+  });
+
+  it('renders institution details container and sub-header', () => {
+    const props = {};
+    mount(<ApplicationInformation {...props} />);
+    const container = cy.get('.institution-details-container');
+    expect(container).to.exist;
+
+    const subheader = cy.get('.institution-details-subheader');
+    expect(subheader).to.exist;
+    subheader.contains('Institution');
+  });
+
+  it('renders cloud use container and sub-header', () => {
+    const props = {};
+    mount(<ApplicationInformation {...props} />);
+    const container = cy.get('.cloud-use-details-container');
+    expect(container).to.exist;
+
+    const subheader = cy.get('.cloud-use-details-subheader');
+    expect(subheader).to.exist;
+    subheader.contains('Cloud Use');
   });
 
   it('renders the cloud computing provider information if provided', () => {
