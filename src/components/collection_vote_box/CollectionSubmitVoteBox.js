@@ -55,8 +55,8 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
       'The vote has not been finalized' :
       `The final vote is: ${voteResultText}`;
   } else if (isVotingDisabled) {
-    // if read-only, describe the vote in a statement
-    heading = `Your Vote: ${voteResultText}`;
+    // if read-only, describe the vote
+    heading = voteResultText;
   }
 
   // determines if text is needed to remind the user that their vote will be final once submitting

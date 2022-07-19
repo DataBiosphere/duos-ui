@@ -351,7 +351,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -373,7 +373,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
