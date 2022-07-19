@@ -41,7 +41,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
         return includes(election.dataSetId, relevantDatasetIds);
       } else {
         // Dataset IDs should be on the DAR, but if not, pull from the dar.data
-        const datasetIds = isEmpty(dars[election.referenceId].datasetIds) ? dars[election.referenceId].data.datasetIds : dars[election.referenceId].datasetIds;
+        const datasetIds = isNil(dars[election.referenceId].datasetIds) ? dars[election.referenceId].data.datasetIds : dars[election.referenceId].datasetIds;
         return intersection(datasetIds, relevantDatasetIds).length > 0;
       }
     })(elections);

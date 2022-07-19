@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash/fp';
+import {isEmpty, isNil} from 'lodash/fp';
 import { div, h, a } from 'react-hyperscript-helpers';
 import {
   applyTextHover,
@@ -71,7 +71,7 @@ export default function DarElectionRecords(props) {
         hideUnderLimit: true,
         readLessText: ' Read Less',
         // Dataset IDs should be on the DAR, but if not, pull from the dar.data
-        content: dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, isEmpty(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds) : '- -'
+        content: dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds) : '- -'
       })]),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
