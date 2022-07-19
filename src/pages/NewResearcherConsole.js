@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, flow, concat} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, flow, concat, uniqBy} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
@@ -66,13 +66,15 @@ export default function NewResearcherConsole() {
         DAR.getDraftDarRequestList()
       ]);
       const [fetchedCollections, fetchedDraftsPayload] = promiseReturns;
-      //Need some extra formatting steps for drafts due to different payload format
+      // Need some extra formatting steps for drafts due to different payload format
+      // Workaround for the API returning a cartesian product of draft dars
+      const uniqueFetchedDrafts = uniqBy('dar.id')(fetchedDraftsPayload.value || []);
       const fetchedDrafts = {
         status: fetchedDraftsPayload.status,
         value: flow(
           map((draftPayload) => draftPayload.dar),
           map(formatDraft),
-        )(fetchedDraftsPayload.value || [])
+        )(uniqueFetchedDrafts || [])
       };
       let collectionArray = [];
       collectionArray = handlePromise(
