@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {a, div, h, span} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
-import {isEmpty, isNil, flatMap, map, keys, get} from 'lodash/fp';
-import DataUsePill from './DataUsePill';
+import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
+import {DataUsePills} from './DataUsePill';
 import DataUseAlertBox from './DataUseAlertBox';
 import {AnimatePresence, motion} from 'framer-motion';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
@@ -21,6 +21,7 @@ import {ScrollToTopButton} from '../ScrollButton';
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
+    paddingBottom: '35px'
   },
   slabTitle: {
     color: '#000000',
@@ -94,21 +95,8 @@ const animationAttributes = {
 const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
-    const label = span({style: styles.dataUseCategoryLabel, isRendered: !isEmpty(dataUses)}, [key + ':']);
-    return div({key: `data-use-${key}-container`}, [
-      label,
-      dataUsePills(dataUses)
-    ]);
+    return DataUsePills(dataUses);
   })(keys(translatedDataUse));
-};
-
-export const dataUsePills = (dataUses) => {
-  return map( dataUse => {
-    return DataUsePill({
-      dataUse,
-      key: dataUse.code
-    });
-  })(dataUses);
 };
 
 const SkeletonLoader = () => {
@@ -185,9 +173,9 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-  return div({ datacy: 'srp-slab', style: styles.baseStyle }, [
+  return div({ datacy: 'rp-slab', style: styles.baseStyle }, [
     div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
-      'Structured Research Purpose',
+      'Research Use Statement (GA4GH DUO)',
       h(ScrollToTopButton, {to: '.header-container'})
     ]),
     div({ isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}} ),
@@ -203,9 +191,9 @@ export default function ResearchProposalVoteSlab(props) {
       h(AnimatePresence, { initial: false }, [
         expanded && (
           h(motion.section, animationAttributes, [
-            div({ datacy: 'srp-expanded', style: styles.expandedData }, [
+            div({ datacy: 'rp-expanded', style: styles.expandedData }, [
               div({ datacy: 'research-purpose' }, [
-                span({ style: styles.researchPurposeTitle }, ['Research Purpose']),
+                span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
                 h(ResearchPurposeSummary, {darInfo}),
                 h(DataUseAlertBox, {translatedDataUse}),
                 h(CollectionSubmitVoteBox, {

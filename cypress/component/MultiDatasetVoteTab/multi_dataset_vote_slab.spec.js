@@ -128,7 +128,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'YES');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -176,7 +176,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('textarea').should('not.be.disabled');
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -197,7 +197,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -218,7 +218,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -239,7 +239,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'YES');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -261,7 +261,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');

@@ -155,7 +155,8 @@ const processDraftsRowData = ({visibleDrafts, showConfirmationModal, history}) =
   if(!isEmpty(visibleDrafts)) {
     return visibleDrafts.map((draft) => {
       const { id, data, createDate, updateDate } = draft;
-      const { projectTitle, partialDarCode } = !isEmpty(data) ? data : {};
+      const { projectTitle } = !isEmpty(data) ? data : {};
+      const partialDarCode = 'DRAFT_DAR_' + formatDate(createDate);
       return [
         partialDarCodeCell({partialDarCode, id}),
         projectTitleCell({projectTitle, id}),

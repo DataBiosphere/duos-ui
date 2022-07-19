@@ -101,7 +101,7 @@ const openableDars = {
 
 const mockBuckets = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true
   },
   {
@@ -675,7 +675,7 @@ describe('getMatchDataForBuckets', () => {
     const buckets = cloneDeep(mockBuckets);
     await getMatchDataForBuckets(buckets);
     buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== 'rp vote') {
+      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
         const {algorithmResult} = bucket;
         expect(algorithmResult).to.not.be.empty;
         expect(algorithmResult.result).to.equal('Yes');
@@ -690,7 +690,7 @@ describe('getMatchDataForBuckets', () => {
     const buckets = cloneDeep(mockBuckets);
     await getMatchDataForBuckets(buckets);
     buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== 'rp vote') {
+      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
         const {algorithmResult} = bucket;
         expect(algorithmResult).to.not.be.empty;
         expect(algorithmResult.result).to.equal('N/A');

@@ -30,7 +30,11 @@ export const UserProperties = {
   RESEARCHER_GATE: 'researcherGate',
   SCIENTIFIC_URL: 'scientificURL',
   STATE: 'state',
-  ZIPCODE: 'zipcode'
+  ZIPCODE: 'zipcode',
+  SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
+  SELECTED_SIGNING_OFFICIAL_ID: 'selectedSigningOfficialId',
+  INSTITUTION_ID: 'institutionId',
+  SUGGESTED_INSTITUTION: 'suggestedInstitution'
 };
 
 ///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +142,11 @@ export const getPropertyValuesFromUser = (user) => {
     researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
     scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user),
     state: findPropertyValue(UserProperties.STATE, user),
-    zipcode: findPropertyValue(UserProperties.ZIPCODE, user)
+    zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
+    institutionId: findPropertyValue(UserProperties.INSTITUTION_ID, user),
+    suggestedInstitution: findPropertyValue(UserProperties.SUGGESTED_INSTITUTION, user),
+    selectedSigningOfficialId: findPropertyValue(UserProperties.SELECTED_SIGNING_OFFICIAL_ID, user),
+    suggestedSigningOfficial: findPropertyValue(UserProperties.SUGGESTED_SIGNING_OFFICIAL, user)
   };
 
   researcherProps.institutionId = user.institutionId;
