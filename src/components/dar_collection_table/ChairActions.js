@@ -3,7 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, head, map, flow, includes, intersection, toLower, forEach, flatten, flatMap, uniq, isNil, pickBy } from 'lodash/fp';
+import { isEmpty, filter, find, head, map, flow, includes, intersection, toLower, forEach, flatten, flatMap, uniq, isNil, pickBy } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
@@ -27,11 +27,10 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
     )(relevantDatasets);
     const relevantDarsNoElections = filter(dar => {
       // Dataset IDs should be on the DAR, but if not, pull from the dar.data
-      const datasetIds = isEmpty(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
+      const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
       const relevant = flow(
         map(id => { return includes(id, relevantDatasetIds) ? isEmpty(dar.elections) : false; }),
-        pickBy(b => b),
-        head()
+        find((r) => {return true === r;} )
       )(datasetIds);
       return !isNil(relevant);
     })(dars);
