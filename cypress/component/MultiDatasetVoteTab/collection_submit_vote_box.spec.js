@@ -214,7 +214,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', ' YES');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'YES');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
