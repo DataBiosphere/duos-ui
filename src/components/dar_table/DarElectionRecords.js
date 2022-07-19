@@ -70,7 +70,7 @@ export default function DarElectionRecords(props) {
         inline: true,
         hideUnderLimit: true,
         readLessText: ' Read Less',
-        content: dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, dar.data.datasetIds) : '- -'
+        content: dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, dar.datasetIds) : '- -'
       })]),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),

@@ -34,7 +34,9 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
     ]),
     div({style: Styles.TABLE.DATASET_CELL, key: 'dataset_name_cell', className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
-        return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, a.dar.data.datasetIds) : '- -';
+        // Dataset IDs should be on the DAR, but if not, pull from the dar.data
+        const datasetIds = isEmpty(a.dar.datasetIds) ? a.dar.data.datasetIds : a.dar.datasetIds;
+        return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, datasetIds) : '- -';
       },
       descendantOrder: descOrder
     })}, [

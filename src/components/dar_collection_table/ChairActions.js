@@ -3,7 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, head, map, flow, includes, toLower, forEach, flatten, flatMap, uniq, isNil, pickBy } from 'lodash/fp';
+import { isEmpty, filter, head, map, flow, includes, intersection, toLower, forEach, flatten, flatMap, uniq, isNil, pickBy } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
@@ -36,13 +36,14 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       return !isNil(relevant);
     })(dars);
     const relevantElections = filter((election) => {
-      //NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
-      //For this ticket I'm going to use dar.data.datasetIds[0] as a fallback value
+      // NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
+      // For this ticket I'm going to use dar.datasetIds/dar.data.datasetIds as a fallback value
       if(!isNil(election.dataSetId)) {
         return includes(election.dataSetId, relevantDatasetIds);
       } else {
-        const datasetId = !isEmpty(dars[election.referenceId].data) ? dars[election.referenceId].data.datasetIds[0] : -1;
-        return includes(datasetId, relevantDatasetIds);
+        // Dataset IDs should be on the DAR, but if not, pull from the dar.data
+        const datasetIds = isEmpty(dars[election.referenceId].datasetIds) ? dars[election.referenceId].data.datasetIds : dars[election.referenceId].datasetIds;
+        return intersection(datasetIds, relevantDatasetIds).length > 0;
       }
     })(elections);
     return {relevantDarsNoElections, relevantElections, relevantDatasetIds};
