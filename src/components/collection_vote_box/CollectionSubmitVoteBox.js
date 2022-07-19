@@ -151,7 +151,7 @@ export default function CollectionSubmitVoteBox(props) {
           textarea({
             name: 'Rationale Input',
             value: rationale,
-            placeholder: 'Optional: Describe your rationale or add comments here. Enter your comments prior to voting.',
+            placeholder: 'Optional: Enter your comments and describe your rationale prior to voting.',
             onChange: e => setRationale(e.target.value),
             onBlur: updateRationale,
             style: styles.rationaleTextArea,
