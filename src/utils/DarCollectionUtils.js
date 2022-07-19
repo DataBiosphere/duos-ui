@@ -71,7 +71,7 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
     forEach((datasetId) => {
       const targetBucket = datasetBucketMap[datasetId];
       targetBucket.dars.push(dar);
-    })(dar.data.datasetIds);
+    })(dar.datasetIds);
   })(dars);
   return buckets;
 };
