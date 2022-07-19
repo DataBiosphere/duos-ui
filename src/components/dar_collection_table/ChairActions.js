@@ -3,7 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import { isEmpty, filter, find, head, map, flow, includes, intersection, toLower, forEach, flatten, flatMap, uniq, isNil, pickBy } from 'lodash/fp';
+import { isEmpty, filter, find, map, flow, includes, intersection, toLower, forEach, flatten, flatMap, uniq, isNil } from 'lodash/fp';
 import { Storage } from '../../libs/storage';
 import SimpleButton from '../SimpleButton';
 
