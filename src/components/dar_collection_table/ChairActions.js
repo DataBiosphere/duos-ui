@@ -26,7 +26,8 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       uniq
     )(relevantDatasets);
     const relevantDarsNoElections = filter(dar => {
-      const datasetIds = !isEmpty(dar.data) ? dar.data.datasetIds : [];
+      // Dataset IDs should be on the DAR, but if not, pull from the dar.data
+      const datasetIds = isEmpty(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
       const relevant = flow(
         map(id => { return includes(id, relevantDatasetIds) ? isEmpty(dar.elections) : false; }),
         pickBy(b => b),
