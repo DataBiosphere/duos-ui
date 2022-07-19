@@ -20,6 +20,9 @@ const darInfoPrimarySecondaryUse = {
   'illegalBehavior': true
 };
 
+const primaryUseCode = 'DS';
+const secondaryUseCode = 'OTHER';
+
 const votesForElection1 = {
   rp: {
     finalVotes: [
@@ -74,8 +77,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.get('[datacy=srp-slab]').should('be.visible');
-    cy.get('[datacy=srp-expanded]').should('not.exist');
+    cy.get('[datacy=rp-slab]').should('be.visible');
+    cy.get('[datacy=rp-expanded]').should('not.exist');
   });
 
   it('Renders primary data use pill', function() {
@@ -84,8 +87,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimaryUseManualReviewFalse}
       />
     );
-    cy.contains('primary');
-    cy.get('secondary').should('not.exist');
+    cy.contains(primaryUseCode);
+    cy.get(secondaryUseCode).should('not.exist');
   });
 
   it('Renders secondary data use pill', function() {
@@ -94,8 +97,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoSecondaryUseManualReviewTrue}
       />
     );
-    cy.contains('secondary');
-    cy.get('primary').should('not.exist');
+    cy.contains(secondaryUseCode);
+    cy.get(primaryUseCode).should('not.exist');
   });
 
   it('Renders primary and secondary data use pills', function() {
@@ -104,8 +107,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimarySecondaryUse}
       />
     );
-    cy.contains('primary');
-    cy.contains('secondary');
+    cy.contains(primaryUseCode);
+    cy.contains(secondaryUseCode);
   });
 
   it('Renders link to expand when collapsed', function() {
@@ -138,8 +141,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
-    cy.contains('primary');
-    cy.contains('secondary');
+    cy.contains(primaryUseCode);
+    cy.contains(secondaryUseCode);
   });
 
   it('Renders research purpose when expanded', function() {
@@ -206,8 +209,8 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isLoading={true}
       />
     );
-    cy.get('primary').should('not.exist');
-    cy.get('secondary').should('not.exist');
+    cy.get(primaryUseCode).should('not.exist');
+    cy.get(secondaryUseCode).should('not.exist');
   });
 
   it('Does not render link to expand/collapse when loading', function() {
@@ -348,7 +351,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -370,7 +373,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains('Expand to view Research Purpose and Vote');
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');

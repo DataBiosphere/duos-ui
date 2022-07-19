@@ -2,10 +2,11 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import DataUseVoteSummary from '../../../src/components/common/DataUseVoteSummary/DataUseVoteSummary';
+import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
 
 const buckets = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [{
       rp: {
@@ -26,7 +27,7 @@ const buckets = [
 
 const bucketsWithMultipleElections = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [
       {
@@ -61,7 +62,7 @@ const bucketsWithMultipleElections = [
 
 const bucketsWithMixedVotes = [
   {
-    key: 'RP Vote',
+    key: rpVoteKey,
     isRP: true,
     votes: [{
       rp: {
@@ -93,7 +94,7 @@ describe('DataUseVoteSummary - Tests', function() {
     component.should('exist');
     const rows = cy.get('.vote-summary-row');
     rows.should('have.length', 1);
-    const bucketResult1 = cy.get('.vote-result-box-text-RP-Vote');
+    const bucketResult1 = cy.get('.vote-result-box-text-RUS-Vote');
     bucketResult1.should('exist');
     const bucketResult2 = cy.get('.vote-result-box-text-Bucket-2');
     bucketResult2.should('exist');
@@ -121,7 +122,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 
@@ -135,7 +136,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 
@@ -149,7 +150,7 @@ describe('DataUseVoteSummary - Tests', function() {
       />
     );
 
-    cy.get('.vote-result-mixed-icon-RP-Vote').should('exist');
+    cy.get('.vote-result-mixed-icon-RUS-Vote').should('exist');
     cy.get('.vote-result-mixed-icon-Bucket-2').should('exist');
   });
 });
