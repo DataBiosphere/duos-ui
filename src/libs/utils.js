@@ -63,8 +63,8 @@ export const darCollectionUtils = {
             // Dataset IDs should be on the DAR, but if not, pull from the dar.data
             const datasetIds = isEmpty(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
             forEach((datasetId) => {
-              if(includes(relevantDatasets, datasetId)) {
-                if(isNil(electionStatusCount['Submitted'])) {
+              if (includes(relevantDatasets, datasetId)) {
+                if (isNil(electionStatusCount['Submitted'])) {
                   electionStatusCount['Submitted'] = 0;
                 }
                 electionStatusCount['Submitted']++;
