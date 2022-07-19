@@ -5,11 +5,9 @@ import {Styles} from '../libs/theme';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
 import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
-import { Config } from '../libs/config';
 
 
 export default function SigningOfficialConsole() {
-  const [env, setEnv] = useState();
   const [signingOfficial, setSigningOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
   const [unregisteredResearchers, setUnregisteredResearchers] = useState();
@@ -21,9 +19,7 @@ export default function SigningOfficialConsole() {
     const init = async() => {
       try {
         setIsLoading(true);
-        //NOTE: Config.getEnv is async, can't just use it directly in isRendered
         //Need to assign to state variable on Component init for template reference
-        const envValue = await Config.getEnv();
         const soUser = await User.getMe();
         const soPromises = await Promise.all([
           User.list(USER_ROLES.signingOfficial),
@@ -34,7 +30,6 @@ export default function SigningOfficialConsole() {
         setUnregisteredResearchers(unregisteredResearchers);
         setResearchers(researcherList);
         setSigningOfficial(soUser);
-        setEnv(envValue);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
@@ -48,7 +43,8 @@ export default function SigningOfficialConsole() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        h(DataCustodianTable, {isRendered: env !== 'prod', researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        //NOTE: Links to this custodian table have been removed, we are retaining it with the intention of repurposing it for data submitters
+        h(DataCustodianTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       ])
     ])
   );

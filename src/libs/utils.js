@@ -6,7 +6,6 @@ import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, pick, capitalize } from 'lodash/fp';
 import {User} from './ajax';
-import {Config} from './config';
 
 export const UserProperties = {
   ACADEMIC_EMAIL: 'academicEmail',
@@ -31,7 +30,11 @@ export const UserProperties = {
   RESEARCHER_GATE: 'researcherGate',
   SCIENTIFIC_URL: 'scientificURL',
   STATE: 'state',
-  ZIPCODE: 'zipcode'
+  ZIPCODE: 'zipcode',
+  SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
+  SELECTED_SIGNING_OFFICIAL_ID: 'selectedSigningOfficialId',
+  INSTITUTION_ID: 'institutionId',
+  SUGGESTED_INSTITUTION: 'suggestedInstitution'
 };
 
 ///////DAR Collection Utils///////////////////////////////////////////////////////////////////////////////////
@@ -141,7 +144,11 @@ export const getPropertyValuesFromUser = (user) => {
     researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
     scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user),
     state: findPropertyValue(UserProperties.STATE, user),
-    zipcode: findPropertyValue(UserProperties.ZIPCODE, user)
+    zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
+    institutionId: findPropertyValue(UserProperties.INSTITUTION_ID, user),
+    suggestedInstitution: findPropertyValue(UserProperties.SUGGESTED_INSTITUTION, user),
+    selectedSigningOfficialId: findPropertyValue(UserProperties.SELECTED_SIGNING_OFFICIAL_ID, user),
+    suggestedSigningOfficial: findPropertyValue(UserProperties.SUGGESTED_SIGNING_OFFICIAL, user)
   };
 
   researcherProps.institutionId = user.institutionId;
@@ -257,51 +264,23 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const env = await Config.getEnv();
-    let page;
-    if (env !== 'prod') {
-      page =
-        user.isAdmin ? '/admin_manage_dar_collections'
-          :user.isChairPerson ? '/new_chair_console'
-            : user.isMember ? '/new_member_console'
-              : user.isResearcher ? '/dataset_catalog'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    } else {
-      page =
-        user.isAdmin ? '/admin_manage_dar_collections'
-          :user.isChairPerson ? '/new_chair_console'
-            : user.isMember ? '/new_member_console'
-              : user.isResearcher ? '/dataset_catalog'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    }
+    let page =
+      user.isAdmin ? '/admin_manage_dar_collections'
+        :user.isChairPerson ? '/new_chair_console'
+          : user.isMember ? '/new_member_console'
+            : user.isResearcher ? '/dataset_catalog'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
     history.push(page);
   },
   console: async (user, history) => {
-    const env = await Config.getEnv();
-    let page;
-    if (env !== 'prod') {
-      page =
-        user.isAdmin ? '/admin_manage_dar_collections'
-          : user.isChairPerson ? '/new_chair_console'
-            : user.isMember ? '/new_member_console'
-              : user.isResearcher ? '/new_researcher_console'
-                : user.isDataOwner ? '/data_owner_console'
-                  : user.isAlumni ? '/summary_votes'
-                    : '/';
-    } else {
-      page =
-          user.isAdmin ? '/admin_manage_dar_collections'
-            : user.isChairPerson ? '/new_chair_console'
-              : user.isMember ? '/new_member_console'
-                : user.isResearcher ? '/new_researcher_console'
-                  : user.isDataOwner ? '/data_owner_console'
-                    : user.isAlumni ? '/summary_votes'
-                      : '/';
-    }
+    let page =
+      user.isAdmin ? '/admin_manage_dar_collections'
+        : user.isChairPerson ? '/new_chair_console'
+          : user.isMember ? '/new_member_console'
+            : user.isResearcher ? '/new_researcher_console'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
     history.push(page);
   }
 };

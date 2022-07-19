@@ -114,7 +114,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       cursor: 'pointer',
       color: '#999',
       fontWeight: 500,
-      fontSize: '.9em',
+      fontSize: '.8em',
       transition: 'all .2s ease'
     };
     const validationErrorState = get(this.props, 'validationError', false) ? {
@@ -126,7 +126,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
     return (
       div({ className: this.props.className }, [
-        label({ className: 'control-label' }, ['NIH eRA Commons ID*']),
+        label({ className: 'control-label', isRendered: this.props.header }, ['NIH eRA Commons ID*']),
         div({
           isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
         }, [
