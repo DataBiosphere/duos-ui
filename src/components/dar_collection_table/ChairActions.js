@@ -36,7 +36,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       return !isNil(relevant);
     })(dars);
     const relevantElections = filter((election) => {
-      // NOTE: not all elections have the dataSetId attribute tied to it (not sure why)
+      // NOTE: not all elections have the dataSetId attribute tied to it (https://broadworkbench.atlassian.net/browse/DUOS-1689)
       // For this ticket I'm going to use dar.datasetIds/dar.data.datasetIds as a fallback value
       if(!isNil(election.dataSetId)) {
         return includes(election.dataSetId, relevantDatasetIds);
