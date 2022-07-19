@@ -27,7 +27,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote*');
+    cy.get('[datacy=vote-subsection-heading]').should('not.be.visible');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -41,7 +41,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote*');
+    cy.get('[datacy=vote-subsection-heading]').should('not.be.visible');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -196,11 +196,11 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote*(Vote and Rationale cannot be updated after submitting)');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', '(Vote and Rationale cannot be updated after submitting)');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NO');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -214,7 +214,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: YES');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'YES');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -250,7 +250,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'Your Vote: NOT SELECTED');
+    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('textarea').should('be.disabled');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');

@@ -5,6 +5,7 @@ import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
+import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
 
 const darInfo = {
   rus: 'test',
@@ -120,7 +121,7 @@ beforeEach(() => {
 });
 
 describe('MultiDatasetVoteTab - Tests', function() {
-  it('Renders srp slab', function () {
+  it('Renders rp slab', function () {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
@@ -130,9 +131,8 @@ describe('MultiDatasetVoteTab - Tests', function() {
       />
     );
 
-    cy.get('[datacy=srp-slab]').should('be.visible');
-    cy.get('[datacy=srp-expanded]').should('not.exist');
-    cy.contains('primary');
+    cy.get('[datacy=rp-slab]').should('be.visible');
+    cy.get('[datacy=rp-expanded]').should('not.exist');
     cy.contains('DS');
   });
 
@@ -227,7 +227,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
 describe('filterBucketsForUser - Tests', function() {
   it('Filters out buckets if current user has no votes in it', function () {
     const currentUser = {userId: 100};
-    const rpBucket = {isRP: true, key: 'RP Vote'};
+    const rpBucket = {isRP: true, key: rpVoteKey};
     const prefilteredBuckets = [rpBucket, bucket1, bucket2];
 
     const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);

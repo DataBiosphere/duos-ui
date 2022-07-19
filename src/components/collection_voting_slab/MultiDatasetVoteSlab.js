@@ -4,7 +4,7 @@ import {filter, flatMap, flow, map, isNil, isEmpty, get, includes, every, toLowe
 import {Storage} from '../../libs/storage';
 import {useEffect, useState} from 'react';
 import DatasetsRequestedPanel from './DatasetsRequestedPanel';
-import {ChairVoteInfo, dataUsePills} from './ResearchProposalVoteSlab';
+import {ChairVoteInfo} from './ResearchProposalVoteSlab';
 import {
   extractDacDataAccessVotesFromBucket,
   extractDatasetIdsFromBucket,
@@ -13,6 +13,7 @@ import {
 import {Alert} from '../Alert';
 import {ScrollToTopButton} from '../ScrollButton';
 import {convertLabelToKey} from '../../libs/utils';
+import {DataUsePills} from './DataUsePill';
 
 const styles = {
   baseStyle: {
@@ -67,7 +68,7 @@ export default function MultiDatasetVoteSlab(props) {
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
     return !isNil(dataUses)
-      ? div({style: styles.dataUses}, [dataUsePills(dataUses)])
+      ? div({style: styles.dataUses}, [DataUsePills(dataUses)])
       : div();
   };
 

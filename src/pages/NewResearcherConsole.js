@@ -1,25 +1,25 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, flow, concat, replace} from 'lodash/fp';
+import {cloneDeep, map, findIndex, isEmpty, flow, concat} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import accessIcon from '../images/icon_access.png';
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
+import {Notifications, searchOnFilteredList, getSearchFilterFunctions, formatDate} from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_table/DarTableActions';
 
 const formatDraft = (draft) => {
-  const { data, referenceId, id } = draft;
+  const { data, referenceId, id, createDate } = draft;
   const {
-    partialDarCode,
     projectTitle,
     datasets,
     institution,
   } = data;
+  const darCode = 'DRAFT_DAR_' + formatDate(createDate);
 
   const output =  {
-    darCode: replace('temp', 'DRAFT')(partialDarCode),
+    darCode,
     referenceId,
     darCollectionId: id,
     projectTitle,
