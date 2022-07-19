@@ -30,7 +30,7 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
       const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
       const relevant = flow(
         map(id => { return includes(id, relevantDatasetIds) ? isEmpty(dar.elections) : false; }),
-        find((r) => {return true === r;} )
+        find((r) => { return true === r; } )
       )(datasetIds);
       return !isNil(relevant);
     })(dars);
