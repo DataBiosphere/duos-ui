@@ -1,5 +1,5 @@
 import {Component, Fragment} from 'react';
-import {a, button, div, h, hr, span} from 'react-hyperscript-helpers';
+import {a, button, div, h, hr, span, table, thead, tr, th, tbody, td} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import {AddDacModal} from './AddDacModal';
 import {DacDatasetsModal} from '../../components/modals/DacDatasetsModal';
@@ -16,6 +16,12 @@ import TableIconButton from '../../components/TableIconButton';
 import {Delete} from '@material-ui/icons';
 import {Notifications} from '../../libs/utils';
 import {Styles} from '../../libs/theme';
+import {Theme} from '../../libs/theme';
+
+const tableBody = {
+  ...Theme.textTableBody,
+  padding: '8px 5px 8px 5px'
+};
 
 const limit = 10;
 const CHAIR = 'Chairperson';
@@ -47,6 +53,10 @@ class ManageDac extends Component {
 
   componentDidMount() {
     this.getAllData();
+  }
+
+  truncate(text, max) {
+    return text.substr(0,max-1)+(text.length>max?'...':'');
   }
 
   getAllData = async () => {
@@ -246,7 +256,7 @@ class ManageDac extends Component {
               id: 'manageDac',
               imgSrc: manageDACIcon,
               iconSize: 'large',
-              color: 'common',
+              color: 'dataset',
               title: 'Manage Data Access Committee',
               description: 'Create and manage Data Access Commitee'
             })
@@ -284,87 +294,93 @@ class ManageDac extends Component {
             ])
           ])
         ]),
-        div({className: 'jumbotron table-box'}, [
-          div({className: 'grid-9-row'}, [
-            div({
-              className: 'col-2 cell-header cell-sort common-color',
-              onClick: this.sort('name', !this.state.descendingOrder)
-            }, [
-              'DAC Name',
-              span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-            div({className: 'col-3 cell-header common-color'}, ['DAC Description']),
-            div({className: 'col-2 cell-header common-color'}, ['DAC Datasets']),
-            div({className: 'col-2 cell-header f-center common-color'}, ['Actions'])
-          ]),
-
-          hr({className: 'table-head-separator'}),
-
-          this.state.dacs.filter(this.searchTable(searchDacText))
-            .slice((currentPage - 1) * limit, currentPage * this.state.limit)
-            .map(dac => {
-              const disabled = !isNil(dac.datasets) && !isEmpty(dac.datasets);
-              return (h(Fragment, {key: dac.dacId}, [
-                div({
-                  id: dac.dacId,
-                  className: 'grid-9-row tableRow'
-                }, [
-                  div({
-                    id: dac.dacId + '_dacName',
-                    name: 'name',
-                    className: 'col-2 cell-body text bold',
-                    title: dac.name
-                  }, [dac.name]),
-                  div({
-                    id: dac.dacId + '_dacDescription',
-                    name: 'dacDescription',
-                    className: 'col-3 cell-body text',
-                    title: dac.description
-                  }, [dac.description]),
-                  div({
-                    className: 'col-2 cell-body'
+        div({ className:  'table-scroll' }, [
+          div({style: Theme.lightTable}, [
+            table({ className: 'table' }, [
+              thead({}, [
+                tr({}, [
+                  th({
+                    className: 'col-2 cell-size cell-sort',
+                    onClick: this.sort('name', !this.state.descendingOrder)
                   }, [
-                    button({
-                      id: dac.dacId + '_dacDatasets',
-                      name: 'dacDatasets',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.viewDatasets(dac)
-                    }, ['View'])
-                  ]),
-                  div({
-                    className: 'col-2 cell-body f-center',
-                    style: {display: 'flex'}
-                  }, [
-                    button({
-                      id: dac.dacId + '_btnViewDAC',
-                      name: 'btn_viewDac',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.viewMembers(dac)
-                    }, ['View']),
-                    button({
-                      id: dac.dacId + '_btnEditDAC',
-                      name: 'btn_editDac',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.editDac(dac)
-                    }, ['Edit']),
-                    h(TableIconButton, {
-                      key: 'delete-dac-icon',
-                      dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
-                      isRendered: userRole === ADMIN,
-                      disabled: disabled,
-                      onClick: () => this.deleteDac(dac),
-                      icon: Delete,
-                      style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
-                      hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
-                    })
-                  ])
+                    'DAC Name',
+                    span({className: 'glyphicon sort-icon glyphicon-sort'})]),
+                  th({ className: 'cell-size' }, ['DAC Description']),
+                  th({ className: 'cell-size' }, ['DAC Datasets']),
+                  th({ className: 'cell-size' }, ['Actions']),
                 ]),
-                hr({className: 'table-body-separator'})
-              ])
-              );
-            }),
+              ]),
+              tbody({}, [
+                this.state.dacs.filter(this.searchTable(searchDacText))
+                  .slice((currentPage - 1) * limit, currentPage * this.state.limit)
+                  .map(dac => {
+                    const disabled = !isNil(dac.datasets) && !isEmpty(dac.datasets);
+                    return (h(Fragment, {key: dac.dacId}, [
+                      tr({
+                        id: dac.dacId,
+                        className: 'tableRow'
+                      }, [
+                        td({
+                          id: dac.dacId + '_dacName',
+                          name: 'name',
+                          className: 'cell-size',
+                          style: tableBody,
+                          title: dac.name
+                        }, [dac.name]),
+                        td({
+                          id: dac.dacId + '_dacDescription',
+                          name: 'dacDescription',
+                          className: 'cell-size',
+                          style: tableBody,
+                          title: dac.description
+                        }, [dac.description]),
+                        td({
+                          className: 'cell-size',
+                          style: tableBody,
+                        }, [
+                          button({
+                            id: dac.dacId + '_dacDatasets',
+                            name: 'dacDatasets',
+                            className: 'cell-button hover-color',
+                            style: actionButtonStyle,
+                            onClick: () => this.viewDatasets(dac)
+                          }, ['View'])
+                        ]),
+                        td({
+                          className: 'col-2 cell-body f-center',
+                          style: {display: 'flex'}
+                        }, [
+                          button({
+                            id: dac.dacId + '_btnViewDAC',
+                            name: 'btn_viewDac',
+                            className: 'cell-button hover-color',
+                            style: actionButtonStyle,
+                            onClick: () => this.viewMembers(dac)
+                          }, ['View']),
+                          button({
+                            id: dac.dacId + '_btnEditDAC',
+                            name: 'btn_editDac',
+                            className: 'cell-button hover-color',
+                            style: actionButtonStyle,
+                            onClick: () => this.editDac(dac)
+                          }, ['Edit']),
+                          h(TableIconButton, {
+                            key: 'delete-dac-icon',
+                            dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
+                            isRendered: userRole === ADMIN,
+                            disabled: disabled,
+                            onClick: () => this.deleteDac(dac),
+                            icon: Delete,
+                            style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+                            hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
+                          })
+                        ])
+                      ]),
+                    ]));
+                  }),
+              ]),
+            ]),
+          ]),
           PaginatorBar({
             total: this.state.dacs.filter(this.searchTable(searchDacText)).length,
             limit: this.state.limit,
@@ -412,8 +428,7 @@ class ManageDac extends Component {
             className: 'tooltip-wrapper'
           })
         ])
-      ])
-    );
+      ]));
   }
 }
 
