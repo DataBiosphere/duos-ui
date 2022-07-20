@@ -1,5 +1,6 @@
 import {div, span} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash';
+import {map} from 'lodash/fp';
 
 const styles = {
   baseStyle: {
@@ -28,11 +29,20 @@ const styles = {
 };
 
 
-export default function DataUsePill(props) {
+export function DataUsePill(props) {
   const {dataUse} = props;
 
   return div({key: `data_use_pill_${dataUse.code}`, style: styles.baseStyle}, [
     span({ style: styles.code }, !isNil(dataUse) ? [dataUse.code] : []),
     span({ style: styles.description }, !isNil(dataUse) ? [dataUse.description] : [])
   ]);
+}
+
+export function DataUsePills(dataUses){
+  return map( dataUse => {
+    return DataUsePill({
+      dataUse,
+      key: dataUse.code
+    });
+  })(dataUses);
 }

@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
 import {Institution, User} from '../libs/ajax';
 import {USER_ROLES} from '../libs/utils';
-import {ResearcherReview} from './ResearcherReview';
+import {ResearcherReview} from '../components/ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from '../components/PageHeading';
 import {SearchSelect} from '../components/SearchSelect';

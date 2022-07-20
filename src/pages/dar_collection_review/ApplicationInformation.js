@@ -119,14 +119,20 @@ export default function ApplicationInformation(props) {
   const processCollaborators = (collaborators) =>
     collaborators.map(collaborator => collaborator.name).join(', ');
 
-  const appDetailLabels = [
+  const collaboratorLabels = [
     {value: processCollaborators(externalCollaborators), title: 'External Collaborators', key: 'external-collaborators'},
     {value: processCollaborators(internalCollaborators), title: 'Internal Collaborators', key: 'internal-collaborators'},
+    {value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff'},
+  ];
+
+  const institutionLabels = [
     {value: signingOfficial, title: 'Signing Official', key: 'signing-official'},
     {value: itDirector, title: 'IT Director', key: 'it-director'},
     {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
     {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
-    {value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff'},
+  ];
+
+  const cloudUseLabels = [
     {value: anvilStorage, title: 'Using AnVIL only for storage and analysis', key: 'anvil-storage'},
     {value: localComputing, title: 'Requesting permission to use local computing', key: 'local-computing'},
     {value: cloudComputing, title: 'Requesting permission to use cloud computing', key: 'cloud-computing'},
@@ -151,9 +157,21 @@ export default function ApplicationInformation(props) {
             width: '100%',
           }})
       ]),
-      div({className: 'application-details-container', style: { margin: '2.5rem 0'}}, [
-        div({className: 'application-details-subheader', style: styles.subheader}, ['Application Details']),
-        dynamicRowGeneration(2, appDetailLabels, isLoading, cloudComputing),
+
+      div({className: 'collaborator-details-container', style: { margin: '3rem 0'}}, [
+        div({className: 'collaborator-details-subheader', style: styles.subheader,
+          isRendered: !(isEmpty(internalCollaborators) && isEmpty(externalCollaborators) && isEmpty(internalLabStaff))}, ['Collaborators']),
+        dynamicRowGeneration(2, collaboratorLabels, isLoading)
+      ]),
+
+      div({className: 'institution-details-container', style: { margin: '3rem 0'}}, [
+        div({className: 'institution-details-subheader', style: styles.subheader}, ['Institution']),
+        dynamicRowGeneration(2, institutionLabels, isLoading)
+      ]),
+
+      div({className: 'cloud-use-details-container', style: { margin: '3rem 0'}}, [
+        div({className: 'cloud-use-details-subheader', style: styles.subheader}, ['Cloud Use']),
+        dynamicRowGeneration(2, cloudUseLabels, isLoading, cloudComputing),
         (cloudComputing) ?
           div({className: 'cloud-provider-description-container'}, [
             !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.textBox}, [cloudProviderDescription])

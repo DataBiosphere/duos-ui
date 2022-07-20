@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { h, div } from 'react-hyperscript-helpers';
+import {h, div, span} from 'react-hyperscript-helpers';
 import {chunk, map, range} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
@@ -42,7 +42,16 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
   //convert is once again used here to provide unique key identifier for the row
   //necessary for React when rendering elements provided by an array
   const rowTemplate = map.convert({cap:false})((row, index) =>
-    div({ style: { display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap' }, className: 'vote-summary-row', key: `summary-row-${index}` }, elementTemplate(row))
+    div({
+      className: 'vote-summary-row', key: `summary-row-${index}`,
+      style: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+        flexWrap: 'wrap',
+        margin: '0.5% 0'
+      }
+    },
+    elementTemplate(row))
   );
 
   const elementTemplate = (row = []) => {
@@ -81,9 +90,9 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
 
   return !isLoading ?
     div({
-      className: 'vote-summary-header-component',
-      style: {margin: '1% 0'}
+      className: 'vote-summary-header-component'
     }, [
+      span({style: {color: '#777777'}}, ['Final Vote Summary']),
       rowTemplate(chunkedBuckets),
       h(ReactTooltip, {
         id: 'vote-result',
