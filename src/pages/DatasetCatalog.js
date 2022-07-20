@@ -46,26 +46,6 @@ export default function DatasetCatalog(props) {
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
 
-  // Initialize page data
-  useEffect( () => {
-    const init = async() => {
-      setCurrentUser(Storage.getCurrentUser());
-      await getDatasets();
-      ReactTooltip.rebuild();
-    };
-    init();
-  }, [getDatasets]);
-
-  const applyDatasetSort = useCallback((sortParams, datasets) => {
-    const sortedList = datasets.sort((a, b) => {
-      const aVal = a[sortParams.field] || findPropertyValue(a, sortParams.field);
-      const bVal = b[sortParams.field] || findPropertyValue(b, sortParams.field);
-      return aVal.localeCompare(bVal, 'en', {numeric: true}) * sortParams.dir;
-    });
-    setSort(sortParams);
-    setDatasetList(sortedList);
-  }, []);
-
   const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
     let localDacs = await getDacs();
@@ -85,9 +65,28 @@ export default function DatasetCatalog(props) {
 
       return row;
     })(datasets);
-    setDatasetList(datasets);
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
+
+  // Initialize page data
+  useEffect( () => {
+    const init = async() => {
+      setCurrentUser(Storage.getCurrentUser());
+      await getDatasets();
+      ReactTooltip.rebuild();
+    };
+    init();
+  }, [getDatasets]);
+
+  const applyDatasetSort = useCallback((sortParams, datasets) => {
+    const sortedList = datasets.sort((a, b) => {
+      const aVal = a[sortParams.field] || findPropertyValue(a, sortParams.field);
+      const bVal = b[sortParams.field] || findPropertyValue(b, sortParams.field);
+      return aVal.localeCompare(bVal, 'en', {numeric: true}) * sortParams.dir;
+    });
+    setSort(sortParams);
+    setDatasetList(sortedList);
+  }, []);
 
   const getDacs = async () => {
     let dacs = await DAC.list(false);
