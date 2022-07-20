@@ -267,7 +267,7 @@ export default function DatasetCatalog(props) {
       return row.dataSetId;
     });
 
-    const selectedDatasets = map((row) => {
+    const modifiedDatasetList = map((row) => {
       if (row.active) {
         if (datasetIdsToCheck.includes(row.dataSetId)) {
           row.checked = checked;
@@ -275,10 +275,10 @@ export default function DatasetCatalog(props) {
       }
 
       return row;
-    });
+    })(datasetList);
 
     // Update state
-    setDatasetList(selectedDatasets);
+    setDatasetList(modifiedDatasetList);
   };
 
   const checkSingleRow = (dataset) => (e) => {
