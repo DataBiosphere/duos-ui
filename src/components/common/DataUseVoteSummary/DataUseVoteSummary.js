@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import {h, div, span} from 'react-hyperscript-helpers';
-import {chunk, map, range} from 'lodash/fp';
+import {chunk, isEmpty, map, range} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 import VoteResultBox from './VoteResultBox';
 import {extractDacFinalVotesFromBucket} from '../../../utils/DarCollectionUtils';
@@ -90,7 +90,8 @@ export default function DataUseVoteSummary({dataUseBuckets, currentUser, isLoadi
 
   return !isLoading ?
     div({
-      className: 'vote-summary-header-component'
+      className: 'vote-summary-header-component',
+      isRendered: !isEmpty(chunkedBuckets)
     }, [
       span({style: {color: '#777777'}}, ['Final Vote Summary']),
       rowTemplate(chunkedBuckets),
