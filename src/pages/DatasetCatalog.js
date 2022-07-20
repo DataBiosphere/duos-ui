@@ -85,7 +85,6 @@ export default function DatasetCatalog(props) {
 
       return row;
     })(datasets);
-    setDatasetList(datasets);
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
 
