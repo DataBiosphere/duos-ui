@@ -107,7 +107,8 @@ export default function MultiDatasetVoteSlab(props) {
       bucketDatasetIds,
       collectionDatasets,
       isLoading,
-      adminPage
+      adminPage,
+      bucketDatasets: bucket.datasets
     });
   };
 

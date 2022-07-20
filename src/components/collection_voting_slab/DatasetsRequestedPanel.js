@@ -47,9 +47,17 @@ export default function DatasetsRequestedPanel(props) {
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const collapsedDatasetCapacity = 5;
-  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading, adminPage} = props;
+  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading, adminPage, bucketDatasets} = props;
 
   const requestedDatasetIds = useCallback(() => {
+    return adminPage ?
+      bucketDatasets :
+      filter(dataset => {
+          return includes(dataset.dataSetId)(dacDatasetIds);
+        }
+      )(bucketDatasets);
+
+   /*
     if(adminPage) {
       return filter(dataset =>
         includes(dataset.dataSetId)(bucketDatasetIds)
@@ -62,7 +70,9 @@ export default function DatasetsRequestedPanel(props) {
     return filter(dataset =>
       includes(dataset.dataSetId)(datasetsForDacInBucket)
     )(collectionDatasets);
-  }, [bucketDatasetIds, collectionDatasets, dacDatasetIds, adminPage]);
+
+    */
+  }, [dacDatasetIds, adminPage, bucketDatasets]);
 
   useEffect(() => {
     const datasets = requestedDatasetIds();
