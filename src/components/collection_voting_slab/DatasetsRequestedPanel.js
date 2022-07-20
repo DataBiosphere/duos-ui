@@ -1,5 +1,5 @@
 import {a, div, h, span} from 'react-hyperscript-helpers';
-import {useCallback, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {isNil, filter, includes, map} from 'lodash/fp';
 
 const styles = {
@@ -47,39 +47,20 @@ export default function DatasetsRequestedPanel(props) {
   const [datasetCount, setDatasetCount] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const collapsedDatasetCapacity = 5;
-  const {bucketDatasetIds, dacDatasetIds, collectionDatasets, isLoading, adminPage, bucketDatasets} = props;
-
-  const requestedDatasetIds = useCallback(() => {
-    return adminPage ?
-      bucketDatasets :
-      filter(dataset => {
-          return includes(dataset.dataSetId)(dacDatasetIds);
-        }
-      )(bucketDatasets);
-
-   /*
-    if(adminPage) {
-      return filter(dataset =>
-        includes(dataset.dataSetId)(bucketDatasetIds)
-      )(collectionDatasets);
-    }
-    const datasetsForDacInBucket = filter(bucketDatasetId =>
-      includes(bucketDatasetId)(dacDatasetIds)
-    )(bucketDatasetIds);
-
-    return filter(dataset =>
-      includes(dataset.dataSetId)(datasetsForDacInBucket)
-    )(collectionDatasets);
-
-    */
-  }, [dacDatasetIds, adminPage, bucketDatasets]);
+  const {bucketDatasets, dacDatasetIds, isLoading, adminPage} = props;
 
   useEffect(() => {
-    const datasets = requestedDatasetIds();
+    const datasets = adminPage ?
+      bucketDatasets :
+      filter(dataset => {
+        const { dataSetId } = dataset;
+        return includes(dataSetId)(dacDatasetIds);
+      })(bucketDatasets);
+
     setFilteredDatasets(datasets);
     setDatasetCount(datasets.length);
     collapseView(datasets);
-  }, [requestedDatasetIds]);
+  }, [adminPage, bucketDatasets, dacDatasetIds]);
 
   const collapseView = (datasets) => {
     const datasetsHiddenWhenCollapsed = datasets.length > collapsedDatasetCapacity;
