@@ -28,7 +28,6 @@ export default function DatasetCatalog(props) {
   const [sort, setSort] = useState({ field: 'alias', dir: 1 });
 
   // Selection States
-  const [allChecked, setAllChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataUse, setDataUse] = useState();
   const [errorMessage, setErrorMessage] = useState();
@@ -252,23 +251,34 @@ export default function DatasetCatalog(props) {
     return true;
   };
 
+  const filteredAndPaginatedDatasetList = () => {
+    return datasetList.filter(searchTable(searchDulText)).slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  };
+
+  const allOnPageSelected = () => {
+    return filteredAndPaginatedDatasetList().every((row) => {
+      return row.checked || (!row.active);
+    });
+  };
+
   const selectAll = (e) => {
     const checked = isNil(e.target.checked) ? false : e.target.checked;
-    const selectedDatasets = map(row => {
-      if (checked) {
-        // The select all case, only select active datasets
-        if (row.active) {
+
+    const datasetIdsToCheck = filteredAndPaginatedDatasetList().map((row) => {
+      return row.dataSetId;
+    });
+
+    const selectedDatasets = map((row) => {
+      if (row.active) {
+        if (datasetIdsToCheck.includes(row.dataSetId)) {
           row.checked = checked;
         }
-      } else {
-        // The unselect all case, ensure everything is unselected
-        row.checked = checked;
       }
+
       return row;
-    })(datasetList);
+    });
 
     // Update state
-    setAllChecked(checked);
     setDatasetList(selectedDatasets);
   };
 
@@ -386,7 +396,7 @@ export default function DatasetCatalog(props) {
         div({style: Theme.lightTable}, [
           form({ className: 'pos-relative' }, [
             div({ className: 'checkbox check-all' }, [
-              input({ checked: allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
+              input({ checked: allOnPageSelected(), type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
               label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
             ]),
           ]),
@@ -416,8 +426,7 @@ export default function DatasetCatalog(props) {
               ]),
 
               tbody({ isRendered: !isNil(datasetList) && !isEmpty(datasetList) }, [
-                datasetList.filter(searchTable(searchDulText))
-                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                filteredAndPaginatedDatasetList()
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
                       tr({ className: 'tableRow' }, [
