@@ -50,6 +50,7 @@ export default function DatasetsRequestedPanel(props) {
   const {bucketDatasets, dacDatasetIds, isLoading, adminPage} = props;
 
   useEffect(() => {
+    // admins see all datasets in bucket; DACs only see datasets relevant to them
     const datasets = adminPage ?
       bucketDatasets :
       filter(dataset => {
