@@ -12,7 +12,6 @@ import {
   isNil,
   size,
   includes,
-  get,
   concat,
   findIndex,
   cloneDeep,
@@ -292,14 +291,6 @@ export const getMatchDataForBuckets = async (buckets) => {
   });
 };
 
-export const extractDatasetIdsFromBucket = (bucket) => {
-  return flow(
-    get('elections'),
-    flatMap(election => flatMap(electionData => electionData)(election)),
-    filter(electionData => electionData.electionType === 'DataAccess'),
-    map(electionData => electionData.dataSetId)
-  )(bucket);
-};
 
 //collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
 export const collapseVotesByUser = (votes) => {
@@ -483,7 +474,6 @@ export default {
   extractDacFinalVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
-  extractDatasetIdsFromBucket,
   collapseVotesByUser,
   updateFinalVote,
   rpVoteKey
