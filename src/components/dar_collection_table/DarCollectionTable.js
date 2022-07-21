@@ -1,15 +1,14 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
-import { div, h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find, get} from 'lodash/fp';
+import { h } from 'react-hyperscript-helpers';
+import {isNil, isEmpty, find} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
-import { recalculateVisibleTable, goToPage as updatePage, darCollectionUtils } from '../../libs/utils';
+import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 
-const { determineCollectionStatus } = darCollectionUtils;
 const storageDarCollectionSort = 'storageDarCollectionSort';
 export const getProjectTitle = ((collection) => {
   if(collection.isDraft){return collection.projectTitle;}
@@ -105,10 +104,7 @@ const columnHeaderConfig = {
   name: {
     label: 'Title',
     cellStyle: { width: styles.cellWidth.projectTitle },
-    cellDataFn: (props) => {
-      props.projectTitle = getProjectTitle(props.collection);
-      return cellData.projectTitleCellData(props);
-    },
+    cellDataFn: cellData.projectTitleCellData,
     sortable: true
   },
   submissionDate: {
@@ -120,19 +116,13 @@ const columnHeaderConfig = {
   researcher: {
     label: 'Researcher',
     cellStyle: { width: styles.cellWidth.researcher },
-    cellDataFn: (props) => {
-      props.researcherName = get('displayName')(props.createUser);
-      return cellData.researcherCellData(props);
-    },
+    cellDataFn: cellData.researcherCellData,
     sortable: true
   },
   institution: {
     label: 'Institution',
     cellStyle: { width: styles.cellWidth.institution },
-    cellDataFn: (props) => {
-      props.institution = isNil(props.createUser) || isNil(props.createUser.institution) ? '- -' : props.createUser.institution.name;
-      return cellData.institutionCellData(props);
-    },
+    cellDataFn: cellData.institutionCellData,
     sortable: true
   },
   datasetCount: {
@@ -150,11 +140,7 @@ const columnHeaderConfig = {
   actions: {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
-    cellDataFn: (props) => {
-      return props.actionsDisabled
-        ? div()
-        : cellData.consoleActionsCellData(props);
-    }
+    cellDataFn: cellData.consoleActionsCellData
   }
 };
 
@@ -167,15 +153,18 @@ const columnHeaderData = (columns = defaultColumns) => {
 const processCollectionRowData = ({ collections, showConfirmationModal, columns = defaultColumns, consoleType = '', goToVote, reviewCollection, resumeCollection, relevantDatasets}) => {
   if(!isNil(collections)) {
     return collections.map((collection) => {
-      const { darCollectionId, darCode, createDate, datasets, createUser } = collection;
-      const status = collection.isDraft ? 'Draft' : determineCollectionStatus(collection, relevantDatasets);
+      const {
+        darCollectionId, darCode, datasetIds,
+        submissionDate, status, actions,
+        researcherName, name, institutionName
+      } = collection;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          collection, darCollectionId, datasets, darCode, status,
-          createDate, createUser,
+          collection, darCollectionId, datasetIds, darCode, status, name,
+          submissionDate, researcherName, institutionName,
           showConfirmationModal, consoleType,
           goToVote, reviewCollection, relevantDatasets,
-          resumeCollection
+          resumeCollection, actions
         });
       });
     });
@@ -208,7 +197,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   const [consoleAction, setConsoleAction] = useState();
   const {
     collections, columns, isLoading, cancelCollection, reviseCollection,
-    openCollection, actionsDisabled, goToVote, consoleType, relevantDatasets, deleteDraft,
+    openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
   } = props;
 
   /*
@@ -231,7 +220,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         collections,
         columns,
         showConfirmationModal,
-        actionsDisabled,
         consoleType,
         openCollection,
         goToVote,
@@ -243,7 +231,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, actionsDisabled, consoleType, openCollection, goToVote, relevantDatasets/*, resumeCollection, reviewCollection*/]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets/*, resumeCollection, reviewCollection*/]);
 
   const showConfirmationModal = (collection, action = '') => {
     setConsoleAction(action);

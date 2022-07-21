@@ -10,9 +10,9 @@ import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
 import { consoleTypes } from '../dar_table/DarTableActions';
 
-export function projectTitleCellData({projectTitle = '- -', darCollectionId, label= 'project-title'}) {
+export function projectTitleCellData({name = '- -', darCollectionId, label= 'project-title'}) {
   return {
-    data: isEmpty(projectTitle) ? '- -' : projectTitle,
+    data: isEmpty(name) ? '- -' : name,
     id: darCollectionId,
     style : {
       color: '#354052',
@@ -68,9 +68,9 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   return h(Link, { to: path }, [darCode]);
 };
 
-export function submissionDateCellData({createDate, darCollectionId, label = 'submission-date'}) {
-  const dateString = isNil(createDate) ? '- -' :
-    toLower(createDate) === 'unsubmitted' ? '- -' : formatDate(createDate);
+export function submissionDateCellData({submissionDate, darCollectionId, label = 'submission-date'}) {
+  const dateString = isNil(submissionDate) ? '- -' :
+    toLower(submissionDate) === 'unsubmitted' ? '- -' : formatDate(submissionDate);
   return {
     data: dateString,
     id: darCollectionId,
@@ -94,9 +94,9 @@ export function researcherCellData({researcherName = '- -', darCollectionId, lab
   };
 }
 
-export function institutionCellData({institution = '- -', darCollectionId, label = 'institution'}) {
+export function institutionCellData({institutionName = '- -', darCollectionId, label = 'institution'}) {
   return {
-    data: institution,
+    data: institutionName,
     id: darCollectionId,
     style: {
       color: '#354052',
@@ -107,9 +107,9 @@ export function institutionCellData({institution = '- -', darCollectionId, label
   };
 }
 
-export function datasetCountCellData({datasets = [], darCollectionId, label = 'datasets'}) {
+export function datasetCountCellData({datasetIds = [], darCollectionId, label = 'datasets'}) {
   return {
-    data: datasets.length > 0 ? datasets.length : '- -',
+    data: datasetIds.length > 0 ? datasetIds.length : '- -',
     id: darCollectionId,
     style: {
       color: '#333F52',
@@ -133,7 +133,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection, actions}) {
   let actionComponent;
 
   switch (consoleType) {
@@ -141,7 +141,12 @@ export function consoleActionsCellData({collection, reviewCollection, goToVote, 
       actionComponent = h(AdminActions, {collection, showConfirmationModal});
       break;
     case consoleTypes.CHAIR:
-      actionComponent = h(ChairActions, {collection, showConfirmationModal, goToVote, relevantDatasets});
+      actionComponent = h(ChairActions, {
+        collection, showConfirmationModal, goToVote, relevantDatasets,
+        openEnabled: actions.includes('Open'),
+        cancelEnabled: actions.includes('Cancel'),
+        voteEnabled: actions.includes('Vote')
+      });
       break;
     case consoleTypes.MEMBER:
       actionComponent = h(MemberActions, {collection, showConfirmationModal, goToVote});

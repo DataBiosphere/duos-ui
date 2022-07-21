@@ -52,31 +52,19 @@ const initUserData = ({dars, elections, relevantDatasets}) => {
   }
 };
 
-const calcComponentState = ({userId, relevantElections, relevantDarsNoElections}) => {
+const calcComponentState = ({relevantElections}) => {
   try{
-    let nonOpenRelevantElectionPresent = false;
-    let closedRelevantElectionPresent = false;
-    let openRelevantElectionPresent = false;
-    let userHasVote = false;
     let label = 'Vote';
 
     //iterate through elections, push open and non-open elections into their respective arrays
     //also for each election, see if user has a vote and whether or not they've already voted
     forEach(election => {
-      const {votes, status} = election;
-      const isElectionOpen = toLower(status) === 'open';
-      isElectionOpen ? openRelevantElectionPresent = true : nonOpenRelevantElectionPresent = true;
-      if(toLower(status) === 'closed') {closedRelevantElectionPresent = true;}
+      const {votes} = election;
       forEach(vote => {
-        if(vote.dacUserId === userId && isElectionOpen) {userHasVote = true;}
         if(!isNil(vote.vote)) { label = 'Update'; }
       })(votes);
     })(relevantElections);
-    //To determine open, see if empty dars exist or if any election is non-open
-    const isOpenEnabled = (!isEmpty(relevantDarsNoElections) || nonOpenRelevantElectionPresent);
-    //To determine cancel, see if there are no closed and any open relevant elections present
-    const isCancelEnabled = (!closedRelevantElectionPresent && openRelevantElectionPresent);
-    return {isCancelEnabled, userHasVote, label, isOpenEnabled};
+    return {label};
   } catch(error) {
     throw new Error ('Error initializing chair actions');
   }
@@ -101,9 +89,9 @@ export default function ChairActions(props) {
   const { showConfirmationModal, collection, relevantDatasets, goToVote } = props;
   const { dars } = collection;
   const collectionId = collection.darCollectionId;
-  const [openEnabled, setOpenEnabled] = useState(false);
-  const [cancelEnabled, setCancelEnabled] = useState(false);
-  const [voteEnabled, setVoteEnabled] = useState(false);
+  const [openEnabled, setOpenEnabled] = useState(props.openEnabled);
+  const [cancelEnabled, setCancelEnabled] = useState(props.cancelEnabled);
+  const [voteEnabled, setVoteEnabled] = useState(props.voteEnabled);
   const [voteLabel, setVoteLabel] = useState('Vote');
 
   //if there's something wrong with the collection it's best to fail gracefully
@@ -111,7 +99,7 @@ export default function ChairActions(props) {
   const updateStateOnFail = () => {
     setOpenEnabled(false);
     setCancelEnabled(false);
-    setVoteLabel(false);
+    setVoteEnabled(false);
   };
 
   useEffect(() => {
@@ -122,20 +110,14 @@ export default function ChairActions(props) {
           elections,
           relevantDatasets
         });
-      const { isCancelEnabled, userHasVote, label, isOpenEnabled } =
-        calcComponentState({
-          userId,
-          relevantElections,
-          relevantDarsNoElections,
-          setVoteLabel
-        });
-      setOpenEnabled(isOpenEnabled);
-      //enable cancel button if no elections are closed and at least one is open
-      setCancelEnabled(isCancelEnabled);
+      const { label } = calcComponentState({
+        userId,
+        relevantElections,
+        relevantDarsNoElections,
+        setVoteLabel
+      });
       //set label based on function return, visibility determined by setVoteEnabled
       setVoteLabel(label);
-      //enable vote button, visibility determined by userHasVote
-      setVoteEnabled(userHasVote);
     };
 
     try {
@@ -177,7 +159,7 @@ export default function ChairActions(props) {
       fontWeight: 600,
       color: 'white',
       marginRight: '8%'
-    },
+    }
   };
 
   const cancelButtonAttributes = {
