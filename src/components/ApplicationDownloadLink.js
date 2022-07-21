@@ -173,6 +173,13 @@ export default function ApplicationDownloadLink(props) {
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
+            label: 'NIH eRA Commons ID',
+            text: `${researcherProfile.eraCommonsId}`,
+            style: {marginRight: 30}
+          }),
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {
             label: 'Signing Official',
             text: darInfo.signingOfficial,
             style: {marginRight: 30}
