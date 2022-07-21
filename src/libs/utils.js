@@ -60,13 +60,16 @@ export const darCollectionUtils = {
           //see if its relevant, if it is, add 1 to submitted on hash
           //return empty array at the end
           if(isEmpty(elections)) {
-            const datasetId = (isEmpty(dar.data) || isEmpty(dar.data.datasetIds)) ? -1 : dar.data.datasetIds[0];
-            if(includes(relevantDatasets, datasetId)) {
-              if(isNil(electionStatusCount['Submitted'])) {
-                electionStatusCount['Submitted'] = 0;
+            // Dataset IDs should be on the DAR, but if not, pull from the dar.data
+            const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
+            forEach((datasetId) => {
+              if (includes(relevantDatasets, datasetId)) {
+                if (isNil(electionStatusCount['Submitted'])) {
+                  electionStatusCount['Submitted'] = 0;
+                }
+                electionStatusCount['Submitted']++;
               }
-              electionStatusCount['Submitted']++;
-            }
+            })(datasetIds);
             return [];
           } else {
             //if elections exist, filter out elections based on relevant ids
