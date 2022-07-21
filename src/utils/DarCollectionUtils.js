@@ -12,7 +12,6 @@ import {
   isNil,
   size,
   includes,
-  get,
   concat,
   findIndex,
   cloneDeep,
@@ -131,7 +130,7 @@ export const processDataUseBuckets = async(buckets) => {
 
   //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
-    const { dars, dataUse } = bucket;
+    const { dars, dataUse, datasets } = bucket;
     const elections = flow([
       map((dar) => Object.values(dar.elections)),
     ])(dars);
@@ -140,7 +139,7 @@ export const processDataUseBuckets = async(buckets) => {
 
     const dataUses = filter(dataUseDescription => !isEmpty(dataUseDescription))(dataUse);
 
-    return { key, dars, elections, votes, dataUses };
+    return { key, dars, elections, votes, dataUses, datasets };
   })(buckets);
 
   //Process custom RP Vote bucket for VoteSummary
@@ -292,14 +291,6 @@ export const getMatchDataForBuckets = async (buckets) => {
   });
 };
 
-export const extractDatasetIdsFromBucket = (bucket) => {
-  return flow(
-    get('elections'),
-    flatMap(election => flatMap(electionData => electionData)(election)),
-    filter(electionData => electionData.electionType === 'DataAccess'),
-    map(electionData => electionData.dataSetId)
-  )(bucket);
-};
 
 //collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
 export const collapseVotesByUser = (votes) => {
@@ -483,7 +474,6 @@ export default {
   extractDacFinalVotesFromBucket,
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
-  extractDatasetIdsFromBucket,
   collapseVotesByUser,
   updateFinalVote,
   rpVoteKey

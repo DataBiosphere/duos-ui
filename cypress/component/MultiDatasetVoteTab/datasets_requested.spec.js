@@ -11,7 +11,7 @@ const dataset = (id) => {
   };
 };
 
-const collectionDatasets = [
+const bucketDatasets = [
   dataset(1),
   dataset(2),
   dataset(3),
@@ -21,25 +21,22 @@ const collectionDatasets = [
   dataset(7),
 ];
 
-
 describe('DatasetsRequestedPanel - Tests', function () {
-  it('Renders no dataset information if bucketDatasetIds is empty', function () {
+  it('Renders no dataset information if bucketDatasets is empty', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[]}
+        bucketDatasets={[]}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 0);
     cy.get('[datacy=dataset-count]').should('contain.text', '(0)');
   });
 
-  it('Renders no dataset information if bucketDatasetIds is null', function () {
+  it('Renders no dataset information if bucketDatasets is null', function () {
     mount(
       <DatasetsRequestedPanel
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 0);
@@ -49,9 +46,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders no dataset information if dacDatasetIds is empty', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3]}
+        bucketDatasets={bucketDatasets}
         dacDatasetIds={[]}
-        collectionDatasets={collectionDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 0);
@@ -61,43 +57,18 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders no dataset information if dacDatasetIds is null', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3]}
-        collectionDatasets={collectionDatasets}
+        bucketDatasets={bucketDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 0);
     cy.get('[datacy=dataset-count]').should('contain.text', '(0)');
   });
 
-  it('Renders no dataset information if collectionDatasets is empty', function () {
+  it('Renders no dataset information if there are no matches between bucket datasets and DAC dataset ids', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3]}
-        dacDatasetIds={[1, 2, 3]}
-        collectionDatasets={[]}
-      />
-    );
-    cy.get('[datacy=dataset-list]').children().should('have.length', 0);
-    cy.get('[datacy=dataset-count]').should('contain.text', '(0)');
-  });
-
-  it('Renders no dataset information if collectionDatasets is null', function () {
-    mount(
-      <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3]}
-        dacDatasetIds={[1, 2, 3]}
-      />
-    );
-    cy.get('[datacy=dataset-list]').children().should('have.length', 0);
-    cy.get('[datacy=dataset-count]').should('contain.text', '(0)');
-  });
-
-  it('Renders no dataset information if there is no matches between bucket and DAC dataset ids', function () {
-    mount(
-      <DatasetsRequestedPanel
-        bucketDatasetIds={[8, 9, 10]}
-        dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
+        bucketDatasets={bucketDatasets}
+        dacDatasetIds={[8, 9, 10]}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 0);
@@ -107,9 +78,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders less than five datasets without an expansion link', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[8, 9, 1, 3]}
-        dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
+        bucketDatasets={bucketDatasets}
+        dacDatasetIds={[1, 3, 9, 10]}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 2);
@@ -126,9 +96,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders five datasets without an expansion link', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[8, 1, 2, 3, 4, 5, 9]}
-        dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
+        bucketDatasets={bucketDatasets}
+        dacDatasetIds={[1, 2, 3, 4, 5]}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 5);
@@ -151,9 +120,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders more than five datasets with an expansion link', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
+        bucketDatasets={bucketDatasets}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 5);
@@ -181,9 +149,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Shows more or less datasets when link is clicked', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
+        bucketDatasets={bucketDatasets}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
       />
     );
     cy.get('[datacy=dataset-list]').children().should('have.length', 5);
@@ -213,14 +180,13 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders filler dataset identifier if attribute is null', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1]}
-        dacDatasetIds={[1]}
-        collectionDatasets={[
+        bucketDatasets={[
           {
             dataSetId: 1,
             name: 'Dataset 1'
           }
         ]}
+        dacDatasetIds={[1]}
       />
     );
     cy.get('[datacy=dataset-list]').should('not.contain.text', 'DUOS-1');
@@ -231,14 +197,13 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders filler dataset name if attribute is null', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1]}
-        dacDatasetIds={[1]}
-        collectionDatasets={[
+        bucketDatasets={[
           {
             dataSetId: 1,
             datasetIdentifier: 'DUOS-1'
           }
         ]}
+        dacDatasetIds={[1]}
       />
     );
     cy.get('[datacy=dataset-list]').should('contain.text', 'DUOS-1');
@@ -249,9 +214,8 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('Renders skeleton text when loading', function () {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1]}
+        bucketDatasets={bucketDatasets}
         dacDatasetIds={[1, 2, 3, 4, 5, 6, 7]}
-        collectionDatasets={collectionDatasets}
         isLoading={true}
       />
     );
@@ -263,14 +227,13 @@ describe('DatasetsRequestedPanel - Tests', function () {
   it('shows all datasets if the viewing on the admin page', () => {
     mount(
       <DatasetsRequestedPanel
-        bucketDatasetIds={[1,2,3,4,5,6]}
+        bucketDatasets={bucketDatasets}
         dacDatasetIds={[1]}
-        collectionDatasets={collectionDatasets}
         isLoading={false}
         adminPage={true}
       />
     );
     cy.get('.dataset-list-item').should('have.length', 5);
-    cy.get('[datacy=collapse-expand-link]').contains('View 1 more');
+    cy.get('[datacy=collapse-expand-link]').contains('View 2 more');
   });
 });
