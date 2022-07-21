@@ -112,7 +112,12 @@ const NavigationTabsComponent = (props) => {
             return h(Tab, {
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
-              to: tab.link,
+              to: {
+                pathname: tab.link,
+                state: {
+                  selectedMenuTab: selectedMenuTab,
+                },
+              },
               component: Link
             });
           }))
@@ -235,7 +240,12 @@ const NavigationTabsComponent = (props) => {
         return h(Tab, {
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
-          to: tab.link,
+          to: {
+            pathname: tab.link,
+            state: {
+              selectedMenuTab: selectedMenuTab,
+            },
+          },
           component: Link
         });
       }))
@@ -441,21 +451,44 @@ class DuosHeader extends Component {
       }
     ].filter((data) => !!data);
 
-    let initialSubTab = false;
-    const initialTab = tabs.findIndex((tab) => {
+    // returns true if the current page the app is on is a part of this tab
+    const isValidTab = (tab) => {
       if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
-        initialSubTab = 0;
         return true;
       }
       if (tab.children) {
-        initialSubTab = tab.children.findIndex((subtab) => {
+        return tab.children.some((subtab) => {
           return subtab.link === location.pathname || location.pathname.includes(subtab.search);
         });
-
-        return initialSubTab !== -1;
       }
       return tab.children ? tab.children.indexOf((subtab) => subtab.link === location.pathname) !== -1 : false;
-    });
+    };
+
+    let initialSubTab = false;
+    let initialTab = false;
+
+    // note: location.state.selectedMenuTab will be populated if the user navigated
+    // to the current page by clicking on a tab from the nav bar.
+
+    // populate initialTab based on state (if valid) or by manually searching through all tabs.
+    if (location?.state?.selectedMenuTab
+        && tabs.length > location.state.selectedMenuTab
+        && isValidTab(tabs[location.state.selectedMenuTab])) {
+      initialTab = location.state.selectedMenuTab;
+    } else {
+      initialTab = tabs.findIndex(isValidTab);
+    }
+
+    // populate initialSubTab
+    if (initialTab != -1) {
+      if (tabs[initialTab].link == location.pathname) {
+        initialSubTab = 0;
+      } else if (tabs[initialTab].children) {
+        initialSubTab = tabs[initialTab].children.findIndex((subtab) => {
+          return subtab.link === location.pathname || location.pathname.includes(subtab.search);
+        });
+      }
+    }
 
     return nav({ className: 'navbar-duos', role: 'navigation' }, [
       h(Hidden, { mdDown: true }, [
