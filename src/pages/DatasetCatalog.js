@@ -255,12 +255,15 @@ export default function DatasetCatalog(props) {
   };
 
   const allOnPageSelected = () => {
-    return filteredAndPaginatedDatasetList().every((row) => {
+
+    const filteredList = filteredAndPaginatedDatasetList();
+
+    return filteredList.length > 0 &&  filteredList.every((row) => {
       return row.checked || (!row.active);
     });
   };
 
-  const selectAll = (e) => {
+  const selectAllOnPage = (e) => {
     const checked = isNil(e.target.checked) ? false : e.target.checked;
 
     const datasetIdsToCheck = filteredAndPaginatedDatasetList().map((row) => {
@@ -392,10 +395,27 @@ export default function DatasetCatalog(props) {
           ]),
         ]),
 
-        div({style: Theme.lightTable}, [
+        div({
+          style: {
+            ...Theme.lightTable,
+            ...{
+              paddingTop: '6px',
+            }
+          },
+        }, [
+
+          div({style: {position: 'absolute'}}, [
+            span({
+              style: {
+                marginTop: '4px',
+                fontSize: '.8em',
+              }
+            }, ['Select Visible']),
+          ]),
+
           form({ className: 'pos-relative' }, [
             div({ className: 'checkbox check-all' }, [
-              input({ checked: allOnPageSelected(), type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
+              input({ checked: allOnPageSelected(), type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAllOnPage }),
               label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
             ]),
           ]),
