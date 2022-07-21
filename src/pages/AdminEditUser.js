@@ -71,13 +71,10 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: this.state.emailPreference,
       institutionId: this.state.institutionId
     };
-    const updatedUser = await User.update(user, userId);
+    await User.update(user, userId);
     await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
-    this.setState({
-      user: Object.assign({}, updatedUser),
-      displayNameValid: this.nameRef.current.validity.valid
-    });
+    this.props.history.push('/admin_manage_users');
   };
 
   updateRolesIfDifferent = async (userId, updatedRoles) => {
