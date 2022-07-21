@@ -44,12 +44,14 @@ import NewChairConsole from './pages/NewChairConsole';
 import NewMemberConsole from './pages/NewMemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
+import { HealthCheck } from './pages/HealthCheck';
 
 const Routes = (props) => (
   <Switch>
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(mergeAll([routeProps, props]))} />
+    <Route exact path="/liveness" render={() => HealthCheck()} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
         props.env
