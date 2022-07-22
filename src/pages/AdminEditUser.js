@@ -187,7 +187,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                   })
                 ])
               ]),
-
               div({className: 'form-group'}, [
                 label({
                   id: 'lbl_email',
