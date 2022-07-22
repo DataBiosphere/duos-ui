@@ -26,6 +26,8 @@ export default function DatasetCatalog(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
   const [sort, setSort] = useState({ field: 'alias', dir: 1 });
+  const [numDatasetsSelected, setNumDatasetsSelected] = useState(0);
+  const [selectedDatasets, setSeelctedDatasets] = useState([]);
 
   // Selection States
   const [allChecked, setAllChecked] = useState(false);
@@ -37,7 +39,6 @@ export default function DatasetCatalog(props) {
   const [searchDulText, setSearchDulText] = useState();
   const [selectedDataset, setSelectedDataset] = useState();
   const [selectedDatasetId, setSelectedDatasetId] = useState();
-  const [numDatasetsSelected, setNumDatasetsSelected] = useState();
 
   // Modal States
   const [showConnectDataset, setShowConnectDataset] = useState(false);
@@ -46,6 +47,8 @@ export default function DatasetCatalog(props) {
   const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
+
+  const [filterToOnlySelected, setFilterToOnlySelected] = useState(false);
 
 
   const getDatasets = useCallback(async () => {
@@ -71,7 +74,10 @@ export default function DatasetCatalog(props) {
   }, [applyDatasetSort, sort]);
 
   useEffect(() => {
-    setNumDatasetsSelected(datasetList.filter((ds) => ds.checked).length);
+    const selected = datasetList.filter((ds) => ds.checked);
+
+    setNumDatasetsSelected(selected.length);
+    setSeelctedDatasets(selected);
   }, [datasetList]);
 
   // Initialize page data
@@ -357,6 +363,10 @@ export default function DatasetCatalog(props) {
     return false;
   };
 
+  const visibleDatasets = () => {
+    return (filterToOnlySelected ? selectedDatasets : datasetList);
+  };
+
   return (
     h(Fragment, {}, [
       div({ className: 'container container-wide' }, [
@@ -403,7 +413,11 @@ export default function DatasetCatalog(props) {
                 paddingBottom: '0px'
               }
             }, [
-              span({}, [`${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected.`])
+              a({
+                onClick: () => {
+                  setFilterToOnlySelected(!filterToOnlySelected);
+                }
+              }, [`${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected.`])
             ])
           ]),
 
@@ -432,7 +446,8 @@ export default function DatasetCatalog(props) {
               ]),
 
               tbody({ isRendered: !isNil(datasetList) && !isEmpty(datasetList) }, [
-                datasetList.filter(searchTable(searchDulText))
+                visibleDatasets()
+                  .filter(searchTable(searchDulText))
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
@@ -642,7 +657,7 @@ export default function DatasetCatalog(props) {
           ]),
           div({ style: { 'margin': '0 20px 15px 20px' } }, [
             PaginatorBar({
-              total: datasetList.filter(searchTable(searchDulText)).length,
+              total: visibleDatasets().filter(searchTable(searchDulText)).length,
               limit: pageSize,
               currentPage: currentPage,
               onPageChange: handlePageChange,
