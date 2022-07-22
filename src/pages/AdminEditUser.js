@@ -166,7 +166,6 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
               name: 'userForm',
               encType: 'multipart/form-data',
             }, [
-
               div({className: 'form-group first-form-group'}, [
                 label({
                   id: 'lbl_name',
@@ -187,6 +186,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                   })
                 ])
               ]),
+
               div({className: 'form-group'}, [
                 label({
                   id: 'lbl_email',
