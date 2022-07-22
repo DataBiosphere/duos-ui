@@ -450,7 +450,7 @@ export default function DatasetCatalog(props) {
                 }
               }),
               label({ id: 'lbl_onlySelected', className: 'regular-checkbox', htmlFor: 'chk_onlySelected' },
-                [`Show ${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected`])
+                [`Show ${numDatasetsSelected} Dataset${(numDatasetsSelected != 1?'s':'')} Selected`])
             ])
           ]),
 
