@@ -220,8 +220,8 @@ export const Navigation = {
   back: async (user, history) => {
     let page =
       user.isAdmin ? '/admin_manage_dar_collections'
-        :user.isChairPerson ? '/new_chair_console'
-          : user.isMember ? '/new_member_console'
+        :user.isChairPerson ? '/chair_console'
+          : user.isMember ? '/member_console'
             : user.isResearcher ? '/dataset_catalog'
               : user.isAlumni ? '/summary_votes'
                 : '/';
@@ -230,9 +230,9 @@ export const Navigation = {
   console: async (user, history) => {
     let page =
       user.isAdmin ? '/admin_manage_dar_collections'
-        : user.isChairPerson ? '/new_chair_console'
-          : user.isMember ? '/new_member_console'
-            : user.isResearcher ? '/new_researcher_console'
+        : user.isChairPerson ? '/chair_console'
+          : user.isMember ? '/member_console'
+            : user.isResearcher ? '/researcher_console'
               : user.isAlumni ? '/summary_votes'
                 : '/';
     history.push(page);
