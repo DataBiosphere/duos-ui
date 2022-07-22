@@ -403,20 +403,15 @@ export default function DatasetCatalog(props) {
             }
           },
         }, [
-
-          div({style: {position: 'absolute'}}, [
-            span({
-              style: {
-                marginTop: '4px',
-                fontSize: '.8em',
-              }
-            }, ['Select Visible']),
-          ]),
-
-          form({ className: 'pos-relative' }, [
+          form({
+            className: 'pos-relative',
+            style: {
+              marginBottom: '10px',
+            }
+          }, [
             div({ className: 'checkbox check-all' }, [
               input({ checked: allOnPageSelected(), type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAllOnPage }),
-              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
+              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, ['Select All Visible']),
             ]),
           ]),
 
