@@ -400,24 +400,57 @@ export default function DatasetCatalog(props) {
 
         div({style: Theme.lightTable}, [
           form({ className: 'pos-relative' }, [
-            div({ className: 'checkbox check-all' }, [
-              input({ checked: allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
-              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
-            ]),
             div({
-              className: 'text-right',
+              className: 'checkbox display-inline-block',
               style: {
-                paddingTop: '5px',
-                paddingRight: '20px',
+                marginLeft: '28px',
                 marginBottom: '0px',
-                paddingBottom: '0px'
               }
             }, [
-              a({
-                onClick: () => {
+              input({ checked: allChecked,
+                type: 'checkbox',
+                'select-all': 'true',
+                className: 'checkbox-inline',
+                id: 'chk_selectAll',
+                onChange: selectAll
+              }),
+              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, ['Select All Visible']),
+            ]),
+
+            // vertical line
+            div({
+              className: 'display-inline-block',
+              style: {
+                top: '13px',
+                position: 'absolute',
+              }
+            }, [
+              div({
+                style: {
+                  borderLeft: '1px solid rgb(204, 204, 204)',
+                  height: '15px'
+                }
+              }, []),
+            ]),
+
+            div({
+              className: 'checkbox display-inline-block',
+              style: {
+                marginLeft: '18px',
+                marginBottom: '0px',
+              }
+            }, [
+              input({
+                type: 'checkbox',
+                id: 'chk_onlySelected',
+                checked: filterToOnlySelected,
+                className: 'checkbox-inline',
+                onChange: () => {
                   setFilterToOnlySelected(!filterToOnlySelected);
                 }
-              }, [`${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected.`])
+              }),
+              label({ id: 'lbl_onlySelected', className: 'regular-checkbox', htmlFor: 'chk_onlySelected' },
+                [`Show ${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected`])
             ])
           ]),
 
