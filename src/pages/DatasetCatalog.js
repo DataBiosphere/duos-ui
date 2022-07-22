@@ -37,6 +37,7 @@ export default function DatasetCatalog(props) {
   const [searchDulText, setSearchDulText] = useState();
   const [selectedDataset, setSelectedDataset] = useState();
   const [selectedDatasetId, setSelectedDatasetId] = useState();
+  const [numDatasetsSelected, setNumDatasetsSelected] = useState();
 
   // Modal States
   const [showConnectDataset, setShowConnectDataset] = useState(false);
@@ -45,6 +46,7 @@ export default function DatasetCatalog(props) {
   const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
+
 
   const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
@@ -67,6 +69,10 @@ export default function DatasetCatalog(props) {
     })(datasets);
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
+
+  useEffect(() => {
+    setNumDatasetsSelected(datasetList.filter((ds) => ds.checked).length);
+  }, [datasetList]);
 
   // Initialize page data
   useEffect( () => {
@@ -388,6 +394,17 @@ export default function DatasetCatalog(props) {
               input({ checked: allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
               label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
             ]),
+            div({
+              className: 'text-right',
+              style: {
+                paddingTop: '5px',
+                paddingRight: '20px',
+                marginBottom: '0px',
+                paddingBottom: '0px'
+              }
+            }, [
+              span({}, [`${numDatasetsSelected} dataset${(numDatasetsSelected != 1?'s':'')} selected.`])
+            ])
           ]),
 
           div({ className: currentUser.isAdmin ? 'table-scroll-admin' : 'table-scroll' }, [
