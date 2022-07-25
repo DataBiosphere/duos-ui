@@ -5,7 +5,7 @@ describe('Status', function() {
 
   it('Liveness successfully loads', function() {
     cy.visit('liveness');
-    cy.contains('DUOS is healthy!')
+    cy.contains('DUOS is healthy!');
   });
 
 });
