@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
 import {isEqual} from 'lodash';
+import {find} from 'lodash/fp';
 
 import './SearchSelect.css';
 
