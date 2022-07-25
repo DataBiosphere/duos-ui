@@ -100,6 +100,7 @@ export default function ChairActions(props) {
     setOpenEnabled(false);
     setCancelEnabled(false);
     setVoteEnabled(false);
+    setVoteLabel(false);
   };
 
   useEffect(() => {
