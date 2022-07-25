@@ -26,6 +26,9 @@ export const darCollectionUtils = {
   //determineCollectionStatus uses this function so its definition/reference needs to exist
   isCollectionCanceled,
   determineCollectionStatus: (collection, relevantDatasets) => {
+    // Unreviewed (when a DAR is submitted but no election has been created; only visible to Admins and Chairs),
+    // In progress (a DAR is open but not all Data Use buckets have a final/chair vote),
+    // Complete (a DAR has final/chair votes on all Data Use buckets).
     const electionStatusCount = {};
     let output;
     if(!isEmpty(collection.dars)) {
@@ -55,6 +58,181 @@ export const darCollectionUtils = {
             const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
             if(isNil(relevantDatasets)) {
               return electionArr;
+            } else {
+              const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
+              return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
+            }
+          }
+        }),
+        flatten
+      ])(collection.dars);
+
+      if(isNil(relevantDatasets)) {
+        each(election => {
+          const {status} = election;
+          if(isNil(electionStatusCount[status])) {
+            electionStatusCount[status] = 0;
+          }
+          electionStatusCount[status]++;
+        })(targetElections);
+        output = nonFPMap(electionStatusCount, (value, key) => {
+          return `${key}: ${value}`;
+        }).join('\n');
+      } else {
+        output = outputCommaSeperatedElectionStatuses(targetElections);
+      }
+      return output;
+    }
+  },
+  determineCollectionStatusNew: (collection, relevantDatasets, researcherView = false) => {
+    // collection statuses: In Progress, Complete, Unreviewed, Canceled (researchers only)
+    // Election statuses : Open, Closed, Canceled, Final
+    // relevantDatasets = datasets the current user has permission to view
+    // Logical Steps
+
+    // Pull out all elections to an array
+    const elections = flatMap(dar => dar.elections)(collection.dars);
+    // filter elections to what user can see
+    // not sure if relevantDatasets is the ids or an object
+    const filteredElections = isEmpty(relevantDatasets) ?
+        // when relevantDatasets is null/undefined, do not filter, just process elections as is (admin, maybe SO page)
+        // admins should see all elections
+        elections :
+        // check the election.datasetId and make sure it is in the relevantDatasets (arr of datasets? -> get the IDs)
+        filter(election => relevantDatasets.includes(election.datasetId))(elections);
+    // Unreviewed (when a DAR is submitted but no election has been created; only visible to Admins and Chairs),
+      // check whether or not the collection has a draft status
+      // if a collection has isDraft, status is Draft
+      // check the dar and see if dar is canceled (no elections), status is Canceled otherwise Unreviewed
+      if (isEmpty(filteredElections)) {
+        // iterate through dars
+        const isCanceled = every(dar => toLower(dar.data.status) === 'canceled')(collection.dars);
+        if (isCanceled) {
+          collection.status = 'Canceled';
+        } else {
+          collection.status = 'Unreviewed';
+        }
+      } else {
+        // (filteredElections is not empty/null)
+        // PROCESSING ELECTIONS (after iterating through elections, incrementing counts
+        // if the elections are closed/final/canceled (anything not open)
+        // should check the number of elections = the number of relevant datasets, status is complete
+        // number of elections != the number of relevant datasets, status is In Progress
+        // if there is at least one open election - In Progress
+
+        // collection statuses: In Progress, Complete, Unreviewed, Canceled (researchers only)
+        electionStatusCount['In Progress'] = 0;
+        electionStatusCount['Complete'] = 0;
+        electionStatusCount['Unreviewed'] = 0;
+        electionStatusCount['Canceled'] = 0;
+
+        let output;
+        if(!isEmpty(collection.dars)) {
+          const targetElections = flow([
+            map((dar) => {
+              const { elections } = dar;
+              //election is empty => no elections made for dar
+              //need to figure out if dar is relevant, can obtain datasetId from dar.data
+              //see if its relevant, if it is, add 1 to submitted on hash
+              //return empty array at the end
+              if(isEmpty(elections)) {
+                // Dataset IDs should be on the DAR, but if not, pull from the dar.data
+                const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
+                forEach((datasetId) => {
+                  if (includes(relevantDatasets, datasetId)) {
+                    if (isNil(electionStatusCount['Submitted'])) {
+                      electionStatusCount['Submitted'] = 0;
+                    }
+                    electionStatusCount['Submitted']++;
+                  }
+                })(datasetIds);
+                return [];
+              } else {
+                //if elections exist, filter out elections based on relevant ids
+                //only Data Access elections impact the status of the collection
+                //NOTE: Admin does not have relevantIds, DAC roles do
+                const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
+                if(isNil(relevantDatasets)) {
+                  return electionArr;
+                } else {
+                  const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
+                  return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
+                }
+              }
+            }),
+            flatten
+          ])(collection.dars);
+
+          if(isNil(relevantDatasets)) {
+            each(election => {
+              const {status} = election;
+              if(isNil(electionStatusCount[status])) {
+                electionStatusCount[status] = 0;
+              }
+              electionStatusCount[status]++;
+            })(targetElections);
+            output = nonFPMap(electionStatusCount, (value, key) => {
+              return `${key}: ${value}`;
+            }).join('\n');
+          } else {
+            output = outputCommaSeperatedElectionStatuses(targetElections);
+          }
+          return output;
+        }
+
+      }
+
+
+    // after processing elections
+    // In progress (a DAR is open but not all Data Use buckets have a final/chair vote),
+    // Complete (a DAR has final/chair votes on all Data Use buckets).
+
+
+
+
+    // none of the dars have an election, hash should have no elections
+    // need to ignore RP elections, only look at Data Access elections
+    electionStatusCount['Dataset Count'] = 0;
+    electionStatusCount['Data Access '] = 0;
+
+    // example: DAR has two datasets - one has an election, the other does not
+    // if there is at least one open election, "In Progress"
+    electionStatusCount['In Progress']++;
+
+////////// additional notes
+
+
+    // the following statuses are for researchers only
+    // Need to look at the DAR itself
+    // two types of canceled: Researcher canceled / chairperson or admin canceled (elections are not opened)
+    // admin/chair canceled -> Complete
+    electionStatusCount['Canceled'] = 0;
+    // check isDraft key on the collection is true, no need to tally counts, immediately assign status to Draft
+    electionStatusCount['Draft'] = 0;
+    let output;
+    if(!isEmpty(collection.dars)) {
+      const targetElections = flow([
+        map((dar) => {
+          const { elections } = dar;
+          //election is empty => no elections made for dar
+          //need to figure out if dar is relevant, can obtain datasetId from dar.data
+          //see if its relevant, if it is, add 1 to submitted on hash
+          //return empty array at the end
+          if(isEmpty(elections)) {
+            const datasetId = (isEmpty(dar.data) || isEmpty(dar.data.datasetIds)) ? -1 : dar.data.datasetIds[0];
+            if(includes(relevantDatasets, datasetId)) {
+              // Unreviewed (when a DAR is submitted but no election has been created; only visible to Admins and Chairs),
+              electionStatusCount['In Progress']++;
+            }
+            return [];
+          } else {
+            //if elections exist, filter out elections based on relevant ids
+            //only Data Access elections impact the status of the collection
+            //NOTE: Admin does not have relevantIds, DAC roles do
+            const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
+            if(isNil(relevantDatasets)) {
+              return electionArr;
+              toLower(processElectionStatus(election, votes))
             } else {
               const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
               return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
@@ -561,7 +739,8 @@ export const getSearchFilterFunctions = () => {
           createDate = formatDate(collection.createDate);
           const { darCode, isDraft, createUser } = collection;
           const researcherName = get('displayName')(createUser);
-          const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
+          // const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
+          const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatusNew(collection)) || '';
           const matched = find((phrase) => {
             const termArr = lowerCaseTerm.split(' ');
             return find(term => includes(term, phrase))(termArr);
