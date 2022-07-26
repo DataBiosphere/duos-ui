@@ -6,41 +6,41 @@ import ResearcherActions from '../../../src/components/dar_collection_table/Rese
 
 
 const draftDarColl = {
-  "darCollectionId": null,
-  "referenceIds": [
+  'darCollectionId': null,
+  'referenceIds': [
     '0a4jn-g838d-bsdg8-6s7fs7',
   ],
-  "darCode": "DRAFT-023",
-  "name": null,
-  "submissionDate": "2022-07-26",
-  "researcherName": null,
-  "institutionName": null,
-  "status": "Draft",
-  "actions": [
-    "Resume",
+  'darCode': "DRAFT-023",
+  'name': null,
+  'submissionDate': "2022-07-26",
+  'researcherName': null,
+  'institutionName': null,
+  'status': "Draft",
+  'actions': [
+    'Resume',
   ],
   "hasVoted": false,
-  "datasetCount": 10
+  'datasetCount': 10
 }
 
 const darColl = {
-  "darCollectionId": 2345,
+  'darCollectionId': 2345,
   "referenceIds": [
     '4a3fd-g77fd-2f345-4h2g31',
     '0a4jn-g838d-bsdg8-6s7fs7',
   ],
-  "darCode": "DAR-9583",
-  "name": "Example DAR 1",
+  'darCode': "DAR-9583",
+  'name': "Example DAR 1",
   "submissionDate": "2022-07-26",
-  "researcherName": "John Doe",
-  "institutionName": "Broad Institute",
+  'researcherName': "John Doe",
+  'institutionName': "Broad Institute",
   "status": "Draft",
   "actions": [
-    "Review",
-    "Cancel",
+    'Review',
+    'Cancel',
   ],
   "hasVoted": false,
-  "datasetCount": 4
+  'datasetCount': 4
 }
 
 let props;
