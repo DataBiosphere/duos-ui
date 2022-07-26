@@ -63,7 +63,6 @@ export default function SigningOfficialDarRequests() {
           isLoading,
           cancelCollection: null,
           reviseCollection: null,
-          actionsDisabled: true,
           consoleType: consoleTypes.SIGNING_OFFICIAL
         }, [])
       ])
