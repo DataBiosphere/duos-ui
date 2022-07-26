@@ -18,8 +18,8 @@ const redirectToDARApplication = (darCollectionId, history) => {
 };
 
 //redirect function on DAR draft to resume DAR application
-const resumeDARApplication = (darCollectionId, history) => {
-  history.push(`/dar_application/${darCollectionId}`);
+const resumeDARApplication = (referenceId, history) => {
+  history.push(`/dar_application/${referenceId}`);
 };
 
 /*
