@@ -3,7 +3,7 @@ import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {Component} from 'react';
 import {button, div, form, h, hh, input, label} from 'react-hyperscript-helpers';
 import {Institution, User} from '../libs/ajax';
-import {USER_ROLES} from '../libs/utils';
+import {Notifications, USER_ROLES} from '../libs/utils';
 import {ResearcherReview} from '../components/ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from '../components/PageHeading';
@@ -71,13 +71,14 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
       emailPreference: this.state.emailPreference,
       institutionId: this.state.institutionId
     };
-    const updatedUser = await User.update(user, userId);
-    await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
 
-    this.setState({
-      user: Object.assign({}, updatedUser),
-      displayNameValid: this.nameRef.current.validity.valid
-    });
+    try {
+      await User.update(user, userId);
+      await this.updateRolesIfDifferent(userId, this.state.updatedRoles);
+      this.props.history.push('/admin_manage_users');
+    } catch (error) {
+      Notifications.showError({text: 'Error: Failed to update user'});
+    }
   };
 
   updateRolesIfDifferent = async (userId, updatedRoles) => {
@@ -312,6 +313,19 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 ])
               ]),
               div({className: 'col-lg-12 col-xs-12 inline-block'}, [
+                div({
+                  style: {
+                    marginLeft: '40px',
+                  }
+                }, [
+                  button({
+                    id: 'btn_save',
+                    onClick: () => {
+                      this.props.history.push('/admin_manage_users');
+                    },
+                    className: 'f-left btn-primary btn-back',
+                  }, ['Back']),
+                ]),
                 button({
                   id: 'btn_save',
                   onClick: this.OKHandler,
