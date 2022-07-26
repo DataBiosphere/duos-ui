@@ -21,7 +21,7 @@ import AccessReview from './pages/access_review/AccessReview';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import NewResearcherConsole from './pages/NewResearcherConsole';
+import ResearcherConsole from './pages/ResearcherConsole';
 import ResearcherProfile from './pages/ResearcherProfile';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
@@ -40,8 +40,8 @@ import DatasetStatistics from './pages/DatasetStatistics';
 import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from './pages/AdminEditUser';
-import NewChairConsole from './pages/NewChairConsole';
-import NewMemberConsole from './pages/NewMemberConsole';
+import ChairConsole from './pages/ChairConsole';
+import MemberConsole from './pages/MemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 
@@ -72,13 +72,10 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/summary_votes" component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
-    <AuthenticatedRoute path="/researcher_console" component={NewResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
-    <AuthenticatedRoute path="/new_researcher_console" component={NewResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+    <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
-    <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
-    <AuthenticatedRoute path="/chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
-    <AuthenticatedRoute path="/new_member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
-    <AuthenticatedRoute path="/member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
+    <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>
+    <AuthenticatedRoute path="/member_console" component={MemberConsole} props={props} rolesAllowed={[USER_ROLES.member]}/>
     <AuthenticatedRoute path="/dar_vote_review/:collectionId" component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     {/* Order is important for processing links with embedded dataRequestIds */}

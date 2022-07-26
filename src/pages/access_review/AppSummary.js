@@ -8,8 +8,6 @@ import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
 import {isNil, isEmpty} from 'lodash/fp';
-import {findPropertyValue} from '../../libs/utils';
-import {UserProperties} from '../../libs/utils';
 
 const ROOT = {
   fontFamily: 'Arial',
@@ -68,13 +66,6 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
-    const isThePi = findPropertyValue(UserProperties.IS_THE_PI, researcherProfile);
-    const piName = isThePi === true ?
-      researcherProfile.displayName
-      : findPropertyValue(UserProperties.PI_NAME, researcherProfile);
-    const department = findPropertyValue(UserProperties.DEPARTMENT, researcherProfile);
-    const city = findPropertyValue(UserProperties.CITY, researcherProfile);
-    const country = findPropertyValue(UserProperties.COUNTRY, researcherProfile);
     const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
@@ -139,11 +130,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
             researcherProfile: researcherProfile,
             institution: this.state.institution,
             content: {
-              principalInvestigator: piName,
               researcher: researcherProfile.displayName,
-              department,
-              city,
-              country
             },
           })]
         )

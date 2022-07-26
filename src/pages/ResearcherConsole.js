@@ -1,384 +1,224 @@
-import { Component, Fragment } from 'react';
-import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { PageSubHeading } from '../components/PageSubHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { DAR } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { Link } from 'react-router-dom';
-import { Theme } from '../libs/theme';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { div, h, img } from 'react-hyperscript-helpers';
+import {cloneDeep, map, findIndex, isEmpty, flow, concat, uniqBy} from 'lodash/fp';
+import { Styles } from '../libs/theme';
+import { Collections, DAR } from '../libs/ajax';
+import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import accessIcon from '../images/icon_access.png';
-import {find, getOr, isNil} from 'lodash/fp';
-import {formatDate, getColumnSort, USER_ROLES, wasFinalVoteTrue} from '../libs/utils';
+import {Notifications, searchOnFilteredList, getSearchFilterFunctions, formatDate} from '../libs/utils';
+import SearchBar from '../components/SearchBar';
+import { consoleTypes } from '../components/dar_table/DarTableActions';
 
-class ResearcherConsole extends Component {
+const formatDraft = (draft) => {
+  const { data, referenceId, id, createDate } = draft;
+  const {
+    projectTitle,
+    datasets,
+    institution,
+  } = data;
+  const darCode = 'DRAFT_DAR_' + formatDate(createDate);
 
-  darPageCount = 10;
-  partialDarPageCount = 20;
+  const output =  {
+    darCode,
+    referenceId,
+    darCollectionId: id,
+    projectTitle,
+    isDraft: true,
+    createDate: 'Unsubmitted',
+    datasets,
+    institution,
+  };
+  return output;
+};
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      buttonDisabled: false,
-      showModal: false,
-      currentUser: {},
-      dars: [],
-      partialDars: [],
-      darLimit: 5,
-      partialDarLimit: 5,
-      currentDarPage: 1,
-      currentPartialDarPage: 1,
-      showDialogCancelDAR: false,
-      showDialogDeletePDAR: false,
-      alertTitle: undefined
+const filterFn = getSearchFilterFunctions().darCollections;
+
+export default function ResearcherConsole() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [researcherCollections, setResearcherCollections] = useState();
+  const [filteredList, setFilteredList] = useState();
+  const searchRef = useRef('');
+
+  //basic helper to process promises for collections and drafts in init
+  const handlePromise = (promise, targetArray, errorMsg, newError) => {
+    if(promise.status === 'rejected') {
+      errorMsg.push(newError);
+    } else {
+      return concat(targetArray, promise.value);
+    }
+  };
+
+  //callback function passed to search bar to perform filter
+  const handleSearchChange = useCallback(() => searchOnFilteredList(
+    searchRef.current.value,
+    researcherCollections,
+    filterFn,
+    setFilteredList
+  ), [researcherCollections]);
+
+
+  //sequence of init events on component load
+  useEffect(() => {
+    const init = async () => {
+      let errorMsg = [];
+      const promiseReturns = await Promise.allSettled([
+        Collections.getCollectionsForResearcher(),
+        DAR.getDraftDarRequestList()
+      ]);
+      const [fetchedCollections, fetchedDraftsPayload] = promiseReturns;
+      // Need some extra formatting steps for drafts due to different payload format
+      // Workaround for the API returning a cartesian product of draft dars
+      const uniqueFetchedDrafts = uniqBy('dar.id')(fetchedDraftsPayload.value || []);
+      const fetchedDrafts = {
+        status: fetchedDraftsPayload.status,
+        value: flow(
+          map((draftPayload) => draftPayload.dar),
+          map(formatDraft),
+        )(uniqueFetchedDrafts || [])
+      };
+      let collectionArray = [];
+      collectionArray = handlePromise(
+        fetchedCollections,
+        collectionArray,
+        errorMsg,
+        'Failed to fetch Data Access Request Collection'
+      );
+      collectionArray = handlePromise(
+        fetchedDrafts,
+        collectionArray,
+        errorMsg,
+        'Failed to fetch Data Access Request Drafts'
+      );
+      if(!isEmpty(errorMsg)) {
+        Notifications.showError({text: errorMsg.join('\n')});
+      }
+      setResearcherCollections(collectionArray);
+      setFilteredList(collectionArray);
+      setIsLoading(false);
     };
-  }
+    init();
+  }, []);
 
-  handleDarPageChange = page => {
-    this.setState(prev => {
-      prev.currentDarPage = page;
-      return prev;
-    });
-  };
+  //sequence of events when data is updated (perform new filter based on search query)
+  useEffect(() => {
+    searchOnFilteredList(
+      searchRef.current.value,
+      researcherCollections,
+      filterFn,
+      setFilteredList
+    );
+  }, [researcherCollections]);
 
-  handlePartialDarPageChange = page => {
-    this.setState(prev => {
-      prev.currentPartialDarPage = page;
-      return prev;
-    });
-  };
-
-  handleDarSizeChange = size => {
-    this.setState(prev => {
-      prev.darLimit = size;
-      return prev;
-    });
-  };
-
-  handlePartialDarSizeChange = size => {
-    this.setState(prev => {
-      prev.partialDarLimit = size;
-      return prev;
-    });
-  };
-
-  sortDars = getColumnSort(() => { return this.state ? this.state.dars: []; }, (sortedData, descendantOrder) => {
-    this.setState(prev => {
-      prev.dars = sortedData;
-      prev.darDescOrder = !descendantOrder;
-      return prev;
-    });
-  });
-
-  sortPartials = getColumnSort(() => { return this.state ? this.state.partialDars: []; }, (sortedData, descendantOrder) => {
-    this.setState(prev => {
-      prev.partialDars = sortedData;
-      prev.partialDescOrder = !descendantOrder;
-      return prev;
-    });
-  });
-
-  cancelDar = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
-  };
-
-  deletePartialDar = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
-
-  };
-
-  dialogHandlerCancelDAR = (answer) => () => {
-    this.setState({ buttonDisabled: true });
-    if (answer === true) {
-      DAR.cancelDar(this.state.dataRequestId).then(() => {
-        this.init();
-      }).catch(() => {
-        this.setState({ alertTitle: 'Sorry, something went wrong when trying to cancel the request. Please try again.', buttonDisabled: false });
+  //cancel collection function, passed to collections table to be used in buttons
+  const cancelCollection = async (darCollection) => {
+    try {
+      const { darCollectionId, darCode } = darCollection;
+      const canceledCollection = await Collections.cancelCollection(darCollectionId);
+      const targetIndex = researcherCollections.findIndex((collection) =>
+        collection.darCollectionId === darCollectionId);
+      if (targetIndex < 0) {
+        throw new Error('Error: Could not find target Data Access Request');
+      }
+      const clonedCollections = cloneDeep(researcherCollections);
+      clonedCollections[targetIndex] = canceledCollection;
+      setResearcherCollections(clonedCollections);
+      Notifications.showSuccess({text: `Deleted Data Access Request ${darCode}`});
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error: Cannot cancel target Data Access Request'
       });
-    } else {
-      this.setState({ showDialogCancelDAR: false, buttonDisabled: false, alertTitle: undefined });
     }
   };
 
-  dialogHandlerDeletePDAR = (answer) => () => {
-    this.setState({ buttonDisabled: true });
-    if (answer === true) {
-      DAR.deleteDar(this.state.dataRequestId).then(() => {
-        this.init();
-      }).catch(() => {
-        this.setState({ alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.', buttonDisabled: false });
+  //revise collection function, passed to collections table to be used in buttons
+  const reviseCollection = async (darCollection) => {
+    try {
+      const { darCollectionId, darCode } = darCollection;
+      const draftCollection = await Collections.reviseCollection(darCollectionId);
+      const targetIndex = researcherCollections.findIndex((collection) =>
+        collection.darCollectionId === darCollectionId);
+      if (targetIndex < 0) {
+        throw new Error('Error: Could not find target Data Access Request');
+      }
+      //remove resubmitted collection from DAR Collection table
+      const clonedCollections = cloneDeep(researcherCollections);
+      clonedCollections[targetIndex] = formatDraft(draftCollection);
+      setResearcherCollections(clonedCollections);
+      Notifications.showSuccess({text: `Revising Data Access Request ${darCode}`});
+    } catch (error) {
+      Notifications.showError({
+        text: 'Error: Cannot revise target Data Access Request'
       });
-    } else {
-      this.setState({ showDialogDeletePDAR: false, buttonDisabled: false, alertTitle: undefined });
     }
   };
 
-  componentDidMount() {
-    let currentUser = Storage.getCurrentUser();
-    this.setState({ currentUser: currentUser });
-    this.init();
-  }
-
-  init() {
-
-    DAR.getDataAccessManageV2(USER_ROLES.researcher).then(
-      dars => {
-        this.setState({
-          dars: dars,
-          showDialogDeletePDAR: false,
-          buttonDisabled: false,
-          showDialogCancelDAR: false,
-          alertTitle: undefined
-        });
+  //Draft delete, passed down to draft table to be used with delete button
+  const deleteDraft = async ({ referenceId, identifier }) => {
+    try {
+      await DAR.deleteDar(referenceId);
+      const collectionsClone = cloneDeep(researcherCollections);
+      const targetIndex = findIndex((draft) => {
+        return draft.referenceId === referenceId;
+      })(collectionsClone);
+      if (targetIndex === -1) {
+        Notifications.showError({ text: 'Error processing delete request' });
+      } else {
+        collectionsClone.splice(targetIndex, 1);
+        setResearcherCollections(collectionsClone);
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
       }
-    );
+    } catch (error) {
+      Notifications.showError({
+        text: `Failed to delete Data Access Request Draft ${identifier}`,
+      });
+    }
 
-    DAR.getDraftDarRequestList().then(
-      pdars => {
-        this.setState({
-          partialDars: pdars,
-          showDialogDeletePDAR: false,
-          buttonDisabled: false,
-          showDialogCancelDAR: false,
-          alertTitle: undefined
-        });
-      }
-    );
-  }
+  };
 
-  render() {
-
-    const { currentUser, currentDarPage, darLimit, currentPartialDarPage, partialDarLimit } = this.state;
-
-    return (
-      div({ className: 'container' }, [
-        div({ className: 'row no-margin' }, [
-          div({ className: 'col-xs-12 no-padding' }, [
-            PageHeading({
-              id: 'researcherConsole',
-              color: 'common',
-              title: 'Welcome to your Researcher Console, ' + currentUser.displayName + '!',
-              description: 'Your Data Access Requests are below'
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', margin: '0px -3%' } }, [
+      div(
+        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
+        [
+          div({ style: Styles.ICON_CONTAINER }, [
+            img({
+              id: 'access-icon',
+              src: accessIcon,
+              style: Styles.HEADER_IMG,
             }),
-            hr({ className: 'section-separator' }),
           ]),
-
-          div({ className: 'col-xs-12 no-padding' }, [
-            div({ className: 'row no-margin' }, [
-              div({ className: 'col-md-9 col-sm-8 col-xs-12 no-padding' }, [
-                PageSubHeading({
-                  id: 'researcherConsoleAccess',
-                  imgSrc: accessIcon,
-                  color: 'access',
-                  title: 'Your Data Access Requests',
-                  description: 'List of your Data Access Requests'
+          div({ style: Styles.HEADER_CONTAINER }, [
+            div({ style: Styles.TITLE }, ['My Data Access Requests']),
+            div(
+              {
+                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+                  fontSize: '18px',
                 }),
-              ]),
-
-              h(Link, {
-                id: 'btn_createRequest',
-                className: 'col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper', to: '/dar_application'
-              }, [
-                div({ className: 'all-icons add-access_white' }, []),
-                span({}, ['Create Data Access Request']),
-              ]),
-            ]),
-
-            div({ style: Theme.lightTable }, [
-              div({ className: 'row no-margin' }, [
-                div({ style: Theme.textTableHead, className: 'col-xs-2 cell-sort access-color', onClick: this.sortDars({
-                  sortKey: 'dar.data.darCode',
-                  descendantOrder: this.state.darDescOrder
-                }) }, [
-                  'DAR ID',
-                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                ]),
-                div({ style: Theme.textTableHead, className: 'col-xs-4 cell-sort access-color', onClick: this.sortDars({
-                  sortKey: 'dar.data.projectTitle',
-                  descendantOrder: this.state.darDescOrder
-                }) }, [
-                  'Title',
-                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                ]),
-                div({ style: Theme.textTableHead, className: 'col-xs-2 cell-sort access-color', onClick: this.sortDars({
-                  sortKey: 'dar.createDate',
-                  descendantOrder: this.state.darDescOrder
-                }) }, [
-                  'Date',
-                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                ]),
-                div({ style: Theme.textTableHead, className: 'col-xs-2 cell-sort f-center access-color'}, ['Status']),
-                div({ style: Theme.textTableHead, className: 'col-xs-1 f-center access-color' }, ['Cancel']),
-                div({ style: Theme.textTableHead, className: 'col-xs-1 f-center access-color' }, ['Review']),
-              ]),
-              hr({ className: 'table-head-separator' }),
-
-              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((darInfo, idx) => {
-                const opened = !isNil(darInfo.election);
-                // Look for any FINAL votes with a `true` value. Legacy default
-                // value was `election.finalAccessVote`, so fall back to that if
-                // we don't have any votes.
-                const finalAccessVoteValue = getOr(false)('finalAccessVote')(darInfo.election);
-                // This uses the same logic we use in the chair/admin console
-                const finalVote = isNil(darInfo.votes) ? null : find(wasFinalVoteTrue)(darInfo.votes);
-                const finalVoteValue = isNil(finalVote) ? finalAccessVoteValue : finalVote.vote;
-                //if the dar was canceled by an admin or chair the canceled status will be on the election
-                //if the researcher canceled the dar the canceled status will be on the dar data
-                const canceled =
-                !isNil(darInfo.dar.data.status) ?
-                  darInfo.dar.data.status === 'Canceled'
-                  : opened ?
-                    darInfo.election.status === 'Canceled'
-                    : false;
-                return h(Fragment, { key: darInfo.dar.darCode + '_' + idx}, [
-                  div({ key: darInfo.dar.data.darCode, id: darInfo.dar.data.darCode, className: 'row no-margin tableRow' }, [
-                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_darId', name: 'darId', className: 'col-xs-2' }, [darInfo.dar.data.darCode]),
-                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_projectTitle', name: 'projectTitle', className: 'col-xs-4' }, [darInfo.dar.data.projectTitle]),
-                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_createDate', name: 'createDate', className: 'col-xs-2' }, [formatDate(darInfo.dar.createDate)]),
-                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + '_electionStatus', name: 'electionStatus', className: 'col-xs-2 bold f-center' }, [
-                      span({ isRendered: !opened && !canceled}, ['Submitted']),
-                      span({ isRendered: opened && !canceled ? darInfo.election.status === 'Open' || darInfo.election.status === 'Final' || darInfo.election.status === 'PendingApproval' : false}, ['In review']),
-                      span({ isRendered: canceled }, ['Canceled']),
-                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && finalVoteValue === false : false}, ['Denied']),
-                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && finalVoteValue === true : false}, ['Approved']),
-                    ]),
-                    div({ className: 'col-xs-1 cell-body f-center' }, [
-                      button({
-                        isRendered: !opened && !canceled,
-                        id: darInfo.dar.data.darCode + '_btnCancel',
-                        name: 'btn_cancel',
-                        className: 'cell-button cancel-color',
-                        onClick: this.cancelDar,
-                        value: darInfo.dar.referenceId
-                      }, ['Cancel'])
-                    ]),
-                    div({ className: 'col-xs-1 cell-body f-center' }, [
-                      button({
-                        id: darInfo.dar.data.darCode + '_btnReview', name: 'btn_review', className: 'cell-button hover-color'
-                      }, [h(Link, {
-                        to: 'dar_application/' + darInfo.dar.referenceId,
-                      }, ['Review'])]),
-                    ])
-                  ]),
-                  hr({ className: 'table-body-separator' })
-                ]);
-              }),
-              PaginatorBar({
-                name: 'dar',
-                total: this.state.dars.length,
-                limit: darLimit,
-                pageCount: this.darPageCount,
-                currentPage: currentDarPage,
-                onPageChange: this.handleDarPageChange,
-                changeHandler: this.handleDarSizeChange,
-              }),
-            ]),
-            div({ isRendered: ResearcherConsole.partialDars !== 0, className: 'row no-margin' }, [
-              PageSubHeading({
-                id: 'researcherConsoleSavedAccess',
-                color: 'access',
-                iconSize: 'none',
-                title: 'Saved Data Access Requests'
-              }),
-              div({ style: Theme.lightTable }, [
-                div({ className: 'row no-margin' }, [
-                  div({ style: Theme.textTableHead, className: 'col-xs-2 col-xs-offset-1 cell-sort access-color', onClick: this.sortPartials({
-                    sortKey: 'partialDarCode',
-                    descendantOrder: this.state.partialDescOrder
-                  }) }, [
-                    'Temporary ID',
-                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                  ]),
-                  div({ style: Theme.textTableHead, className: 'col-xs-5 cell-sort access-color', onClick: this.sortPartials({
-                    sortKey: 'projectTitle',
-                    descendantOrder: this.state.partialDescOrder
-                  }) }, [
-                    'Title',
-                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                  ]),
-                  div({ style: Theme.textTableHead, className: 'col-xs-2 cell-sort access-color', onClick: this.sortPartials({
-                    sortKey: 'createDate',
-                    descendantOrder: this.state.partialDescOrder
-                  }) }, [
-                    'Date',
-                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                  ]),
-                  div({ style: Theme.textTableHead, className: 'col-xs-2 f-center access-color' }, ['Resume']),
-                ]),
-                hr({ className: 'table-head-separator' }),
-
-                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, idx) => {
-                  const formattedCreateDate = formatDate(pdar.dar.createDate);
-                  const partialDarCode = 'DRAFT_DAR_' + formattedCreateDate;
-                  return h(Fragment, { key: partialDarCode + '_' + idx }, [
-                    div({ key: partialDarCode, id: partialDarCode, className: 'row no-margin tableRowPartial' }, [
-                      a({
-                        id: partialDarCode + '_btnDelete',
-                        name: 'btn_delete',
-                        className: 'col-xs-1 cell-body delete-dar default-color',
-                        onClick: this.deletePartialDar,
-                        value: pdar.dar.referenceId
-                      }, [
-                        span({ className: 'cm-icon-button glyphicon glyphicon-trash caret-margin', 'aria-hidden': 'true', value: pdar.dar.referenceId }),
-                      ]),
-
-                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialId', name: 'partialId', className: 'col-xs-2' }, [partialDarCode]),
-                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialTitle', name: 'partialTitle', className: 'col-xs-5' }, [pdar.dar.data.projectTitle]),
-                      div({ style: Theme.textTableBody, id: partialDarCode + '_partialDate', name: 'partialDate', className: 'col-xs-2' }, [formattedCreateDate]),
-                      div({className: 'col-xs-2 cell-body f-center' }, [
-                        button({
-                          id: partialDarCode + '_btnResume',
-                          name: 'btn_resume',
-                          className: 'cell-button hover-color',
-                        }, [
-                          h(Link, {
-                            to: 'dar_application/' + pdar.dar.data.referenceId,
-                          }, ['Resume'])],
-                        ),
-                      ]),
-                    ]),
-                    hr({ className: 'table-body-separator' })
-                  ]);
-                }),
-                PaginatorBar({
-                  name: 'partialDar',
-                  total: this.state.partialDars.length,
-                  limit: partialDarLimit,
-                  pageCount: this.partialDarPageCount,
-                  currentPage: currentPartialDarPage,
-                  onPageChange: this.handlePartialDarPageChange,
-                  changeHandler: this.handlePartialDarSizeChange,
-                }),
-              ]),
-            ]),
+              },
+              [`Select and manage Data Access Requests and Drafts below`]
+            ),
           ]),
-        ]),
-        ConfirmationDialog({
-          title: 'Cancel saved Request?',
-          color: 'cancel',
-          isRendered: this.state.showDialogCancelDAR,
-          showModal: this.state.showDialogCancelDAR,
-          disableOkBtn: this.state.buttonDisabled,
-          action: { label: 'Yes', handler: this.dialogHandlerCancelDAR }
-        }, [div({ className: 'dialog-description' }, ['Are you sure you want to cancel this Data Access Request?']),]),
-
-        ConfirmationDialog({
-          title: 'Delete saved Request?',
-          color: 'cancel',
-          isRendered: this.state.showDialogDeletePDAR,
-          showModal: this.state.showDialogDeletePDAR,
-          disableOkBtn: this.state.buttonDisabled,
-          action: { label: 'Yes', handler: this.dialogHandlerDeletePDAR },
-          alertTitle: this.state.alertTitle,
-        }, [div({ className: 'dialog-description' }, ['Are you sure you want to delete this Data Access Request?']),])
-
-      ])
-
-    );
-  }
+        ]
+      ),
+      h(SearchBar, { handleSearchChange, searchRef }),
+    ]),
+    div({ className: 'table-container' }, [
+      h(DarCollectionTable, {
+        collections: filteredList,
+        columns: [
+          DarCollectionTableColumnOptions.DAR_CODE,
+          DarCollectionTableColumnOptions.NAME,
+          DarCollectionTableColumnOptions.SUBMISSION_DATE,
+          DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.STATUS,
+          DarCollectionTableColumnOptions.ACTIONS,
+        ],
+        isLoading,
+        cancelCollection,
+        reviseCollection,
+        deleteDraft,
+        consoleType: consoleTypes.RESEARCHER,
+      })
+    ]),
+  ]);
 }
-
-export default ResearcherConsole;
