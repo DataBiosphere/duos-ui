@@ -19,7 +19,7 @@ const draftDarColl = {
   'actions': [
     'Resume',
   ],
-  "hasVoted": false,
+  'hasVoted': false,
   'datasetCount': 10
 }
 
