@@ -313,6 +313,19 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
                 ])
               ]),
               div({className: 'col-lg-12 col-xs-12 inline-block'}, [
+                div({
+                  style: {
+                    marginLeft: '40px',
+                  }
+                }, [
+                  button({
+                    id: 'btn_save',
+                    onClick: () => {
+                      this.props.history.push('/admin_manage_users');
+                    },
+                    className: 'f-left btn-primary btn-back',
+                  }, ['Back']),
+                ]),
                 button({
                   id: 'btn_save',
                   onClick: this.OKHandler,
