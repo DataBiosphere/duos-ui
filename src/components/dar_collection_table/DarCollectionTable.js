@@ -233,9 +233,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     });
   }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets/*, resumeCollection, reviewCollection*/]);
 
-  const showConfirmationModal = (collection, action = '') => {
+  const showConfirmationModal = (collectionSummary, action = '') => {
     setConsoleAction(action);
-    setSelectedCollection(collection);
+    setSelectedCollection(collectionSummary);
     setShowConfirmation(true);
   };
 
