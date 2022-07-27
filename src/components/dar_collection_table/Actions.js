@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles } from '../../libs/theme';
