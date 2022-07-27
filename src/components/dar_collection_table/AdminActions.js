@@ -1,13 +1,8 @@
-import { useState, useEffect } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import SimpleButton from '../SimpleButton';
 import { Styles, Theme } from '../../libs/theme';
 import { Block } from '@material-ui/icons';
-import {
-  checkIfOpenableElectionPresent,
-  checkIfCancelableElectionPresent,
-} from '../../utils/DarCollectionUtils';
 
 const hoverCancelButtonStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER;
 const baseCancelButtonStyle = Object.assign(
@@ -34,17 +29,8 @@ export default function AdminActions(props) {
 
   const { collection, showConfirmationModal } = props;
   const collectionId = collection.darCollectionId;
-  const [openEnabled, setOpenEnabled] = useState(false);
-  const [cancelEnabled, setCancelEnabled] = useState(false);
-
-  useEffect(() => {
-    const { dars } = collection;
-    const isCancelable = checkIfCancelableElectionPresent(dars);
-    const isOpenable = checkIfOpenableElectionPresent(dars);
-
-    setOpenEnabled(isOpenable);
-    setCancelEnabled(isCancelable);
-  }, [collection]);
+  const openEnabled = collection.actions.includes('Open');
+  const cancelEnabled = collection.actions.includes('Cancel');
 
   const openOnClick = async (collection) => {
     showConfirmationModal(collection, 'open');
