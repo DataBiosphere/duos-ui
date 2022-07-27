@@ -26,7 +26,7 @@ export default function AdminManageDarCollections() {
   useEffect(() => {
     const init = async() => {
       try {
-        const collectionsResp = await Collections.getCollectionsByRoleName('admin');
+        const collectionsResp = await Collections.getCollectionSummariesByRoleName('admin');
         setCollections(collectionsResp);
         setFilteredList(collectionsResp);
         setIsLoading(false);
