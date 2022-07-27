@@ -98,7 +98,7 @@ export default function Actions(props) {
 
   return div(
     {
-      className: '${consoleType}-actions',
+      className: `${consoleType}-actions`,
       key: `${consoleType}-actions-${collectionId}`,
       id: `${consoleType}-actions-${collectionId}`,
       style: {
