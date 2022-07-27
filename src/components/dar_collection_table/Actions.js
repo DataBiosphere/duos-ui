@@ -16,7 +16,7 @@ const baseCancelButtonStyle = Object.assign(
 );
 
 export default function Actions(props) {
-  const { showConfirmationModal, collection, goToVote, consoleType, actions } = props;
+  const { showConfirmationModal, collection, goToVote, consoleType, actions = [] } = props;
   const collectionId = collection.darCollectionId;
 
   const openOnClick = async (collection) => {
