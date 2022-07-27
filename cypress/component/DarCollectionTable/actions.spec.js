@@ -39,7 +39,7 @@ beforeEach(() => {
   cy.stub(Storage, 'getCurrentUser').returns(user);
 });
 
-describe('Chair Actions - Container', () => {
+describe('Actions - Container', () => {
   it('renders the actions container div', () => {
     mount(<Actions {...propCopy}/>);
     const container = cy.get('.chair-actions');
@@ -47,7 +47,7 @@ describe('Chair Actions - Container', () => {
   });
 });
 
-describe('Chair Actions - Open Button', () => {
+describe('Actions - Open Button', () => {
   it('should render the open button if there is a an Open Action', () => {
     propCopy.actions = ['Open'];
     mount(<Actions {...propCopy} />);
@@ -55,7 +55,7 @@ describe('Chair Actions - Open Button', () => {
     openButton.should('exist');
   });
 
-  it('should not render if there is no valid election for opening/re-opening', () => {
+  it('should not render Open Button if there is no valid election for opening/re-opening', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
     const openButton = cy.get(`#chair-open-${collectionId}`);
@@ -63,7 +63,7 @@ describe('Chair Actions - Open Button', () => {
   });
 });
 
-describe('Chair Actions - Close Button', () => {
+describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
     propCopy.actions = ['Cancel'];
     mount(<Actions {...propCopy} />);
@@ -79,7 +79,7 @@ describe('Chair Actions - Close Button', () => {
   });
 });
 
-describe('Chair Actions - Vote Button', () => {
+describe('Actions - Vote Button', () => {
   it('should not render if relevant elections are not votable', () => {
     propCopy.actions = [];
     mount(<Actions {...propCopy} />);
@@ -94,5 +94,18 @@ describe('Chair Actions - Vote Button', () => {
   });
 });
 
-
+describe('Actions - Update Button', () => {
+  it('should not render if relevant elections are not votable', () => {
+    propCopy.actions = [];
+    mount(<Actions {...propCopy} />);
+    const voteButton = cy.get(`#chair-update-${collectionId}`);
+    voteButton.should('not.exist');
+  });
+  it('should render if all relevant elections are votable', () => {
+    propCopy.actions = ['Update'];
+    mount(<Actions {...propCopy} />);
+    const voteButton = cy.get(`#chair-update-${collectionId}`);
+    voteButton.should('exist');
+  });
+});
 
