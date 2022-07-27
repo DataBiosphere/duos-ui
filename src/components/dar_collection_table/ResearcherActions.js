@@ -105,7 +105,6 @@ export default function ResearcherActions(props) {
     fontColor: 'white',
     hoverStyle: hoverPrimaryButtonStyle,
     additionalStyle: {
-      width: '37%',
       padding: '3%',
       marginRight: '2%',
       fontSize: '1.45rem',
