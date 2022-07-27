@@ -6,21 +6,21 @@ import AdminActions from '../../../src/components/dar_collection_table/AdminActi
 
 const darColl = {
   'darCollectionId': 2345,
-  "referenceIds": [
+  'referenceIds': [
     '4a3fd-g77fd-2f345-4h2g31',
     '0a4jn-g838d-bsdg8-6s7fs7',
   ],
   'darCode': "DAR-9583",
-  'name': "Example DAR 1",
-  "submissionDate": "2022-07-26",
-  'researcherName': "John Doe",
-  'institutionName': "Broad Institute",
+  'name': 'Example DAR 1',
+  'submissionDate': "2022-07-26",
+  'researcherName': 'John Doe',
+  'institutionName': 'Broad Institute',
   "status": "Draft",
-  "actions": [
+  'actions': [
     'Review',
     'Cancel',
   ],
-  "hasVoted": false,
+  'hasVoted': false,
   'datasetCount': 4
 }
 
