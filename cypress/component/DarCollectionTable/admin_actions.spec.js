@@ -12,7 +12,7 @@ const darColl = {
   ],
   'darCode': "DAR-9583",
   'name': 'Example DAR 1',
-  'submissionDate': "2022-07-26",
+  'submissionDate': '2022-07-26',
   'researcherName': 'John Doe',
   'institutionName': 'Broad Institute',
   "status": "Draft",
