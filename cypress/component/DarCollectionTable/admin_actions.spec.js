@@ -22,7 +22,7 @@ const darColl = {
   ],
   'hasVoted': false,
   'datasetCount': 4
-}
+};
 
 let props;
 
