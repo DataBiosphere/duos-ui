@@ -33,7 +33,7 @@ const formatDraft = (draft) => {
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
-export default function NewResearcherConsole() {
+export default function ResearcherConsole() {
   const [isLoading, setIsLoading] = useState(true);
   const [researcherCollections, setResearcherCollections] = useState();
   const [filteredList, setFilteredList] = useState();
