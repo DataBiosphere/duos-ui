@@ -27,7 +27,7 @@ export default function MemberConsole(props) {
     const init = async () => {
       try {
         const [collections, datasets] = await Promise.all([
-          Collections.getCollectionsByRoleName('member'),
+          Collections.getCollectionSummariesByRoleName('member'),
           User.getUserRelevantDatasets(), //still need this on this console for status cell
         ]);
         setCollections(collections);

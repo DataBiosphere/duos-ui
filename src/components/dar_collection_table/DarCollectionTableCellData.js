@@ -2,9 +2,8 @@ import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
 import {h} from 'react-hyperscript-helpers';
 import {styles} from './DarCollectionTable';
+import Actions from './Actions';
 import AdminActions from './AdminActions';
-import ChairActions from './ChairActions';
-import MemberActions from './MemberActions';
 import ResearcherActions from './ResearcherActions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
@@ -133,29 +132,15 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, relevantDatasets, resumeCollection, actions}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions}) {
   let actionComponent;
 
-  switch (consoleType) {
-    case consoleTypes.ADMIN:
-      actionComponent = h(AdminActions, {collection, showConfirmationModal});
-      break;
-    case consoleTypes.CHAIR:
-      actionComponent = h(ChairActions, {
-        collection, showConfirmationModal, goToVote, relevantDatasets,
-        openEnabled: actions.includes('Open'),
-        cancelEnabled: actions.includes('Cancel'),
-        voteEnabled: actions.includes('Vote')
-      });
-      break;
-    case consoleTypes.MEMBER:
-      actionComponent = h(MemberActions, {collection, showConfirmationModal, goToVote});
-      break;
-    case consoleTypes.RESEARCHER:
-    default:
-      actionComponent = h(ResearcherActions, {collection, showConfirmationModal, reviewCollection, resumeCollection});
-      break;
-  }
+  actionComponent = h(Actions, {
+    collection, consoleType,
+    showConfirmationModal, goToVote,
+    reviewCollection, resumeCollection,
+    actions
+  });
 
   return {
     isComponent: true,
