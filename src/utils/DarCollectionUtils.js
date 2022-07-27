@@ -59,24 +59,26 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
       buckets[dataUseLabel] = {
         dars: [],
         datasets: [],
-        dataUse: restrictions
+        dataUse: restrictions,
+        elections: []
       };
     }
     buckets[dataUseLabel].datasets.push(datasets[index]);
     datasetBucketMap[dataSetId] = buckets[dataUseLabel];
   });
 
-  forEach((dar) => {
-    forEach((datasetId) => {
-      const targetBucket = datasetBucketMap[datasetId];
-      targetBucket.dars.push(dar);
-    })(dar.datasetIds);
-  })(dars);
+  flow([
+    flatMap((dar) => Object.values(dar.elections)),
+    forEach((election) => {
+      const {dataSetId} = election;
+      datasetBucketMap[dataSetId].elections.push(election);
+    })
+  ])(dars);
   return buckets;
 };
 
 //Helper function for processDataUseBuckets, essentilly organizes votes in a dar's elections by type
-const processVotesForBucket = (darElections) => {
+const processVotesForBucket = (darElections = []) => {
   const rp =  {
     chairpersonVotes: [],
     memberVotes : [],
@@ -122,7 +124,7 @@ const processVotesForBucket = (darElections) => {
       }
     })(dateSortedVotes);
   });
-  return { rp, dataAccess };
+  return [{ rp, dataAccess }];
 };
 
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
@@ -131,16 +133,10 @@ export const processDataUseBuckets = async(buckets) => {
 
   //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
-    const { dars, dataUse, datasets } = bucket;
-    const elections = flow([
-      map((dar) => Object.values(dar.elections)),
-    ])(dars);
-    //votes indexing lines up with dar indexing
-    const votes = map(processVotesForBucket)(elections);
-
+    const { dataUse, datasets, elections } = bucket;
+    const votes = processVotesForBucket(elections);
     const dataUses = filter(dataUseDescription => !isEmpty(dataUseDescription))(dataUse);
-
-    return { key, dars, elections, votes, dataUses, datasets };
+    return { key, elections, votes, dataUses, datasets };
   })(buckets);
 
   //Process custom RP Vote bucket for VoteSummary
