@@ -67,11 +67,17 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
     datasetBucketMap[dataSetId] = buckets[dataUseLabel];
   });
 
+  const datasetElectionMap = {};
+
   flow([
     flatMap((dar) => Object.values(dar.elections)),
     forEach((election) => {
       const {dataSetId} = election;
-      datasetBucketMap[dataSetId].elections.push(election);
+      if(isNil(datasetElectionMap[dataSetId])) {
+        datasetElectionMap[dataSetId] = [];
+        datasetBucketMap[dataSetId].elections.push(datasetElectionMap[dataSetId]);
+      }
+      datasetElectionMap[dataSetId].push(election);
     })
   ])(dars);
   return buckets;
@@ -90,7 +96,6 @@ const processVotesForBucket = (darElections = []) => {
     chairpersonVotes: [],
     agreementVotes: []
   };
-
   darElections.forEach((election) => {
     const {electionType, votes = []} = election;
     let dateSortedVotes = sortBy((vote) => vote.updateDate)(votes);
@@ -124,7 +129,7 @@ const processVotesForBucket = (darElections = []) => {
       }
     })(dateSortedVotes);
   });
-  return [{ rp, dataAccess }];
+  return { rp, dataAccess };
 };
 
 //Follow up step to generatePreProcessedBucketData, function process formatted data for consumption within components
@@ -134,7 +139,7 @@ export const processDataUseBuckets = async(buckets) => {
   //convert alters the lodash/fp map definition by uncapping the function arguments, allowing access to index
   const processedBuckets = map.convert({cap:false})((bucket, key) => {
     const { dataUse, datasets, elections } = bucket;
-    const votes = processVotesForBucket(elections);
+    const votes = map(processVotesForBucket)(elections);
     const dataUses = filter(dataUseDescription => !isEmpty(dataUseDescription))(dataUse);
     return { key, elections, votes, dataUses, datasets };
   })(buckets);
