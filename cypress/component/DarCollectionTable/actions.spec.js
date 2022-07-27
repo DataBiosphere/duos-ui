@@ -41,8 +41,6 @@ beforeEach(() => {
 
 describe('Chair Actions - Container', () => {
   it('renders the actions container div', () => {
-    propCopy.collection.dars = votableDars;
-    propCopy.relevantDatasets = [];
     mount(<Actions {...propCopy}/>);
     const container = cy.get('.chair-actions');
     container.should('exist');
@@ -51,7 +49,6 @@ describe('Chair Actions - Container', () => {
 
 describe('Chair Actions - Open Button', () => {
   it('should render the open button if there is a an Open Action', () => {
-    propCopy.collection.dars = nonOpenDars;
     propCopy.actions = ['Open'];
     mount(<Actions {...propCopy} />);
     const openButton = cy.get(`#chair-open-${collectionId}`);
