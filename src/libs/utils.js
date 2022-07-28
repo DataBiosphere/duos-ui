@@ -780,6 +780,7 @@ export const recalculateVisibleTable = async ({
     );
     setVisibleList(visibleList);
   } catch (error) {
+    console.log(error);
     Notifications.showError({ text: 'Error updating table' });
   }
 };
