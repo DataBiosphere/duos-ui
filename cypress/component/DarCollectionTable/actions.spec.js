@@ -11,41 +11,41 @@ const collectionId = 1;
 
 const darColl = {
   'darCollectionId': collectionId,
-  "referenceIds": [
+  'referenceIds': [
     '4a3fd-g77fd-2f345-4h2g31',
     '0a4jn-g838d-bsdg8-6s7fs7',
   ],
-  'darCode': "DAR-9583",
-  'name': "Example DAR 1",
-  "submissionDate": "2022-07-26",
-  'researcherName': "John Doe",
-  'institutionName': "Broad Institute",
-  "status": "Draft",
-  "actions": [
+  'darCode': 'DAR-9583',
+  'name': 'Example DAR 1',
+  'submissionDate': '2022-07-26',
+  'researcherName': 'John Doe',
+  'institutionName': 'Broad Institute',
+  'status': 'Draft',
+  'actions': [
     'Review',
     'Cancel',
   ],
-  "hasVoted": false,
+  'hasVoted': false,
   'datasetCount': 4
-}
+};
 
 const draftDarColl = {
   'darCollectionId': null,
   'referenceIds': [
     '0a4jn-g838d-bsdg8-6s7fs7',
   ],
-  'darCode': "DRAFT-023",
+  'darCode': 'DRAFT-023',
   'name': null,
-  'submissionDate': "2022-07-26",
+  'submissionDate': '2022-07-26',
   'researcherName': null,
   'institutionName': null,
-  'status': "Draft",
+  'status': 'Draft',
   'actions': [
     'Resume',
   ],
   'hasVoted': false,
   'datasetCount': 10
-}
+};
 
 const user = {
   userId: 1,
