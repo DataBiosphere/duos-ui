@@ -65,7 +65,7 @@ describe('Actions - Open Button', () => {
 
 describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
-    propCopy.actions = ['Cancel'];
+    propCopy.actions = ['Cancel', 'Vote'];
     mount(<Actions {...propCopy} />);
     const closeButton = cy.get(`#chair-cancel-${collectionId}`);
     closeButton.should('exist');
@@ -107,5 +107,72 @@ describe('Actions - Update Button', () => {
     const voteButton = cy.get(`#chair-update-${collectionId}`);
     voteButton.should('exist');
   });
+
+
+  describe('Researcher Actions - Revise Button', () => {
+    it('renders the revise button if the collection is revisable', () => {
+      props.collection.actions = ['Revise', 'Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#revise-collection-${props.collection.darCollectionId}`).should('exist');
+    });
+    it('does not render if the election is not revisable', () => {
+      props.collection.actions = ['Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#revise-collection-${props.collection.darCollectionId}`).should('not.exist');
+    });
+  });
+
+  describe('Researcher Actions - Review Button', () => {
+    it('renders the review button if the collection is reviewable', () => {
+      props.collection.actions = ['Revise', 'Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-review-${props.collection.darCollectionId}`).should('exist');
+    });
+    it('does not render if the election is not reviewable', () => {
+      props.collection.actions = ['Revise'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-review-${props.collection.darCollectionId}`).should('not.exist');
+    });
+  });
+
+  describe('Researcher Actions - Resume Button', () => {
+    it('renders the resume button if the collection is resumable', () => {
+      props.collection.actions = ['Resume', 'Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-resume-${props.collection.darCollectionId}`).should('exist');
+    });
+    it('does not render if the election is not resumable', () => {
+      props.collection.actions = ['Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-resume-${props.collection.darCollectionId}`).should('not.exist');
+    });
+  });
+
+  describe('Researcher Actions - Delete Button', () => {
+    it('renders the delete button if the collection is deletable', () => {
+      props.collection.actions = ['Delete', 'Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-delete-${props.collection.darCollectionId}`).should('exist');
+    });
+    it('does not render if the election is not deletable', () => {
+      props.collection.actions = ['Review'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-delete-${props.collection.darCollectionId}`).should('not.exist');
+    });
+  });
+
+  describe('Researcher Actions - Draft', () => {
+    it('uses the referenceId in id if draft', () => {
+      props.collection = draftDarColl;
+      props.collection.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
+      mount(<Actions {...props} />);
+      cy.get(`#researcher-resume-${props.collection.referenceIds[0]}`).should('exist');
+      cy.get(`#researcher-review-${props.collection.referenceIds[0]}`).should('exist');
+      cy.get(`#researcher-cancel-${props.collection.referenceIds[0]}`).should('exist');
+      cy.get(`#researcher-delete-${props.collection.referenceIds[0]}`).should('exist');
+      cy.get(`#revise-collection-${props.collection.referenceIds[0]}`).should('exist');
+    });
+  });
+
 });
 
