@@ -68,8 +68,7 @@ export function actionsCellData({dac, editDac, deleteDac, userRole}) {
   const actions = [
     h(TableIconButton, {
       key: 'edit-dac-icon',
-      dataTip: !isAdmin ? 'You do not have permission to edit this DAC.' : 'Edit DAC',
-      disabled: !isAdmin,
+      dataTip: 'Edit DAC',
       onClick: () => editDac(dac),
       icon: Edit,
       style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
