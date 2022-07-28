@@ -53,17 +53,7 @@ export function datasetsCellData({dac, viewDatasets}) {
 
 export function actionsCellData({dac, editDac, deleteDac, userRole}) {
   const isAdmin = (userRole === 'Admin');
-  const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets) || !isAdmin);
-
-
-  let deleteDataTip = 'Delete DAC';
-  if (!isAdmin) {
-    deleteDataTip = 'You do not have permission to delete this DAC.';
-  } else {
-    if (deleteDisabled) {
-      deleteDataTip = 'All datasets assigned to this DAC must be reassigned before this can be deleted' ;
-    }
-  }
+  const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets));
 
   const actions = [
     h(TableIconButton, {
@@ -76,8 +66,9 @@ export function actionsCellData({dac, editDac, deleteDac, userRole}) {
     }),
     h(TableIconButton, {
       key: 'delete-dac-icon',
-      dataTip: deleteDataTip,
+      dataTip: (deleteDisabled?'All datasets assigned to this DAC must be reassigned before this can be deleted' :'Delete DAC'),
       disabled: deleteDisabled,
+      isRendered: isAdmin,
       onClick: () => deleteDac(dac),
       icon: Delete,
       style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),

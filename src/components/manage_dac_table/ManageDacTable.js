@@ -39,9 +39,9 @@ export const styles = {
   }),
   cellWidth: {
     name: '25%',
-    description: '45%',
+    description: '62%',
     datasets: '10%',
-    actions: '5%',
+    actions: '3%',
   },
   color: {
     name: '#337ab7',
