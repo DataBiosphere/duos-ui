@@ -148,6 +148,7 @@ export const ManageDacTable = function ManageDacTable(props) {
     setShowDacModal,
     setShowDatasetsModal,
     setShowMembersModal,
+    setShowConfirmationModal,
     setIsEditMode,
     setSelectedDac,
     setSelectedDatasets
@@ -182,17 +183,15 @@ export const ManageDacTable = function ManageDacTable(props) {
   }, [setShowDacModal, setSelectedDac, setIsEditMode]);
 
   const deleteDac = useCallback((selectedDac) => {
-    setShowDacModal(true);
+    setShowConfirmationModal(true);
     setSelectedDac(selectedDac);
     setIsEditMode(false);
-  }, [setShowDacModal, setSelectedDac, setIsEditMode]);
+  }, [setShowConfirmationModal, setSelectedDac, setIsEditMode]);
 
   const viewMembers = useCallback((selectedDac) => {
     setShowMembersModal(true);
     setSelectedDac(selectedDac);
   }, [setShowMembersModal, setSelectedDac]);
-
-
 
   const viewDatasets = useCallback(async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
@@ -202,8 +201,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     setSelectedDac(selectedDac);
     setSelectedDatasets(activeDatasets);
   }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets]);
-
-
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -240,139 +237,6 @@ export const ManageDacTable = function ManageDacTable(props) {
         setSort(sort);
       }
     }),
-    // div({className: 'row no-margin'}, [
-    //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding'}, [
-    //     PageHeading({
-    //       id: 'manageDac',
-    //       imgSrc: manageDACIcon,
-    //       iconSize: 'large',
-    //       color: 'dataset',
-    //       title: 'Manage Data Access Committee',
-    //       description: 'Create and manage Data Access Commitee'
-    //     })
-    //   ]),
-    //   div({
-    //     isRendered: (userRole === ADMIN),
-    //     className: 'col-md-6 col-xs-12 search-wrapper no-padding'}, [
-    //     div({className: 'col-xs-6'}, [
-    //       h(SearchBox, {
-    //         id: 'manageDac',
-    //         searchHandler: handleSearchDac,
-    //         pageHandler: handlePageChange,
-    //         color: 'common'
-    //       })
-    //     ]),
-    //     a({
-    //       id: 'btn_addDAC',
-    //       className: 'col-xs-6 btn-primary btn-add common-background',
-    //       onClick: addDac
-    //     }, [
-    //       div({className: 'all-icons add-dac_white'}),
-    //       span({}, ['Add Data Access Committee'])
-    //     ])
-    //   ]),
-    //   div({
-    //     isRendered: (userRole === CHAIR),
-    //     className: 'search-wrapper no-padding'}, [
-    //     div({className: 'col-xs-6'}, [
-    //       h(SearchBox, {
-    //         id: 'manageDac',
-    //         searchHandler: handleSearchDac,
-    //         pageHandler: handlePageChange,
-    //         color: 'common'
-    //       })
-    //     ])
-    //   ])
-    // ]),
-    // div({ className:  'table-scroll' }, [
-    //   div({style: Theme.lightTable}, [
-    //     table({ className: 'table' }, [
-    //       thead({}, [
-    //         tr({}, [
-    //           th({
-    //             className: 'col-2 cell-size cell-sort',
-    //             onClick: sort('name', !descendingOrder)
-    //           }, [
-    //             'DAC Name',
-    //             span({className: 'glyphicon sort-icon glyphicon-sort'})]),
-    //           th({ className: 'cell-size' }, ['DAC Description']),
-    //           th({ className: 'cell-size' }, ['DAC Datasets']),
-    //           th({ className: 'cell-size' }, ['Actions']),
-    //         ]),
-    //       ]),
-    //       tbody({}, [
-    //         dacs.filter(searchTable(searchDacText))
-    //           .slice((currentPage - 1) * limit, currentPage * limit)
-    //           .map(dac => {
-    //             const disabled = !isNil(dac.datasets) && !isEmpty(dac.datasets);
-    //             return (h(Fragment, {key: dac.dacId}, [
-    //               tr({
-    //                 id: dac.dacId,
-    //                 className: 'tableRow'
-    //               }, [
-    //                 td({
-    //                   id: dac.dacId + '_dacName',
-    //                   name: 'name',
-    //                   className: 'cell-size',
-    //                   style: tableBody,
-    //                   title: dac.name
-    //                 }, [dac.name]),
-    //                 td({
-    //                   id: dac.dacId + '_dacDescription',
-    //                   name: 'dacDescription',
-    //                   className: 'cell-size',
-    //                   style: tableBody,
-    //                   title: dac.description
-    //                 }, [dac.description]),
-    //                 td({
-    //                   className: 'cell-size',
-    //                   style: tableBody,
-    //                 }, [
-    //                   button({
-    //                     id: dac.dacId + '_dacDatasets',
-    //                     name: 'dacDatasets',
-    //                     className: 'cell-button hover-color',
-    //                     style: actionButtonStyle,
-    //                     onClick: () => viewDatasets(dac)
-    //                   }, ['View'])
-    //                 ]),
-    //                 td({
-    //                   className: 'col-2 cell-body f-center',
-    //                   style: {display: 'flex'}
-    //                 }, [
-    //                   button({
-    //                     id: dac.dacId + '_btnViewDAC',
-    //                     name: 'btn_viewDac',
-    //                     className: 'cell-button hover-color',
-    //                     style: actionButtonStyle,
-    //                     onClick: () => viewMembers(dac)
-    //                   }, ['View']),
-    //                   button({
-    //                     id: dac.dacId + '_btnEditDAC',
-    //                     name: 'btn_editDac',
-    //                     className: 'cell-button hover-color',
-    //                     style: actionButtonStyle,
-    //                     onClick: () => editDac(dac)
-    //                   }, ['Edit']),
-    //                   h(TableIconButton, {
-    //                     key: 'delete-dac-icon',
-    //                     dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
-    //                     isRendered: userRole === ADMIN,
-    //                     disabled: disabled,
-    //                     onClick: () => deleteDac(dac),
-    //                     icon: Delete,
-    //                     style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
-    //                     hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
-    //                   })
-    //                 ])
-    //               ]),
-    //             ]));
-    //           }),
-    //       ]),
-    //     ]),
-    //   ]),
-
-
     h(ReactTooltip, {
       place: 'left',
       effect: 'solid',

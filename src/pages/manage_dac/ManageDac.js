@@ -1,4 +1,4 @@
-import ManageDacTable from './ManageDacTable';
+import ManageDacTable from '../../components/manage_dac_table/ManageDacTable';
 import {useState, useEffect, useCallback} from 'react';
 import {div, h, img, a, span} from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
@@ -12,7 +12,7 @@ import {DacDatasetsModal} from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 
-const CHAIR = 'Chair';
+const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
 
 export const ManageDac = function ManageDac() {
@@ -171,6 +171,7 @@ export const ManageDac = function ManageDac() {
       setShowDacModal,
       setShowDatasetsModal,
       setShowMembersModal,
+      setShowConfirmationModal,
       setIsEditMode,
       setSelectedDac,
       setSelectedDatasets
