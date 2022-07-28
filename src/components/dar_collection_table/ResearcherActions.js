@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
 import {Styles, Theme} from '../../libs/theme';
 import { h, div } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Block, Delete } from '@material-ui/icons';
-import { every, lowerCase, flow, map, filter, flatMap, isEmpty } from 'lodash/fp';
 import SimpleButton from '../SimpleButton';
 import { useHistory } from 'react-router-dom';
 import { Notifications } from '../../libs/utils';
@@ -43,52 +41,24 @@ const hoverPrimaryButtonStyle = {
   color: 'white'
 };
 
-//Function to determine if collection is revisable
-//Should only show up if all of the DARs have a canceled status
-const isCollectionRevisable = (dars = {}) => {
-  const elections = flow(
-    flatMap(dar => !isEmpty(dar.elections) ? Object.values(dar.elections) : [])
-  )(dars);
-  return isEmpty(elections) && allCanceledDars(dars);
-};
-
-//Function to determine if collection is cancelable
-//Should only show up if none of the DARs have elections and not all DARs in the collection are canceled
-const isCollectionCancelable = (dars = {}) => {
-  const hasDars = !isEmpty(dars);
-  const hasNoElections = flow(
-    filter(dar => lowerCase(dar.data.status) !== 'canceled'),
-    map(dar => dar.elections),
-    flatMap((electionMap = {}) => Object.values(electionMap)),
-    isEmpty
-  )(dars);
-  return hasDars && !allCanceledDars(dars) && hasNoElections;
-};
-
-const allCanceledDars = (dars = {}) => {
-  return every(dar => lowerCase(dar.data.status) === 'canceled')(dars);
-};
-
 export default function ResearcherActions(props) {
   const { collection, showConfirmationModal } = props;
   const collectionId = collection.darCollectionId;
-  const { dars } = collection;
+
+  const uniqueId = (collectionId ? collectionId : collection.referenceIds[0]);
+
   const history = useHistory();
 
-  const [cancelEnabled, setCancelEnabled] = useState(false);
-  const [reviseEnabled, setReviseEnabled] = useState(false);
-
-  useEffect(() => {
-    const isCancelable = isCollectionCancelable(dars);
-    const isRevisable = isCollectionRevisable(dars);
-    setCancelEnabled(isCancelable);
-    setReviseEnabled(isRevisable);
-  }, [dars]);
+  const cancelEnabled = collection.actions.includes('Cancel');
+  const reviseEnabled = collection.actions.includes('Revise');
+  const reviewEnabled = collection.actions.includes('Review');
+  const deleteEnabled = collection.actions.includes('Delete');
+  const resumeEnabled = collection.actions.includes('Resume');
 
   const reviewButtonAttributes = {
-    keyProp: `researcher-review-${collectionId}`,
+    keyProp: `researcher-review-${uniqueId}`,
     label: 'Review',
-    isRendered: true,
+    isRendered: reviewEnabled,
     onClick: () => redirectToDARApplication(collectionId, history),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
@@ -105,9 +75,9 @@ export default function ResearcherActions(props) {
   };
 
   const cancelButtonAttributes = {
-    keyProp: `researcher-cancel-${collectionId}`,
+    keyProp: `researcher-cancel-${uniqueId}`,
     label: 'Cancel',
-    isRendered: cancelEnabled && !collection.isDraft,
+    isRendered: cancelEnabled,
     onClick: () => showConfirmationModal(collection, 'cancel'),
     dataTip: 'Cancel Collection',
     style: baseCancelButtonStyle,
@@ -116,9 +86,9 @@ export default function ResearcherActions(props) {
   };
 
   const deleteButtonAttributes = {
-    keyProp: `researcher-delete-${collectionId}`,
+    keyProp: `researcher-delete-${uniqueId}`,
     label: 'Delete',
-    isRendered: collection.isDraft === true,
+    isRendered: deleteEnabled,
     onClick: () => showConfirmationModal(collection, 'delete'),
     dataTip: 'Delete Collection Draft',
     style: baseCancelButtonStyle,
@@ -127,9 +97,9 @@ export default function ResearcherActions(props) {
   };
 
   const resumeButtonAttributes = {
-    keyProp: `researcher-resume-${collectionId}`,
-    isRendered: collection.isDraft,
-    onClick: () => resumeDARApplication(collection.referenceId, history),
+    keyProp: `researcher-resume-${uniqueId}`,
+    isRendered: resumeEnabled,
+    onClick: () => resumeDARApplication(collection.referenceIds[0], history),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',
@@ -144,7 +114,7 @@ export default function ResearcherActions(props) {
   };
 
   const reviseButtonAttributes = {
-    keyProp: `revise-collection-${collectionId}`,
+    keyProp: `revise-collection-${uniqueId}`,
     label: 'Revise',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
@@ -153,15 +123,15 @@ export default function ResearcherActions(props) {
       fontWeight: 600,
     },
     hoverStyle: hoverPrimaryButtonStyle,
-    isRendered: !collection.isDraft && reviseEnabled,
+    isRendered: reviseEnabled,
     onClick: () => showConfirmationModal(collection, 'revise'),
   };
 
   return div(
     {
       className: 'researcher-actions',
-      key: `researcher-actions-${collectionId}`,
-      id: `researcher-actions-${collectionId}`,
+      key: `researcher-actions-${uniqueId}`,
+      id: `researcher-actions-${uniqueId}`,
       style: {
         display: 'flex',
         padding: '10px 5px',
@@ -172,7 +142,9 @@ export default function ResearcherActions(props) {
     },
     [
       h(SimpleButton, reviseButtonAttributes),
-      h(SimpleButton, collection.isDraft ? resumeButtonAttributes : reviewButtonAttributes),
+      h(SimpleButton, resumeButtonAttributes),
+      h(SimpleButton, reviewButtonAttributes),
+
       h(TableIconButton, deleteButtonAttributes),
       h(TableIconButton, cancelButtonAttributes)
     ]
