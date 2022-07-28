@@ -425,7 +425,10 @@ describe('Dar Collection determineCollectionStatus', () => {
   it('Returns empty string when there are no elections and the collection does not contains relevant datasets', () => {
     const collection = {
       dars: {
-        0: {data: {datasetIds: [100]}}
+        0: {
+          data: {datasetIds: [100]},
+          datasetIds: [100]
+        }
       }
     };
     const status = determineCollectionStatus(collection);

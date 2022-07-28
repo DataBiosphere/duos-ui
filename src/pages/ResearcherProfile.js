@@ -1,14 +1,14 @@
 import {useState, useEffect} from 'react';
 import {find, isNil, isNumber} from 'lodash';
-import {button, div, form, h, hr, input, label, p, a} from 'react-hyperscript-helpers';
+import {button, div, form, h, h2, hr, input, label, p, a, textarea} from 'react-hyperscript-helpers';
 import {eRACommons} from '../components/eRACommons';
 import {PageHeading} from '../components/PageHeading';
 import {Notification} from '../components/Notification';
 import {SearchSelectOrText} from '../components/SearchSelectOrText';
-import {Institution, User} from '../libs/ajax';
+import {Institution, Support, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
-import {getPropertyValuesFromUser, isEmailAddress} from '../libs/utils';
+import { Notifications, getPropertyValuesFromUser, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -17,7 +17,37 @@ export default function ResearcherProfile(props) {
     suggestedInstitution: undefined,
     selectedSigningOfficialId: undefined,
     suggestedSigningOfficial: undefined,
-    eraCommonsId: undefined
+    eraCommonsId: undefined,
+    completed: undefined,
+    email: undefined,
+    id: undefined
+  });
+
+  const possibleSupportRequests = [
+    {
+      key: 'checkRegisterDataset',
+      label: 'Register a dataset'
+    },
+    {
+      key: 'checkRequestDataAccess',
+      label: 'Request access to data',
+    },
+    {
+      key: 'checkSOPermissions',
+      label: `I am a Signing Official and I want to issue permissions to my institution's users`
+    },
+    {
+      key: 'checkJoinDac',
+      label: 'I am looking to join a DAC'
+    }
+  ];
+
+  const [supportRequests, setSupportRequests] = useState({
+    checkRegisterDataset: false,
+    checkRequestDataAccess: false,
+    checkSOPermissions: false,
+    checkJoinDac: false,
+    extraRequest: undefined
   });
 
   const [institutionList, setInstitutionList] = useState([]);
@@ -86,6 +116,8 @@ export default function ResearcherProfile(props) {
       suggestedSigningOfficial: userProps.suggestedSigningOfficial,
       eraCommonsId: userProps.eraCommonsId,
       profileName: user.displayName,
+      email: user.email,
+      id: user.userId
     });
   };
 
@@ -97,10 +129,20 @@ export default function ResearcherProfile(props) {
     setProfile(newProfile);
   };
 
+  const handleSupportRequestsChange = (event) => {
+    let field = event.target.name;
+    let value = event.target.type === 'checkbox'
+      ? event.target.checked
+      : event.target.value;
+    let newSupportRequests = Object.assign({}, supportRequests, {[field]: value});
+    setSupportRequests(newSupportRequests);
+  };
+
   const submitForm = async (event) => {
     event.preventDefault();
 
     await updateUser();
+    await sendSupportRequests();
     props.history.push({ pathname: 'dataset_catalog' });
   };
 
@@ -114,9 +156,56 @@ export default function ResearcherProfile(props) {
       suggestedSigningOfficial: profile.suggestedSigningOfficial,
     };
 
-
     let updatedUser = await User.updateSelf(payload);
     return updatedUser;
+  };
+
+  const processSupportRequests = () => {
+    const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key]);
+    return [
+      filteredRequests.length > 0,
+      filteredRequests
+        .map(x => `- ${x.label}`)
+        .join('\n')
+    ];
+  };
+
+  const sendSupportRequests = async () => {
+    const [hasSupportRequests, requestText] = processSupportRequests();
+
+    // if there are no supportRequests, don't create a new support ticket
+    if (!hasSupportRequests) {
+      return;
+    }
+
+    const ticketInfo = {
+      attachmentToken: [],
+      type: 'task',
+      subject: `DUOS: User Request for ${profile.profileName}`,
+      description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
+        + requestText
+        + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : '')
+    };
+
+    const ticket = Support.createTicket(
+      profile.profileName, ticketInfo.type, profile.email,
+      ticketInfo.subject,
+      ticketInfo.description,
+      ticketInfo.attachmentToken,
+      'User Profile Page'
+    );
+
+    const response = await Support.createSupportRequest(ticket);
+    if (response.status === 201) {
+      Notifications.showSuccess(
+        {text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500}
+      );
+    } else {
+      Notifications.showError({
+        text: `ERROR ${response.status} : Unable To Send Requests`,
+        layout: 'topRight',
+      });
+    }
   };
 
   const generateInstitutionSelectionDisplay = () => {
@@ -348,10 +437,63 @@ export default function ResearcherProfile(props) {
                 ])
               ]),
 
+              div({
+                className: 'row no-margin',
+                style: { padding: '0 15px' }
+              }, [
+                div({
+                  className: 'col-lg-12 col-xs-12',
+                  style: {
+                    backgroundColor: '#F2F6FB',
+                    padding: 25,
+                    marginTop: 40
+                  }
+                }, [
+                  h2({
+                    id: 'lbl_supportRequests',
+                    style: { ...headerStyle, marginTop: 0 },
+                  }, ['Which of the following are you looking to do?*']),
+
+                  possibleSupportRequests.map(supportRequest => {
+                    return div({ className: 'col-xs-12 checkbox', key: supportRequest.key }, [
+                      input({
+                        type: 'checkbox',
+                        id: `chk_${supportRequest.key}`,
+                        name: supportRequest.key,
+                        className: 'checkbox-inline checkbox',
+                        checked: supportRequests[supportRequest.id],
+                        onChange: handleSupportRequestsChange
+                      }),
+                      label({ className: 'regular-checkbox', htmlFor: `chk_${supportRequest.key}` },
+                        [supportRequest.label])
+                    ]);
+                  }),
+
+                  div({ className: 'col-xs-12' }, [
+                    div({ style: { margin: '15px 0 10px' }}, [
+                      `Is there anything else you'd like to request?`
+                    ]),
+
+                    textarea({
+                      value: supportRequests.extraRequest,
+                      onChange: handleSupportRequestsChange,
+                      className: 'form-control col-xs-12',
+                      name: 'extraRequest',
+                      id: 'supportRequests_extraRequest',
+                      maxLength: '512',
+                      rows: '3',
+                      placeholder: 'Enter your request'
+                    })
+                  ])
+                ])
+              ]),
+
+
 
 
               div({
-                className: 'row margin-top-20',
+                className: 'row',
+                style: { margin: '20px 0' }
               }, [
                 div({ className: 'col-lg-4 col-xs-6' }, [
                   div({ className: 'italic default-color' }, ['*Required field'])

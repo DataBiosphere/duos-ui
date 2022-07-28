@@ -82,24 +82,6 @@ export const Consent = {
     return await res.json();
   },
 
-  findConsentManage: async () => {
-    const url = `${await Config.getApiUrl()}/api/consent/manage`;
-    const res = await fetchOk(url, Config.authOpts());
-    const data = await res.json();
-    const regex = new RegExp('-', 'g');
-    return data.map(dul => {
-      const str = dul.consentName.replace(regex, ' ');
-      dul.ct = dul.consentName + ' ' + dul.version;
-      dul.cts = str + ' ' + dul.version;
-      return dul;
-    });
-  },
-
-  deleteConsent: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}`;
-    return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-  },
-
 };
 
 export const DAC = {
@@ -549,20 +531,6 @@ export const Election = {
     const url = `${await Config.getApiUrl()}/api/election/${electionId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return await res.json();
-  },
-
-  createElection: async (consentId) => {
-    const election = { status: 'Open' };
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}/election`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
-  },
-
-  createElectionForDac: async (consentId, dacId) => {
-    const election = { status: 'Open' };
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}/election/dac/${dacId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
   },
 
   findReviewedConsents: async () => {

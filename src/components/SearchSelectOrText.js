@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
-import {find} from 'lodash/fp';
 import {isEqual} from 'lodash';
+import {find} from 'lodash/fp';
 
 import './SearchSelect.css';
 
-// Similar to SearchSelect, but allows the user to input free text
 export const SearchSelectOrText = (props) => {
   const { onPresetSelection, onManualSelection, placeholder, options, searchPlaceholder, id, label } = props;
   const [currentDisplay, setCurrentDisplay] = useState(placeholder || '');
@@ -101,7 +100,6 @@ export const SearchSelectOrText = (props) => {
               selectManual(searchTerms.current.value);
             }
           },
-
           ref: searchTerms
         }),
         div({

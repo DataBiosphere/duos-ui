@@ -91,7 +91,8 @@ const missingElectionSet = {
     elections: {},
     data: {
       datasetIds: [1]
-    }
+    },
+    datasetIds: [1]
   },
   2: {
     elections: {

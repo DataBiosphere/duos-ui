@@ -112,6 +112,17 @@ describe('DataUseVoteSummary - Tests', function() {
     component.should('not.exist');
   });
 
+  it('should not render if dataUseBuckets is empty', function() {
+    mount(
+      <DataUseVoteSummary
+        dataUseBuckets={[]}
+        currentUser={{userId: 1}}
+        isLoading={true}
+      />
+    );
+    cy.get('.vote-summary-header-component').should('not.exist');
+  });
+
   it('filters out final votes outside of the current user\'s DAC if adminPage is false', function() {
     mount(
       <DataUseVoteSummary

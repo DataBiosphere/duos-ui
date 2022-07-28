@@ -7,7 +7,6 @@ import DatasetsRequestedPanel from './DatasetsRequestedPanel';
 import {ChairVoteInfo} from './ResearchProposalVoteSlab';
 import {
   extractDacDataAccessVotesFromBucket,
-  extractDatasetIdsFromBucket,
   extractUserDataAccessVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import {Alert} from '../Alert';
@@ -54,15 +53,13 @@ const styles = {
 export default function MultiDatasetVoteSlab(props) {
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const [bucketDatasetIds, setBucketDatasetIds] = useState([]);
-  const {title, bucket, collectionDatasets, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage, updateFinalVote} = props;
+  const {title, bucket, dacDatasetIds, isChair, isApprovalDisabled, isLoading, readOnly, adminPage, updateFinalVote} = props;
   const {algorithmResult, key} = bucket;
 
   useEffect(() => {
     const user = Storage.getCurrentUser();
     setDacVotes(extractDacDataAccessVotesFromBucket(bucket, user, adminPage));
     setCurrentUserVotes(extractUserDataAccessVotesFromBucket(bucket, user, isChair, adminPage));
-    setBucketDatasetIds(extractDatasetIdsFromBucket(bucket));
   }, [bucket, isChair, adminPage]);
 
   const DataUseSummary = () => {
@@ -105,8 +102,7 @@ export default function MultiDatasetVoteSlab(props) {
   const DatasetsRequested = () => {
     return h(DatasetsRequestedPanel, {
       dacDatasetIds,
-      bucketDatasetIds,
-      collectionDatasets,
+      bucketDatasets: bucket.datasets,
       isLoading,
       adminPage
     });
