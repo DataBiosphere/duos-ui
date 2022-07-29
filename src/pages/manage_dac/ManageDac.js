@@ -154,7 +154,8 @@ export const ManageDac = function ManageDac() {
           id: 'btn_addDAC',
           className: 'col-md-12 btn-primary btn-add common-background',
           style: {
-            marginTop: '30%'
+            marginTop: '30%',
+            display: 'flex'
           },
           onClick: addDac
         }, [
