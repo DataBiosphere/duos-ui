@@ -144,12 +144,12 @@ describe('Actions - Update Button', () => {
 
 describe('Researcher Actions - Revise Button', () => {
   it('renders the revise button if the collection is revisable', () => {
-    props.collection.actions = ['Revise', 'Review'];
+    propCopy.actions = ['Revise', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#revise-collection-${collectionId}`).should('exist');
   });
   it('does not render if the election is not revisable', () => {
-    props.collection.actions = ['Review'];
+    propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#revise-collection-${collectionId}`).should('not.exist');
   });
@@ -157,12 +157,12 @@ describe('Researcher Actions - Revise Button', () => {
 
 describe('Researcher Actions - Review Button', () => {
   it('renders the review button if the collection is reviewable', () => {
-    props.collection.actions = ['Revise', 'Review'];
+    propCopy.actions = ['Revise', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-review-${collectionId}`).should('exist');
   });
   it('does not render if the election is not reviewable', () => {
-    props.collection.actions = ['Revise'];
+    propCopy.actions = ['Revise'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-review-${collectionId}`).should('not.exist');
   });
@@ -170,12 +170,12 @@ describe('Researcher Actions - Review Button', () => {
 
 describe('Researcher Actions - Resume Button', () => {
   it('renders the resume button if the collection is resumable', () => {
-    props.collection.actions = ['Resume', 'Review'];
+    propCopy.actions = ['Resume', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-resume-${collectionId}`).should('exist');
   });
   it('does not render if the election is not resumable', () => {
-    props.collection.actions = ['Review'];
+    propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-resume-${collectionId}`).should('not.exist');
   });
@@ -183,12 +183,12 @@ describe('Researcher Actions - Resume Button', () => {
 
 describe('Researcher Actions - Delete Button', () => {
   it('renders the delete button if the collection is deletable', () => {
-    props.collection.actions = ['Delete', 'Review'];
+    propCopy.actions = ['Delete', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('exist');
   });
   it('does not render if the election is not deletable', () => {
-    props.collection.actions = ['Review'];
+    propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
   });
@@ -198,7 +198,7 @@ describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
     props.consoleType = 'researcher';
     props.collection = draftDarColl;
-    props.collection.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
+    propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
     mount(<Actions {...props} />);
     cy.get(`#researcher-resume-${refId1}`).should('exist');
     cy.get(`#researcher-review-${refId1}`).should('exist');
