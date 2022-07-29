@@ -47,7 +47,7 @@ export default function Actions(props) {
   const history = useHistory();
 
   const openButtonAttributes = {
-    keyProp: `${consoleType}-open-${collectionId}`,
+    keyProp: `${consoleType}-open-${uniqueId}`,
     label: 'Open',
     isRendered: actions.includes('Open'),
     onClick: () => showConfirmationModal(collection, 'open'),
@@ -66,7 +66,7 @@ export default function Actions(props) {
   };
 
   const cancelButtonAttributes = {
-    keyProp: `${consoleType}-cancel-${collectionId}`,
+    keyProp: `${consoleType}-cancel-${uniqueId}`,
     isRendered: actions.includes('Cancel'),
     onClick: () => showConfirmationModal(collection, 'cancel'),
     style: baseCancelButtonStyle,
@@ -76,7 +76,7 @@ export default function Actions(props) {
   };
 
   const voteButtonAttributes = {
-    keyProp: `${consoleType}-vote-${collectionId}`,
+    keyProp: `${consoleType}-vote-${uniqueId}`,
     label: 'Vote',
     isRendered: actions.includes('Vote'),
     onClick: () => goToVote(collectionId),

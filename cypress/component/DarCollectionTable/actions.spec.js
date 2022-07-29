@@ -197,6 +197,7 @@ describe('Actions - Update Button', () => {
 
   describe('Researcher Actions - Draft', () => {
     it('uses the referenceId in id if draft', () => {
+      props.consoleType = 'researcher';
       props.collection = draftDarColl;
       props.collection.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
       mount(<Actions {...props} />);
