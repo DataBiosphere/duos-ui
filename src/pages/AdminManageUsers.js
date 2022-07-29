@@ -29,8 +29,6 @@ const getUserList = async () => {
 };
 
 export const AdminManageUsers = function AdminManageUsers() {
-
-
   const [searchText, setSearchText] = useState('');
   const [userList, setUserList] = useState([]);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
@@ -75,6 +73,7 @@ export const AdminManageUsers = function AdminManageUsers() {
   const handleSearchUser = (query) => {
     setSearchText(query);
   };
+
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
       div(

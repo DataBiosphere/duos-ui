@@ -113,8 +113,6 @@ const getInitialSort = (columns = []) => {
 const filterFn = getSearchFilterFunctions().users;
 
 export const ManageUsersTable = function ManageUsersTable(props) {
-
-
   const {
     isLoading,
     userList,
@@ -188,6 +186,5 @@ export const ManageUsersTable = function ManageUsersTable(props) {
         setSort(sort);
       }
     }),
-
   ]);
 };

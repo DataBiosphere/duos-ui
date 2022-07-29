@@ -18,8 +18,6 @@ export function usernameCellData({displayName, userId, label= 'user-name'}) {
 }
 
 export function googleIdCellData({userId, email, label = 'google-id'}) {
-
-
   return {
     data: email,
     value: email,
@@ -44,7 +42,6 @@ export function roleCellData({userId, roles, label = 'user-role'}) {
 }
 
 export function actionsCellData({userId, user, editUser}) {
-
   return {
     isComponent: true,
     id: userId,
