@@ -198,8 +198,7 @@ describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
     propCopy.consoleType = 'researcher';
     propCopy.collection = draftDarColl;
-    propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
-    mount(<Actions {...props} />);
+    mount(<Actions {...propCopy} />);
     cy.get(`#researcher-resume-${refId1}`).should('exist');
     cy.get(`#researcher-review-${refId1}`).should('exist');
     cy.get(`#researcher-cancel-${refId1}`).should('exist');
