@@ -144,11 +144,13 @@ describe('Actions - Update Button', () => {
 
 describe('Researcher Actions - Revise Button', () => {
   it('renders the revise button if the collection is revisable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Revise', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#revise-collection-${collectionId}`).should('exist');
   });
   it('does not render if the election is not revisable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#revise-collection-${collectionId}`).should('not.exist');
@@ -157,11 +159,13 @@ describe('Researcher Actions - Revise Button', () => {
 
 describe('Researcher Actions - Review Button', () => {
   it('renders the review button if the collection is reviewable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Revise', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-review-${collectionId}`).should('exist');
   });
   it('does not render if the election is not reviewable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Revise'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-review-${collectionId}`).should('not.exist');
@@ -170,11 +174,13 @@ describe('Researcher Actions - Review Button', () => {
 
 describe('Researcher Actions - Resume Button', () => {
   it('renders the resume button if the collection is resumable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Resume', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-resume-${collectionId}`).should('exist');
   });
   it('does not render if the election is not resumable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-resume-${collectionId}`).should('not.exist');
@@ -183,11 +189,13 @@ describe('Researcher Actions - Resume Button', () => {
 
 describe('Researcher Actions - Delete Button', () => {
   it('renders the delete button if the collection is deletable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Delete', 'Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('exist');
   });
   it('does not render if the election is not deletable', () => {
+    propCopy.consoleType = 'researcher';
     propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
