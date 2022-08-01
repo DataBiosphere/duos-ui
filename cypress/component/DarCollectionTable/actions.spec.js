@@ -62,8 +62,8 @@ const user = {
 const props = {
   consoleType: 'chair',
   collection: darColl,
-  showCancelModal: () => {},
-  updateCollections: () => {}
+  showConfirmationModal: () => {},
+  history: {}
 };
 
 beforeEach(() => {
@@ -206,8 +206,20 @@ describe('Researcher Actions - Draft', () => {
 
     propCopy.collection = draftDarColl;
     mount(<Actions {...propCopy} />);
-    cy.get(`#researcher-delete-${collectionId}`).should('not.exist'); // just checking this one next.
+    cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
     cy.get(`#researcher-review-${refId1}`).should('exist');
   });
 });
 
+describe('Researcher Actions - Draft', () => {
+  it('uses the referenceId in id if draft', () => {
+    propCopy.collection = draftDarColl;
+    propCopy.collection.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete']
+    mount(<Actions {...props} />);
+    cy.get(`#researcher-resume-${propCopy.collection.referenceIds[0]}`).should('exist');
+    cy.get(`#researcher-review-${propCopy.collection.referenceIds[0]}`).should('exist');
+    cy.get(`#researcher-cancel-${propCopy.collection.referenceIds[0]}`).should('exist');
+    cy.get(`#researcher-delete-${propCopy.collection.referenceIds[0]}`).should('exist');
+    cy.get(`#revise-collection-${propCopy.collection.referenceIds[0]}`).should('exist');
+  });
+});
