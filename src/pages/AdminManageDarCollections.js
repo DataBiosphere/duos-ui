@@ -38,8 +38,8 @@ export default function AdminManageDarCollections() {
   }, []);
 
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections, role: 'admin'});
-  const openCollection = openCollectionFn({updateCollections});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: 'Admin'});
+  const openCollection = openCollectionFn({updateCollections, role: 'Admin'});
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [

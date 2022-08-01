@@ -44,8 +44,8 @@ export default function ChairConsole(props) {
   }, []);
 
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections, role: 'chairperson'});
-  const openCollection = openCollectionFn({updateCollections});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: 'Chairperson'});
+  const openCollection = openCollectionFn({updateCollections, role: 'Chairperson'});
   const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
 
   return div({ style: Styles.PAGE }, [
