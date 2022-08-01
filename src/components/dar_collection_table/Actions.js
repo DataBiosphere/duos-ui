@@ -116,7 +116,7 @@ export default function Actions(props) {
   };
 
   const reviewButtonAttributes = {
-    keyProp: `researcher-review-${uniqueId}`,
+    keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
     isRendered: actions.includes('Review'),
     onClick: () => redirectToDARApplication(collectionId, history),
@@ -135,7 +135,7 @@ export default function Actions(props) {
   };
 
   const deleteButtonAttributes = {
-    keyProp: `researcher-delete-${uniqueId}`,
+    keyProp: `${consoleType}-delete-${uniqueId}`,
     label: 'Delete',
     isRendered: actions.includes('Delete'),
     onClick: () => showConfirmationModal(collection, 'delete'),
@@ -147,7 +147,7 @@ export default function Actions(props) {
 
 
   const resumeButtonAttributes = {
-    keyProp: `researcher-resume-${uniqueId}`,
+    keyProp: `${consoleType}-resume-${uniqueId}`,
     isRendered: actions.includes('Resume'),
     onClick: () => resumeDARApplication(collection.referenceIds[0], history),
     label: 'Resume',
@@ -164,7 +164,7 @@ export default function Actions(props) {
   };
 
   const reviseButtonAttributes = {
-    keyProp: `revise-collection-${uniqueId}`,
+    keyProp: `${consoleType}-collection-${uniqueId}`,
     label: 'Revise',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
