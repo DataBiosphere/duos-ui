@@ -196,14 +196,18 @@ describe('Researcher Actions - Delete Button', () => {
 
 describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
-    propCopy.consoleType = 'researcher';
+    // propCopy.collection = draftDarColl;
+    // mount(<Actions {...propCopy} />);
+    // cy.get(`#researcher-resume-${refId1}`).should('exist');
+    // cy.get(`#researcher-review-${refId1}`).should('exist');
+    // cy.get(`#researcher-cancel-${refId1}`).should('exist');
+    // cy.get(`#researcher-delete-${refId1}`).should('exist');
+    // cy.get(`#revise-collection-${refId1}`).should('exist');
+
     propCopy.collection = draftDarColl;
     mount(<Actions {...propCopy} />);
-    cy.get(`#researcher-resume-${refId1}`).should('exist');
+    cy.get(`#researcher-delete-${collectionId}`).should('not.exist'); // just checking this one next.
     cy.get(`#researcher-review-${refId1}`).should('exist');
-    cy.get(`#researcher-cancel-${refId1}`).should('exist');
-    cy.get(`#researcher-delete-${refId1}`).should('exist');
-    cy.get(`#revise-collection-${refId1}`).should('exist');
   });
 });
 
