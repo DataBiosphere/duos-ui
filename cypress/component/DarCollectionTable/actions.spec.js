@@ -147,13 +147,13 @@ describe('Researcher Actions - Revise Button', () => {
     propCopy.consoleType = 'researcher';
     propCopy.actions = ['Revise', 'Review'];
     mount(<Actions {...propCopy} />);
-    cy.get(`#revise-collection-${collectionId}`).should('exist');
+    cy.get(`#researcher-revise-${collectionId}`).should('exist');
   });
   it('does not render if the election is not revisable', () => {
     propCopy.consoleType = 'researcher';
     propCopy.actions = ['Review'];
     mount(<Actions {...propCopy} />);
-    cy.get(`#revise-collection-${collectionId}`).should('not.exist');
+    cy.get(`#researcher-revise-${collectionId}`).should('not.exist');
   });
 });
 
@@ -206,13 +206,16 @@ describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
     propCopy.consoleType = 'researcher';
     propCopy.collection = draftDarColl;
+    propCopy.actions = [
+      'Delete', 'Resume', 'Review', 'Cancel', 'Revise'
+    ]
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
     cy.get(`#researcher-resume-${refId1}`).should('exist');
     cy.get(`#researcher-review-${refId1}`).should('exist');
     cy.get(`#researcher-cancel-${refId1}`).should('exist');
     cy.get(`#researcher-delete-${refId1}`).should('exist');
-    cy.get(`#revise-collection-${refId1}`).should('exist');
+    cy.get(`#researcher-revise-${refId1}`).should('exist');
   });
 });
 

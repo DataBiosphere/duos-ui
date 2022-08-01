@@ -164,7 +164,7 @@ export default function Actions(props) {
   };
 
   const reviseButtonAttributes = {
-    keyProp: `${consoleType}-collection-${uniqueId}`,
+    keyProp: `${consoleType}-revise-${uniqueId}`,
     label: 'Revise',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
