@@ -39,11 +39,11 @@ const draftDarColl = {
   'researcherName': null,
   'institutionName': null,
   'status': 'Draft',
-  'actions': [
-    'Resume',
-  ],
   'hasVoted': false,
-  'datasetCount': 10
+  'datasetCount': 10,
+  'actions': [
+    'Revise', 'Resume', 'Review', 'Cancel', 'Delete'
+  ]
 };
 
 const user = {
@@ -196,8 +196,8 @@ describe('Researcher Actions - Delete Button', () => {
 
 describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
-    props.consoleType = 'researcher';
-    props.collection = draftDarColl;
+    propCopy.consoleType = 'researcher';
+    propCopy.collection = draftDarColl;
     propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
     mount(<Actions {...props} />);
     cy.get(`#researcher-resume-${refId1}`).should('exist');
