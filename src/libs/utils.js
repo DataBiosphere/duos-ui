@@ -583,10 +583,15 @@ export const getSearchFilterFunctions = () => {
 
       return filter(user => {
         const {
-          displayName, email
+          displayName, email, roles
         } = user;
 
-        const match = find(isMatch)([displayName, email]);
+        const matchable = [displayName, email];
+        if (!isNil(roles)) {
+          matchable.push(...map((r) => r.name)(roles));
+        }
+
+        const match = find(isMatch)(matchable);
         return !isNil(match);
       })(targetList);
     }

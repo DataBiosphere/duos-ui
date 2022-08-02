@@ -109,8 +109,10 @@ export const AdminManageUsers = function AdminManageUsers() {
       h(SearchBar, {
         handleSearchChange: handleSearchUser,
         searchRef,
-        width: '60%',
-        margin: '0 3% 0 0',
+        style: {
+          width: '60%',
+          margin: '0 3% 0 0',
+        },
         button: div({
           style: {
             display: 'flex',

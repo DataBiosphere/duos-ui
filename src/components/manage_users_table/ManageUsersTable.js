@@ -34,9 +34,11 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    username: '33.33%',
-    googleId: '33.33%',
-    role: '33.33%',
+    username: '30%',
+    usernameMargin: '5%',
+    googleId: '30%',
+    googleIdMargin: '5%',
+    role: '30%',
   },
   color: {
     username: '#000000',
@@ -53,13 +55,19 @@ export const styles = {
 const columnHeaderConfig = {
   username: {
     label: 'User Name',
-    cellStyle: { width: styles.cellWidth.username },
+    cellStyle: {
+      width: styles.cellWidth.username,
+      margin: `0% ${styles.cellWidth.usernameMargin} 0% 0%`
+    },
     cellDataFn: cellData.usernameCellData,
     sortable: true
   },
   googleId: {
     label: 'Google Account ID',
-    cellStyle: {width: styles.cellWidth.googleId},
+    cellStyle: {
+      width: styles.cellWidth.googleId,
+      margin: `0% ${styles.cellWidth.googleIdMargin} 0% 0%`
+    },
     cellDataFn: cellData.googleIdCellData,
     sortable: false
   },
