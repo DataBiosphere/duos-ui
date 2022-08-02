@@ -22,10 +22,6 @@ const darColl = {
   'researcherName': 'John Doe',
   'institutionName': 'Broad Institute',
   'status': 'Draft',
-  'actions': [
-    'Review',
-    'Cancel',
-  ],
   'hasVoted': false,
   'datasetCount': 4
 };
@@ -40,10 +36,7 @@ const draftDarColl = {
   'institutionName': null,
   'status': 'Draft',
   'hasVoted': false,
-  'datasetCount': 10,
-  'actions': [
-    'Revise', 'Resume', 'Review', 'Cancel', 'Delete'
-  ]
+  'datasetCount': 10
 };
 
 const user = {
@@ -206,6 +199,7 @@ describe('Researcher Actions - Draft', () => {
   it('uses the referenceId in id if draft', () => {
     propCopy.consoleType = 'researcher';
     propCopy.collection = draftDarColl;
+    propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
     mount(<Actions {...propCopy} />);
     cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
     cy.get(`#researcher-resume-${refId1}`).should('exist');
