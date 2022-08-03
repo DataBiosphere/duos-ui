@@ -10,7 +10,7 @@ export const Spinner =
 // TODO: implement this spinner in every componentDidMount or Init method on
 // pages that call async methods upon loading the page.
 // ManageDac, AddDacModal, DataAccessRequest, AppSummary, AccessReview, SigningOfficialConsole,
-// ReviewResults, ReviewedCases, ResearcherProfile, NewMemberConsole, DataSharingLanguageTool,
+// ReviewResults, ResearcherProfile, NewMemberConsole, DataSharingLanguageTool,
 // DatasetStatistics, DatasetRegistration, DatasetCatalog, DataOwnerReview, DataAccessRequestApplication,
 // ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,
 // AdminConsole, SUpportRequestModal, ElectionTimeoutModal,
