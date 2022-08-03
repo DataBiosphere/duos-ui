@@ -37,6 +37,17 @@ npm install
 ```
 cp config/perf.json public/config.json
 ```
+
+Create a local env override file: `.env.local`
+```
+HOST=local.broadinstitute.org
+HTTPS=true
+SSL_CRT_FILE=config/server.crt
+SSL_KEY_FILE=config/server.key
+```
+Ensure that you have configured your `etc/hosts` file to point `localhost` to `local.broadinstitute.org` 
+and copy over `server.crt` and `server.key` from vault into the `config` directory
+
 4. Start development server:
 
 ```
