@@ -542,30 +542,12 @@ export const getSearchFilterFunctions = () => {
     darCollections: (term, targetList) =>
       isEmpty(term) ? targetList :
         filter(collection => {
-          if(isEmpty(term)) {return true;}
-          let projectTitle, institution, createDate;
-          if(collection.isDraft) {
-            projectTitle = collection.projectTitle;
-            createDate = collection.createDate;
-            institution = collection.institution;
-          } else {
-            const referenceDar = find((dar) => !isEmpty(dar.data))(
-              collection.dars
-            );
-            const { data } = referenceDar;
-            projectTitle = data.projectTitle;
-            institution = data.institution;
-          }
-          const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
-          const lowerCaseTerm = toLower(term);
-          createDate = formatDate(collection.createDate);
-          const { darCode, isDraft, createUser } = collection;
-          const researcherName = get('displayName')(createUser);
-          const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
+          const {darCode, datasetCount, institutionName, name, researcherName, status, submissionDate} = collection;
+          const formattedSubmissionDate = formatDate(submissionDate);
           const matched = find((phrase) => {
-            const termArr = lowerCaseTerm.split(' ');
-            return find(term => includes(term, phrase))(termArr);
-          })([datasetCount, toLower(darCode), toLower(createDate), toLower(projectTitle), toLower(status), toLower(institution), toLower(researcherName)]);
+            const termArr = term.split(' ');
+            return find(term => includes(toLower(term), toLower(phrase)))(termArr);
+          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate]);
           return !isNil(matched);
         })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
