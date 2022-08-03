@@ -475,7 +475,7 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
   };
 };
 
-//Helper function, search bar handler for DAC Chair console and AdminManageAccess
+//Helper function, search bar handler for DAC Chair console
 //NOTE: need to replace this in favor of the generic function. Will remove once substitutions in code is completed
 export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
   return (searchTerms) => {
