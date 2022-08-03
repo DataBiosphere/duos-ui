@@ -693,13 +693,6 @@ export const PendingCases = {
     return resp;
   },
 
-
-  findConsentUnReviewed: async () => {
-    const url = `${await Config.getApiUrl()}/api/consent/unreviewed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   findDARUnReviewed: async () => {
     const url = `${await Config.getApiUrl()}/api/dar/cases/unreviewed`;
     const res = await fetchOk(url, Config.authOpts());

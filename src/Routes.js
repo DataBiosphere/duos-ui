@@ -3,7 +3,6 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import { USER_ROLES } from './libs/utils';
-import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
@@ -66,7 +65,6 @@ const Routes = (props) => (
     <Route path="/tos" component={TermsOfService} props={props} />
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
-    <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_review_collection/:collectionId" component={DarCollectionReview} props={Object.assign({adminPage: true}, props)} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_edit_user/:userId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
