@@ -11,6 +11,7 @@ import {Storage} from '../libs/storage';
 import { Notifications, getPropertyValuesFromUser, isEmailAddress} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
+  const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState({
     profileName: '',
     institutionId: undefined,
@@ -58,14 +59,17 @@ export default function ResearcherProfile(props) {
   useEffect(() => {
     const init = async () => {
       try {
+        setIsLoading(true);
         await getResearcherProfile();
 
         setInstitutionList(await Institution.list());
 
         props.history.push('profile');
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
+        setIsLoading(false);
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
+        setIsLoading(false);
       }
     };
 
@@ -320,7 +324,7 @@ export default function ResearcherProfile(props) {
 
                 p(
                   {
-                    isRendered: !profileNameIsValid(),
+                    isRendered: !profileNameIsValid() && !isLoading,
                     style: {
                       fontStyle: 'italic',
                       color: '#D13B07',
@@ -352,7 +356,7 @@ export default function ResearcherProfile(props) {
                     destination: 'profile',
                     onNihStatusUpdate: () => {},
                     location: props.location,
-                    header: false,
+                    header: false
                   }),
                 ])
               ]),
