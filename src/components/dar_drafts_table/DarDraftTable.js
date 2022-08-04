@@ -221,9 +221,9 @@ export default function DarDraftTable(props) {
 
   //delete function that fires on modal confirmation, removes draft from listing via prop delete function
   const deleteOnClick = async() => {
-    const {id, data, referenceId} = selectedDraft;
-    const identifier = getIdentifier({id: id || referenceId, data});
-    await deleteDraft({ referenceId, identifier, });
+    const {id, data, referenceIds} = selectedDraft;
+    const identifier = getIdentifier({id: id || referenceIds, data});
+    await deleteDraft({ referenceIds, identifier, });
     setShowConfirmation(false);
   };
 

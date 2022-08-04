@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, findIndex} from 'lodash/fp';
+import {cloneDeep, findIndex, uniq} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
@@ -112,19 +112,32 @@ export default function ResearcherConsole() {
     }
   };
 
+
+  //Draft delete, by referenceIds
+  const deleteDraftById = async ({ referenceId, collectionsClone }) => {
+    await DAR.deleteDar(referenceId);
+    const targetIndex = findIndex((draft) => {
+      return draft.referenceId === referenceId;
+    })(collectionsClone);
+
+    return targetIndex;
+  };
+
   //Draft delete, passed down to draft table to be used with delete button
-  const deleteDraft = async ({ referenceId, identifier }) => {
+  const deleteDraft = async ({ referenceIds, identifier }) => {
     try {
-      await DAR.deleteDar(referenceId);
       const collectionsClone = cloneDeep(researcherCollections);
-      const targetIndex = findIndex((draft) => {
-        return draft.referenceId === referenceId;
-      })(collectionsClone);
-      if (targetIndex === -1) {
+      const deletedDraftIndices = referenceIds.map((referenceId) => deleteDraftById({ referenceId }));
+      const hasAnySuccess = deletedDraftIndices.findIndex((draftIndex) => draftIndex !== -1);
+
+      if (!hasAnySuccess) {
         Notifications.showError({ text: 'Error processing delete request' });
       } else {
-        collectionsClone.splice(targetIndex, 1);
-        setResearcherCollections(collectionsClone);
+        // if deleted index, remove it from the collections array
+        const filteredCollections = collectionsClone.filter((collection, collectionIndex) => {
+          deletedDraftIndices.indexOf(collectionIndex) === -1;
+        });
+        setResearcherCollections(filteredCollections);
         Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
       }
     } catch (error) {
