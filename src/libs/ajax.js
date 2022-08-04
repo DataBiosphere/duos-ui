@@ -533,18 +533,6 @@ export const Election = {
     return await res.json();
   },
 
-  findReviewedConsents: async () => {
-    const url = `${await Config.getApiUrl()}/api/consent/cases/closed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findReviewedDRs: async () => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/cases/closed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   findReviewedElections: async (electionId) => {
     const url = `${await Config.getApiUrl()}/api/electionReview/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
