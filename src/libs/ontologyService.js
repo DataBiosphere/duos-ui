@@ -3,7 +3,8 @@ import { Config } from '../libs/config';
 import { Notifications } from '../libs/utils';
 
 export async function searchOntology(obolibraryURL) {
-  const baseURL = await Config.getOntologyApiUrl();
+  const env = await Config.getEnv();
+  const baseURL = env === 'local' ? '/' : await Config.getOntologyApiUrl();
   const params = {id: obolibraryURL};
   try{
     let resp = await axios.get(`${baseURL}search`, {params});

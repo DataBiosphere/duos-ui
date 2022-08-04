@@ -65,7 +65,7 @@ export default function ResearcherProfile(props) {
         props.history.push('profile');
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
       } catch (error) {
-        Notification.showError({text: 'Error: Unable to retrieve user data from server'});
+        Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
       }
     };
 
