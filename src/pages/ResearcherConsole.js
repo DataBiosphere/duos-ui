@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, findIndex, uniq} from 'lodash/fp';
+import {cloneDeep, findIndex} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
