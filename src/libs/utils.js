@@ -772,12 +772,3 @@ export const completedResearcherInfoCheck = (properties) => {
   } = properties;
   return !isNil(institutionId);
 };
-
-export const researcherProfileComplete = (user) => {
-  const {
-    institutionId,
-    selectedSigningOfficialId,
-  } = getPropertyValuesFromUser(user);
-
-  return !isNil(institutionId) && !isNil(selectedSigningOfficialId);
-};

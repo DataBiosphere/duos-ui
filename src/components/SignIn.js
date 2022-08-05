@@ -6,7 +6,7 @@ import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
-import {Navigation, setUserRoleStatuses, researcherProfileComplete} from '../libs/utils';
+import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
@@ -42,12 +42,6 @@ export default function SignIn(props) {
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Storage.setUserIsLogged(false);
       history.push('/tos_acceptance');
-      return;
-    }
-
-    const {isResearcher} = Storage.getCurrentUser();
-    if (isResearcher && !researcherProfileComplete(user)) {
-      history.push('/profile');
       return;
     }
     redirect(user);
