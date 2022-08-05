@@ -42,9 +42,9 @@ export default function SignIn(props) {
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Storage.setUserIsLogged(false);
       history.push('/tos_acceptance');
-      return;
+    } else {
+      redirect(user);
     }
-    redirect(user);
   };
 
   const onSuccess = async (response) => {
