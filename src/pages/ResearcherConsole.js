@@ -127,17 +127,14 @@ export default function ResearcherConsole() {
   const deleteDraft = async ({ referenceIds, identifier }) => {
     try {
       const collectionsClone = cloneDeep(researcherCollections);
-      const deletedDraftIndices = referenceIds.map((referenceId) => deleteDraftById({ referenceId }));
-      const hasAnySuccess = deletedDraftIndices.findIndex((draftIndex) => draftIndex !== -1);
+      const targetIndex = deleteDraftById({ referenceId: referenceIds[0] });
 
-      if (!hasAnySuccess) {
+      if (targetIndex === -1) {
         Notifications.showError({ text: 'Error processing delete request' });
       } else {
         // if deleted index, remove it from the collections array
-        const filteredCollections = collectionsClone.filter((collection, collectionIndex) => {
-          deletedDraftIndices.indexOf(collectionIndex) === -1;
-        });
-        setResearcherCollections(filteredCollections);
+        collectionsClone.splice(targetIndex, 1);
+        setResearcherCollections(collectionsClone);
         Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
       }
     } catch (error) {
