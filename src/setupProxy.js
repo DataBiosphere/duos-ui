@@ -7,14 +7,20 @@ module.exports = function (app) {
     createProxyMiddleware({
       target: configUrls.apiUrl,
       secure: false,
+      pathRewrite: {
+        '/api/status': '/status'
+      }
     })
   );
 
   app.use(
-    ['/autocomplete', '/search'],
+    ['/autocomplete', '/search', '/ontology/status'],
     createProxyMiddleware({
       target: configUrls.ontologyApiUrl,
-      secure: false
+      secure: false,
+      pathRewrite: {
+        '/ontology/status': '/status'
+      }
     })
   );
 

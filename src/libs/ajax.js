@@ -31,14 +31,14 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error);
 });
 
-const getApiUrl = async() => {
+export const getApiUrl = async(baseUrl = '') => {
   const env = await Config.getEnv();
-  return env === 'local' ? '' : await Config.getApiUrl();
+  return env === 'local' ? baseUrl : await Config.getApiUrl();
 };
 
-const getOntologyUrl = async() => {
+export const getOntologyUrl = async(baseUrl = '') => {
   const env = await Config.getEnv();
-  return env === 'local' ? '' : await getOntologyUrl();
+  return env === 'local' ? baseUrl : await getOntologyUrl();
 };
 
 const dataTemplate = {
