@@ -74,15 +74,6 @@ const dataTemplate = {
   ]
 };
 
-export const Consent = {
-
-  findConsentById: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json();
-  },
-
-};
 
 export const DAC = {
 
@@ -489,24 +480,9 @@ export const Election = {
     return res.json();
   },
 
-  findElectionByVoteId: async (voteId) => {
-    const url = `${await Config.getApiUrl()}/api/election/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   findElectionByDarId: async (requestId) => {
     const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  electionReviewResource: async (referenceId, type) => {
-    const url = `${await Config.getApiUrl()}/api/electionReview?referenceId=${referenceId}&type=${type}`;
-    const res = await fetchOk(url, Config.authOpts());
-    if (res.status === 204) {
-      return {};
-    }
     return await res.json();
   },
 
@@ -530,12 +506,6 @@ export const Election = {
   updateElection: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/api/election/${electionId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
-    return await res.json();
-  },
-
-  findReviewedElections: async (electionId) => {
-    const url = `${await Config.getApiUrl()}/api/electionReview/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
 
@@ -885,32 +855,6 @@ export const User = {
 };
 
 export const Votes = {
-
-  find: async (consentId, voteId) => {
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  postVote: async (consentId, vote) => {
-    var postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
-    return await res.json();
-  },
-
-  updateVote: async (consentId, vote) => {
-    var voteToUpdate = {};
-    voteToUpdate.vote = vote.vote;
-    voteToUpdate.dacUserId = vote.dacUserId;
-    voteToUpdate.rationale = vote.rationale;
-    const url = `${await Config.getApiUrl()}/api/consent/${consentId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteToUpdate), { method: 'PUT' }]));
-    return await res.json();
-  },
 
   postDarVote: async (requestId, vote) => {
     const postObject = {};
