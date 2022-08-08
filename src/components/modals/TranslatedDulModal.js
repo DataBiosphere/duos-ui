@@ -1,13 +1,31 @@
-import { ul } from 'react-hyperscript-helpers';
+import {li, ul} from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import {GenerateUseRestrictionStatements} from '../TranslatedDULComponent';
 import { useState, useEffect } from 'react';
+import isEmpty from 'lodash/fp/isEmpty';
+import {DataUseTranslation} from '../../libs/dataUseTranslation';
 
 const MODAL_ID = 'translatedDul';
 
 const listStyle = {
   listStyle: 'none'
 };
+
+//NOTE: li partial can be used in components that only need the list
+async function GenerateUseRestrictionStatements(dataUse) {
+  if (!dataUse || isEmpty(dataUse)) {
+    return [li({
+      className: 'translated restriction',
+      key: 'restriction-none'
+    }, ['None'])];
+  }
+  const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+  return translations.map((restriction) => {
+    return li({
+      className: 'translated-restriction',
+      key: `${restriction.code}-statement`,
+    }, [restriction.description]);
+  });
+}
 
 export default function TranslatedDulModal(props) {
   const OKHandler = () => {

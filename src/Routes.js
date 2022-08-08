@@ -9,10 +9,6 @@ import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
-import DulCollect from './pages/DulCollect';
-import DulPreview from './pages/DulPreview';
-import DulResultRecords from './pages/DulResultRecords';
-import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import Home from './pages/Home';
 import AccessReview from './pages/access_review/AccessReview';
@@ -25,7 +21,6 @@ import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
-import ReviewedCases from './pages/ReviewedCases';
 import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
@@ -95,18 +90,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/access_review/:darId" component={AccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}/>
-    <AuthenticatedRoute path="/dul_review/:voteId/:consentId" component={DulReview} props={props}
-      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/dul_preview/:consentId" component={DulPreview} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/dul_collect/:consentId" component={DulCollect} props={props}
-      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/review_results/:referenceId/:status?" component={ReviewResults} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
