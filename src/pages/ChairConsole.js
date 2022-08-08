@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
 import { Collections, User } from '../libs/ajax';
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
+import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
 import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
@@ -44,8 +44,8 @@ export default function ChairConsole(props) {
   }, []);
 
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections, role: 'Chairperson'});
-  const openCollection = openCollectionFn({updateCollections, role: 'Chairperson'});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: USER_ROLES.chairperson});
+  const openCollection = openCollectionFn({updateCollections, role: USER_ROLES.chairperson});
   const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
 
   return div({ style: Styles.PAGE }, [
