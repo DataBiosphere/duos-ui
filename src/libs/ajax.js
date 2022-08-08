@@ -509,18 +509,6 @@ export const Election = {
     return await res.json();
   },
 
-  findReviewedConsents: async () => {
-    const url = `${await Config.getApiUrl()}/api/consent/cases/closed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findReviewedDRs: async () => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/cases/closed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   createDARElection: async (requestId) => {
     const election = { status: 'Open', finalAccessVote: false };
     const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/election`;

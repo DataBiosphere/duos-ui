@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as nonFPMap} from 'lodash';
 import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
-import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, every, capitalize } from 'lodash/fp';
+import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 
 export const UserProperties = {
@@ -475,7 +475,7 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
   };
 };
 
-//Helper function, search bar handler for DAC Chair console and AdminManageAccess
+//Helper function, search bar handler for DAC Chair console
 //NOTE: need to replace this in favor of the generic function. Will remove once substitutions in code is completed
 export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
   return (searchTerms) => {
@@ -576,7 +576,25 @@ export const getSearchFilterFunctions = () => {
         includes(lowerCaseTerm, toLower(phrase))
       )([partialDarCode, ...(projectTitle.split(' ')), (updateDate || createDate)]);
       return !isNil(matched) && (draft !== false || draft !== 'false');
-    })(targetList)
+    })(targetList),
+    users: (term, targetList) => {
+      const lowerCaseTerm = toLower(term);
+      const isMatch = (userField) => includes(lowerCaseTerm, toLower(userField));
+
+      return filter(user => {
+        const {
+          displayName, email, roles
+        } = user;
+
+        const matchable = [displayName, email];
+        if (!isNil(roles)) {
+          matchable.push(...map((r) => r.name)(roles));
+        }
+
+        const match = find(isMatch)(matchable);
+        return !isNil(match);
+      })(targetList);
+    }
   };
 };
 
@@ -594,29 +612,6 @@ export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelN
         if(!isEmpty(term)) {
           const filterFn = filterFnMap[modelName];
           newFilteredList = filterFn(term, newFilteredList);
-        }
-      });
-      setFilteredList(newFilteredList);
-    }
-    setCurrentPage(1);
-  };
-};
-
-export const userSearchHandler = (userList, setFilteredList, setCurrentPage) => {
-  return (searchTerms) => {
-    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
-    if(isEmpty(searchTermValues)) {
-      setFilteredList(userList);
-    } else {
-      let newFilteredList = cloneDeep(userList);
-      searchTermValues.forEach((splitTerm) => {
-        const term = splitTerm.trim();
-        if(!isEmpty(term)) {
-          newFilteredList = filter(user => {
-            const roles = sortedUniq(map(role => role.name)(user.roles));
-            const targetUserAttrs = !isNil(user) ? JSON.stringify([toLower(user.displayName), toLower(user.email), toLower(roles)]) : [];
-            return includes(term, targetUserAttrs);
-          }, newFilteredList);
         }
       });
       setFilteredList(newFilteredList);
@@ -741,7 +736,7 @@ export const recalculateVisibleTable = async ({
 };
 
 export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
-  let searchList = originalList;
+  let searchList = (!isNil(originalList) ? [...originalList] : []);
   if(!isEmpty(searchTerms)) {
     const terms = searchTerms.split(' ');
     terms.forEach((term => searchList = filterFn(term, searchList)));
