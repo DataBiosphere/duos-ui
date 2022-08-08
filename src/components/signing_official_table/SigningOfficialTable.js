@@ -212,7 +212,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  const { signingOfficial, unregisteredResearchers, isLoading } = props;
+  const { signingOfficial, isLoading } = props;
   const [lcaText, setLcaText] = useState('');
 
   //Search function for SearchBar component, function defined in utils
@@ -442,7 +442,7 @@ export default function SigningOfficialTable(props) {
       createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
-      users: unregisteredResearchers,
+      users: researchers,
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
       lcaContent: lcaContent

@@ -108,7 +108,7 @@ export default function SigningOfficialConsole(props) {
             selectedType: selectedTag
           })
         ]),
-        h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, isLoading}, []),
         //NOTE: Links to this custodian table have been removed, we are retaining it with the intention of repurposing it for data submitters
         h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
         h(DarCollectionTable, {
