@@ -2,7 +2,6 @@ import {div, h, h1} from 'react-hyperscript-helpers';
 import {useCallback, useEffect, useState} from 'react';
 import {TosService} from '../libs/tosService';
 import {Storage} from '../libs/storage';
-import {Navigation} from '../libs/utils';
 import SimpleButton from '../components/SimpleButton';
 import {Theme} from '../libs/theme';
 
@@ -20,10 +19,10 @@ export default function TermsOfServiceAcceptance(props) {
   }, []);
 
   const acceptToS = useCallback(async () => {
-    const user = await Storage.getCurrentUser();
     await TosService.acceptTos();
     await Storage.setUserIsLogged(true);
-    Navigation.back(user, history);
+
+    history.push('/profile');
   }, [history]);
 
   const acceptButton = h(SimpleButton, {

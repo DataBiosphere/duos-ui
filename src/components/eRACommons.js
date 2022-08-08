@@ -6,6 +6,7 @@ import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
 import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import eraIcon from '../images/era-commons-logo.png';
+import './Animations.css';
 
 export const eRACommons = hh(class eRACommons extends React.Component {
 
@@ -125,7 +126,10 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     const nihErrorMessage = 'Something went wrong. Please try again.';
 
     return (
-      div({ className: this.props.className }, [
+      div({
+        className: this.props.className,
+        style: { minHeight: 65, ...this.props.style }
+      }, [
         label({ className: 'control-label', isRendered: this.props.header }, ['NIH eRA Commons ID*']),
         div({
           isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
@@ -178,8 +182,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             },
             className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding'
           }, [
-            div({ isRendered: this.state.expirationCount >= 0 }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
-            div({ isRendered: this.state.expirationCount < 0 }, ['Your NIH authentication has expired'])
+            div({ isRendered: this.state.expirationCount >= 0, className: 'fadein' }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
+            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, ['Your NIH authentication has expired'])
           ])
         ])
       ])
