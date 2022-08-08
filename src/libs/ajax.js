@@ -38,7 +38,7 @@ export const getApiUrl = async(baseUrl = '') => {
 
 export const getOntologyUrl = async(baseUrl = '') => {
   const env = await Config.getEnv();
-  return env === 'local' ? baseUrl : await getOntologyUrl();
+  return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
 };
 
 const dataTemplate = {
