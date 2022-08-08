@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react
 import { Styles, Theme } from '../../libs/theme';
 import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from 'lodash/fp';
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
 import SimpleButton from '../SimpleButton';
 import PaginationBar from '../PaginationBar';
@@ -196,6 +196,10 @@ const generateLcaText = (text) => {
   return <ReactMarkdown components={{a: (props) => <a target={'_blank'} {...props}/>}}>
     {DOMPurify.sanitize(text, null)}
   </ReactMarkdown>;
+};
+
+const onlyResearchersWithoutCardFilter = (researcher) => {
+  return isNil(researcher.libraryCards);
 };
 
 export default function SigningOfficialTable(props) {
@@ -442,7 +446,7 @@ export default function SigningOfficialTable(props) {
       createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
-      users: researchers,
+      users: filter(onlyResearchersWithoutCardFilter)(researchers),
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
       lcaContent: lcaContent
