@@ -15,7 +15,7 @@ import {
   rpVoteKey
 } from '../../../src/utils/DarCollectionUtils';
 import {Collections, Match} from '../../../src/libs/ajax';
-import {formatDate, Notifications} from '../../../src/libs/utils';
+import {formatDate, Notifications, USER_ROLES} from '../../../src/libs/utils';
 import {cloneDeep, forEach, includes, concat} from 'lodash/fp';
 
 const openableAndClosableDars = {
@@ -177,7 +177,7 @@ describe('updateCollectionFn', () => {
 describe('cancelCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
-    const callback = cancelCollectionFn({updateCollections, role: 'Admin'});
+    const callback = cancelCollectionFn({updateCollections, role: USER_ROLES.admin});
     expect(callback).to.exist;
   });
 
@@ -203,7 +203,7 @@ describe('cancelCollectionFn', () => {
 describe('openCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
-    const callback = openCollectionFn({updateCollections, role: 'Admin'});
+    const callback = openCollectionFn({updateCollections, role: USER_ROLES.admin});
     expect(callback).to.exist;
   });
 
