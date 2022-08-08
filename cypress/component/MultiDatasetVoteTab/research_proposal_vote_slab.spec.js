@@ -223,8 +223,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isLoading={true}
       />
     );
-    cy.get(collapseSlabLinkText).should('not.exist');
-    cy.get(expandSlabLinkText).should('not.exist');
+    cy.get('#expand-rp-vote-button').should('not.exist');
   });
 
   it('Renders skeleton when loading', function() {
