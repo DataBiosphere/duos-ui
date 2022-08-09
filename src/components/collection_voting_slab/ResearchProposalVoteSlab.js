@@ -105,8 +105,8 @@ const SkeletonLoader = () => {
 
 const CollapseExpandLink = ({expanded, setExpanded}) => {
   const linkMessage = expanded ?
-    'Hide Research Purpose and Vote' :
-    'Expand to view Research Purpose and Vote';
+    'Hide Research Use Statement (Narrative)' :
+    'Expand to view Research Use Statement (Narrative)';
 
   return a({
     style: styles.link,
@@ -197,7 +197,7 @@ export default function ResearchProposalVoteSlab(props) {
                 h(ResearchPurposeSummary, {darInfo}),
                 h(DataUseAlertBox, {translatedDataUse}),
                 h(CollectionSubmitVoteBox, {
-                  question: 'Was the research purpose accurately converted to a structured format?',
+                  question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
                   votes: currentUserVotes,
                   isFinal: false,
                   isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),

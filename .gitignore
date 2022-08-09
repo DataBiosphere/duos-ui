@@ -36,3 +36,8 @@ public/config.json
 /cypress/videos/
 /cypress/fixtures/duos-automation*.json
 /cypress/screenshots
+
+
+# Server
+server.crt
+server.key

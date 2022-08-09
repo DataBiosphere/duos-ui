@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
 import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
 import DiameterVariant from 'react-material-icon-svg/dist/DiameterVariant';
-import { Config } from '../libs/config';
+import { getApiUrl, getOntologyUrl } from '../libs/ajax';
 
 
 export const Status = hh(class Status extends Component {
@@ -33,8 +33,8 @@ export const Status = hh(class Status extends Component {
   };
 
   async componentDidMount() {
-    const consentStatusUrl = `${ await Config.getApiUrl() }/status`;
-    const ontologyStatusUrl = `${ await Config.getOntologyApiUrl() }/status`;
+    const consentStatusUrl = `${ await getApiUrl('/api') }/status`;
+    const ontologyStatusUrl = `${ await getOntologyUrl('/ontology') }/status`;
     fetch(consentStatusUrl, { method: 'GET' })
       .then(response => response.json())
       .then(data => this.setState({ consentStatus: data }));
