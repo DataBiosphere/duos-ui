@@ -198,8 +198,13 @@ const generateLcaText = (text) => {
   </ReactMarkdown>;
 };
 
-const onlyResearchersWithoutCardFilter = (researcher) => {
-  return isNil(researcher.libraryCards);
+const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
+  const cards = researcher.libraryCards;
+  if (isEmpty(cards)) {
+    return true;
+  }
+
+  return isNil(find((card) => card.institutionId == institutionId)(researcher.libraryCards));
 };
 
 export default function SigningOfficialTable(props) {
@@ -446,7 +451,7 @@ export default function SigningOfficialTable(props) {
       createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
-      users: filter(onlyResearchersWithoutCardFilter)(researchers),
+      users: filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers),
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
       lcaContent: lcaContent
