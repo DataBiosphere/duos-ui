@@ -260,18 +260,12 @@ class DuosHeader extends Component {
     this.state = {
       showSupportRequestModal: false,
       hover: false,
-      dacChairPath: '',
-      dacMemberPath: '',
-      researcherPath: '',
       notificationData: [],
       openDrawer: false
     };
   }
 
   async componentDidMount() {
-    this.setState({dacChairPath: '/chair_console'});
-    this.setState({dacMemberPath: '/member_console'});
-    this.setState({researcherPath: '/researcher_console'});
     const notificationData =  await NotificationService.getActiveBanners();
     this.setState(prev => {
       prev.notificationData = notificationData;
@@ -423,29 +417,29 @@ class DuosHeader extends Component {
       },
       isResearcher && {
         label: 'Researcher Console',
-        link: this.state.researcherPath,
+        link: '/researcher_console',
         search: 'researcher_console',
         children: [
-          { label: 'DAR Requests', link: this.state.researcherPath },
+          { label: 'DAR Requests', link: '/researcher_console' },
           { label: 'Data Catalog', link: '/dataset_catalog' }
         ]
       },
       isChairPerson && {
         label: 'DAC Chair Console',
-        link: this.state.dacChairPath,
+        link: '/chair_console',
         search: 'chair_console',
         children: [
-          { label: 'DAR Requests', link: this.state.dacChairPath },
+          { label: 'DAR Requests', link: '/chair_console' },
           { label: 'Datasets', link: '/dataset_catalog' },
           { label: 'DAC Members', link: '/manage_dac' }
         ]
       },
       isMember && {
         label: 'DAC Member Console',
-        link: this.state.dacMemberPath,
+        link: '/member_console',
         search: 'member_console',
         children: [
-          { label: 'DAR Requests', link: this.state.dacMemberPath },
+          { label: 'DAR Requests', link: '/member_console' },
           { label: 'Datasets', link: '/dataset_catalog' },
         ]
       }
