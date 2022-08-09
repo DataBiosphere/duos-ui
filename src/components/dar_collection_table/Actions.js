@@ -15,7 +15,7 @@ const baseCancelButtonStyle = Object.assign(
   Styles.TABLE.TABLE_ICON_BUTTON,
   {color: cancelGray},
   { alignItems: 'center' },
-  { marginRight: 5 }
+  { marginRight: '5px' }
 );
 
 const hoverPrimaryButtonStyle = {
