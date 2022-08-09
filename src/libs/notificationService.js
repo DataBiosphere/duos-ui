@@ -15,7 +15,12 @@ export const NotificationService = {
    */
   getBanners: async () => {
     const env = await Config.getEnv();
-    return $.getJSON(gcs + '/' + env + '_' + bannerFileName, (data) => {
+    const hash = await Config.getHash();
+    const url =
+      env === 'local'
+        ? `/broad-duos-banner/${hash}_${bannerFileName}`
+        : gcs + '/' + env + '_' + bannerFileName;
+    return $.getJSON(url, (data) => {
       return data;
     });
   },
