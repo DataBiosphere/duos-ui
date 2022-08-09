@@ -115,7 +115,7 @@ const LibraryCardCell = ({
 }) => {
   const id = researcher.userId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
-    ? researcher.libraryCards[0]
+    ? find((card) => card.institutionId == institutionId)(researcher.libraryCards)
     : null;
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
