@@ -23,6 +23,9 @@ const darInfoPrimarySecondaryUse = {
 const primaryUseCode = 'DS';
 const secondaryUseCode = 'OTHER';
 
+const expandSlabLinkText = 'Expand to view Research Use Statement (Narrative)';
+const collapseSlabLinkText = 'Hide Research Use Statement (Narrative)';
+
 const votesForElection1 = {
   rp: {
     finalVotes: [
@@ -117,7 +120,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         darInfo={darInfoPrimarySecondaryUse}
       />
     );
-    cy.contains('Expand to view Research Purpose and Vote');
+    cy.contains(expandSlabLinkText);
   });
 
   it('Renders link to collapse when expanded', function() {
@@ -127,9 +130,9 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{key: 'test'}}
       />
     );
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
-    cy.contains('Hide Research Purpose and Vote');
+    cy.contains(collapseSlabLinkText);
   });
 
   it('Renders data use pills when expanded', function() {
@@ -139,7 +142,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{ key: 'test' }}
       />
     );
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
     cy.contains(primaryUseCode);
     cy.contains(secondaryUseCode);
@@ -152,7 +155,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{key: 'test'}}
       />
     );
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
     cy.get('[datacy=research-purpose]').should('exist');
     cy.contains('test');
@@ -176,7 +179,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       />
     );
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
     cy.get('[datacy=alert-box]').should('exist');
   });
@@ -188,7 +191,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{ key: 'test' }}
       />
     );
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
     cy.get('[datacy=alert-box]').should('not.exist');
   });
@@ -220,8 +223,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         isLoading={true}
       />
     );
-    cy.get('Hide Research Purpose and Vote').should('not.exist');
-    cy.get('Expand to view Research Purpose and Vote').should('not.exist');
+    cy.get('#expand-rp-vote-button').should('not.exist');
   });
 
   it('Renders skeleton when loading', function() {
@@ -256,7 +258,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -279,7 +281,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -302,7 +304,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -325,7 +327,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
@@ -348,7 +350,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
@@ -370,7 +372,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
     cy.stub(Votes, 'updateVotesByIds');
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
@@ -390,7 +392,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=chair-vote-info]').should('not.exist');
@@ -407,7 +409,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=chair-vote-info]').should('not.exist');
@@ -424,7 +426,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('[datacy=chair-vote-info]').should('exist');
@@ -441,7 +443,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     const component = cy.get('.table-data');
@@ -462,7 +464,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('.table-data').should('exist');
@@ -480,7 +482,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('.table-data').should('exist');
@@ -498,7 +500,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('.table-data').should('exist').should('not.contain', 'undefined');
@@ -516,7 +518,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('.table-data').should('exist');
@@ -535,7 +537,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    const link = cy.contains('Expand to view Research Purpose and Vote');
+    const link = cy.contains(expandSlabLinkText);
     link.click();
 
     cy.get('.table-data').should('exist');
