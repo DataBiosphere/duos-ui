@@ -98,8 +98,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
-    <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />
-
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />}
     <Route path="*" component={NotFound} />
   </Switch>
 );

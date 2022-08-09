@@ -37,7 +37,7 @@ export const DataSubmissionForm = () => {
                   fontSize: '1.6rem'
                 },
               },
-              ['View Dataset submissions and status']
+              ['Submit a new dataset to DUOS']
             ),
           ]),
         ]
