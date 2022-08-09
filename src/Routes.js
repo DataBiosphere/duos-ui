@@ -38,6 +38,7 @@ import MemberConsole from './pages/MemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import { HealthCheck } from './pages/HealthCheck';
+import DataSubmissionForm from './pages/DataSubmissionForm';
 
 const Routes = (props) => (
   <Switch>
@@ -97,6 +98,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
+    <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />
+
     <Route path="*" component={NotFound} />
   </Switch>
 );
