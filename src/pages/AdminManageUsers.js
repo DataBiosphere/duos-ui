@@ -18,7 +18,6 @@ const getUserList = async () => {
     if (!isNil(user.roles)) {
       user.roles.forEach(role => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.completed = user.profileCompleted;
           user.researcher = true;
         }
       });
