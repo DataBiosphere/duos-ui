@@ -966,7 +966,7 @@ class DataAccessRequestApplication extends Component {
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 checkNihDataOnly: checkNihDataOnly,
-                completed: !isNil(get('institution', this.state.researcher)),
+                completed: !isNil(get('institutionId', this.state.researcher)),
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
                 formFieldChange: this.formFieldChange,
