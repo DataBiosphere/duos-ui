@@ -10,7 +10,6 @@ import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
-export const getProjectTitle = ((collection) => collection.name);
 
 export const styles = {
   baseStyle: {

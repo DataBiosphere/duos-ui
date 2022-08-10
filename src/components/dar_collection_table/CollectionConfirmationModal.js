@@ -2,14 +2,13 @@ import {isNil} from 'lodash/fp';
 import {h} from 'react-hyperscript-helpers';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import {isCollectionCanceled} from '../../libs/utils';
-import {getProjectTitle} from './DarCollectionTable';
 
 export default function CollectionConfirmationModal(props) {
   const {collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft} = props;
 
   const getModalHeader = (collection) => {
     if(!isNil(collection)) {
-      return `${collection.darCode} - ${getProjectTitle(collection)}`;
+      return `${collection.darCode} - ${collection.name}`;
     }
     return '';
   };
