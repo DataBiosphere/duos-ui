@@ -2,14 +2,13 @@ import {isNil} from 'lodash/fp';
 import {h} from 'react-hyperscript-helpers';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import {isCollectionCanceled} from '../../libs/utils';
-import {getProjectTitle} from './DarCollectionTable';
 
 export default function CollectionConfirmationModal(props) {
   const {collection, showConfirmation, setShowConfirmation, cancelCollection, reviseCollection, openCollection, consoleAction, deleteDraft} = props;
 
-  const getModalHeader = () => {
+  const getModalHeader = (collection) => {
     if(!isNil(collection)) {
-      return `${collection.darCode} - ${getProjectTitle(collection)}`;
+      return `${collection.darCode} - ${collection.name}`;
     }
     return '';
   };
@@ -40,7 +39,7 @@ export default function CollectionConfirmationModal(props) {
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Cancel Data Access Request',
       message: `Are you sure you want to cancel ${collection.darCode}?`,
-      header: getModalHeader(),
+      header: getModalHeader(collection),
       onConfirm: cancelOnClick
     });
 
@@ -51,7 +50,7 @@ export default function CollectionConfirmationModal(props) {
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Revise Data Access Request',
       message: `Are you sure you want to revise ${collection.darCode}?`,
-      header: getModalHeader(),
+      header: getModalHeader(collection),
       onConfirm: reviseOnClick
     });
 
@@ -60,7 +59,7 @@ export default function CollectionConfirmationModal(props) {
     closeConfirmation: () => setShowConfirmation(false),
     title: 'Open Data Access Request',
     message: `Are you sure you want to open ${collection.darCode}?`,
-    header: getModalHeader(),
+    header: getModalHeader(collection),
     onConfirm: openOnClick,
   });
 
@@ -70,7 +69,7 @@ export default function CollectionConfirmationModal(props) {
     closeConfirmation: () => setShowConfirmation(false),
     title: 'Delete Data Access Request Draft',
     message: `Are you sure you want to delete ${collection.darCode}?`,
-    header: getModalHeader(),
+    header: getModalHeader(collection),
     onConfirm: deleteOnClick,
   });
 

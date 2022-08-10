@@ -1,6 +1,6 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { h } from 'react-hyperscript-helpers';
-import {isNil, isEmpty, find} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
@@ -10,13 +10,6 @@ import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
-export const getProjectTitle = ((collection) => {
-  if(collection.isDraft){return collection.projectTitle;}
-  if(!isNil(collection) && !isEmpty(collection.dars)) {
-    const darData = find((dar) => !isEmpty(dar.data))(collection.dars).data;
-    return darData.projectTitle;
-  }
-});
 
 export const styles = {
   baseStyle: {

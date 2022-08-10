@@ -42,7 +42,6 @@ const resumeDARApplication = (referenceId, history) => {
 export default function Actions(props) {
   const { showConfirmationModal, collection, goToVote, consoleType, actions = [] } = props;
   const collectionId = collection.darCollectionId;
-
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0]);
 
   const history = useHistory();
@@ -72,7 +71,7 @@ export default function Actions(props) {
     onClick: () => showConfirmationModal(collection, 'cancel'),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
-    dataTip: 'Cancel Elections',
+    dataTip: `Cancel ${consoleType === 'researcher' ? 'Collection' : 'Elections'}`,
     icon: Block,
   };
 
