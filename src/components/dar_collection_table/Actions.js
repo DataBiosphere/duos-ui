@@ -71,7 +71,7 @@ export default function Actions(props) {
     onClick: () => showConfirmationModal(collection, 'cancel'),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
-    dataTip: 'Cancel Elections',
+    dataTip: `Cancel ${consoleType === 'researcher' ? 'Collection' : 'Elections'}`,
     icon: Block,
   };
 

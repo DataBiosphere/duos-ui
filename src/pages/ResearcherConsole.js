@@ -5,32 +5,10 @@ import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import accessIcon from '../images/icon_access.png';
-import {Notifications, searchOnFilteredList, getSearchFilterFunctions, formatDate} from '../libs/utils';
+import {Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_table/DarTableActions';
 import { USER_ROLES } from '../libs/utils';
-
-const formatDraft = (draft) => {
-  const { data, referenceId, id, createDate } = draft;
-  const {
-    projectTitle,
-    datasets,
-    institution,
-  } = data;
-  const darCode = 'DRAFT_DAR_' + formatDate(createDate);
-
-  const output =  {
-    darCode,
-    referenceId,
-    darCollectionId: id,
-    projectTitle,
-    isDraft: true,
-    createDate: 'Unsubmitted',
-    datasets,
-    institution,
-  };
-  return output;
-};
 
 const filterFn = getSearchFilterFunctions().darCollections;
 

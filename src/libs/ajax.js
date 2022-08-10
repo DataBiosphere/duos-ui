@@ -190,7 +190,7 @@ export const Collections = {
     return res.data;
   },
   getCollectionSummaryByRoleNameAndId: async({roleName, id}) => {
-    const url = `${await Config.getApiUrl()}/api/collections/role/${roleName}/summary/${id}`;
+    const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary/${id}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
