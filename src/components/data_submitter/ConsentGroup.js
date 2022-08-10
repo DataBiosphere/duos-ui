@@ -132,14 +132,14 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_consent_group_name',
-        className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+        className: 'control-label'
       }, ['Consent Group Name*']),
-      div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+      div({ className: '' }, [
         input({
           type: 'text',
           name: key+'_consent_group_name',
           id: key+'_consent_group_name',
-          className: 'form-control col-lg-12',
+          className: 'form-control',
           placeholder: '',
           required: true,
           value: consentGroup.consentGroupName,
@@ -153,9 +153,10 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_primary_researcher',
-        className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+        className: 'control-label'
       }, ['Consent Group - Primary Data Use Terms*']),
-      div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+      div({ className: '' }, [
+
         RadioButton({
           style: radioButtonStyle,
           id: key+'_generalResearchUse',
@@ -204,7 +205,6 @@ export const ConsentGroup = (props) => {
           value: 'poa',
           defaultChecked: consentGroup.poa,
           onClick: () => checkPrimary('poa'),
-          label: 'Populations, Origins, Ancestry Use',
           description: 'Populations, Origins, Ancestry Use',
         }),
         RadioButton({

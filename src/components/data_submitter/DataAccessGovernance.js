@@ -29,6 +29,7 @@ export const DataAccessGovernance = (props) => {
     div({}, [
       div({},
         [
+          
           // formData.consentGroups.forEach((group, idx) =>
           h(ConsentGroup, {
             key: '0',
@@ -40,7 +41,8 @@ export const DataAccessGovernance = (props) => {
                 consentGroups: consentGroups,
               });
             },
-          })])
+          })
+        ])
     ])
   ]);
 };
