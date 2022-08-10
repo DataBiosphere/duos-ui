@@ -14,7 +14,8 @@ const baseCancelButtonStyle = Object.assign(
   {},
   Styles.TABLE.TABLE_ICON_BUTTON,
   {color: cancelGray},
-  { alignItems: 'center' }
+  { alignItems: 'center' },
+  { marginRight: '5px' }
 );
 
 const hoverPrimaryButtonStyle = {
@@ -61,7 +62,7 @@ export default function Actions(props) {
       fontSize: '1.45rem',
       fontWeight: 600,
       color: 'white',
-      marginRight: '8%'
+      marginRight: 5
     }
   };
 
@@ -90,7 +91,7 @@ export default function Actions(props) {
       fontSize: '1.45rem',
       fontWeight: 600,
       color: 'white',
-      marginRight: '8%',
+      marginRight: 5,
       border: `1px ${duosBlue} solid`,
     },
   };
@@ -110,7 +111,7 @@ export default function Actions(props) {
       fontSize: '1.45rem',
       fontWeight: 600,
       color: duosBlue,
-      marginRight: '8%',
+      marginRight: 5,
       border: `1px ${duosBlue} solid`
     }
   };
@@ -130,7 +131,8 @@ export default function Actions(props) {
       padding: '3%',
       fontSize: '1.45rem',
       fontWeight: 600,
-      border: `1px solid ${Theme.palette.secondary}`
+      border: `1px solid ${Theme.palette.secondary}`,
+      marginRight: 5
     },
   };
 
@@ -156,7 +158,7 @@ export default function Actions(props) {
     hoverStyle: hoverPrimaryButtonStyle,
     additionalStyle: {
       padding: '3%',
-      marginRight: '2%',
+      marginRight: 5,
       fontSize: '1.45rem',
       fontWeight: 600,
       border: `1px solid ${Theme.palette.secondary}`,
@@ -171,6 +173,7 @@ export default function Actions(props) {
       padding: '3%',
       fontSize: '1.45rem',
       fontWeight: 600,
+      marginRight: 5
     },
     hoverStyle: hoverPrimaryButtonStyle,
     isRendered: actions.includes('Revise'),

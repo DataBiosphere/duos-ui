@@ -1,205 +1,152 @@
-import _ from 'lodash';
-import { Component, Fragment } from 'react';
-import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
-import ReactTooltip from 'react-tooltip';
+import { useState, useRef, useEffect } from 'react';
+import { a, div, h, span, img } from 'react-hyperscript-helpers';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from '../images/icon_manage_users.png';
 import {USER_ROLES} from '../libs/utils';
 import { isNil } from 'lodash/fp';
+import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTable';
+import { Styles } from '../libs/theme';
+import SearchBar from '../components/SearchBar';
+import {Notification} from '../components/Notification';
 
-class AdminManageUsers extends Component {
+const getUserList = async () => {
+  const users = await User.list(USER_ROLES.admin);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchText: '',
-      userList: [],
-      showAddUserModal: false,
-      limit: 10,
-      currentPage: null,
-    };
-  }
-
-  componentDidMount() {
-    this.getUsers();
-  }
-
-  async getUsers() {
-    const users = await User.list(USER_ROLES.admin);
-    let userList = users.map(user => {
-      user.researcher = false;
-      if (!isNil(user.roles)) {
-        user.roles.forEach(role => {
-          if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-            user.completed = user.profileCompleted;
-            user.researcher = true;
-          }
-        });
-      }
-      user.key = user.id;
-      return user;
-    });
-
-    this.setState(prev => {
-      prev.currentPage = 1;
-      prev.userList = userList;
-      return prev;
-    }, () => {
-      ReactTooltip.rebuild();
-    });
-
-  }
-
-  search = (e) => {
-    let query = e.target.value;
-    this.setState(prev => {
-      prev.currentPage = 1;
-      prev.searchUsers = query;
-      return prev;
-    });
-
-  };
-
-  handlePageChange = page => {
-    this.setState(prev => {
-      prev.currentPage = page;
-      return prev;
-    });
-  };
-
-  handleSizeChange = size => {
-    this.setState(prev => {
-      prev.limit = size;
-      prev.currentPage = 1;
-      return prev;
-    });
-  };
-
-  addUser = () => {
-    this.setState(prev => {
-      prev.user = null;
-      prev.showAddUserModal = true;
-      return prev;
-    });
-  };
-
-  editUser = (user) => () => {
-    this.props.history.push(`/admin_edit_user/${user.userId}`);
-  };
-
-  okModal = async () => {
-    this.setState(prev => {
-      prev.showAddUserModal = false;
-      return prev;
-    }, () => {
-      this.getUsers();
-    });
-  };
-
-  closeModal = () => {
-    this.setState(prev => { prev.showAddUserModal = false; return prev; });
-  };
-
-  afterModalOpen = () => {
-    this.setState(prev => { prev.showAddUserModal = false; return prev; });
-  };
-
-  handleSearchUser = (query) => {
-    this.setState({ searchUserText: query });
-  };
-
-  searchTable = (query) => (row) => {
-    if (query) {
-      let text = JSON.stringify(row);
-      return text.toLowerCase().includes(query.toLowerCase());
+  return users.map(user => {
+    user.researcher = false;
+    if (!isNil(user.roles)) {
+      user.roles.forEach(role => {
+        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
+          user.completed = user.profileCompleted;
+          user.researcher = true;
+        }
+      });
     }
-    return true;
+    user.key = user.id;
+    return user;
+  });
+};
+
+export const AdminManageUsers = function AdminManageUsers() {
+  const [searchText, setSearchText] = useState('');
+  const [userList, setUserList] = useState([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const searchRef = useRef('');
+
+  useEffect(() => {
+    setIsLoading(true);
+    getUserList().then((userList) => {
+      setIsLoading(false);
+      setUserList(userList);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+      Notification.showError({text: 'Error: Unable to retrieve user data from server'});
+    });
+  }, []);
+
+  const addUser = () => {
+    setSelectedUser(null);
+    setShowAddUserModal(true);
   };
 
-  render() {
+  const okModal = async () => {
+    setShowAddUserModal(false);
+    setIsLoading(true);
+    let userList = await getUserList();
+    setIsLoading(false);
+    setUserList(userList);
+  };
 
-    const { currentPage, searchUserText } = this.state;
+  const closeModal = () => {
+    setShowAddUserModal(false);
+  };
 
-    return (
-      div({ className: 'container container-wide' }, [
-        div({ className: 'row no-margin' }, [
-          div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
-            PageHeading({ id: 'manageUsers', imgSrc: manageUsersIcon, iconSize: 'medium', color: 'common', title: 'Manage Users', description: 'Select and manage users and their roles' }),
-          ]),
-          div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7' }, [
-              h(SearchBox, { id: 'manageUsers', searchHandler: this.handleSearchUser, pageHandler: this.handlePageChange, color: 'common' })
-            ]),
+  const afterModalOpen = () => {
+    setShowAddUserModal(false);
+  };
 
-            a({
-              id: 'btn_addUser',
-              className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin',
-              onClick: this.addUser
-            }, [
-              div({ className: 'all-icons add-user_white' }),
-              span({}, ['Add User']),
-            ]),
+  const handleSearchUser = (query) => {
+    setSearchText(query);
+  };
 
-            AddUserModal({
-              isRendered: this.state.showAddUserModal,
-              showModal: this.state.showAddUserModal,
-              onOKRequest: this.okModal,
-              onCloseRequest: this.closeModal,
-              onAfterOpen: this.afterModalOpen,
-              user: this.state.user,
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
+      div(
+        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
+        [
+          div({ style: Styles.ICON_CONTAINER }, [
+            img({
+              id: 'manage-users-icon',
+              src: manageUsersIcon,
+              style: Styles.HEADER_IMG,
             }),
-
-          ])
-        ]),
-        div({ className: 'jumbotron table-box' }, [
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header common-color' }, ['User Name']),
-            div({ className: 'col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header common-color' }, ['Google account id']),
-            div({ className: 'col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-header common-color' }, ['User Role']),
-            div({ className: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-header common-color f-center' }, ['Edit User']),
           ]),
+          div({ style: Styles.HEADER_CONTAINER }, [
+            div({ style: {
+              fontFamily: 'Montserrat',
+              fontWeight: 600,
+              fontSize: '2.8rem'
+            } }, [
+              'Edit User',
+            ]),
+            div(
+              {
+                style: {
+                  fontFamily: 'Montserrat',
+                  fontSize: '1.6rem'
+                },
+              },
+              ['Edit a User in the system']
+            ),
+          ]),
+        ]
+      ),
+      h(SearchBar, {
+        handleSearchChange: handleSearchUser,
+        searchRef,
+        style: {
+          width: '60%',
+          margin: '0 3% 0 0',
+        },
+        button: div({
+          style: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+          }
+        }, [
+          a({
+            id: 'btn_addUser',
+            className: 'btn-primary btn-add common-background',
+            onClick: addUser
+          }, [
+            div({ className: 'all-icons add-user_white' }),
+            span({}, ['Add User']),
+          ]),
+        ]),
+      }),
+    ]),
+    h(ManageUsersTable, {
+      userList,
+      isLoading,
+      searchText
+    }),
 
-          hr({ className: 'table-head-separator' }),
-
-          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user) => {
-            return h(Fragment, { key: user.userId }, [
-              div({ id: user.userId, className: 'row no-margin tableRow' }, [
-                div({ id: user.userId + '_name', name: 'userName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text' }, [user.displayName]),
-                div({ id: user.userId + '_email', name: 'userEmail', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text' }, [user.email]),
-                div({ id: user.userId + '_roles', name: 'userRoles', className: 'col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold' }, [
-                  span({ className: 'admin-users-list'},
-                    _.map(_.sortedUniq(_.map(user.roles, 'name')),
-                      (n) => {return span({ className: 'enabled default-color'}, n);})
-                  ),
-                ]),
-                div({ className: 'col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center' }, [
-                  button({
-                    id: user.userId + '_btnEditUser',
-                    name: 'btn_editUser',
-                    className: 'cell-button hover-color',
-                    onClick: this.editUser(user)
-                  }, ['Edit']),
-                ]),
-              ]),
-              hr({ className: 'table-body-separator' })
-            ]);
-          }),
-          PaginatorBar({
-            total: this.state.userList.filter(this.searchTable(searchUserText)).length,
-            limit: this.state.limit,
-            currentPage: this.state.currentPage,
-            onPageChange: this.handlePageChange,
-            changeHandler: this.handleSizeChange,
-          }),
-
-        ])
-      ])
-    );
-  }
-}
+    AddUserModal({
+      isRendered: showAddUserModal,
+      showModal: showAddUserModal,
+      onOKRequest: okModal,
+      onCloseRequest: closeModal,
+      onAfterOpen: afterModalOpen,
+      user: selectedUser,
+    }),
+  ]);
+};
 
 export default AdminManageUsers;

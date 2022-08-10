@@ -112,24 +112,35 @@ export default function ResearcherConsole() {
     }
   };
 
+
+  //Draft delete, by referenceIds
+  const deleteDraftById = async ({ referenceId }) => {
+    const collectionsClone = cloneDeep(researcherCollections);
+    await DAR.deleteDar(referenceId);
+    const targetIndex = findIndex((draft) => {
+      return draft.referenceIds[0] === referenceId;
+    })(collectionsClone);
+
+    // if deleted index, remove it from the collections array
+    collectionsClone.splice(targetIndex, 1);
+    setResearcherCollections(collectionsClone);
+
+    return targetIndex;
+  };
+
   //Draft delete, passed down to draft table to be used with delete button
-  const deleteDraft = async ({ referenceId, identifier }) => {
+  const deleteDraft = async ({ referenceIds, darCode }) => {
     try {
-      await DAR.deleteDar(referenceId);
-      const collectionsClone = cloneDeep(researcherCollections);
-      const targetIndex = findIndex((draft) => {
-        return draft.referenceId === referenceId;
-      })(collectionsClone);
+      const targetIndex = deleteDraftById({ referenceId: referenceIds[0] });
+
       if (targetIndex === -1) {
         Notifications.showError({ text: 'Error processing delete request' });
       } else {
-        collectionsClone.splice(targetIndex, 1);
-        setResearcherCollections(collectionsClone);
-        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${darCode}`});
       }
     } catch (error) {
       Notifications.showError({
-        text: `Failed to delete Data Access Request Draft ${identifier}`,
+        text: `Failed to delete Data Access Request Draft ${darCode}`,
       });
     }
 
