@@ -19,7 +19,6 @@ export default function ResearcherProfile(props) {
     selectedSigningOfficialId: undefined,
     suggestedSigningOfficial: undefined,
     eraCommonsId: undefined,
-    completed: undefined,
     email: undefined,
     id: undefined
   });
