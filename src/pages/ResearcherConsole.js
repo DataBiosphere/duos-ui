@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, flow, concat, uniqBy} from 'lodash/fp';
+import {cloneDeep, findIndex} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
@@ -39,15 +39,6 @@ export default function ResearcherConsole() {
   const [filteredList, setFilteredList] = useState();
   const searchRef = useRef('');
 
-  //basic helper to process promises for collections and drafts in init
-  const handlePromise = (promise, targetArray, errorMsg, newError) => {
-    if(promise.status === 'rejected') {
-      errorMsg.push(newError);
-    } else {
-      return concat(targetArray, promise.value);
-    }
-  };
-
   //callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
     searchRef.current.value,
@@ -60,40 +51,9 @@ export default function ResearcherConsole() {
   //sequence of init events on component load
   useEffect(() => {
     const init = async () => {
-      let errorMsg = [];
-      const promiseReturns = await Promise.allSettled([
-        Collections.getCollectionsForResearcher(),
-        DAR.getDraftDarRequestList()
-      ]);
-      const [fetchedCollections, fetchedDraftsPayload] = promiseReturns;
-      // Need some extra formatting steps for drafts due to different payload format
-      // Workaround for the API returning a cartesian product of draft dars
-      const uniqueFetchedDrafts = uniqBy('dar.id')(fetchedDraftsPayload.value || []);
-      const fetchedDrafts = {
-        status: fetchedDraftsPayload.status,
-        value: flow(
-          map((draftPayload) => draftPayload.dar),
-          map(formatDraft),
-        )(uniqueFetchedDrafts || [])
-      };
-      let collectionArray = [];
-      collectionArray = handlePromise(
-        fetchedCollections,
-        collectionArray,
-        errorMsg,
-        'Failed to fetch Data Access Request Collection'
-      );
-      collectionArray = handlePromise(
-        fetchedDrafts,
-        collectionArray,
-        errorMsg,
-        'Failed to fetch Data Access Request Drafts'
-      );
-      if(!isEmpty(errorMsg)) {
-        Notifications.showError({text: errorMsg.join('\n')});
-      }
-      setResearcherCollections(collectionArray);
-      setFilteredList(collectionArray);
+      const collections = await Collections.getCollectionSummariesByRoleName('Researcher');
+      setResearcherCollections(collections);
+      setFilteredList(collections);
       setIsLoading(false);
     };
     init();
@@ -152,24 +112,35 @@ export default function ResearcherConsole() {
     }
   };
 
+
+  //Draft delete, by referenceIds
+  const deleteDraftById = async ({ referenceId }) => {
+    const collectionsClone = cloneDeep(researcherCollections);
+    await DAR.deleteDar(referenceId);
+    const targetIndex = findIndex((draft) => {
+      return draft.referenceIds[0] === referenceId;
+    })(collectionsClone);
+
+    // if deleted index, remove it from the collections array
+    collectionsClone.splice(targetIndex, 1);
+    setResearcherCollections(collectionsClone);
+
+    return targetIndex;
+  };
+
   //Draft delete, passed down to draft table to be used with delete button
-  const deleteDraft = async ({ referenceId, identifier }) => {
+  const deleteDraft = async ({ referenceIds, darCode }) => {
     try {
-      await DAR.deleteDar(referenceId);
-      const collectionsClone = cloneDeep(researcherCollections);
-      const targetIndex = findIndex((draft) => {
-        return draft.referenceId === referenceId;
-      })(collectionsClone);
+      const targetIndex = deleteDraftById({ referenceId: referenceIds[0] });
+
       if (targetIndex === -1) {
         Notifications.showError({ text: 'Error processing delete request' });
       } else {
-        collectionsClone.splice(targetIndex, 1);
-        setResearcherCollections(collectionsClone);
-        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${darCode}`});
       }
     } catch (error) {
       Notifications.showError({
-        text: `Failed to delete Data Access Request Draft ${identifier}`,
+        text: `Failed to delete Data Access Request Draft ${darCode}`,
       });
     }
 

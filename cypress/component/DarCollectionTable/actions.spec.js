@@ -8,9 +8,35 @@ import { Storage } from '../../../src/libs/storage';
 
 let propCopy;
 const collectionId = 1;
-const collectionSkeleton = {
-  darCollectionId: collectionId,
-  dars: undefined
+const refId1 = '0a4jn-g838d-bsdg8-6s7fs7';
+
+const darColl = {
+  'darCollectionId': collectionId,
+  'referenceIds': [
+    '4a3fd-g77fd-2f345-4h2g31',
+    '0a4jn-g838d-bsdg8-6s7fs7',
+  ],
+  'darCode': 'DAR-9583',
+  'name': 'Example DAR 1',
+  'submissionDate': '2022-07-26',
+  'researcherName': 'John Doe',
+  'institutionName': 'Broad Institute',
+  'status': 'Draft',
+  'hasVoted': false,
+  'datasetCount': 4
+};
+
+const draftDarColl = {
+  'darCollectionId': null,
+  'referenceIds': [refId1],
+  'darCode': 'DRAFT-023',
+  'name': null,
+  'submissionDate': '2022-07-26',
+  'researcherName': null,
+  'institutionName': null,
+  'status': 'Draft',
+  'hasVoted': false,
+  'datasetCount': 10
 };
 
 const user = {
@@ -28,9 +54,9 @@ const user = {
 
 const props = {
   consoleType: 'chair',
-  collection: collectionSkeleton,
-  showCancelModal: () => {},
-  updateCollections: () => {}
+  collection: darColl,
+  showConfirmationModal: () => {},
+  history: {}
 };
 
 beforeEach(() => {
@@ -65,7 +91,7 @@ describe('Actions - Open Button', () => {
 
 describe('Actions - Close Button', () => {
   it('should render if there is a valid election for canceling (all open elections)', () => {
-    propCopy.actions = ['Cancel'];
+    propCopy.actions = ['Cancel', 'Vote'];
     mount(<Actions {...propCopy} />);
     const closeButton = cy.get(`#chair-cancel-${collectionId}`);
     closeButton.should('exist');
@@ -106,6 +132,81 @@ describe('Actions - Update Button', () => {
     mount(<Actions {...propCopy} />);
     const voteButton = cy.get(`#chair-update-${collectionId}`);
     voteButton.should('exist');
+  });
+});
+
+describe('Researcher Actions - Revise Button', () => {
+  it('renders the revise button if the collection is revisable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Revise', 'Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-revise-${collectionId}`).should('exist');
+  });
+  it('does not render if the election is not revisable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-revise-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Review Button', () => {
+  it('renders the review button if the collection is reviewable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Revise', 'Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-${collectionId}`).should('exist');
+  });
+  it('does not render if the election is not reviewable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Revise'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-review-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Resume Button', () => {
+  it('renders the resume button if the collection is resumable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Resume', 'Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-resume-${collectionId}`).should('exist');
+  });
+  it('does not render if the election is not resumable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-resume-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Delete Button', () => {
+  it('renders the delete button if the collection is deletable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Delete', 'Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-delete-${collectionId}`).should('exist');
+  });
+  it('does not render if the election is not deletable', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.actions = ['Review'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
+  });
+});
+
+describe('Researcher Actions - Draft', () => {
+  it('uses the referenceId in id if draft', () => {
+    propCopy.consoleType = 'researcher';
+    propCopy.collection = draftDarColl;
+    propCopy.actions = ['Revise', 'Resume', 'Review', 'Cancel', 'Delete'];
+    mount(<Actions {...propCopy} />);
+    cy.get(`#researcher-delete-${collectionId}`).should('not.exist');
+    cy.get(`#researcher-resume-${refId1}`).should('exist');
+    cy.get(`#researcher-review-${refId1}`).should('exist');
+    cy.get(`#researcher-cancel-${refId1}`).should('exist');
+    cy.get(`#researcher-delete-${refId1}`).should('exist');
+    cy.get(`#researcher-revise-${refId1}`).should('exist');
   });
 });
 
