@@ -110,9 +110,9 @@ export const getPropertyValuesFromUser = (user) => {
 };
 
 export const applyHoverEffects = (e, style) => {
-  nonFPForEach((key, value) => {
+  nonFPForEach(style, (value, key) => {
     e.target.style[key] = value;
-  })(style);
+  });
 };
 
 export const highlightExactMatches = (highlightedWords, content) => {
