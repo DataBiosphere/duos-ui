@@ -395,9 +395,7 @@ export const updateCollectionFn = ({collections, filterFn, searchRef, setCollect
       });
     } else {
       const collectionsCopy = cloneDeep(collections);
-      //NOTE: update does not return datasets, so a direct collection update will mess up the datasets column
-      //That's not a big deal, we know the only things updated were the elections, so we can still update the dars (sicne elections are nested inside)
-      collectionsCopy[targetIndex].dars = updatedCollection.dars;
+      collectionsCopy[targetIndex] = updatedCollection;
       const updatedFilteredList = filterFn(
         searchRef.current.value,
         collectionsCopy
@@ -407,30 +405,37 @@ export const updateCollectionFn = ({collections, filterFn, searchRef, setCollect
     }
   };
 
-export const cancelCollectionFn = ({updateCollections, role}) =>
-  async ({ darCode, darCollectionId }) => {
-    try {
-      const canceledCollection = await Collections.cancelCollection(
-        darCollectionId,
-        role
-      );
-      updateCollections(canceledCollection);
-      Notifications.showSuccess({ text: `Successfully canceled ${darCode}` });
-    } catch (error) {
-      Notifications.showError({ text: `Error canceling ${darCode}` });
-    }
-  };
+export const cancelCollectionFn =
+  ({ updateCollections, role }) =>
+    async ({ darCode, darCollectionId }) => {
+      try {
+        await Collections.cancelCollection(darCollectionId, role);
+        const summary = await Collections.getCollectionSummaryByRoleNameAndId({
+          id: darCollectionId,
+          roleName: role,
+        });
+        updateCollections(summary);
+        Notifications.showSuccess({ text: `Successfully canceled ${darCode}` });
+      } catch (error) {
+        Notifications.showError({ text: `Error canceling ${darCode}` });
+      }
+    };
 
-export const openCollectionFn = ({updateCollections}) =>
-  async ({ darCode, darCollectionId }) => {
-    try {
-      const openCollection = await Collections.openElectionsById(darCollectionId);
-      updateCollections(openCollection);
-      Notifications.showSuccess({ text: `Successfully opened ${darCode}` });
-    } catch (error) {
-      Notifications.showError({ text: `Error opening ${darCode}` });
-    }
-  };
+export const openCollectionFn =
+  ({ updateCollections, role }) =>
+    async ({ darCode, darCollectionId }) => {
+      try {
+        await Collections.openElectionsById(darCollectionId);
+        const summary = await Collections.getCollectionSummaryByRoleNameAndId({
+          id: darCollectionId,
+          roleName: role,
+        });
+        updateCollections(summary);
+        Notifications.showSuccess({ text: `Successfully opened ${darCode}` });
+      } catch (error) {
+        Notifications.showError({ text: `Error opening ${darCode}` });
+      }
+    };
 
 
 //helper function used in DarCollectionReview to update final vote on source of truth

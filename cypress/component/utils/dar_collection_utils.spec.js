@@ -15,7 +15,7 @@ import {
   rpVoteKey
 } from '../../../src/utils/DarCollectionUtils';
 import {Collections, Match} from '../../../src/libs/ajax';
-import {formatDate, Notifications} from '../../../src/libs/utils';
+import {formatDate, Notifications, USER_ROLES} from '../../../src/libs/utils';
 import {cloneDeep, forEach, includes, concat} from 'lodash/fp';
 
 const openableAndClosableDars = {
@@ -177,40 +177,48 @@ describe('updateCollectionFn', () => {
 describe('cancelCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
-    const callback = cancelCollectionFn({updateCollections, role: 'admin'});
+    const callback = cancelCollectionFn({updateCollections, role: USER_ROLES.admin});
     expect(callback).to.exist;
   });
 
   it('updates collections and filteredList on successful cancel', async () => {
-    let collections = [{dars: {1: {status: 'Open'}}}];
-    const updatedCollection = {dars: {1: {status: 'Canceled'}}};
+    let collections = [{status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1}];
+    const updatedCollection = {status: 'Complete', darCode: 'DAR-1', darCollectionId: 1};
     const updateCollections = (collection) => collections = [collection];
     const callback = cancelCollectionFn({updateCollections});
-    cy.stub(Collections, 'cancelCollection').returns(updatedCollection);
+    cy.stub(Collections, 'cancelCollection').returns();
+    cy.stub(Collections, 'getCollectionSummaryByRoleNameAndId').returns(
+      updatedCollection
+    );
     cy.stub(Notifications, 'showSuccess').returns(undefined);
     cy.stub(Notifications, 'showError').returns(undefined);
 
-    await callback({darCode: 'test', darCollectionId: 1});
+    await callback({darCode: '', darCollectionId: 1});
     expect(collections).to.not.be.empty;
-    expect(collections[0].dars[1].status).to.equal(updatedCollection.dars[1].status);
+    expect(collections[0].darCollectionId).to.equal(1);
+    expect(collections[0].status).to.equal('Complete');
   });
 });
 
 describe('openCollectionFn', () => {
   it('returns a callback function for consoles to use', () => {
     const updateCollections = (arr) => collections = arr;
-    const callback = openCollectionFn(updateCollections);
+    const callback = openCollectionFn({updateCollections, role: USER_ROLES.admin});
     expect(callback).to.exist;
   });
 
   it('updatesCollections on a successful open', async () => {
-    const updatedCollection = {dars: {1: {status: 'Open'}}};
-    cy.stub(Collections, 'openElectionsById').returns(updatedCollection);
-    let collections = [{dars: {1: {status: 'Canceled'}}}];
+    let collections = [{status: 'Complete', darCode: 'DAR-1', darCollectionId: 1}];
+    const updatedCollection = {status: 'In Progress', darCode: 'DAR-1', darCollectionId: 1};
+    cy.stub(Collections, 'openElectionsById').returns({});
+    cy.stub(Collections, 'getCollectionSummaryByRoleNameAndId').returns(
+      updatedCollection
+    );
     const updateCollections = (collection) => collections = [collection];
     const callback = openCollectionFn({updateCollections});
-    await callback({darCode: 'test', darCollectionId: 1});
-    expect(collections[0].dars[1].status).to.equal(updatedCollection.dars[1].status);
+    await callback({darCode: '', darCollectionId: 1});
+    expect(collections[0].darCode).to.equal('DAR-1');
+    expect(collections[0].status).to.equal('In Progress');
   });
 });
 
