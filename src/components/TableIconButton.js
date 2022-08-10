@@ -22,6 +22,7 @@ export default function TableIconButton(props) {
   }, []);
 
   const onMouseEnterFn = (e) => {
+    e.target.style.cursor = 'pointer';
     applyHoverEffects(e, hoverStyle);
   };
 
