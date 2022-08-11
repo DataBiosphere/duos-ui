@@ -1,6 +1,7 @@
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, uniq } from 'lodash/fp';
+import { cloneDeep, uniq, get, set } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
+import { Theme } from '../../libs/theme';
 import './ds_common.css';
 
 export const styles = {
@@ -59,8 +60,8 @@ const onFormInputChange = (config, value) => {
   if (isValidInput) {
     onChange({key: id, value: normalizedValue});
     const formInfoClone = cloneDeep(formInfo);
-    formInfoClone[id] = normalizedValue;
-    setFormInfo(formInfoClone);
+    const updatedFormInfo = set(id, normalizedValue, formInfoClone);
+    setFormInfo(updatedFormInfo);
   }
 };
 
@@ -91,7 +92,7 @@ const formInputText = (config) => {
     type: type || 'text',
     className: `form-control ${errors[id] ? 'errored' : ''}`,
     placeholder: placeholder || title,
-    defaultValue: formInfo[id] || defaultValue || '',
+    defaultValue: get(id, formInfo) || defaultValue || '',
     style: { ...styles.inputStyle, ...inputStyle },
     disabled: disabled,
     onChange: (event) => onFormInputChange(config, event.target.value),
@@ -152,7 +153,7 @@ const formInputMultiText = (config) => {
       onBlur: (event) => pushValue(event)
     }),
     div({ style: { ...styles.flexRow, justifyContent: null } },
-      formInfo[id]?.map((val, i) => {
+      get(id, formInfo)?.map((val, i) => {
         return h(button, {
           key: val,
           className: 'pill btn-xs',
@@ -187,16 +188,16 @@ const formInputSelect = (config) => {
 const formInputCheckbox = (config) => {
   const {
     id, disabled, errors, toggleText,
-    formInfo
+    formInfo, defaultValue
   } = config;
 
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
       id: `cb_${id}_${toggleText}`,
-      checked: formInfo[id],
+      checked: get(id, formInfo) === undefined ? defaultValue : get(id, formInfo),
       className: 'checkbox-inline',
-      onChange: (val) => onFormInputChange(config, val),
+      onChange: (event) => onFormInputChange(config, event.target.checked),
       disabled
     }),
     label({
@@ -221,7 +222,7 @@ const formInputSlider = (config) => {
       input({
         type: 'checkbox',
         id: `cb_${id}_${toggleText}`,
-        checked: formInfo[id] === undefined ? defaultValue : formInfo[id],
+        checked: get(id, formInfo) === undefined ? defaultValue : get(id, formInfo),
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
         disabled
@@ -257,12 +258,12 @@ const formInputSlider = (config) => {
 */
 export const formField = (config) => {
   const {
-    id, title, description,
+    id, title, hideTitle, description,
     required, style, errors
   } = config;
 
   return div({ key: `formControl_${id}`, style: style, className: 'formField-container' }, [
-    label({
+    title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${errors[id] ? 'errored' : ''}`,
       htmlFor: id
@@ -275,4 +276,46 @@ export const formField = (config) => {
   ]);
 };
 
+export const formTable = (config) => {
+  const {
+    id, formFields,
+    onChange, errors, setErrors, formInfo, setFormInfo
+  } = config;
+
+  return div({ id, className: 'formTable' }, [
+    div({ className: 'formTable-row' }, formFields.map(x => {
+      return label({ className: 'control-label' }, [x.title]);
+    })),
+    get(id, formInfo).map((formRow, i) => {
+      return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
+        return formField({
+          ...formCol,
+          id: `${id}.${i}.${formCol.id}`,
+          hideTitle: true,
+          onChange, errors, setErrors, formInfo, setFormInfo
+        });
+      }));
+    }),
+    div({ style: { display: 'flex', width: '100%', justifyContent: 'flex-end' } }, [
+      h(button, {
+        key: 'add-new-filetype',
+        className: 'pill btn-xs',
+        style: {
+          backgroundColor: Theme.palette.secondary,
+          borderRadius: 0,
+          marginRight: 0
+        },
+        type: 'button',
+        onClick: () => {
+          const formInfoClone = cloneDeep(formInfo);
+          formInfoClone.fileTypes.push({});
+          setFormInfo(formInfoClone);
+        }
+      }, [
+        'Add New Filetype',
+        span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })
+      ])
+    ])
+  ]);
+};
 

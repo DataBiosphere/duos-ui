@@ -43,3 +43,32 @@
 .formField-container .dropdown-toggle .select-caret {
   position: initial;
 }
+
+.formTable-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.formTable-row:first-of-type,
+.formTable-row:nth-of-type(2) {
+  margin-top: 0;
+}
+
+.formTable-row .formField-container {
+  width: 100%;
+  margin-left: 10px;
+}
+
+.formTable-row .formField-container:first-of-type,
+.formTable-row .control-label:first-of-type {
+  margin-left: 0;
+}
+
+.formTable-row .control-label {
+  width: 100%;
+  text-align: left;
+  margin-left: 10px;
+}
