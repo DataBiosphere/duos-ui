@@ -57,7 +57,7 @@ export default function DataSubmissionStudyInformation(props) {
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
     formField({
-      id: 'studyDesc',
+      id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
       onChange, errors, setErrors, formInfo, setFormInfo
@@ -69,32 +69,32 @@ export default function DataSubmissionStudyInformation(props) {
       type: 'multitext',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    div({ style: styles.flexRow }, [
+    div({ style: styles.flexRow, id: 'fileTypes' }, [
       formField({
         id: 'fileType',
         title: 'File Type',
         type: 'select',
         selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
-        style: { width: '31%' },
+        style: { width: '100%', marginRight: 20 },
         onChange, errors, setErrors, formInfo, setFormInfo
       }),
       formField({
-        id: 'funcEq',
+        id: 'functionalEquivalence',
         title: 'Functional Equivalence',
         placeholder: 'Type',
-        style: { width: '31%' },
+        style: { width: '100%', marginRight: 20 },
         onChange, errors, setErrors, formInfo, setFormInfo
       }),
       formField({
-        id: 'numParticipants',
+        id: 'numberOfParticipants',
         title: '# of Participants',
         placeholder: 'number',
-        style: { width: '31%' },
+        style: { width: '100%' },
         onChange, errors, setErrors, formInfo, setFormInfo
       })
     ]),
     formField({
-      id: 'phenotype',
+      id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
@@ -104,7 +104,7 @@ export default function DataSubmissionStudyInformation(props) {
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
     formField({
-      id: 'principalInvestigatorName',
+      id: 'piName',
       title: 'Principal Investigator Name',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
@@ -127,7 +127,6 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Data Custodian Email',
       type: 'multitext',
       isValid: isEmailAddress,
-      description: 'hello there this is me',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
     formField({

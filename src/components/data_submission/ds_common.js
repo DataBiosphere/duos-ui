@@ -25,7 +25,8 @@ const validateFormInput = (config, value) => {
     required, isValid
   } = config;
 
-  const requiredValid = !required || (required && value);
+  const valueExists = value || value === 0 || value === false;
+  const requiredValid = !required || (required && valueExists);
   const customValid = !isValid || isValid(value);
   const isValidInput = requiredValid && customValid;
   const errorsClone = cloneDeep(errors);
@@ -47,19 +48,19 @@ const normalizeValue = (value) => {
   } else if (Array.isArray(value)) {
     return value.map(x => normalizeValue(x));
   }
-  console.log('in normalize value, got here', value)
   return value;
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange } = config;
+  const { id, onChange, formInfo, setFormInfo } = config;
   const normalizedValue = normalizeValue(value);
-  console.log('normalizedValue', normalizedValue)
-
   const isValidInput = validateFormInput(config, normalizedValue);
 
   if (isValidInput) {
     onChange({key: id, value: normalizedValue});
+    const formInfoClone = cloneDeep(formInfo);
+    formInfoClone[id] = normalizedValue;
+    setFormInfo(formInfoClone);
   }
 };
 
@@ -200,7 +201,7 @@ const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${errors[id] ? 'errored' : ''}`,
-      for: `cb_${id}_${toggleText}`,
+      htmlFor: `cb_${id}_${toggleText}`,
       style: {
         fontWeight: 'normal',
         fontStyle: 'italic'
@@ -211,18 +212,18 @@ const formInputCheckbox = (config) => {
 
 const formInputSlider = (config) => {
   const {
-    id, disabled, toggleText,
+    id, disabled, toggleText, defaultValue,
     formInfo
   } = config;
 
   return div({ style: { ...styles.flexRow, justifyContent: 'unset', alignItems: 'center' } }, [
-    label({ className: 'switch', for: `cb_${id}_${toggleText}` }, [
+    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
       input({
         type: 'checkbox',
         id: `cb_${id}_${toggleText}`,
-        checked: formInfo[id],
+        checked: formInfo[id] === undefined ? defaultValue : formInfo[id],
         className: 'checkbox-inline',
-        onChange: (val) => onFormInputChange(config, val),
+        onChange: (event) => onFormInputChange(config, event.target.checked),
         disabled
       }),
       div({className: 'slider round'}),
