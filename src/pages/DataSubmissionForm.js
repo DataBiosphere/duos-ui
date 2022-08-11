@@ -8,9 +8,7 @@ export const DataSubmissionForm = () => {
 
   // NOTE: remove after adding components
   /* eslint-disable no-unused-vars */
-  const [formData, setFormData] = useState({
-    consentGroups: [{}],
-  });
+  const [formData, setFormData] = useState({});
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
@@ -50,7 +48,6 @@ export const DataSubmissionForm = () => {
       style: {
         paddingLeft: '5%',
         paddingRight: '5%',
-
       }
     }, [
       h(DataAccessGovernance, {
