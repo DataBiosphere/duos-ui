@@ -53,6 +53,12 @@ export const DataSubmissionForm = () => {
       h(DataAccessGovernance, {
         formData: formData,
         setFormData: setFormData,
+        updateFormData: (update) => {
+          setFormData({
+            ...formData,
+            ...update,
+          });
+        }
       }),
     ])
 

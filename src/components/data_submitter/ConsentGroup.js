@@ -2,35 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { div, input, label, h, span, a, button } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil } from 'lodash/fp';
 import {RadioButton} from '../RadioButton';
-import {SearchSelect} from '../SearchSelect';
+import DataSubmitterStyles from './DataSubmitterStyles';
 
-const cardStyle = {
-  border: '1px solid #283593',
-  padding: '0 2rem 1rem 2rem',
-  borderRadius: '4px',
-};
-const radioButtonStyle = {
-  fontFamily: 'Montserrat',
-  fontSize: '14px',
-};
-const radioContainer = {
-  marginTop: '.5rem',
-};
-const checkboxTextStyle = {
-  fontSize: '14px',
-  paddingTop: '.5rem',
-};
-const textInputStyle = {
-  width: '70%',
-  height: '48px'
-};
-const headerStyle = {
-  fontWeight: 'bold',
-  color: '#333F52',
-  fontSize: '16px',
-  marginTop: '1.5rem',
-  marginBottom: '1rem'
-};
 
 // show text iff text
 const ConditionalText = (props) => {
@@ -45,14 +18,14 @@ const ConditionalText = (props) => {
 
   const show = useCallback(() => {
     return !isNil(text);
-  }, [text])
+  }, [text]);
 
   return div({
     isRendered: show(),
   }, [
     input({
       type: 'text',
-      style: textInputStyle,
+      style: DataSubmitterStyles.textInput,
       value: text,
       onChange: (e) => setText(e.target.value),
       name: idx,
@@ -136,32 +109,19 @@ export const ConsentGroup = (props) => {
       }});
   };
 
-  const deselectPrimary = () => {
-    setConsentGroup({
-      ...consentGroup,
-      ...{
-        generalResearchUse: false,
-        hmb: false,
-        diseaseSpecificUse: undefined,
-        poa: false,
-        otherPrimary: undefined,
-      }
-    });
-  };
-
-  return div({style: cardStyle}, [
+  return div({style: DataSubmitterStyles.consentGroupCard}, [
     // name
 
     div({ className: 'form-group' }, [
       label({
         id: idx+'_consent_group_name',
         className: 'control-label',
-        style: headerStyle,
+        style: DataSubmitterStyles.header,
       }, ['Consent Group Name*']),
       div({ className: '' }, [
         input({
           type: 'text',
-          style: textInputStyle,
+          style: DataSubmitterStyles.textInput,
           name: idx+'_consent_group_name',
           id: idx+'_consent_group_name',
           className: 'form-control',
@@ -179,16 +139,12 @@ export const ConsentGroup = (props) => {
       label({
         id: idx+'_primary_researcher',
         className: 'control-label',
-        style: headerStyle,
+        style: DataSubmitterStyles.header,
       }, ['Consent Group - Primary Data Use Terms*']),
       div({ className: '' }, [
 
         div({
-          style: {
-            marginBottom: '1rem',
-            fontSize: '14px',
-            fontWeight: '100',
-          }
+          style: DataSubmitterStyles.headerDescription
         }, [
           span({}, [
             'Please select one of the following data use permissions for your dataset'
@@ -197,10 +153,10 @@ export const ConsentGroup = (props) => {
 
 
         div({
-          style: radioContainer,
+          style: DataSubmitterStyles.radioContainer,
         }, [
           RadioButton({
-            style: radioButtonStyle,
+            style: DataSubmitterStyles.radioButton,
             id: idx+'_generalResearchUse',
             name: idx+'_generalResearchUse',
             value: 'generalResearchUse',
@@ -211,10 +167,10 @@ export const ConsentGroup = (props) => {
         ]),
 
         div({
-          style: radioContainer,
+          style: DataSubmitterStyles.radioContainer,
         }, [
           RadioButton({
-            style: radioButtonStyle,
+            style: DataSubmitterStyles.radioButton,
             id: idx+'_hmb',
             name: idx+'_hmb',
             value: 'hmb',
@@ -225,10 +181,10 @@ export const ConsentGroup = (props) => {
         ]),
 
         div({
-          style: radioContainer,
+          style: DataSubmitterStyles.radioContainer,
         }, [
           RadioButton({
-            style: radioButtonStyle,
+            style: DataSubmitterStyles.radioButton,
             id: idx+'_diseaseSpecificUse',
             name: idx+'_diseaseSpecificUse',
             value: 'diseaseSpecificUse',
@@ -247,10 +203,10 @@ export const ConsentGroup = (props) => {
         }, []),
 
         div({
-          style: radioContainer,
+          style: DataSubmitterStyles.radioContainer,
         }, [
           RadioButton({
-            style: radioButtonStyle,
+            style: DataSubmitterStyles.radioButton,
             id: idx+'_poa',
             name: idx+'_poa',
             value: 'poa',
@@ -261,10 +217,10 @@ export const ConsentGroup = (props) => {
         ]),
 
         div({
-          style: radioContainer,
+          style: DataSubmitterStyles.radioContainer,
         }, [
           RadioButton({
-            style: radioButtonStyle,
+            style: DataSubmitterStyles.radioButton,
             id: idx+'_otherPrimary',
             name: idx+'_otherPrimary',
             value: 'otherPrimary',
@@ -289,15 +245,11 @@ export const ConsentGroup = (props) => {
       label({
         id: idx+'_primary_researcher',
         className: 'control-label',
-        style: headerStyle,
+        style: DataSubmitterStyles.header,
       }, ['Consent Secondary Data Use Terms']),
 
       div({
-        style: {
-          marginBottom: '1rem',
-          fontSize: '14px',
-          fontWeight: '100',
-        }
+        style: DataSubmitterStyles.headerDescription,
       }, [
         span({}, [
           'Select all applicable data use parameters'
@@ -314,7 +266,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_nmds',
         }, [
           span({ className: ''},
@@ -333,7 +285,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox ',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_gso',
         }, [
           span({ className: ''},
@@ -351,7 +303,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox ',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_pub',
         }, [
           span({ className: ''},
@@ -369,7 +321,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_col',
         }, [
           span({ className: ''},
@@ -387,7 +339,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_irb',
         }, [
           span({ className: ''},
@@ -404,7 +356,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_gs',
         }, [
           span({ className: ''},
@@ -431,7 +383,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_mor',
         }, [
           span({ className: ''},
@@ -449,7 +401,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_npu',
         }, [
           span({ className: ''},
@@ -466,7 +418,7 @@ export const ConsentGroup = (props) => {
         }),
         label({
           className: 'regular-checkbox',
-          style: checkboxTextStyle,
+          style: DataSubmitterStyles.checkboxText,
           htmlFor: idx+'_otherSecondary',
         }, [
           span({ className: ''},
@@ -488,7 +440,7 @@ export const ConsentGroup = (props) => {
       label({
         id: idx+'_primary_researcher',
         className: 'control-label',
-        style: headerStyle,
+        style: DataSubmitterStyles.header,
       }, ['Data Location*']),
       // h(SearchSelect, {
       //   options: [
@@ -505,7 +457,7 @@ export const ConsentGroup = (props) => {
       // }),
       input({
         type: 'text',
-        style: textInputStyle,
+        style: DataSubmitterStyles.textInput,
         className: 'form-control',
         value: consentGroup.url,
         onChange: (e) => updateField('url', e.target.value),

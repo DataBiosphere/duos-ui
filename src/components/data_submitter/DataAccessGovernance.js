@@ -1,57 +1,43 @@
 import ConsentGroup from './ConsentGroup';
 import { useEffect, useState } from 'react';
 import { cloneDeep, isNil } from 'lodash/fp';
-import { div, h, a, span} from 'react-hyperscript-helpers';
-import SimpleButton from '../SimpleButton';
-import { Theme } from '../../libs/theme';
+import { div, h, a, span, label } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
 import {SearchSelect} from '../SearchSelect';
 import {RadioButton} from '../RadioButton';
-
-const OPEN_ACCESS = "Open Access";
-const CLOSED_ACCESS = "Closed Access";
+import DataSubmitterStyles from './DataSubmitterStyles';
 
 
-const radioButtonStyle = {
-  fontFamily: 'Montserrat',
-  fontSize: '14px',
-};
-const radioContainer = {
-  marginTop: '.5rem',
-};
+const OPEN_ACCESS = 'Open Access';
+const CLOSED_ACCESS = 'Closed Access';
+
 
 export const DataAccessGovernance = (props) => {
   const {
-    formData, setFormData
+    formData, updateFormData
   } = props;
 
   const [consentGroups, setConsentGroups] = useState([]);
   const [dacs, setDacs] = useState([]);
 
-
-  const updateFormData = (updatedFields) => {
-    setFormData({
-      ...formData,
-      ...updatedFields,
-    });
-  };
-
   useEffect(() => {
     updateFormData({
       consentGroups: consentGroups.filter((val) => !isNil(val)),
-    })
+    });
+  // eslint forces unneccessary circular dependency
+  // eslint-disable-next-line
   }, [consentGroups]);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
-  }, [])
+  }, []);
 
   const addNewConsentGroup = () => {
     const newConsentGroups = cloneDeep(consentGroups);
     newConsentGroups.push({});
-    setConsentGroups(newConsentGroups)
+    setConsentGroups(newConsentGroups);
   };
 
   const deleteConsentGroup = (idx) => {
@@ -71,17 +57,27 @@ export const DataAccessGovernance = (props) => {
     });
   };
 
-
-
   return div({}, [
+    label({
+      id: 'access_header',
+      className: 'control-label',
+      style: DataSubmitterStyles.sectionHeader,
+    }, ['Data Access Governance']),
+
+
     div({}, [
 
       // open or closed access
+      label({
+        id: 'access_header',
+        className: 'control-label',
+        style: DataSubmitterStyles.header,
+      }, ['Does the data need to be managed under Controlled or Open Access?']),
       div({
-        style: radioContainer,
+        style: DataSubmitterStyles.radioContainer,
       }, [
         RadioButton({
-          style: radioButtonStyle,
+          style: DataSubmitterStyles.radioButton,
           id: 'alternativeDataSharingPlanControlledOpenAccess',
           name: 'alternativeDataSharingPlanControlledOpenAccess',
           value: 'alternativeDataSharingPlanControlledOpenAccess',
@@ -94,10 +90,10 @@ export const DataAccessGovernance = (props) => {
       ]),
 
       div({
-        style: radioContainer,
+        style: DataSubmitterStyles.radioContainer,
       }, [
         RadioButton({
-          style: radioButtonStyle,
+          style: DataSubmitterStyles.radioButton,
           id: 'alternativeDataSharingPlanControlledOpenAccess',
           name: 'alternativeDataSharingPlanControlledOpenAccess',
           value: 'alternativeDataSharingPlanControlledOpenAccess',
@@ -109,47 +105,62 @@ export const DataAccessGovernance = (props) => {
         }),
       ]),
 
-      
+
       div({
         isRendered: formData.alternativeDataSharingPlanControlledOpenAccess === CLOSED_ACCESS,
       },
-        [
-          // select dac
+      [
 
-          h(SearchSelect, {
-            id: 'data_submission_select_dac',
-            name: 'data_submission_select_dac',
-            onSelection: (selection) => updateFormData({
-              dataAccessCommitteeId: selection,
-            }),
-            options: dacs.map((dac) => {
-              return { key: dac.dacId, displayText: dac.name };
-            }),
-            placeholder: 'Search for institution...',
-            value: formData.dataAccessCommitteeId,
-          }),
+        // select dac
+        label({
+          id: 'access_header',
+          className: 'control-label',
+          style: DataSubmitterStyles.header,
+        }, ['Data Access Committee*']),
 
-
-          // add consent groupa
-          div({className: 'right-header-section', style: {
-            display: 'flex',
-            alignItems: 'flex-end'
-          }}, [
-            a({
-              id: 'btn_addInstitution',
-              className: 'btn-primary btn-add common-background',
-              onClick: () => addNewConsentGroup(),
-            }, [
-              span({}, ['Add Consent Group'])
-            ])
+        div({
+          style: DataSubmitterStyles.headerDescription
+        }, [
+          span({}, [
+            'Please select which DAC should goverrn requests for this dataset.'
           ]),
+        ]),
+        h(SearchSelect, {
+          id: 'data_submission_select_dac',
+          name: 'data_submission_select_dac',
+          onSelection: (selection) => updateFormData({
+            dataAccessCommitteeId: selection,
+          }),
+          options: dacs.map((dac) => {
+            return { key: dac.dacId, displayText: dac.name };
+          }),
+          placeholder: 'Search for institution...',
+          value: formData.dataAccessCommitteeId,
+        }),
 
-          // consent groups
-          consentGroups
+
+        // add consent groupa
+        div({className: 'right-header-section',
+          style: {
+            display: 'flex',
+            alignItems: 'flex-end',
+            margin: '2rem 0 2rem 0'
+          }}, [
+          a({
+            id: 'btn_addInstitution',
+            className: 'btn-primary btn-add common-background',
+            onClick: () => addNewConsentGroup(),
+          }, [
+            span({}, ['Add Consent Group'])
+          ])
+        ]),
+
+        // consent groups
+        consentGroups
           .map((group, idx) => {
             if (isNil(group)) {
               return div({}, []);
-            } 
+            }
 
             return h(ConsentGroup, {
               key: idx.toString() + '_consentGroup',
@@ -159,10 +170,10 @@ export const DataAccessGovernance = (props) => {
               deleteConsentGroup: () => deleteConsentGroup(idx),
             });
           }
-            
+
           )]),
-        ])
-    ]);
+    ])
+  ]);
 };
 
 export default DataAccessGovernance;
