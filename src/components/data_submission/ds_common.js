@@ -84,7 +84,7 @@ const formInputText = (config) => {
   const {
     formInfo, id, title, type, disabled,
     placeholder, defaultValue,
-    inputStyle, errors
+    inputStyle, errors, ariaDescribedby
   } = config;
 
   return input({
@@ -96,7 +96,8 @@ const formInputText = (config) => {
     style: { ...styles.inputStyle, ...inputStyle },
     disabled: disabled,
     onChange: (event) => onFormInputChange(config, event.target.value),
-    onBlur: (event) => validateFormInput(config, event.target.value)
+    onBlur: (event) => validateFormInput(config, event.target.value),
+    'aria-describedby': ariaDescribedby,
   });
 };
 
@@ -104,7 +105,7 @@ const formInputMultiText = (config) => {
   const {
     formInfo, setFormInfo,
     id, title, type, disabled,
-    placeholder,
+    placeholder, ariaDescribedby,
     inputStyle, errors
   } = config;
 
@@ -145,6 +146,7 @@ const formInputMultiText = (config) => {
       defaultValue: '',
       style: { ...styles.inputStyle, ...inputStyle },
       disabled,
+      'aria-describedby': ariaDescribedby,
       onKeyUp: (event) => {
         if (event.code === 'Enter') {
           pushValue(event);
@@ -171,11 +173,12 @@ const formInputMultiText = (config) => {
 const formInputSelect = (config) => {
   const {
     id, title, disabled, errors,
-    selectOptions, searchPlaceholder
+    selectOptions, searchPlaceholder, ariaDescribedby
   } = config;
 
   return h(SearchSelectOrText, {
     id,
+    'aria-describedby': ariaDescribedby,
     onPresetSelection: async (selection) => onFormInputChange(config, selection),
     onManualSelection: (selection) => onFormInputChange(config, selection),
     options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
@@ -188,7 +191,7 @@ const formInputSelect = (config) => {
 const formInputCheckbox = (config) => {
   const {
     id, disabled, errors, toggleText,
-    formInfo, defaultValue
+    formInfo, defaultValue, ariaDescribedby
   } = config;
 
   return div({ className: 'checkbox' }, [
@@ -197,6 +200,7 @@ const formInputCheckbox = (config) => {
       id: `cb_${id}_${toggleText}`,
       checked: get(id, formInfo) === undefined ? defaultValue : get(id, formInfo),
       className: 'checkbox-inline',
+      'aria-describedby': ariaDescribedby,
       onChange: (event) => onFormInputChange(config, event.target.checked),
       disabled
     }),
@@ -284,14 +288,14 @@ export const formTable = (config) => {
 
   return div({ id, className: 'formTable' }, [
     div({ className: 'formTable-row' }, formFields.map(x => {
-      return label({ className: 'control-label' }, [x.title]);
+      return label({ className: 'control-label', id: `${id}.${x.title}` }, [x.title]);
     })),
     get(id, formInfo).map((formRow, i) => {
       return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
         return formField({
           ...formCol,
           id: `${id}.${i}.${formCol.id}`,
-          hideTitle: true,
+          hideTitle: true, ariaDescribedby: `${id}.${formCol.title}`,
           onChange, errors, setErrors, formInfo, setFormInfo
         });
       }));
