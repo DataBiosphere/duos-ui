@@ -1,18 +1,41 @@
-import { useState, useEffect } from 'react';
-import { div, input, label, h, span, textarea } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { useState, useEffect, useCallback } from 'react';
+import { div, input, label, h, span, textarea, a, button } from 'react-hyperscript-helpers';
+import { cloneDeep, isNil } from 'lodash/fp';
 import {RadioButton} from '../RadioButton';
 import {SearchSelect} from '../SearchSelect';
 
 const cardStyle = {
+  border: '1px solid black',
+  padding: '0 2rem 1rem 2rem',
+  borderRadius: '5px',
 
 };
-const otherTextStyle = {};
-const radioButtonStyle = {};
+const radioButtonStyle = {
+  fontFamily: 'Montserrat',
+  fontSize: '14px',
+};
+const radioContainer = {
+  marginTop: '.5rem',
+};
+const checkboxTextStyle = {
+  fontSize: '14px',
+  paddingTop: '.5rem',
+};
+const textInputStyle = {
+  width: '70%',
+  height: '48px'
+};
+const headerStyle = {
+  fontWeight: 'bold',
+  color: '#333F52',
+  fontSize: '16px',
+  marginTop: '1.5rem',
+  marginBottom: '1rem'
+};
 
+// show text iff text
 const ConditionalText = (props) => {
   const {
-    checked,
     text,
     setText,
     key,
@@ -21,22 +44,20 @@ const ConditionalText = (props) => {
   } = props;
 
 
-  useEffect(() => {
-    if (!checked) {
-      setText(undefined);
-    } else {
-      setText('');
-    }
-  }, [checked]);
+  const show = useCallback(() => {
+    return !isNil(text);
+  }, [text])
 
   return div({
-    isRendered: checked,
+    isRendered: show(),
   }, [
-    textarea({
-      style: otherTextStyle,
+    input({
+      type: 'text',
+      style: textInputStyle,
       value: text,
-      onChange: setText,
+      onChange: (e) => setText(e.target.value),
       name: key,
+      className: 'form-control',
       id: key,
       maxLength: '512',
       rows: '2',
@@ -51,16 +72,18 @@ export const ConsentGroup = (props) => {
 
   const {
     key,
+    initialConsentGroup,
     saveConsentGroup,
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
+    ...{
     consentGroupName: '',
 
     // primary: one of these needs to be filled
     generalResearchUse: undefined,
     hmb: undefined,
-    diseaseSpecificUse: undefined,
+    diseaseSpecificUse: undefined, // string
     poa: undefined,
     otherPrimary: undefined, // string
 
@@ -81,12 +104,9 @@ export const ConsentGroup = (props) => {
     dataLocation: [],
 
     url: ''
+  },
+  ...initialConsentGroup,
   });
-
-  const [showDiseaseSpecificUse, setShowDiseaseSpecificUse] = useState(false);
-  const [showOtherPrimary, setShowOtherPrimary] = useState(false);
-  const [showOtherSecondary, setShowOtherSecondary] = useState(false);
-  const [showGeographicRestriction, setShowGeographicRestriction] = useState(false);
 
   const updateField = (field, val) => {
     const newConsentGroup = cloneDeep(consentGroup);
@@ -96,20 +116,19 @@ export const ConsentGroup = (props) => {
   };
 
 
-  const checkPrimary = (field) => {
-    const fields = {
-      generalResearchUse: false,
-      hmb: false,
-      diseaseSpecificUse: false,
-      poa: false
-    };
-
-    fields[field] = true;
-
+  const setPrimary = (field, val=true) => {
     setConsentGroup({
       ...consentGroup,
-      ...fields
-    });
+      ...{
+        generalResearchUse: false,
+        hmb: false,
+        diseaseSpecificUse: undefined,
+        poa: false,
+        otherPrimary: undefined,
+      },
+      ...{
+        [field]: val,
+      }});
   };
 
   const deselectPrimary = () => {
@@ -118,13 +137,12 @@ export const ConsentGroup = (props) => {
       ...{
         generalResearchUse: false,
         hmb: false,
-        diseaseSpecificUse: false,
-        poa: false
+        diseaseSpecificUse: undefined,
+        poa: false,
+        otherPrimary: undefined,
       }
     });
   };
-
-  console.log('hi');
 
   return div({style: cardStyle}, [
     // name
@@ -132,11 +150,13 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_consent_group_name',
-        className: 'control-label'
+        className: 'control-label',
+        style: headerStyle,
       }, ['Consent Group Name*']),
       div({ className: '' }, [
         input({
           type: 'text',
+          style: textInputStyle,
           name: key+'_consent_group_name',
           id: key+'_consent_group_name',
           className: 'form-control',
@@ -153,77 +173,105 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_primary_researcher',
-        className: 'control-label'
+        className: 'control-label',
+        style: headerStyle,
       }, ['Consent Group - Primary Data Use Terms*']),
       div({ className: '' }, [
 
-        RadioButton({
-          style: radioButtonStyle,
-          id: key+'_generalResearchUse',
-          name: key+'_generalResearchUse',
-          value: 'generalResearchUse',
-          defaultChecked: consentGroup.generalResearchUse,
-          onClick: () => checkPrimary('generalResearchUse'),
-          label: 'General Research Use',
-          description: 'General Research Use',
-        }),
-        RadioButton({
-          style: radioButtonStyle,
-          id: key+'_hmb',
-          name: key+'_hmb',
-          value: 'hmb',
-          defaultChecked: consentGroup.hmb,
-          onClick: () => checkPrimary('hmb'),
-          label: 'Health/Medical/Biomedical Research Use',
-          description: 'Health/Medical/Biomedical Research Use',
-        }),
-        RadioButton({
-          style: radioButtonStyle,
-          id: key+'_diseaseSpecificUse',
-          name: key+'_diseaseSpecificUse',
-          value: 'diseaseSpecificUse',
-          defaultChecked: showDiseaseSpecificUse,
-          onClick: () => {
-            deselectPrimary();
-            setShowDiseaseSpecificUse(!showDiseaseSpecificUse);
-          },
-          label: 'Disease-Specific Research Use',
-          description: 'Disease-Specific Research Use',
-        }),
+        div({
+          style: {
+            marginBottom: '1rem',
+            fontSize: '14px',
+            fontWeight: '100',
+          }
+        }, [
+          span({}, [
+            'Please select one of the following data use permissions for your dataset'
+          ]),
+        ]),
+
+
+        div({
+          style: radioContainer,
+        }, [
+          RadioButton({
+            style: radioButtonStyle,
+            id: key+'_generalResearchUse',
+            name: key+'_generalResearchUse',
+            value: 'generalResearchUse',
+            defaultChecked: consentGroup.generalResearchUse,
+            onClick: () => setPrimary('generalResearchUse'),
+            description: 'General Research Use',
+          }),
+        ]),
+
+        div({
+          style: radioContainer,
+        }, [
+          RadioButton({
+            style: radioButtonStyle,
+            id: key+'_hmb',
+            name: key+'_hmb',
+            value: 'hmb',
+            defaultChecked: consentGroup.hmb,
+            onClick: () => setPrimary('hmb'),
+            description: 'Health/Medical/Biomedical Research Use',
+          }),
+        ]),
+
+        div({
+          style: radioContainer,
+        }, [
+          RadioButton({
+            style: radioButtonStyle,
+            id: key+'_diseaseSpecificUse',
+            name: key+'_diseaseSpecificUse',
+            value: 'diseaseSpecificUse',
+            defaultChecked: !isNil(consentGroup.diseaseSpecificUse),
+            onClick: () => (isNil(consentGroup.diseaseSpecificUse) ? setPrimary('diseaseSpecificUse', '') : undefined),
+            description: 'Disease-Specific Research Use',
+          }),
+        ]),
+
         h(ConditionalText, {
-          checked: showDiseaseSpecificUse,
           text: consentGroup.diseaseSpecificUse,
-          setText: (val) => updateField('diseaseSpecificUse', val),
+          setText: (val) => setPrimary('diseaseSpecificUse', val),
           key: key + '_diseaseSpecificUseText',
           required: true,
           placeholder: 'Please enter one or more diseases'
         }, []),
-        RadioButton({
-          style: radioButtonStyle,
-          id: key+'_poa',
-          name: key+'_poa',
-          value: 'poa',
-          defaultChecked: consentGroup.poa,
-          onClick: () => checkPrimary('poa'),
-          description: 'Populations, Origins, Ancestry Use',
-        }),
-        RadioButton({
-          style: radioButtonStyle,
-          id: key+'_otherPrimary',
-          name: key+'_otherPrimary',
-          value: 'otherPrimary',
-          defaultChecked: showOtherPrimary,
-          onClick: () => {
-            deselectPrimary();
-            setShowOtherPrimary(!showOtherPrimary);
-          },
-          label: 'Other',
-          description: 'Other',
-        }),
+
+        div({
+          style: radioContainer,
+        }, [
+          RadioButton({
+            style: radioButtonStyle,
+            id: key+'_poa',
+            name: key+'_poa',
+            value: 'poa',
+            defaultChecked: consentGroup.poa,
+            onClick: () => setPrimary('poa'),
+            description: 'Populations, Origins, Ancestry Use',
+          }),
+        ]),
+
+        div({
+          style: radioContainer,
+        }, [
+          RadioButton({
+            style: radioButtonStyle,
+            id: key+'_otherPrimary',
+            name: key+'_otherPrimary',
+            value: 'otherPrimary',
+            defaultChecked: !isNil(consentGroup.otherPrimary),
+            onClick: () => (isNil(consentGroup.otherPrimary) ? setPrimary('otherPrimary', '') : undefined),
+            description: 'Other',
+          }),
+        ]),
+
         h(ConditionalText, {
-          checked: showOtherPrimary,
           text: consentGroup.otherPrimary,
-          setText: (val) => updateField('otherPrimary', val),
+          setText: (val) => setPrimary('otherPrimary', val),
           key: key + '_otherPrimaryText',
           required: true,
           placeholder: 'Please specify if selected (max 512 characters)',
@@ -235,10 +283,21 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_primary_researcher',
-        className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+        className: 'control-label',
+        style: headerStyle,
       }, ['Consent Secondary Data Use Terms']),
 
-
+      div({
+        style: {
+          marginBottom: '1rem',
+          fontSize: '14px',
+          fontWeight: '100',
+        }
+      }, [
+        span({}, [
+          'Select all applicable data use parameters'
+        ]),
+      ]),
 
       div({className: 'checkbox'}, [
         input({
@@ -247,13 +306,13 @@ export const ConsentGroup = (props) => {
           id: key+'_nmds',
           name: key+'_nmds',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_nmds',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['No methods development or validation studies (NMDS)']),
         ]),
       ]),
@@ -265,13 +324,14 @@ export const ConsentGroup = (props) => {
           id: key+'_gso',
           name: key+'_gso',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
+          className: ' ',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox ',
+          style: checkboxTextStyle,
           htmlFor: key+'_gso',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Genetic studies only (GSO)']),
         ]),
       ]),
@@ -283,13 +343,13 @@ export const ConsentGroup = (props) => {
           id: key+'_pub',
           name: key+'_pub',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox ',
+          style: checkboxTextStyle,
           htmlFor: key+'_pub',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Publication Required (PUB)']),
         ]),
       ]),
@@ -301,13 +361,13 @@ export const ConsentGroup = (props) => {
           id: key+'_col',
           name: key+'_col',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_col',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Collaboration Required (COL)']),
         ]),
       ]),
@@ -319,37 +379,35 @@ export const ConsentGroup = (props) => {
           id: key+'_irb',
           name: key+'_irb',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_irb',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Ethics Approval Required (IRB)']),
         ]),
       ]),
 
       div({className: 'checkbox'}, [
         input({
-          checked: showGeographicRestriction,
-          onChange: () => setShowGeographicRestriction(!showGeographicRestriction),
+          onChange: () => isNil(consentGroup.gs) ? updateField('gs', '') : updateField('gs', undefined),
           id: key+'_gs',
           name: key+'_gs',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_gs',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Geographic Restriction (GS-)']),
         ]),
       ]),
 
       h(ConditionalText, {
-        checked: showGeographicRestriction,
         text: consentGroup.gs,
         setText: (val) => updateField('gs', val),
         key: key + '_gstext',
@@ -365,13 +423,13 @@ export const ConsentGroup = (props) => {
           id: key+'_mor',
           name: key+'_mor',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_mor',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Publication Moratorium (MOR)']),
         ]),
       ]),
@@ -383,37 +441,35 @@ export const ConsentGroup = (props) => {
           id: key+'_npu',
           name: key+'_npu',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_npu',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Non-profit Use Only (NPU)']),
         ]),
       ]),
 
       div({className: 'checkbox'}, [
         input({
-          checked: showOtherSecondary,
-          onChange: () => setShowOtherSecondary(!showOtherSecondary),
+          onChange: () => isNil(consentGroup.otherSecondary) ? updateField('otherSecondary', '') : updateField('otherSecondary', undefined),
           id: key+'_otherSecondary',
           name: key+'_otherSecondary',
           type: 'checkbox',
-          className: 'checkbox-inline rp-checkbox',
         }),
         label({
-          className: 'regular-checkbox rp-choice-questions',
+          className: 'regular-checkbox',
+          style: checkboxTextStyle,
           htmlFor: key+'_otherSecondary',
         }, [
-          span({ className: 'access-color'},
+          span({ className: ''},
             ['Other']),
         ]),
       ]),
 
       h(ConditionalText, {
-        checked: showOtherSecondary,
         text: consentGroup.otherSecondary,
         setText: (val) => updateField('otherSecondary', val),
         key: key + '_otherSecondarytext',
@@ -426,23 +482,28 @@ export const ConsentGroup = (props) => {
     div({ className: 'form-group' }, [
       label({
         id: key+'_primary_researcher',
-        className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+        className: 'control-label',
+        style: headerStyle,
       }, ['Data Location*']),
-      h(SearchSelect, {
-        options: [
-          'AnVIL Workspace',
-          'Terra Workspace',
-          'TDR Location',
-          'Not Determined'
-        ],
-        placeholder: 'Select location',
-        id: key+'_dataLocation',
-        label: key+'_dataLocation',
-        onSelection: (selected) => updateField('dataLocation', selected),
-      }),
-      textarea({
+      // h(SearchSelect, {
+      //   options: [
+      //     'AnVIL Workspace',
+      //     'Terra Workspace',
+      //     'TDR Location',
+      //     'Not Determined'
+      //   ],
+      //   placeholder: 'Select location',
+      //   id: key+'_dataLocation',
+      //   label: key+'_dataLocation',
+      //   value: consentGroup.dataLocation,
+      //   onSelection: (selected) => updateField('dataLocation', selected),
+      // }),
+      input({
+        type: 'text',
+        style: textInputStyle,
+        className: 'form-control',
         value: consentGroup.url,
-        onChange: (val) => updateField('url', val),
+        onChange: (e) => updateField('url', e.target.value),
         name: key+'_url',
         id: key+'_url',
         maxLength: '512',
@@ -461,11 +522,25 @@ export const ConsentGroup = (props) => {
         justifyContent: 'space-between',
       }
     }, [
-      div({}, [
-        span({}, ['Delete']),
+      a({}, [
+        span({
+          className: 'cm-icon-button glyphicon glyphicon-trash',
+          'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+        }),
+        span({
+          style: {
+            marginLeft: '1rem',
+          }
+        }, ['Delete this entry']),
       ]),
       div({}, [
-        span({}, ['Save']),
+        button({
+          id: 'btn_save',
+          onClick: () => {
+            console.log(consentGroup);
+          },
+          className: 'f-right btn-primary common-background',
+        }, ['Save']),
       ]),
     ])
   ]);
