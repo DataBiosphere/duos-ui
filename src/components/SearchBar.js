@@ -7,7 +7,10 @@ import { defaultTo } from 'lodash/fp';
 export default function SearchBar(props) {
   const { handleSearchChange } = props;
   const searchTerms = useRef('');
-  const style = props.style ? props.style : {
+
+  const button = props.button ? props.button : div();
+
+  const style = {
     width: '100%',
     border: '1px solid #cecece',
     backgroundColor: '#f3f6f7',
@@ -15,7 +18,8 @@ export default function SearchBar(props) {
     height: '4rem',
     paddingLeft: '2%',
     fontFamily: 'Montserrat',
-    fontSize: '1.5rem'
+    fontSize: '1.5rem',
+    ...props.style
   };
 
   return div({className: 'right-header-section', style: Styles.RIGHT_HEADER_SECTION}, [
@@ -27,6 +31,7 @@ export default function SearchBar(props) {
       style,
       onChange:() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms),
       ref: props.searchRef || searchTerms
-    })
+    }),
+    button
   ]);
 }

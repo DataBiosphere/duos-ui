@@ -26,10 +26,13 @@ export default function DatasetCatalog(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
   const [sort, setSort] = useState({ field: 'alias', dir: 1 });
+  const [numDatasetsSelected, setNumDatasetsSelected] = useState(0);
+  const [selectedDatasets, setSelectedDatasets] = useState([]);
 
   // Selection States
-  const [allChecked, setAllChecked] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPageAllDatasets, setCurrentPageAllDatasets] = useState(1);
+  const [currentPageOnlySelected, setCurrentPageOnlySelected] = useState(1);
+
   const [dataUse, setDataUse] = useState();
   const [errorMessage, setErrorMessage] = useState();
   const [errorTitle, setErrorTitle] = useState();
@@ -45,6 +48,9 @@ export default function DatasetCatalog(props) {
   const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
+
+  const [filterToOnlySelected, setFilterToOnlySelected] = useState(false);
+
 
   const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
@@ -67,6 +73,23 @@ export default function DatasetCatalog(props) {
     })(datasets);
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
+
+  useEffect(() => {
+    const selected = datasetList.filter((ds) => ds.checked);
+
+    setNumDatasetsSelected(selected.length);
+    setSelectedDatasets(selected);
+  }, [datasetList]);
+
+  useEffect(() => {
+
+    const numPages = Math.ceil(selectedDatasets.length / pageSize);
+    // if we're past the last page, then
+    // go to the last page.
+    if (currentPageOnlySelected > numPages && numPages != 0) {
+      setCurrentPageOnlySelected(numPages);
+    }
+  }, [selectedDatasets, pageSize, currentPageOnlySelected]);
 
   // Initialize page data
   useEffect( () => {
@@ -96,6 +119,10 @@ export default function DatasetCatalog(props) {
     return dacs;
   };
 
+  const currentPage = () => {
+    return (filterToOnlySelected ? currentPageOnlySelected : currentPageAllDatasets);
+  };
+
   const downloadList = (dataset) => {
     Files.getApprovedUsersFile(dataset.dataSetId + '-ApprovedRequestors.tsv', dataset.dataSetId);
   };
@@ -103,7 +130,7 @@ export default function DatasetCatalog(props) {
   const exportToRequest = async () => {
     let datasets = [];
     let datasetIdList = [];
-    datasetList.filter(row => row.checked)
+    selectedDatasets
       .forEach(dataset => {
         const dsNameProp = find({propertyName: 'Dataset Name'})(dataset.properties);
         const label = dsNameProp.propertyValue;
@@ -222,7 +249,7 @@ export default function DatasetCatalog(props) {
   };
 
   const download = () => {
-    const listDownload = datasetList.filter(row => row.checked);
+    const listDownload = selectedDatasets;
     let dataSetsId = [];
     listDownload.forEach(dataset => {
       dataSetsId.push(dataset.dataSetId);
@@ -231,12 +258,16 @@ export default function DatasetCatalog(props) {
   };
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    if (filterToOnlySelected) {
+      setCurrentPageOnlySelected(page);
+    } else {
+      setCurrentPageAllDatasets(page);
+    }
   };
 
   const handleSizeChange = (size) => {
     setPageSize(size);
-    setCurrentPage(1);
+    handlePageChange(1);
   };
 
   const handleSearchDul = (query) => {
@@ -251,24 +282,38 @@ export default function DatasetCatalog(props) {
     return true;
   };
 
-  const selectAll = (e) => {
+  const filteredAndPaginatedDatasetList = () => {
+    return visibleDatasets().filter(searchTable(searchDulText)).slice((currentPage() - 1) * pageSize, currentPage() * pageSize);
+  };
+
+  const allOnPageSelected = () => {
+
+    const filteredList = filteredAndPaginatedDatasetList();
+
+    return filteredList.length > 0 &&  filteredList.every((row) => {
+      return row.checked || (!row.active);
+    });
+  };
+
+  const selectAllOnPage = (e) => {
     const checked = isNil(e.target.checked) ? false : e.target.checked;
-    const selectedDatasets = map(row => {
-      if (checked) {
-        // The select all case, only select active datasets
-        if (row.active) {
+
+    const datasetIdsToCheck = filteredAndPaginatedDatasetList().map((row) => {
+      return row.dataSetId;
+    });
+
+    const modifiedDatasetList = map((row) => {
+      if (row.active) {
+        if (datasetIdsToCheck.includes(row.dataSetId)) {
           row.checked = checked;
         }
-      } else {
-        // The unselect all case, ensure everything is unselected
-        row.checked = checked;
       }
+
       return row;
     })(datasetList);
 
     // Update state
-    setAllChecked(checked);
-    setDatasetList(selectedDatasets);
+    setDatasetList(modifiedDatasetList);
   };
 
   const checkSingleRow = (dataset) => (e) => {
@@ -351,6 +396,10 @@ export default function DatasetCatalog(props) {
     return false;
   };
 
+  const visibleDatasets = () => {
+    return (filterToOnlySelected ? selectedDatasets : datasetList);
+  };
+
   return (
     h(Fragment, {}, [
       div({ className: 'container container-wide' }, [
@@ -384,10 +433,58 @@ export default function DatasetCatalog(props) {
 
         div({style: Theme.lightTable}, [
           form({ className: 'pos-relative' }, [
-            div({ className: 'checkbox check-all' }, [
-              input({ checked: allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: selectAll }),
-              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
+            div({
+              className: 'checkbox display-inline-block',
+              style: {
+                marginLeft: '28px',
+                marginBottom: '0px',
+              }
+            }, [
+              input({
+                checked: allOnPageSelected(),
+                type: 'checkbox',
+                'select-all': 'true',
+                className: 'checkbox-inline',
+                id: 'chk_selectAll',
+                onChange: selectAllOnPage
+              }),
+              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, ['Select All Visible']),
             ]),
+            // vertical line
+            div({
+              className: 'display-inline-block',
+              style: {
+                top: '13px',
+                position: 'absolute',
+              }
+            }, [
+              div({
+                style: {
+                  borderLeft: '1px solid rgb(204, 204, 204)',
+                  height: '15px'
+                }
+              }, []),
+            ]),
+
+            div({
+              className: 'checkbox display-inline-block',
+              style: {
+                marginLeft: '18px',
+                marginBottom: '0px',
+              }
+            }, [
+              input({
+                type: 'checkbox',
+                id: 'chk_onlySelected',
+                checked: filterToOnlySelected,
+                className: 'checkbox-inline',
+                onChange: () => {
+                  setFilterToOnlySelected(!filterToOnlySelected);
+                }
+              }),
+              label({ id: 'lbl_onlySelected', className: 'regular-checkbox', htmlFor: 'chk_onlySelected' },
+                [`Show ${numDatasetsSelected} Dataset${(numDatasetsSelected != 1?'s':'')} Selected`])
+            ])
           ]),
 
           div({ className: currentUser.isAdmin ? 'table-scroll-admin' : 'table-scroll' }, [
@@ -414,9 +511,8 @@ export default function DatasetCatalog(props) {
                 ])
               ]),
 
-              tbody({ isRendered: !isNil(datasetList) && !isEmpty(datasetList) }, [
-                datasetList.filter(searchTable(searchDulText))
-                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              tbody({ isRendered: !isNil(visibleDatasets()) && !isEmpty(visibleDatasets()) }, [
+                filteredAndPaginatedDatasetList()
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
                       tr({ className: 'tableRow' }, [
@@ -625,9 +721,9 @@ export default function DatasetCatalog(props) {
           ]),
           div({ style: { 'margin': '0 20px 15px 20px' } }, [
             PaginatorBar({
-              total: datasetList.filter(searchTable(searchDulText)).length,
+              total: visibleDatasets().filter(searchTable(searchDulText)).length,
               limit: pageSize,
-              currentPage: currentPage,
+              currentPage: currentPage(),
               onPageChange: handlePageChange,
               changeHandler: handleSizeChange,
             })
@@ -638,7 +734,7 @@ export default function DatasetCatalog(props) {
           button({
             id: 'btn_downloadSelection',
             download: '',
-            disabled: datasetList.filter(row => row.checked).length === 0,
+            disabled: selectedDatasets.length === 0,
             onClick: download,
             className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
           }, [
@@ -650,7 +746,7 @@ export default function DatasetCatalog(props) {
           button({
             id: 'btn_applyAccess',
             isRendered: currentUser.isResearcher,
-            disabled: (datasetList.filter(row => row.checked).length === 0),
+            disabled: (selectedDatasets.length === 0),
             onClick: () => exportToRequest(),
             className: 'btn-primary dataset-background search-wrapper',
             'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
