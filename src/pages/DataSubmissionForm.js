@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import {div, img} from 'react-hyperscript-helpers';
+import {h, div, img, h1, form} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
+
+import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 
 
 export const DataSubmissionForm = () => {
@@ -23,26 +25,24 @@ export const DataSubmissionForm = () => {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: {
-              fontFamily: 'Montserrat',
-              fontWeight: 600,
-              fontSize: '2.8rem'
-            } }, [
-              'Register a Dataset',
-            ]),
+            h1(['Register a Dataset']),
             div(
-              {
-                style: {
-                  fontFamily: 'Montserrat',
-                  fontSize: '1.6rem'
-                },
-              },
+              { style: { fontSize: '1.6rem' }},
               ['Submit a new dataset to DUOS']
             ),
           ]),
         ]
       ),
     ]),
+
+    form({}, [
+      h(DataSubmissionStudyInformation, {
+        onChange: ({ key, value }) => {
+          /* eslint-disable no-console */
+          console.log(key, value);
+        }
+      })
+    ])
   ]);
 };
 

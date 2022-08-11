@@ -6,7 +6,7 @@ import {find} from 'lodash/fp';
 import './SearchSelect.css';
 
 export const SearchSelectOrText = (props) => {
-  const { onPresetSelection, onManualSelection, placeholder, options, searchPlaceholder, id, label } = props;
+  const { onPresetSelection, onManualSelection, placeholder, options, searchPlaceholder, id, label, disabled, errored, onBlur} = props;
   const [currentDisplay, setCurrentDisplay] = useState(placeholder || '');
 
   const [currentSelection, setCurrentSelection] = useState(props.value);
@@ -22,7 +22,7 @@ export const SearchSelectOrText = (props) => {
       if (item) {
         setCurrentDisplay(item.displayText);
       }
-    } else {
+    } else if (props.freetextValue) {
       setCurrentDisplay(props.freetextValue);
     }
 
@@ -70,17 +70,18 @@ export const SearchSelectOrText = (props) => {
   return (
     div({ className: 'dropdown select-dropdown', id, name: label }, [
       a({
-        className: 'btn select-btn btn-secondary dropdown-toggle',
+        className: `btn select-btn btn-secondary dropdown-toggle ${errored ? 'errored' : ''}`,
         role: 'button',
         id: 'dropdownMenuLink',
         'data-toggle': 'dropdown',
         'aria-haspopup': true,
-        'aria-expanded': false
+        'aria-expanded': false,
+        disabled
       }, [
         div({
           style: { width: '100%' }
         }, [
-          currentDisplay,
+          span([currentDisplay]),
           span({ className: 'caret select-caret caret-margin', style: { right: '2%' } })
         ])
       ]),
@@ -88,6 +89,7 @@ export const SearchSelectOrText = (props) => {
         className: 'dropdown-menu select-dropdown-menu',
         onBlur: () => {
           selectManual(searchTerms.current.value);
+          onBlur && onBlur();
         }
       }, [
         input({
@@ -105,7 +107,7 @@ export const SearchSelectOrText = (props) => {
         div({
           className: 'dropdown-divider'
         }),
-        ul({}, filteredList.map(item => {
+        ul({ style: { paddingLeft: 0 } }, filteredList.map(item => {
           return li({
             className: item.key === currentSelection
               ? 'dropdown-item select-dropdown-item active'
