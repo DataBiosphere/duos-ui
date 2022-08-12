@@ -57,6 +57,6 @@ describe('DataSubmissionStudyInformation - Tests', () => {
     cy.get('#dataSubmitterName').should('be.disabled');
     cy.get('#dataSubmitterName').should('have.value', user.displayName);
     cy.get('#dataSubmitterEmail').should('be.disabled');
-    cy.get('#dataSubmitterName').should('have.value', user.email);
+    cy.get('#dataSubmitterEmail').should('have.value', user.email);
   });
 });
