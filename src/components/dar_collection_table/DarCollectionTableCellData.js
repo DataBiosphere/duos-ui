@@ -104,9 +104,9 @@ export function institutionCellData({institutionName = '- -', darCollectionId, l
   };
 }
 
-export function datasetCountCellData({datasetIds = [], darCollectionId, label = 'datasets'}) {
+export function datasetCountCellData({collection, darCollectionId, label = 'datasets'}) {
   return {
-    data: datasetIds.length > 0 ? datasetIds.length : '- -',
+    data: collection.datasetCount || '- -',
     id: darCollectionId,
     style: {
       color: '#333F52',

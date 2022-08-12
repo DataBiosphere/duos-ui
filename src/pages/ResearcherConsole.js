@@ -30,7 +30,7 @@ export default function ResearcherConsole() {
   //sequence of init events on component load
   useEffect(() => {
     const init = async () => {
-      const collections = await Collections.getCollectionSummariesByRoleName('Researcher');
+      const collections = await Collections.getCollectionSummariesByRoleName(USER_ROLES.researcher);
       setResearcherCollections(collections);
       setFilteredList(collections);
       setIsLoading(false);
