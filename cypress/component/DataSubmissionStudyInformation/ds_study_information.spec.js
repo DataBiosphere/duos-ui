@@ -31,9 +31,9 @@ describe('DataSubmissionStudyInformation - Tests', () => {
     cy.get('.formField-studyType').should('have.length', 1);
     cy.get('.formField-studyDescription').should('have.length', 1);
     cy.get('.formField-dataTypes').should('have.length', 1);
-    cy.get('.formField-fileTypes.0.fileType').should('have.length', 1);
-    cy.get('.formField-fileTypes.0.functionalEquivlanece').should('have.length', 1);
-    cy.get('.formField-fileTypes.0.numberOfParticipants').should('have.length', 1);
+    cy.get('.formField-fileTypes-0-fileType').should('have.length', 1);
+    cy.get('.formField-fileTypes-0-functionalEquivalence').should('have.length', 1);
+    cy.get('.formField-fileTypes-0-numberOfParticipants').should('have.length', 1);
     cy.get('.formField-phenotypeIndication').should('have.length', 1);
     cy.get('.formField-species').should('have.length', 1);
     cy.get('.formField-piName').should('have.length', 1);

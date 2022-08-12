@@ -55,14 +55,14 @@ const normalizeValue = (value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, formInfo, setFormInfo } = config;
+  const { id, onChange, formInfo, setFormInfo, path } = config;
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
   if (isValidInput) {
-    onChange({key: id, value: normalizedValue});
+    onChange({key: path || id, value: normalizedValue});
     const formInfoClone = cloneDeep(formInfo);
-    const updatedFormInfo = set(id, normalizedValue, formInfoClone);
+    const updatedFormInfo = set((path || id), normalizedValue, formInfoClone);
     setFormInfo(updatedFormInfo);
   }
 };
@@ -300,15 +300,16 @@ export const formTable = (config) => {
   return div({ id, className: `formTable` }, [
     // generate columns
     div({ className: 'formTable-row' }, formFields.map(x => {
-      return label({ className: 'control-label', id: `${id}.${x.title}` }, [x.title]);
+      return label({ className: 'control-label', id: `${id}-${x.title}` }, [x.title]);
     })),
     // generate form rows
     get(id, formInfo).map((formRow, i) => {
       return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
         return formField({
           ...formCol,
-          id: `${id}.${i}.${formCol.id}`,
-          hideTitle: true, ariaDescribedby: `${id}.${formCol.title}`,
+          id: `${id}-${i}-${formCol.id}`,
+          path: `${id}.${i}.${formCol.id}`,
+          hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
           onChange, errors, setErrors, formInfo, setFormInfo
         });
       }));
