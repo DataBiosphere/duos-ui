@@ -52,9 +52,9 @@ describe('DataSubmissionStudyInformation - Tests', () => {
 
   it('should load the user information into disabled fields', () => {
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
-    cy.get('.formField-dataSubmitterName').should('be.disabled');
+    cy.get('#dataSubmitterName').should('be.disabled');
     cy.get('.formField-dataSubmitterName').should('have.value', user.displayName);
-    cy.get('.formField-dataSubmitterEmail').should('be.disabled');
+    cy.get('#dataSubmitterEmail').should('be.disabled');
     cy.get('.formField-dataSubmitterName').should('have.value', user.email);
   });
 });
