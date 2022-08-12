@@ -39,7 +39,7 @@ export const DataSubmissionForm = () => {
       h(DataSubmissionStudyInformation, {
         onChange: ({ key, value }) => {
           /* eslint-disable no-console */
-          console.log(key, value);
+          console.log('StudyInfo OnChange:', key, value);
         }
       })
     ])

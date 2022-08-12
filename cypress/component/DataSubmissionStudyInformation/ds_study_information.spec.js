@@ -51,6 +51,7 @@ describe('DataSubmissionStudyInformation - Tests', () => {
       .type('Dangerous Study')
       .trigger('change')
       .blur();
+    cy.get('#studyName').should('have.value', 'Dangerous Study');
     expect(onChangeSpy).to.be.called;
   });
 
