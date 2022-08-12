@@ -50,7 +50,6 @@ const dataLocationOptions = [
 // const dataLocationOptions = ["AnVIL Workspace", "Terra Workspace", "TDR Location", "Not Determined"]
 
 export const ConsentGroup = (props) => {
-
   const {
     idx,
     parentConsentGroup,
