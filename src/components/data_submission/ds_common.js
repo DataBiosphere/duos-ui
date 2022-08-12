@@ -245,7 +245,7 @@ const formInputSlider = (config) => {
 };
 
 //---------------------------------------------
-// Main Component
+// Main Components
 //---------------------------------------------
 /*
 * Config options:
@@ -261,6 +261,9 @@ const formInputSlider = (config) => {
 * placeholder, defaultValue,
 * style (for the formControl component)
 * inputStyle (for the input element)
+* onChange,
+* errors, setErrors,
+* formInfo, setFormInfo
 */
 export const formField = (config) => {
   const {
@@ -282,6 +285,12 @@ export const formField = (config) => {
   ]);
 };
 
+/*
+* Config options:
+* id
+* formFields: array[FormField Configs]
+* onChange, errors, setErrors, formInfo, setFormInfo
+*/
 export const formTable = (config) => {
   const {
     id, formFields,
@@ -289,9 +298,11 @@ export const formTable = (config) => {
   } = config;
 
   return div({ id, className: 'formTable' }, [
+    // generate columns
     div({ className: 'formTable-row' }, formFields.map(x => {
       return label({ className: 'control-label', id: `${id}.${x.title}` }, [x.title]);
     })),
+    // generate form rows
     get(id, formInfo).map((formRow, i) => {
       return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
         return formField({
@@ -302,6 +313,7 @@ export const formTable = (config) => {
         });
       }));
     }),
+    // add new button
     div({ style: { display: 'flex', width: '100%', justifyContent: 'flex-end' } }, [
       h(button, {
         key: 'add-new-filetype',
