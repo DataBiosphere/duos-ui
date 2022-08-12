@@ -126,59 +126,8 @@ export const darCollectionUtils = {
         electionStatusCount['Unreviewed'] = 0;
         electionStatusCount['Canceled'] = 0;
 
-        let output;
-        if(!isEmpty(collection.dars)) {
-          const targetElections = flow([
-            map((dar) => {
-              const { elections } = dar;
-              //election is empty => no elections made for dar
-              //need to figure out if dar is relevant, can obtain datasetId from dar.data
-              //see if its relevant, if it is, add 1 to submitted on hash
-              //return empty array at the end
-              if(isEmpty(elections)) {
-                // Dataset IDs should be on the DAR, but if not, pull from the dar.data
-                const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
-                forEach((datasetId) => {
-                  if (includes(relevantDatasets, datasetId)) {
-                    if (isNil(electionStatusCount['Submitted'])) {
-                      electionStatusCount['Submitted'] = 0;
-                    }
-                    electionStatusCount['Submitted']++;
-                  }
-                })(datasetIds);
-                return [];
-              } else {
-                //if elections exist, filter out elections based on relevant ids
-                //only Data Access elections impact the status of the collection
-                //NOTE: Admin does not have relevantIds, DAC roles do
-                const electionArr = filter(election => toLower(election.electionType) === 'dataaccess')(Object.values(elections));
-                if(isNil(relevantDatasets)) {
-                  return electionArr;
-                } else {
-                  const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
-                  return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
-                }
-              }
-            }),
-            flatten
-          ])(collection.dars);
-
-          if(isNil(relevantDatasets)) {
-            each(election => {
-              const {status} = election;
-              if(isNil(electionStatusCount[status])) {
-                electionStatusCount[status] = 0;
-              }
-              electionStatusCount[status]++;
-            })(targetElections);
-            output = nonFPMap(electionStatusCount, (value, key) => {
-              return `${key}: ${value}`;
-            }).join('\n');
-          } else {
-            output = outputCommaSeperatedElectionStatuses(targetElections);
-          }
-          return output;
-        }
+        // Iterate through elections
+        filteredElections
 
       }
 
