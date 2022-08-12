@@ -44,10 +44,12 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   });
 
   it('should run onChange event when user inputs values into form control', () => {
-    cy.spy(propCopy, onChange);
+    const onChangeSpy = cy.spy(propCopy, 'onChange');
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
-    cy.get('#studyName').type('Study Name');
-    expect(propCopy.onChange).to.be.calledWith({ key: 'studyName', value: 'Study Name'});
+    cy.get('#studyName').type('Dangerous Study');
+    expect(onChangeSpy).to.be.calledWith(
+      expect.objectContaining({ key: 'studyName', value: 'Dangerous Study'})
+    );
   });
 
   it('should load the user information into disabled fields', () => {
