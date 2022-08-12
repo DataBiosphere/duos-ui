@@ -275,7 +275,7 @@ export const formField = (config) => {
     title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${errors[id] ? 'errored' : ''}`,
-      htmlFor: id
+      htmlFor: `${id}`
     }, [
       title,
       required && '*'
