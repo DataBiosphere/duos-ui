@@ -78,11 +78,11 @@ const formInput = (config) => {
     case 'slider': return formInputSlider(config);
     case 'text':
     default:
-      return formInputText(config);
+      return formInputGeneric(config);
   }
 };
 
-const formInputText = (config) => {
+const formInputGeneric = (config) => {
   const {
     formInfo, id, title, type, disabled,
     placeholder, defaultValue,
