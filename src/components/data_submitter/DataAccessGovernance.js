@@ -17,16 +17,8 @@ export const DataAccessGovernance = (props) => {
     formData, updateFormData
   } = props;
 
-  const [consentGroups, setConsentGroups] = useState([]);
+  const [consentGroups, setConsentGroups] = useState((isNil(formData.consentGroups) ? [] : formData.consentGroups));
   const [dacs, setDacs] = useState([]);
-
-  useEffect(() => {
-    updateFormData({
-      consentGroups: consentGroups.filter((val) => !isNil(val)),
-    });
-  // eslint forces unneccessary circular dependency
-  // eslint-disable-next-line
-  }, [consentGroups]);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -38,12 +30,18 @@ export const DataAccessGovernance = (props) => {
     const newConsentGroups = cloneDeep(consentGroups);
     newConsentGroups.push({});
     setConsentGroups(newConsentGroups);
+    updateFormData({
+      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
+    });
   };
 
   const deleteConsentGroup = (idx) => {
     const newConsentGroups = cloneDeep(consentGroups);
     newConsentGroups[idx] = undefined;
     setConsentGroups(newConsentGroups);
+    updateFormData({
+      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
+    });
   };
 
   const updateConsentGroup = (idx, update) => {
@@ -52,8 +50,9 @@ export const DataAccessGovernance = (props) => {
       ...consentGroups[idx],
       ...update,
     };
+    setConsentGroups(newConsentGroups);
     updateFormData({
-      consentGroups: newConsentGroups,
+      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
     });
   };
 

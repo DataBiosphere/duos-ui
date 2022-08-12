@@ -3,7 +3,7 @@ import { div, input, label, h, span, a, button } from 'react-hyperscript-helpers
 import { cloneDeep, isNil } from 'lodash/fp';
 import {RadioButton} from '../RadioButton';
 import DataSubmitterStyles from './DataSubmitterStyles';
-
+import Select from 'react-select';
 
 // show text iff text
 const ConditionalText = (props) => {
@@ -39,6 +39,15 @@ const ConditionalText = (props) => {
   ]);
 };
 
+
+const dataLocationOptions = [
+  { value: 'AnVIL Workspace', label: 'AnVIL Workspace' },
+  { value: 'Terra Workspace', label: 'Terra Workspace' },
+  { value: 'TDR Location', label: 'TDR Location' },
+  { value: 'Not Determined', label: 'Not Determined' }
+];
+
+// const dataLocationOptions = ["AnVIL Workspace", "Terra Workspace", "TDR Location", "Not Determined"]
 
 export const ConsentGroup = (props) => {
 
@@ -442,19 +451,45 @@ export const ConsentGroup = (props) => {
         className: 'control-label',
         style: DataSubmitterStyles.header,
       }, ['Data Location*']),
-      // h(SearchSelect, {
-      //   options: [
-      //     'AnVIL Workspace',
-      //     'Terra Workspace',
-      //     'TDR Location',
-      //     'Not Determined'
-      //   ],
-      //   placeholder: 'Select location',
-      //   id: idx+'_dataLocation',
-      //   label: idx+'_dataLocation',
-      //   value: consentGroup.dataLocation,
-      //   onSelection: (selected) => updateField('dataLocation', selected),
-      // }),
+
+      div({style: DataSubmitterStyles.textInput}, [
+        h(Select, {
+          isMulti: true,
+          options: dataLocationOptions,
+          value: (
+            isNil(consentGroup.dataLocation)
+              ? null
+              : consentGroup.dataLocation.map((loc) => {
+                return {
+                  value: loc,
+                  label: loc,
+                };
+              })),
+          name: idx+'_dataLocation',
+          placeholder: 'Data Location(s)',
+          onChange: (selected) => {
+            const values = selected.map((s) => s.value);
+
+            if (values.includes('Not Determined')) {
+              // user selected 'Not Determined', so clear all other values
+              if (values[values.length - 1] == 'Not Determined') {
+                updateField('dataLocation', ['Not Determined']);
+                return;
+              }
+
+              // user selected something other than 'Not Determined',
+              // so remove 'Not Determined' and keep the new value.
+              const notDeterminedIdx = values.indexOf('Not Determined');
+              values.splice(notDeterminedIdx, 1);
+              updateField('dataLocation', values);
+              return;
+            }
+            updateField('dataLocation', values);
+          }
+        }),
+      ]),
+
+
       input({
         type: 'text',
         style: DataSubmitterStyles.textInput,
