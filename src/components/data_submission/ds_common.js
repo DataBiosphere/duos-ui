@@ -271,7 +271,11 @@ export const formField = (config) => {
     required, style, errors
   } = config;
 
-  return div({ key: `formControl_${id}`, style: style, className: `formField-container formField-${id}` }, [
+  return div({
+    key: `formControl_${id}`,
+    style,
+    className: `formField-container formField-${id}`
+  }, [
     title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${errors[id] ? 'errored' : ''}`,

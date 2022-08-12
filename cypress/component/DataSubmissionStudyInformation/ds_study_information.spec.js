@@ -8,6 +8,7 @@ import DataSubmissionStudyInformation from '../../../src/components/data_submiss
 let propCopy;
 const user = {
   userId: 1,
+  dacUserId: 2,
   displayName: 'Cindy Crawford',
   email: 'cc@c.com'
 };
@@ -44,15 +45,16 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   });
 
   it('should run onChange event when user inputs values into form control', () => {
-    const onChangeSpy = cy.spy(propCopy, 'onChange');
+    const textToType = 'Dangerous Study';
+    cy.spy(propCopy, 'onChange');
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
     cy.get('#studyName')
-      .click()
-      .type('Dangerous Study')
+      .type(textToType)
       .trigger('change')
-      .blur();
-    cy.get('#studyName').should('have.value', 'Dangerous Study');
-    expect(onChangeSpy).to.be.called;
+      .then(() => {
+        cy.get('#studyName').should('have.value', textToType);
+        expect(propCopy.onChange).to.be.callCount(1 /* first call is updating user id */ + textToType.length);
+      });
   });
 
   it('should load the user information into disabled fields', () => {
