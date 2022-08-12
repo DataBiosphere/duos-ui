@@ -2,6 +2,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
+import { User } from '../../../src/libs/ajax';
 import DataSubmissionStudyInformation from "../../../src/components/data_submission/ds_study_information";
 
 let propCopy;
@@ -17,7 +18,7 @@ const props = {
 
 beforeEach(() => {
   propCopy = cloneDeep(props);
-  cy.stub(Storage, 'getCurrentUser').returns(user);
+  cy.stub(User, 'getMe').returns(user);
 });
 
 describe('DataSubmissionStudyInformation - Tests', () => {
