@@ -46,7 +46,10 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   it('should run onChange event when user inputs values into form control', () => {
     const onChangeSpy = cy.spy(propCopy, 'onChange');
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
-    cy.get('#studyName').type('Dangerous Study');
+    cy.get('#studyName')
+      .click()
+      .type('Dangerous Study')
+      .trigger('change');
     expect(onChangeSpy).to.be.called;
   });
 
