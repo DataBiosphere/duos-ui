@@ -49,7 +49,8 @@ describe('DataSubmissionStudyInformation - Tests', () => {
     cy.get('#studyName')
       .click()
       .type('Dangerous Study')
-      .trigger('change');
+      .trigger('change')
+      .blur();
     expect(onChangeSpy).to.be.called;
   });
 
