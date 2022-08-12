@@ -85,7 +85,8 @@ export default function DataSubmissionStudyInformation(props) {
         }, {
           id: 'numberOfParticipants',
           title: '# of Participants',
-          placeholder: 'Number'
+          placeholder: 'Number',
+          type: 'number'
         }
       ],
       onChange, errors, setErrors, formInfo, setFormInfo

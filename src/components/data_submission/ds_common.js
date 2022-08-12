@@ -26,7 +26,7 @@ const validateFormInput = (config, value) => {
     required, isValid
   } = config;
 
-  const valueExists = value || value === 0 || value === false;
+  const valueExists = value !== undefined && value !== null && value !== '';
   const requiredValid = !required || (required && valueExists);
   const customValid = !isValid || isValid(value);
   const isValidInput = requiredValid && customValid;
@@ -47,7 +47,9 @@ const normalizeValue = (value) => {
   if (typeof value === 'string') {
     return value.trim();
   } else if (Array.isArray(value)) {
-    return value.map(x => normalizeValue(x));
+    return value
+      .map(x => normalizeValue(x))
+      .filter(x => x); // filter out null strings
   }
   return value;
 };
