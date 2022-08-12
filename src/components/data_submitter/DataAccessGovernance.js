@@ -1,4 +1,4 @@
-import ConsentGroup from './ConsentGroup';
+import ConsentGroupForm from './ConsentGroupForm';
 import { useEffect, useState } from 'react';
 import { cloneDeep, isNil } from 'lodash/fp';
 import { div, h, a, span, label } from 'react-hyperscript-helpers';
@@ -161,7 +161,7 @@ export const DataAccessGovernance = (props) => {
               return div({}, []);
             }
 
-            return h(ConsentGroup, {
+            return h(ConsentGroupForm, {
               key: idx.toString() + '_consentGroup',
               idx: idx,
               parentConsentGroup: group,
