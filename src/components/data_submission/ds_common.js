@@ -106,7 +106,7 @@ const formInputGeneric = (config) => {
 const formInputMultiText = (config) => {
   const {
     formInfo, setFormInfo,
-    id, title, type, disabled,
+    id, title, defaultValue, disabled,
     placeholder, ariaDescribedby,
     inputStyle, errors
   } = config;
@@ -142,10 +142,10 @@ const formInputMultiText = (config) => {
   return div({}, [
     input({
       id,
-      type: type || 'text',
+      type: 'text',
       className: `form-control ${errors[id] ? 'errored' : ''}`,
       placeholder: placeholder || title,
-      defaultValue: '',
+      defaultValue: defaultValue || '',
       style: { ...styles.inputStyle, ...inputStyle },
       disabled,
       'aria-describedby': ariaDescribedby,
@@ -271,7 +271,7 @@ export const formField = (config) => {
     required, style, errors
   } = config;
 
-  return div({ key: `formControl_${id}`, style: style, className: 'formField-container' }, [
+  return div({ key: `formControl_${id}`, style: style, className: `formField-container formField-${id}` }, [
     title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${errors[id] ? 'errored' : ''}`,
@@ -297,7 +297,7 @@ export const formTable = (config) => {
     onChange, errors, setErrors, formInfo, setFormInfo
   } = config;
 
-  return div({ id, className: 'formTable' }, [
+  return div({ id, className: `formTable` }, [
     // generate columns
     div({ className: 'formTable-row' }, formFields.map(x => {
       return label({ className: 'control-label', id: `${id}.${x.title}` }, [x.title]);
