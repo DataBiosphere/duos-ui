@@ -1,5 +1,5 @@
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, uniq, get, set } from 'lodash/fp';
+import { cloneDeep, get, set } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import { Theme } from '../../libs/theme';
 import './ds_common.css';
@@ -108,35 +108,32 @@ const formInputMultiText = (config) => {
     formInfo, setFormInfo,
     id, title, defaultValue, disabled,
     placeholder, ariaDescribedby,
-    inputStyle, errors
+    inputStyle, errors, onChange
   } = config;
 
   const pushValue = (event) => {
     const value = event.target.value.trim();
     const formInfoClone = cloneDeep(formInfo);
 
-    if (!value) {
+    if (!value || !validateFormInput(config, value)) {
       return;
     }
-
-    if (!validateFormInput(config, value)) {
+    if (formInfoClone[id].indexOf(value) !== -1) {
+      event.target.value = '';
       return;
-    }
-
-    if (!formInfoClone[id]) {
-      formInfoClone[id] = [];
     }
 
     formInfoClone[id].push(value);
-    formInfoClone[id] = uniq(formInfoClone[id]);
     event.target.value = '';
     setFormInfo(formInfoClone);
+    onChange({key: id, value: formInfoClone[id]});
   };
 
   const removePill = (index) => {
     const formInfoClone = cloneDeep(formInfo);
     formInfoClone[id].splice(index, 1);
     setFormInfo(formInfoClone);
+    onChange({key: id, value: formInfoClone[id]});
   };
 
   return div({}, [
@@ -265,7 +262,7 @@ const formInputSlider = (config) => {
 * errors, setErrors,
 * formInfo, setFormInfo
 */
-export const formField = (config) => {
+export const FormField = (config) => {
   const {
     id, title, hideTitle, description,
     required, style, errors
@@ -295,7 +292,7 @@ export const formField = (config) => {
 * formFields: array[FormField Configs]
 * onChange, errors, setErrors, formInfo, setFormInfo
 */
-export const formTable = (config) => {
+export const FormTable = (config) => {
   const {
     id, formFields,
     onChange, errors, setErrors, formInfo, setFormInfo
@@ -309,7 +306,7 @@ export const formTable = (config) => {
     // generate form rows
     get(id, formInfo).map((formRow, i) => {
       return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
-        return formField({
+        return FormField({
           ...formCol,
           id: `${id}-${i}-${formCol.id}`,
           path: `${id}.${i}.${formCol.id}`,

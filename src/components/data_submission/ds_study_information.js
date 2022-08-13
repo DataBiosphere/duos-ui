@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { formField, formTable } from './ds_common';
+import { FormField, FormTable } from './ds_common';
 
 const updateUserAndFields = async ({ setUser, onChange }) => {
   const me = await User.getMe();
@@ -15,7 +15,9 @@ export default function DataSubmissionStudyInformation(props) {
   const [errors, setErrors] = useState({});
   const [user, setUser] = useState(null);
   const [formInfo, setFormInfo] = useState(props.studyInfo || {
-    fileTypes: [{}]
+    dataTypes: [],
+    fileTypes: [{}],
+    dataCustodianEmail: []
   });
 
   //init hook, need to make ajax calls here
@@ -39,13 +41,13 @@ export default function DataSubmissionStudyInformation(props) {
     }
   }, [
     h2('Study Information'),
-    formField({
+    FormField({
       id: 'studyName',
       title: 'Study Name',
       required: true,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'studyType',
       title: 'Study Type',
       type: 'select',
@@ -57,20 +59,20 @@ export default function DataSubmissionStudyInformation(props) {
       ],
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
       type: 'multitext',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formTable({
+    FormTable({
       id: 'fileTypes',
       formFields: [
         {
@@ -91,43 +93,43 @@ export default function DataSubmissionStudyInformation(props) {
       ],
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'species',
       title: 'Species',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'piName',
       title: 'Principal Investigator Name',
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'dataSubmitterName',
       title: 'Data Submitter Name',
       defaultValue: user?.displayName,
       disabled: true,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
       defaultValue: user?.email,
       disabled: true,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
       type: 'multitext',
       isValid: isEmailAddress,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
-    formField({
+    FormField({
       id: 'publicVisibility',
       title: 'Public Visibility',
       required: true,
