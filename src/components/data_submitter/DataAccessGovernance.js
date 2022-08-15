@@ -93,9 +93,9 @@ export const DataAccessGovernance = (props) => {
       }, [
         RadioButton({
           style: DataSubmitterStyles.radioButton,
-          id: 'alternativeDataSharingPlanControlledOpenAccess',
-          name: 'alternativeDataSharingPlanControlledOpenAccess',
-          value: 'alternativeDataSharingPlanControlledOpenAccess',
+          id: 'alternativeDataSharingPlanControlledClosedAccess',
+          name: 'alternativeDataSharingPlanControlledClosedAccess',
+          value: 'alternativeDataSharingPlanControlledClosedAccess',
           defaultChecked: formData.alternativeDataSharingPlanControlledOpenAccess === CLOSED_ACCESS,
           onClick: () => updateFormData({
             alternativeDataSharingPlanControlledOpenAccess: CLOSED_ACCESS,
@@ -112,7 +112,7 @@ export const DataAccessGovernance = (props) => {
 
         // select dac
         label({
-          id: 'access_header',
+          id: 'data_access_committee_header',
           className: 'control-label',
           style: DataSubmitterStyles.header,
         }, ['Data Access Committee*']),
@@ -139,7 +139,9 @@ export const DataAccessGovernance = (props) => {
 
 
         // add consent groupa
-        div({className: 'right-header-section',
+        div({
+          className: 'right-header-section',
+          id: 'add-new-consent-group-btn',
           style: {
             display: 'flex',
             alignItems: 'flex-end',

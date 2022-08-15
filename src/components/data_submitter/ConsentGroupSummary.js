@@ -130,9 +130,6 @@ export const ConsentGroupSummary = (props) => {
   };
 
   return div({}, [
-
-    // row 1:
-    // name, primary consent
     div({
       style: {
         display: 'flex',
@@ -213,11 +210,6 @@ export const ConsentGroupSummary = (props) => {
         }),
       ]),
     ]),
-
-    // row 2:
-    // secondary, data location
-    // row 3:
-    // url
   ]);
 };
 

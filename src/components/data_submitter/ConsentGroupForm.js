@@ -118,7 +118,10 @@ export const ConsentGroupForm = (props) => {
       }});
   };
 
-  return div({style: DataSubmitterStyles.consentGroupCard}, [
+  return div({
+    style: DataSubmitterStyles.consentGroupCard,
+    id: idx+'_consentGroupForm'
+  }, [
 
     div({
       isRendered: !editMode,
@@ -134,7 +137,7 @@ export const ConsentGroupForm = (props) => {
       // name
       div({ className: 'form-group' }, [
         label({
-          id: idx+'_consent_group_name',
+          id: idx+'_consent_group_name_label',
           className: 'control-label',
           style: DataSubmitterStyles.header,
         }, ['Consent Group Name*']),
@@ -546,6 +549,7 @@ export const ConsentGroupForm = (props) => {
       }
     }, [
       a({
+        id: idx+'_deleteConsentGroup',
         onClick: () => deleteConsentGroup(),
       }, [
         span({
@@ -560,7 +564,7 @@ export const ConsentGroupForm = (props) => {
       ]),
       div({}, [
         button({
-          id: 'btn_save',
+          id: idx+'_editConsentGroup',
           isRendered: !editMode,
           onClick: () => {
             setEditMode(true);
@@ -569,7 +573,7 @@ export const ConsentGroupForm = (props) => {
         }, ['Edit']),
 
         button({
-          id: 'btn_save',
+          id: idx+'_saveConsentGroup',
           isRendered: editMode,
           onClick: () => {
             saveConsentGroup(consentGroup);
