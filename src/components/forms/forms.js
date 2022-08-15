@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, get, set } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import { Theme } from '../../libs/theme';
-import './ds_common.css';
+import './forms.css';
 
 export const FormFieldTypes = {
   SELECT: 'select',
@@ -31,22 +32,22 @@ export const styles = {
 //---------------------------------------------
 const validateFormInput = (config, value) => {
   const {
-    id, errors, setErrors,
-    required, isValid
+    title, setError,
+    required, isValid,
   } = config;
 
   const valueExists = value !== undefined && value !== null && value !== '';
   const requiredValid = !required || (required && valueExists);
   const customValid = !isValid || isValid(value);
   const isValidInput = requiredValid && customValid;
-  const errorsClone = cloneDeep(errors);
 
   if (isValidInput) {
-    delete errorsClone[id];
-    setErrors(errorsClone);
+    setError();
   } else {
-    errorsClone[id] = true;
-    setErrors(errorsClone);
+    setError([
+      requiredValid && `${title} is required`,
+      isValidInput
+    ]);
   }
 
   return isValidInput;
@@ -64,15 +65,13 @@ const normalizeValue = (value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, formInfo, setFormInfo, path } = config;
+  const { id, onChange, setFormValue } = config;
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
   if (isValidInput) {
-    onChange({key: path || id, value: normalizedValue});
-    const formInfoClone = cloneDeep(formInfo);
-    const updatedFormInfo = set((path || id), normalizedValue, formInfoClone);
-    setFormInfo(updatedFormInfo);
+    onChange({key: id, value: normalizedValue});
+    setFormValue(value);
   }
 };
 
@@ -93,17 +92,18 @@ const formInput = (config) => {
 
 const formInputGeneric = (config) => {
   const {
-    formInfo, id, title, type, disabled,
-    placeholder, defaultValue,
-    inputStyle, errors, ariaDescribedby
+    id, title, type, disabled,
+    placeholder,
+    inputStyle, ariaDescribedby,
+    value, error
   } = config;
 
   return input({
     id: id,
     type: type || 'text',
-    className: `form-control ${errors[id] ? 'errored' : ''}`,
+    className: `form-control ${error ? 'errored' : ''}`,
     placeholder: placeholder || title,
-    defaultValue: get(id, formInfo) || defaultValue || '',
+    value: value,
     style: { ...styles.inputStyle, ...inputStyle },
     disabled: disabled,
     onChange: (event) => onFormInputChange(config, event.target.value),
@@ -114,44 +114,43 @@ const formInputGeneric = (config) => {
 
 const formInputMultiText = (config) => {
   const {
-    formInfo, setFormInfo,
-    id, title, defaultValue, disabled,
+    id, title, disabled,
     placeholder, ariaDescribedby,
-    inputStyle, errors, onChange
+    inputStyle, onChange,
+    formValue, setFormValue, error
   } = config;
 
   const pushValue = (event) => {
     const value = event.target.value.trim();
-    const formInfoClone = cloneDeep(formInfo);
 
     if (!value || !validateFormInput(config, value)) {
       return;
     }
-    if (formInfoClone[id].indexOf(value) !== -1) {
+    if (formValue.indexOf(value) !== -1) {
       event.target.value = '';
       return;
     }
 
-    formInfoClone[id].push(value);
+    const formValueClone = cloneDeep(formValue);
+    formValueClone.push(value);
+    setFormValue(formValueClone);
+    onChange({key: id, value: formValueClone});
     event.target.value = '';
-    setFormInfo(formInfoClone);
-    onChange({key: id, value: formInfoClone[id]});
   };
 
   const removePill = (index) => {
-    const formInfoClone = cloneDeep(formInfo);
-    formInfoClone[id].splice(index, 1);
-    setFormInfo(formInfoClone);
-    onChange({key: id, value: formInfoClone[id]});
+    const formValueClone = cloneDeep(formValue);
+    formValueClone.splice(index, 1);
+    setFormValue(formValueClone);
+    onChange({key: id, value: formValueClone});
   };
 
   return div({}, [
     input({
       id,
       type: 'text',
-      className: `form-control ${errors[id] ? 'errored' : ''}`,
+      className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
-      defaultValue: defaultValue || '',
       style: { ...styles.inputStyle, ...inputStyle },
       disabled,
       'aria-describedby': ariaDescribedby,
@@ -163,7 +162,7 @@ const formInputMultiText = (config) => {
       onBlur: (event) => pushValue(event)
     }),
     div({ style: { ...styles.flexRow, justifyContent: null } },
-      get(id, formInfo)?.map((val, i) => {
+      formValue.map((val, i) => {
         return h(button, {
           key: val,
           className: 'pill btn-xs',
@@ -180,7 +179,7 @@ const formInputMultiText = (config) => {
 
 const formInputSelect = (config) => {
   const {
-    id, title, disabled, errors,
+    id, title, disabled, error,
     selectOptions, searchPlaceholder, ariaDescribedby
   } = config;
 
@@ -192,28 +191,28 @@ const formInputSelect = (config) => {
     options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
     searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
     className: 'form-control',
-    disabled, errored: errors[id]
+    disabled, errored: error
   });
 };
 
 const formInputCheckbox = (config) => {
   const {
-    id, disabled, errors, toggleText,
-    formInfo, defaultValue, ariaDescribedby
+    id, disabled, error, toggleText,
+    formValue, ariaDescribedby
   } = config;
 
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
       id: `cb_${id}_${toggleText}`,
-      checked: get(id, formInfo) === undefined ? defaultValue : get(id, formInfo),
+      checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
       onChange: (event) => onFormInputChange(config, event.target.checked),
       disabled
     }),
     label({
-      className: `regular-checkbox ${errors[id] ? 'errored' : ''}`,
+      className: `regular-checkbox ${error ? 'errored' : ''}`,
       htmlFor: `cb_${id}_${toggleText}`,
       style: {
         fontWeight: 'normal',
@@ -225,8 +224,7 @@ const formInputCheckbox = (config) => {
 
 const formInputSlider = (config) => {
   const {
-    id, disabled, toggleText, defaultValue,
-    formInfo
+    id, disabled, toggleText, formValue
   } = config;
 
   return div({ style: { ...styles.flexRow, justifyContent: 'unset', alignItems: 'center' } }, [
@@ -234,7 +232,7 @@ const formInputSlider = (config) => {
       input({
         type: 'checkbox',
         id: `cb_${id}_${toggleText}`,
-        checked: get(id, formInfo) === undefined ? defaultValue : get(id, formInfo),
+        checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
         disabled
@@ -268,14 +266,17 @@ const formInputSlider = (config) => {
 * style (for the formControl component)
 * inputStyle (for the input element)
 * onChange,
-* errors, setErrors,
+* error, setError,
 * formInfo, setFormInfo
 */
 export const FormField = (config) => {
   const {
     id, title, hideTitle, description,
-    required, style, errors
+    defaultValue, required, style
   } = config;
+
+  const [error, setError] = useState();
+  const [formValue, setFormValue] = useState(defaultValue);
 
   return div({
     key: `formControl_${id}`,
@@ -284,14 +285,18 @@ export const FormField = (config) => {
   }, [
     title && !hideTitle && label({
       id: `lbl_${id}`,
-      className: `control-label ${errors[id] ? 'errored' : ''}`,
+      className: `control-label ${error ? 'errored' : ''}`,
       htmlFor: `${id}`
     }, [
       title,
       required && '*'
     ]),
     description && div({ style: { marginBottom: 15 } }, [description]),
-    formInput(config)
+    formInput({
+      ...config,
+      error, setError,
+      formValue, setFormValue
+    })
   ]);
 };
 
@@ -299,35 +304,53 @@ export const FormField = (config) => {
 * Config options:
 * id
 * formFields: array[FormField Configs]
-* onChange, errors, setErrors, formInfo, setFormInfo
+* onChange, error, setError, formInfo, setFormInfo
 */
 export const FormTable = (config) => {
   const {
-    id, formFields,
-    onChange, errors, setErrors, formInfo, setFormInfo
+    id, formFields, defaultValue,
+    onChange
   } = config;
 
-  return div({ id, className: `formTable` }, [
+  const [formValue, setFormValue] = useState(defaultValue || [{}]);
+
+  return div({ id, className: `formField-container formField-${id}` }, [
     // generate columns
-    div({ className: 'formTable-row' }, formFields.map(x => {
+    div({ className: 'formTable-row formTable-cols' }, formFields.map(x => {
       return label({ className: 'control-label', id: `${id}-${x.title}` }, [x.title]);
     })),
     // generate form rows
-    get(id, formInfo).map((formRow, i) => {
-      return div({ className: 'formTable-row', key: `formtable-${id}-${i}` }, formFields.map(formCol => {
-        return FormField({
-          ...formCol,
-          id: `${id}-${i}-${formCol.id}`,
-          path: `${id}.${i}.${formCol.id}`,
-          hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-          onChange, errors, setErrors, formInfo, setFormInfo
-        });
-      }));
+    formValue?.map((formRow, i) => {
+      return div({ className: 'formTable-row formTable-data-row', key: `formtable-${id}-${i}` }, [
+        ...formFields.map(formCol => {
+          return h(FormField, {
+            ...formCol,
+            id: `${id}-${i}-${formCol.id}`,
+            hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
+            onChange: (({ value }) => onChange({key: `${id}.${i}.${formCol.id}`, value }))
+          });
+        }),
+        h(button, {
+          id: `delete-table-row-${id}-${i}`,
+          key: `delete-table-row-${id}-${i}`,
+          className: 'btn-formTable-delete btn-xs',
+          type: 'button',
+          onClick: () => {
+            const formValueClone = cloneDeep(formValue);
+            formValueClone.splice(i, 1);
+            setFormValue(formValueClone);
+            onChange({ key: id, value: formValueClone });
+          }
+        }, [
+          span({ className: 'glyphicon glyphicon-remove' })
+        ])
+      ]);
     }),
     // add new row to table button
     div({ style: { display: 'flex', width: '100%', justifyContent: 'flex-end' } }, [
       h(button, {
-        key: 'add-new-filetype',
+        id: `add-new-table-row-${id}`,
+        key: `add-new-table-row-${id}`,
         className: 'pill btn-xs',
         style: {
           backgroundColor: Theme.palette.secondary,
@@ -336,9 +359,10 @@ export const FormTable = (config) => {
         },
         type: 'button',
         onClick: () => {
-          const formInfoClone = cloneDeep(formInfo);
-          formInfoClone.fileTypes.push({});
-          setFormInfo(formInfoClone);
+          const formValueClone = cloneDeep(formValue);
+          formValueClone.push({});
+          setFormValue(formValueClone);
+          onChange({ key: id, value: formValueClone });
         }
       }, [
         'Add New Filetype',

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import {h, div, img, h1, form} from 'react-hyperscript-helpers';
+import { cloneDeep, set } from 'lodash/fp';
+
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
 
@@ -40,6 +42,9 @@ export const DataSubmissionForm = () => {
         onChange: ({ key, value }) => {
           /* eslint-disable no-console */
           console.log('StudyInfo OnChange:', key, value);
+          const formDataClone = cloneDeep(formData);
+          const updatedFormInfo = set(key, value, formDataClone);
+          setFormData(formDataClone);
         }
       })
     ])

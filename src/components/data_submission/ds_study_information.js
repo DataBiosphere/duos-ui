@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormFieldTypes, FormField, FormTable } from './ds_common';
+import { FormFieldTypes, FormField, FormTable } from '../forms/forms';
 
 const updateUserAndFields = async ({ setUser, onChange }) => {
   const me = await User.getMe();
@@ -12,26 +12,21 @@ const updateUserAndFields = async ({ setUser, onChange }) => {
 
 export default function DataSubmissionStudyInformation(props) {
   const { onChange } = props;
-  const [errors, setErrors] = useState({});
   const [user, setUser] = useState(null);
-  const [formInfo, setFormInfo] = useState(props.studyInfo || {
-    dataTypes: [],
-    fileTypes: [{}],
-    dataCustodianEmail: []
-  });
 
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async () => {
       try {
-        updateUserAndFields({ setUser, onChange });
+        updateUserAndFields({ setUser, ...props });
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
       }
     };
 
     init();
-  }, [onChange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // need the eslint to force useEffect to only run on initialization
 
   return h(div, {
     style: {
@@ -45,7 +40,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyName',
       title: 'Study Name',
       required: true,
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'studyType',
@@ -57,20 +52,21 @@ export default function DataSubmissionStudyInformation(props) {
         'Case report', 'Case series', 'Cross-sectional',
         'Cohort study'
       ],
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
+      defaultValue: [],
       type: FormFieldTypes.MULTITEXT,
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormTable({
       id: 'fileTypes',
@@ -91,43 +87,45 @@ export default function DataSubmissionStudyInformation(props) {
           type: FormFieldTypes.NUMBER
         }
       ],
-      onChange, errors, setErrors, formInfo, setFormInfo
+      defaultValue: [{}],
+      onChange
     }),
     FormField({
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'species',
       title: 'Species',
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'piName',
       title: 'Principal Investigator Name',
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'dataSubmitterName',
       title: 'Data Submitter Name',
       defaultValue: user?.displayName,
       disabled: true,
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
       defaultValue: user?.email,
       disabled: true,
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
       type: FormFieldTypes.MULTITEXT,
+      defaultValue: [],
       isValid: isEmailAddress,
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     }),
     FormField({
       id: 'publicVisibility',
@@ -139,7 +137,7 @@ export default function DataSubmissionStudyInformation(props) {
         to be publicly visible for the requesters to see and select
         for an access request`,
       toggleText: 'Visible',
-      onChange, errors, setErrors, formInfo, setFormInfo
+      onChange
     })
   ]);
 }

@@ -1,0 +1,88 @@
+.control-label {
+  font-weight: bold;
+  color: #333F52;
+  font-size: 16px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.dropdown.select-dropdown .errored,
+.form-control.errored {
+  border: 1px solid red;
+}
+
+.errored {
+  color: red;
+}
+
+.pill {
+  background-color: #0948B7;
+  color: white;
+  padding: 10px 10px;
+  border: 0;
+  border-radius: 20px;
+  margin: 10px 10px 0 0;
+}
+
+.formField-container .dropdown-toggle {
+  padding: 25px 15px;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+  border: 1px solid #999999;
+}
+
+.formField-container .dropdown-toggle > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  width: 100%;
+}
+
+.formField-container .dropdown-toggle .select-caret {
+  position: initial;
+}
+
+.formTable-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.formTable-row:first-of-type,
+.formTable-row:nth-of-type(2) {
+  margin-top: 0;
+}
+
+.formTable-row .formField-container {
+  width: 100%;
+  margin-left: 10px;
+}
+
+.formTable-row .formField-container:first-of-type,
+.formTable-row .control-label:first-of-type {
+  margin-left: 0;
+}
+
+.formTable-row.formTable-cols {
+  width: calc(100% - 35px);
+}
+
+.formTable-row .control-label {
+  width: 100%;
+  text-align: left;
+  margin-left: 10px;
+}
+
+.formTable-row .btn-formTable-delete {
+  padding-top: 0;
+  color:#0948B7;
+  background-color: transparent;
+  border: 0;
+  width: 35px;
+  height: 50px;
+  flex-shrink: 0;
+}
