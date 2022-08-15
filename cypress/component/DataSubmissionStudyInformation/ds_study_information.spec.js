@@ -68,7 +68,7 @@ describe('DataSubmissionStudyInformation - Tests', () => {
         .type(textToType)
         .then(() => {
           cy.get('#studyName').should('have.value', textToType);
-          expect(propCopy.onChange).to.be.callCount(1 /* first call is updating user id */ + textToType.length);
+          expect(propCopy.onChange).to.be.calledWith({key: 'studyName', value: textToType}); // code value
         });
     });
 
