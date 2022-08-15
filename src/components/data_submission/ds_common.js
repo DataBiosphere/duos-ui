@@ -324,7 +324,7 @@ export const FormTable = (config) => {
         });
       }));
     }),
-    // add new button
+    // add new row to table button
     div({ style: { display: 'flex', width: '100%', justifyContent: 'flex-end' } }, [
       h(button, {
         key: 'add-new-filetype',
