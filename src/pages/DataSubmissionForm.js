@@ -3,7 +3,7 @@ import {h, div, img, h1, form} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
 
-import DataSubmissionStudyInformation from '../components/data_submission/DsStudyInformation';
+import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 
 
 export const DataSubmissionForm = () => {
