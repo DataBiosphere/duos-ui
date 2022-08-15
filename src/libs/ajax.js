@@ -352,16 +352,6 @@ export const DAR = {
     return res.data;
   },
 
-  //new manage endpoint, should be renamed once v1 variant is removed from use
-  getDataAccessManageV2: async(roleName) => {
-    let url = `${await getApiUrl()}/api/dar/manage/v2`;
-    if (!isNil(roleName)) {
-      url = `${await getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
-    }
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
