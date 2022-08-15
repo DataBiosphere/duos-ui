@@ -1,35 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-import {cloneDeep, map, findIndex, isEmpty, flow, concat, uniqBy} from 'lodash/fp';
+import {cloneDeep, findIndex} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import accessIcon from '../images/icon_access.png';
-import {Notifications, searchOnFilteredList, getSearchFilterFunctions, formatDate} from '../libs/utils';
+import {Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_table/DarTableActions';
-
-const formatDraft = (draft) => {
-  const { data, referenceId, id, createDate } = draft;
-  const {
-    projectTitle,
-    datasets,
-    institution,
-  } = data;
-  const darCode = 'DRAFT_DAR_' + formatDate(createDate);
-
-  const output =  {
-    darCode,
-    referenceId,
-    darCollectionId: id,
-    projectTitle,
-    isDraft: true,
-    createDate: 'Unsubmitted',
-    datasets,
-    institution,
-  };
-  return output;
-};
+import { USER_ROLES } from '../libs/utils';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
@@ -38,15 +17,6 @@ export default function ResearcherConsole() {
   const [researcherCollections, setResearcherCollections] = useState();
   const [filteredList, setFilteredList] = useState();
   const searchRef = useRef('');
-
-  //basic helper to process promises for collections and drafts in init
-  const handlePromise = (promise, targetArray, errorMsg, newError) => {
-    if(promise.status === 'rejected') {
-      errorMsg.push(newError);
-    } else {
-      return concat(targetArray, promise.value);
-    }
-  };
 
   //callback function passed to search bar to perform filter
   const handleSearchChange = useCallback(() => searchOnFilteredList(
@@ -60,40 +30,9 @@ export default function ResearcherConsole() {
   //sequence of init events on component load
   useEffect(() => {
     const init = async () => {
-      let errorMsg = [];
-      const promiseReturns = await Promise.allSettled([
-        Collections.getCollectionsForResearcher(),
-        DAR.getDraftDarRequestList()
-      ]);
-      const [fetchedCollections, fetchedDraftsPayload] = promiseReturns;
-      // Need some extra formatting steps for drafts due to different payload format
-      // Workaround for the API returning a cartesian product of draft dars
-      const uniqueFetchedDrafts = uniqBy('dar.id')(fetchedDraftsPayload.value || []);
-      const fetchedDrafts = {
-        status: fetchedDraftsPayload.status,
-        value: flow(
-          map((draftPayload) => draftPayload.dar),
-          map(formatDraft),
-        )(uniqueFetchedDrafts || [])
-      };
-      let collectionArray = [];
-      collectionArray = handlePromise(
-        fetchedCollections,
-        collectionArray,
-        errorMsg,
-        'Failed to fetch Data Access Request Collection'
-      );
-      collectionArray = handlePromise(
-        fetchedDrafts,
-        collectionArray,
-        errorMsg,
-        'Failed to fetch Data Access Request Drafts'
-      );
-      if(!isEmpty(errorMsg)) {
-        Notifications.showError({text: errorMsg.join('\n')});
-      }
-      setResearcherCollections(collectionArray);
-      setFilteredList(collectionArray);
+      const collections = await Collections.getCollectionSummariesByRoleName(USER_ROLES.researcher);
+      setResearcherCollections(collections);
+      setFilteredList(collections);
       setIsLoading(false);
     };
     init();
@@ -113,14 +52,15 @@ export default function ResearcherConsole() {
   const cancelCollection = async (darCollection) => {
     try {
       const { darCollectionId, darCode } = darCollection;
-      const canceledCollection = await Collections.cancelCollection(darCollectionId);
+      await Collections.cancelCollection(darCollectionId);
+      const updatedCollection = await Collections.getCollectionSummaryByRoleNameAndId({roleName: USER_ROLES.researcher, id: darCollectionId});
       const targetIndex = researcherCollections.findIndex((collection) =>
         collection.darCollectionId === darCollectionId);
       if (targetIndex < 0) {
         throw new Error('Error: Could not find target Data Access Request');
       }
       const clonedCollections = cloneDeep(researcherCollections);
-      clonedCollections[targetIndex] = canceledCollection;
+      clonedCollections[targetIndex] = updatedCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({text: `Deleted Data Access Request ${darCode}`});
     } catch (error) {
@@ -142,7 +82,7 @@ export default function ResearcherConsole() {
       }
       //remove resubmitted collection from DAR Collection table
       const clonedCollections = cloneDeep(researcherCollections);
-      clonedCollections[targetIndex] = formatDraft(draftCollection);
+      clonedCollections[targetIndex] = draftCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({text: `Revising Data Access Request ${darCode}`});
     } catch (error) {
@@ -152,24 +92,34 @@ export default function ResearcherConsole() {
     }
   };
 
+
+  //Draft delete, by referenceIds
+  const deleteDraftById = async ({ referenceId }) => {
+    const collectionsClone = cloneDeep(researcherCollections);
+    await DAR.deleteDar(referenceId);
+    const targetIndex = findIndex((draft) => {
+      return draft.referenceIds[0] === referenceId;
+    })(collectionsClone);
+
+    // if deleted index, remove it from the collections array
+    collectionsClone.splice(targetIndex, 1);
+    setResearcherCollections(collectionsClone);
+
+    return targetIndex;
+  };
+
   //Draft delete, passed down to draft table to be used with delete button
-  const deleteDraft = async ({ referenceId, identifier }) => {
+  const deleteDraft = async ({ referenceIds, darCode }) => {
     try {
-      await DAR.deleteDar(referenceId);
-      const collectionsClone = cloneDeep(researcherCollections);
-      const targetIndex = findIndex((draft) => {
-        return draft.referenceId === referenceId;
-      })(collectionsClone);
+      const targetIndex = deleteDraftById({ referenceId: referenceIds[0] });
       if (targetIndex === -1) {
         Notifications.showError({ text: 'Error processing delete request' });
       } else {
-        collectionsClone.splice(targetIndex, 1);
-        setResearcherCollections(collectionsClone);
-        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${identifier}`});
+        Notifications.showSuccess({text: `Deleted Data Access Request Draft ${darCode}`});
       }
     } catch (error) {
       Notifications.showError({
-        text: `Failed to delete Data Access Request Draft ${identifier}`,
+        text: `Failed to delete Data Access Request Draft ${darCode}`,
       });
     }
 

@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
 import { Collections } from '../libs/ajax';
-import { Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
+import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
 import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
@@ -26,7 +26,7 @@ export default function AdminManageDarCollections() {
   useEffect(() => {
     const init = async() => {
       try {
-        const collectionsResp = await Collections.getCollectionsByRoleName('admin');
+        const collectionsResp = await Collections.getCollectionSummariesByRoleName(USER_ROLES.admin);
         setCollections(collectionsResp);
         setFilteredList(collectionsResp);
         setIsLoading(false);
@@ -38,8 +38,8 @@ export default function AdminManageDarCollections() {
   }, []);
 
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
-  const cancelCollection = cancelCollectionFn({updateCollections, role: 'admin'});
-  const openCollection = openCollectionFn({updateCollections});
+  const cancelCollection = cancelCollectionFn({updateCollections, role: USER_ROLES.admin});
+  const openCollection = openCollectionFn({updateCollections, role: USER_ROLES.admin});
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
