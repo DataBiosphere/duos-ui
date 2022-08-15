@@ -4,6 +4,15 @@ import { SearchSelectOrText } from '../SearchSelectOrText';
 import { Theme } from '../../libs/theme';
 import './ds_common.css';
 
+export const FormFieldTypes = {
+  SELECT: 'select',
+  MULTITEXT: 'multitext',
+  CHECKBOX: 'checkbox',
+  SLIDER: 'slider',
+  TEXT: 'text',
+  NUMBER: 'number'
+};
+
 export const styles = {
   inputStyle: {
     padding: '25px 15px',
@@ -72,11 +81,11 @@ const onFormInputChange = (config, value) => {
 //---------------------------------------------
 const formInput = (config) => {
   switch (config.type) {
-    case 'select': return formInputSelect(config);
-    case 'multitext': return formInputMultiText(config);
-    case 'checkbox': return formInputCheckbox(config);
-    case 'slider': return formInputSlider(config);
-    case 'text':
+    case FormFieldTypes.SELECT: return formInputSelect(config);
+    case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
+    case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
+    case FormFieldTypes.SLIDER: return formInputSlider(config);
+    case FormFieldTypes.TEXT:
     default:
       return formInputGeneric(config);
   }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormField, FormTable } from './ds_common';
+import { FormFieldTypes, FormField, FormTable } from './ds_common';
 
 const updateUserAndFields = async ({ setUser, onChange }) => {
   const me = await User.getMe();
@@ -50,7 +50,7 @@ export default function DataSubmissionStudyInformation(props) {
     FormField({
       id: 'studyType',
       title: 'Study Type',
-      type: 'select',
+      type: FormFieldTypes.SELECT,
       selectOptions: [
         'Observational', 'Interventional', 'Descriptive',
         'Analytical', 'Prospective', 'Retrospective',
@@ -69,7 +69,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
-      type: 'multitext',
+      type: FormFieldTypes.MULTITEXT,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
     FormTable({
@@ -78,7 +78,7 @@ export default function DataSubmissionStudyInformation(props) {
         {
           id: 'fileType',
           title: 'File Type',
-          type: 'select',
+          type: FormFieldTypes.SELECT,
           selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype']
         }, {
           id: 'functionalEquivalence',
@@ -88,7 +88,7 @@ export default function DataSubmissionStudyInformation(props) {
           id: 'numberOfParticipants',
           title: '# of Participants',
           placeholder: 'Number',
-          type: 'number'
+          type: FormFieldTypes.NUMBER
         }
       ],
       onChange, errors, setErrors, formInfo, setFormInfo
@@ -125,7 +125,7 @@ export default function DataSubmissionStudyInformation(props) {
     FormField({
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
-      type: 'multitext',
+      type: FormFieldTypes.MULTITEXT,
       isValid: isEmailAddress,
       onChange, errors, setErrors, formInfo, setFormInfo
     }),
@@ -133,7 +133,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'publicVisibility',
       title: 'Public Visibility',
       required: true,
-      type: 'slider',
+      type: FormFieldTypes.SLIDER,
       defaultValue: true,
       description: `Please select if you would like your dataset
         to be publicly visible for the requesters to see and select
