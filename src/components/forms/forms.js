@@ -180,10 +180,15 @@ const formInputMultiText = (config) => {
           key: val,
           className: 'pill btn-xs',
           type: 'button',
+          disabled,
           onClick: () => removePill(i)
         }, [
           val,
-          span({ className: 'glyphicon glyphicon-remove', style: { marginLeft: '8px' } })
+          span({
+            className: 'glyphicon glyphicon-remove',
+            style: { marginLeft: '8px' },
+            isRendered: !disabled
+          })
         ]);
       })
     )
