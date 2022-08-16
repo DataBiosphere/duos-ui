@@ -386,7 +386,7 @@ class DuosHeader extends Component {
       'data-tip': 'Need help? Contact us for some assistance', 'data-for': 'tip_requestAccess'
     }, [contactUsIcon, contactUsText]);
 
-    const supportrequestModal = SupportRequestModal({
+    const supportrequestModal = h(SupportRequestModal, {
       showModal: this.state.showSupportRequestModal,
       onOKRequest: this.okSupportRequestModal,
       onCloseRequest: this.closeSupportRequestModal,
