@@ -888,6 +888,14 @@ input:checked + .slider {
   background-color: #0948B7;
 }
 
+input:checked:disabled + .slider {
+  background-color: #999;
+}
+
+input:checked:disabled + .slider:before {
+  background-color: #DDD;
+}
+
 input:checked + .slider:before {
   transform: translateX(29px);
 }
