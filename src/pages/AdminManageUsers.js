@@ -125,7 +125,6 @@ export const AdminManageUsers = function AdminManageUsers() {
             className: 'btn-primary btn-add common-background',
             onClick: addUser
           }, [
-            div({ className: 'all-icons add-user_white' }),
             span({}, ['Add User']),
           ]),
         ]),
