@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
+import { isEmpty } from 'lodash/fp';
+
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormTable, FormValidators } from '../forms/forms';
@@ -104,17 +106,19 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Principal Investigator Name',
       onChange
     }),
-    user && h(FormField, {
+    h(FormField, {
+      isRendered: !isEmpty(user),
       id: 'dataSubmitterName',
       title: 'Data Submitter Name',
-      defaultValue: user.displayName,
+      defaultValue: user?.displayName,
       disabled: true,
       onChange
     }),
-    user && h(FormField, {
+    h(FormField, {
+      isRendered: !isEmpty(user),
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
-      defaultValue: user.email,
+      defaultValue: user?.email,
       disabled: true,
       onChange
     }),

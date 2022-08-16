@@ -289,7 +289,7 @@ export const FormField = (config) => {
 
   const [error, setError] = useState();
   const [formValue, setFormValue] = useState(defaultValue || '');
-  const required = validators?.findIndex(v => v === FormValidators.REQUIRED) !== -1;
+  const required = validators ? validators.findIndex(v => v === FormValidators.REQUIRED) !== -1 : false;
 
   return div({
     key: `formControl_${id}`,
