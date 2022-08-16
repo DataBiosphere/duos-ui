@@ -88,8 +88,9 @@ const onFormInputChange = (config, value) => {
 
   if (isValidInput) {
     onChange({key: id, value: normalizedValue});
-    setFormValue(value);
   }
+
+  setFormValue(value);
 };
 
 //---------------------------------------------
