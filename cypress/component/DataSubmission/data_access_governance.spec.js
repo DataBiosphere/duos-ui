@@ -21,40 +21,40 @@ describe('Data Access Governance', function () {
 
     cy.get('#btn_addInstitution').should('exist');
     cy.get('#data_submission_select_dac').should('exist');
-    cy.get('#0_consentGroupForm').should('not.exist')
+    cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#btn_addInstitution').click();
-    cy.get('#0_consentGroupForm').should('exist')
+    cy.get('#0_consentGroupForm').should('exist');
 
     cy.get('#alternativeDataSharingPlanControlledOpenAccess').check();
 
     cy.get('#btn_addInstitution').should('not.exist');
     cy.get('#data_submission_select_dac').should('not.exist');
-    cy.get('#0_consentGroupForm').should('not.exist')
+    cy.get('#0_consentGroupForm').should('not.exist');
 
   }),
   it('Adds multiple consent groups', function () {
     mount(<DataSubmissionForm />);
 
     cy.get('#alternativeDataSharingPlanControlledClosedAccess').check();
-    
-    cy.get('#0_consentGroupForm').should('not.exist')
-    cy.get('#1_consentGroupForm').should('not.exist')
-    cy.get('#2_consentGroupForm').should('not.exist')
+
+    cy.get('#0_consentGroupForm').should('not.exist');
+    cy.get('#1_consentGroupForm').should('not.exist');
+    cy.get('#2_consentGroupForm').should('not.exist');
 
     cy.get('#btn_addInstitution').click();
-    cy.get('#0_consentGroupForm').should('exist')
-    cy.get('#1_consentGroupForm').should('not.exist')
-    cy.get('#2_consentGroupForm').should('not.exist')
+    cy.get('#0_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('not.exist');
+    cy.get('#2_consentGroupForm').should('not.exist');
 
     cy.get('#btn_addInstitution').click();
-    cy.get('#0_consentGroupForm').should('exist')
-    cy.get('#1_consentGroupForm').should('exist')
-    cy.get('#2_consentGroupForm').should('not.exist')
+    cy.get('#0_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('not.exist');
 
     cy.get('#btn_addInstitution').click();
-    cy.get('#0_consentGroupForm').should('exist')
-    cy.get('#1_consentGroupForm').should('exist')
-    cy.get('#2_consentGroupForm').should('exist')
+    cy.get('#0_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('exist');
 
 
   }),
@@ -62,11 +62,11 @@ describe('Data Access Governance', function () {
     mount(<DataSubmissionForm />);
 
     cy.get('#alternativeDataSharingPlanControlledClosedAccess').check();
-    
+
     cy.get('#btn_addInstitution').click();
     cy.get('#btn_addInstitution').click();
     cy.get('#btn_addInstitution').click();
-  
+
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('exist');
@@ -85,5 +85,5 @@ describe('Data Access Governance', function () {
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');
-  })
-})
+  });
+});

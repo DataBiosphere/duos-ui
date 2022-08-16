@@ -7,13 +7,13 @@ const props = {
   parentConsentGroup: {},
   saveConsentGroup: () => {},
   deleteConsentGroup: () => {},
-}
+};
 
-let propCopy = {}; 
+let propCopy = {};
 
 beforeEach(() => {
-    propCopy = cloneDeep(props);
-})
+  propCopy = cloneDeep(props);
+});
 
 describe('Consent Group', function () {
   it('Edits without saving', function () {
@@ -25,7 +25,6 @@ describe('Consent Group', function () {
     cy.get('#0_url').type('https://www.asdf.gov');
 
     expect(propCopy.saveConsentGroup).to.not.be.called;
-
   }),
   it('Saves properly', function () {
     cy.spy(propCopy, 'saveConsentGroup');
@@ -37,16 +36,16 @@ describe('Consent Group', function () {
     cy.get('#0_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_saveConsentGroup').click().then(() => {
-        expect(propCopy.saveConsentGroup).to.be.calledWith({
-            col: true,
-            consentGroupName: "Hello!",
-            diseaseSpecificUse: undefined,
-            generalResearchUse: false,
-            hmb: true,
-            otherPrimary: undefined,
-            poa: false,
-            url: "https://www.asdf.gov",
-        });
+      expect(propCopy.saveConsentGroup).to.be.calledWith({
+        col: true,
+        consentGroupName: 'Hello!',
+        diseaseSpecificUse: undefined,
+        generalResearchUse: false,
+        hmb: true,
+        otherPrimary: undefined,
+        poa: false,
+        url: 'https://www.asdf.gov',
+      });
     });
 
 
@@ -61,7 +60,7 @@ describe('Consent Group', function () {
     cy.get('#0_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_deleteConsentGroup').click().then(() => {
-        expect(propCopy.deleteConsentGroup).to.be.called;
+      expect(propCopy.deleteConsentGroup).to.be.called;
     });
   }),
   it('Shows conditional fields only when checked', function () {
@@ -91,9 +90,9 @@ describe('Consent Group', function () {
 
     cy.get('#0_consent_group_name').type('Hello!');
 
-    
+
     cy.get('#0_consentGroupSummary').should('not.exist');
     cy.get('#0_saveConsentGroup').click();
     cy.get('#0_consentGroupSummary').should('exist');
-  })
-})
+  });
+});
