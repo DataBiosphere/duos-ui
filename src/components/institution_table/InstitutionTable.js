@@ -72,7 +72,7 @@ export default function InstitutionTable(props) {
   return (
     div({className: 'institution-table-component'}, [
       div({style: Styles.TABLE.CONTAINER}, [
-        div({style: Styles.TABLE.HEADER_ROW}, [tableHeaderTemplate]),
+        div({style: Styles.TABLE.HEADER_ROW}, tableHeaderTemplate),
         filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
           let signingOfficialsList = [];
           if (!isNil(inst.signingOfficials)) {
