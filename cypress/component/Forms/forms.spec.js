@@ -392,6 +392,8 @@ describe('FormField - Tests', () => {
           }
         ],
         defaultValue: [{}],
+        enableAddingRow: true,
+        addRowLabel: 'Add New Filetype'
       };
     });
 
@@ -441,6 +443,18 @@ describe('FormField - Tests', () => {
       cy.get('#delete-table-row-fileTypes-0').click().then(() => {
         expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: []}); // code value
         cy.get('.formTable-row.formTable-data-row').should('have.length', 0); // only columns left
+      });
+    });
+
+    it('should not allow you to delete if minLength rows has been declared', () => {
+      cy.spy(props, 'onChange');
+      props.minLength = 1;
+      props.defaultValue = [{}, {}];
+      mount(<FormTable {...props}/>);
+      cy.get('#delete-table-row-fileTypes-0').click().then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [{}]}); // code value
+        cy.get('.formTable-row.formTable-data-row').should('have.length', 1); // only columns left
+        cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
     });
 

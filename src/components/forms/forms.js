@@ -329,7 +329,7 @@ export const FormTable = (config) => {
   const {
     id, formFields, defaultValue,
     enableAddingRow, addRowLabel,
-    disabled, onChange
+    disabled, onChange, minLength
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
@@ -355,7 +355,7 @@ export const FormTable = (config) => {
           key: `delete-table-row-${id}-${i}`,
           className: 'btn-formTable-delete btn-xs',
           type: 'button',
-          disabled: disabled || i === 0,
+          disabled: disabled || formValue.length <= minLength,
           onClick: () => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.splice(i, 1);
