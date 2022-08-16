@@ -11,7 +11,7 @@ const ConditionalText = (props) => {
   const {
     text,
     setText,
-    idx,
+    id,
     required,
     placeholder
   } = props;
@@ -28,9 +28,9 @@ const ConditionalText = (props) => {
       style: DataSubmitterStyles.textInput,
       value: text,
       onChange: (e) => setText(e.target.value),
-      name: idx,
+      name: id,
       className: 'form-control',
-      id: idx,
+      id: id,
       maxLength: '512',
       rows: '2',
       required: required,
@@ -125,6 +125,7 @@ export const ConsentGroupForm = (props) => {
 
     div({
       isRendered: !editMode,
+      id: idx+'_consentGroupSummary',
     }, [
       h(ConsentGroupSummary, {
         consentGroup: consentGroup,
@@ -224,7 +225,7 @@ export const ConsentGroupForm = (props) => {
           h(ConditionalText, {
             text: consentGroup.diseaseSpecificUse,
             setText: (val) => setPrimary('diseaseSpecificUse', val),
-            idx: idx + '_diseaseSpecificUseText',
+            id: idx + '_diseaseSpecificUseText',
             required: true,
             placeholder: 'Please enter one or more diseases'
           }, []),
@@ -262,7 +263,7 @@ export const ConsentGroupForm = (props) => {
           h(ConditionalText, {
             text: consentGroup.otherPrimary,
             setText: (val) => setPrimary('otherPrimary', val),
-            idx: idx + '_otherPrimaryText',
+            id: idx + '_otherPrimaryText',
             required: true,
             disabled: !editMode,
             placeholder: 'Please specify if selected (max 512 characters)',
@@ -403,7 +404,7 @@ export const ConsentGroupForm = (props) => {
         h(ConditionalText, {
           text: consentGroup.gs,
           setText: (val) => updateField('gs', val),
-          idx: idx + '_gstext',
+          id: idx + '_gstext',
           disabled: !editMode,
           required: true,
           placeholder: 'Specify (TODO)',
@@ -469,7 +470,7 @@ export const ConsentGroupForm = (props) => {
         h(ConditionalText, {
           text: consentGroup.otherSecondary,
           setText: (val) => updateField('otherSecondary', val),
-          idx: idx + '_otherSecondarytext',
+          id: idx + '_otherSecondaryText',
           required: true,
           disabled: !editMode,
           placeholder: 'Other'
