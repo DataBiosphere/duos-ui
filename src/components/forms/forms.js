@@ -328,7 +328,8 @@ export const FormField = (config) => {
 export const FormTable = (config) => {
   const {
     id, formFields, defaultValue,
-    onChange
+    enableAddingRow, addRowLabel,
+    disabled, onChange
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
@@ -354,6 +355,7 @@ export const FormTable = (config) => {
           key: `delete-table-row-${id}-${i}`,
           className: 'btn-formTable-delete btn-xs',
           type: 'button',
+          disabled: disabled || i === 0,
           onClick: () => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.splice(i, 1);
@@ -366,7 +368,10 @@ export const FormTable = (config) => {
       ]);
     }),
     // add new row to table button
-    div({ style: { display: 'flex', width: '100%', justifyContent: 'flex-end' } }, [
+    div({
+      style: { display: 'flex', width: '100%', justifyContent: 'flex-end' },
+      isRendered: enableAddingRow
+    }, [
       h(button, {
         id: `add-new-table-row-${id}`,
         key: `add-new-table-row-${id}`,
@@ -384,7 +389,7 @@ export const FormTable = (config) => {
           onChange({ key: id, value: formValueClone });
         }
       }, [
-        'Add New Filetype',
+        (addRowLabel || 'Add New'),
         span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })
       ])
     ])

@@ -89,6 +89,8 @@ export default function DataSubmissionStudyInformation(props) {
         }
       ],
       defaultValue: [{}],
+      enableAddingRow: true,
+      addRowLabel: 'Add New Filetype',
       onChange
     }),
     h(FormField, {
