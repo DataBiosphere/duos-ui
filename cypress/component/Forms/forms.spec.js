@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import { FormField, FormFieldTypes, FormTable } from '../../../src/components/forms/forms';
+import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
 import { isEmailAddress } from '../../../src/libs/utils';
 
 let props;
@@ -17,7 +17,7 @@ describe('FormField - Tests', () => {
         ...baseProps,
         id: 'studyName',
         title: 'Study Name',
-        required: true
+        validators: [FormValidators.REQUIRED]
       };
 
       mount(<FormField {...props}/>);
@@ -29,36 +29,32 @@ describe('FormField - Tests', () => {
         ...baseProps,
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
-        validator: (value) => {
-          return isEmailAddress(value)
-            ? null
-            : 'Enter a valid email address `example@site.com`';
-        }
+        validators: [
+          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+        ]
       };
 
-      cy.spy(props, 'validator');
+      cy.spy(props.validators[0], 'isValid');
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail')
         .type('a')
         .then(() => {
           cy.get('#dataCustodianEmail').should('have.value', 'a');
-          expect(props.validator).to.be.calledWith('a');
+          expect(props.validators[0].isValid).to.be.calledWith('a');
           expect(props.onChange).to.be.callCount(0); // no change if invalid
         });
     });
 
     it('should show error message with validator error message', () => {
-      const errMessage = 'Enter a valid email address `example@site.com`';
+      const errMessage = 'Enter a valid email address (example@site.com)';
       props = {
         ...baseProps,
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
-        validator: (value) => {
-          return isEmailAddress(value)
-            ? null
-            : errMessage;
-        }
+        validators: [
+          { isValid: isEmailAddress, msg: errMessage }
+        ]
       };
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail')
@@ -76,7 +72,7 @@ describe('FormField - Tests', () => {
         ...baseProps,
         id: 'studyName',
         title: 'Study Name',
-        required: true
+        validators: [FormValidators.REQUIRED]
       };
     });
 
@@ -138,11 +134,9 @@ describe('FormField - Tests', () => {
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         type: FormFieldTypes.MULTITEXT,
-        validator: (value) => {
-          return isEmailAddress(value)
-            ? null
-            : 'Enter a valid email address (example@site.com)';
-        },
+        validators: [
+          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+        ],
         defaultValue: []
       };
     });
@@ -264,7 +258,7 @@ describe('FormField - Tests', () => {
         ...baseProps,
         id: 'publicVisibility',
         title: 'Public Visibility',
-        required: true,
+        validators: [FormValidators.REQUIRED],
         type: FormFieldTypes.SLIDER,
         defaultValue: true,
         description: `Please select if you would like your dataset

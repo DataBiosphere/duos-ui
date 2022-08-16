@@ -27,47 +27,29 @@ export const styles = {
   }
 };
 
+export const FormValidators = {
+  REQUIRED: {
+    isValid: (value) => value !== undefined && value !== null && value !== '',
+    msg: 'Please enter a value'
+  }
+};
+
 //---------------------------------------------
 // Form Behavior
 //---------------------------------------------
-const validateRequired = (value) => {
-  return value === undefined || value === null || value === ''
-    ? 'Please enter a value'
-    : null;
-};
-
-const extractValidators = (config) => {
-  const { required, validator } = config;
-  const ret = [];
-
-  if (required) {
-    ret.push(validateRequired);
-  }
-  if (validator) {
-    if (Array.isArray(validator)) {
-      validator.forEach(v => ret.push(v));
-    } else {
-      ret.push(validator);
-    }
-  }
-
-  return ret;
-};
-
 const validateFormInput = (config, value) => {
-  const { setError } = config;
-  const validators = extractValidators(config);
-  const validationResults = validators
-    .map((validator) => validator(value))
-    .filter(x => !!x);
+  const { setError, validators } = config;
+  if (validators) {
+    const validationResults = validators
+      .filter(validator => !validator.isValid(value))
+      .map(x => x.msg);
 
-  if (validationResults.length === 0) {
-    setError();
-    return true;
-  } else {
-    setError(validationResults);
-    return false;
+    const isValid = validationResults.length === 0;
+    setError(isValid ? undefined : validationResults);
+    return isValid;
   }
+  setError();
+  return true;
 };
 
 const normalizeValue = (value) => {
@@ -292,21 +274,22 @@ const formInputSlider = (config) => {
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType
-* required, disabled
+* disabled
 * placeholder, defaultValue,
 * style (for the formControl component)
 * inputStyle (for the input element)
 * onChange,
-* validator: function that returns string with error message if errored
+* validators: [{isValid: func, msg: string}]
 */
 export const FormField = (config) => {
   const {
     id, title, hideTitle, description,
-    defaultValue, required, style
+    defaultValue, style, validators
   } = config;
 
   const [error, setError] = useState();
   const [formValue, setFormValue] = useState(defaultValue || '');
+  const required = validators?.findIndex(v => v === FormValidators.REQUIRED) !== -1;
 
   return div({
     key: `formControl_${id}`,
@@ -325,7 +308,8 @@ export const FormField = (config) => {
     formInput({
       ...config,
       error, setError,
-      formValue, setFormValue
+      formValue, setFormValue,
+      required
     })
   ]);
 };

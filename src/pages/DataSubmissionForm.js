@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {h, div, img, h1, form} from 'react-hyperscript-helpers';
-import { cloneDeep, set } from 'lodash/fp';
+import { set } from 'lodash/fp';
 
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormFieldTypes, FormField, FormTable } from '../forms/forms';
+import { FormFieldTypes, FormField, FormTable, FormValidators } from '../forms/forms';
 
 export default function DataSubmissionStudyInformation(props) {
   const { onChange } = props;
@@ -38,7 +38,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'studyName',
       title: 'Study Name',
-      required: true,
+      validators: [FormValidators.REQUIRED],
       onChange
     }),
     h(FormField, {
@@ -123,17 +123,15 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Data Custodian Email',
       type: FormFieldTypes.MULTITEXT,
       defaultValue: [],
-      validator: (value) => {
-        return isEmailAddress(value)
-          ? null
-          : 'Enter a valid email address (example@site.com)';
-      },
+      validators: [
+        { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+      ],
       onChange
     }),
     h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',
-      required: true,
+      validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.SLIDER,
       defaultValue: true,
       description: `Please select if you would like your dataset
