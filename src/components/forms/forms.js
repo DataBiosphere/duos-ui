@@ -30,27 +30,44 @@ export const styles = {
 //---------------------------------------------
 // Form Behavior
 //---------------------------------------------
-const validateFormInput = (config, value) => {
-  const {
-    title, setError,
-    required, isValid,
-  } = config;
+const validateRequired = (value) => {
+  return value === undefined || value === null || value === ''
+    ? 'Please enter a value'
+    : null;
+};
 
-  const valueExists = value !== undefined && value !== null && value !== '';
-  const requiredValid = !required || (required && valueExists);
-  const customValid = !isValid || isValid(value);
-  const isValidInput = requiredValid && customValid;
+const extractValidators = (config) => {
+  const { required, validator } = config;
+  const ret = [];
 
-  if (isValidInput) {
-    setError();
-  } else {
-    setError([
-      requiredValid && `${title} is required`,
-      isValidInput
-    ]);
+  if (required) {
+    ret.push(validateRequired);
+  }
+  if (validator) {
+    if (Array.isArray(validator)) {
+      validator.forEach(v => ret.push(v));
+    } else {
+      ret.push(validator);
+    }
   }
 
-  return isValidInput;
+  return ret;
+};
+
+const validateFormInput = (config, value) => {
+  const { setError } = config;
+  const validators = extractValidators(config);
+  const validationResults = validators
+    .map((validator) => validator(value))
+    .filter(x => !!x);
+
+  if (validationResults.length === 0) {
+    setError();
+    return true;
+  } else {
+    setError(validationResults);
+    return false;
+  }
 };
 
 const normalizeValue = (value) => {
@@ -95,21 +112,28 @@ const formInputGeneric = (config) => {
     id, title, type, disabled,
     placeholder,
     inputStyle, ariaDescribedby,
-    value, error
+    formValue, error, setError
   } = config;
 
-  return input({
-    id: id,
-    type: type || 'text',
-    className: `form-control ${error ? 'errored' : ''}`,
-    placeholder: placeholder || title,
-    value: value,
-    style: { ...styles.inputStyle, ...inputStyle },
-    disabled: disabled,
-    onChange: (event) => onFormInputChange(config, event.target.value),
-    onBlur: (event) => validateFormInput(config, event.target.value),
-    'aria-describedby': ariaDescribedby,
-  });
+  return div([
+    input({
+      id: id,
+      type: type || 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || title,
+      value: formValue,
+      style: { ...styles.inputStyle, ...inputStyle },
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+    }),
+    error && div({ className: `error-message fadein`}, [
+      span({ className: 'glyphicon glyphicon-play' }),
+      ...error.map((err) => div([err])),
+    ])
+  ]);
 };
 
 const formInputMultiText = (config) => {
@@ -117,7 +141,7 @@ const formInputMultiText = (config) => {
     id, title, disabled,
     placeholder, ariaDescribedby,
     inputStyle, onChange,
-    formValue, setFormValue, error
+    formValue, setFormValue, error, setError
   } = config;
 
   const pushValue = (event) => {
@@ -157,10 +181,16 @@ const formInputMultiText = (config) => {
       onKeyUp: (event) => {
         if (event.code === 'Enter') {
           pushValue(event);
+        } else {
+          setError();
         }
       },
-      onBlur: (event) => pushValue(event)
+      onFocus: () => setError()
     }),
+    error && div({ className: `error-message fadein`}, [
+      span({ className: 'glyphicon glyphicon-play' }),
+      ...error.map((err) => div([err])),
+    ]),
     div({ style: { ...styles.flexRow, justifyContent: null } },
       formValue.map((val, i) => {
         return h(button, {
@@ -266,8 +296,7 @@ const formInputSlider = (config) => {
 * style (for the formControl component)
 * inputStyle (for the input element)
 * onChange,
-* error, setError,
-* formInfo, setFormInfo
+* validator: function that returns string with error message if errored
 */
 export const FormField = (config) => {
   const {
@@ -314,7 +343,7 @@ export const FormTable = (config) => {
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
 
-  return div({ id, className: `formField-container formField-${id}` }, [
+  return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
     div({ className: 'formTable-row formTable-cols' }, formFields.map(x => {
       return label({ className: 'control-label', id: `${id}-${x.title}` }, [x.title]);

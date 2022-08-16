@@ -29,18 +29,43 @@ describe('FormField - Tests', () => {
         ...baseProps,
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
-        isValid: isEmailAddress
+        validator: (value) => {
+          return isEmailAddress(value)
+            ? null
+            : 'Enter a valid email address `example@site.com`';
+        }
       };
 
-      cy.spy(props, 'isValid');
+      cy.spy(props, 'validator');
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail')
         .type('a')
         .then(() => {
           cy.get('#dataCustodianEmail').should('have.value', 'a');
-          expect(props.isValid).to.be.calledWith('a');
+          expect(props.validator).to.be.calledWith('a');
           expect(props.onChange).to.be.callCount(0); // no change if invalid
+        });
+    });
+
+    it('should show error message with validator error message', () => {
+      const errMessage = 'Enter a valid email address `example@site.com`';
+      props = {
+        ...baseProps,
+        id: 'dataCustodianEmail',
+        title: 'Data Custodian Email',
+        validator: (value) => {
+          return isEmailAddress(value)
+            ? null
+            : errMessage;
+        }
+      };
+      mount(<FormField {...props}/>);
+      cy.get('#dataCustodianEmail')
+        .type('a')
+        .then(() => {
+          cy.get('#dataCustodianEmail').should('have.value', 'a');
+          cy.get('.formField-dataCustodianEmail .error-message').contains(errMessage);
         });
     });
   });
@@ -113,7 +138,11 @@ describe('FormField - Tests', () => {
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         type: FormFieldTypes.MULTITEXT,
-        isValid: isEmailAddress,
+        validator: (value) => {
+          return isEmailAddress(value)
+            ? null
+            : 'Enter a valid email address (example@site.com)';
+        },
         defaultValue: []
       };
     });

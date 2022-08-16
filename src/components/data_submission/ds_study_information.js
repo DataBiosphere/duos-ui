@@ -4,15 +4,15 @@ import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormTable } from '../forms/forms';
 
-const updateUserAndFields = async ({ setUser, onChange }) => {
-  const me = await User.getMe();
-  setUser(me);
-  onChange({key: 'dataSubmitterId', value: me.dacUserId});
-};
-
 export default function DataSubmissionStudyInformation(props) {
   const { onChange } = props;
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState();
+
+  const updateUserAndFields = async () => {
+    const me = await User.getMe();
+    setUser(me);
+    onChange({key: 'dataSubmitterId', value: me.dacUserId});
+  };
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -36,13 +36,13 @@ export default function DataSubmissionStudyInformation(props) {
     }
   }, [
     h2('Study Information'),
-    FormField({
+    h(FormField, {
       id: 'studyName',
       title: 'Study Name',
       required: true,
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'studyType',
       title: 'Study Type',
       type: FormFieldTypes.SELECT,
@@ -54,13 +54,13 @@ export default function DataSubmissionStudyInformation(props) {
       ],
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
@@ -68,7 +68,7 @@ export default function DataSubmissionStudyInformation(props) {
       type: FormFieldTypes.MULTITEXT,
       onChange
     }),
-    FormTable({
+    h(FormTable, {
       id: 'fileTypes',
       formFields: [
         {
@@ -90,44 +90,48 @@ export default function DataSubmissionStudyInformation(props) {
       defaultValue: [{}],
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'species',
       title: 'Species',
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'piName',
       title: 'Principal Investigator Name',
       onChange
     }),
-    FormField({
+    user && h(FormField, {
       id: 'dataSubmitterName',
       title: 'Data Submitter Name',
-      defaultValue: user?.displayName,
+      defaultValue: user.displayName,
       disabled: true,
       onChange
     }),
-    FormField({
+    user && h(FormField, {
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
-      defaultValue: user?.email,
+      defaultValue: user.email,
       disabled: true,
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
       type: FormFieldTypes.MULTITEXT,
       defaultValue: [],
-      isValid: isEmailAddress,
+      validator: (value) => {
+        return isEmailAddress(value)
+          ? null
+          : 'Enter a valid email address (example@site.com)';
+      },
       onChange
     }),
-    FormField({
+    h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',
       required: true,
