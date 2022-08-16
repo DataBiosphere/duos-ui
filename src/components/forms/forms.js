@@ -306,7 +306,7 @@ export const FormField = (config) => {
   } = config;
 
   const [error, setError] = useState();
-  const [formValue, setFormValue] = useState(defaultValue);
+  const [formValue, setFormValue] = useState(defaultValue || '');
 
   return div({
     key: `formControl_${id}`,

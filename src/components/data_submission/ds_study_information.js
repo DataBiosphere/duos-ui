@@ -8,25 +8,24 @@ export default function DataSubmissionStudyInformation(props) {
   const { onChange } = props;
   const [user, setUser] = useState();
 
-  const updateUserAndFields = async () => {
-    const me = await User.getMe();
-    setUser(me);
-    onChange({key: 'dataSubmitterId', value: me.dacUserId});
-  };
-
   //init hook, need to make ajax calls here
   useEffect(() => {
+    const updateUserAndFields = async () => {
+      const me = await User.getMe();
+      setUser(me);
+      onChange({key: 'dataSubmitterId', value: me.dacUserId});
+    };
+
     const init = async () => {
       try {
-        updateUserAndFields({ setUser, ...props });
+        updateUserAndFields();
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
       }
     };
 
     init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // need the eslint to force useEffect to only run on initialization
+  }, [onChange]);
 
   return h(div, {
     style: {

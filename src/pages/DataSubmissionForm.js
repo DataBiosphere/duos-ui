@@ -14,6 +14,12 @@ export const DataSubmissionForm = () => {
   /* eslint-disable no-unused-vars */
   const [formData, setFormData] = useState({});
 
+  const onChange = ({ key, value }) => {
+    /* eslint-disable no-console */
+    console.log('StudyInfo OnChange:', key, value);
+    set(key, value, formData);
+  };
+
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
       div(
@@ -38,15 +44,7 @@ export const DataSubmissionForm = () => {
     ]),
 
     form({}, [
-      h(DataSubmissionStudyInformation, {
-        onChange: ({ key, value }) => {
-          /* eslint-disable no-console */
-          console.log('StudyInfo OnChange:', key, value);
-          const formDataClone = cloneDeep(formData);
-          const updatedFormInfo = set(key, value, formDataClone);
-          setFormData(formDataClone);
-        }
-      })
+      h(DataSubmissionStudyInformation, { onChange })
     ])
   ]);
 };
