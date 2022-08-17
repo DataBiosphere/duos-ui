@@ -76,16 +76,19 @@ export default function DataSubmissionStudyInformation(props) {
           id: 'fileType',
           title: 'File Type',
           type: FormFieldTypes.SELECT,
-          selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype']
+          selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
+          validators: [FormValidators.REQUIRED]
         }, {
           id: 'functionalEquivalence',
           title: 'Functional Equivalence',
-          placeholder: 'Type'
+          placeholder: 'Type',
+          validators: [FormValidators.REQUIRED]
         }, {
           id: 'numberOfParticipants',
           title: '# of Participants',
           placeholder: 'Number',
-          type: FormFieldTypes.NUMBER
+          type: FormFieldTypes.NUMBER,
+          validators: [FormValidators.REQUIRED]
         }
       ],
       defaultValue: [{}],

@@ -6,7 +6,7 @@ import {find} from 'lodash/fp';
 import './SearchSelect.css';
 
 export const SearchSelectOrText = (props) => {
-  const { onPresetSelection, onManualSelection, placeholder, options, searchPlaceholder, id, label, disabled, errored, onBlur} = props;
+  const { onPresetSelection, onManualSelection, onOpen, placeholder, options, searchPlaceholder, id, label, disabled, errored, onBlur} = props;
   const [currentDisplay, setCurrentDisplay] = useState(placeholder || '');
 
   const [currentSelection, setCurrentSelection] = useState(props.value);
@@ -76,6 +76,7 @@ export const SearchSelectOrText = (props) => {
         'data-toggle': 'dropdown',
         'aria-haspopup': true,
         'aria-expanded': false,
+        onClick: onOpen,
         disabled
       }, [
         div({

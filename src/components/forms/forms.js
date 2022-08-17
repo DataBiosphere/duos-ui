@@ -197,20 +197,27 @@ const formInputMultiText = (config) => {
 
 const formInputSelect = (config) => {
   const {
-    id, title, disabled, error,
+    id, title, disabled, error, setError,
     selectOptions, searchPlaceholder, ariaDescribedby
   } = config;
 
-  return h(SearchSelectOrText, {
-    id,
-    'aria-describedby': ariaDescribedby,
-    onPresetSelection: async (selection) => onFormInputChange(config, selection),
-    onManualSelection: (selection) => onFormInputChange(config, selection),
-    options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
-    searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
-    className: 'form-control',
-    disabled, errored: error
-  });
+  return div({}, [
+    h(SearchSelectOrText, {
+      id,
+      'aria-describedby': ariaDescribedby,
+      onPresetSelection: async (selection) => onFormInputChange(config, selection),
+      onManualSelection: (selection) => onFormInputChange(config, selection),
+      onOpen: () => setError(),
+      options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
+      searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
+      className: 'form-control',
+      disabled, errored: error
+    }),
+    error && div({ className: `error-message fadein`}, [
+      span({ className: 'glyphicon glyphicon-play' }),
+      ...error.map((err) => div([err])),
+    ])
+  ]);
 };
 
 const formInputCheckbox = (config) => {
@@ -336,8 +343,12 @@ export const FormTable = (config) => {
 
   return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
-    div({ className: 'formTable-row formTable-cols' }, formFields.map(x => {
-      return label({ className: 'control-label', id: `${id}-${x.title}` }, [x.title]);
+    div({ className: 'formTable-row formTable-cols' }, formFields.map(({ validators, title }) => {
+      const required = validators ? validators.findIndex(v => v === FormValidators.REQUIRED) !== -1 : false;
+      return label({ className: 'control-label', id: `${id}-${title}` }, [
+        title,
+        required && '*'
+      ]);
     })),
     // generate form rows
     formValue?.map((formRow, i) => {
@@ -347,7 +358,12 @@ export const FormTable = (config) => {
             ...formCol,
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-            onChange: (({ value }) => onChange({key: `${id}.${i}.${formCol.id}`, value }))
+            onChange: ({ value }) => {
+              const formValueClone = cloneDeep(formValue);
+              formValueClone[i][formCol.id] = value;
+              setFormValue(formValueClone);
+              onChange({key: id, value: formValueClone });
+            }
           });
         }),
         h(button, {
