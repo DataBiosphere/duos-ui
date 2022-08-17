@@ -103,25 +103,17 @@ export default function AdminManageInstitutions(props) {
             width: '60%',
             margin: '0 3% 0 0',
           },
-          button: div({
-            style: {
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              justifyContent: 'center',
-            }
-          }, [
+          button: div([
             a({
               id: 'btn_addInstitution',
               className: 'btn-primary btn-add common-background',
               style: {
                 marginTop: '30%',
-                display: 'flex',
-                lineHeight: 1,
+                display: 'block',
+                lineHeight: 0.6,
               },
               onClick: addInstitution
             }, [
-              div({ className: 'all-icons add-dac_white' }),
               span({}, ['Add Institution']),
             ]),
           ]),
