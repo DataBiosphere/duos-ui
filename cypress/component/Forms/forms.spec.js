@@ -42,7 +42,7 @@ describe('FormField - Tests', () => {
         .then(() => {
           cy.get('#dataCustodianEmail').should('have.value', 'a');
           expect(props.validators[0].isValid).to.be.calledWith('a');
-          expect(props.onChange).to.be.callCount(0); // no change if invalid
+          expect(props.onChange).to.be.calledWith({ key: 'dataCustodianEmail', value: 'a', isValid: false });
         });
     });
 
@@ -91,7 +91,7 @@ describe('FormField - Tests', () => {
         .type(textToType)
         .then(() => {
           cy.get('#studyName').should('have.value', textToType);
-          expect(props.onChange).to.be.calledWith({key: 'studyName', value: textToType}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'studyName', value: textToType, isValid: true}); // code value
         });
     });
 
@@ -153,7 +153,7 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail').type('a@a.com');
       cy.get('#dataCustodianEmail').type('{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com']}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com'], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com'); // ui element exists
       });
     });
@@ -166,7 +166,7 @@ describe('FormField - Tests', () => {
         .type('b@b.com').type('{enter}')
         .type('c@c.com').type('{enter}')
         .then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com', 'c@c.com']}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com', 'c@c.com'], isValid: true}); // code value
           cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
           cy.get('.formField-dataCustodianEmail .pill').first().next().contains('b@b.com');
           cy.get('.formField-dataCustodianEmail .pill').first().next().next().contains('c@c.com');
@@ -204,7 +204,7 @@ describe('FormField - Tests', () => {
       cy.get('#dataCustodianEmail').type('a@a.com').type('{enter}');
       cy.get('.formField-dataCustodianEmail .pill').first().should('exist');
       cy.get('.formField-dataCustodianEmail .pill').first().click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: []}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: [], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').should('not.exist');
       });
     });
@@ -217,7 +217,7 @@ describe('FormField - Tests', () => {
         .type('b@b.com').type('{enter}')
         .type('c@c.com').type('{enter}');
       cy.get('.formField-dataCustodianEmail .pill').eq(0).click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['b@b.com', 'c@c.com']}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['b@b.com', 'c@c.com'], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('b@b.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('c@c.com');
       });
@@ -231,7 +231,7 @@ describe('FormField - Tests', () => {
         .type('b@b.com').type('{enter}')
         .type('c@c.com').type('{enter}');
       cy.get('.formField-dataCustodianEmail .pill').eq(1).click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'c@c.com']}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'c@c.com'], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('c@c.com');
       });
@@ -245,7 +245,7 @@ describe('FormField - Tests', () => {
         .type('b@b.com').type('{enter}')
         .type('c@c.com').type('{enter}');
       cy.get('.formField-dataCustodianEmail .pill').eq(2).then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com']}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com'], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('b@b.com');
       });
@@ -282,7 +282,7 @@ describe('FormField - Tests', () => {
         .click()
         .then(() => {
           cy.get(selector).should('not.be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
         });
     });
 
@@ -296,7 +296,7 @@ describe('FormField - Tests', () => {
         .click()
         .then(() => {
           cy.get(selector).should('be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
         });
     });
   });
@@ -349,7 +349,7 @@ describe('FormField - Tests', () => {
       cy.get('#studyType .dropdown-toggle').click();
       cy.get('#studyType .search-bar').type('d').then(() => {
         cy.get('#studyType .select-dropdown-item').first().click().then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Descriptive'}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Descriptive', isValid: true}); // code value
           cy.get('#studyType .dropdown-toggle').contains('Descriptive'); // ui updates with new val
         });
       });
@@ -361,7 +361,7 @@ describe('FormField - Tests', () => {
       cy.get('#studyType .dropdown-toggle').click();
       cy.get('#studyType .search-bar').type('newtext').then(() => {
         cy.get('#studyType .search-bar').blur().then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'newtext'}); // code value
+          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'newtext', isValid: true}); // code value
           cy.get('#studyType .dropdown-toggle').contains('newtext'); // ui updates with new val
         });
       });
@@ -410,7 +410,7 @@ describe('FormField - Tests', () => {
       mount(<FormTable {...props}/>);
       cy.get('#fileTypes-0-functionalEquivalence').type('hello').then(() => {
         cy.get('#fileTypes-0-functionalEquivalence').should('have.value', 'hello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes.0.functionalEquivalence', value: 'hello'}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes.0.functionalEquivalence', value: 'hello', isValid: true}); // code value
       });
     });
 
@@ -433,7 +433,7 @@ describe('FormField - Tests', () => {
       cy.get('#add-new-table-row-fileTypes').click();
       cy.get('#fileTypes-1-functionalEquivalence').type('jello').then(() => {
         cy.get('#fileTypes-1-functionalEquivalence').should('have.value', 'jello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes.1.functionalEquivalence', value: 'jello'}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes.1.functionalEquivalence', value: 'jello', isValid: true }); // code value
       });
     });
 
@@ -441,7 +441,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormTable {...props}/>);
       cy.get('#delete-table-row-fileTypes-0').click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: []}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [], isValid: true}); // code value
         cy.get('.formTable-row.formTable-data-row').should('have.length', 0); // only columns left
       });
     });
@@ -452,7 +452,7 @@ describe('FormField - Tests', () => {
       props.defaultValue = [{}, {}];
       mount(<FormTable {...props}/>);
       cy.get('#delete-table-row-fileTypes-0').click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [{}]}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [{}], isValid: true}); // code value
         cy.get('.formTable-row.formTable-data-row').should('have.length', 1); // only columns left
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });

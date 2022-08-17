@@ -138,7 +138,7 @@ const formInputMultiText = (config) => {
     const formValueClone = cloneDeep(formValue);
     formValueClone.push(value);
     setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone});
+    onChange({key: id, value: formValueClone, isValid: true});
     event.target.value = '';
   };
 
@@ -146,7 +146,7 @@ const formInputMultiText = (config) => {
     const formValueClone = cloneDeep(formValue);
     formValueClone.splice(index, 1);
     setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone});
+    onChange({key: id, value: formValueClone, isValid: true});
   };
 
   return div({}, [
@@ -366,7 +366,7 @@ export const FormTable = (config) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][formCol.id] = value;
               setFormValue(formValueClone);
-              onChange({key: `${id}.${i}.${formCol.id}`, value: value });
+              onChange({key: `${id}.${i}.${formCol.id}`, value: value, isValid: true });
             }
           });
         }),
@@ -380,7 +380,7 @@ export const FormTable = (config) => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.splice(i, 1);
             setFormValue(formValueClone);
-            onChange({ key: id, value: formValueClone });
+            onChange({ key: id, value: formValueClone, isValid: true });
           }
         }, [
           span({ className: 'glyphicon glyphicon-remove' })
