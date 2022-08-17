@@ -226,8 +226,8 @@ export const Navigation = {
     );
     let page =
       queryParameters.redirectTo ? queryParameters.redirectTo
-        :user.isAdmin ? '/admin_manage_dar_collections'
-          :user.isChairPerson ? '/chair_console'
+        : user.isAdmin ? '/admin_manage_dar_collections'
+          : user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
               : user.isResearcher ? '/dataset_catalog'
                 : user.isAlumni ? '/summary_votes'
