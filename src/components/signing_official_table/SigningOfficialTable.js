@@ -204,7 +204,7 @@ const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
     return true;
   }
 
-  return isNil(find((card) => card.institutionId == institutionId)(researcher.libraryCards));
+  return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
 };
 
 export default function SigningOfficialTable(props) {
