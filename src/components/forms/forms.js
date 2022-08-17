@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
@@ -6,12 +6,12 @@ import { Theme } from '../../libs/theme';
 import './forms.css';
 
 export const FormFieldTypes = {
-  SELECT: 'select',
-  MULTITEXT: 'multitext',
-  CHECKBOX: 'checkbox',
-  SLIDER: 'slider',
-  TEXT: 'text',
-  NUMBER: 'number'
+  SELECT: { id: 'select', defaultValue: '' },
+  MULTITEXT: { id: 'multitext', defaultValue: [] },
+  CHECKBOX: { id: 'checkbox', defaultValue: false },
+  SLIDER: { id: 'slider', defaultValue: false },
+  TEXT: { id: 'text', defaultValue: '' },
+  NUMBER: { id: 'number', defaultValue: '' }
 };
 
 export const styles = {
@@ -68,10 +68,7 @@ const onFormInputChange = (config, value) => {
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
-  if (isValidInput) {
-    onChange({key: id, value: normalizedValue});
-  }
-
+  onChange({key: id, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
 };
 
@@ -295,13 +292,19 @@ const formInputSlider = (config) => {
 */
 export const FormField = (config) => {
   const {
-    id, title, hideTitle, description,
+    id, title, hideTitle, description, type,
     defaultValue, style, validators
   } = config;
 
   const [error, setError] = useState();
-  const [formValue, setFormValue] = useState(defaultValue || '');
+  const [formValue, setFormValue] = useState(type?.defaultValue || '');
   const required = validators ? validators.findIndex(v => v === FormValidators.REQUIRED) !== -1 : false;
+
+  useEffect(() => {
+    if (defaultValue !== undefined) {
+      setFormValue(defaultValue);
+    }
+  }, [defaultValue]);
 
   return div({
     key: `formControl_${id}`,
@@ -358,6 +361,7 @@ export const FormTable = (config) => {
             ...formCol,
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
+            defaultValue: formValue[i][formCol.id],
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][formCol.id] = value;

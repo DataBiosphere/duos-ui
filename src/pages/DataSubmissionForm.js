@@ -14,9 +14,9 @@ export const DataSubmissionForm = () => {
   /* eslint-disable no-unused-vars */
   const [formData, setFormData] = useState({});
 
-  const onChange = ({ key, value }) => {
+  const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
-    console.log('StudyInfo OnChange:', key, value);
+    console.log('StudyInfo OnChange:', key, value, isValid);
     set(key, value, formData);
   };
 
