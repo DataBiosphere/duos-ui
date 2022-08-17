@@ -362,7 +362,7 @@ export const FormTable = (config) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][formCol.id] = value;
               setFormValue(formValueClone);
-              onChange({key: id, value: formValueClone });
+              onChange({key: `${id}.${i}.${formCol.id}`, value: value });
             }
           });
         }),
@@ -402,7 +402,7 @@ export const FormTable = (config) => {
           const formValueClone = cloneDeep(formValue);
           formValueClone.push({});
           setFormValue(formValueClone);
-          onChange({ key: id, value: formValueClone });
+          onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
         }
       }, [
         (addRowLabel || 'Add New'),

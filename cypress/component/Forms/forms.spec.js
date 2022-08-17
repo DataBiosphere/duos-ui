@@ -421,7 +421,7 @@ describe('FormField - Tests', () => {
       cy.get('#add-new-table-row-fileTypes')
         .click()
         .then(() => {
-          expect(props.onChange).to.be.calledWith({ key: 'fileTypes', value: [{}, {}] }); // code value
+          expect(props.onChange).to.be.calledWith({ key: 'fileTypes.1', value: {} }); // code value
           cy.get('.formTable-row').should('have.length', 3);
           cy.get('.control-label').should('have.length', 3); // still only 3 column headers
         });
