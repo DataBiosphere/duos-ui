@@ -218,14 +218,9 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const queryParameters = Object.fromEntries(
-      window.location.search
-        .replace('?', '')
-        .split('&')
-        .map(queryString => queryString.split('='))
-    );
+    const queryParams = new URLSearchParams(window.location.search);
     let page =
-      queryParameters.redirectTo ? queryParameters.redirectTo
+      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : user.isAdmin ? '/admin_manage_dar_collections'
           : user.isChairPerson ? '/chair_console'
             : user.isMember ? '/member_console'
