@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import {div, img} from 'react-hyperscript-helpers';
+import {div, h, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
+import DataSubmissionNihAnvilUse from "../components/DataSubmissionNihAnvilUse";
 
 
 export const DataSubmissionForm = () => {
@@ -43,6 +44,7 @@ export const DataSubmissionForm = () => {
         ]
       ),
     ]),
+    h(DataSubmissionNihAnvilUse, {formData: {}})
   ]);
 };
 
