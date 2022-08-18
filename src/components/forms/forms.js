@@ -124,14 +124,14 @@ const formInputMultiText = (config) => {
     formValue, setFormValue, error, setError
   } = config;
 
-  const pushValue = (event) => {
-    const value = event.target.value.trim();
+  const pushValue = (element) => {
+    const value = element.value.trim();
 
     if (!value || !validateFormInput(config, value)) {
       return;
     }
     if (formValue.indexOf(value) !== -1) {
-      event.target.value = '';
+      element.value = '';
       return;
     }
 
@@ -139,7 +139,7 @@ const formInputMultiText = (config) => {
     formValueClone.push(value);
     setFormValue(formValueClone);
     onChange({key: id, value: formValueClone, isValid: true});
-    event.target.value = '';
+    element.value = '';
   };
 
   const removePill = (index) => {
@@ -150,23 +150,39 @@ const formInputMultiText = (config) => {
   };
 
   return div({}, [
-    input({
-      id,
-      type: 'text',
-      className: `form-control ${error ? 'errored' : ''}`,
-      placeholder: placeholder || title,
-      style: { ...styles.inputStyle, ...inputStyle },
-      disabled,
-      'aria-describedby': ariaDescribedby,
-      onKeyUp: (event) => {
-        if (event.code === 'Enter') {
-          pushValue(event);
-        } else {
-          setError();
-        }
-      },
-      onFocus: () => setError()
-    }),
+    div({
+      className: 'formControl-group',
+      style: styles.flexRow
+    }, [
+      input({
+        id,
+        type: 'text',
+        className: `form-control ${error ? 'errored' : ''}`,
+        placeholder: placeholder || title,
+        style: { ...styles.inputStyle, ...inputStyle },
+        disabled,
+        'aria-describedby': ariaDescribedby,
+        onKeyUp: (event) => event.code === 'Enter' ? pushValue(event.target) : setError(),
+        onFocus: () => setError()
+      }),
+      h(button, {
+        className: 'pill form-btn btn-xs',
+        type: 'button',
+        disabled,
+        style: {
+          marginTop: 0,
+          minWidth: 'fit-content'
+        },
+        onClick: (event) => pushValue(document.getElementById(id))
+      }, [
+        span({
+          className: 'glyphicon glyphicon-plus',
+          'aria-label': 'Add',
+          style: { margin: '0 8px' },
+          isRendered: !disabled
+        })
+      ])
+    ]),
     error && div({ className: `error-message fadein`}, [
       span({ className: 'glyphicon glyphicon-play' }),
       ...error.map((err) => div([err])),
@@ -395,12 +411,7 @@ export const FormTable = (config) => {
       h(button, {
         id: `add-new-table-row-${id}`,
         key: `add-new-table-row-${id}`,
-        className: 'pill btn-xs',
-        style: {
-          backgroundColor: Theme.palette.secondary,
-          borderRadius: 0,
-          marginRight: 0
-        },
+        className: 'pill form-btn btn-xs',
         type: 'button',
         onClick: () => {
           const formValueClone = cloneDeep(formValue);
