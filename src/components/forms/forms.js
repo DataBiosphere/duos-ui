@@ -298,7 +298,7 @@ export const FormField = (config) => {
 
   const [error, setError] = useState();
   const [formValue, setFormValue] = useState(type?.defaultValue || '');
-  const required = validators ? validators.findIndex(v => v === FormValidators.REQUIRED) !== -1 : false;
+  const required = (validators || []).includes(FormValidators.REQUIRED);
 
   useEffect(() => {
     if (defaultValue !== undefined) {
@@ -347,7 +347,7 @@ export const FormTable = (config) => {
   return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
     div({ className: 'formTable-row formTable-cols' }, formFields.map(({ validators, title }) => {
-      const required = validators ? validators.findIndex(v => v === FormValidators.REQUIRED) !== -1 : false;
+      const required = (validators || []).includes(FormValidators.REQUIRED);
       return label({ className: 'control-label', id: `${id}-${title}` }, [
         title,
         required && '*'
