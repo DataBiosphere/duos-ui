@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
-import { Theme } from '../../libs/theme';
 import './forms.css';
 
 export const FormFieldTypes = {
@@ -173,7 +172,7 @@ const formInputMultiText = (config) => {
           marginTop: 0,
           minWidth: 'fit-content'
         },
-        onClick: (event) => pushValue(document.getElementById(id))
+        onClick: () => pushValue(document.getElementById(id))
       }, [
         span({
           className: 'glyphicon glyphicon-plus',
