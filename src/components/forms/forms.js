@@ -165,7 +165,7 @@ const formInputMultiText = (config) => {
         onFocus: () => setError()
       }),
       h(button, {
-        className: 'pill form-btn btn-xs',
+        className: 'form-btn btn-xs',
         type: 'button',
         disabled,
         style: {

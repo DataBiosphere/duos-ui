@@ -27,10 +27,12 @@
   margin: 10px 10px 0 0;
 }
 
-.pill.form-btn {
+.form-btn {
   background-color: rgb(0, 96, 159);
-  border-radius: 0;
-  margin-right: 0;
+  color: white;
+  padding: 10px 10px;
+  border: 0;
+  margin: 0;
 }
 
 .formField-container .dropdown-toggle {
@@ -62,6 +64,8 @@
 .formField-container .formControl-group button {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .formTable-row {
