@@ -86,7 +86,6 @@ export default function DarCollectionReview(props) {
   const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
-  const [researcherProperties, setResearcherProperties] = useState({});
   const { adminPage = false, readOnly = false } = props;
 
   const init = useCallback(async () => {
@@ -96,11 +95,6 @@ export default function DarCollectionReview(props) {
       const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const researcherProfile = await User.getById(collection.createUserId);
-      const researcherProperties = {};
-      researcherProfile.researcherProperties.forEach((property) => {
-        const { propertyKey, propertyValue } = property;
-        researcherProperties[propertyKey] = propertyValue;
-      });
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
         processDataUseBuckets,
@@ -109,7 +103,6 @@ export default function DarCollectionReview(props) {
       const filteredBuckets = adminPage
         ? processedBuckets
         : filterBucketsForUser(user, processedBuckets);
-      setResearcherProperties(researcherProperties);
       setDataUseBuckets(filteredBuckets);
       setCollection(collection);
       setCurrentUser(user);
@@ -215,7 +208,7 @@ export default function DarCollectionReview(props) {
           isRendered: selectedTab === tabs.applicationInformation,
           institution: get('institution.name')(researcherProfile),
           researcher: researcherProfile.displayName,
-          email: researcherProperties.academicEmail,
+          email: researcherProfile.email,
           nonTechSummary: darInfo.nonTechRus,
           isLoading: subcomponentLoading,
           collection: collection,
