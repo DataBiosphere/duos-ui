@@ -13,7 +13,7 @@ export const Spinner =
 // ReviewResults, ResearcherProfile, NewMemberConsole, DataSharingLanguageTool,
 // DatasetStatistics, DatasetRegistration, DatasetCatalog, DataOwnerReview, DataAccessRequestApplication,
 // ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,
-// AdminConsole, SUpportRequestModal, ElectionTimeoutModal,
+// SupportRequestModal, ElectionTimeoutModal,
 // DacDatasetsModal, EraCommons, ApplicationSummaryModa, AddUserModal, AddInstitutionModal,
 // LibraryCardTable, DarTable DarTableCancelButton, SubmitVoteBox
 // See SignIn for example usage of this constant.

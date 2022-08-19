@@ -184,6 +184,16 @@ export const Collections = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
+  getCollectionSummariesByRoleName: async(roleName) => {
+    const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  getCollectionSummaryByRoleNameAndId: async({roleName, id}) => {
+    const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary/${id}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
   openElectionsById: async(id) => {
     const url = `${await getApiUrl()}/api/collections/${id}/election`;
     const res = await axios.post(url, {}, Config.authOpts());
@@ -339,16 +349,6 @@ export const DAR = {
     });
     const url = `${await getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`;
     const res = await axios.get(url, authOpts);
-    return res.data;
-  },
-
-  //new manage endpoint, should be renamed once v1 variant is removed from use
-  getDataAccessManageV2: async(roleName) => {
-    let url = `${await getApiUrl()}/api/dar/manage/v2`;
-    if (!isNil(roleName)) {
-      url = `${await getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
-    }
-    const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
 
@@ -659,13 +659,6 @@ export const PendingCases = {
       }
     );
     return resp;
-  },
-
-
-  findConsentUnReviewed: async () => {
-    const url = `${await getApiUrl()}/api/consent/unreviewed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   },
 
   findDARUnReviewed: async () => {

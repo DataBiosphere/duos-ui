@@ -56,7 +56,13 @@ export const DataAccessGovernance = (props) => {
     });
   };
 
-  return div({}, [
+  return div({
+    style: {
+      padding: '50px 0',
+      maxWidth: 800,
+      margin: 'auto'
+    }
+  }, [
     label({
       id: 'access_header',
       className: 'control-label',

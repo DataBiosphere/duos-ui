@@ -24,6 +24,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'flex-start',
     marginBottom: '3rem',
+    columnGap: '2rem'
   },
   title: {
     fontWeight: 800,

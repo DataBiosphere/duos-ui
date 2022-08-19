@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import {div, img, h} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
-import DataAccessGovernance from '../components/data_submitter/DataAccessGovernance';
+import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
+import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
+import {h, div, img, h1, form} from 'react-hyperscript-helpers';
+import { set } from 'lodash/fp';
+
 
 export const DataSubmissionForm = () => {
 
   // NOTE: remove after adding components
   /* eslint-disable no-unused-vars */
   const [formData, setFormData] = useState({});
+
+  const onChange = ({ key, value, isValid }) => {
+    /* eslint-disable no-console */
+    console.log('StudyInfo OnChange:', key, value, isValid);
+    set(key, value, formData);
+  };
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
@@ -23,33 +32,18 @@ export const DataSubmissionForm = () => {
             }),
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: {
-              fontFamily: 'Montserrat',
-              fontWeight: 600,
-              fontSize: '2.8rem'
-            } }, [
-              'Register a Dataset',
-            ]),
+            h1(['Register a Dataset']),
             div(
-              {
-                style: {
-                  fontFamily: 'Montserrat',
-                  fontSize: '1.6rem'
-                },
-              },
+              { style: { fontSize: '1.6rem' }},
               ['Submit a new dataset to DUOS']
             ),
           ]),
         ]
       ),
     ]),
+    form({}, [
+      h(DataSubmissionStudyInformation, { onChange }),
 
-    div({
-      style: {
-        paddingLeft: '5%',
-        paddingRight: '5%',
-      }
-    }, [
       h(DataAccessGovernance, {
         formData: formData,
         setFormData: setFormData,
@@ -61,7 +55,6 @@ export const DataSubmissionForm = () => {
         }
       }),
     ])
-
   ]);
 };
 
