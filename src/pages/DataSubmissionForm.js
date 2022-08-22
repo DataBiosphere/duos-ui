@@ -7,10 +7,7 @@ import { set } from 'lodash/fp';
 
 
 export const DataSubmissionForm = () => {
-
-  // NOTE: remove after adding components
-  /* eslint-disable no-unused-vars */
-  const formData = {};
+  let formData = {};
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
