@@ -98,7 +98,26 @@ export default function AdminManageInstitutions(props) {
             div({style: Styles.SMALL}, ['Select and manage Institutions'])
           ]),
         ]),
-        h(SearchBar, {handleSearchChange, currentPage})
+        h(SearchBar, {handleSearchChange, currentPage,
+          style: {
+            width: '60%',
+            margin: '0 3% 0 0',
+          },
+          button: div([
+            a({
+              id: 'btn_addInstitution',
+              className: 'btn-primary btn-add common-background',
+              style: {
+                marginTop: '30%',
+                display: 'block',
+                lineHeight: 0.6,
+              },
+              onClick: addInstitution
+            }, [
+              span({}, ['Add Institution']),
+            ]),
+          ]),
+        })
       ]),
       h(InstitutionTable, {
         filteredList,
@@ -118,22 +137,6 @@ export default function AdminManageInstitutions(props) {
         onOKRequest: modalSave,
         onCloseRequest: closeAddInstitutionModal
       }),
-      div({ style: {display: 'flex', justifyContent: 'space-between'}}, [
-        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, []),
-        div({className: 'right-header-section', style: {
-          display: 'flex',
-          alignItems: 'flex-end'
-        }}, [
-          a({
-            id: 'btn_addInstitution',
-            className: 'btn-primary btn-add common-background',
-            onClick: addInstitution
-          }, [
-            div({className: 'all-icons add-dac_white'}),
-            span({}, ['Add Institution'])
-          ])
-        ])
-      ])
     ])
   );
 }
