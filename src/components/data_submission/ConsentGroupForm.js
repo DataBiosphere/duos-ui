@@ -1,44 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { div, input, label, h, span, a, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isNil } from 'lodash/fp';
-import {RadioButton} from '../RadioButton';
-import DataSubmitterStyles from './DataSubmitterStyles';
+import { useState } from 'react';
+import { div, h, h3, span, a, button } from 'react-hyperscript-helpers';
+import { set } from 'lodash/fp';
 import ConsentGroupSummary from './ConsentGroupSummary';
-import Select from 'react-select';
-
-// show text iff text
-const ConditionalText = (props) => {
-  const {
-    text,
-    setText,
-    id,
-    required,
-    placeholder
-  } = props;
-
-  const show = useCallback(() => {
-    return !isNil(text);
-  }, [text]);
-
-  return div({
-    isRendered: show(),
-  }, [
-    input({
-      type: 'text',
-      style: DataSubmitterStyles.textInput,
-      value: text,
-      onChange: (e) => setText(e.target.value),
-      name: id,
-      className: 'form-control',
-      id: id,
-      maxLength: '512',
-      rows: '2',
-      required: required,
-      placeholder: placeholder
-    })
-  ]);
-};
-
+import { FormFieldTypes, FormField } from '../forms/forms';
 
 const dataLocationOptions = [
   { value: 'AnVIL Workspace', label: 'AnVIL Workspace' },
@@ -47,79 +11,67 @@ const dataLocationOptions = [
   { value: 'Not Determined', label: 'Not Determined' }
 ];
 
-// const dataLocationOptions = ["AnVIL Workspace", "Terra Workspace", "TDR Location", "Not Determined"]
-
 export const ConsentGroupForm = (props) => {
   const {
     idx,
-    parentConsentGroup,
     saveConsentGroup,
     deleteConsentGroup,
   } = props;
 
-  const [consentGroup, setConsentGroup] = useState({
-    ...{
-      consentGroupName: '',
+  const consentGroup = {
+    consentGroupName: '',
 
-      // primary: one of these needs to be filled
-      generalResearchUse: undefined,
-      hmb: undefined,
-      diseaseSpecificUse: undefined, // string
-      poa: undefined,
-      otherPrimary: undefined, // string
+    // primary: one of these needs to be filled
+    generalResearchUse: undefined,
+    hmb: undefined,
+    diseaseSpecificUse: undefined, // string
+    poa: undefined,
+    otherPrimary: undefined, // string
 
-      // secondary:
-      nmds: false, // No Methods Development or validation studies
-      gso: false, // genetic studies only
-      pub: false, // publication required
-      col: false, // collaboration required
-      irb: false, // irb approval required
-      gs: undefined, // string: geographic restriction
-      mor: false, // publication moratorium
-      npu: false, // non profit only
-      otherSecondary: undefined, // string
+    // secondary:
+    nmds: false, // No Methods Development or validation studies
+    gso: false, // genetic studies only
+    pub: false, // publication required
+    col: false, // collaboration required
+    irb: false, // irb approval required
+    gs: undefined, // string: geographic restriction
+    mor: false, // publication moratorium
+    npu: false, // non profit only
+    otherSecondary: undefined, // string
 
-      // dataLocation is one of:
-      // "AnVIL Workspace", "Terra Workspace",
-      // "TDR Location", "Not Determined"
-      dataLocation: [],
+    // dataLocation is one of:
+    // "AnVIL Workspace", "Terra Workspace",
+    // "TDR Location", "Not Determined"
+    dataLocation: [],
 
-      url: ''
-    },
-    ...parentConsentGroup,
-  });
+    url: ''
+  };
+
+  const isConsentGroupValid = () => {
+    const isPrimarySelected = () => {
+      return false;
+    };
+
+    const isUrlSpecified = false;
+
+    const isNameSpecified = false;
+
+    return isPrimarySelected() && isUrlSpecified && isNameSpecified;
+  };
 
   const [editMode, setEditMode] = useState(true);
 
-  useEffect(() => {
-    setConsentGroup(parentConsentGroup);
-  }, [parentConsentGroup]);
-
   const updateField = (field, val) => {
-    const newConsentGroup = cloneDeep(consentGroup);
-    newConsentGroup[field] = val;
-
-    setConsentGroup(newConsentGroup);
-  };
-
-
-  const setPrimary = (field, val=true) => {
-    setConsentGroup({
-      ...consentGroup,
-      ...{
-        generalResearchUse: false,
-        hmb: false,
-        diseaseSpecificUse: undefined,
-        poa: false,
-        otherPrimary: undefined,
-      },
-      ...{
-        [field]: val,
-      }});
+    set(consentGroup, field, val);
   };
 
   return div({
-    style: DataSubmitterStyles.consentGroupCard,
+    style: {
+      border: '1px solid #283593',
+      padding: '1rem 2rem 1rem 2rem',
+      borderRadius: '4px',
+      marginBottom: '2rem',
+    },
     id: idx+'_consentGroupForm'
   }, [
 
@@ -135,411 +87,161 @@ export const ConsentGroupForm = (props) => {
     div({
       isRendered: editMode,
     }, [
-      // name
-      div({ className: 'form-group' }, [
-        label({
-          id: idx+'_consent_group_name_label',
-          className: 'control-label',
-          style: DataSubmitterStyles.header,
-        }, ['Consent Group Name*']),
-        div({ className: '' }, [
-          input({
-            type: 'text',
-            style: DataSubmitterStyles.textInput,
-            name: idx+'_consent_group_name',
-            id: idx+'_consent_group_name',
-            className: 'form-control',
-            placeholder: '',
-            required: true,
-            disabled: !editMode,
-            value: consentGroup.consentGroupName,
-            onChange: (e) => updateField('consentGroupName', e.target.value),
-          })
-        ])
-      ]),
 
-      // primary
+      div({
+        style: {
+          width: '70%'
+        }
+      }, [
+        h3(['Consent Group Information']),
 
-      div({ className: 'form-group' }, [
-        label({
-          id: idx+'_primary_researcher',
-          className: 'control-label',
-          style: DataSubmitterStyles.header,
-        }, ['Consent Group - Primary Data Use Terms*']),
-        div({ className: '' }, [
+        // name
+        h(FormField, {
+          id: 'consentGroupName',
+          title: 'Consent Group Name*',
+          placeholder: 'Enter name',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
 
-          div({
-            style: DataSubmitterStyles.headerDescription
-          }, [
-            span({}, [
-              'Please select one of the following data use permissions for your dataset'
-            ]),
-          ]),
+        // primary
 
-
-          div({
-            style: DataSubmitterStyles.radioContainer,
-          }, [
-            RadioButton({
-              style: DataSubmitterStyles.radioButton,
-              id: idx+'_generalResearchUse',
-              name: idx+'_generalResearchUse',
-              value: 'generalResearchUse',
-              defaultChecked: consentGroup.generalResearchUse,
-              disabled: !editMode,
-              onClick: () => setPrimary('generalResearchUse'),
-              description: 'General Research Use',
-            }),
-          ]),
-
-          div({
-            style: DataSubmitterStyles.radioContainer,
-          }, [
-            RadioButton({
-              style: DataSubmitterStyles.radioButton,
-              id: idx+'_hmb',
-              name: idx+'_hmb',
-              value: 'hmb',
-              defaultChecked: consentGroup.hmb,
-              disabled: !editMode,
-              onClick: () => setPrimary('hmb'),
-              description: 'Health/Medical/Biomedical Research Use',
-            }),
-          ]),
-
-          div({
-            style: DataSubmitterStyles.radioContainer,
-          }, [
-            RadioButton({
-              style: DataSubmitterStyles.radioButton,
-              id: idx+'_diseaseSpecificUse',
-              name: idx+'_diseaseSpecificUse',
-              value: 'diseaseSpecificUse',
-              disabled: !editMode,
-              defaultChecked: !isNil(consentGroup.diseaseSpecificUse),
-              onClick: () => (isNil(consentGroup.diseaseSpecificUse) ? setPrimary('diseaseSpecificUse', '') : undefined),
-              description: 'Disease-Specific Research Use',
-            }),
-          ]),
-
-          h(ConditionalText, {
-            text: consentGroup.diseaseSpecificUse,
-            setText: (val) => setPrimary('diseaseSpecificUse', val),
-            id: idx + '_diseaseSpecificUseText',
-            required: true,
-            placeholder: 'Please enter one or more diseases'
-          }, []),
-
-          div({
-            style: DataSubmitterStyles.radioContainer,
-          }, [
-            RadioButton({
-              style: DataSubmitterStyles.radioButton,
-              id: idx+'_poa',
-              name: idx+'_poa',
-              value: 'poa',
-              defaultChecked: consentGroup.poa,
-              disabled: !editMode,
-              onClick: () => setPrimary('poa'),
-              description: 'Populations, Origins, Ancestry Use',
-            }),
-          ]),
-
-          div({
-            style: DataSubmitterStyles.radioContainer,
-          }, [
-            RadioButton({
-              style: DataSubmitterStyles.radioButton,
-              id: idx+'_otherPrimary',
-              name: idx+'_otherPrimary',
-              value: 'otherPrimary',
-              defaultChecked: !isNil(consentGroup.otherPrimary),
-              disabled: !editMode,
-              onClick: () => (isNil(consentGroup.otherPrimary) ? setPrimary('otherPrimary', '') : undefined),
-              description: 'Other',
-            }),
-          ]),
-
-          h(ConditionalText, {
-            text: consentGroup.otherPrimary,
-            setText: (val) => setPrimary('otherPrimary', val),
-            id: idx + '_otherPrimaryText',
-            required: true,
-            disabled: !editMode,
-            placeholder: 'Please specify if selected (max 512 characters)',
-          }, []),
-        ])
-      ]),
-
-      // secondary
-      div({ className: 'form-group' }, [
-        label({
-          id: idx+'_primary_researcher',
-          className: 'control-label',
-          style: DataSubmitterStyles.header,
-        }, ['Consent Secondary Data Use Terms']),
-
-        div({
-          style: DataSubmitterStyles.headerDescription,
-        }, [
-          span({}, [
-            'Select all applicable data use parameters'
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.nmds,
-            onChange: ()=>updateField('nmds', !consentGroup.nmds),
-            id: idx+'_nmds',
-            name: idx+'_nmds',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_nmds',
-          }, [
-            span({ className: ''},
-              ['No methods development or validation studies (NMDS)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.gso,
-            onChange: ()=>updateField('gso', !consentGroup.gso),
-            id: idx+'_gso',
-            name: idx+'_gso',
-            disabled: !editMode,
-            type: 'checkbox',
-            className: ' ',
-          }),
-          label({
-            className: 'regular-checkbox ',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_gso',
-          }, [
-            span({ className: ''},
-              ['Genetic studies only (GSO)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.pub,
-            onChange: ()=>updateField('pub', !consentGroup.pub),
-            id: idx+'_pub',
-            disabled: !editMode,
-            name: idx+'_pub',
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox ',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_pub',
-          }, [
-            span({ className: ''},
-              ['Publication Required (PUB)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.col,
-            onChange: ()=>updateField('col', !consentGroup.col),
-            id: idx+'_col',
-            name: idx+'_col',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_col',
-          }, [
-            span({ className: ''},
-              ['Collaboration Required (COL)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.irb,
-            onChange: ()=>updateField('irb', !consentGroup.irb),
-            id: idx+'_irb',
-            name: idx+'_irb',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_irb',
-          }, [
-            span({ className: ''},
-              ['Ethics Approval Required (IRB)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            onChange: () => isNil(consentGroup.gs) ? updateField('gs', '') : updateField('gs', undefined),
-            id: idx+'_gs',
-            name: idx+'_gs',
-            type: 'checkbox',
-            disabled: !editMode,
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_gs',
-          }, [
-            span({ className: ''},
-              ['Geographic Restriction (GS-)']),
-          ]),
-        ]),
-
-        h(ConditionalText, {
-          text: consentGroup.gs,
-          setText: (val) => updateField('gs', val),
-          id: idx + '_gstext',
-          disabled: !editMode,
-          required: true,
-          placeholder: 'Specify (TODO)',
-        }, []),
-
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.mor,
-            onChange: ()=>updateField('mor', !consentGroup.mor),
-            id: idx+'_mor',
-            name: idx+'_mor',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_mor',
-          }, [
-            span({ className: ''},
-              ['Publication Moratorium (MOR)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            checked: consentGroup.npu,
-            onChange: ()=>updateField('npu', !consentGroup.npu),
-            id: idx+'_npu',
-            name: idx+'_npu',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_npu',
-          }, [
-            span({ className: ''},
-              ['Non-profit Use Only (NPU)']),
-          ]),
-        ]),
-
-        div({className: 'checkbox'}, [
-          input({
-            onChange: () => isNil(consentGroup.otherSecondary) ? updateField('otherSecondary', '') : updateField('otherSecondary', undefined),
-            id: idx+'_otherSecondary',
-            name: idx+'_otherSecondary',
-            disabled: !editMode,
-            type: 'checkbox',
-          }),
-          label({
-            className: 'regular-checkbox',
-            style: DataSubmitterStyles.checkboxText,
-            htmlFor: idx+'_otherSecondary',
-          }, [
-            span({ className: ''},
-              ['Other']),
-          ]),
-        ]),
-
-        h(ConditionalText, {
-          text: consentGroup.otherSecondary,
-          setText: (val) => updateField('otherSecondary', val),
-          id: idx + '_otherSecondaryText',
-          required: true,
-          disabled: !editMode,
-          placeholder: 'Other'
-        }, []),
-      ]),
-
-      // location
-      div({ className: 'form-group' }, [
-        label({
-          id: idx+'_primary_researcher',
-          className: 'control-label',
-          style: DataSubmitterStyles.header,
-        }, ['Data Location*']),
-
-        div({style: DataSubmitterStyles.textInput}, [
-          h(Select, {
-            isMulti: true,
-            options: dataLocationOptions,
-            disabled: !editMode,
-            value: (
-              isNil(consentGroup.dataLocation)
-                ? null
-                : consentGroup.dataLocation.map((loc) => {
-                  return {
-                    value: loc,
-                    label: loc,
-                  };
-                })),
-            name: idx+'_dataLocation',
-            placeholder: 'Data Location(s)',
-            onChange: (selected) => {
-              const values = selected.map((s) => s.value);
-
-              if (values.includes('Not Determined')) {
-                // user selected 'Not Determined', so clear all other values
-                if (values[values.length - 1] == 'Not Determined') {
-                  updateField('dataLocation', ['Not Determined']);
-                  return;
-                }
-
-                // user selected something other than 'Not Determined',
-                // so remove 'Not Determined' and keep the new value.
-                const notDeterminedIdx = values.indexOf('Not Determined');
-                values.splice(notDeterminedIdx, 1);
-                updateField('dataLocation', values);
-                return;
-              }
-              updateField('dataLocation', values);
+        h(FormField,
+          {
+            type: FormFieldTypes.RADIO,
+            id: 'primaryRadio',
+            title: 'Consent Group - Primary Data Use Terms*',
+            description: 'Please select one of the following data use permissions for your dataset',
+            options: [
+              {
+                id: 'generalResearchUse',
+                key: 'generalResearchUse',
+                text: 'General Research Use',
+              },
+              {
+                id: 'hmb',
+                key: 'hmb',
+                text: 'Health/Medical/Biomedical Research Use',
+              },
+              {
+                id: 'diseaseSpecificUse',
+                key: 'diseaseSpecificUse',
+                text: 'Disease-Specific Research Use',
+                type: 'string',
+                placeholder: 'Please enter one or more diseases',
+              },
+              {
+                id: 'poa',
+                key: 'poa',
+                text: 'Populations, Origins, Ancestry Use',
+              },
+              {
+                id: 'otherPrimary',
+                key: 'otherPrimary',
+                text: 'Other',
+                type: 'string',
+                placeholder: 'Please specify',
+              },
+            ],
+            onChange: ({value}) => {
+              set(consentGroup, value.key, value.value);
             }
-          }),
-        ]),
+          }
+        ),
+
+        // secondary
+        h(FormField, {
+          title: 'Consent Secondary Data Use Terms',
+          description: 'Select all applicable data use parameters',
+          id: 'nmds',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'No methods development or validation studies (NMDS)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'gso',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Genetic studies only (GSO)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'pub',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Publication Required (PUB)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'col',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Collaboration Required (COL)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'irb',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Ethics Approval Required (IRB)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'gs',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Geographic Restriction (GS-)',
+          valueType: 'string',
+          placeholder: 'Specify (TODO)',
+          defaultValue: null,
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'mor',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Publication Moratorium (MOR)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
 
 
-        input({
-          type: 'text',
-          style: DataSubmitterStyles.textInput,
-          className: 'form-control',
-          value: consentGroup.url,
-          onChange: (e) => updateField('url', e.target.value),
-          name: idx+'_url',
-          id: idx+'_url',
-          disabled: !editMode,
-          maxLength: '512',
-          rows: '2',
-          required: false,
-          placeholder: 'Free text field for entering URL of data.'
-        })
+        h(FormField, {
+          id: 'npu',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Non-profit Use Only (NPU)',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        h(FormField, {
+          id: 'otherSecondary',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Other',
+          valueType: 'string',
+          placeholder: 'Please specify.',
+          defaultValue: null,
+          onChange: ({key, value}) => updateField(key, value),
+        }),
+
+        // location
+
+        h(FormField, {
+          id: 'datalocations',
+          type: FormFieldTypes.MULTISELECT,
+          title: 'Data Location*',
+          exclusiveValues: 'Not Determined',
+          options: dataLocationOptions,
+          placeholder: 'Data Location(s)',
+          onChange: ({key, value}) => updateField(key, value.map((sel) => sel.value)),
+        }),
+
+        h(FormField, {
+          id: 'url',
+          placeholder: 'Enter URL',
+          onChange: ({key, value}) => updateField(key, value),
+        }),
       ]),
     ]),
+
+
 
     // save + delete
     div({
@@ -577,7 +279,7 @@ export const ConsentGroupForm = (props) => {
           id: idx+'_saveConsentGroup',
           isRendered: editMode,
           onClick: () => {
-            saveConsentGroup(consentGroup);
+            saveConsentGroup({ value: consentGroup, valid: isConsentGroupValid });
             setEditMode(false);
           },
           className: 'f-right btn-primary common-background',

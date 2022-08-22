@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
 import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
@@ -11,7 +10,7 @@ export const DataSubmissionForm = () => {
 
   // NOTE: remove after adding components
   /* eslint-disable no-unused-vars */
-  const [formData, setFormData] = useState({});
+  const formData = {};
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
@@ -44,16 +43,7 @@ export const DataSubmissionForm = () => {
     form({}, [
       h(DataSubmissionStudyInformation, { onChange }),
 
-      h(DataAccessGovernance, {
-        formData: formData,
-        setFormData: setFormData,
-        updateFormData: (update) => {
-          setFormData({
-            ...formData,
-            ...update,
-          });
-        }
-      }),
+      h(DataAccessGovernance, { onChange }),
     ])
   ]);
 };

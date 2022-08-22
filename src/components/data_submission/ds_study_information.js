@@ -47,6 +47,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyType',
       title: 'Study Type',
       type: FormFieldTypes.SELECT,
+      allowManualEntry: false,
       selectOptions: [
         'Observational', 'Interventional', 'Descriptive',
         'Analytical', 'Prospective', 'Retrospective',

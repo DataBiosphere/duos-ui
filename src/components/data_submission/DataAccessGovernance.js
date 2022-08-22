@@ -1,24 +1,44 @@
 import ConsentGroupForm from './ConsentGroupForm';
 import { useEffect, useState } from 'react';
-import { cloneDeep, isNil } from 'lodash/fp';
-import { div, h, a, span, label } from 'react-hyperscript-helpers';
+import { cloneDeep, isNil, every } from 'lodash/fp';
+import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
-import {SearchSelect} from '../SearchSelect';
-import {RadioButton} from '../RadioButton';
-import DataSubmitterStyles from './DataSubmitterStyles';
+import { FormFieldTypes, FormField } from '../forms/forms';
 
 
 const OPEN_ACCESS = 'Open Access';
 const CLOSED_ACCESS = 'Closed Access';
 
+const openClosedRadioOptions =     [
+  {
+    id: 'open_access',
+    key: OPEN_ACCESS,
+    text: 'Open Access'
+  },
+  {
+    id: 'closed_access',
+    key: CLOSED_ACCESS,
+    text: 'Closed Access',
+  }
+];
 
 export const DataAccessGovernance = (props) => {
   const {
-    formData, updateFormData
+    onChange
   } = props;
 
-  const [consentGroups, setConsentGroups] = useState((isNil(formData.consentGroups) ? [] : formData.consentGroups));
+  const [consentGroupsState, setConsentGroupsState] = useState([]);
+
+  // const [consentGroupsState, setConsentGroupsState] = useState((isNil(formData.consentGroups) ? [] : formData.consentGroups.map((c) => {
+  //   return {
+  //     consentGroup: c,
+  //     editMode: false,
+  //     valid: true,
+  //   };
+  // })));
+
   const [dacs, setDacs] = useState([]);
+  const [isClosedAccess, setIsClosedAccess] = useState(false);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -26,34 +46,48 @@ export const DataAccessGovernance = (props) => {
     });
   }, []);
 
+  useEffect(() => {
+    const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
+
+    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
+    const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
+
+    onChange({key: 'consentGroups', value: groups, isValid: valid});
+  }, [consentGroupsState, onChange]);
+
   const addNewConsentGroup = () => {
-    const newConsentGroups = cloneDeep(consentGroups);
-    newConsentGroups.push({});
-    setConsentGroups(newConsentGroups);
-    updateFormData({
-      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
+    const newConsentGroupsState = cloneDeep(consentGroupsState);
+    newConsentGroupsState.push({
+      consentGroup: {},
+      editMode: true,
+      valid: false,
     });
+    setConsentGroupsState(newConsentGroupsState);
   };
 
   const deleteConsentGroup = (idx) => {
-    const newConsentGroups = cloneDeep(consentGroups);
-    newConsentGroups[idx] = undefined;
-    setConsentGroups(newConsentGroups);
-    updateFormData({
-      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
-    });
+    const newConsentGroupsState = cloneDeep(consentGroupsState);
+    newConsentGroupsState[idx] = undefined;
+    setConsentGroupsState(newConsentGroupsState);
   };
 
-  const updateConsentGroup = (idx, update) => {
-    const newConsentGroups = cloneDeep(consentGroups);
-    newConsentGroups[idx] = {
-      ...consentGroups[idx],
-      ...update,
+  const updateConsentGroup = (idx, value, isValid) => {
+    const newConsentGroupsState = cloneDeep(newConsentGroupsState);
+    newConsentGroupsState[idx] = {
+      editMode: false,
+      valid: isValid,
+      consentGroup: {
+        ...consentGroupsState[idx],
+        ...value,
+      }
     };
-    setConsentGroups(newConsentGroups);
-    updateFormData({
-      consentGroups: newConsentGroups.filter((val) => !isNil(val)),
-    });
+    setConsentGroupsState(newConsentGroupsState);
+  };
+
+  const startEditConsentGroup = (idx) => {
+    const newConsentGroupsState = cloneDeep(newConsentGroupsState);
+    newConsentGroupsState[idx].editMode = true;
+    setConsentGroupsState(newConsentGroupsState);
   };
 
   return div({
@@ -63,88 +97,45 @@ export const DataAccessGovernance = (props) => {
       margin: 'auto'
     }
   }, [
-    label({
-      id: 'access_header',
-      className: 'control-label',
-      style: DataSubmitterStyles.sectionHeader,
-    }, ['Data Access Governance']),
-
-
+    h2('Data Access Governance'),
     div({}, [
 
-      // open or closed access
-      label({
-        id: 'access_header',
-        className: 'control-label',
-        style: DataSubmitterStyles.header,
-      }, ['Does the data need to be managed under Controlled or Open Access?']),
-      div({
-        style: DataSubmitterStyles.radioContainer,
-      }, [
-        RadioButton({
-          style: DataSubmitterStyles.radioButton,
-          id: 'alternativeDataSharingPlanControlledOpenAccess',
-          name: 'alternativeDataSharingPlanControlledOpenAccess',
-          value: 'alternativeDataSharingPlanControlledOpenAccess',
-          defaultChecked: formData.alternativeDataSharingPlanControlledOpenAccess === OPEN_ACCESS,
-          onClick: () => updateFormData({
-            alternativeDataSharingPlanControlledOpenAccess: OPEN_ACCESS,
-          }),
-          description: 'Open Access',
-        }),
-      ]),
+      h(FormField,
+        {
+          type: FormFieldTypes.RADIO,
+          id: 'dataSharingPlan',
+          title: 'Does the data need to be managed under Controlled or Open Access?',
+          options: openClosedRadioOptions,
+          onChange: ({ value, isValid }) => {
+            onChange({
+              key: 'alternativeDataSharingPlanControlledOpenAccess',
+              value: value.key,
+              isValid: isValid,
+            });
+
+            setIsClosedAccess(value.key === CLOSED_ACCESS);
+          },
+        }
+      ),
 
       div({
-        style: DataSubmitterStyles.radioContainer,
-      }, [
-        RadioButton({
-          style: DataSubmitterStyles.radioButton,
-          id: 'alternativeDataSharingPlanControlledClosedAccess',
-          name: 'alternativeDataSharingPlanControlledClosedAccess',
-          value: 'alternativeDataSharingPlanControlledClosedAccess',
-          defaultChecked: formData.alternativeDataSharingPlanControlledOpenAccess === CLOSED_ACCESS,
-          onClick: () => updateFormData({
-            alternativeDataSharingPlanControlledOpenAccess: CLOSED_ACCESS,
-          }),
-          description: 'Closed Access',
-        }),
-      ]),
-
-
-      div({
-        isRendered: formData.alternativeDataSharingPlanControlledOpenAccess === CLOSED_ACCESS,
+        isRendered: isClosedAccess,
       },
       [
-
-        // select dac
-        label({
-          id: 'data_access_committee_header',
-          className: 'control-label',
-          style: DataSubmitterStyles.header,
-        }, ['Data Access Committee*']),
-
-        div({
-          style: DataSubmitterStyles.headerDescription
-        }, [
-          span({}, [
-            'Please select which DAC should goverrn requests for this dataset.'
-          ]),
-        ]),
-        h(SearchSelect, {
-          id: 'data_submission_select_dac',
-          name: 'data_submission_select_dac',
-          onSelection: (selection) => updateFormData({
-            dataAccessCommitteeId: selection,
-          }),
-          options: dacs.map((dac) => {
+        h(FormField, {
+          id: 'dataAccessCommitteeId',
+          title: 'Data Access Committee*',
+          description: 'Please select which DAC should govern requests for this dataset',
+          type: FormFieldTypes.SELECT,
+          allowManualEntry: false,
+          selectOptions: dacs.map((dac) => {
             return { key: dac.dacId, displayText: dac.name };
           }),
-          placeholder: 'Search for institution...',
-          value: formData.dataAccessCommitteeId,
+          onChange
         }),
 
 
-        // add consent groupa
+        // add consent group
         div({
           className: 'right-header-section',
           id: 'add-new-consent-group-btn',
@@ -163,22 +154,21 @@ export const DataAccessGovernance = (props) => {
         ]),
 
         // consent groups
-        consentGroups
-          .map((group, idx) => {
-            if (isNil(group)) {
+        consentGroupsState
+          .map((state, idx) => {
+            if (isNil(state)) {
               return div({}, []);
             }
 
             return h(ConsentGroupForm, {
               key: idx.toString() + '_consentGroup',
               idx: idx,
-              parentConsentGroup: group,
               saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
               deleteConsentGroup: () => deleteConsentGroup(idx),
+              startEditConsentGroup: () => startEditConsentGroup(idx),
             });
-          }
-
-          )]),
+          })
+      ]),
     ])
   ]);
 };

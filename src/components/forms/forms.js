@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isNil, isString } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
+import { SearchSelect } from '../SearchSelect';
 import './forms.css';
+import { RadioButton } from '../RadioButton';
+import Select from 'react-select';
 
 export const FormFieldTypes = {
   SELECT: { id: 'select', defaultValue: '' },
+  MULTISELECT: { id: 'select', defaultValue: [] },
   MULTITEXT: { id: 'multitext', defaultValue: [] },
   CHECKBOX: { id: 'checkbox', defaultValue: false },
   SLIDER: { id: 'slider', defaultValue: false },
   TEXT: { id: 'text', defaultValue: '' },
-  NUMBER: { id: 'number', defaultValue: '' }
+  NUMBER: { id: 'number', defaultValue: '' },
+  RADIO: { id: 'radio', defaultValue: null }
 };
 
 export const styles = {
@@ -77,9 +82,11 @@ const onFormInputChange = (config, value) => {
 const formInput = (config) => {
   switch (config.type) {
     case FormFieldTypes.SELECT: return formInputSelect(config);
+    case FormFieldTypes.MULTISELECT: return formInputMultiSelect(config);
     case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
     case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
     case FormFieldTypes.SLIDER: return formInputSlider(config);
+    case FormFieldTypes.RADIO: return formInputRadioGroup(config);
     case FormFieldTypes.TEXT:
     default:
       return formInputGeneric(config);
@@ -210,21 +217,50 @@ const formInputMultiText = (config) => {
 const formInputSelect = (config) => {
   const {
     id, title, disabled, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby
+    selectOptions, searchPlaceholder, ariaDescribedby,
+    allowManualEntry
   } = config;
+
+  const manualEntry = !isNil(allowManualEntry) && allowManualEntry;
 
   return div({}, [
     h(SearchSelectOrText, {
       id,
+      isRendered: manualEntry,
       'aria-describedby': ariaDescribedby,
       onPresetSelection: async (selection) => onFormInputChange(config, selection),
       onManualSelection: (selection) => onFormInputChange(config, selection),
       onOpen: () => setError(),
-      options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
+      options: selectOptions.map((x) => {
+        if (isString(x)) {
+          return { key: x, displayText: x };
+        }
+
+        return x;
+      }),
       searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
       className: 'form-control',
       disabled, errored: error
     }),
+
+    h(SearchSelect, {
+      id,
+      isRendered: !manualEntry,
+      'aria-describedby': ariaDescribedby,
+      onSelection: async (selection) => onFormInputChange(config, selection),
+      onOpen: () => setError(),
+      options: selectOptions.map((x) => {
+        if (isString(x)) {
+          return { key: x, displayText: x };
+        }
+
+        return x;
+      }),
+      searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
+      className: 'form-control',
+      disabled, errored: error
+    }),
+
     error && div({ className: `error-message fadein`}, [
       span({ className: 'glyphicon glyphicon-play' }),
       ...error.map((err) => div([err])),
@@ -232,20 +268,64 @@ const formInputSelect = (config) => {
   ]);
 };
 
+const formInputMultiSelect = (config) => {
+
+  const {
+    options, exclusiveValues, id, placeholder,
+    formValue
+  } = config;
+
+  return h(Select, {
+    isMulti: true,
+    options: options,
+    value: formValue,
+    name: id,
+    placeholder: placeholder || '',
+    onChange: (selected) => {
+
+      if (selected.length > 0 && !isNil(exclusiveValues)) {
+        const newSelection = selected[selected.length - 1];
+
+        if (exclusiveValues.includes(newSelection.value)) {
+          onFormInputChange(config, [newSelection]);
+          return;
+        }
+
+
+        if (exclusiveValues.includes(selected[0].value)) {
+          selected.splice(0, 1);
+          onFormInputChange(config, selected);
+          return;
+        }
+
+      }
+      onFormInputChange(config, selected);
+    }
+  });
+
+};
+
 const formInputCheckbox = (config) => {
   const {
     id, disabled, error, toggleText,
-    formValue, ariaDescribedby
+    formValue, ariaDescribedby,
+    valueType, placeholder, setError
   } = config;
 
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
       id: `cb_${id}_${toggleText}`,
-      checked: formValue,
+      checked: (valueType === 'string' ? isString(formValue) : formValue),
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
-      onChange: (event) => onFormInputChange(config, event.target.checked),
+      onChange: (event) => {
+        if (valueType === 'string') {
+          onFormInputChange(config, (event.target.checked ? '' : undefined));
+        } else {
+          onFormInputChange(config, event.target.checked);
+        }
+      },
       disabled
     }),
     label({
@@ -255,8 +335,98 @@ const formInputCheckbox = (config) => {
         fontWeight: 'normal',
         fontStyle: 'italic'
       }
-    }, [toggleText])
+    }, [toggleText]),
+    input({
+      isRendered: valueType === 'string' && isString(formValue),
+      id: id,
+      type: 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || '',
+      value: formValue,
+      style: styles.inputStyle,
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+    }),
   ]);
+};
+
+const formInputRadioGroup = (config) => {
+  /* options example:
+
+    [
+      {
+        id: 'open_access',
+        key: 'open_access',
+        text: 'Open Access'
+      },
+      {
+        id: 'closed_access',
+        key: 'closed_access',
+        text: 'Closed Access',
+      },
+      {
+        id: 'other',
+        key: 'other',
+        text: 'Other',
+        type: 'string',
+        placeholder: 'Please specify.',
+      }
+    ]
+
+    if type is 'string', then a textbox is rendered
+    when checked.
+  */
+
+  const {
+    id, disabled, error,
+    formValue, options, ariaDescribedby,
+    setError
+  } = config;
+
+  return div({},
+    [
+      div(
+        {
+          className: 'radio-group'
+        },
+        options.map((option => {
+          return div({}, [
+            h(RadioButton, {
+              id: id+'_'+option.id,
+              name: id+'_'+option.id,
+              defaultChecked: !isNil(formValue) && formValue.key === option.key,
+              onClick: () => onFormInputChange(config, {
+                key: option.key,
+                value: (option.type === 'string'? '' : true),
+              }),
+              description: option.text,
+              disabled,
+            }),
+            input({
+              isRendered: option.type === 'string' && formValue.key == option.key,
+              id: id+'_'+option.id+'_text_input',
+              type: 'text',
+              className: `form-control ${error ? 'errored' : ''}`,
+              placeholder: (!isNil(option.placeholder)),
+              value: formValue.value,
+              style: styles.inputStyle,
+              disabled: disabled,
+              onChange: (event) => onFormInputChange(config, {
+                key: option.key,
+                value: event.target.value,
+              }),
+              onFocus: () => setError(),
+              onBlur: (event) => validateFormInput(config, event.target.value),
+              'aria-describedby': ariaDescribedby,
+            }),
+          ]);
+        }))
+      )
+    ]
+  );
 };
 
 const formInputSlider = (config) => {
