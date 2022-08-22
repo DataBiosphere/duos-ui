@@ -6,6 +6,7 @@ import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import {User} from './ajax';
+import { headerTabsConfig } from '../components/DuosHeader';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -163,6 +164,7 @@ export const USER_ROLES = {
   researcher: 'Researcher',
   alumni: 'Alumni',
   signingOfficial: 'SigningOfficial',
+  dataSubmitter: 'DataSubmitter',
   all: 'All'
 };
 
@@ -212,29 +214,26 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
   user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
+  user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1;
   Storage.setCurrentUser(user);
   return user;
 };
 
 export const Navigation = {
   back: async (user, history) => {
+    let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
-      user.isAdmin ? '/admin_manage_dar_collections'
-        :user.isChairPerson ? '/chair_console'
-          : user.isMember ? '/member_console'
-            : user.isResearcher ? '/dataset_catalog'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+      firstConsole ? firstConsole.link
+        : user.isAlumni ? '/summary_votes'
+          : '/';
     history.push(page);
   },
   console: async (user, history) => {
+    let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
-      user.isAdmin ? '/admin_manage_dar_collections'
-        : user.isChairPerson ? '/chair_console'
-          : user.isMember ? '/member_console'
-            : user.isResearcher ? '/researcher_console'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+      firstConsole ? firstConsole.link
+        : user.isAlumni ? '/summary_votes'
+          : '/';
     history.push(page);
   }
 };

@@ -67,6 +67,72 @@ const styles = {
   }
 };
 
+export const headerTabsConfig = [
+  {
+    label: 'Admin Console',
+    link: '/admin_manage_dar_collections',
+    children: [
+      { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
+      { label: 'Dataset Catalog', link: '/dataset_catalog' },
+      { label: 'DACs', link: '/manage_dac' },
+      { label: 'Statistics', link: '/summary_votes' },
+      { label: 'Users', link: '/admin_manage_users' },
+      { label: 'Institutions', link: '/admin_manage_institutions' },
+      { label: 'Library Cards', link: '/admin_manage_lc' }
+    ],
+    isRendered: (user) => user.isAdmin
+  },
+  {
+    label: 'SO Console',
+    link: '/signing_official_console/researchers',
+    children: [
+      { label: 'Researchers', link: '/signing_official_console/researchers' },
+      { label: 'DAR Requests', link: '/signing_official_console/dar_requests' }
+    ],
+    isRendered: (user) => user.isSigningOfficial
+  },
+  {
+    label: 'Researcher Console',
+    link: '/researcher_console',
+    search: 'researcher_console',
+    children: [
+      { label: 'DAR Requests', link: '/researcher_console' },
+      { label: 'Data Catalog', link: '/dataset_catalog' }
+    ],
+    isRendered: (user) => user.isResearcher
+  },
+  {
+    label: 'DAC Chair Console',
+    link: '/chair_console',
+    search: 'chair_console',
+    children: [
+      { label: 'DAR Requests', link: '/chair_console' },
+      { label: 'Datasets', link: '/dataset_catalog' },
+      { label: 'DAC Members', link: '/manage_dac' }
+    ],
+    isRendered: (user) => user.isChairPerson
+  },
+  {
+    label: 'DAC Member Console',
+    link: '/member_console',
+    search: 'member_console',
+    children: [
+      { label: 'DAR Requests', link: '/member_console' },
+      { label: 'Datasets', link: '/dataset_catalog' },
+    ],
+    isRendered: (user) => user.isMember
+  },
+  {
+    label: 'DS Console',
+    link: '/data_submission_form',
+    search: 'data_submission_form',
+    children: [
+      { label: 'Datasets', link: '/data_submission_form' }
+    ],
+    isRendered: (user) => user.isDataSubmitter || true
+  }
+];
+
 const NavigationTabsComponent = (props) => {
   const {
     orientation,
@@ -327,21 +393,11 @@ class DuosHeader extends Component {
   render() {
     const { classes, location } = this.props;
 
-    let isChairPerson = false;
-    let isMember = false;
-    let isAdmin = false;
-    let isResearcher = false;
-    let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
     if (isLogged) {
       currentUser = Storage.getCurrentUser();
-      isChairPerson = currentUser.isChairPerson;
-      isMember = currentUser.isMember;
-      isAdmin = currentUser.isAdmin;
-      isResearcher = currentUser.isResearcher;
-      isSigningOfficial = currentUser.isSigningOfficial;
     }
 
     const duosLogoImage = {
@@ -393,57 +449,7 @@ class DuosHeader extends Component {
       url: this.props.location.pathname
     });
 
-    const tabs = [
-      isAdmin && {
-        label: 'Admin Console',
-        link: '/admin_manage_dar_collections',
-        children: [
-          { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-          { label: 'Dataset Catalog', link: '/dataset_catalog' },
-          { label: 'DACs', link: '/manage_dac' },
-          { label: 'Statistics', link: '/summary_votes' },
-          { label: 'Users', link: '/admin_manage_users' },
-          { label: 'Institutions', link: '/admin_manage_institutions' },
-          { label: 'Library Cards', link: '/admin_manage_lc' }
-        ]
-      },
-      isSigningOfficial && {
-        label: 'SO Console',
-        link: '/signing_official_console/researchers',
-        children: [
-          { label: 'Researchers', link: '/signing_official_console/researchers' },
-          { label: 'DAR Requests', link: '/signing_official_console/dar_requests' }
-        ]
-      },
-      isResearcher && {
-        label: 'Researcher Console',
-        link: '/researcher_console',
-        search: 'researcher_console',
-        children: [
-          { label: 'DAR Requests', link: '/researcher_console' },
-          { label: 'Data Catalog', link: '/dataset_catalog' }
-        ]
-      },
-      isChairPerson && {
-        label: 'DAC Chair Console',
-        link: '/chair_console',
-        search: 'chair_console',
-        children: [
-          { label: 'DAR Requests', link: '/chair_console' },
-          { label: 'Datasets', link: '/dataset_catalog' },
-          { label: 'DAC Members', link: '/manage_dac' }
-        ]
-      },
-      isMember && {
-        label: 'DAC Member Console',
-        link: '/member_console',
-        search: 'member_console',
-        children: [
-          { label: 'DAR Requests', link: '/member_console' },
-          { label: 'Datasets', link: '/dataset_catalog' },
-        ]
-      }
-    ].filter((data) => !!data);
+    const tabs = headerTabsConfig.filter((data) => data.isRendered(currentUser));
 
     // returns true if the current page the app is on is a part of this tab
     const isValidTab = (tab) => {
