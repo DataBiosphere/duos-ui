@@ -36,7 +36,7 @@ export const FormValidators = {
   },
   EMAIL: {
     isValid: (value) => isEmailAddress(value),
-    msg: 'Please enter an email address'
+    msg: 'Please enter a valid email address'
   }
 };
 

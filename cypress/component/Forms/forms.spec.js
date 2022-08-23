@@ -369,6 +369,48 @@ describe('FormField - Tests', () => {
 
   });
 
+  describe('Form Control - Radio Button Tests', () => {
+    beforeEach(() => {
+      props = {
+        ...baseProps,
+        id: 'submittingToAnvil',
+        title: 'Are you planning to submit to AnVIL?',
+        type: FormFieldTypes.RADIO,
+        selectOptions: [
+          {label: 'Yes', value: true},
+          {label: 'No', value: false},
+        ]
+      };
+    });
+
+    it('should render the options', () => {
+      mount(<FormField {...props}/>);
+      cy.get('.formField-submittingToAnvil').should('have.length', 1);
+      cy.get('.formField-submittingToAnvil label').contains('Are you planning to submit to AnVIL?');
+      cy.get('.formField-submittingToAnvil').contains( 'Yes');
+      cy.get('.formField-submittingToAnvil').contains('No');
+
+      cy.get('#radio_option_submittingToAnvil_Yes').should('exist');
+      cy.get('#radio_option_submittingToAnvil_Yes').should('not.be.checked');
+
+      cy.get('#radio_option_submittingToAnvil_No').should('exist');
+      cy.get('#radio_option_submittingToAnvil_No').should('not.be.checked');
+    });
+
+    it('should allow the user to select an option by clicking on the button', () => {
+      mount(<FormField {...props}/>);
+
+      cy.get('#radio_option_submittingToAnvil_Yes').should('exist');
+      cy.get('#radio_option_submittingToAnvil_Yes').should('not.be.checked');
+      cy.get('#radio_option_submittingToAnvil_No').should('exist');
+      cy.get('#radio_option_submittingToAnvil_No').should('not.be.checked');
+
+      cy.get('#radio_option_submittingToAnvil_Yes').click();
+      cy.get('#radio_option_submittingToAnvil_Yes').should('be.checked');
+      cy.get('#radio_option_submittingToAnvil_No').should('not.be.checked');
+    });
+  });
+
   describe('Form Table - Tests', () => {
     beforeEach(() => {
       props = {
