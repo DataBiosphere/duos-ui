@@ -3,11 +3,14 @@ import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import './forms.css';
+import {RadioButton} from '../RadioButton';
+import {isEmailAddress} from '../../libs/utils';
 
 export const FormFieldTypes = {
   SELECT: { id: 'select', defaultValue: '' },
   MULTITEXT: { id: 'multitext', defaultValue: [] },
   CHECKBOX: { id: 'checkbox', defaultValue: false },
+  RADIO: {id: 'radio', defaultValue: null },
   SLIDER: { id: 'slider', defaultValue: false },
   TEXT: { id: 'text', defaultValue: '' },
   NUMBER: { id: 'number', defaultValue: '' }
@@ -30,6 +33,10 @@ export const FormValidators = {
   REQUIRED: {
     isValid: (value) => value !== undefined && value !== null && value !== '',
     msg: 'Please enter a value'
+  },
+  EMAIL: {
+    isValid: (value) => isEmailAddress(value),
+    msg: 'Please enter an email address'
   }
 };
 
@@ -62,6 +69,19 @@ const normalizeValue = (value) => {
   return value;
 };
 
+const clearDependentFormFields = (config) => {
+  const {onChange, dependentFormFields = []} = config;
+  /*
+   * Clears fields for questions that are rendered conditionally, setting them to their default value
+   * dependentFormFields: [ {id: string, type: FormFieldType }, ... ]
+   */
+
+  dependentFormFields.map((formField) => {
+    const { id, type } = formField;
+    onChange({key: id, value: type.defaultValue});
+  });
+};
+
 const onFormInputChange = (config, value) => {
   const { id, onChange, setFormValue } = config;
   const normalizedValue = normalizeValue(value);
@@ -69,7 +89,9 @@ const onFormInputChange = (config, value) => {
 
   onChange({key: id, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
+  clearDependentFormFields(config);
 };
+
 
 //---------------------------------------------
 // Form Controls
@@ -80,6 +102,7 @@ const formInput = (config) => {
     case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
     case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
     case FormFieldTypes.SLIDER: return formInputSlider(config);
+    case FormFieldTypes.RADIO: return formInputRadioButtons(config);
     case FormFieldTypes.TEXT:
     default:
       return formInputGeneric(config);
@@ -232,6 +255,35 @@ const formInputSelect = (config) => {
   ]);
 };
 
+const formInputRadioButtons = (config) => {
+  const {
+    id, disabled, error,
+    selectOptions, formValue, ariaDescribedby,
+  } = config;
+
+  return div({}, [
+    selectOptions.map((option) =>
+      RadioButton({
+        'aria-describedby': ariaDescribedby,
+        id: `radio_option_${id}_${option.label}`,
+        defaultChecked: formValue === option.value,
+        onClick: () => onFormInputChange(config, option.value),
+        disabled,
+        description: option.label,
+        checkedStyle: {
+          backgroundColor: '#0948B7',
+          border: '5px solid white',
+          boxShadow: '#0948b7 0 0 0 1px'
+        }
+      })
+    ),
+    error && div({ className: `error-message fadein`}, [
+      span({ className: 'glyphicon glyphicon-play' }),
+      ...error.map((err) => div([err])),
+    ])
+  ]);
+};
+
 const formInputCheckbox = (config) => {
   const {
     id, disabled, error, toggleText,
@@ -258,6 +310,7 @@ const formInputCheckbox = (config) => {
     }, [toggleText])
   ]);
 };
+
 
 const formInputSlider = (config) => {
   const {
