@@ -72,7 +72,7 @@ export const DataAccessGovernance = (props) => {
   };
 
   const updateConsentGroup = (idx, value, isValid) => {
-    const newConsentGroupsState = cloneDeep(newConsentGroupsState);
+    const newConsentGroupsState = cloneDeep(consentGroupsState);
     newConsentGroupsState[idx] = {
       editMode: false,
       valid: isValid,
@@ -161,7 +161,7 @@ export const DataAccessGovernance = (props) => {
             }
 
             return h(ConsentGroupForm, {
-              key: idx.toString() + '_consentGroup',
+              key: idx,
               idx: idx,
               saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
               deleteConsentGroup: () => deleteConsentGroup(idx),

@@ -312,7 +312,12 @@ const formInputCheckbox = (config) => {
     valueType, placeholder, setError
   } = config;
 
-  return div({ className: 'checkbox' }, [
+  return div({
+    className: 'checkbox',
+    style: {
+      margin: '1.5rem 0 1.5rem 0',
+    },
+  }, [
     input({
       type: 'checkbox',
       id: `cb_${id}_${toggleText}`,
@@ -332,9 +337,9 @@ const formInputCheckbox = (config) => {
       className: `regular-checkbox ${error ? 'errored' : ''}`,
       htmlFor: `cb_${id}_${toggleText}`,
       style: {
-        fontWeight: 'normal',
-        fontStyle: 'italic'
-      }
+        fontFamily: 'Montserrat',
+        fontSize: '14px',
+      },
     }, [toggleText]),
     input({
       isRendered: valueType === 'string' && isString(formValue),
@@ -343,7 +348,12 @@ const formInputCheckbox = (config) => {
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || '',
       value: formValue,
-      style: styles.inputStyle,
+      style: {
+        ...styles.inputStyle,
+        ...{
+          marginTop: '1.0rem',
+        }
+      },
       disabled: disabled,
       onChange: (event) => onFormInputChange(config, event.target.value),
       onFocus: () => setError(),
@@ -393,7 +403,11 @@ const formInputRadioGroup = (config) => {
           className: 'radio-group'
         },
         options.map((option => {
-          return div({}, [
+          return div({
+            style: {
+              margin: '1.0rem 0 0.5rem 0',
+            }
+          }, [
             h(RadioButton, {
               id: id+'_'+option.id,
               name: id+'_'+option.id,
@@ -402,6 +416,10 @@ const formInputRadioGroup = (config) => {
                 key: option.key,
                 value: (option.type === 'string'? '' : true),
               }),
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
               description: option.text,
               disabled,
             }),
@@ -410,9 +428,14 @@ const formInputRadioGroup = (config) => {
               id: id+'_'+option.id+'_text_input',
               type: 'text',
               className: `form-control ${error ? 'errored' : ''}`,
-              placeholder: (!isNil(option.placeholder)),
+              placeholder: option.placeholder,
               value: formValue.value,
-              style: styles.inputStyle,
+              style: {
+                ...styles.inputStyle,
+                ...{
+                  marginTop: '0.5rem',
+                }
+              },
               disabled: disabled,
               onChange: (event) => onFormInputChange(config, {
                 key: option.key,
