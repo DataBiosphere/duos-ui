@@ -73,12 +73,12 @@ const clearDependentFormFields = (config) => {
   const {onChange, dependentFormFields = []} = config;
   /*
    * Clears fields for questions that are rendered conditionally, setting them to their default value
-   * dependentFormFields: [ {id: string, type: FormFieldType }, ... ]
+   * dependentFormFields: [ {id: string, type: FormFieldType, defaultValue: (optional) }, ... ]
    */
 
   dependentFormFields.map((formField) => {
-    const { id, type } = formField;
-    onChange({key: id, value: type.defaultValue});
+    const { id, type, defaultValue } = formField;
+    onChange({key: id, value: defaultValue || type.defaultValue});
   });
 };
 

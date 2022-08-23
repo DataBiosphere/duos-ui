@@ -57,7 +57,6 @@ export const RadioButton = (props) => {
       label({style: wrapperStyle}, [
         div({style: {float: 'left'}}, [
           input({
-            className: 'radio-btn',
             id: props.id,
             type: 'radio',
             name: props.name,

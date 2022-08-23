@@ -397,7 +397,7 @@ describe('FormField - Tests', () => {
       cy.get('#radio_option_submittingToAnvil_No').should('not.be.checked');
     });
 
-    it('should allow the user to select an option by clicking on the button', () => {
+    it('should allow the user to select an option by clicking the radio button', () => {
       mount(<FormField {...props}/>);
 
       cy.get('#radio_option_submittingToAnvil_Yes').should('exist');
