@@ -6,7 +6,7 @@ import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
 
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
-import DataSubmissionNihAnvilUse from "../components/data_submission/DataSubmissionNihAnvilUse";
+import DataSubmissionNihAnvilUse from '../components/data_submission/DataSubmissionNihAnvilUse';
 
 
 export const DataSubmissionForm = () => {
