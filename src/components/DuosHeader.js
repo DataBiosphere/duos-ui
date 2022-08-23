@@ -129,7 +129,7 @@ export const headerTabsConfig = [
     children: [
       { label: 'Datasets', link: '/data_submission_form' }
     ],
-    isRendered: (user) => user.isDataSubmitter || true
+    isRendered: (user) => user.isDataSubmitter
   }
 ];
 
