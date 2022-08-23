@@ -1,99 +1,91 @@
-import {div, h} from "react-hyperscript-helpers";
-import {RadioButton} from "./RadioButton";
-
-const I_DID = 'I did';
-const I_WILL = 'I will';
-const NO = 'No';
-
-function dbGapForm(props) {
-
-  return div([
-
-
-
-  ])
-}
+import {div, h, h2} from 'react-hyperscript-helpers';
+import {useEffect, useState} from 'react';
+import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
 
 export default function DataSubmissionNihAnvilUse(props) {
-  const { updateFormData, formData } = props;
+  const { onChange, formData } = props;
+  const [nihAnvilUse, setNihAnvilUse] = useState(formData.nihAnvilUse);
 
+  useEffect(() => {
+    //track as state variable for dependent questions that are rendered conditionally
+    setNihAnvilUse(formData.nihAnvilUse);
+  }, [formData.nihAnvilUse]);
 
-  const submittingToAnvilRequired = ({nilAnvilUse = ''}) => {
-    return nilAnvilUse === I_WILL || nilAnvilUse === NO;
-  };
+  const I_DID = 'I did';
+  const I_WILL = 'I will';
+  const NO = 'No';
 
-  return div([
-    div(['NIH and AnVIL use']),
-    div([
-      'Will you or did you submit data to the NIH?*',
+  return h(div, {
+    style: {
+      padding: '50px 0',
+      maxWidth: 800,
+      margin: 'auto'
+    }
+  }, [
+    h2('NIH and AnVIL use'),
+    h(FormField, {
+      id: 'nihAnvilUse',
+      title: 'Will you or did you submit data to the NIH?',
+      type: FormFieldTypes.RADIO,
+      selectOptions: [
+        {label: I_DID, value: I_DID},
+        {label: I_WILL, value: I_WILL},
+        {label: NO, value: NO},
+      ],
+      dependentFormFields: [
+        {id: 'submittingToAnvil', type: FormFieldTypes.RADIO},
+        {id: 'dbGaPPhsID', type: FormFieldTypes.TEXT},
+        {id: 'dbGaPStudyRegistrationName', type: FormFieldTypes.TEXT},
+        {id: 'embargoReleaseDate', type: FormFieldTypes.TEXT},
+        {id: 'sequencingCenter', type: FormFieldTypes.TEXT},
+      ],
+      validators: [FormValidators.REQUIRED],
+      onChange,
+    }),
 
-      RadioButton({
-        id: 'nihAnvilUseIDid',
-        name: 'nihAnvilUseIDid',
-        value: 'nihAnvilUseIDid',
-        defaultChecked: formData.nihAnvilUse === I_DID,
-        onClick: () => updateFormData({
-          nihAnvilUse: I_DID,
-          submittingToAnvil: null
-        }),
-        description: I_DID
+    h(FormField, {
+      isRendered: nihAnvilUse === I_WILL || nihAnvilUse === NO,
+      id: 'submittingToAnvil',
+      title: 'Are you planning to submit to AnVIL?',
+      type: FormFieldTypes.RADIO,
+      selectOptions: [
+        {label: 'Yes', value: true},
+        {label: 'No', value: false},
+      ],
+      validators: [FormValidators.REQUIRED],
+      onChange,
+    }),
+
+    div({ isRendered: nihAnvilUse === I_DID }, [
+      h(FormField, {
+        id: 'dbGaPPhsID',
+        title: 'dbGaP phs ID',
+        placeholder: 'Firstname Lastname',
+        validators: [FormValidators.REQUIRED],
+        onChange
       }),
-
-      RadioButton({
-        id: 'nihAnvilUseIWill',
-        name: 'nihAnvilUseIWill',
-        value: 'nihAnvilUseIWill',
-        defaultChecked: formData.nihAnvilUse === I_WILL,
-        onClick: () => updateFormData({
-          nihAnvilUse: I_WILL
-        }),
-        description: I_WILL
+      h(FormField, {
+        id: 'dbGaPStudyRegistrationName',
+        title: 'dbGaP Study Registration Name',
+        placeholder: 'Email',
+        validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+        onChange
       }),
-
-      RadioButton({
-        id: 'nihAnvilUseNo',
-        name: 'nihAnvilUseNo',
-        value: 'nihAnvilUseNo',
-        defaultChecked: formData.nihAnvilUse === NO,
-        onClick: () => updateFormData({
-          nihAnvilUse: NO
-        }),
-        description: NO
-      })
-
-    ]),
-    div(
-      {
-        isRendered: submittingToAnvilRequired({nilAnvilUse: formData.nilAnvilUse})
-      },
-      [
-        'Are you planning to submit to AnVIL?*',
-
-        RadioButton({
-          id: 'submittingToAnvilYes',
-          name: 'submittingToAnvilYes',
-          value: 'submittingToAnvilYes',
-          defaultChecked: formData.submittingToAnvil === true,
-          onClick: () => updateFormData({
-            submittingToAnvil: true
-          }),
-          description: 'Yes'
-        }),
-
-        RadioButton({
-          id: 'submittingToAnvilNo',
-          name: 'submittingToAnvilNo',
-          value: 'submittingToAnvilNo',
-          defaultChecked: formData.submittingToAnvil === false,
-          onClick: () => updateFormData({
-            submittingToAnvil: false
-          }),
-          description: 'No'
-        })
-
-      ]),
-
-    h(dbGapForm, {isRendered: formData.nihAnvilUse === I_DID})
+      h(FormField, {
+        id: 'embargoReleaseDate',
+        title: 'Embargo Release Date',
+        placeholder: 'Firstname Lastname',
+        validators: [FormValidators.REQUIRED],
+        onChange
+      }),
+      h(FormField, {
+        id: 'sequencingCenter',
+        title: 'Sequencing Center',
+        placeholder: 'Email',
+        validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+        onChange
+      }),
+    ])
   ]);
 }
