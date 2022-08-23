@@ -7,7 +7,6 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
-    fontFamily: '\'Roboto\', sans-serif',
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };
@@ -32,11 +31,12 @@ export const RadioButton = (props) => {
 
   const uncheckedStyle = props.style ? fp.merge(basicUnchecked, props.style) : basicUnchecked;
 
-  const checkedStyle = fp.merge(uncheckedStyle, {
-    boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
-    backgroundColor: '#2196F3',
-    border: '2px solid white',
-  });
+  const checkedStyle = props.checkedStyle ? fp.merge(uncheckedStyle, props.checkedStyle) :
+    fp.merge(uncheckedStyle, {
+      boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
+      backgroundColor: '#2196F3',
+      border: '2px solid white',
+    });
 
   const basicLabelStyle = {
     cursor: props.disabled ? 'not-allowed' : 'pointer',
@@ -57,6 +57,7 @@ export const RadioButton = (props) => {
       label({style: wrapperStyle}, [
         div({style: {float: 'left'}}, [
           input({
+            className: 'radio-btn',
             id: props.id,
             type: 'radio',
             name: props.name,
