@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {h, div, img, h1, form} from 'react-hyperscript-helpers';
 import { set } from 'lodash/fp';
 
@@ -11,9 +10,7 @@ import DataSubmissionNihAnvilUse from '../components/data_submission/DataSubmiss
 
 export const DataSubmissionForm = () => {
 
-  // NOTE: remove after adding components
-  /* eslint-disable no-unused-vars */
-  const [formData, setFormData] = useState({});
+  let formData = {};
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
