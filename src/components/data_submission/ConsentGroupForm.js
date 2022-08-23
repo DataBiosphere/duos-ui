@@ -90,6 +90,7 @@ const EditConsentGroup = (props) => {
   const {
     consentGroup,
     setConsentGroup,
+    idx,
   } = props;
 
   const onChange = ({key, value}) => {
@@ -127,7 +128,8 @@ const EditConsentGroup = (props) => {
 
     // name
     h(FormField, {
-      id: 'consentGroupName',
+      id: idx+'_consentGroupName',
+      name: 'consentGroupName',
       title: 'Consent Group Name',
       validators: [FormValidators.REQUIRED],
       placeholder: 'Enter name',
@@ -139,7 +141,8 @@ const EditConsentGroup = (props) => {
     h(FormField,
       {
         type: FormFieldTypes.RADIO,
-        id: 'primaryRadio',
+        id: idx+'_primaryRadio',
+        name: 'primaryRadio',
         title: 'Consent Group - Primary Data Use Terms',
         validators: [FormValidators.REQUIRED],
         description: 'Please select one of the following data use permissions for your dataset',
@@ -183,7 +186,8 @@ const EditConsentGroup = (props) => {
     h(FormField, {
       title: 'Consent Secondary Data Use Terms',
       description: 'Select all applicable data use parameters',
-      id: 'nmds',
+      id: idx+'_nmds',
+      name: 'nmds',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'No methods development or validation studies (NMDS)',
       defaultValue: consentGroup.nmds,
@@ -191,7 +195,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'gso',
+      id: idx+'_gso',
+      name: 'gso',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Genetic studies only (GSO)',
       defaultValue: consentGroup.gso,
@@ -199,7 +204,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'pub',
+      id: idx+'_pub',
+      name: 'pub',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Publication Required (PUB)',
       defaultValue: consentGroup.pub,
@@ -207,7 +213,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'col',
+      id: idx+'_col',
+      name: 'col',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Collaboration Required (COL)',
       defaultValue: consentGroup.col,
@@ -215,7 +222,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'irb',
+      id: idx+'_irb',
+      name: 'irb',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Ethics Approval Required (IRB)',
       defaultValue: consentGroup.irb,
@@ -223,7 +231,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'gs',
+      id: idx+'_gs',
+      name: 'gs',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Geographic Restriction (GS-)',
       valueType: 'string',
@@ -233,7 +242,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'mor',
+      id: idx+'_mor',
+      name: 'mor',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Publication Moratorium (MOR)',
       defaultValue: consentGroup.mor,
@@ -241,7 +251,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'npu',
+      id: idx+'_npu',
+      name: 'npu',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Non-profit Use Only (NPU)',
       defaultValue: consentGroup.npu,
@@ -249,7 +260,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'otherSecondary',
+      id: idx+'_otherSecondary',
+      name: 'otherSecondary',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Other',
       valueType: 'string',
@@ -261,7 +273,8 @@ const EditConsentGroup = (props) => {
     // location
 
     h(FormField, {
-      id: 'dataLocation',
+      id: idx+'_dataLocation',
+      name: 'dataLocation',
       type: FormFieldTypes.MULTISELECT,
       title: 'Data Location',
       description: 'Please provide the location of your data resource for this consent group',
@@ -274,7 +287,8 @@ const EditConsentGroup = (props) => {
     }),
 
     h(FormField, {
-      id: 'url',
+      id: idx+'_url',
+      name: 'url',
       title: 'Data URL',
       validators: [FormValidators.REQUIRED],
       placeholder: 'Free text field for entering URL of data',

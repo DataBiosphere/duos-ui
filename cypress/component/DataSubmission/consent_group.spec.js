@@ -1,4 +1,4 @@
-import ConsentGroupForm from '../../../src/components/data_submitter/ConsentGroupForm';
+import ConsentGroupForm from '../../../src/components/data_submission/ConsentGroupForm';
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'cypress/react';
 
@@ -21,7 +21,7 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
-    cy.get('#0_consent_group_name').type('Hello!');
+    cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
 
     expect(propCopy.saveConsentGroup).to.not.be.called;
@@ -31,9 +31,9 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
-    cy.get('#0_consent_group_name').type('Hello!');
+    cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
-    cy.get('#0_hmb').check();
+    cy.get('#0_primaryRadio_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_saveConsentGroup').click().then(() => {
       expect(propCopy.saveConsentGroup).to.be.calledWith({
@@ -55,7 +55,7 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
-    cy.get('#0_consent_group_name').type('Hello!');
+    cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
     cy.get('#0_hmb').check();
     cy.get('#0_col').check();
@@ -88,7 +88,7 @@ describe('Consent Group', function () {
   it('Shows summary when saved', function () {
     mount(<ConsentGroupForm {...propCopy}/>);
 
-    cy.get('#0_consent_group_name').type('Hello!');
+    cy.get('#0_consentGroupName').type('Hello!');
 
 
     cy.get('#0_consentGroupSummary').should('not.exist');

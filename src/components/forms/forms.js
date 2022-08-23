@@ -68,7 +68,10 @@ const normalizeValue = (value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
+  const { id, name, onChange, setFormValue } = config;
+
+  const key = (!isNil(name) ? name : id);
+
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
@@ -320,7 +323,7 @@ const formInputCheckbox = (config) => {
   }, [
     input({
       type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
+      id: id,
       checked: (valueType === 'string' ? isString(formValue) : formValue),
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -335,7 +338,7 @@ const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
+      htmlFor: id,
       style: {
         fontFamily: 'Montserrat',
         fontSize: '14px',
@@ -343,7 +346,7 @@ const formInputCheckbox = (config) => {
     }, [toggleText]),
     input({
       isRendered: valueType === 'string' && isString(formValue),
-      id: id,
+      id: id+'_text',
       type: 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || '',
@@ -400,7 +403,8 @@ const formInputRadioGroup = (config) => {
     [
       div(
         {
-          className: 'radio-group'
+          className: 'radio-group',
+          id: id,
         },
         options.map((option => {
           return div({
@@ -458,10 +462,10 @@ const formInputSlider = (config) => {
   } = config;
 
   return div({ style: { ...styles.flexRow, justifyContent: 'unset', alignItems: 'center' } }, [
-    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
+    label({ className: 'switch', htmlFor: id }, [
       input({
         type: 'checkbox',
-        id: `cb_${id}_${toggleText}`,
+        id: id,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
@@ -483,7 +487,7 @@ const formInputSlider = (config) => {
 //---------------------------------------------
 /*
 * Config options:
-* id, title, description
+* id, title, description, name (optional - if set, will be used as onChange key instead of id)
 * type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox')
 *  * type == select
 *    * selectOptions: [{key: string, displayText: string}]
