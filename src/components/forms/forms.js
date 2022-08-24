@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import { RadioButton } from '../RadioButton';
+import Creatable from 'react-select/creatable';
 
 import './forms.css';
 
 export const FormFieldTypes = {
   SELECT: { id: 'select', defaultValue: '' },
+  SELECT_CREATABLE: { id: 'selectCreatable', defaultValue: '' },
   MULTITEXT: { id: 'multitext', defaultValue: [] },
   CHECKBOX: { id: 'checkbox', defaultValue: false },
   SLIDER: { id: 'slider', defaultValue: false },
@@ -74,6 +76,7 @@ const onFormInputChange = (config, value) => {
 const formInput = (config) => {
   switch (config.type) {
     case FormFieldTypes.SELECT: return formInputSelect(config);
+    case FormFieldTypes.SELECT_CREATABLE: return formInputSelectOrCreate(config);
     case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
     case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
     case FormFieldTypes.SLIDER: return formInputSlider(config);
@@ -205,6 +208,46 @@ const formInputMultiText = (config) => {
   ]);
 };
 
+// Using react-select/creatable - Passing config directly through!
+const formInputSelectOrCreate = (config) => {
+  const {
+    id, title, disabled, required, error, setError,
+    selectOptions, searchPlaceholder, ariaDescribedby,
+    formValue,
+    creatableConfig = {}
+  } = config;
+
+  return h(Creatable, {
+    key: id,
+    isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
+    required,
+    isDisabled: disabled,
+    placeholder: searchPlaceholder || `Search for ${title}...`,
+    className: `form-select ${error ? 'errored' : ''}`,
+    onChange: (option) => onFormInputChange(config, option),
+    onMenuOpen: () => setError(),
+    onMenuClose: () => {
+      if (required && !formValue) {
+        setError(FormValidators.REQUIRED.msg);
+      }
+    },
+    options: selectOptions,
+    getOptionLabel: (option) => option.displayValue,
+    getNewOptionData: (inputValue) => {
+      return { displayValue: inputValue };
+    },
+    getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
+      if(isNil(option) || isEmpty(option.displayName)) {
+        return null;
+      }
+      return option;
+    },
+    value: formValue,
+    ...creatableConfig,
+    'aria-describedby': ariaDescribedby
+  });
+};
+
 const formInputSelect = (config) => {
   const {
     id, title, disabled, error, setError,
@@ -218,7 +261,11 @@ const formInputSelect = (config) => {
       onPresetSelection: async (selection) => onFormInputChange(config, selection),
       onManualSelection: (selection) => onFormInputChange(config, selection),
       onOpen: () => setError(),
-      options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
+      options: selectOptions.map((x) => {
+        return typeof x == 'string' || typeof x === 'number'
+          ? { key: x, displayText: x }
+          : x;
+      }),
       searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
       className: 'form-control',
       disabled, errored: error

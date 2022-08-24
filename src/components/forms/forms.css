@@ -1,22 +1,13 @@
+/* ----------------------------------------------------
+  Form Components
+------------------------------------------------------*/
 .control-label {
   font-weight: bold;
   color: #333F52;
   font-size: 16px;
   margin-top: 2rem;
   margin-bottom: 1rem;
-  transition: color .3s ease-in;
-}
-
-.dropdown.select-dropdown .errored,
-.form-control.errored {
-  border: 1px solid red;
-  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(255 0 0 / 60%);
-  transition: all .3s ease-in;
-  border-bottom-left-radius: 0;
-}
-
-.errored {
-  color: red;
+  transition: color .3s ease-in-out;
 }
 
 .pill {
@@ -36,6 +27,9 @@
   margin: 0;
 }
 
+/* ----------------------------------------------------
+  Form Field
+------------------------------------------------------*/
 .formField-container .dropdown-toggle {
   padding: 25px 15px;
   display: flex;
@@ -70,6 +64,9 @@
   padding: 17px 10px;
 }
 
+/* ----------------------------------------------------
+  Form Table
+------------------------------------------------------*/
 .formTable-row {
   display: flex;
   align-items: flex-start;
@@ -113,6 +110,21 @@
   flex-shrink: 0;
 }
 
+/* ----------------------------------------------------
+  Form Errors
+------------------------------------------------------*/
+.dropdown.select-dropdown .errored,
+.form-control.errored {
+  border: 1px solid red;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(255 0 0 / 60%);
+  transition: all .3s ease-in-out;
+  border-bottom-left-radius: 0;
+}
+
+.errored {
+  color: red;
+}
+
 .error-message {
   position: absolute;
   background-color: red;
@@ -131,4 +143,24 @@
   top: -17px;
   font-size: 2.5rem;
 }
-   
+
+/* ----------------------------------------------------
+  External Overrides
+------------------------------------------------------*/
+.form-select input {
+  height: 40px;
+}
+
+.form-select > div:first-of-type {
+  transition: all .3s ease-in-out;
+  border: 1px solid #999999;
+}
+
+.form-select.errored > div:first-of-type {
+  border-color: red;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(255 0 0 / 60%);
+}
+
+.form-select.errored {
+  color: black;
+}

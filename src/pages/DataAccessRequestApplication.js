@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
-// import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
@@ -964,22 +963,6 @@ class DataAccessRequestApplication extends Component {
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
             div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
-              // h(ResearcherInfo, {
-              //   eRACommonsDestination, onNihStatusUpdate: this.onNihStatusUpdate,
-              //   showValidationMessages: showValidationMessages,
-              //   researcher: this.state.formData.researcher, // 1.1
-              //   // 1.2.1 ?
-              //   checkNihDataOnly: this.state.nihValid, // 1.2.2
-              //   nihValid: this.state.nihValid, // 1.2.3
-              //   // 1.3
-              //   labCollaborators, // 1.4
-              //   internalCollaborators, // 1.5
-              //   signingOfficial: {displayName: signingOfficial}, // 1.6
-              //   allSigningOfficials: this.state.allSigningOfficials,
-              //   itDirector,// 1.7
-              //   cloudUse, // 1.8
-              //   externalCollaborators // 1.9
-              // }),
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 checkNihDataOnly: checkNihDataOnly,

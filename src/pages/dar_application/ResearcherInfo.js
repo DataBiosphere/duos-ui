@@ -7,6 +7,7 @@ import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
+import './dar_application.css';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
@@ -130,8 +131,49 @@ export default function ResearcherInfo(props) {
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
             onChange: () => {},
-            defaultValue: researcher
+            defaultValue: researcher,
           }),
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          h3('1.2 Researcher Identification'),
+          div([
+            'Please authenticate with ',
+            a({href: 'https://public.era.nih.gov/commonsplus/public/login.era'}, ['eRA Commons ID'])
+          ]),
+          div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
+            h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
+            eRACommons({
+              destination: eRACommonsDestination,
+              onNihStatusUpdate: onNihStatusUpdate,
+              location: location,
+              validationError: showValidationMessages,
+              header: true,
+              // onChange
+            })
+          ]),
+          div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
+            h4({ style: { marginRight: 30 } }, '1.2.2'),
+            h(FormField, {
+              id: `researcher-identification_NIH`,
+              toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
+              type: FormFieldTypes.CHECKBOX,
+              ariaLevel: ariaLevel + 2,
+              // onChange,
+              // defaultValue: formData[`researcher-identification_NIH`]
+            })
+          ]),
+          div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
+            h4({ style: { marginRight: 30 } }, '1.2.3'),
+            h(FormField, {
+              id: `researcher-identification_isNIHResearcher`,
+              toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
+              type: FormFieldTypes.CHECKBOX,
+              ariaLevel: ariaLevel + 2,
+              // onChange,
+              // defaultValue: formData[`researcher-identification_isNIHResearcher`]
+            })
+          ]),
         ]),
 
         div({className: 'dar-application-row'}, [
@@ -157,7 +199,8 @@ export default function ResearcherInfo(props) {
             level here.`
           ),
           button({
-            className: 'button button-white',
+            type: 'button', // default button element type inside a form is "submit".
+            className: 'button button-white btn-xs',
             style: { marginTop: 25 },
             onClick: () => {}
           }, ['Add Collaborator'])
@@ -179,6 +222,7 @@ export default function ResearcherInfo(props) {
             on this project.`
           ),
           button({
+            type: 'button', // default button element type inside a form is "submit".
             className: 'button button-white',
             style: { marginTop: 25 },
             onClick: () => {}
@@ -188,13 +232,29 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h(FormField, {
             id: `institutional_signing_official`,
+            type: FormFieldTypes.SELECT_CREATABLE,
             description: 'I certify that the individual listed below is my Institutional Signing official',
-            placeholder: 'Signing Official',
             title: '1.6 Institutional Signing Official',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: () => {},
-            // defaultValue: formData[`institutional_signing_official`]
+            onChange: ({key, value}) => {
+              const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
+              formFieldChange({name: key, formattedValue});
+            },
+            creatableConfig: {
+              placeholder: 'Signing Official',
+              options: allSigningOfficials,
+              getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
+              getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
+                return { displayName: inputValue };
+              },
+              getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
+                if(isNil(option) || isEmpty(option.displayName)) {
+                  return null;
+                }
+                return option;
+              },
+            },
           }),
         ]),
 
@@ -245,6 +305,7 @@ export default function ResearcherInfo(props) {
             the External Collaborators listed.`
           ),
           button({
+            type: 'button', // default button element type inside a form is "submit".
             className: 'button button-white',
             style: { marginTop: 25 },
             onClick: () => {}
