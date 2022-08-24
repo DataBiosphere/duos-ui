@@ -383,7 +383,7 @@ export const ConsentGroupForm = (props) => {
       })
       : h(ConsentGroupSummary, {
         ...props,
-        ...{consentGroup: consentGroup, id: idx+"_consentGroupSummary"},
+        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary'},
       })),
 
     // save + delete
