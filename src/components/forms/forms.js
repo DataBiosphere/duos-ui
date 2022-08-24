@@ -295,7 +295,6 @@ const formInputMultiSelect = (config) => {
     value: formValue,
     name: id,
     id: id,
-    id: `${id}_text`,
     placeholder: placeholder || '',
     onChange: (selected) => {
 
