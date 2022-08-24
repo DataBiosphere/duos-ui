@@ -292,7 +292,7 @@ const formInputRadio = (config) => {
       onClick: (event) => onFormInputChange(config, value),
       description: displayText,
       style: { fontFamily: 'Montserrat', color: '#1f3b50'}
-    })  
+    });  
   });
 };
 
