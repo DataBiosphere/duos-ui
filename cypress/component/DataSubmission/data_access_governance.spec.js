@@ -14,28 +14,28 @@ describe('Data Access Governance', function () {
     mount(<DataSubmissionForm />);
 
     cy.get('#btn_addInstitution').should('not.exist');
-    cy.get('#data_submission_select_dac').should('not.exist');
+    cy.get('#dataAccessCommitteeId').should('not.exist');
 
-    cy.get('#alternativeDataSharingPlanControlledClosedAccess').check();
+    cy.get('#dataSharingPlan_closed_access').check();
 
 
     cy.get('#btn_addInstitution').should('exist');
-    cy.get('#data_submission_select_dac').should('exist');
+    cy.get('#dataAccessCommitteeId').should('exist');
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#btn_addInstitution').click();
     cy.get('#0_consentGroupForm').should('exist');
 
-    cy.get('#alternativeDataSharingPlanControlledOpenAccess').check();
+    cy.get('#dataSharingPlan_open_access').check();
 
     cy.get('#btn_addInstitution').should('not.exist');
-    cy.get('#data_submission_select_dac').should('not.exist');
+    cy.get('#dataAccessCommitteeId').should('not.exist');
     cy.get('#0_consentGroupForm').should('not.exist');
 
   }),
   it('Adds multiple consent groups', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#alternativeDataSharingPlanControlledClosedAccess').check();
+    cy.get('#dataSharingPlan_closed_access').check();
 
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#1_consentGroupForm').should('not.exist');
@@ -61,7 +61,7 @@ describe('Data Access Governance', function () {
   it('Delete consent group works', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#alternativeDataSharingPlanControlledClosedAccess').check();
+    cy.get('#dataSharingPlan_closed_access').check();
 
     cy.get('#btn_addInstitution').click();
     cy.get('#btn_addInstitution').click();

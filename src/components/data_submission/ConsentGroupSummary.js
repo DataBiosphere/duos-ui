@@ -70,7 +70,8 @@ const secondaryConsentFields = [
 
 export const ConsentGroupSummary = (props) => {
   const {
-    consentGroup
+    consentGroup,
+    id
   } = props;
 
   const primaryGroupHtml = () => {
@@ -131,6 +132,7 @@ export const ConsentGroupSummary = (props) => {
 
   return div({}, [
     div({
+      id: id,
       style: {
         display: 'flex',
         justifyContent: 'space-around',

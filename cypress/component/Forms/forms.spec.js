@@ -276,7 +276,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider false', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -289,7 +289,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider true', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -355,9 +355,9 @@ describe('FormField - Tests', () => {
       });
     });
 
-    it('should allow user to select by entering a new option as freetext', () => {
+    it('should allow user to select by entering a new option as freetext if prop passed in', () => {
       cy.spy(props, 'onChange');
-      mount(<FormField {...props}/>);
+      mount(<FormField {...{...props, ...{'allowManualEntry': true}}} />);
       cy.get('#studyType .dropdown-toggle').click();
       cy.get('#studyType .search-bar').type('newtext').then(() => {
         cy.get('#studyType .search-bar').blur().then(() => {
@@ -367,6 +367,16 @@ describe('FormField - Tests', () => {
       });
     });
 
+    it('should not allow user to select by entering a new option as freetext by default', () => {
+      cy.spy(props, 'onChange');
+      mount(<FormField {...props}/>);
+      cy.get('#studyType .dropdown-toggle').click();
+      cy.get('#studyType .search-bar').type('newtext').then(() => {
+        cy.get('#studyType .search-bar').blur().then(() => {
+          expect(props.onChange).to.not.be.called;
+        });
+      });
+    });
   });
 
   describe('Form Table - Tests', () => {

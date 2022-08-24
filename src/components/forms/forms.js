@@ -35,7 +35,18 @@ export const FormValidators = {
   REQUIRED: {
     isValid: (value) => value !== undefined && value !== null && value !== '',
     msg: 'Please enter a value'
-  }
+  },
+  URL: {
+    isValid: (val) => {
+      try {
+        new URL(val);
+      } catch (_) {
+        return false;
+      }
+      return true;
+    },
+    msg: 'Please enter a valid url (e.g., https://www.google.com)'
+  },
 };
 
 //---------------------------------------------
@@ -75,7 +86,7 @@ const onFormInputChange = (config, value) => {
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
-  onChange({key: id, value: normalizedValue, isValid: isValidInput });
+  onChange({key: key, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
 };
 
@@ -283,6 +294,8 @@ const formInputMultiSelect = (config) => {
     options: options,
     value: formValue,
     name: id,
+    id: id,
+    id: `${id}_text`,
     placeholder: placeholder || '',
     onChange: (selected) => {
 

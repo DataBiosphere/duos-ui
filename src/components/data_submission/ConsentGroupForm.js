@@ -290,7 +290,7 @@ const EditConsentGroup = (props) => {
       id: idx+'_url',
       name: 'url',
       title: 'Data URL',
-      validators: [FormValidators.REQUIRED],
+      validators: [FormValidators.REQUIRED, FormValidators.URL],
       placeholder: 'Free text field for entering URL of data',
       defaultValue: consentGroup.url,
       onChange
@@ -383,7 +383,7 @@ export const ConsentGroupForm = (props) => {
       })
       : h(ConsentGroupSummary, {
         ...props,
-        ...{consentGroup: consentGroup},
+        ...{consentGroup: consentGroup, id: idx+"_consentGroupSummary"},
       })),
 
     // save + delete
