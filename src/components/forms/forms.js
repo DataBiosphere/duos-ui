@@ -289,10 +289,11 @@ const formInputRadio = (config) => {
       key: `${id}-${value}`,
       value,
       defaultChecked: formValue === value,
-      onClick: (event) => onFormInputChange(config, value),
+      onClick: (event) => onFormInputChange(config, event.target.checked),
       description: displayText,
+      disabled,
       style: { fontFamily: 'Montserrat', color: '#1f3b50'}
-    });  
+    });
   });
 };
 

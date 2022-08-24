@@ -1,11 +1,12 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, input, label, span, textarea, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
+import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
@@ -37,7 +38,8 @@ export default function ResearcherInfo(props) {
     cloudProvider,
     isCloudUseInvalid,
     isCloudProviderInvalid,
-    isAnvilUseInvalid
+    isAnvilUseInvalid,
+    ariaLevel = 2
   } = props;
 
   const navButtonContainerStyle = {
@@ -116,6 +118,141 @@ export default function ResearcherInfo(props) {
     div({
       datacy: 'researcher-info',
       className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
+
+      div({ style: { backgroundColor: 'rgba(184, 205, 211, .15)', padding: '20px 30px' } }, [
+        h2('Step 1: Researcher Information'),
+
+        div({className: 'dar-application-row'}, [
+          h(FormField, {
+            id: `researcher_name`,
+            placeholder: 'Enter Firstname Lastname',
+            title: '1.1 Researcher',
+            validators: [FormValidators.REQUIRED],
+            ariaLevel: ariaLevel + 1,
+            onChange: () => {},
+            defaultValue: researcher
+          }),
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          h(FormField, {
+            id: `principal_investigator`,
+            description: 'I certify that the prinicpal investigator listed below is aware of this study',
+            placeholder: 'Firstname Lastname',
+            title: '1.3 Principal Investigator',
+            validators: [FormValidators.REQUIRED],
+            ariaLevel: ariaLevel + 1,
+            onChange: () => {},
+            // defaultValue: formData[`principal_investigator`]
+          })
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          // TODO: DUOS-1753
+          h3('1.4 Internal Lab Staff'),
+          div(
+            `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
+            this data access request, including any that are downloaded or utilized in the cloud. 
+            please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
+            level here.`
+          ),
+          button({
+            className: 'button button-white',
+            style: { marginTop: 25 },
+            onClick: () => {}
+          }, ['Add Collaborator'])
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          // TODO: DUOS-1754
+          h3('1.5 Internal Collaborators'),
+          div(
+            `Please add Internal Collaborators here Internal Collaborators are defined as individuals
+            who are not under the direct supervision of the PI (e.g., not a member of the PI's 
+            laboratory) who assists with the PI's research project involving controlled-access data 
+            subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting 
+            PI's institution and work at the same location/campus as the PI. Internal Collaborators 
+            must be at the PI or equivalent level and are required to have a Library Card in order 
+            to access data through this request. Internal Collaborators will have Data 
+            Downloader/Approver status so that they may add their own relevant Internal Lab Staff. 
+            Internal Collaborators will not be required to submit an independent DAR to collaborate 
+            on this project.`
+          ),
+          button({
+            className: 'button button-white',
+            style: { marginTop: 25 },
+            onClick: () => {}
+          }, ['Add Collaborator'])
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          h(FormField, {
+            id: `institutional_signing_official`,
+            description: 'I certify that the individual listed below is my Institutional Signing official',
+            placeholder: 'Signing Official',
+            title: '1.6 Institutional Signing Official',
+            validators: [FormValidators.REQUIRED],
+            ariaLevel: ariaLevel + 1,
+            onChange: () => {},
+            // defaultValue: formData[`institutional_signing_official`]
+          }),
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          h(FormField, {
+            id: `information_technology_director`,
+            description: 'I certify that the individual listed below is my IT Director',
+            placeholder: 'IT Director',
+            title: '1.7 Information Technology (IT) Director',
+            validators: [FormValidators.REQUIRED],
+            ariaLevel: ariaLevel + 1,
+            onChange: () => {},
+            // defaultValue: formData[`information_technology_director`]
+          })
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          h(FormField, {
+            id: `cloud_use_statement`,
+            description: [
+              'Will you perform all of your data storage and analysis for this project on the ',
+              a({href: 'https://anvilproject.org/'}, ['AnVIL']),
+              '?'],
+            title: '1.8 Cloud Use Statement*',
+            // type: FormFieldTypes.RADIO,
+            // radioOptions: [
+            //   { value: 'yes', displayText: 'Yes' },
+            //   { value: 'no', displayText: 'No' }
+            // ],
+            ariaLevel: ariaLevel + 1,
+            onChange: () => {},
+            // defaultValue: formData[`cloud_use_statement`]
+          })
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          // TODO: DUOS-1754
+          h3('1.9 External Collaborators'),
+          div(
+            `Please list External collaborators here. External Collaboratos are not employees of the 
+            Requesting PI's institution and/or do not work at the same location as the PI, and 
+            consequently must be independently approved to access controlled-access data subject to 
+            the GDS Policy. External Collaborators must be at the PI or equivalent level and are not 
+            required to have a Library Card in order to access data, although it is encouraged. Note: 
+            External Collaborators must submit an independent DAR approved by their signing Official 
+            to collaborate on this project. External Collaborators will be able to add their Lab Staff, 
+            as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
+            the External Collaborators listed.`
+          ),
+          button({
+            className: 'button button-white',
+            style: { marginTop: 25 },
+            onClick: () => {}
+          }, ['Add Collaborator'])
+        ])
+
+      ]),
+
       fieldset({ disabled: !isNil(darCode) }, [
 
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
@@ -131,8 +268,6 @@ export default function ResearcherInfo(props) {
           label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_nih_data_only' },
             ['I am exclusively applying for NIH/NHGRI data (ex. GTex)'])
         ]),
-
-        h3({ className: 'rp-form-title access-color' }, ['1. Researcher Information']),
 
         div({ className: 'form-group' }, [
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [

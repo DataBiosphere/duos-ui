@@ -6,18 +6,59 @@ import './dar_application.css';
 
 export default function ResearcherInfo(props) {
   const {
-    eRACommonsDestination, onNihStatusUpdate,
-    validationError: showValidationMessages,
+    allSigningOfficials,
+    completed,
+    darCode,
+    cloudProviderDescription,
+    eRACommonsDestination,
+    // externalCollaborators,
+    formFieldChange,
+    internalCollaborators,
+    invalidResearcher,
+    // labCollaborators,
+    location,
+    nihValid,
+    onNihStatusUpdate,
+    partialSave,
+    // researcher,
+    showValidationMessages,
+    // nextPage,
+    cloudProviderType,
+    cloudProvider,
+    isCloudUseInvalid,
+    isCloudProviderInvalid,
+    isAnvilUseInvalid,
+    ariaLevel = 2,
+    researcher
   } = props;
-
-  const ariaLevel = props.ariaLevel || 2;
-
-  let formData = {};
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
     console.log('on form change!', key, value, isValid);
   };
+
+  //initial state variable assignment
+  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);
+  const [signingOfficial, setSigningOfficial] = useState();
+  const [itDirector, setITDirector] = useState(props.itDirector || '');
+  const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
+  const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
+  const [localUse, setLocalUse] = useState(props.localUse || '');
+  const [researcherUser, setResearcherUser] = useState(props.researcherUser);
+  const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
+
+  useEffect(() => {
+    setSigningOfficial(props.signingOfficial);
+    setCheckCollaborator(props.checkCollaborator);
+    setCheckNihDataOnly(props.checkNihDataOnly);
+    setITDirector(props.itDirector);
+    setAnvilUse(props.anvilUse);
+    setCloudUse(props.cloudUse);
+    setLocalUse(props.localUse);
+    setResearcherUser(props.researcherUser);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+
 
   return (
     div({ datacy: 'researcher-info' }, [
@@ -29,7 +70,8 @@ export default function ResearcherInfo(props) {
           placeholder: 'Enter Firstname Lastname',
           title: '1.1 Researcher',
           validators: [FormValidators.REQUIRED],
-          ariaLevel: ariaLevel + 1, onChange
+          ariaLevel: ariaLevel + 1, onChange,
+          defaultValue: researcherUser
         }),
       ]),
 
@@ -56,7 +98,8 @@ export default function ResearcherInfo(props) {
             id: `researcher-identification_NIH`,
             toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
             type: FormFieldTypes.CHECKBOX,
-            ariaLevel: ariaLevel + 2, onChange
+            ariaLevel: ariaLevel + 2, onChange,
+            // defaultValue: formData[`researcher-identification_NIH`]
           })
         ]),
         div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
@@ -65,7 +108,8 @@ export default function ResearcherInfo(props) {
             id: `researcher-identification_isNIHResearcher`,
             toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
             type: FormFieldTypes.CHECKBOX,
-            ariaLevel: ariaLevel + 2, onChange
+            ariaLevel: ariaLevel + 2, onChange,
+            // defaultValue: formData[`researcher-identification_isNIHResearcher`]
           })
         ]),
       ]),
@@ -77,18 +121,8 @@ export default function ResearcherInfo(props) {
           placeholder: 'Firstname Lastname',
           title: '1.3 Principal Investigator',
           validators: [FormValidators.REQUIRED],
-          ariaLevel: ariaLevel + 1, onChange
-        })
-      ]),
-
-      div({className: 'dar-application-row'}, [
-        h(FormField, {
-          id: `principal_investigator`,
-          description: 'I certify that the prinicpal investigator listed below is aware of this study',
-          placeholder: 'Firstname Lastname',
-          title: '1.3 Principal Investigator',
-          validators: [FormValidators.REQUIRED],
-          ariaLevel: ariaLevel + 1, onChange
+          ariaLevel: ariaLevel + 1, onChange,
+          // defaultValue: formData[`principal_investigator`]
         })
       ]),
 
@@ -137,7 +171,8 @@ export default function ResearcherInfo(props) {
           placeholder: 'Signing Official',
           title: '1.6 Institutional Signing Official',
           validators: [FormValidators.REQUIRED],
-          ariaLevel: ariaLevel + 1, onChange
+          ariaLevel: ariaLevel + 1, onChange,
+          // defaultValue: formData[`institutional_signing_official`]
         }),
       ]),
 
@@ -148,7 +183,8 @@ export default function ResearcherInfo(props) {
           placeholder: 'IT Director',
           title: '1.7 Information Technology (IT) Director',
           validators: [FormValidators.REQUIRED],
-          ariaLevel: ariaLevel + 1, onChange
+          ariaLevel: ariaLevel + 1, onChange,
+          // defaultValue: formData[`information_technology_director`]
         })
       ]),
 
@@ -160,12 +196,13 @@ export default function ResearcherInfo(props) {
             a({href: 'https://anvilproject.org/'}, ['AnVIL']),
             '?'],
           title: '1.8 Cloud Use Statement*',
-          type: FormFieldTypes.RADIO,
-          radioOptions: [
-            { value: 'yes', displayText: 'Yes' },
-            { value: 'no', displayText: 'No' }
-          ],
-          ariaLevel: ariaLevel + 1, onChange
+          // type: FormFieldTypes.RADIO,
+          // radioOptions: [
+          //   { value: 'yes', displayText: 'Yes' },
+          //   { value: 'no', displayText: 'No' }
+          // ],
+          ariaLevel: ariaLevel + 1, onChange,
+          // defaultValue: formData[`cloud_use_statement`]
         })
       ]),
 
