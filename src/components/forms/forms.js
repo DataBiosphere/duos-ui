@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
+import { RadioButton } from '../RadioButton';
+
 import './forms.css';
 
 export const FormFieldTypes = {
@@ -10,18 +12,13 @@ export const FormFieldTypes = {
   CHECKBOX: { id: 'checkbox', defaultValue: false },
   SLIDER: { id: 'slider', defaultValue: false },
   TEXT: { id: 'text', defaultValue: '' },
-  NUMBER: { id: 'number', defaultValue: '' }
+  NUMBER: { id: 'number', defaultValue: '' },
+  RADIO: { id: 'radio', defaultValue: '' }
 };
 
 export const styles = {
   inputStyle: {
     padding: '25px 15px',
-    width: '100%'
-  },
-  flexRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     width: '100%'
   }
 };
@@ -80,7 +77,9 @@ const formInput = (config) => {
     case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
     case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
     case FormFieldTypes.SLIDER: return formInputSlider(config);
+    case FormFieldTypes.RADIO: return formInputRadio(config);
     case FormFieldTypes.TEXT:
+    case FormFieldTypes.NUMBER:
     default:
       return formInputGeneric(config);
   }
@@ -150,8 +149,7 @@ const formInputMultiText = (config) => {
 
   return div({}, [
     div({
-      className: 'formControl-group',
-      style: styles.flexRow
+      className: 'formControl-group flex-row',
     }, [
       input({
         id,
@@ -186,7 +184,7 @@ const formInputMultiText = (config) => {
       span({ className: 'glyphicon glyphicon-play' }),
       ...error.map((err) => div([err])),
     ]),
-    div({ style: { ...styles.flexRow, justifyContent: null } },
+    div({ className: 'flex-row', style: { justifyContent: null } },
       formValue.map((val, i) => {
         return h(button, {
           key: val,
@@ -251,10 +249,6 @@ const formInputCheckbox = (config) => {
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
       htmlFor: `cb_${id}_${toggleText}`,
-      style: {
-        fontWeight: 'normal',
-        fontStyle: 'italic'
-      }
     }, [toggleText])
   ]);
 };
@@ -264,7 +258,7 @@ const formInputSlider = (config) => {
     id, disabled, toggleText, formValue
   } = config;
 
-  return div({ style: { ...styles.flexRow, justifyContent: 'unset', alignItems: 'center' } }, [
+  return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
     label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
       input({
         type: 'checkbox',
@@ -285,29 +279,55 @@ const formInputSlider = (config) => {
   ]);
 };
 
+const formInputRadio = (config) => {
+  const {
+    id, disabled, radioOptions, formValue
+  } = config;
+
+  return radioOptions.map(({value, displayText}) => {
+    return RadioButton({
+      key: `${id}-${value}`,
+      value,
+      defaultChecked: formValue === value,
+      onClick: (event) => onFormInputChange(config, value),
+      description: displayText,
+      style: { fontFamily: 'Montserrat', color: '#1f3b50'}
+    })  
+  });
+};
+
 //---------------------------------------------
 // Main Components
 //---------------------------------------------
 /*
 * Config options:
 * id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox')
+* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
+*  * type == 'text'
+*  * type == 'multitext'
 *  * type == select
-*    * selectOptions: [{key: string, displayText: string}]
+*    * selectOptions: [{key: '', displayText: ''}]
 *    * searchPlaceholder
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType
-* disabled
+*  * type === 'sliding-checkbox'
+*  * type === 'radio'
+*    * radioOptions = [{ value: '', displayText: '' }]
+* disabled: bool
 * placeholder, defaultValue,
 * style (for the formControl component)
 * inputStyle (for the input element)
-* onChange,
-* validators: [{isValid: func, msg: string}]
+* onChange: func({key: '', value: '', isValid: boolean}),
+* validators: [{isValid: func, msg: ''}]
+* Accessibility: (defaults blank)
+*    * ariaDescribedby
+*    * ariaLevel
 */
 export const FormField = (config) => {
   const {
-    id, title, hideTitle, description, type,
+    id, type, ariaLevel,
+    title, hideTitle, description,
     defaultValue, style, validators
   } = config;
 
@@ -329,7 +349,8 @@ export const FormField = (config) => {
     title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${error ? 'errored' : ''}`,
-      htmlFor: `${id}`
+      htmlFor: `${id}`,
+      'aria-level': ariaLevel
     }, [
       title,
       required && '*'
@@ -417,7 +438,8 @@ export const FormTable = (config) => {
           formValueClone.push({});
           setFormValue(formValueClone);
           onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
-        }
+        },
+        style: { marginTop: 10, padding: '17px 10px' }
       }, [
         (addRowLabel || 'Add New'),
         span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })
