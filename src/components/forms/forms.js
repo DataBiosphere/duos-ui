@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isNil } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import './forms.css';
 import {RadioButton} from '../RadioButton';
@@ -73,23 +73,28 @@ const clearDependentFormFields = (config) => {
   const {onChange, dependentFormFields = []} = config;
   /*
    * Clears fields for questions that are rendered conditionally, setting them to their default value
-   * dependentFormFields: [ {id: string, type: FormFieldType, defaultValue: (optional) }, ... ]
+   * dependentFormFields: [ {id: string, type: FormFieldType, defaultValue: (optional),  }, ... ]
    */
 
   dependentFormFields.map((formField) => {
-    const { id, type, defaultValue } = formField;
-    onChange({key: id, value: defaultValue || type.defaultValue});
+    const { id, type, defaultValue, shouldClear } = formField;
+    if (isNil(shouldClear) || shouldClear(config)) {
+      onChange({key: id, value: defaultValue || type.defaultValue});
+    }
   });
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
+  const { id, onChange, setFormValue, setFormValueParent } = config;
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
   onChange({key: id, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
-  clearDependentFormFields(config);
+  if (!isNil(setFormValueParent)) {
+    setFormValueParent(value);
+  }
+  clearDependentFormFields({...config, value});
 };
 
 
@@ -131,10 +136,7 @@ const formInputGeneric = (config) => {
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
     }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
+    errorMessage(error)
   ]);
 };
 
@@ -205,10 +207,7 @@ const formInputMultiText = (config) => {
         })
       ])
     ]),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ]),
+    errorMessage(error),
     div({ style: { ...styles.flexRow, justifyContent: null } },
       formValue.map((val, i) => {
         return h(button, {
@@ -248,10 +247,7 @@ const formInputSelect = (config) => {
       className: 'form-control',
       disabled, errored: error
     }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
+    errorMessage(error)
   ]);
 };
 
@@ -277,10 +273,7 @@ const formInputRadioButtons = (config) => {
         }
       })
     ),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
+    errorMessage(error)
   ]);
 };
 
@@ -335,6 +328,13 @@ const formInputSlider = (config) => {
         fontStyle: 'italic'
       }
     }, [toggleText])
+  ]);
+};
+
+const errorMessage = (error) => {
+  return error && div({ className: `error-message fadein`}, [
+    span({ className: 'glyphicon glyphicon-play' }),
+    ...error.map((err) => div([err])),
   ]);
 };
 
