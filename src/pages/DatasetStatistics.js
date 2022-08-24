@@ -78,11 +78,11 @@ export default function DatasetStatistics(props) {
             div({style: Styles.TITLE}, ['Dataset Statistics']),
             div({style: Styles.MEDIUM_ROW}, [
               div({style: {fontWeight: '500', marginRight: '5px'}}, ['Dataset ID: ']),
-              div([dataset.alias])
+              div([dataset?.alias])
             ]),
             div({style: Styles.MEDIUM_ROW}, [
               div({style: {fontWeight: '500', marginRight: '5px'}}, ['Dataset Name: ']),
-              div([get(find(dataset.properties, p => {
+              div([get(find(dataset?.properties, p => {
                 return p.propertyName === 'Dataset Name';
               }), 'propertyValue', '')])
             ])
@@ -93,7 +93,7 @@ export default function DatasetStatistics(props) {
               div({style: {...Styles.MINOR_HEADER, paddingLeft:'10px'}}, ['Dataset Description:']),
               LINE,
               div({style: {fontSize: Theme.font.size.small, padding: '1rem'}}, [
-                get(find(dataset.properties, p => {
+                get(find(dataset?.properties, p => {
                   return p.propertyName === 'Description';
                 }), 'propertyValue', '')
               ])
@@ -102,21 +102,21 @@ export default function DatasetStatistics(props) {
               div({style: {display: 'flex'}}, [
                 div({style: Styles.SMALL_BOLD}, ['Number of Participants: ']),
                 div({style: Styles.SMALL_BOLD}, [
-                  get(find(dataset.properties, p => {
+                  get(find(dataset?.properties, p => {
                     return p.propertyName === '# of participants';
                   }), 'propertyValue', '')]),
               ]),
               div({style: {display: 'flex'}}, [
                 div({style: Styles.SMALL_BOLD}, ['Principal Investigator: ']),
                 div({style: Styles.SMALL_BOLD}, [
-                  get(find(dataset.properties, p => {
+                  get(find(dataset?.properties, p => {
                     return p.propertyName === 'Principal Investigator(PI)';
                   }), 'propertyValue', '')]),
               ]),
               div({style: {display: 'flex'}}, [
                 div({style: Styles.SMALL_BOLD}, ['Data Custodian: ']),
                 div({style: Styles.SMALL_BOLD}, [
-                  get(find(dataset.properties, p => {
+                  get(find(dataset?.properties, p => {
                     return p.propertyName === 'Data Depositor';
                   }), 'propertyValue', '')]),
               ])
@@ -127,33 +127,33 @@ export default function DatasetStatistics(props) {
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['Data Access Requests']),
               LINE,
-              div({style: Styles.JUMBO}, [dars.length])
+              div({style: Styles.JUMBO}, [dars?.length])
             ]),
             div({style: Styles.DESCRIPTION_BOX}, [
               div({style: {...Styles.MINOR_HEADER, paddingLeft:'10px'}}, ['DAR Project Titles:']),
               LINE,
               div({style: {fontSize: Theme.font.size.small, padding: '1rem'}}, [
-                dars.map((dar) => a({style: {display: 'block'}, href: `#${dar.darCode}`}, [dar.projectTitle]))
+                dars?.map((dar) => a({style: {display: 'block'}, href: `#${dar.darCode}`}, [dar.projectTitle]))
               ])
             ]),
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Approved']),
               LINE,
-              div({style: Styles.JUMBO}, [darsApproved.length])
+              div({style: Styles.JUMBO}, [darsApproved?.length])
             ]),
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Denied']),
               LINE,
-              div({style: Styles.JUMBO}, [darsDenied.length])
+              div({style: Styles.JUMBO}, [darsDenied?.length])
             ]),
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Open, Canceled, Unreviewed']),
               LINE,
-              div({style: Styles.JUMBO}, [darsOpen.length + darsCanceled.length + darsUnreviewed.length])
+              div({style: Styles.JUMBO}, [darsOpen?.length + darsCanceled?.length + darsUnreviewed?.length])
             ]),
           ]),
           div({style: Styles.SUB_HEADER}, ['Data Access Requests - Research Statements']),
-          dars.map((dar) =>
+          dars?.map((dar) =>
             div({style: Styles.READ_MORE, id: `${dar.darCode}` }, [
               ReadMore({
                 props: props,
