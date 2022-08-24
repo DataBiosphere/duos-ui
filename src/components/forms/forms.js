@@ -355,7 +355,7 @@ export const FormField = (config) => {
       title,
       required && '*'
     ]),
-    description && div({ style: { marginBottom: 15 } }, [description]),
+    description && div({ style: { marginBottom: 15 } }, description),
     formInput({
       ...config,
       error, setError,
