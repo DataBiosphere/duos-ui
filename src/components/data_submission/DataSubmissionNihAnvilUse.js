@@ -1,16 +1,11 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
 
 export default function DataSubmissionNihAnvilUse(props) {
-  const { onChange, formData } = props;
-  const [nihAnvilUse, setNihAnvilUse] = useState(formData.nihAnvilUse);
-
-  useEffect(() => {
-    //track as state variable for dependent questions that are rendered conditionally
-    setNihAnvilUse(formData.nihAnvilUse);
-  }, [formData.nihAnvilUse]);
+  const { onChange } = props;
+  const [nihAnvilUse, setNihAnvilUse] = useState();
 
   const I_DID = 'I did';
   const I_WILL = 'I will';
@@ -34,7 +29,7 @@ export default function DataSubmissionNihAnvilUse(props) {
         {label: NO, value: NO},
       ],
       dependentFormFields: [
-        {id: 'submittingToAnvil', type: FormFieldTypes.RADIO},
+        {id: 'submittingToAnvil', type: FormFieldTypes.RADIO, shouldClear: ({value}) => value === I_DID},
         {id: 'dbGaPPhsID', type: FormFieldTypes.TEXT},
         {id: 'dbGaPStudyRegistrationName', type: FormFieldTypes.TEXT},
         {id: 'embargoReleaseDate', type: FormFieldTypes.TEXT},
@@ -42,6 +37,7 @@ export default function DataSubmissionNihAnvilUse(props) {
       ],
       validators: [FormValidators.REQUIRED],
       onChange,
+      setFormValueParent: setNihAnvilUse
     }),
 
     h(FormField, {
@@ -54,7 +50,7 @@ export default function DataSubmissionNihAnvilUse(props) {
         {label: 'No', value: false},
       ],
       validators: [FormValidators.REQUIRED],
-      onChange,
+      onChange
     }),
 
     div({ isRendered: nihAnvilUse === I_DID }, [
