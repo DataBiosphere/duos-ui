@@ -1,5 +1,5 @@
 import {h, div, img, h1, form} from 'react-hyperscript-helpers';
-import { set } from 'lodash/fp';
+import { set } from 'lodash';
 
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
@@ -15,7 +15,7 @@ export const DataSubmissionForm = () => {
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
     console.log('StudyInfo OnChange:', key, value, isValid);
-    set(key, value, formData);
+    set(formData, key, value);
   };
 
   return div({ style: Styles.PAGE }, [
@@ -43,7 +43,7 @@ export const DataSubmissionForm = () => {
 
     form({}, [
       h(DataSubmissionStudyInformation, { onChange }),
-      h(DataSubmissionNihAnvilUse, { onChange, formData })
+      h(DataSubmissionNihAnvilUse, { onChange })
     ])
   ]);
 };
