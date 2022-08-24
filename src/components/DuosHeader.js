@@ -92,16 +92,6 @@ export const headerTabsConfig = [
     isRendered: (user) => user.isSigningOfficial
   },
   {
-    label: 'Researcher Console',
-    link: '/researcher_console',
-    search: 'researcher_console',
-    children: [
-      { label: 'DAR Requests', link: '/researcher_console' },
-      { label: 'Data Catalog', link: '/dataset_catalog' }
-    ],
-    isRendered: (user) => user.isResearcher
-  },
-  {
     label: 'DAC Chair Console',
     link: '/chair_console',
     search: 'chair_console',
@@ -130,6 +120,16 @@ export const headerTabsConfig = [
       { label: 'Datasets', link: '/data_submission_form' }
     ],
     isRendered: (user) => user.isDataSubmitter
+  },
+  {
+    label: 'Researcher Console',
+    link: '/researcher_console',
+    search: 'researcher_console',
+    children: [
+      { label: 'DAR Requests', link: '/researcher_console' },
+      { label: 'Data Catalog', link: '/dataset_catalog' }
+    ],
+    isRendered: (user) => user.isResearcher
   }
 ];
 
