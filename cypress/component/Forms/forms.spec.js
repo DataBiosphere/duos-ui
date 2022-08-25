@@ -270,7 +270,7 @@ describe('FormField - Tests', () => {
             value: true,
           }, 
           isValid: true
-        }); 
+        });
       });
 
       cy.get('#radioGroup_opt1').should('be.checked');
