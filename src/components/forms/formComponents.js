@@ -178,7 +178,7 @@ export const formInputMultiText = (config) => {
 export const formInputSelect = (config) => {
   const {
     id, title, disabled, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby,
+    selectOptions, placeholder, ariaDescribedby,
     creatableConfig
   } = config;
 
@@ -196,7 +196,7 @@ export const formInputSelect = (config) => {
           }
           return x;
         }),
-        searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
+        searchPlaceholder: placeholder || `Search for ${title}...`,
         className: 'form-control',
         disabled, errored: error
       }),
@@ -207,7 +207,7 @@ export const formInputSelect = (config) => {
 export const formInputCreatable = (config) => {
   const {
     id, title, disabled, required, error, setError,
-    selectOptions = [], searchPlaceholder, ariaDescribedby,
+    selectOptions = [], placeholder, ariaDescribedby,
     formValue, setFormValue,
     creatableConfig = {}
   } = config;
@@ -222,7 +222,7 @@ export const formInputCreatable = (config) => {
     isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
     required,
     isDisabled: disabled,
-    placeholder: searchPlaceholder || `Search for ${title}...`,
+    placeholder: placeholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
     onChange: (option) => {
       const inputChange = isStringArr ? option.displayValue : option;
