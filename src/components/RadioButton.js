@@ -60,6 +60,7 @@ export const RadioButton = (props) => {
             type: 'radio',
             name: props.name,
             value: props.value,
+            checked: props.defaultChecked,
             defaultChecked: props.defaultChecked,
             onClick: props.onClick,
             disabled: props.disabled,

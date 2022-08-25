@@ -306,13 +306,11 @@ const formInputMultiSelect = (config) => {
           return;
         }
 
-
         if (exclusiveValues.includes(selected[0].value)) {
           selected.splice(0, 1);
           onFormInputChange(config, selected);
           return;
         }
-
       }
       onFormInputChange(config, selected);
     }
@@ -418,15 +416,17 @@ const formInputRadioGroup = (config) => {
           className: 'radio-group',
           id: id,
         },
-        options.map((option => {
+        options.map(((option, idx) => {
           return div({
             style: {
+              key: idx,
               margin: '1.0rem 0 0.5rem 0',
             }
           }, [
             h(RadioButton, {
               id: id+'_'+option.id,
               name: id+'_'+option.id,
+              key: idx,
               defaultChecked: !isNil(formValue) && formValue.key === option.key,
               onClick: () => onFormInputChange(config, {
                 key: option.key,

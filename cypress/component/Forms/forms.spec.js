@@ -126,6 +126,156 @@ describe('FormField - Tests', () => {
     });
   });
 
+  describe('Form Control - Multi Select', () => {
+    beforeEach(() => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.MULTISELECT,
+        id: 'multiSelect',
+        options: [
+          {
+            value: 'opt1',
+            label: 'Option 1',
+          },
+          {
+            value: 'opt2',
+            label: 'Option 2',
+          },
+          {
+            value: 'none',
+            label: 'None',
+          }
+        ]
+      };
+    });
+
+
+    it('should render', () => {
+      mount(<FormField {...props}/>);
+      cy.get('#multiSelect').should('exist');
+    });
+
+    it('selects multiple', () => {
+      mount(<FormField {...props}/>);
+      cy.get('#multiSelect').should('exist');
+    });
+
+    it('properly excludes', () => {
+      mount(<FormField {...props}/>);
+      cy.get('#multiSelect').should('exist');
+    });
+  
+  });
+
+  describe('Form Control - Radio', () => {
+    beforeEach(() => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.RADIO,
+        id: 'radioGroup',
+        options: [
+          {
+            id: 'opt1',
+            key: 'opt1',
+            text: 'Option 1',
+          },
+          {
+            id: 'opt2',
+            key: 'opt2',
+            text: 'Option 2',
+          },
+          {
+            id: 'opt3',
+            key: 'opt3',
+            text: 'Option 3 (text)',
+            type: 'string',
+            placeholder: 'Please specify.',
+          }
+        ]
+      };
+    });
+
+
+    it('should render', () => {
+      mount(<FormField {...props}/>);
+      cy.get('#radioGroup_opt1').should('exist');
+      cy.get('#radioGroup_opt2').should('exist');
+      cy.get('#radioGroup_opt3').should('exist');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+    });
+
+    it('should able to check, only one at a time', () => {
+      cy.spy(props, 'onChange');
+      mount(<FormField {...props}/>);
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt1').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            key: 'opt1',
+            value: true,
+          }, 
+          isValid: true
+        }); 
+      });
+
+      cy.get('#radioGroup_opt1').should('be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt2').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            key: 'opt2',
+            value: true,
+          }, 
+          isValid: true
+        });
+      });
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt3').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            key: 'opt3',
+            value: '',
+          }, 
+          isValid: true
+        });
+      });
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('exist');
+
+      cy.get('#radioGroup_opt3_text_input').type('Hello!').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            key: 'opt3',
+            value: 'Hello!',
+          }, 
+          isValid: true
+        });
+      });
+    });
+
+
+  });
+
   describe('Form Control - MultiText', () => {
 
     beforeEach(() => {
