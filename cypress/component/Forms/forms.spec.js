@@ -357,6 +357,7 @@ describe('FormField - Tests', () => {
 
     it('should allow user to select by entering a new option as freetext', () => {
       cy.spy(props, 'onChange');
+      props.creatableConfig = {};
       mount(<FormField {...props}/>);
       cy.get('#studyType .dropdown-toggle').click();
       cy.get('#studyType .search-bar').type('newtext').then(() => {

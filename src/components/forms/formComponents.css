@@ -29,7 +29,8 @@
   border-bottom-left-radius: 0;
 }
 
-.errored {
+.errored,
+.control-label.errored {
   color: red;
 }
 

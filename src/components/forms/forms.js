@@ -3,10 +3,8 @@ import { h, div, label, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
-  formInputGeneric, formInputMultiText,
-  formInputSelectOrCreate, formInputSelect,
-  formInputCheckbox,
-  formInputSlider
+  formInputGeneric, formInputMultiText, formInputSelect,
+  formInputCheckbox, formInputSlider
 } from './formComponents';
 
 import './forms.css';
