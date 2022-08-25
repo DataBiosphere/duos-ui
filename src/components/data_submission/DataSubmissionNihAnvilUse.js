@@ -12,10 +12,10 @@ export default function DataSubmissionNihAnvilUse(props) {
 
   //when a secondary question is removed from view, clear its associated form value
   const clearDependentFormFields = ({newNihAnvilUse}) => {
-    const valueIsNotIDid = () => newNihAnvilUse !== I_DID;
+    const valueIsNotIDid = newNihAnvilUse !== I_DID;
 
     const dependentFormFields = [
-      {id: 'submittingToAnvil', shouldClear: () => newNihAnvilUse === I_DID},
+      {id: 'submittingToAnvil', shouldClear: newNihAnvilUse === I_DID},
       {id: 'dbGaPPhsID', shouldClear: valueIsNotIDid},
       {id: 'dbGaPStudyRegistrationName', shouldClear: valueIsNotIDid},
       {id: 'embargoReleaseDate', shouldClear: valueIsNotIDid},
@@ -23,7 +23,7 @@ export default function DataSubmissionNihAnvilUse(props) {
     ];
 
     dependentFormFields
-      .filter(formField => formField.shouldClear())
+      .filter(formField => formField.shouldClear)
       .map(formField => onChange({key: formField.id, value: null}));
   };
 
