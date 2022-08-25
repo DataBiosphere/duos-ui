@@ -54,7 +54,7 @@ export const SearchSelect = (props) => {
         div({
           style: { width: '100%' }
         }, [
-          currentDisplay,
+          span(currentDisplay),
           span({ className: 'caret select-caret caret-margin', style: { right: '2%' } })
         ])
       ]),

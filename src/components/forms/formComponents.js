@@ -1,8 +1,10 @@
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
-import { SearchSelectOrText } from '../SearchSelectOrText';
+import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import { FormValidators } from './forms';
+import { SearchSelect } from '../SearchSelect';
+
+import './formComponents.css';
 
 const styles = {
   inputStyle: {
@@ -173,14 +175,48 @@ export const formInputMultiText = (config) => {
   ]);
 };
 
+export const formInputSelect = (config) => {
+  const {
+    id, title, disabled, error, setError,
+    selectOptions, searchPlaceholder, ariaDescribedby,
+    creatableConfig
+  } = config;
+
+  return creatableConfig
+    ? formInputCreatable(config)
+    : div({}, [
+      h(SearchSelect, {
+        id,
+        'aria-describedby': ariaDescribedby,
+        onSelection: async (selection) => onFormInputChange(config, selection),
+        onOpen: () => setError(),
+        options: selectOptions.map((x) => {
+          if (isString(x)) {
+            return { key: x, displayText: x };
+          }
+          return x;
+        }),
+        searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
+        className: 'form-control',
+        disabled, errored: error
+      }),
+    ]);
+};
+
 // Using react-select/creatable - Passing config directly through!
-export const formInputSelectOrCreate = (config) => {
+export const formInputCreatable = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, searchPlaceholder, ariaDescribedby,
     formValue,
     creatableConfig = {}
   } = config;
+
+  const normalizedOptions = selectOptions.map((option) => {
+    return isString(option)
+      ? { key: option, displayValue: option }
+      : option ;
+  });
 
   return h(Creatable, {
     key: id,
@@ -196,13 +232,13 @@ export const formInputSelectOrCreate = (config) => {
         setError(FormValidators.REQUIRED.msg);
       }
     },
-    options: selectOptions,
+    options: normalizedOptions,
     getOptionLabel: (option) => option.displayValue,
     getNewOptionData: (inputValue) => {
       return { displayValue: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayName)) {
+      if(isNil(option) || isEmpty(option.displayValue)) {
         return null;
       }
       return option;
@@ -211,32 +247,6 @@ export const formInputSelectOrCreate = (config) => {
     ...creatableConfig,
     'aria-describedby': ariaDescribedby
   });
-};
-
-export const formInputSelect = (config) => {
-  const {
-    id, title, disabled, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby
-  } = config;
-
-  return div({}, [
-    h(SearchSelectOrText, {
-      id,
-      'aria-describedby': ariaDescribedby,
-      onPresetSelection: async (selection) => onFormInputChange(config, selection),
-      onManualSelection: (selection) => onFormInputChange(config, selection),
-      onOpen: () => setError(),
-      options: selectOptions.map((x) => {
-        return typeof x == 'string' || typeof x === 'number'
-          ? { key: x, displayText: x }
-          : x;
-      }),
-      searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
-      className: 'form-control',
-      disabled, errored: error
-    }),
-    errorMessage(error)
-  ]);
 };
 
 export const formInputCheckbox = (config) => {

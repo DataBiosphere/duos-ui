@@ -13,7 +13,6 @@ import './forms.css';
 
 export const FormFieldTypes = {
   SELECT: { defaultValue: '', component: formInputSelect },
-  SELECT_CREATABLE: { defaultValue: '', component: formInputSelectOrCreate },
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
   CHECKBOX: { defaultValue: false, component: formInputCheckbox },
   SLIDER: { defaultValue: false, component: formInputSlider },
