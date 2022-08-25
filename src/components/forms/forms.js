@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
-import { SearchSelectOrText } from '../SearchSelectOrText';
-import Creatable from 'react-select/creatable';
+import { cloneDeep } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
   formInputGeneric, formInputMultiText,
