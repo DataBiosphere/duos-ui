@@ -5,7 +5,6 @@ import { a, div, fieldset, h, h2, h3, h4, input, label, span, textarea, button }
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
-import Creatable from 'react-select/creatable';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application.css';
 
@@ -26,10 +25,9 @@ export default function ResearcherInfo(props) {
     externalCollaborators,
     formFieldChange,
     internalCollaborators,
-    invalidResearcher,
     labCollaborators,
     location,
-    nihValid,
+    // nihValid,
     onNihStatusUpdate,
     partialSave,
     researcher,
@@ -55,14 +53,15 @@ export default function ResearcherInfo(props) {
   };
 
   //initial state variable assignment
-  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
-  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);
-  const [signingOfficial, setSigningOfficial] = useState();
-  const [itDirector, setITDirector] = useState(props.itDirector || '');
+  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);//
+  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);//
+  const [signingOfficial, setSigningOfficial] = useState();//
+  const [itDirector, setITDirector] = useState(props.itDirector || '');//
+  const [principalInvestigator, setPrincipalInvestigator] = useState(props.principalInvestigator || '');//
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [researcherUser, setResearcherUser] = useState(props.researcherUser);
+  const [researcherUser, setResearcherUser] = useState(props.researcherUser);//
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
@@ -74,11 +73,12 @@ export default function ResearcherInfo(props) {
     setCheckCollaborator(props.checkCollaborator);
     setCheckNihDataOnly(props.checkNihDataOnly);
     setITDirector(props.itDirector);
+    setPrincipalInvestigator(props.principalInvestigator);
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.principalInvestigator, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -130,16 +130,16 @@ export default function ResearcherInfo(props) {
             title: '1.1 Researcher',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: () => {},
+            onChange: ({key: name, value}) => formFieldChange({name, value}),
             defaultValue: researcher,
           }),
         ]),
 
         div({className: 'dar-application-row'}, [
           h3('1.2 Researcher Identification'),
-          div([
+          span({ className: 'default-color' }, [
             'Please authenticate with ',
-            a({href: 'https://public.era.nih.gov/commonsplus/public/login.era'}, ['eRA Commons ID'])
+            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
@@ -148,30 +148,29 @@ export default function ResearcherInfo(props) {
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
               validationError: showValidationMessages,
-              header: true,
-              // onChange
+              header: true
             })
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
             h4({ style: { marginRight: 30 } }, '1.2.2'),
             h(FormField, {
-              id: `researcher-identification_NIH`,
+              id: 'checkNihDataOnly',
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
-              // onChange,
-              // defaultValue: formData[`researcher-identification_NIH`]
+              onChange: ({key: name, value}) => formFieldChange({name, value}),
+              defaultValue: checkNihDataOnly
             })
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
             h4({ style: { marginRight: 30 } }, '1.2.3'),
             h(FormField, {
-              id: `researcher-identification_isNIHResearcher`,
+              id: 'checkCollaborator',
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
-              // onChange,
-              // defaultValue: formData[`researcher-identification_isNIHResearcher`]
+              onChange: ({key: name, value}) => formFieldChange({name, value}),
+              defaultValue: checkCollaborator
             })
           ]),
         ]),
@@ -184,8 +183,8 @@ export default function ResearcherInfo(props) {
             title: '1.3 Principal Investigator',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: () => {},
-            // defaultValue: formData[`principal_investigator`]
+            onChange: ({key: name, value}) => formFieldChange({name, value}),
+            defaultValue: principalInvestigator
           })
         ]),
 
@@ -231,15 +230,16 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h(FormField, {
-            id: `institutional_signing_official`,
+            id: 'signingOfficial',
             type: FormFieldTypes.SELECT,
             description: 'I certify that the individual listed below is my Institutional Signing official',
             title: '1.6 Institutional Signing Official',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: ({key, value}) => {
+            defaultValue: signingOfficial,
+            onChange: ({key: name, value}) => {
               const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
-              formFieldChange({name: key, formattedValue});
+              formFieldChange({name, formattedValue});
             },
             selectOptions: allSigningOfficials,
             creatableConfig: {
@@ -260,41 +260,127 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h(FormField, {
-            id: `information_technology_director`,
+            id: 'itDirector',
             description: 'I certify that the individual listed below is my IT Director',
             placeholder: 'IT Director',
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: () => {},
-            // defaultValue: formData[`information_technology_director`]
+            onChange: ({key: name, value,}) => formFieldChange(name, value),
+            defaultValue: itDirector
           })
         ]),
 
         div({className: 'dar-application-row'}, [
-          h(FormField, {
-            id: `cloud_use_statement`,
-            description: [
-              'Will you perform all of your data storage and analysis for this project on the ',
-              a({href: 'https://anvilproject.org/'}, ['AnVIL']),
-              '?'],
-            title: '1.8 Cloud Use Statement*',
-            // type: FormFieldTypes.RADIO,
-            // radioOptions: [
-            //   { value: 'yes', displayText: 'Yes' },
-            //   { value: 'no', displayText: 'No' }
-            // ],
-            ariaLevel: ariaLevel + 1,
-            onChange: () => {},
-            // defaultValue: formData[`cloud_use_statement`]
-          })
+          h3(['1.8 Cloud Use Statement*']),
+          span([
+            'Will you perform all of your data storage and analysis for this project on the ',
+            a({
+              rel: 'noopener noreferrer',
+              href: 'https://anvil.terra.bio/',
+              target: '_blank'
+            }, ['AnVIL']),
+            '?'
+          ]),
+          cloudRadioGroup
+        ]),
+
+        div({className: 'dar-application-row'}, [
+          div({className: 'row no-margin'}, [
+            div({
+              isRendered: !anvilUse && anvilUse !== '',
+              className: 'computing-use-container',
+              style: {
+                backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
+              }
+            }, [
+              div({className: 'row no-margin'}, [
+                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                  input({
+                    type: 'checkbox',
+                    id: 'cloud-requested',
+                    name: 'cloudUse',
+                    className: 'checkbox-inline rp-checkbox',
+                    disabled: !isNil(darCode),
+                    required: true,
+                    checked: cloudUse,
+                    onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
+                  }),
+                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
+                    ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
+                  )
+                ])
+              ]),
+              div({className: 'row no-margin'}, [
+                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                  input({
+                    type: 'checkbox',
+                    id: 'local-requested',
+                    name: 'localUse',
+                    className: 'checkbox-inline rp-checkbox',
+                    disabled: !isNil(darCode),
+                    required: true,
+                    checked: localUse,
+                    onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
+                  }),
+                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
+                    ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
+                  )
+                ])
+              ]),
+            ]),
+            div({className: 'row no-margin', isRendered: cloudUse === true}, [
+              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+                h(FormField, {
+                  id: 'cloudProvider',
+                  title: 'Name of Cloud Provider',
+                  onChange: ({ key: name, value }) => formFieldChange(name, value),
+                  defaultValue: cloudProvider,
+                  validators: [FormValidators.REQUIRED],
+                  disabled: !isEmpty(darCode)
+                })
+              ]),
+              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+                h(FormField, {
+                  id: 'cloudProviderType',
+                  title: 'Type of Cloud Provider',
+                  defaultValue: cloudProviderType,
+                  validators: [FormValidators.REQUIRED],
+                  disabled: !isNil(darCode),
+                  onChange: ({ key: name, value }) => formFieldChange(name, value)
+                })
+              ])
+            ]),
+            div({className: 'row no-margin', isRendered: cloudUse === true}, [
+              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                textarea({
+                  style: {
+                    backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
+                    width: '100%',
+                    padding: '1rem'
+                  },
+                  defaultValue: cloudProviderDescription,
+                  disabled: !isNil(darCode),
+                  onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
+                  name: 'cloudProviderDescription',
+                  id: 'cloudProviderDescription',
+                  rows: '6',
+                  required: true,
+                  placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
+                    + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
+                    + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
+                  maxLength: 2000
+                })
+              ])
+            ])
+          ])
         ]),
 
         div({className: 'dar-application-row'}, [
           // TODO: DUOS-1754
           h3('1.9 External Collaborators'),
           div(
-            `Please list External collaborators here. External Collaboratos are not employees of the 
+            `Please list External collaborators here. External Collaborators are not employees of the 
             Requesting PI's institution and/or do not work at the same location as the PI, and 
             consequently must be independently approved to access controlled-access data subject to 
             the GDS Policy. External Collaborators must be at the PI or equivalent level and are not 
@@ -315,82 +401,6 @@ export default function ResearcherInfo(props) {
       ]),
 
       fieldset({ disabled: !isNil(darCode) }, [
-
-        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-          input({
-            type: 'checkbox',
-            id: 'chk_nih_data_only',
-            name: 'checkNihDataOnly',
-            className: 'checkbox-inline rp-checkbox',
-            disabled: !isNil(darCode),
-            checked: checkNihDataOnly,
-            onChange: (e) => formFieldChange({name: 'checkNihDataOnly', value: e.target.checked})
-          }),
-          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_nih_data_only' },
-            ['I am exclusively applying for NIH/NHGRI data (ex. GTex)'])
-        ]),
-
-        div({ className: 'form-group' }, [
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-            label({ className: 'control-label rp-title-question' }, ['1.1 Researcher*'])
-          ]),
-
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-            input({
-              type: 'text',
-              name: 'researcher',
-              id: 'inputResearcher',
-              value: researcher,
-              disabled: true,
-              className: invalidResearcher && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-              required: true
-            }),
-            span({
-              isRendered: (invalidResearcher) && (showValidationMessages), className: 'cancel-color required-field-error-span'
-            }, ['Required field'])
-          ]),
-
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-            input({
-              type: 'checkbox',
-              id: 'chk_collaborator',
-              name: 'checkCollaborator',
-              className: 'checkbox-inline rp-checkbox',
-              disabled: !isNil(darCode),
-              checked: checkCollaborator,
-              onChange: (e) => formFieldChange({name: 'checkCollaborator', value: e.target.checked})
-            }),
-            label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-              ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
-          ]),
-
-          div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
-            label({ className: 'control-label rp-title-question' }, [
-              '1.2 Researcher Identification',
-              div({ isRendered: checkCollaborator !== true, className: 'display-inline' }, ['*']),
-              div({ isRendered: checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
-              span({ className: 'default-color' },
-                ['Please authenticate with ',
-                  a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
-                ])
-            ])
-          ]),
-
-          span({
-            isRendered: (showValidationMessages && !nihValid && !checkCollaborator), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
-          }, ['NIH eRA Authentication is required']),
-
-          div({ className: 'row no-margin' }, [
-            eRACommons({
-              className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-              destination: eRACommonsDestination,
-              onNihStatusUpdate: onNihStatusUpdate,
-              location: location,
-              validationError: showValidationMessages,
-              header: true
-            }),
-          ]),
-        ]),
 
         div({
           datacy: 'researcher-info-missing-library-cards',
@@ -460,186 +470,117 @@ export default function ResearcherInfo(props) {
         ]),
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.5 Institutional Signing Official*',
-                span(['I certify the individual listed below is my Institutional Signing Official.'])
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              h(Creatable, {
-                key: 'selectSO',
-                isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
-                required: true,
-                isDisabled: !isNil(darCode),
-                placeholder: 'Select from the list or type your SO\'s full name if it is not present. Clear selection with the Backspace key or the \'X\' at the end of this input box',
-                onChange: (option) => {
-                  const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
-                  formFieldChange({name: 'signingOfficial', value});
-                },
-                onInputChange: (input, {action}) => {
-                  if(action !== 'input-blur' && action !== 'menu-close') {
-                    const value = isNil(input) ? '' : formatSOString(input, null);
-                    formFieldChange({name: 'signingOfficial', value});
-                  }
-                },
-                options: allSigningOfficials, //dropdown options
-                getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
-                getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
-                  return { displayName: inputValue };
-                },
-                getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-                  if(isNil(option) || isEmpty(option.displayName)) {
-                    return null;
-                  }
-                  return option;
-                },
-                value: props.signingOfficial
-              }),
-              span({
-                isRendered: showValidationMessages && (isNil(signingOfficial) || isEmpty(signingOfficial.displayName)),
-                className: 'cancel-color required-field-error-span'
-              }, ['Required field'])
-            ])
-          ])
-        ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.6 Information Technology (IT) Director*',
-                span(['I certify the individual listed below is my IT Director.'])
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              input({
-                type: 'text',
-                defaultValue: itDirector,
-                name: 'itDirector',
-                required: true,
-                className: isEmpty(itDirector) && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                onBlur: (e) => formFieldChange({name: 'itDirector', value: e.target.value})
-              }),
-              span({
-                isRendered: showValidationMessages && isEmpty(itDirector),
-                className: 'cancel-color required-field-error-span'
-              }, ['Required field'])
-            ])
-          ])
-        ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.7 Cloud Use Statement*',
-                span([
-                  'Will you perform all of your data storage and analysis for this project on the ',
-                  a({
-                    rel: 'noopener noreferrer',
-                    href: 'https://anvil.terra.bio/',
-                    target: '_blank'
-                  }, ['AnVIL']),
-                  '?'
-                ]),
-              ]),
-            ]),
-            div({className: 'row no-margin'}, [
-              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-                cloudRadioGroup
-              ]),
-            ]),
-            div({
-              isRendered: !anvilUse && anvilUse !== '',
-              className: 'computing-use-container',
-              style: {
-                backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
-              }
-            }, [
-              div({className: 'row no-margin'}, [
-                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                  input({
-                    type: 'checkbox',
-                    id: 'cloud-requested',
-                    name: 'cloudUse',
-                    className: 'checkbox-inline rp-checkbox',
-                    disabled: !isNil(darCode),
-                    required: true,
-                    checked: cloudUse,
-                    onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
-                  }),
-                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
-                    ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
-                  )
-                ])
-              ]),
-              div({className: 'row no-margin'}, [
-                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                  input({
-                    type: 'checkbox',
-                    id: 'local-requested',
-                    name: 'localUse',
-                    className: 'checkbox-inline rp-checkbox',
-                    disabled: !isNil(darCode),
-                    required: true,
-                    checked: localUse,
-                    onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
-                  }),
-                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
-                    ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
-                  )
-                ])
-              ]),
-            ]),
-            div({className: 'row no-margin', isRendered: cloudUse === true}, [
-              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                label({className: 'control-label'}, ['Name of Cloud Provider']),
-                input({
-                  style: cloudInputStyle(cloudProvider),
-                  type: 'text',
-                  name: 'cloud-provider-name',
-                  defaultValue: cloudProvider || '',
-                  className: 'form-control',
-                  required: true,
-                  disabled: !isEmpty(darCode),
-                  onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
-                })
-              ]),
-              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                label({className: 'control-label'}, ['Type of Cloud Provider']),
-                input({
-                  style: cloudInputStyle(cloudProviderType),
-                  type: 'text',
-                  name: 'provider-type-name',
-                  defaultValue: cloudProviderType || '',
-                  className: 'form-control',
-                  required: true,
-                  disabled: !isNil(darCode),
-                  onBlur: (e) => formFieldChange({name: 'cloudProviderType', value: e.target.value})
-                })
-              ])
-            ]),
-            div({className: 'row no-margin', isRendered: cloudUse === true}, [
-              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                textarea({
-                  style: {
-                    backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-                    width: '100%',
-                    padding: '1rem'
-                  },
-                  defaultValue: cloudProviderDescription,
-                  disabled: !isNil(darCode),
-                  onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-                  name: 'cloudProviderDescription',
-                  id: 'cloudProviderDescription',
-                  rows: '6',
-                  required: true,
-                  placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-                    + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-                    + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                  maxLength: 2000
-                })
-              ])
-            ])
+            // div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            //   label({className: 'control-label rp-title-question'}, [
+            //     '1.7 Cloud Use Statement*',
+            //     span([
+            //       'Will you perform all of your data storage and analysis for this project on the ',
+            //       a({
+            //         rel: 'noopener noreferrer',
+            //         href: 'https://anvil.terra.bio/',
+            //         target: '_blank'
+            //       }, ['AnVIL']),
+            //       '?'
+            //     ]),
+            //   ]),
+            // ]),
+            // div({className: 'row no-margin'}, [
+            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+            //     cloudRadioGroup
+            //   ]),
+            // ]),
+            // div({
+            //   isRendered: !anvilUse && anvilUse !== '',
+            //   className: 'computing-use-container',
+            //   style: {
+            //     backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
+            //   }
+            // }, [
+            //   div({className: 'row no-margin'}, [
+            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            //       input({
+            //         type: 'checkbox',
+            //         id: 'cloud-requested',
+            //         name: 'cloudUse',
+            //         className: 'checkbox-inline rp-checkbox',
+            //         disabled: !isNil(darCode),
+            //         required: true,
+            //         checked: cloudUse,
+            //         onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
+            //       }),
+            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
+            //         ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
+            //       )
+            //     ])
+            //   ]),
+            //   div({className: 'row no-margin'}, [
+            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            //       input({
+            //         type: 'checkbox',
+            //         id: 'local-requested',
+            //         name: 'localUse',
+            //         className: 'checkbox-inline rp-checkbox',
+            //         disabled: !isNil(darCode),
+            //         required: true,
+            //         checked: localUse,
+            //         onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
+            //       }),
+            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
+            //         ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
+            //       )
+            //     ])
+            //   ]),
+            // ]),
+            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
+            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+            //     label({className: 'control-label'}, ['Name of Cloud Provider']),
+            //     input({
+            //       style: cloudInputStyle(cloudProvider),
+            //       type: 'text',
+            //       name: 'cloud-provider-name',
+            //       defaultValue: cloudProvider || '',
+            //       className: 'form-control',
+            //       required: true,
+            //       disabled: !isEmpty(darCode),
+            //       onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
+            //     })
+            //   ]),
+            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+            //     label({className: 'control-label'}, ['Type of Cloud Provider']),
+            //     input({
+            //       style: cloudInputStyle(cloudProviderType),
+            //       type: 'text',
+            //       name: 'provider-type-name',
+            //       defaultValue: cloudProviderType || '',
+            //       className: 'form-control',
+            //       required: true,
+            //       disabled: !isNil(darCode),
+            //       onBlur: (e) => formFieldChange({name: 'cloudProviderType', value: e.target.value})
+            //     })
+            //   ])
+            // ]),
+            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
+            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            //     textarea({
+            //       style: {
+            //         backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
+            //         width: '100%',
+            //         padding: '1rem'
+            //       },
+            //       defaultValue: cloudProviderDescription,
+            //       disabled: !isNil(darCode),
+            //       onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
+            //       name: 'cloudProviderDescription',
+            //       id: 'cloudProviderDescription',
+            //       rows: '6',
+            //       required: true,
+            //       placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
+            //         + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
+            //         + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
+            //       maxLength: 2000
+            //     })
+            //   ])
+            // ])
           ])
         ]),
         div({ className: 'form-group'}, [

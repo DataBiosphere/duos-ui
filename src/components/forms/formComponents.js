@@ -301,3 +301,7 @@ export const formInputSlider = (config) => {
   ]);
 };
 
+export const formInputRadio = () => {
+  // TODO: stub, someone has written this already :P
+  return div([]);
+};

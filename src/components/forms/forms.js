@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
   formInputGeneric, formInputMultiText, formInputSelect,
-  formInputCheckbox, formInputSlider
+  formInputCheckbox, formInputSlider, formInputRadio
 } from './formComponents';
 
 import './forms.css';
@@ -16,6 +16,7 @@ export const FormFieldTypes = {
   SLIDER: { defaultValue: false, component: formInputSlider },
   TEXT: { defaultValue: '', component: formInputGeneric },
   NUMBER: { defaultValue: '', component: formInputGeneric },
+  RADIO: { defaultValue: '', component: formInputRadio }
 };
 
 export const FormValidators = {
