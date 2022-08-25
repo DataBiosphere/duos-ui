@@ -1,3 +1,7 @@
+@import './styles/buttons.css';
+@import './styles/display.css';
+@import './styles/typography.css';
+
 html, body, .body, #root {
   height: 100%;
   font-family: 'Montserrat', sans-serif;
