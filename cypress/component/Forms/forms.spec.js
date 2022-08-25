@@ -355,15 +355,26 @@ describe('FormField - Tests', () => {
       });
     });
 
-    it('should allow user to select by entering a new option as freetext', () => {
+    it('should not allow user to enter a new value', () => {
       cy.spy(props, 'onChange');
-      props.creatableConfig = {};
       mount(<FormField {...props}/>);
       cy.get('#studyType .dropdown-toggle').click();
       cy.get('#studyType .search-bar').type('newtext').then(() => {
         cy.get('#studyType .search-bar').blur().then(() => {
+          expect(props.onChange).to.be.callCount(0); // only calls onChange once
+        });
+      });
+    });
+
+    it('should allow user to select by entering a new option as freetext', () => {
+      cy.spy(props, 'onChange');
+      props.creatableConfig = {};
+      mount(<FormField {...props}/>);
+      cy.get('.form-select').click();
+      cy.get('.form-select input').type('newtext').then(() => {
+        cy.get('.form-select input').type('{enter}').then(() => {
           expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'newtext', isValid: true}); // code value
-          cy.get('#studyType .dropdown-toggle').contains('newtext'); // ui updates with new val
+          cy.get('.form-select').contains('newtext'); // ui updates with new val
         });
       });
     });

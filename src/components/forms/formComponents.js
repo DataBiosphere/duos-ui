@@ -207,16 +207,15 @@ export const formInputSelect = (config) => {
 export const formInputCreatable = (config) => {
   const {
     id, title, disabled, required, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby,
-    formValue,
+    selectOptions = [], searchPlaceholder, ariaDescribedby,
+    formValue, setFormValue,
     creatableConfig = {}
   } = config;
 
-  const normalizedOptions = selectOptions.map((option) => {
-    return isString(option)
-      ? { key: option, displayValue: option }
-      : option ;
-  });
+  const isStringArr = isString(selectOptions[0]);
+  const normalizedOptions = isStringArr
+    ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
+    : selectOptions;
 
   return h(Creatable, {
     key: id,
@@ -225,7 +224,11 @@ export const formInputCreatable = (config) => {
     isDisabled: disabled,
     placeholder: searchPlaceholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
-    onChange: (option) => onFormInputChange(config, option),
+    onChange: (option) => {
+      const inputChange = isStringArr ? option.displayValue : option;
+      onFormInputChange(config, inputChange);
+      setFormValue(option);
+    },
     onMenuOpen: () => setError(),
     onMenuClose: () => {
       if (required && !formValue) {
@@ -235,13 +238,13 @@ export const formInputCreatable = (config) => {
     options: normalizedOptions,
     getOptionLabel: (option) => option.displayValue,
     getNewOptionData: (inputValue) => {
-      return { displayValue: inputValue };
+      return { key: inputValue, displayValue: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
       if(isNil(option) || isEmpty(option.displayValue)) {
         return null;
       }
-      return option;
+      return isStringArr ? option.displayValue : option;
     },
     value: formValue,
     ...creatableConfig,
