@@ -239,8 +239,7 @@ export default function ResearcherProfile(props) {
             }),
             value: profile.institutionId,
             freetextValue: profile.suggestedInstitution,
-            placeholder: 'Please Select an Institution',
-            searchPlaceholder: 'Search for Institution...',
+            placeholder: 'Search for Institution...',
             className: 'form-control'
           })
         ]
