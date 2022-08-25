@@ -4,8 +4,6 @@ import { SearchSelectOrText } from '../SearchSelectOrText';
 import Creatable from 'react-select/creatable';
 import { FormValidators } from './forms';
 
-import './forms.css';
-
 const styles = {
   inputStyle: {
     padding: '25px 15px',
