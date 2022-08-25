@@ -232,7 +232,7 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h(FormField, {
             id: `institutional_signing_official`,
-            type: FormFieldTypes.SELECT_CREATABLE,
+            type: FormFieldTypes.SELECT,
             description: 'I certify that the individual listed below is my Institutional Signing official',
             title: '1.6 Institutional Signing Official',
             validators: [FormValidators.REQUIRED],
@@ -241,9 +241,9 @@ export default function ResearcherInfo(props) {
               const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
               formFieldChange({name: key, formattedValue});
             },
+            selectOptions: allSigningOfficials,
             creatableConfig: {
               placeholder: 'Signing Official',
-              options: allSigningOfficials,
               getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
               getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
                 return { displayName: inputValue };
@@ -253,7 +253,7 @@ export default function ResearcherInfo(props) {
                   return null;
                 }
                 return option;
-              },
+              }
             },
           }),
         ]),
