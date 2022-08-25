@@ -3,6 +3,7 @@ import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
 import { SearchSelectOrText } from '../SearchSelectOrText';
 import Creatable from 'react-select/creatable';
+import { isEmailAddress } from '../../libs/utils';
 
 import './forms.css';
 
@@ -27,6 +28,21 @@ export const FormValidators = {
   REQUIRED: {
     isValid: (value) => value !== undefined && value !== null && value !== '',
     msg: 'Please enter a value'
+  },
+  URL: {
+    isValid: (val) => {
+      try {
+        new URL(val);
+      } catch (_) {
+        return false;
+      }
+      return true;
+    },
+    msg: 'Please enter a valid url (e.g., https://www.google.com)'
+  },
+  EMAIL: {
+    isValid: isEmailAddress,
+    msg: 'Please enter a valid email address (e.g., person@example.com)'
   }
 };
 
@@ -68,6 +84,13 @@ const onFormInputChange = (config, value) => {
   setFormValue(value);
 };
 
+const errorMessage = (error) => {
+  return error && div({ className: `error-message fadein`}, [
+    span({ className: 'glyphicon glyphicon-play' }),
+    ...error.map((err) => div([err])),
+  ]);
+};
+
 //---------------------------------------------
 // Form Controls
 //---------------------------------------------
@@ -107,10 +130,7 @@ const formInputGeneric = (config) => {
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
     }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
+    errorMessage(error)
   ]);
 };
 
@@ -180,10 +200,7 @@ const formInputMultiText = (config) => {
         })
       ])
     ]),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ]),
+    errorMessage(error),
     div({ className: 'flex-row', style: { justifyContent: null } },
       formValue.map((val, i) => {
         return h(button, {
@@ -267,10 +284,7 @@ const formInputSelect = (config) => {
       className: 'form-control',
       disabled, errored: error
     }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
+    errorMessage(error)
   ]);
 };
 
