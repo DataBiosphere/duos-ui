@@ -132,6 +132,7 @@ describe('FormField - Tests', () => {
         ...baseProps,
         type: FormFieldTypes.MULTISELECT,
         id: 'multiSelect',
+        exclusiveValues: ['none'],
         options: [
           {
             value: 'opt1',
@@ -156,13 +157,61 @@ describe('FormField - Tests', () => {
     });
 
     it('selects multiple', () => {
+      cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#multiSelect').should('exist');
+
+      cy.get('#multiSelect').type('Option 2{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'multiSelect', 
+          value: [{value: 'opt2', label: 'Option 2'}], 
+          isValid: true,
+        });
+      });
+
+      cy.get('#multiSelect').type('Option 1{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'multiSelect', 
+          value: [{value: 'opt2', label: 'Option 2'}, {value: 'opt1', label: 'Option 1'}], 
+          isValid: true,
+        });
+      });
+
+
     });
 
     it('properly excludes', () => {
+      cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#multiSelect').should('exist');
+      
+      
+      cy.get('#multiSelect').type('Option 2{enter}');
+      cy.get('#multiSelect').type('Option 1{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'multiSelect', 
+          value: [{value: 'opt2', label: 'Option 2'}, {value: 'opt1', label: 'Option 1'}], 
+          isValid: true,
+        });
+      });
+
+      // clears all other items when None entered
+      cy.get('#multiSelect').type('None{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'multiSelect', 
+          value: [{value: 'none', label: 'None'}], 
+          isValid: true,
+        });
+      });
+
+
+      // cleans none when another value added
+      cy.get('#multiSelect').type('Option 1{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'multiSelect', 
+          value: [{value: 'opt1', label: 'Option 1'}], 
+          isValid: true,
+        });
+      });
+
     });
   
   });
