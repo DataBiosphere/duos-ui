@@ -69,21 +69,6 @@ const normalizeValue = (value) => {
   return value;
 };
 
-const clearDependentFormFields = (config) => {
-  const {onChange, dependentFormFields = []} = config;
-  /*
-   * Clears fields for questions that are rendered conditionally, setting them to their default value
-   * dependentFormFields: [ {id: string, type: FormFieldType, defaultValue: (optional),  }, ... ]
-   */
-
-  dependentFormFields.map((formField) => {
-    const { id, type, defaultValue, shouldClear } = formField;
-    if (isNil(shouldClear) || shouldClear(config)) {
-      onChange({key: id, value: defaultValue || type.defaultValue});
-    }
-  });
-};
-
 const onFormInputChange = (config, value) => {
   const { id, onChange, setFormValue, setFormValueParent } = config;
   const normalizedValue = normalizeValue(value);
@@ -94,7 +79,6 @@ const onFormInputChange = (config, value) => {
   if (!isNil(setFormValueParent)) {
     setFormValueParent(value);
   }
-  clearDependentFormFields({...config, value});
 };
 
 

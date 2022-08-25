@@ -2,14 +2,30 @@ import {div, h, h2} from 'react-hyperscript-helpers';
 import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
+const I_DID = 'I did';
+const I_WILL = 'I will';
+const NO = 'No';
 
 export default function DataSubmissionNihAnvilUse(props) {
   const { onChange } = props;
   const [nihAnvilUse, setNihAnvilUse] = useState();
 
-  const I_DID = 'I did';
-  const I_WILL = 'I will';
-  const NO = 'No';
+  //when a secondary question is removed from view, clear its associated form value
+  const clearDependentFormFields = ({newNihAnvilUse}) => {
+    const valueIsNotIDid = () => newNihAnvilUse !== I_DID;
+
+    const dependentFormFields = [
+      {id: 'submittingToAnvil', shouldClear: () => newNihAnvilUse === I_DID},
+      {id: 'dbGaPPhsID', shouldClear: valueIsNotIDid},
+      {id: 'dbGaPStudyRegistrationName', shouldClear: valueIsNotIDid},
+      {id: 'embargoReleaseDate', shouldClear: valueIsNotIDid},
+      {id: 'sequencingCenter', shouldClear: valueIsNotIDid},
+    ];
+
+    dependentFormFields
+      .filter(formField => formField.shouldClear())
+      .map(formField => onChange({key: formField.id, value: null}));
+  };
 
   return h(div, {
     style: {
@@ -28,15 +44,11 @@ export default function DataSubmissionNihAnvilUse(props) {
         {label: I_WILL, value: I_WILL},
         {label: NO, value: NO},
       ],
-      dependentFormFields: [
-        {id: 'submittingToAnvil', type: FormFieldTypes.RADIO, shouldClear: ({value}) => value === I_DID},
-        {id: 'dbGaPPhsID', type: FormFieldTypes.TEXT},
-        {id: 'dbGaPStudyRegistrationName', type: FormFieldTypes.TEXT},
-        {id: 'embargoReleaseDate', type: FormFieldTypes.TEXT},
-        {id: 'sequencingCenter', type: FormFieldTypes.TEXT},
-      ],
       validators: [FormValidators.REQUIRED],
-      onChange,
+      onChange: (config) => {
+        onChange(config);
+        clearDependentFormFields({newNihAnvilUse: config.value});
+      },
       setFormValueParent: setNihAnvilUse
     }),
 
