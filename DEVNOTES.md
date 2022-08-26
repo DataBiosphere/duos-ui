@@ -60,7 +60,7 @@ Build and run:
 
 ```shell
 docker build . -t duos
-docker compose up
+docker compose up -d
 ```
 
 # Testing
