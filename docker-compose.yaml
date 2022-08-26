@@ -42,7 +42,7 @@ services:
       - ./site.conf:/etc/apache2/sites-available/site.conf:ro
     environment:
       AUTH_TYPE: AuthType None
-      LOG_LEVEL: debug
+      LOG_LEVEL: warn
       OIDC_CLAIM: Require all granted
       PROXY_PATH: /
       PROXY_URL: http://app:8080/
