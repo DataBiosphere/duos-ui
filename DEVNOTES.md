@@ -62,3 +62,46 @@ Build and run:
 docker build . -t duos
 docker compose up
 ```
+
+# Testing
+
+## Cypress Tests
+
+We use Cypress for all component and integration testing. Each suite
+of tests is run separately for all PRs via github actions. Local
+testing can be run headless or viewed interactively.
+
+### Headless
+To run cypress integration tests, first start up the app in one terminal
+and in another terminal window, spin up the tests headless:
+
+```shell
+npm start
+npm run cypress:run
+```
+
+To run cypress component tests, first start up the app in one terminal
+and in another terminal window, spin up the tests headless:
+
+```shell
+npm start
+npm run cypress:run:component
+```
+
+### Interactive
+To run cypress integration tests, first start up the app in one terminal
+and in another terminal window, spin up the tests for viewing:
+
+```shell
+npm start
+npm run cypress:open
+```
+
+To run cypress component tests, first start up the app in one terminal
+and in another terminal window, spin up the tests for viewing:
+
+```shell
+npm start
+npm run cypress:open:component
+```
+ 
