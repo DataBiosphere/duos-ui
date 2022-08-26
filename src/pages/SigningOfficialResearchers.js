@@ -5,6 +5,7 @@ import {Styles} from '../libs/theme';
 import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
+import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
 
 
 export default function SigningOfficialResearchers() {
@@ -42,6 +43,7 @@ export default function SigningOfficialResearchers() {
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
         h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(DataCustodianTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       ])
     ])
   );

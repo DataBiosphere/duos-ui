@@ -32,8 +32,9 @@ authorized user of the Data under the Requestor’s LCA without any further acti
 Submitter and Requestor.\
 \
 See Section 15 below for the meaning of certain capitalized terms that are not otherwise defined in the text of this
-Agreement.\
-\
+Agreement.
+
+
 1. ***Data Registration***. Data Submitter may register one or more specified datasets to be listed in and
 managed under DUOS by submitting a Data Registration Form (“**DRF**”) through a live link on DUOS.\
 \

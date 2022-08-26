@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import { h, div, img } from 'react-hyperscript-helpers';
+import {h, div, img, a} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
@@ -16,6 +16,9 @@ import {
 } from '../../libs/utils';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import DataCustodianFormModal from '../modals/DataCustodianFormModal';
+import DpaMarkdown from '../../assets/DPA.md';
+import ReactMarkdown from "react-markdown";
+import DOMPurify from "dompurify";
 
 //Styles specific to this table
 const styles = {
@@ -151,6 +154,11 @@ const displayNameCell = (displayName, id) => {
   };
 };
 
+const generateDpaContent = (text) => {
+  return <ReactMarkdown components={{a: (props) => <a target={'_blank'} {...props}/>}}>
+    {DOMPurify.sanitize(text, null)}
+  </ReactMarkdown>;
+};
 
 export default function DataCustodianTable(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
@@ -166,6 +174,7 @@ export default function DataCustodianTable(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState('delete');
+  const [dpaText, setDpaText] = useState('');
   const { signingOfficial, unregisteredResearchers, isLoading } = props;
 
   const handleSearchChange = tableSearchHandler(
@@ -187,6 +196,18 @@ export default function DataCustodianTable(props) {
     setConfirmationTitle(title);
     setConfirmType(confirmType);
   };
+
+  // Hook to initialize the DPA markdown content
+  useEffect(() => {
+    const init = async () => {
+      fetch(DpaMarkdown)
+        .then((res) => res.text())
+        .then((md) => {
+          setDpaText(md);
+        });
+    };
+    init();
+  }, []);
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -338,6 +359,8 @@ export default function DataCustodianTable(props) {
     }
   };
 
+  const dpaContent = generateDpaContent(dpaText);
+
   return h(Fragment, {}, [
     div(
       {
@@ -397,7 +420,8 @@ export default function DataCustodianTable(props) {
       createOnClick: (researcher) => issueCustodian(researcher, researchers),
       closeModal: () => setShowModal(false),
       researcher: selectedResearcher,
-      users: unregisteredResearchers
+      users: unregisteredResearchers,
+      dpaContent
     }),
     h(ConfirmationModal, {
       showConfirmation,

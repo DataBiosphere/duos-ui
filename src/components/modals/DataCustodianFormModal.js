@@ -7,6 +7,8 @@ import Modal from 'react-modal';
 import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
 import { Theme } from '../../libs/theme';
+import ScrollableMarkdownContainer from "../ScrollableMarkdownContainer";
+import DpaMarkdown from '../../assets/DPA.md';
 
 //NOTE: functionality is set for demo purposes on SO Console (no admin functionality)
 //As such, changes to "data" don't persist
@@ -78,6 +80,7 @@ export default function DataCustodianFormModal(props) {
     createOnClick,
     closeModal,
     users,
+    dpaContent
   } = props;
 
   const [user, setUser] = useState(props.user);
@@ -120,6 +123,9 @@ export default function DataCustodianFormModal(props) {
       div({ style: Styles.MODAL.CONTENT }, [
         h(CloseIconComponent, { closeFn: closeModal }),
         div({ style: Styles.MODAL.TITLE_HEADER }, ['Add Data Submitter']),
+        h(ScrollableMarkdownContainer, {
+          markdown: DpaMarkdown
+        }),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         //users dropdown
         h(FormFieldRow, {
