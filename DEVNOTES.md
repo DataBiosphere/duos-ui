@@ -23,7 +23,7 @@ Ensure that your `/etc/hosts` file has an entry for `local.broadinstitute.org`
 127.0.0.1	local.broadinstitute.org
 ```
 
-Download cert files from vault (requires vault access):
+Download cert files from vault (requires vault access - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics):
 ```shell
 vault login -method=github token=$(cat ~/.github-token)
 vault read --format=json <vault path>/server.key | jq -r .data.value > server.key
