@@ -71,6 +71,14 @@ We use Cypress for all component and integration testing. Each suite
 of tests is run separately for all PRs via github actions. Local
 testing can be run headless or viewed interactively.
 
+Cypress integration tests run locally require a different `baseUrl` than those
+run in Github Actions. Modify your local `cypress.config.js` file so
+that the `e2e.baseUrl` looks like this:
+```shell
+    baseUrl: 'https://local.broadinstitute.org:3000/',
+```
+This is not necessary for component tests.
+
 ### Headless
 To run cypress integration tests, first start up the app in one terminal
 and in another terminal window, spin up the tests headless:
