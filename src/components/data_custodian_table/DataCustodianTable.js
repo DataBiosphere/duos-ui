@@ -262,8 +262,7 @@ export default function DataCustodianTable(props) {
           showConfirmationModal,
           institutionId: signingOfficial.institutionId,
         }),
-        roleCell(roles, id),
-        // activeDarCountCell(count, id)
+        roleCell(roles, id)
       ];
     });
   };
@@ -273,7 +272,6 @@ export default function DataCustodianTable(props) {
     columnHeaderFormat.email,
     columnHeaderFormat.institution,
     columnHeaderFormat.role,
-    // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ];
 
   const showModalOnClick = () => {
@@ -411,8 +409,8 @@ export default function DataCustodianTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      styleOverride: confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
-      message: confirmModalType.issue ? div([dpaContent, confirmationModalMsg]) : confirmationModalMsg,
+      styleOverride: confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
+      message: confirmType === confirmModalType.issue ? div([dpaContent, confirmationModalMsg]) : confirmationModalMsg,
       header: `${selectedResearcher.displayName || selectedResearcher.email} - ${
         !isNil(selectedResearcher.institution) ? selectedResearcher.institution.name : ''
       }`,
