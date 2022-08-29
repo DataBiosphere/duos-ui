@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import {h, div, img, a} from 'react-hyperscript-helpers';
+import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
@@ -16,9 +16,10 @@ import {
 } from '../../libs/utils';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import DataCustodianFormModal from '../modals/DataCustodianFormModal';
+import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
 import DpaMarkdown from '../../assets/DPA.md';
-import ReactMarkdown from "react-markdown";
-import DOMPurify from "dompurify";
+import {confirmModalType} from '../signing_official_table/SigningOfficialTable';
+
 
 //Styles specific to this table
 const styles = {
@@ -65,7 +66,7 @@ const RemoveDataCustodianButton = (props) => {
       fontSize: '1.45rem',
     },
     onClick: () =>
-      showConfirmationModal({ researcher, message, title, confirmType: 'delete' }),
+      showConfirmationModal({ researcher, message, title, confirmType: confirmModalType.delete }),
   });
 };
 
@@ -83,7 +84,7 @@ const IssueDataCustodianButton = (props) => {
       fontSize: '1.45rem',
     },
     onClick: () =>
-      showConfirmationModal({ researcher, message, title, confirmType: 'issue' }),
+      showConfirmationModal({ researcher, message, title, confirmType: confirmModalType.issue }),
   });
 };
 
@@ -154,11 +155,6 @@ const displayNameCell = (displayName, id) => {
   };
 };
 
-const generateDpaContent = (text) => {
-  return <ReactMarkdown components={{a: (props) => <a target={'_blank'} {...props}/>}}>
-    {DOMPurify.sanitize(text, null)}
-  </ReactMarkdown>;
-};
 
 export default function DataCustodianTable(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
@@ -173,8 +169,7 @@ export default function DataCustodianTable(props) {
   const searchRef = useRef('');
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
-  const [confirmType, setConfirmType] = useState('delete');
-  const [dpaText, setDpaText] = useState('');
+  const [confirmType, setConfirmType] = useState(confirmModalType.delete);
   const { signingOfficial, unregisteredResearchers, isLoading } = props;
 
   const handleSearchChange = tableSearchHandler(
@@ -197,17 +192,6 @@ export default function DataCustodianTable(props) {
     setConfirmType(confirmType);
   };
 
-  // Hook to initialize the DPA markdown content
-  useEffect(() => {
-    const init = async () => {
-      fetch(DpaMarkdown)
-        .then((res) => res.text())
-        .then((md) => {
-          setDpaText(md);
-        });
-    };
-    init();
-  }, []);
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -359,7 +343,7 @@ export default function DataCustodianTable(props) {
     }
   };
 
-  const dpaContent = generateDpaContent(dpaText);
+  const dpaContent = ScrollableMarkdownContainer({markdown: DpaMarkdown});
 
   return h(Fragment, {}, [
     div(
@@ -427,14 +411,15 @@ export default function DataCustodianTable(props) {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
-      message: confirmationModalMsg,
+      styleOverride: confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
+      message: confirmModalType.issue ? div([dpaContent, confirmationModalMsg]) : confirmationModalMsg,
       header: `${selectedResearcher.displayName || selectedResearcher.email} - ${
         !isNil(selectedResearcher.institution) ? selectedResearcher.institution.name : ''
       }`,
       onConfirm: () =>
-        confirmType == 'delete'
-          ? removeDataCustodian(selectedResearcher, researchers)
-          : issueCustodian(selectedResearcher, researchers),
+        confirmType === confirmModalType.issue
+          ? issueCustodian(selectedResearcher, researchers)
+          : removeDataCustodian(selectedResearcher, researchers),
     }),
   ]);
 }
