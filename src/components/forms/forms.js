@@ -51,11 +51,16 @@ export const FormValidators = {
 /*
 * Config options:
 * id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox')
+* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
 *  * type == 'text'
 *  * type == 'multitext'
-*  * type == select
-*    * selectOptions: [{key: '', displayText: ''}]
+*  * type == 'select'
+*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
+*    * isMulti: boolean - allow multiple simultaneous options
+*    * creatable: boolean - allow creating new values (not part of options)
+*  * type == 'radio'
+*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
+*       * if an option is of type string, a textbox will be added when selected.
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType

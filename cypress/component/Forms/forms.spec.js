@@ -474,6 +474,60 @@ describe('FormField - Tests', () => {
       });
     });
 
+    it('allows multiple selection', () => {
+      cy.spy(props, 'onChange');
+      props.isMulti = true;
+      mount(<FormField {...props}/>);
+      cy.get('#studyType').type('Obs{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+      });
+
+      cy.get('#studyType').type('Prosp{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+      });
+
+    });
+
+    it('allows multiple selection with creatable', () => {
+      cy.spy(props, 'onChange');
+      props.isMulti = true;
+      props.creatable = true;
+      mount(<FormField {...props}/>);
+      cy.get('#studyType').type('Obs{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+      });
+
+      cy.get('#studyType').type('Prosp{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+      });
+
+      cy.get('#studyType').type('asdf{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}, {key: 'asdf', displayValue: 'asdf'}], isValid: true});
+      });
+
+    });
+
+
+    it('allows multiple selection with string array', () => {
+      cy.spy(props, 'onChange');
+      props.selectOptions = ['Observational', 'Prospective', 'Other']
+      props.isMulti = true;
+      props.creatable = true;
+      mount(<FormField {...props}/>);
+      cy.get('#studyType').type('Obs{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational'], isValid: true});
+      });
+
+      cy.get('#studyType').type('Prosp{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational', 'Prospective'], isValid: true});
+      });
+
+      cy.get('#studyType').type('asdf{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational', 'Prospective', 'asdf'], isValid: true});
+      });
+
+    });
+
   });
 
   describe('Form Table - Tests', () => {

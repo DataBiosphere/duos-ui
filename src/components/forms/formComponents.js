@@ -203,9 +203,20 @@ export const formInputSelect = (config) => {
     placeholder: placeholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
     onChange: (option) => {
-      const inputChange = isStringArr ? option.displayValue : option;
-      onFormInputChange(config, inputChange);
-      setFormValue(option);
+      if (isStringArr) {
+        if (isMulti) {
+          // string result, multiple options
+          onFormInputChange(config, option.map((o) => o.displayValue));
+          setFormValue(option);
+          return;
+        } 
+        // string result, only one option
+        onFormInputChange(config, option.displayValue);
+        setFormValue(option);    
+        return;
+      }
+      // object result
+      onFormInputChange(config, option);
     },
     onMenuOpen: () => setError(),
     onMenuClose: () => {
