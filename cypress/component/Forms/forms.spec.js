@@ -190,11 +190,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#radioGroup_opt2').click().then(() => {
         expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup', 
+          key: 'radioGroup',
           value: {
             selected: 'opt2',
             value: true,
-          }, 
+          },
           isValid: true
         });
       });
@@ -206,11 +206,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#radioGroup_opt3').click().then(() => {
         expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup', 
+          key: 'radioGroup',
           value: {
             selected: 'opt3',
             value: '',
-          }, 
+          },
           isValid: true
         });
       });
@@ -222,11 +222,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#radioGroup_opt3_text_input').type('Hello!').then(() => {
         expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup', 
+          key: 'radioGroup',
           value: {
             selected: 'opt3',
             value: 'Hello!',
-          }, 
+          },
           isValid: true
         });
       });
