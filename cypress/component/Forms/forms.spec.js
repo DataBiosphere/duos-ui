@@ -126,6 +126,115 @@ describe('FormField - Tests', () => {
     });
   });
 
+  describe('Form Control - Radio', () => {
+    beforeEach(() => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.RADIO,
+        id: 'radioGroup',
+        options: [
+          {
+            id: 'opt1',
+            name: 'opt1',
+            text: 'Option 1',
+          },
+          {
+            id: 'opt2',
+            name: 'opt2',
+            text: 'Option 2',
+          },
+          {
+            id: 'opt3',
+            name: 'opt3',
+            text: 'Option 3 (text)',
+            type: 'string',
+            placeholder: 'Please specify.',
+          }
+        ]
+      };
+    });
+
+
+    it('should render', () => {
+      mount(<FormField {...props}/>);
+      cy.get('#radioGroup_opt1').should('exist');
+      cy.get('#radioGroup_opt2').should('exist');
+      cy.get('#radioGroup_opt3').should('exist');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+    });
+
+    it('should able to check, only one at a time', () => {
+      cy.spy(props, 'onChange');
+      mount(<FormField {...props}/>);
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt1').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            selected: 'opt1',
+            value: true,
+          }, 
+          isValid: true
+        });
+      });
+
+      cy.get('#radioGroup_opt1').should('be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt2').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            selected: 'opt2',
+            value: true,
+          }, 
+          isValid: true
+        });
+      });
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('be.checked');
+      cy.get('#radioGroup_opt3').should('not.be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('not.exist');
+
+      cy.get('#radioGroup_opt3').click().then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            selected: 'opt3',
+            value: '',
+          }, 
+          isValid: true
+        });
+      });
+
+      cy.get('#radioGroup_opt1').should('not.be.checked');
+      cy.get('#radioGroup_opt2').should('not.be.checked');
+      cy.get('#radioGroup_opt3').should('be.checked');
+      cy.get('#radioGroup_opt3_text_input').should('exist');
+
+      cy.get('#radioGroup_opt3_text_input').type('Hello!').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'radioGroup', 
+          value: {
+            selected: 'opt3',
+            value: 'Hello!',
+          }, 
+          isValid: true
+        });
+      });
+    });
+
+
+  });
+
   describe('Form Control - MultiText', () => {
 
     beforeEach(() => {
@@ -314,7 +423,7 @@ describe('FormField - Tests', () => {
           'Analytical', 'Prospective', 'Retrospective',
           'Case report', 'Case series', 'Cross-sectional',
           'Cohort study'
-        ]
+        ].map((opt) => {return {displayName: opt, displayValue: opt};})
       };
     });
 
@@ -325,45 +434,29 @@ describe('FormField - Tests', () => {
       cy.get('#studyType').should('exist');
     });
 
-    it('should open the options on click', () => {
+    it('should allow user to search options', () => {
+      cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#studyType .dropdown-toggle').click();
-      cy.get('#studyType .select-dropdown-menu').should('exist');
-      cy.get('#studyType .select-dropdown-item').should('have.length', 10);
-      cy.get('#studyType .select-dropdown-item').eq(0).contains('Observational');
+      cy.get('#studyType').type('Obs{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayValue: 'Observational'}, isValid: true});
+      });
+
     });
 
-    it('should filter as the user types', () => {
+    it('should not allow user to select by entering a new option as freetext if creatable not set', () => {
+      cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#studyType .dropdown-toggle').click();
-      cy.get('#studyType .search-bar').type('d').then(() => {
-        cy.get('#studyType .select-dropdown-item').should('have.length', 2);
-        cy.get('#studyType .select-dropdown-item').eq(0).contains('Descriptive');
-        cy.get('#studyType .select-dropdown-item').eq(1).contains('Cohort study');
+      cy.get('#studyType').type('asdf{enter}').then(() => {
+        expect(props.onChange).to.not.be.called;
       });
     });
 
-    it('should allow user to select by clicking dropdown element', () => {
+    it('should allow user to select by entering a new option as freetext if creatable set', () => {
       cy.spy(props, 'onChange');
+      props.creatable = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType .dropdown-toggle').click();
-      cy.get('#studyType .search-bar').type('d').then(() => {
-        cy.get('#studyType .select-dropdown-item').first().click().then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Descriptive', isValid: true}); // code value
-          cy.get('#studyType .dropdown-toggle').contains('Descriptive'); // ui updates with new val
-        });
-      });
-    });
-
-    it('should allow user to select by entering a new option as freetext', () => {
-      cy.spy(props, 'onChange');
-      mount(<FormField {...props}/>);
-      cy.get('#studyType .dropdown-toggle').click();
-      cy.get('#studyType .search-bar').type('newtext').then(() => {
-        cy.get('#studyType .search-bar').blur().then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'newtext', isValid: true}); // code value
-          cy.get('#studyType .dropdown-toggle').contains('newtext'); // ui updates with new val
-        });
+      cy.get('#studyType').type('asdf{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayValue: 'asdf'}, isValid: true});
       });
     });
 

@@ -52,7 +52,7 @@ export default function DataSubmissionStudyInformation(props) {
         'Analytical', 'Prospective', 'Retrospective',
         'Case report', 'Case series', 'Cross-sectional',
         'Cohort study'
-      ],
+      ].map((opt) => {return {displayName: opt, displayValue: opt};}),
       onChange
     }),
     h(FormField, {

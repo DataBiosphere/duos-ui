@@ -1,8 +1,9 @@
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
-import { SearchSelectOrText } from '../SearchSelectOrText';
 import Creatable from 'react-select/creatable';
+import Select from 'react-select';
 import { FormValidators } from './forms';
+import {RadioButton} from '../RadioButton';
 
 const styles = {
   inputStyle: {
@@ -174,17 +175,21 @@ export const formInputMultiText = (config) => {
 };
 
 // Using react-select/creatable - Passing config directly through!
-export const formInputSelectOrCreate = (config) => {
+export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, searchPlaceholder, ariaDescribedby,
-    formValue,
-    creatableConfig = {}
+    formValue, creatable, isMulti,
+    selectConfig = {}
   } = config;
 
-  return h(Creatable, {
+  const component = (creatable ? Creatable : Select);
+
+  return h(component, {
     key: id,
+    id: id,
     isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
+    isMulti,
     required,
     isDisabled: disabled,
     placeholder: searchPlaceholder || `Search for ${title}...`,
@@ -208,35 +213,99 @@ export const formInputSelectOrCreate = (config) => {
       return option;
     },
     value: formValue,
-    ...creatableConfig,
+    ...selectConfig,
     'aria-describedby': ariaDescribedby
-  });
+  }) ;
 };
 
-export const formInputSelect = (config) => {
+export const formInputRadioGroup = (config) => {
+  /* options example:
+    [
+      {
+        name: 'open_access',
+        text: 'Open Access'
+      },
+      {
+        id: 'closed_access', // can specify id, uses name as id otherwise
+        name: 'closed_access',
+        text: 'Closed Access',
+      },
+      {
+        name: 'other',
+        text: 'Other',
+        type: 'string',
+        placeholder: 'Please specify.',
+      }
+    ]
+    if type is 'string', then a textbox is rendered
+    when checked.
+  */
+
   const {
-    id, title, disabled, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby
+    id, disabled, error,
+    formValue, options, ariaDescribedby,
+    setError
   } = config;
 
-  return div({}, [
-    h(SearchSelectOrText, {
-      id,
-      'aria-describedby': ariaDescribedby,
-      onPresetSelection: async (selection) => onFormInputChange(config, selection),
-      onManualSelection: (selection) => onFormInputChange(config, selection),
-      onOpen: () => setError(),
-      options: selectOptions.map((x) => {
-        return typeof x == 'string' || typeof x === 'number'
-          ? { key: x, displayText: x }
-          : x;
-      }),
-      searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
-      className: 'form-control',
-      disabled, errored: error
-    }),
-    errorMessage(error)
-  ]);
+  return div({},
+    [
+      div(
+        {
+          className: 'radio-group',
+          id: id,
+        },
+        options.map(((option, idx) => {
+          const optionId = (!isNil(option.id) ? option.id : option.name);
+
+          return div({
+            style: {
+              key: idx,
+              margin: '1.0rem 0 0.5rem 0',
+            }
+          }, [
+            h(RadioButton, {
+              id: id+'_'+optionId,
+              name: id+'_'+optionId,
+              key: idx,
+              defaultChecked: !isNil(formValue) && formValue.selected === option.name,
+              onClick: () => onFormInputChange(config, {
+                selected: option.name,
+                value: (option.type === 'string'? '' : true),
+              }),
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: option.text,
+              disabled,
+            }),
+            input({
+              isRendered: option.type === 'string' && formValue.selected === option.name,
+              id: id+'_'+optionId+'_text_input',
+              type: 'text',
+              className: `form-control ${error ? 'errored' : ''}`,
+              placeholder: option.placeholder,
+              value: formValue.value,
+              style: {
+                ...styles.inputStyle,
+                ...{
+                  marginTop: '0.5rem',
+                }
+              },
+              disabled: disabled,
+              onChange: (event) => onFormInputChange(config, {
+                selected: option.name,
+                value: event.target.value,
+              }),
+              onFocus: () => setError(),
+              onBlur: (event) => validateFormInput(config, event.target.value),
+              'aria-describedby': ariaDescribedby,
+            }),
+          ]);
+        }))
+      )
+    ]
+  );
 };
 
 export const formInputCheckbox = (config) => {
