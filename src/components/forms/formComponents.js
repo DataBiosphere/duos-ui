@@ -5,7 +5,6 @@ import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import { FormValidators } from './forms';
 import {RadioButton} from '../RadioButton';
-import { SearchSelect } from '../SearchSelect';
 
 import './formComponents.css';
 
@@ -194,8 +193,8 @@ export const formInputSelect = (config) => {
     ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
     : selectOptions;
 
-    return h(component, {
-      key: id,
+  return h(component, {
+    key: id,
     id: id,
     isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
     isMulti,
