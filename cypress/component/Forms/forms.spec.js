@@ -178,7 +178,7 @@ describe('FormField - Tests', () => {
           value: {
             selected: 'opt1',
             value: true,
-          }, 
+          },
           isValid: true
         });
       });
