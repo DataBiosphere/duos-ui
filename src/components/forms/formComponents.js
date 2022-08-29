@@ -209,10 +209,10 @@ export const formInputSelect = (config) => {
           onFormInputChange(config, option.map((o) => o.displayValue));
           setFormValue(option);
           return;
-        } 
+        }
         // string result, only one option
         onFormInputChange(config, option.displayValue);
-        setFormValue(option);    
+        setFormValue(option);
         return;
       }
       // object result
