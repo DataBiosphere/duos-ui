@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
+import ResearcherInfoNew from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
@@ -19,6 +20,7 @@ import { Storage } from '../libs/storage';
 import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
+import {Config} from '../libs/config';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -211,11 +213,13 @@ class DataAccessRequestApplication extends Component {
     formData.institution = isNil(researcher)  || isNil(researcher.institution)? '' : researcher.institution.name;
     formData.userId = researcher.userId;
 
+    const env = await Config.getEnv();
+
     this.setState(prev => {
       prev.formData = merge(prev.formData, formData);
+      prev.env = env;
       return prev;
     });
-
   }
 
   formatDatasetForAutocomplete = (dataset) => {
@@ -852,6 +856,8 @@ class DataAccessRequestApplication extends Component {
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
 
+    const researcherInfoComponent = this.state.env === 'local' ? ResearcherInfoNew : ResearcherInfo;
+
     const TORComponent = TypeOfResearch({
       hmb: hmb,
       hmbHandler: this.setHmb,
@@ -963,7 +969,7 @@ class DataAccessRequestApplication extends Component {
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
             div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
-              h(ResearcherInfo, ({
+              h(researcherInfoComponent, ({
                 checkCollaborator: checkCollaborator,
                 checkNihDataOnly: checkNihDataOnly,
                 completed: !isNil(get('institutionId', this.state.researcher)),
