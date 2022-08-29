@@ -15,7 +15,7 @@ import {
   searchOnFilteredList
 } from '../../libs/utils';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import DataSubmitterFormModal from '../modals/DataSubmitterFormModal';
+import DataCustodianFormModal from '../modals/DataCustodianFormModal';
 import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
 import DpaMarkdown from '../../assets/DPA.md';
 import {confirmModalType} from '../signing_official_table/SigningOfficialTable';
@@ -399,7 +399,7 @@ export default function DataCustodianTable(props) {
       tableSize,
       paginationBar,
     }),
-    h(DataSubmitterFormModal, {
+    h(DataCustodianFormModal, {
       showModal,
       createOnClick: (researcher) => issueCustodian(researcher, researchers),
       closeModal: () => setShowModal(false),
