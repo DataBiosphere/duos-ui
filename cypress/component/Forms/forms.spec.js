@@ -510,7 +510,7 @@ describe('FormField - Tests', () => {
 
     it('allows multiple selection with string array', () => {
       cy.spy(props, 'onChange');
-      props.selectOptions = ['Observational', 'Prospective', 'Other']
+      props.selectOptions = ['Observational', 'Prospective', 'Other'];
       props.isMulti = true;
       props.creatable = true;
       mount(<FormField {...props}/>);
