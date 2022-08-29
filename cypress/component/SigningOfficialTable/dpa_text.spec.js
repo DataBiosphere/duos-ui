@@ -33,7 +33,6 @@ describe('DataCustodianTable - Tests', function () {
           userId: 1,
           displayName: 'researcher',
           roles: [{name: 'Researcher'}],
-          libraryCards: []
         }
       ]}
       unregisteredResearchers={[]}
@@ -43,28 +42,5 @@ describe('DataCustodianTable - Tests', function () {
     button.click();
     const dpaHeader = cy.contains(dpaHeaderText);
     expect(dpaHeader).to.exist;
-  });
-
-
-  it('Deactivate modal does not display the DPA Text', function () {
-    cy.viewport(600, 300);
-    mount(<DataCustodianTable
-      isLoading={false}
-      signingOfficial={{institutionId: 1}}
-      researchers={[
-        {
-          email: 'email',
-          userId: 1,
-          displayName: 'researcher',
-          roles: [{name: 'Researcher'}],
-          libraryCards: [{id: 1}]
-        }
-      ]}
-      unregisteredResearchers={[]}
-    />);
-    const button = cy.get('button').last();
-    expect(button).to.exist;
-    button.click();
-    cy.contains(dpaHeaderText).should('not.exist');
   });
 });
