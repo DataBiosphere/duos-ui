@@ -174,11 +174,11 @@ describe('FormField - Tests', () => {
 
       cy.get('#radioGroup_opt1').click().then(() => {
         expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup', 
+          key: 'radioGroup',
           value: {
             selected: 'opt1',
             value: true,
-          }, 
+          },
           isValid: true
         });
       });
