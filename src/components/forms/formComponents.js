@@ -1,9 +1,13 @@
 import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
+
+import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import { FormValidators } from './forms';
 import {RadioButton} from '../RadioButton';
+import { SearchSelect } from '../SearchSelect';
+
+import './formComponents.css';
 
 const styles = {
   inputStyle: {
@@ -178,39 +182,48 @@ export const formInputMultiText = (config) => {
 export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby,
-    formValue, creatable, isMulti,
+    selectOptions, placeholder, ariaDescribedby,
+    formValue, creatable, isMulti, setFormValue,
     selectConfig = {}
   } = config;
 
   const component = (creatable ? Creatable : Select);
 
-  return h(component, {
-    key: id,
+  const isStringArr = isString(selectOptions[0]);
+  const normalizedOptions = isStringArr
+    ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
+    : selectOptions;
+
+    return h(component, {
+      key: id,
     id: id,
     isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
     isMulti,
     required,
     isDisabled: disabled,
-    placeholder: searchPlaceholder || `Search for ${title}...`,
+    placeholder: placeholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
-    onChange: (option) => onFormInputChange(config, option),
+    onChange: (option) => {
+      const inputChange = isStringArr ? option.displayValue : option;
+      onFormInputChange(config, inputChange);
+      setFormValue(option);
+    },
     onMenuOpen: () => setError(),
     onMenuClose: () => {
       if (required && !formValue) {
         setError(FormValidators.REQUIRED.msg);
       }
     },
-    options: selectOptions,
+    options: normalizedOptions,
     getOptionLabel: (option) => option.displayValue,
     getNewOptionData: (inputValue) => {
-      return { displayValue: inputValue };
+      return { key: inputValue, displayValue: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayName)) {
+      if(isNil(option) || isEmpty(option.displayValue)) {
         return null;
       }
-      return option;
+      return isStringArr ? option.displayValue : option;
     },
     value: formValue,
     ...selectConfig,

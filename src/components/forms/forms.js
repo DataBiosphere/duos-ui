@@ -56,7 +56,6 @@ export const FormValidators = {
 *  * type == 'multitext'
 *  * type == select
 *    * selectOptions: [{key: '', displayText: ''}]
-*    * searchPlaceholder
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType

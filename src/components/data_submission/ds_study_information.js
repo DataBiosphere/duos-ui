@@ -53,6 +53,8 @@ export default function DataSubmissionStudyInformation(props) {
         'Case report', 'Case series', 'Cross-sectional',
         'Cohort study'
       ].map((opt) => {return {displayName: opt, displayValue: opt};}),
+      createable: true,
+      creatableConfig: {},
       onChange
     }),
     h(FormField, {

@@ -456,7 +456,21 @@ describe('FormField - Tests', () => {
       props.creatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayValue: 'asdf'}, isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayValue: 'asdf'}, isValid: true});
+      });
+    });
+
+    it('returns string when isString', () => {
+      cy.spy(props, 'onChange');
+      props.selectOptions = ['Observational', 'Other'];
+      props.creatable = true;
+      mount(<FormField {...props}/>);
+      cy.get('#studyType').type('Obs{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Observational', isValid: true});
+      });
+
+      cy.get('#studyType').type('asdf{enter}').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'asdf', isValid: true});
       });
     });
 
