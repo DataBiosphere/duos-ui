@@ -17,8 +17,8 @@ and for compliance herewith by its Authorized Submission Representatives.\
 To implement DUOS, Broad has entered into, and may in the future enter into, certain “***Library Card Agreements***”
 with various institutions  (each, a “***Requestor***”). The Library Card Agreement (“**LCA**”) enables Requestors to
 request access to Data through DUOS. A link to the form of LCA and, from time to time, as applicable, any updates
-thereto, is available via DUOS*. Each LCA enables multiple investigators at a Requestor institution  (“**
-Requestor Investigators**”)
+thereto, is available via DUOS*. Each LCA enables multiple investigators at a Requestor institution  
+(“**Requestor Investigators**”)
 to request access to Data registered on DUOS. Requestor Investigators are issued Library Cards and are then able to
 apply for access to Data identified as available on DUOS. Access to any Data registered on DUOS is subject to
 Requestor’s LCA, review and approval by the data access committee (“**DAC**,” as further defined in Section 15 below)
