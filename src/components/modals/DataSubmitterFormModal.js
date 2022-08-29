@@ -71,7 +71,7 @@ const FormFieldRow = (props) => {
   return div({ display: 'flex' }, [template]);
 };
 
-export default function DataCustodianFormModal(props) {
+export default function DataSubmitterFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
   const {
     showModal,
