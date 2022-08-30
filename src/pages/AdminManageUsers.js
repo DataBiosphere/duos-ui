@@ -129,7 +129,6 @@ export const AdminManageUsers = function AdminManageUsers() {
             },
             onClick: addUser
           }, [
-            div({ className: 'all-icons add-user_white' }),
             span({}, ['Add User']),
           ]),
         ]),
