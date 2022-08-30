@@ -41,7 +41,7 @@ export default function SigningOfficialResearchers() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, [])
       ])
     ])
   );

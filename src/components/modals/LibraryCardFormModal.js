@@ -145,7 +145,7 @@ export default function LibraryCardFormModal(props) {
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         // Library Card Agreement Text
-        isEmpty(lcaContent) ? div() : div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]),
+        lcaContent,
         // LCA Terms Download
         LibraryCardAgreementTermsDownload,
         //users dropdown
