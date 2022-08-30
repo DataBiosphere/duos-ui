@@ -159,7 +159,6 @@ export const ManageDac = function ManageDac() {
           },
           onClick: addDac
         }, [
-          div({className: 'all-icons add-dac_white'}),
           span({}, ['Add DAC'])
         ])
       ])

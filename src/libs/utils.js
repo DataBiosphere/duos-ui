@@ -221,19 +221,23 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
+    const queryParams = new URLSearchParams(window.location.search);
     let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
-      firstConsole ? firstConsole.link
-        : user.isAlumni ? '/summary_votes'
-          : '/';
+      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
+        : firstConsole ? firstConsole.link
+          : user.isAlumni ? '/summary_votes'
+            : '/';
     history.push(page);
   },
   console: async (user, history) => {
+    const queryParams = new URLSearchParams(window.location.search);
     let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
-      firstConsole ? firstConsole.link
-        : user.isAlumni ? '/summary_votes'
-          : '/';
+      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
+        : firstConsole ? firstConsole.link
+          : user.isAlumni ? '/summary_votes'
+            : '/';
     history.push(page);
   }
 };
