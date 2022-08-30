@@ -28,7 +28,7 @@ services:
 
   proxy:
     image: broadinstitute/openidc-proxy:tcell_3_1_0
-    container_name: proxy
+    container_name: duos-proxy
     hostname: local.broadinstitute.org
     links:
       - app:app
