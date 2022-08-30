@@ -53,8 +53,8 @@ export default function DataSubmissionStudyInformation(props) {
         'Case report', 'Case series', 'Cross-sectional',
         'Cohort study'
       ],
-      createable: true,
-      creatableConfig: {},
+      isCreatable: true,
+      selectConfig: {},
       onChange
     }),
     h(FormField, {
