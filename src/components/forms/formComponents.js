@@ -182,11 +182,11 @@ export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, creatable, isMulti, setFormValue,
+    formValue, isCreatable, isMulti, setFormValue,
     selectConfig = {}
   } = config;
 
-  const component = (creatable ? Creatable : Select);
+  const component = (isCreatable ? Creatable : Select);
 
   const isStringArr = isString(selectOptions[0]);
   const normalizedOptions = isStringArr
@@ -195,7 +195,7 @@ export const formInputSelect = (config) => {
 
   return h(component, {
     key: id,
-    id: id,
+    id,
     isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
     isMulti,
     required,
@@ -281,20 +281,25 @@ export const formInputRadioGroup = (config) => {
           const optionId = (!isNil(option.id) ? option.id : option.name);
 
           return div({
-            style: {
-              key: idx,
-              margin: '1.0rem 0 0.5rem 0',
-            }
+            key: idx,
+            className: 'radio-button-container',
           }, [
             h(RadioButton, {
-              id: id+'_'+optionId,
-              name: id+'_'+optionId,
+              id: `${id}_${optionId}`,
+              name: `${id}_${optionId}`,
               key: idx,
               defaultChecked: !isNil(formValue) && formValue.selected === option.name,
-              onClick: () => onFormInputChange(config, {
-                selected: option.name,
-                value: (option.type === 'string'? '' : true),
-              }),
+              onClick: () => {
+                if (option.type === 'string') {
+                  onFormInputChange(config, {
+                    selected: option.name,
+                    value: '',
+                  });
+                  return;
+                }
+
+                onFormInputChange(config, { selected: option.name });
+              },
               style: {
                 fontFamily: 'Montserrat',
                 fontSize: '14px',
@@ -304,7 +309,7 @@ export const formInputRadioGroup = (config) => {
             }),
             input({
               isRendered: option.type === 'string' && formValue.selected === option.name,
-              id: id+'_'+optionId+'_text_input',
+              id: `${id}_${optionId}_text_input`,
               type: 'text',
               className: `form-control ${error ? 'errored' : ''}`,
               placeholder: option.placeholder,

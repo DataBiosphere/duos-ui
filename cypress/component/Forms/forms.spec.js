@@ -177,7 +177,6 @@ describe('FormField - Tests', () => {
           key: 'radioGroup',
           value: {
             selected: 'opt1',
-            value: true,
           },
           isValid: true
         });
@@ -193,7 +192,6 @@ describe('FormField - Tests', () => {
           key: 'radioGroup',
           value: {
             selected: 'opt2',
-            value: true,
           },
           isValid: true
         });
@@ -453,7 +451,7 @@ describe('FormField - Tests', () => {
 
     it('should allow user to select by entering a new option as freetext if creatable set', () => {
       cy.spy(props, 'onChange');
-      props.creatable = true;
+      props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('asdf{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayValue: 'asdf'}, isValid: true});
@@ -463,7 +461,7 @@ describe('FormField - Tests', () => {
     it('returns string when isString', () => {
       cy.spy(props, 'onChange');
       props.selectOptions = ['Observational', 'Other'];
-      props.creatable = true;
+      props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Observational', isValid: true});
@@ -491,7 +489,7 @@ describe('FormField - Tests', () => {
     it('allows multiple selection with creatable', () => {
       cy.spy(props, 'onChange');
       props.isMulti = true;
-      props.creatable = true;
+      props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
@@ -512,7 +510,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       props.selectOptions = ['Observational', 'Prospective', 'Other'];
       props.isMulti = true;
-      props.creatable = true;
+      props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational'], isValid: true});
