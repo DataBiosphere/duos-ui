@@ -88,11 +88,9 @@ npm start
 npm run cypress:run
 ```
 
-To run cypress component tests, first start up the app in one terminal
-and in another terminal window, spin up the tests headless:
+To run cypress component tests headless:
 
 ```shell
-npm start
 npm run cypress:run:component
 ```
 
@@ -105,11 +103,9 @@ npm start
 npm run cypress:open
 ```
 
-To run cypress component tests, first start up the app in one terminal
-and in another terminal window, spin up the tests for viewing:
+To run cypress component tests in a browser:
 
 ```shell
-npm start
 npm run cypress:open:component
 ```
  
