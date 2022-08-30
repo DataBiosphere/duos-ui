@@ -120,6 +120,19 @@ export default function ResearcherInfoNew(props) {
       className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
 
       div({ style: { backgroundColor: 'rgba(184, 205, 211, .15)', padding: '20px 30px' } }, [
+        div({
+          datacy: 'researcher-info-profile-submitted',
+          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          Alert({
+            id: 'profileSubmitted',
+            type: 'important',
+            title: span([
+              `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
+              ` from your Signing official before you can submit a Data Access Request.`
+            ])
+          })
+        ]),
+
         h2('Step 1: Researcher Information'),
 
         div({className: 'dar-application-row'}, [
