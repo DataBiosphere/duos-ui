@@ -218,13 +218,15 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
+    const queryParams = new URLSearchParams(window.location.search);
     let page =
-      user.isAdmin ? '/admin_manage_dar_collections'
-        :user.isChairPerson ? '/chair_console'
-          : user.isMember ? '/member_console'
-            : user.isResearcher ? '/dataset_catalog'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
+        : user.isAdmin ? '/admin_manage_dar_collections'
+          : user.isChairPerson ? '/chair_console'
+            : user.isMember ? '/member_console'
+              : user.isResearcher ? '/dataset_catalog'
+                : user.isAlumni ? '/summary_votes'
+                  : '/';
     history.push(page);
   },
   console: async (user, history) => {
