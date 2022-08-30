@@ -13,14 +13,18 @@ import {isFileEmpty} from './utils';
 //define axios interceptor
 //to log out user and redirect to home when response has 401 status
 //return responses with statuses in the 200s and reject the rest
+const redirectOnLogout = () => {
+  Storage.clearStorage();
+  window.location.href = `/home?redirectTo=${window.location.pathname}`;
+};
+
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   // Default to a 502 when we can't get a real response object.
   const status = getOr(502)('response.status')(error);
   if (status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
 
   const reportUrl = getOr(null)('response.config.url')(error);
@@ -1066,8 +1070,7 @@ const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
   if (res.status >= 400) {
     await reportError(args[0], res.status);
@@ -1081,8 +1084,7 @@ const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
   if (res.status >= 500) {
     await reportError(args[0], res.status);
