@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
 import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
@@ -16,10 +16,9 @@ import {
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax';
-import ReactMarkdown from 'react-markdown';
-import DOMPurify from 'dompurify';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDownload';
+import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
 
 //Styles specific to this table
 const styles = {
@@ -54,7 +53,7 @@ const columnHeaderFormat = {
 };
 
 // Used to determine which modal type to use for either issuing or deleting a Library Card.
-const confirmModalType = {
+export const confirmModalType = {
   issue: 'issue',
   delete: 'delete'
 };
@@ -183,20 +182,6 @@ const displayNameCell = (displayName, id) => {
   };
 };
 
-// const activeDarCountCell = (count, id) => {
-//   return {
-//     data: count || 0,
-//     id,
-//     style: {},
-//     label: 'active-dar-count'
-//   };
-// };
-
-const generateLcaText = (text) => {
-  return <ReactMarkdown components={{a: (props) => <a target={'_blank'} {...props}/>}}>
-    {DOMPurify.sanitize(text, null)}
-  </ReactMarkdown>;
-};
 
 const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
   const cards = researcher.libraryCards;
@@ -222,7 +207,6 @@ export default function SigningOfficialTable(props) {
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
   const { signingOfficial, isLoading } = props;
-  const [lcaText, setLcaText] = useState('');
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms) => {
@@ -241,19 +225,6 @@ export default function SigningOfficialTable(props) {
     setConfirmationTitle(title);
     setConfirmType(confirmType);
   };
-
-  // Hook to initialize the LCA markdown content
-  // Should not update once loaded.
-  useEffect(() => {
-    const init = async () => {
-      fetch(LcaMarkdown)
-        .then((res) => res.text())
-        .then((md) => {
-          setLcaText(md);
-        });
-    };
-    init();
-  }, []);
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -396,7 +367,7 @@ export default function SigningOfficialTable(props) {
     }
   };
 
-  const lcaContent = generateLcaText(lcaText);
+  const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
 
   return h(Fragment, {}, [
     div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'} }, [
@@ -466,7 +437,7 @@ export default function SigningOfficialTable(props) {
         confirmType === confirmModalType.delete
           ? div({}, [confirmationModalMsg])
           // Library Card Agreement Text
-          : div({}, [div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]), confirmationModalMsg]),
+          : div({}, [lcaContent, confirmationModalMsg]),
       header: `${selectedCard.userName || selectedCard.userEmail} - ${
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,

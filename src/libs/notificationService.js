@@ -30,8 +30,12 @@ export const NotificationService = {
    * @returns {Promise<JSON>}
    */
   getActiveBanners: async () => {
-    const banners = await NotificationService.getBanners();
-    return filter(banners, {active: true});
+    try {
+      const banners = await NotificationService.getBanners();
+      return filter(banners, {active: true});
+    } catch (error) {
+      return [];
+    }
   },
 
   /**

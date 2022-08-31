@@ -1,10 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {map as nonFPMap} from 'lodash';
+import {map as lodashMap, forEach as lodashForEach} from 'lodash';
 import { DAR, DataSet } from './ajax';
 import {Theme, Styles } from './theme';
-import { each, flatMap, flatten, flow, forEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
+import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 
 export const UserProperties = {
@@ -39,7 +39,7 @@ export const darCollectionUtils = {
           if(isEmpty(elections)) {
             // Dataset IDs should be on the DAR, but if not, pull from the dar.data
             const datasetIds = isNil(dar.datasetIds) ? dar.data.datasetIds : dar.datasetIds;
-            forEach((datasetId) => {
+            lodashFPForEach((datasetId) => {
               if (includes(relevantDatasets, datasetId)) {
                 if (isNil(electionStatusCount['Submitted'])) {
                   electionStatusCount['Submitted'] = 0;
@@ -72,7 +72,7 @@ export const darCollectionUtils = {
           }
           electionStatusCount[status]++;
         })(targetElections);
-        output = nonFPMap(electionStatusCount, (value, key) => {
+        output = lodashMap(electionStatusCount, (value, key) => {
           return `${key}: ${value}`;
         }).join('\n');
       } else {
@@ -110,9 +110,9 @@ export const getPropertyValuesFromUser = (user) => {
 };
 
 export const applyHoverEffects = (e, style) => {
-  forEach((key, value) => {
+  lodashForEach(style, (value, key) => {
     e.target.style[key] = value;
-  })(style);
+  });
 };
 
 export const highlightExactMatches = (highlightedWords, content) => {
@@ -218,13 +218,15 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
+    const queryParams = new URLSearchParams(window.location.search);
     let page =
-      user.isAdmin ? '/admin_manage_dar_collections'
-        :user.isChairPerson ? '/chair_console'
-          : user.isMember ? '/member_console'
-            : user.isResearcher ? '/dataset_catalog'
-              : user.isAlumni ? '/summary_votes'
-                : '/';
+      queryParams.get('redirectTo') ? queryParams.get('redirectTo')
+        : user.isAdmin ? '/admin_manage_dar_collections'
+          : user.isChairPerson ? '/chair_console'
+            : user.isMember ? '/member_console'
+              : user.isResearcher ? '/dataset_catalog'
+                : user.isAlumni ? '/summary_votes'
+                  : '/';
     history.push(page);
   },
   console: async (user, history) => {
@@ -484,7 +486,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
       setFilteredList(electionList);
     } else {
       let newFilteredList = cloneDeep(electionList);
-      searchTermValues.forEach((splitTerm) => {
+      lodashFPForEach((splitTerm) => {
         const term = splitTerm.trim();
         if(!isEmpty(term)) {
           newFilteredList = filter(electionData => {
@@ -496,7 +498,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
         }
-      });
+      })(searchTermValues);
       setFilteredList(newFilteredList);
     }
     setCurrentPage(1);
@@ -542,30 +544,12 @@ export const getSearchFilterFunctions = () => {
     darCollections: (term, targetList) =>
       isEmpty(term) ? targetList :
         filter(collection => {
-          if(isEmpty(term)) {return true;}
-          let projectTitle, institution, createDate;
-          if(collection.isDraft) {
-            projectTitle = collection.projectTitle;
-            createDate = collection.createDate;
-            institution = collection.institution;
-          } else {
-            const referenceDar = find((dar) => !isEmpty(dar.data))(
-              collection.dars
-            );
-            const { data } = referenceDar;
-            projectTitle = data.projectTitle;
-            institution = data.institution;
-          }
-          const datasetCount = !isEmpty(collection.datasets) ? collection.datasets.length.toString() : '0';
-          const lowerCaseTerm = toLower(term);
-          createDate = formatDate(collection.createDate);
-          const { darCode, isDraft, createUser } = collection;
-          const researcherName = get('displayName')(createUser);
-          const status = toLower(isDraft ? collection.status : darCollectionUtils.determineCollectionStatus(collection)) || '';
+          const {darCode, datasetCount, institutionName, name, researcherName, status, submissionDate} = collection;
+          const formattedSubmissionDate = formatDate(submissionDate);
           const matched = find((phrase) => {
-            const termArr = lowerCaseTerm.split(' ');
-            return find(term => includes(term, phrase))(termArr);
-          })([datasetCount, toLower(darCode), toLower(createDate), toLower(projectTitle), toLower(status), toLower(institution), toLower(researcherName)]);
+            const termArr = term.split(' ');
+            return find(term => includes(toLower(term), toLower(phrase)))(termArr);
+          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate]);
           return !isNil(matched);
         })(targetList),
     darDrafts: (term, targetList) => filter(draftRecord => {
@@ -607,13 +591,13 @@ export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelN
       setFilteredList(list);
     } else {
       let newFilteredList = cloneDeep(list);
-      searchTermValues.forEach((splitTerm) => {
+      lodashFPForEach((splitTerm) => {
         const term = splitTerm.trim();
         if(!isEmpty(term)) {
           const filterFn = filterFnMap[modelName];
           newFilteredList = filterFn(term, newFilteredList);
         }
-      });
+      })(searchTermValues);
       setFilteredList(newFilteredList);
     }
     setCurrentPage(1);
@@ -739,7 +723,7 @@ export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFil
   let searchList = (!isNil(originalList) ? [...originalList] : []);
   if(!isEmpty(searchTerms)) {
     const terms = searchTerms.split(' ');
-    terms.forEach((term => searchList = filterFn(term, searchList)));
+    lodashFPForEach((term => searchList = filterFn(term, searchList)))(terms);
   }
   setFilteredList(searchList);
 };

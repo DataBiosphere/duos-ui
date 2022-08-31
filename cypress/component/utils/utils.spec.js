@@ -1,22 +1,8 @@
 /* eslint-disable no-undef */
 import {getSearchFilterFunctions, formatDate, darCollectionUtils, processElectionStatus} from '../../../src/libs/utils';
-import {cloneDeep, toLower} from 'lodash/fp';
+import {toLower} from 'lodash/fp';
 import { forEach } from 'lodash';
 const { determineCollectionStatus } = darCollectionUtils;
-
-const collectionsSkeleton = [
-  {
-    dars: {
-      1: {
-        data: {
-          institution: undefined,
-          projectTitle: undefined
-        }
-      }
-    },
-    darCode: undefined
-  }
-];
 
 const collectionWithMixedElectionStatuses = {
   dars: {
@@ -65,56 +51,6 @@ const collectionWithSameElectionStatus = {
   }
 };
 
-const collectionsWithElection = [
-  {
-    dars: {
-      1: {
-        data: {
-          institution: undefined,
-          projectTitle: undefined,
-        },
-        elections: {
-          1: {
-            status: 'Open',
-            electionType: 'DataAccess'
-          },
-          2: {
-            status: 'Open',
-            electionType: 'RP'
-          },
-        },
-      }
-    },
-    datasets: [],
-    darCode: 'DAR-1'
-  }
-];
-
-const collectionsWithProjectTitleAndInstitution = [
-  {
-    dars: {
-      1: {
-        data: {
-          institution: 'broad institute',
-          projectTitle: 'Project: test',
-        },
-        elections: {
-          1: {
-            status: 'Open',
-            electionType: 'DataAccess',
-          },
-          2: {
-            status: 'Open',
-            electionType: 'RP',
-          },
-        },
-      },
-    },
-    datasets: [],
-    darCode: 'DAR-1',
-  },
-];
-
 const sampleLCList = [
   {
     userName: 'Test Person',
@@ -157,86 +93,95 @@ const sampleResearcherList = [
   }
 ];
 
-let collectionSearchFn, cardSearchFn, researcherSearchFn;
+const darCollectionSummaryOne = {
+  darCode: 'DAR-1',
+  datasetCount: 4005,
+  name: 'summaryOne',
+  institutionName: 'CompanyOne',
+  researcherName: 'researcherOne',
+  status: 'In Progress',
+  submissionDate: 1649163460401,
+};
+
+const darCollectionSummaryTwo = {
+  darCode: 'DAR-2',
+  datasetCount: 3005,
+  name: 'summaryTwo',
+  institutionName: 'CompanyTwo',
+  researcherName: 'researcherTwo',
+  status: 'Complete',
+  submissionDate: 1629163460401,
+};
+
+let collectionSearchFn, cardSearchFn, researcherSearchFn, summaryList;
 
 beforeEach(() => {
   const searchFunctionsMap = getSearchFilterFunctions();
   collectionSearchFn = searchFunctionsMap.darCollections;
   cardSearchFn = searchFunctionsMap.libraryCard;
   researcherSearchFn = searchFunctionsMap.signingOfficialResearchers;
+  summaryList = [darCollectionSummaryOne, darCollectionSummaryTwo];
 });
 
 describe('Dar Collection Search Filter', () => {
-  it('filters successfully with missing institution, project title, elections, datasets, dar, and institution', () => {
-    const filteredList = collectionSearchFn('DAR-2', collectionsSkeleton);
-    expect(filteredList).to.be.empty;
+  it('filters on status', () => {
+    const filteredList = collectionSearchFn('In Progress', summaryList);
+    expect(filteredList.length).to.equal(1);
+    expect(filteredList[0].darCode).to.equal(darCollectionSummaryOne.darCode);
+    const closedFilteredList = collectionSearchFn('Complete', summaryList);
+    expect(closedFilteredList.length).to.equal(1);
+    expect(closedFilteredList[0].darCode).to.equal(darCollectionSummaryTwo.darCode);
   });
 
-  it('filters on status with elections present', () => {
-    const filteredList = collectionSearchFn('open', collectionsWithElection);
-    expect(filteredList).to.not.be.empty;
-    const emptyFilteredList = collectionSearchFn('closed', collectionsWithElection);
-    expect(emptyFilteredList).to.be.empty;
+  it('filters on dataset count', () => {
+    const filteredList = collectionSearchFn('4005', summaryList);
+    expect(filteredList.length).to.equal(1);
+    expect(filteredList[0].darCode).to.equal(darCollectionSummaryOne.darCode);
   });
 
-  it('filters on status with datasets present', () => {
-    const collectionsWithDatasets = cloneDeep(collectionsSkeleton);
-    collectionsWithDatasets[0].datasets = [{1: {}}];
-    const filteredList = collectionSearchFn('1', collectionsWithDatasets);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('4', collectionsWithDatasets);
-    expect(emptyList).to.be.empty;
-  });
-
-  it('filters on projectTitle', () => {
-    const filteredList = collectionSearchFn('project', collectionsWithProjectTitleAndInstitution);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('invalid', collectionsWithProjectTitleAndInstitution);
+  it('filters on collection name', () => {
+    const filteredList = collectionSearchFn(darCollectionSummaryOne.name, summaryList);
+    expect(filteredList.length).to.equal(1);
+    const emptyList = collectionSearchFn('invalid', summaryList);
     expect(emptyList).to.be.empty;
   });
 
   it('filters on institution', () => {
-    const institutionTerm = Object.values(collectionsWithProjectTitleAndInstitution[0].dars)[0].data.institution;
-    const filteredList = collectionSearchFn(institutionTerm, collectionsWithProjectTitleAndInstitution);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('invalid', collectionsWithProjectTitleAndInstitution);
+    const institutionTerm = darCollectionSummaryOne.institutionName;
+    const filteredList = collectionSearchFn(institutionTerm, summaryList);
+    expect(filteredList.length).to.equal(1);
+    const emptyList = collectionSearchFn('invalid', summaryList);
     expect(emptyList).to.be.empty;
   });
 
   it('filters on dar code', () => {
-    const darTerm = 'dar-1';
-    const collectionsWithDarCode = cloneDeep(collectionsSkeleton);
-    collectionsWithDarCode[0].darCode = 'DAR-1';
-    const filteredList = collectionSearchFn(darTerm, collectionsWithDarCode);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('invalid', collectionsWithDarCode);
+    const darTerm = darCollectionSummaryOne.darCode;
+    const filteredList = collectionSearchFn(darTerm, summaryList);
+    expect(filteredList.length).to.equal(1);
+    const emptyList = collectionSearchFn('invalid', summaryList);
     expect(emptyList).to.be.empty;
   });
 
-  it('filters on create date', () => {
-    const createDate = '2020-04-05';
-    const collectionsWithCreateDate = cloneDeep(collectionsSkeleton);
-    collectionsWithCreateDate[0].createDate = createDate;
-    const filteredList = collectionSearchFn('2020-04', collectionsWithCreateDate);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('invalid', collectionsWithCreateDate);
+  it('filters on submission date', () => {
+    const formattedSubmissionDate = formatDate(darCollectionSummaryOne.submissionDate);
+    const filteredList = collectionSearchFn(formattedSubmissionDate, summaryList);
+    expect(filteredList.length).to.equal(1);
+    expect(formatDate(filteredList[0].submissionDate)).to.equal(formattedSubmissionDate);
+    const emptyList = collectionSearchFn('invalid', summaryList);
     expect(emptyList).to.be.empty;
   });
 
   it('filters on researcher name', () => {
-    const createUser = {
-      displayName: 'Name'
-    };
-    const collectionsWithResearcherName = cloneDeep(collectionsSkeleton);
-    collectionsWithResearcherName[0].createUser = createUser;
-    const filteredList = collectionSearchFn('name', collectionsWithResearcherName);
-    expect(filteredList).to.not.be.empty;
-    const emptyList = collectionSearchFn('invalid', collectionsWithResearcherName);
+    const researcherTerm = darCollectionSummaryOne.researcherName;
+    const filteredList = collectionSearchFn(researcherTerm, summaryList);
+    expect(filteredList.length).to.equal(1);
+    expect(filteredList[0].researcherName).to.equal(researcherTerm);
+    const emptyList = collectionSearchFn('invalid', summaryList);
     expect(emptyList).to.be.empty;
   });
 });
 
-describe('LC Serch Filter', () => {
+describe('LC Search Filter', () => {
   it('filters cards on create date', () => {
     let filteredList;
     const originalCard = sampleLCList[0];

@@ -13,14 +13,18 @@ import {isFileEmpty} from './utils';
 //define axios interceptor
 //to log out user and redirect to home when response has 401 status
 //return responses with statuses in the 200s and reject the rest
+const redirectOnLogout = () => {
+  Storage.clearStorage();
+  window.location.href = `/home?redirectTo=${window.location.pathname}`;
+};
+
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   // Default to a 502 when we can't get a real response object.
   const status = getOr(502)('response.status')(error);
   if (status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
 
   const reportUrl = getOr(null)('response.config.url')(error);
@@ -184,6 +188,16 @@ export const Collections = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
+  getCollectionSummariesByRoleName: async(roleName) => {
+    const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  getCollectionSummaryByRoleNameAndId: async({roleName, id}) => {
+    const url = `${await getApiUrl()}/api/collections/role/${roleName}/summary/${id}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
   openElectionsById: async(id) => {
     const url = `${await getApiUrl()}/api/collections/${id}/election`;
     const res = await axios.post(url, {}, Config.authOpts());
@@ -339,16 +353,6 @@ export const DAR = {
     });
     const url = `${await getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`;
     const res = await axios.get(url, authOpts);
-    return res.data;
-  },
-
-  //new manage endpoint, should be renamed once v1 variant is removed from use
-  getDataAccessManageV2: async(roleName) => {
-    let url = `${await getApiUrl()}/api/dar/manage/v2`;
-    if (!isNil(roleName)) {
-      url = `${await getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
-    }
-    const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
 
@@ -659,13 +663,6 @@ export const PendingCases = {
       }
     );
     return resp;
-  },
-
-
-  findConsentUnReviewed: async () => {
-    const url = `${await getApiUrl()}/api/consent/unreviewed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   },
 
   findDARUnReviewed: async () => {
@@ -1073,8 +1070,7 @@ const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
   if (res.status >= 400) {
     await reportError(args[0], res.status);
@@ -1088,8 +1084,7 @@ const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
-    Storage.clearStorage();
-    window.location.href = '/home';
+    redirectOnLogout();
   }
   if (res.status >= 500) {
     await reportError(args[0], res.status);

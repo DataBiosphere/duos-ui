@@ -18,7 +18,6 @@ const getUserList = async () => {
     if (!isNil(user.roles)) {
       user.roles.forEach(role => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.completed = user.profileCompleted;
           user.researcher = true;
         }
       });
@@ -124,9 +123,12 @@ export const AdminManageUsers = function AdminManageUsers() {
           a({
             id: 'btn_addUser',
             className: 'btn-primary btn-add common-background',
+            style: {
+              marginTop: '30%',
+              display: 'flex'
+            },
             onClick: addUser
           }, [
-            div({ className: 'all-icons add-user_white' }),
             span({}, ['Add User']),
           ]),
         ]),

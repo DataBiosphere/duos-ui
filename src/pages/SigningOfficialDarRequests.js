@@ -18,7 +18,7 @@ export default function SigningOfficialDarRequests() {
     const init = async() => {
       try {
         setIsLoading(true);
-        const collectionList = await Collections.getCollectionsByRoleName(USER_ROLES.signingOfficial);
+        const collectionList = await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial);
         setCollectionList(collectionList);
         setIsLoading(false);
       } catch(error) {
@@ -63,7 +63,6 @@ export default function SigningOfficialDarRequests() {
           isLoading,
           cancelCollection: null,
           reviseCollection: null,
-          actionsDisabled: true,
           consoleType: consoleTypes.SIGNING_OFFICIAL
         }, [])
       ])

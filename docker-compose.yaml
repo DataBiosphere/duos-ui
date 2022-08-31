@@ -1,19 +1,52 @@
 # This is an example compose file that can be used for local development.
 # Modify the config file in `volumes` to point to the desired environment, default id dev.
-#
+# Ensure that the following configuration files have been created in the correct locations:
+#   * public/config.json
+#   * ca-bundle.crt
+#   * server.crt
+#   * server.key
+#   * site.conf
+# Ensure that /etc/hosts contains an entry for:
+# 	127.0.0.1	local.broadinstitute.org
 # Build:
 #   docker build . -t duos
 # Run:
-#   docker-compose up
+#   docker compose up -d
 # Test
-#   http://localhost:3000/
+#   https://local.broadinstitute.org/
 version: '3.8'
 services:
   app:
     image: duos:latest
     container_name: duos
     ports:
-      - 3000:8080
+      - 8080:8080
     volumes:
-      - ./config/perf.json:/usr/share/nginx/html/config.json
+      - ./public/config.json:/usr/share/nginx/html/config.json
     command: ["nginx", "-g", "daemon off;"]
+    restart: always
+
+  proxy:
+    image: broadinstitute/openidc-proxy:tcell_3_1_0
+    container_name: duos-proxy
+    hostname: local.broadinstitute.org
+    links:
+      - app:app
+    ports:
+      - 80:8080
+      - 443:443
+    volumes:
+      - ./server.crt:/etc/ssl/certs/server.crt:ro
+      - ./server.key:/etc/ssl/private/server.key:ro
+      - ./ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt:ro
+      - ./site.conf:/etc/apache2/sites-available/site.conf:ro
+    environment:
+      AUTH_TYPE: AuthType None
+      LOG_LEVEL: warn
+      OIDC_CLAIM: Require all granted
+      PROXY_PATH: /
+      PROXY_URL: http://app:8080/
+      SERVER_NAME: local.broadinstitute.org
+      SERVER_NAME_INT: local.broadinstitute.org
+      ENABLE_TCELL: 'no'
+    restart: always
