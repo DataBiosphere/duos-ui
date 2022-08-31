@@ -275,18 +275,19 @@ export const getMatchDataForBuckets = async (buckets) => {
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
 
-      bucket.algorithmResult = {result: 'N/A', createDate: undefined, id: key};
+      bucket.algorithmResult = {result: 'N/A', createDate: undefined, failureReasons: 'N/A', id: key};
     }
   })(buckets);
 
   const matchData = idsArr.length > 0 ? await Match.findMatchBatch(idsArr) : [];
   matchData.forEach((match) => {
-    const { purpose, createDate, id } = match;
+    const { purpose, createDate, failureReasons, id } = match;
     const targetBucket = electionIdBucketMap[purpose];
     if(!isNil(targetBucket)) {
       targetBucket.algorithmResult = {
         result: processMatchData(match),
         createDate,
+        failureReasons,
         id
       };
     }

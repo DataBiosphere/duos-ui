@@ -4,7 +4,7 @@ import{ isNil } from 'lodash/fp';
 
 export default function CollectionAlgorithmDecision(props) {
   const {algorithmResult = {}, styleOverride = {}} = props;
-  const { createDate, id, result } = algorithmResult;
+  const { createDate, id, result, failureReasons} = algorithmResult;
 
   const containerProps = {
     id: `collection-algorithm-id-${id}`,
@@ -30,6 +30,10 @@ export default function CollectionAlgorithmDecision(props) {
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-date-label`, style: {paddingRight: '1%'}}, ['Date:']),
           span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
+        ]),
+        div({style: {fontSize: '1.5rem'}}, [
+          span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%'}}, ['Reason:']),
+          span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}}, [failureReasons.join('\n') || 'N/A'])
         ])
       ])
     ])
