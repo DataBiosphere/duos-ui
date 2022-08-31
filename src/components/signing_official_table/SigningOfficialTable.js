@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
 import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from 'lodash/fp';
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../SimpleTable';
 import SimpleButton from '../SimpleButton';
 import PaginationBar from '../PaginationBar';
@@ -114,7 +114,7 @@ const LibraryCardCell = ({
 }) => {
   const id = researcher.userId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
-    ? researcher.libraryCards[0]
+    ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
     : null;
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
@@ -183,6 +183,15 @@ const displayNameCell = (displayName, id) => {
 };
 
 
+const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
+  const cards = researcher.libraryCards;
+  if (isEmpty(cards)) {
+    return true;
+  }
+
+  return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
+};
+
 export default function SigningOfficialTable(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
   const [tableSize, setTableSize] = useState(10);
@@ -197,7 +206,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  const { signingOfficial, unregisteredResearchers, isLoading } = props;
+  const { signingOfficial, isLoading } = props;
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms) => {
@@ -413,7 +422,7 @@ export default function SigningOfficialTable(props) {
       createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
-      users: unregisteredResearchers,
+      users: filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers),
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
       lcaContent: lcaContent
