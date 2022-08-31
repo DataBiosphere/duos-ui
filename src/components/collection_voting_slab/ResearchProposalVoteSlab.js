@@ -4,7 +4,7 @@ import {DataUseTranslation} from '../../libs/dataUseTranslation';
 import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
 import {DataUsePills} from './DataUsePill';
 import DataUseAlertBox from './DataUseAlertBox';
-import {AnimatePresence, motion} from 'framer-motion';
+import {AnimatePresence, motion} from 'framer-motion/dist/framer-motion';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
 import {Storage} from '../../libs/storage';
 import {
