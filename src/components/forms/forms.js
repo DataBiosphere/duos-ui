@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isFunction } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
-  formInputGeneric, formInputMultiText, formInputSelect,
-  formInputCheckbox, formInputSlider
+  formInputGeneric,
+  formInputMultiText,
+  formInputSelect,
+  formInputCheckbox,
+  formInputSlider,
+  formInputRadioGroup
 } from './formComponents';
 
 import './forms.css';
 
 export const FormFieldTypes = {
-  SELECT: { defaultValue: '', component: formInputSelect },
+  SELECT: { defaultValue: (config) => (config?.isMulti ? [] : ''), component: formInputSelect },
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
-  CHECKBOX: { defaultValue: false, component: formInputCheckbox },
+  CHECKBOX: { defaultValue: (config) => (config?.valueType === 'string' ? '' : false), component: formInputCheckbox },
   SLIDER: { defaultValue: false, component: formInputSlider },
+  RADIO: { defaultValue: null, component: formInputRadioGroup },
   TEXT: { defaultValue: '', component: formInputGeneric },
   NUMBER: { defaultValue: '', component: formInputGeneric },
 };
@@ -46,11 +51,16 @@ export const FormValidators = {
 /*
 * Config options:
 * id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox')
+* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
 *  * type == 'text'
 *  * type == 'multitext'
-*  * type == select
-*    * selectOptions: [{key: '', displayText: ''}]
+*  * type == 'select'
+*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
+*    * isMulti: boolean - allow multiple simultaneous options
+*    * creatable: boolean - allow creating new values (not part of options)
+*  * type == 'radio'
+*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
+*       * if an option is of type string, a textbox will be added when selected.
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType
@@ -73,7 +83,10 @@ export const FormField = (config) => {
   } = config;
 
   const [error, setError] = useState();
-  const [formValue, setFormValue] = useState(type?.defaultValue || '');
+
+  const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue;
+  const [formValue, setFormValue] = useState(typeDefaultValue || '');
+
   const required = (validators || []).includes(FormValidators.REQUIRED);
 
   useEffect(() => {
