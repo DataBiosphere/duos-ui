@@ -33,7 +33,7 @@ export default function CollectionAlgorithmDecision(props) {
         ]),
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%'}}, ['Reason:']),
-          span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}}, [!isNil(failureReasons) ? failureReasons : 'N/A'])
+          span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}}, [!isNil(failureReasons) ? failureReasons.join(' ') : 'N/A'])
         ])
       ])
     ])

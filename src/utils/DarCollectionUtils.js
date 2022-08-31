@@ -275,7 +275,7 @@ export const getMatchDataForBuckets = async (buckets) => {
         electionIdBucketMap[dataAccessReferenceId] = bucket;
       }
 
-      bucket.algorithmResult = {result: 'N/A', createDate: undefined, failureReasons: 'N/A', id: key};
+      bucket.algorithmResult = {result: 'N/A', createDate: undefined, failureReasons: undefined, id: key};
     }
   })(buckets);
 
