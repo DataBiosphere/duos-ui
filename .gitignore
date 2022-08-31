@@ -39,5 +39,7 @@ public/config.json
 
 
 # Server
+ca-bundle.crt
 server.crt
 server.key
+site.conf
