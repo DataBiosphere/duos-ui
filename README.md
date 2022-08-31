@@ -18,35 +18,5 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 
 ![What is DUOS](https://github.com/DataBiosphere/duos-ui/blob/develop/public/images/what_is_duos.svg)
 
-### Developers
-
-1. We use [node@16](https://github.com/nvm-sh/nvm#installing-and-updating):
-
-```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install 16
-```
-2. Install deps:
-
-```
-npm install
-```
-
-3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `perf`, `alpha`, or `prod` 
-
-```
-cp config/perf.json public/config.json
-```
-4. Start development server:
-
-```
-npm start
-```
-### Running under Docker
-
-Update your local environment configuration file and mount that to `/usr/share/nginx/html/config.json`
-
-```
-docker build . -t duos
-docker run -v ${PWD}/path/to/config.json:/usr/share/nginx/html/config.json:ro -p 80:8080 duos:latest
-```
+### Local Development
+See [DEVNOTES.md](DEVNOTES.md) for instructions on setting up an environment for local development.
