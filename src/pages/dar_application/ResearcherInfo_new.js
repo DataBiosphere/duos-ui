@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, input, label, span, textarea, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, input, label, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
@@ -35,7 +35,6 @@ export default function ResearcherInfoNew(props) {
     cloudProviderType,
     cloudProvider,
     isCloudUseInvalid,
-    isCloudProviderInvalid,
     isAnvilUseInvalid,
     ariaLevel = 2
   } = props;
@@ -106,13 +105,6 @@ export default function ResearcherInfoNew(props) {
       ])
     )
   ]);
-
-  const cloudInputStyle = (input) => {
-    return {
-      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? 'rgba(243, 73, 73, 0.19)' :
-        isEmpty(darCode) ? 'inherit' : '#eee'
-    };
-  };
 
   return (
     div({
@@ -251,7 +243,7 @@ export default function ResearcherInfoNew(props) {
             defaultValue: signingOfficial,
             onChange: ({key: name, value}) => {
               const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
-              formFieldChange({name, formattedValue});
+              formFieldChange({name, value: formattedValue});
             },
             selectOptions: allSigningOfficials,
             creatableConfig: {
@@ -278,7 +270,7 @@ export default function ResearcherInfoNew(props) {
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: ({key: name, value,}) => formFieldChange(name, value),
+            onChange: ({key: name, value,}) => formFieldChange({name, value}),
             defaultValue: itDirector
           })
         ]),
@@ -308,36 +300,28 @@ export default function ResearcherInfoNew(props) {
             }, [
               div({className: 'row no-margin'}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                  input({
-                    type: 'checkbox',
-                    id: 'cloud-requested',
-                    name: 'cloudUse',
-                    className: 'checkbox-inline rp-checkbox',
+                  h(FormField, {
+                    id: 'cloudUse',
                     disabled: !isNil(darCode),
-                    required: true,
+                    validators: [FormValidators.REQUIRED],
+                    type: FormFieldTypes.CHECKBOX,
+                    toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
                     checked: cloudUse,
-                    onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
-                  }),
-                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
-                    ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
-                  )
+                    onChange: ({ key: name, value }) => formFieldChange({name, value})
+                  })
                 ])
               ]),
               div({className: 'row no-margin'}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                  input({
-                    type: 'checkbox',
-                    id: 'local-requested',
-                    name: 'localUse',
-                    className: 'checkbox-inline rp-checkbox',
+                  h(FormField, {
+                    id: 'localUse',
                     disabled: !isNil(darCode),
-                    required: true,
+                    validators: [FormValidators.REQUIRED],
+                    type: FormFieldTypes.CHECKBOX,
+                    toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
                     checked: localUse,
-                    onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
-                  }),
-                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
-                    ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
-                  )
+                    onChange: ({ key: name, value }) => formFieldChange({name, value})
+                  })
                 ])
               ]),
             ]),
@@ -346,7 +330,7 @@ export default function ResearcherInfoNew(props) {
                 h(FormField, {
                   id: 'cloudProvider',
                   title: 'Name of Cloud Provider',
-                  onChange: ({ key: name, value }) => formFieldChange(name, value),
+                  onChange: ({ key: name, value }) => formFieldChange({name, value}),
                   defaultValue: cloudProvider,
                   validators: [FormValidators.REQUIRED],
                   disabled: !isEmpty(darCode)
@@ -359,30 +343,43 @@ export default function ResearcherInfoNew(props) {
                   defaultValue: cloudProviderType,
                   validators: [FormValidators.REQUIRED],
                   disabled: !isNil(darCode),
-                  onChange: ({ key: name, value }) => formFieldChange(name, value)
+                  onChange: ({ key: name, value }) => formFieldChange({name, value})
                 })
               ])
             ]),
             div({className: 'row no-margin', isRendered: cloudUse === true}, [
               div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                textarea({
-                  style: {
-                    backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-                    width: '100%',
-                    padding: '1rem'
-                  },
+                h(FormField, {
+                  id: 'cloudProviderDescription',
+                  type: FormFieldTypes.TEXTAREA,
                   defaultValue: cloudProviderDescription,
                   disabled: !isNil(darCode),
-                  onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-                  name: 'cloudProviderDescription',
-                  id: 'cloudProviderDescription',
-                  rows: '6',
-                  required: true,
+                  validators: [FormValidators.REQUIRED],
                   placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-                    + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-                    + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                  maxLength: 2000
-                })
+                  + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
+                  + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
+                  rows: 6,
+                  maxLength: 2000,
+                  onChange: ({ key: name, value}) => formFieldChange({name, value})
+                }),
+                // textarea({
+                //   style: {
+                //     backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
+                //     width: '100%',
+                //     padding: '1rem'
+                //   },
+                //   defaultValue: cloudProviderDescription,
+                //   disabled: !isNil(darCode),
+                //   onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
+                //   name: 'cloudProviderDescription',
+                //   id: 'cloudProviderDescription',
+                //   rows: '6',
+                //   required: true,
+                //   placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
+                //     + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
+                //     + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
+                //   maxLength: 2000
+                // })
               ])
             ])
           ])

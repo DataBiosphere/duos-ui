@@ -4,7 +4,8 @@ import { cloneDeep } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
   formInputGeneric, formInputMultiText, formInputSelect,
-  formInputCheckbox, formInputSlider, formInputRadio
+  formInputCheckbox, formInputSlider, formInputRadio,
+  formInputTextarea
 } from './formComponents';
 
 import './forms.css';
@@ -15,6 +16,7 @@ export const FormFieldTypes = {
   CHECKBOX: { defaultValue: false, component: formInputCheckbox },
   SLIDER: { defaultValue: false, component: formInputSlider },
   TEXT: { defaultValue: '', component: formInputGeneric },
+  TEXTAREA: { defaultValue: '', component: formInputTextarea },
   NUMBER: { defaultValue: '', component: formInputGeneric },
   RADIO: { defaultValue: '', component: formInputRadio }
 };

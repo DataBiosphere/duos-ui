@@ -1,4 +1,4 @@
-import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
+import { h, div, label, input, span, button, textarea } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import { FormValidators } from './forms';
@@ -71,7 +71,7 @@ export const formInputGeneric = (config) => {
 
   return div([
     input({
-      id: id,
+      id,
       type: type || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
@@ -82,6 +82,35 @@ export const formInputGeneric = (config) => {
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
+    }),
+    errorMessage(error)
+  ]);
+};
+
+export const formInputTextarea = (config) => {
+  const {
+    id, title, type, disabled,
+    placeholder,
+    inputStyle, ariaDescribedby,
+    rows, maxLength,
+    formValue, error, setError
+  } = config;
+
+  return div([
+    textarea({
+      id,
+      type: type || 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || title,
+      value: formValue,
+      style: { ...styles.inputStyle, ...inputStyle },
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+      rows,
+      maxLength
     }),
     errorMessage(error)
   ]);
