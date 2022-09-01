@@ -40,7 +40,8 @@ export function darCodeCellData({darCode = '- -', darCollectionId, status, conso
     style: {
       color: styles.color.darCode,
       fontSize: styles.fontSize.darCode,
-      fontWeight: '500'
+      fontWeight: '500',
+      overflowWrap: 'break-word'
     },
     label
   };
