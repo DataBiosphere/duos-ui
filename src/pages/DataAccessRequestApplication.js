@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, div, form, h, hr, i, small, span, strong } from 'react-hyperscript-helpers';
+import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import ResearcherInfoNew from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
@@ -960,7 +960,9 @@ class DataAccessRequestApplication extends Component {
             ])
           ])
         ]),
-        form({ name: 'form', 'noValidate': true, className: `${this.state.env === 'dev' || this.state.env === 'local'}` ? 'forms-v2 col-md-12' : '' }, [
+
+        div({ isRendered: this.state.env === 'local' || this.state.env === 'dev', style: { clear: 'both' } }),
+        form({ name: 'form', 'noValidate': true, className: `${this.state.env === 'local' ? 'forms-v2' : ''}` }, [
           div({ isRendered: this.state.env === 'local' || this.state.env === 'dev', className: 'multi-step-buttons-container' }, [
             h(Tabs, {
               value: this.state.step,
@@ -975,31 +977,35 @@ class DataAccessRequestApplication extends Component {
               }
             }, [
               h(Tab, {
-                label: [
+                // key: `dar-request-step-1`,
+                label: div([
                   div({ className: 'step' }, 'Step 1'),
                   div({ className: 'title' }, 'Researcher Information')
-                ],
+                ]),
                 value: 1
               }),
               h(Tab, {
-                label: [
+                // key: `dar-request-step-2`,
+                label: div([
                   div({ className: 'step' }, 'Step 2'),
                   div({ className: 'title' }, 'Data Access Request')
-                ],
+                ]),
                 value: 2
               }),
               h(Tab, {
-                label: [
+                // key: `dar-request-step-3`,
+                label: div([
                   div({ className: 'step' }, 'Step 3'),
                   div({ className: 'title' }, 'Research Purpose Statement')
-                ],
+                ]),
                 value: 3
               }),
               h(Tab, {
-                label: [
+                // key: `dar-request-step-1`,
+                label: div([
                   div({ className: 'step' }, 'Step 4'),
                   div({ className: 'title' }, 'Data Use Agreement')
-                ],
+                ]),
                 value: 4
               })
             ])
