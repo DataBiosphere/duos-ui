@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
+import { a, div, form, h, hr, i, small, span, strong } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import ResearcherInfoNew from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
@@ -21,6 +21,8 @@ import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, m
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import {Config} from '../libs/config';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -909,9 +911,9 @@ class DataAccessRequestApplication extends Component {
               ])
             ])
           ]),
-          hr({ className: 'section-separator' }),
+          hr({ isRendered: this.state.env !== 'local' && this.state.env !== 'dev', className: 'section-separator' }),
 
-          div({ className: 'row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin' }, [
+          div({ isRendered: this.state.env !== 'local' && this.state.env !== 'dev', className: `row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin` }, [
 
             a({
               id: 'btn_step_1',
@@ -958,7 +960,51 @@ class DataAccessRequestApplication extends Component {
             ])
           ])
         ]),
-        form({ name: 'form', 'noValidate': true }, [
+        form({ name: 'form', 'noValidate': true, className: `${this.state.env === 'dev' || this.state.env === 'local'}` ? 'forms-v2 col-md-12' : '' }, [
+          div({ isRendered: this.state.env === 'local' || this.state.env === 'dev', className: 'multi-step-buttons-container' }, [
+            h(Tabs, {
+              value: this.state.step,
+              variant: 'scrollable',
+              scrollButtons: 'auto',
+              orientation: 'vertical',
+              TabIndicatorProps: {
+                style: { background: '#2BBD9B' }
+              },
+              onChange: (event, step) => {
+                this.goToStep(step);
+              }
+            }, [
+              h(Tab, {
+                label: [
+                  div({ className: 'step' }, 'Step 1'),
+                  div({ className: 'title' }, 'Researcher Information')
+                ],
+                value: 1
+              }),
+              h(Tab, {
+                label: [
+                  div({ className: 'step' }, 'Step 2'),
+                  div({ className: 'title' }, 'Data Access Request')
+                ],
+                value: 2
+              }),
+              h(Tab, {
+                label: [
+                  div({ className: 'step' }, 'Step 3'),
+                  div({ className: 'title' }, 'Research Purpose Statement')
+                ],
+                value: 3
+              }),
+              h(Tab, {
+                label: [
+                  div({ className: 'step' }, 'Step 4'),
+                  div({ className: 'title' }, 'Data Use Agreement')
+                ],
+                value: 4
+              })
+            ])
+          ]),
+
           div({ id: 'form-views' }, [
 
             ConfirmationDialog({

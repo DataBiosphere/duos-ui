@@ -99,3 +99,67 @@ fieldset[disabled] .regular-checkbox:before {
   cursor: not-allowed !important;
   opacity: 0.65;
 }
+
+/* ------------------------------------- */
+/*    New Forms Styles                   */
+/* ------------------------------------- */
+.forms-v2 {
+  border-top: 1px solid #929292;
+  display: flex;
+  flex-direction: row;
+  margin-top: 30px;
+  padding: 0;
+}
+
+/* ------------------------------------- */
+/*    MUI Overrides                      */
+/* ------------------------------------- */
+.multi-step-buttons-container {
+  width: 200px;
+  flex-shrink: 0;
+  margin-top: 25px;
+  margin-right: 25px;
+}
+
+.multi-step-buttons-container .MuiButtonBase-root {
+  align-items: flex-start;
+}
+
+.multi-step-buttons-container .MuiTabs-indicator {
+  width: 5px;
+  right: unset;
+  left: 0;
+}
+
+.multi-step-buttons-container .MuiButtonBase-root {
+  margin-top: 25px;
+}
+
+.multi-step-buttons-container .step,
+.multi-step-buttons-container .Mui-selected .step {
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Montserrat';
+  color: #646464;
+  text-transform: none;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+.multi-step-buttons-container .title {
+  font-size: 17px;
+  font-weight: bold;
+  font-family: 'Montserrat';
+  text-transform: none;
+  text-align: left;
+  color: #333F52;
+}
+
+.multi-step-buttons-container .Mui-selected .title {
+  color: #2BBD9B;
+}
+
+.multi-step-buttons-container .MuiTouchRipple-root span {
+  background-color: rgba(43, 189, 155, .3);
+}
+

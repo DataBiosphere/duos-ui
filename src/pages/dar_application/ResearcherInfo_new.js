@@ -107,10 +107,7 @@ export default function ResearcherInfoNew(props) {
   ]);
 
   return (
-    div({
-      datacy: 'researcher-info',
-      className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-
+    div({ datacy: 'researcher-info'}, [
       div({ style: { backgroundColor: 'rgba(184, 205, 211, .15)', padding: '20px 30px' } }, [
         div({
           datacy: 'researcher-info-profile-submitted',
