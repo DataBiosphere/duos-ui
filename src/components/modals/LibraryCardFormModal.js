@@ -145,7 +145,7 @@ export default function LibraryCardFormModal(props) {
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         // Library Card Agreement Text
-        isEmpty(lcaContent) ? div() : div({style: { maxWidth: '700px', minWidth: '700px', maxHeight: '200px', overflow: 'auto', marginBottom: '25px' }}, [lcaContent]),
+        lcaContent,
         // LCA Terms Download
         LibraryCardAgreementTermsDownload,
         //users dropdown
@@ -168,8 +168,7 @@ export default function LibraryCardFormModal(props) {
           {
             style: {
               display: 'flex',
-              marginLeft: '85%',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-end',
             },
           },
           [
@@ -179,9 +178,10 @@ export default function LibraryCardFormModal(props) {
                   ? () => createOnClick(card)
                   : () => updateOnClick(card),
               additionalStyle: {
-                flex: 1,
-                display: 'inline-block',
-                margin: '5%',
+                margin: '0%',
+                width: '80px',
+                height: '15px',
+                padding: '20px'
               },
               baseColor: Theme.palette.secondary,
               disabled: isConfirmDisabled(modalType, card),
@@ -190,9 +190,10 @@ export default function LibraryCardFormModal(props) {
             h(SimpleButton, {
               onClick: closeModal,
               additionalStyle: {
-                flex: 1,
-                display: 'inline-block',
-                margin: '5%',
+                marginLeft: '1%',
+                width: '80px',
+                height: '15px',
+                padding: '20px'
               },
               baseColor: Theme.palette.secondary,
               label: 'Cancel'

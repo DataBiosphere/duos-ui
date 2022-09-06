@@ -179,7 +179,7 @@ export const FormTable = (config) => {
     }),
     // add new row to table button
     div({
-      style: { display: 'flex', width: '100%', justifyContent: 'flex-end' },
+      style: { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },
       isRendered: enableAddingRow
     }, [
       h(button, {

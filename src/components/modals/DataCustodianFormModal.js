@@ -78,6 +78,7 @@ export default function DataCustodianFormModal(props) {
     createOnClick,
     closeModal,
     users,
+    dpaContent
   } = props;
 
   const [user, setUser] = useState(props.user);
@@ -120,6 +121,7 @@ export default function DataCustodianFormModal(props) {
       div({ style: Styles.MODAL.CONTENT }, [
         h(CloseIconComponent, { closeFn: closeModal }),
         div({ style: Styles.MODAL.TITLE_HEADER }, ['Add Data Submitter']),
+        dpaContent,
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
         //users dropdown
         h(FormFieldRow, {
@@ -133,7 +135,7 @@ export default function DataCustodianFormModal(props) {
             style: {
               display: 'flex',
               marginLeft: '85%',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-end',
             },
           },
           [
