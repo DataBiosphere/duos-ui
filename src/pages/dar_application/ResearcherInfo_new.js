@@ -294,6 +294,7 @@ export default function ResearcherInfo(props) {
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
                     checked: cloudUse,
+                    ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
                 ])
@@ -307,6 +308,7 @@ export default function ResearcherInfo(props) {
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
                     checked: localUse,
+                    ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
                 ])
@@ -320,7 +322,8 @@ export default function ResearcherInfo(props) {
                   onChange: ({ key: name, value }) => formFieldChange({name, value}),
                   defaultValue: cloudProvider,
                   validators: [FormValidators.REQUIRED],
-                  disabled: !isEmpty(darCode)
+                  disabled: !isEmpty(darCode),
+                  ariaLevel: ariaLevel + 3,
                 })
               ]),
               div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
@@ -330,6 +333,7 @@ export default function ResearcherInfo(props) {
                   defaultValue: cloudProviderType,
                   validators: [FormValidators.REQUIRED],
                   disabled: !isNil(darCode),
+                  ariaLevel: ariaLevel + 3,
                   onChange: ({ key: name, value }) => formFieldChange({name, value})
                 })
               ])
@@ -347,26 +351,9 @@ export default function ResearcherInfo(props) {
                   + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
                   rows: 6,
                   maxLength: 2000,
+                  ariaLevel: ariaLevel + 3,
                   onChange: ({ key: name, value}) => formFieldChange({name, value})
-                }),
-                // textarea({
-                //   style: {
-                //     backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-                //     width: '100%',
-                //     padding: '1rem'
-                //   },
-                //   defaultValue: cloudProviderDescription,
-                //   disabled: !isNil(darCode),
-                //   onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-                //   name: 'cloudProviderDescription',
-                //   id: 'cloudProviderDescription',
-                //   rows: '6',
-                //   required: true,
-                //   placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-                //     + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-                //     + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                //   maxLength: 2000
-                // })
+                })
               ])
             ])
           ])
