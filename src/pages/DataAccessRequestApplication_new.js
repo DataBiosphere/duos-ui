@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
-import ResearcherInfo from './dar_application/ResearcherInfo';
+import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
@@ -20,7 +20,7 @@ import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, m
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 
-class DataAccessRequestApplication extends Component {
+class DataAccessRequestApplicationNew extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -1086,4 +1086,4 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
-export default DataAccessRequestApplication;
+export default DataAccessRequestApplicationNew;

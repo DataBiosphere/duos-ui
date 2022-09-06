@@ -15,7 +15,7 @@ const profileSubmitted = span(['Please make sure ', profileLink, ' is updated as
 const libraryCardLink = a({href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs', style: linkStyle, target: '_blank'}, ['Library Card']);
 const missingLibraryCard = span(['You must submit ', profileLink, ' and obtain a ', libraryCardLink, ' from your Signing Official before you can submit a Data Access Request']);
 
-export default function ResearcherInfoNew(props) {
+export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     completed,
@@ -475,121 +475,6 @@ export default function ResearcherInfoNew(props) {
                 deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
                 showApproval: false})
             ])
-          ])
-        ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            // div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //   label({className: 'control-label rp-title-question'}, [
-            //     '1.7 Cloud Use Statement*',
-            //     span([
-            //       'Will you perform all of your data storage and analysis for this project on the ',
-            //       a({
-            //         rel: 'noopener noreferrer',
-            //         href: 'https://anvil.terra.bio/',
-            //         target: '_blank'
-            //       }, ['AnVIL']),
-            //       '?'
-            //     ]),
-            //   ]),
-            // ]),
-            // div({className: 'row no-margin'}, [
-            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-            //     cloudRadioGroup
-            //   ]),
-            // ]),
-            // div({
-            //   isRendered: !anvilUse && anvilUse !== '',
-            //   className: 'computing-use-container',
-            //   style: {
-            //     backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
-            //   }
-            // }, [
-            //   div({className: 'row no-margin'}, [
-            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //       input({
-            //         type: 'checkbox',
-            //         id: 'cloud-requested',
-            //         name: 'cloudUse',
-            //         className: 'checkbox-inline rp-checkbox',
-            //         disabled: !isNil(darCode),
-            //         required: true,
-            //         checked: cloudUse,
-            //         onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
-            //       }),
-            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
-            //         ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
-            //       )
-            //     ])
-            //   ]),
-            //   div({className: 'row no-margin'}, [
-            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //       input({
-            //         type: 'checkbox',
-            //         id: 'local-requested',
-            //         name: 'localUse',
-            //         className: 'checkbox-inline rp-checkbox',
-            //         disabled: !isNil(darCode),
-            //         required: true,
-            //         checked: localUse,
-            //         onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
-            //       }),
-            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
-            //         ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
-            //       )
-            //     ])
-            //   ]),
-            // ]),
-            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
-            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-            //     label({className: 'control-label'}, ['Name of Cloud Provider']),
-            //     input({
-            //       style: cloudInputStyle(cloudProvider),
-            //       type: 'text',
-            //       name: 'cloud-provider-name',
-            //       defaultValue: cloudProvider || '',
-            //       className: 'form-control',
-            //       required: true,
-            //       disabled: !isEmpty(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
-            //     })
-            //   ]),
-            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-            //     label({className: 'control-label'}, ['Type of Cloud Provider']),
-            //     input({
-            //       style: cloudInputStyle(cloudProviderType),
-            //       type: 'text',
-            //       name: 'provider-type-name',
-            //       defaultValue: cloudProviderType || '',
-            //       className: 'form-control',
-            //       required: true,
-            //       disabled: !isNil(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProviderType', value: e.target.value})
-            //     })
-            //   ])
-            // ]),
-            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
-            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //     textarea({
-            //       style: {
-            //         backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-            //         width: '100%',
-            //         padding: '1rem'
-            //       },
-            //       defaultValue: cloudProviderDescription,
-            //       disabled: !isNil(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-            //       name: 'cloudProviderDescription',
-            //       id: 'cloudProviderDescription',
-            //       rows: '6',
-            //       required: true,
-            //       placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-            //         + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-            //         + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-            //       maxLength: 2000
-            //     })
-            //   ])
-            // ])
           ])
         ]),
         div({ className: 'form-group'}, [
