@@ -124,7 +124,7 @@ export const formInputMultiText = (config) => {
 
   return div({}, [
     div({
-      className: 'formControl-group flex-row',
+      className: 'formControl-group flex-row'
     }, [
       input({
         id,
@@ -156,7 +156,7 @@ export const formInputMultiText = (config) => {
       ])
     ]),
     errorMessage(error),
-    div({ className: 'flex-row', style: { justifyContent: null } },
+    div({ className: 'flex-row', style: { justifyContent: 'flex-start' } },
       formValue.map((val, i) => {
         return h(button, {
           key: val,
