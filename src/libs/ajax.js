@@ -728,22 +728,6 @@ export const PendingCases = {
 
 };
 
-export const Researcher = {
-
-  createProperties: async (properties) => {
-    const url = `${await getApiUrl()}/api/user/profile`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(properties), { method: 'POST' }]));
-    return await res;
-  },
-
-  updateProperties: async (userId, validate, properties) => {
-    const url = `${await getApiUrl()}/api/user/profile?validate=${validate}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(properties), { method: 'PUT' }]));
-    return res.json();
-  },
-
-};
-
 export const StatFiles = {
 
   getDARsReport: async (reportType, fileName) => {
