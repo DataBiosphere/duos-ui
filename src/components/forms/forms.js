@@ -1,24 +1,40 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isFunction, isString } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
-  formInputGeneric, formInputMultiText, formInputSelect,
-  formInputCheckbox, formInputSlider, formInputRadio,
+  formInputGeneric,
+  formInputMultiText,
+  formInputSelect,
+  formInputCheckbox,
+  formInputSlider,
+  formInputRadioGroup,
   formInputTextarea
 } from './formComponents';
 
 import './forms.css';
 
 export const FormFieldTypes = {
-  SELECT: { defaultValue: '', component: formInputSelect },
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
-  CHECKBOX: { defaultValue: false, component: formInputCheckbox },
-  SLIDER: { defaultValue: false, component: formInputSlider },
+  RADIO: { defaultValue: null, component: formInputRadioGroup },
   TEXT: { defaultValue: '', component: formInputGeneric },
   TEXTAREA: { defaultValue: '', component: formInputTextarea },
   NUMBER: { defaultValue: '', component: formInputGeneric },
-  RADIO: { defaultValue: '', component: formInputRadio }
+  SLIDER: { defaultValue: false, component: formInputSlider },
+  CHECKBOX: {
+    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    component: formInputCheckbox
+  },
+  SELECT: {
+    defaultValue: (config) => (config?.isMulti ? [] : ''),
+    updateDefaultValue: ({ selectOptions, defaultValue }) => {
+      const isStringArr = isString(selectOptions[0]);
+      return isStringArr
+        ? { key: defaultValue, displayValue: defaultValue }
+        : defaultValue;
+    },
+    component: formInputSelect
+  },
 };
 
 export const FormValidators = {
@@ -49,11 +65,16 @@ export const FormValidators = {
 /*
 * Config options:
 * id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox')
+* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
 *  * type == 'text'
 *  * type == 'multitext'
-*  * type == select
-*    * selectOptions: [{key: '', displayText: ''}]
+*  * type == 'select'
+*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
+*    * isMulti: boolean - allow multiple simultaneous options
+*    * creatable: boolean - allow creating new values (not part of options)
+*  * type == 'radio'
+*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
+*       * if an option is of type string, a textbox will be added when selected.
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType
@@ -76,14 +97,20 @@ export const FormField = (config) => {
   } = config;
 
   const [error, setError] = useState();
-  const [formValue, setFormValue] = useState(type?.defaultValue || '');
+
+  const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue;
+  const [formValue, setFormValue] = useState(typeDefaultValue || '');
+
   const required = (validators || []).includes(FormValidators.REQUIRED);
 
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setFormValue(defaultValue);
+      const normalizedValue = isFunction(type.updateDefaultValue)
+        ? type.updateDefaultValue(config)
+        : defaultValue;
+      setFormValue(normalizedValue);
     }
-  }, [defaultValue]);
+  }, [defaultValue, config, type]);
 
   return div({
     key: `formControl_${id}`,
@@ -183,7 +210,7 @@ export const FormTable = (config) => {
           setFormValue(formValueClone);
           onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
         },
-        style: { marginTop: 10, padding: '17px 10px' }
+        style: { marginTop: 10 }
       }, [
         (addRowLabel || 'Add New'),
         span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })

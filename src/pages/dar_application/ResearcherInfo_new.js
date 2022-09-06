@@ -246,7 +246,7 @@ export default function ResearcherInfoNew(props) {
               formFieldChange({name, value: formattedValue});
             },
             selectOptions: allSigningOfficials,
-            creatableConfig: {
+            selectConfig: {
               placeholder: 'Signing Official',
               getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
               getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
