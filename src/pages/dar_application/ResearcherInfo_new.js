@@ -78,34 +78,6 @@ export default function ResearcherInfo(props) {
     setResearcherUser(props.researcherUser);
   }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.principalInvestigator, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
-  const cloudRadioGroup = div({
-    className: 'radio-inline',
-    style: {
-      marginBottom: '2rem',
-      backgroundColor: showValidationMessages && isAnvilUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
-    }
-  }, [
-    [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
-      label({
-        className: 'radio-wrapper',
-        key: `anvil-use-option-${option.value}`,
-        id: `lbl-anvil-use-option-${option.value}`,
-        htmlFor: `rad-anvil-use-option-${option.value}`
-      }, [
-        input({
-          type: 'radio',
-          id: `rad-anvil-use-option-${option.value}`,
-          name: 'anvil-use-approval-status',
-          checked: option.value === anvilUse,
-          value: option.value,
-          onChange: () => (formFieldChange({name: 'anvilUse', value: option.value}))
-        }),
-        span({ className: 'radio-check'}),
-        span({ className: 'radio-label'}, [option.label])
-      ])
-    )
-  ]);
-
   return (
     div({
       datacy: 'researcher-info',
@@ -276,23 +248,39 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          h3(['1.8 Cloud Use Statement*']),
-          span([
-            'Will you perform all of your data storage and analysis for this project on the ',
-            a({
-              rel: 'noopener noreferrer',
-              href: 'https://anvil.terra.bio/',
-              target: '_blank'
-            }, ['AnVIL']),
-            '?'
-          ]),
-          div([cloudRadioGroup])
+          div([
+            h(FormField, {
+              id: 'anvilUse',
+              type: FormFieldTypes.RADIO,
+              title: '1.8 Cloud Use Statement',
+              description: [span([
+                'Will you perform all of your data storage and analysis for this project on the ',
+                a({
+                  rel: 'noopener noreferrer',
+                  href: 'https://anvil.terra.bio/',
+                  target: '_blank'
+                }, ['AnVIL']),
+                '?'
+              ])],
+              options: [
+                { name: 'yes', text: 'Yes' },
+                { name: 'no', text: 'No' }
+              ],
+              validators: [FormValidators.REQUIRED],
+              ariaLevel: ariaLevel + 1,
+              orientation: 'horizontal',
+              onChange: ({key: name, value}) => {
+                const normalizedValue = value && value.selected === 'yes';
+                formFieldChange({name, value: normalizedValue});
+              }
+            })
+          ])
         ]),
 
         div({className: 'dar-application-row'}, [
           div({className: 'row no-margin'}, [
             div({
-              isRendered: !anvilUse && anvilUse !== '',
+              isRendered: anvilUse === false,
               className: 'computing-use-container',
               style: {
                 backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
