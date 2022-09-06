@@ -11,7 +11,12 @@ import Modal from 'react-modal';
 import * as fp from 'lodash/fp';
 import addHelpIcon from '../../images/icon_add_help.png';
 
-Modal.setAppElement('#root');
+try {
+  Modal.setAppElement('#root');
+} catch (error) {
+  // trycatch for unit testing purposes, since #root may not always exist
+  // when testing a component in isolation
+}
 
 export const SupportRequestModal = hh(
   class SupportRequestModal extends Component {
