@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, input, label, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
@@ -35,7 +35,6 @@ export default function ResearcherInfo(props) {
     cloudProviderType,
     cloudProvider,
     isCloudUseInvalid,
-    isAnvilUseInvalid,
     ariaLevel = 2
   } = props;
 
