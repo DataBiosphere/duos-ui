@@ -458,35 +458,11 @@ describe('FormField - Tests', () => {
       });
     });
 
-<<<<<<< HEAD
-    it('should not allow user to enter a new value', () => {
-=======
     it('returns string when isString', () => {
->>>>>>> ebdacab6993bb4c73a92e32baed928cffaabd3ef
       cy.spy(props, 'onChange');
       props.selectOptions = ['Observational', 'Other'];
       props.isCreatable = true;
       mount(<FormField {...props}/>);
-<<<<<<< HEAD
-      cy.get('#studyType .dropdown-toggle').click();
-      cy.get('#studyType .search-bar').type('newtext').then(() => {
-        cy.get('#studyType .search-bar').blur().then(() => {
-          expect(props.onChange).to.be.callCount(0); // only calls onChange once
-        });
-      });
-    });
-
-    it('should allow user to select by entering a new option as freetext', () => {
-      cy.spy(props, 'onChange');
-      props.creatableConfig = {};
-      mount(<FormField {...props}/>);
-      cy.get('.form-select').click();
-      cy.get('.form-select input').type('newtext').then(() => {
-        cy.get('.form-select input').type('{enter}').then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'newtext', isValid: true}); // code value
-          cy.get('.form-select').contains('newtext'); // ui updates with new val
-        });
-=======
       cy.get('#studyType').type('Obs{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Observational', isValid: true});
       });
@@ -538,7 +514,6 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational'], isValid: true});
->>>>>>> ebdacab6993bb4c73a92e32baed928cffaabd3ef
       });
 
       cy.get('#studyType').type('Prosp{enter}').then(() => {

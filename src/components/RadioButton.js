@@ -60,9 +60,10 @@ export const RadioButton = (props) => {
             type: 'radio',
             name: props.name,
             value: props.value,
-            defaultChecked: props.defaultChecked,
+            checked: props.defaultChecked,
             onClick: props.onClick,
             disabled: props.disabled,
+            onChange: props.onChange ? props.onChange : () => {}
           }),
           span({
             style: props.defaultChecked ? checkedStyle : uncheckedStyle,
@@ -72,7 +73,7 @@ export const RadioButton = (props) => {
           span({style: labelStyle}, [props.label]),
           span({style: descriptionStyle}, [props.description]),
         ]),
-      ]),
+      ])
     ])
   );
 };
