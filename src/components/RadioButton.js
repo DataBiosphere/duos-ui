@@ -7,7 +7,6 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
-    fontFamily: '\'Roboto\', sans-serif',
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };

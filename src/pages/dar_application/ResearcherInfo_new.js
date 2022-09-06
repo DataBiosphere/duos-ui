@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, input, label, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
@@ -15,7 +15,7 @@ const profileSubmitted = span(['Please make sure ', profileLink, ' is updated as
 const libraryCardLink = a({href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs', style: linkStyle, target: '_blank'}, ['Library Card']);
 const missingLibraryCard = span(['You must submit ', profileLink, ' and obtain a ', libraryCardLink, ' from your Signing Official before you can submit a Data Access Request']);
 
-export default function ResearcherInfoNew(props) {
+export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     completed,
@@ -35,7 +35,6 @@ export default function ResearcherInfoNew(props) {
     cloudProviderType,
     cloudProvider,
     isCloudUseInvalid,
-    isAnvilUseInvalid,
     ariaLevel = 2
   } = props;
 
@@ -77,34 +76,6 @@ export default function ResearcherInfoNew(props) {
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
   }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.principalInvestigator, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
-
-  const cloudRadioGroup = div({
-    className: 'radio-inline',
-    style: {
-      marginBottom: '2rem',
-      backgroundColor: showValidationMessages && isAnvilUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
-    }
-  }, [
-    [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
-      label({
-        className: 'radio-wrapper',
-        key: `anvil-use-option-${option.value}`,
-        id: `lbl-anvil-use-option-${option.value}`,
-        htmlFor: `rad-anvil-use-option-${option.value}`
-      }, [
-        input({
-          type: 'radio',
-          id: `rad-anvil-use-option-${option.value}`,
-          name: 'anvil-use-approval-status',
-          checked: option.value === anvilUse,
-          value: option.value,
-          onChange: () => (formFieldChange({name: 'anvilUse', value: option.value}))
-        }),
-        span({ className: 'radio-check'}),
-        span({ className: 'radio-label'}, [option.label])
-      ])
-    )
-  ]);
 
   return (
     div({ datacy: 'researcher-info'}, [
@@ -243,7 +214,7 @@ export default function ResearcherInfoNew(props) {
               formFieldChange({name, value: formattedValue});
             },
             selectOptions: allSigningOfficials,
-            creatableConfig: {
+            selectConfig: {
               placeholder: 'Signing Official',
               getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
               getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
@@ -273,23 +244,39 @@ export default function ResearcherInfoNew(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          h3(['1.8 Cloud Use Statement*']),
-          span([
-            'Will you perform all of your data storage and analysis for this project on the ',
-            a({
-              rel: 'noopener noreferrer',
-              href: 'https://anvil.terra.bio/',
-              target: '_blank'
-            }, ['AnVIL']),
-            '?'
-          ]),
-          div([cloudRadioGroup])
+          div([
+            h(FormField, {
+              id: 'anvilUse',
+              type: FormFieldTypes.RADIO,
+              title: '1.8 Cloud Use Statement',
+              description: [span([
+                'Will you perform all of your data storage and analysis for this project on the ',
+                a({
+                  rel: 'noopener noreferrer',
+                  href: 'https://anvil.terra.bio/',
+                  target: '_blank'
+                }, ['AnVIL']),
+                '?'
+              ])],
+              options: [
+                { name: 'yes', text: 'Yes' },
+                { name: 'no', text: 'No' }
+              ],
+              validators: [FormValidators.REQUIRED],
+              ariaLevel: ariaLevel + 1,
+              orientation: 'horizontal',
+              onChange: ({key: name, value}) => {
+                const normalizedValue = value && value.selected === 'yes';
+                formFieldChange({name, value: normalizedValue});
+              }
+            })
+          ])
         ]),
 
         div({className: 'dar-application-row'}, [
           div({className: 'row no-margin'}, [
             div({
-              isRendered: !anvilUse && anvilUse !== '',
+              isRendered: anvilUse === false,
               className: 'computing-use-container',
               style: {
                 backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
@@ -304,6 +291,7 @@ export default function ResearcherInfoNew(props) {
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
                     checked: cloudUse,
+                    ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
                 ])
@@ -317,6 +305,7 @@ export default function ResearcherInfoNew(props) {
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
                     checked: localUse,
+                    ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
                 ])
@@ -330,7 +319,8 @@ export default function ResearcherInfoNew(props) {
                   onChange: ({ key: name, value }) => formFieldChange({name, value}),
                   defaultValue: cloudProvider,
                   validators: [FormValidators.REQUIRED],
-                  disabled: !isEmpty(darCode)
+                  disabled: !isEmpty(darCode),
+                  ariaLevel: ariaLevel + 3,
                 })
               ]),
               div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
@@ -340,6 +330,7 @@ export default function ResearcherInfoNew(props) {
                   defaultValue: cloudProviderType,
                   validators: [FormValidators.REQUIRED],
                   disabled: !isNil(darCode),
+                  ariaLevel: ariaLevel + 3,
                   onChange: ({ key: name, value }) => formFieldChange({name, value})
                 })
               ])
@@ -357,26 +348,9 @@ export default function ResearcherInfoNew(props) {
                   + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
                   rows: 6,
                   maxLength: 2000,
+                  ariaLevel: ariaLevel + 3,
                   onChange: ({ key: name, value}) => formFieldChange({name, value})
-                }),
-                // textarea({
-                //   style: {
-                //     backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-                //     width: '100%',
-                //     padding: '1rem'
-                //   },
-                //   defaultValue: cloudProviderDescription,
-                //   disabled: !isNil(darCode),
-                //   onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-                //   name: 'cloudProviderDescription',
-                //   id: 'cloudProviderDescription',
-                //   rows: '6',
-                //   required: true,
-                //   placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-                //     + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-                //     + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                //   maxLength: 2000
-                // })
+                })
               ])
             ])
           ])
@@ -472,121 +446,6 @@ export default function ResearcherInfoNew(props) {
                 deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
                 showApproval: false})
             ])
-          ])
-        ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            // div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //   label({className: 'control-label rp-title-question'}, [
-            //     '1.7 Cloud Use Statement*',
-            //     span([
-            //       'Will you perform all of your data storage and analysis for this project on the ',
-            //       a({
-            //         rel: 'noopener noreferrer',
-            //         href: 'https://anvil.terra.bio/',
-            //         target: '_blank'
-            //       }, ['AnVIL']),
-            //       '?'
-            //     ]),
-            //   ]),
-            // ]),
-            // div({className: 'row no-margin'}, [
-            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-            //     cloudRadioGroup
-            //   ]),
-            // ]),
-            // div({
-            //   isRendered: !anvilUse && anvilUse !== '',
-            //   className: 'computing-use-container',
-            //   style: {
-            //     backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
-            //   }
-            // }, [
-            //   div({className: 'row no-margin'}, [
-            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //       input({
-            //         type: 'checkbox',
-            //         id: 'cloud-requested',
-            //         name: 'cloudUse',
-            //         className: 'checkbox-inline rp-checkbox',
-            //         disabled: !isNil(darCode),
-            //         required: true,
-            //         checked: cloudUse,
-            //         onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
-            //       }),
-            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
-            //         ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
-            //       )
-            //     ])
-            //   ]),
-            //   div({className: 'row no-margin'}, [
-            //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //       input({
-            //         type: 'checkbox',
-            //         id: 'local-requested',
-            //         name: 'localUse',
-            //         className: 'checkbox-inline rp-checkbox',
-            //         disabled: !isNil(darCode),
-            //         required: true,
-            //         checked: localUse,
-            //         onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
-            //       }),
-            //       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
-            //         ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
-            //       )
-            //     ])
-            //   ]),
-            // ]),
-            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
-            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-            //     label({className: 'control-label'}, ['Name of Cloud Provider']),
-            //     input({
-            //       style: cloudInputStyle(cloudProvider),
-            //       type: 'text',
-            //       name: 'cloud-provider-name',
-            //       defaultValue: cloudProvider || '',
-            //       className: 'form-control',
-            //       required: true,
-            //       disabled: !isEmpty(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
-            //     })
-            //   ]),
-            //   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-            //     label({className: 'control-label'}, ['Type of Cloud Provider']),
-            //     input({
-            //       style: cloudInputStyle(cloudProviderType),
-            //       type: 'text',
-            //       name: 'provider-type-name',
-            //       defaultValue: cloudProviderType || '',
-            //       className: 'form-control',
-            //       required: true,
-            //       disabled: !isNil(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProviderType', value: e.target.value})
-            //     })
-            //   ])
-            // ]),
-            // div({className: 'row no-margin', isRendered: cloudUse === true}, [
-            //   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-            //     textarea({
-            //       style: {
-            //         backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
-            //         width: '100%',
-            //         padding: '1rem'
-            //       },
-            //       defaultValue: cloudProviderDescription,
-            //       disabled: !isNil(darCode),
-            //       onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
-            //       name: 'cloudProviderDescription',
-            //       id: 'cloudProviderDescription',
-            //       rows: '6',
-            //       required: true,
-            //       placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-            //         + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-            //         + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-            //       maxLength: 2000
-            //     })
-            //   ])
-            // ])
           ])
         ]),
         div({ className: 'form-group'}, [

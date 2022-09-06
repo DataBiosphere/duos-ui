@@ -1,6 +1,6 @@
 import { Component } from 'react';
-import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
-import ResearcherInfo from './dar_application/ResearcherInfo';
+import { a, div, form, h, i } from 'react-hyperscript-helpers';
+import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
@@ -19,6 +19,8 @@ import { Storage } from '../libs/storage';
 import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -901,58 +903,59 @@ class DataAccessRequestApplication extends Component {
                 i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
               ])
             ])
-          ]),
-          hr({ className: 'section-separator' }),
-
-          div({ className: `row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin` }, [
-
-            a({
-              id: 'btn_step_1',
-              onClick: (() => this.goToStep(1, false)),
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 1 ? 'active' : '')
-            }, [
-              small({}, ['Step 1']),
-              'Researcher Information',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ]),
-
-            a({
-              id: 'btn_step_2',
-              onClick: (() => this.goToStep(2, false)),
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 2 ? 'active' : '')
-            }, [
-              small({}, ['Step 2']),
-              'Data Access Request',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ]),
-
-            a({
-              id: 'btn_step_3',
-              onClick: (() => this.goToStep(3, false)),
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 3 ? 'active' : '')
-            }, [
-              small({}, ['Step 3']),
-              'Research Purpose Statement',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ]),
-
-            a({
-              id: 'btn_step_4',
-              onClick: (() => this.goToStep(4, false)),
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 4 ? 'active' : '')
-            }, [
-              small({}, ['Step 4']),
-              'Attestation & Agreements',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ])
           ])
         ]),
 
-        form({ name: 'form', 'noValidate': true }, [
+        div({ style: { clear: 'both' } }),
+        form({ name: 'form', 'noValidate': true, className: 'forms-v2' }, [
+          div({ className: 'multi-step-buttons-container' }, [
+            h(Tabs, {
+              value: this.state.step,
+              variant: 'scrollable',
+              scrollButtons: 'auto',
+              orientation: 'vertical',
+              TabIndicatorProps: {
+                style: { background: '#2BBD9B' }
+              },
+              onChange: (event, step) => {
+                this.goToStep(step);
+              }
+            }, [
+              h(Tab, {
+                // key: `dar-request-step-1`,
+                label: div([
+                  div({ className: 'step' }, 'Step 1'),
+                  div({ className: 'title' }, 'Researcher Information')
+                ]),
+                value: 1
+              }),
+              h(Tab, {
+                // key: `dar-request-step-2`,
+                label: div([
+                  div({ className: 'step' }, 'Step 2'),
+                  div({ className: 'title' }, 'Data Access Request')
+                ]),
+                value: 2
+              }),
+              h(Tab, {
+                // key: `dar-request-step-3`,
+                label: div([
+                  div({ className: 'step' }, 'Step 3'),
+                  div({ className: 'title' }, 'Research Purpose Statement')
+                ]),
+                value: 3
+              }),
+              h(Tab, {
+                // key: `dar-request-step-1`,
+                label: div([
+                  div({ className: 'step' }, 'Step 4'),
+                  div({ className: 'title' }, 'Data Use Agreement')
+                ]),
+                value: 4
+              })
+            ])
+          ]),
+
           div({ id: 'form-views' }, [
 
             ConfirmationDialog({
