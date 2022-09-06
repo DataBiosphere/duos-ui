@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction } from 'lodash/fp';
+import { cloneDeep, isFunction, isString } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
   formInputGeneric,
@@ -14,13 +14,25 @@ import {
 import './forms.css';
 
 export const FormFieldTypes = {
-  SELECT: { defaultValue: (config) => (config?.isMulti ? [] : ''), component: formInputSelect },
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
-  CHECKBOX: { defaultValue: (config) => (config?.valueType === 'string' ? '' : false), component: formInputCheckbox },
   SLIDER: { defaultValue: false, component: formInputSlider },
   RADIO: { defaultValue: null, component: formInputRadioGroup },
   TEXT: { defaultValue: '', component: formInputGeneric },
   NUMBER: { defaultValue: '', component: formInputGeneric },
+  CHECKBOX: {
+    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    component: formInputCheckbox
+  },
+  SELECT: {
+    defaultValue: (config) => (config?.isMulti ? [] : ''),
+    updateDefaultValue: ({ selectOptions, defaultValue }) => {
+      const isStringArr = isString(selectOptions[0]);
+      return isStringArr
+        ? { key: defaultValue, displayValue: defaultValue }
+        : defaultValue;
+    },
+    component: formInputSelect
+  },
 };
 
 export const FormValidators = {
@@ -91,9 +103,12 @@ export const FormField = (config) => {
 
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setFormValue(defaultValue);
+      const normalizedValue = isFunction(type.updateDefaultValue)
+        ? type.updateDefaultValue(config)
+        : defaultValue;
+      setFormValue(normalizedValue);
     }
-  }, [defaultValue]);
+  }, [defaultValue, config, type]);
 
   return div({
     key: `formControl_${id}`,
