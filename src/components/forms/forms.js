@@ -193,7 +193,7 @@ export const FormTable = (config) => {
           setFormValue(formValueClone);
           onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
         },
-        style: { marginTop: 10, padding: '17px 10px' }
+        style: { marginTop: 10 }
       }, [
         (addRowLabel || 'Add New'),
         span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })

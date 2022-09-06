@@ -206,12 +206,12 @@ export const formInputSelect = (config) => {
       if (isStringArr) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, option.map((o) => o.displayValue));
+          onFormInputChange(config, option?.map((o) => o.displayValue));
           setFormValue(option);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, option.displayValue);
+        onFormInputChange(config, option?.displayValue);
         setFormValue(option);
         return;
       }
