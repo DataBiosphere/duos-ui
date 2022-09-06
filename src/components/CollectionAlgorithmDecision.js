@@ -1,6 +1,6 @@
-import { div, h5, span, } from 'react-hyperscript-helpers';
+import { div, h5, p, span, } from 'react-hyperscript-helpers';
 import { formatDate } from '../libs/utils';
-import{ isNil } from 'lodash/fp';
+import{ isEmpty, isNil } from 'lodash/fp';
 
 export default function CollectionAlgorithmDecision(props) {
   const {algorithmResult = {}, styleOverride = {}} = props;
@@ -34,7 +34,7 @@ export default function CollectionAlgorithmDecision(props) {
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%'}}, ['Reason:']),
           span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
-            [!isNil(failureReasons) ? failureReasons.map((r) => span([r + ' '])) : 'N/A'])
+            [!isEmpty(failureReasons) ? failureReasons.map((r) => p([r])) : 'N/A'])
         ])
       ])
     ])
