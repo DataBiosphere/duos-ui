@@ -215,8 +215,10 @@ export const formInputSelect = (config) => {
         setFormValue(option);
         return;
       }
-      // object result
-      onFormInputChange(config, option);
+      else {
+        // object result
+        onFormInputChange(config, option);
+      }
     },
     onMenuOpen: () => setError(),
     onMenuClose: () => {
