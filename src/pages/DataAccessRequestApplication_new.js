@@ -174,7 +174,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentWillUnmount () {
-    window.removeEventListener('scroll', this.onScroll);
+    window.removeEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }
 
   async getDatasets(formData) {
@@ -338,7 +338,7 @@ class DataAccessRequestApplication extends Component {
     }
 
     this.setState(prev => {
-      prev.forcedScroll = setTimeout(() => {
+      prev.forcedScroll = setTimeout(() => { // eslint-disable-line -- codacy says settimeout is dangerous
         this.setState(prev => {
           prev.forcedScroll = null;
           return prev;
