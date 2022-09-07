@@ -22,6 +22,12 @@ import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
+const ApplicationTabs = [
+  'Researcher Information',
+  'Data Access Request',
+  'Research Purpose Statement',
+  'Data Use Agreement'
+];
 class DataAccessRequestApplication extends Component {
   constructor(props) {
     super(props);
@@ -920,40 +926,16 @@ class DataAccessRequestApplication extends Component {
               onChange: (event, step) => {
                 this.goToStep(step);
               }
-            }, [
-              h(Tab, {
-                // key: `dar-request-step-1`,
+            }, ApplicationTabs.map((tabName, index) => {
+              return h(Tab, {
+                key: `step-${index}-${tabName}`,
                 label: div([
-                  div({ className: 'step' }, 'Step 1'),
-                  div({ className: 'title' }, 'Researcher Information')
+                  div({ className: 'step' }, `Step ${index + 1}`),
+                  div({ className: 'title' }, tabName)
                 ]),
-                value: 1
-              }),
-              h(Tab, {
-                // key: `dar-request-step-2`,
-                label: div([
-                  div({ className: 'step' }, 'Step 2'),
-                  div({ className: 'title' }, 'Data Access Request')
-                ]),
-                value: 2
-              }),
-              h(Tab, {
-                // key: `dar-request-step-3`,
-                label: div([
-                  div({ className: 'step' }, 'Step 3'),
-                  div({ className: 'title' }, 'Research Purpose Statement')
-                ]),
-                value: 3
-              }),
-              h(Tab, {
-                // key: `dar-request-step-1`,
-                label: div([
-                  div({ className: 'step' }, 'Step 4'),
-                  div({ className: 'title' }, 'Data Use Agreement')
-                ]),
-                value: 4
-              })
-            ])
+                value: index + 1
+              });
+            }))
           ]),
 
           div({ id: 'form-views' }, [
