@@ -190,7 +190,7 @@ export const formInputSelect = (config) => {
 
   const isStringArr = isString(selectOptions[0]);
   const normalizedOptions = isStringArr
-    ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
+    ? selectOptions.map((option) => { return { displayText: option }; })
     : selectOptions;
 
   return h(component, {
@@ -206,12 +206,12 @@ export const formInputSelect = (config) => {
       if (isStringArr) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, option?.map((o) => o.displayValue));
+          onFormInputChange(config, option?.map((o) => o.displayText));
           setFormValue(option);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, option?.displayValue);
+        onFormInputChange(config, option?.displayText);
         setFormValue(option);
         return;
       }
@@ -227,15 +227,15 @@ export const formInputSelect = (config) => {
       }
     },
     options: normalizedOptions,
-    getOptionLabel: (option) => option.displayValue,
+    getOptionLabel: (option) => option.displayText,
     getNewOptionData: (inputValue) => {
-      return { key: inputValue, displayValue: inputValue };
+      return { key: inputValue, displayText: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayValue)) {
+      if(isNil(option) || isEmpty(option.displayText)) {
         return null;
       }
-      return isStringArr ? option.displayValue : option;
+      return isStringArr ? option.displayText : option;
     },
     value: formValue,
     ...selectConfig,
