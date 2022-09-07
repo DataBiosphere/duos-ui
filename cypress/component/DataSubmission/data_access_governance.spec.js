@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { DAC } from '../../../src/libs/ajax';
 import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
 import { cloneDeep } from 'lodash/fp';
