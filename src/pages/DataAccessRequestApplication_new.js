@@ -174,7 +174,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentWillUnmount () {
-    window.removeEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
+    window.removeEventListener('scroll', this.onScroll);
   }
 
   async getDatasets(formData) {
@@ -231,7 +231,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
 
-    window.addEventListener('scroll', this.onScroll);
+    window.addEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }
 
   formatDatasetForAutocomplete = (dataset) => {
