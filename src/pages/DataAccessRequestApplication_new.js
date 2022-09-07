@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, div, form, h, i } from 'react-hyperscript-helpers';
+import { a, div, form, h, h2, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
@@ -23,10 +23,11 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 const ApplicationTabs = [
-  'Researcher Information',
-  'Data Access Request',
-  'Research Purpose Statement',
-  'Data Use Agreement'
+  { name: 'Researcher Information' },
+  { name: 'Data Access Request' },
+  { name: 'Research Purpose Statement' },
+  { name: 'Progress Report' },
+  { name: 'Data Use Agreement', showStep: false }
 ];
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -92,7 +93,7 @@ class DataAccessRequestApplication extends Component {
         irbDocumentName: '',
         collaborationLetterLocation: '',
         collaborationLetterName: '',
-        activeDULQuestions: {}
+        activeDULQuestions: {},
       },
       step1: {
         inputResearcher: {
@@ -111,13 +112,15 @@ class DataAccessRequestApplication extends Component {
           invalid: false
         }
       },
-      problemSavingRequest: false
+      problemSavingRequest: false,
+      forcedScroll: null
     };
 
     this.goToStep = this.goToStep.bind(this);
     this.formFieldChange = this.formFieldChange.bind(this);
     this.partialSave = this.partialSave.bind(this);
     this.changeDARDocument = this.changeDARDocument.bind(this);
+    this.onScroll = this.onScroll.bind(this);
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -168,6 +171,10 @@ class DataAccessRequestApplication extends Component {
       prev.notificationData = notificationData;
       return prev;
     });
+  }
+
+  async componentWillUnmount () {
+    window.removeEventListener('scroll', this.onScroll);
   }
 
   async getDatasets(formData) {
@@ -223,6 +230,8 @@ class DataAccessRequestApplication extends Component {
       prev.formData = merge(prev.formData, formData);
       return prev;
     });
+
+    window.addEventListener('scroll', this.onScroll);
   }
 
   formatDatasetForAutocomplete = (dataset) => {
@@ -281,27 +290,62 @@ class DataAccessRequestApplication extends Component {
 
   //NOTE: use nextPage and previous page instead of having individual go to pages for each step
   nextPage = () => {
-    this.setState(prev => {
-      prev.step = prev.step + 1;
-      return prev;
-    });
-    window.scrollTo(0,0);
+    this.goToStep(this.state.step + 1);
   };
 
   prevPage = () => {
-    this.setState(prev => {
-      prev.step = prev.step - 1;
-      return prev;
-    });
-    window.scrollTo(0,0);
+    this.goToStep(this.state.step - 1);
   };
 
   goToStep = (step = 1) => {
+    this.resetForcedScrollDebounce();
     this.setState(prev => {
       prev.step = step;
       return prev;
     });
-    window.scrollTo(0, 0);
+    window.scroll({
+      top: document.getElementById(`step-${step}`).offsetTop,
+      behavior: 'smooth'
+    });
+  };
+
+  onScroll = () => {
+    if (this.state.forcedScroll) {
+      this.resetForcedScrollDebounce();
+    } else {
+      const scrollPos = window.scrollY;
+      const scrollBuffer = window.innerHeight * .25;
+      const sectionIndex = ApplicationTabs
+        .map((tab, index) => document.getElementById(`step-${index + 1}`).offsetTop)
+        .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
+
+      this.setState(prev => {
+        if (sectionIndex === 0) {
+          prev.step = 1;
+        } else if (sectionIndex === -1) {
+          prev.step = ApplicationTabs.length;
+        } else {
+          prev.step = sectionIndex;
+        }
+        return prev;
+      });
+    }
+  };
+
+  resetForcedScrollDebounce = () => {
+    if (this.state.forcedScroll) {
+      clearTimeout(this.state.forcedScroll);
+    }
+
+    this.setState(prev => {
+      prev.forcedScroll = setTimeout(() => {
+        this.setState(prev => {
+          prev.forcedScroll = null;
+          return prev;
+        });
+      }, 200);
+      return prev;
+    });
   };
 
   attestAndSave = () => {
@@ -926,20 +970,22 @@ class DataAccessRequestApplication extends Component {
               onChange: (event, step) => {
                 this.goToStep(step);
               }
-            }, ApplicationTabs.map((tabName, index) => {
-              return h(Tab, {
-                key: `step-${index}-${tabName}`,
-                label: div([
-                  div({ className: 'step' }, `Step ${index + 1}`),
-                  div({ className: 'title' }, tabName)
-                ]),
-                value: index + 1
-              });
-            }))
+            }, [
+              ...ApplicationTabs.map((tabConfig, index) => {
+                const { name, showStep = true } = tabConfig;
+                return h(Tab, {
+                  key: `step-${index}-${name}`,
+                  label: div([
+                    div({ isRendered: showStep, className: 'step' }, `Step ${index + 1}`),
+                    div({ className: 'title' }, name)
+                  ]),
+                  value: index + 1
+                });
+              })
+            ])
           ]),
 
           div({ id: 'form-views' }, [
-
             ConfirmationDialog({
               title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access',
               showModal: this.state.showDialogSave, action: { label: 'Yes', handler: this.dialogHandlerSave }
@@ -947,7 +993,7 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-            div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
+            div({id: 'step-1', className: 'step-container'}, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 checkNihDataOnly: checkNihDataOnly,
@@ -984,7 +1030,7 @@ class DataAccessRequestApplication extends Component {
               }))
             ]),
 
-            div({ isRendered: this.state.step === 2 }, [
+            div({id: 'step-2', className: 'step-container'}, [
               h(DataAccessRequest, {
                 darCode: darCode,
                 datasets: this.state.formData.datasets,
@@ -1017,7 +1063,7 @@ class DataAccessRequestApplication extends Component {
               })
             ]),
 
-            div({ isRendered: this.state.step === 3 }, [
+            div({id: 'step-3', className: 'step-container'}, [
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
                 darCode: darCode,
@@ -1048,7 +1094,12 @@ class DataAccessRequestApplication extends Component {
               })
             ]),
 
-            div({ isRendered: this.state.step === 4 }, [
+            div({id: 'step-4', className: 'step-container'}, [
+              // Progress Report Section
+              h2('Progress Report')
+            ]),
+
+            div({id: 'step-5', className: 'step-container'}, [
               h(DataUseAgreements, {
                 darCode: darCode,
                 problemSavingRequest,

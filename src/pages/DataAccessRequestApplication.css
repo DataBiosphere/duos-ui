@@ -111,6 +111,10 @@ fieldset[disabled] .regular-checkbox:before {
   padding: 0;
 }
 
+.step-container {
+  clear: both;
+}
+
 /* ------------------------------------- */
 /*    MUI Overrides                      */
 /* ------------------------------------- */
@@ -136,6 +140,7 @@ fieldset[disabled] .regular-checkbox:before {
 
 .multi-step-buttons-container .MuiButtonBase-root {
   margin-top: 25px;
+  padding-left: 20px;
 }
 
 .multi-step-buttons-container .step,

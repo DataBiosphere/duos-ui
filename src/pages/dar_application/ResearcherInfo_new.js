@@ -50,15 +50,15 @@ export default function ResearcherInfo(props) {
   };
 
   //initial state variable assignment
-  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);//
-  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);//
-  const [signingOfficial, setSigningOfficial] = useState();//
-  const [itDirector, setITDirector] = useState(props.itDirector || '');//
-  const [principalInvestigator, setPrincipalInvestigator] = useState(props.principalInvestigator || '');//
+  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);
+  const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || ['']);
+  const [itDirector, setITDirector] = useState(props.itDirector || '');
+  const [principalInvestigator, setPrincipalInvestigator] = useState(props.principalInvestigator || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [researcherUser, setResearcherUser] = useState(props.researcherUser);//
+  const [researcherUser, setResearcherUser] = useState(props.researcherUser);
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
@@ -213,7 +213,7 @@ export default function ResearcherInfo(props) {
               const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
               formFieldChange({name, value: formattedValue});
             },
-            selectOptions: allSigningOfficials,
+            selectOptions: allSigningOfficials || [''],
             selectConfig: {
               placeholder: 'Signing Official',
               getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
