@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
+import React from 'react';
 import { DAC } from '../../../src/libs/ajax';
 import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
-import { cloneDeep } from 'lodash/fp';
 import { mount } from 'cypress/react';
 
 const dacs = [];
