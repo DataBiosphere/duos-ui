@@ -4,6 +4,7 @@ import { set } from 'lodash/fp';
 import lockIcon from '../images/lock-icon.png';
 import {Styles} from '../libs/theme';
 
+import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 
 
@@ -41,7 +42,8 @@ export const DataSubmissionForm = () => {
     ]),
 
     form({}, [
-      h(DataSubmissionStudyInformation, { onChange })
+      h(DataSubmissionStudyInformation, { onChange }),
+      h(DataAccessGovernance, { onChange }),
     ])
   ]);
 };

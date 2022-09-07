@@ -25,8 +25,13 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: ({ selectOptions, defaultValue }) => {
+    updateDefaultValue: ({ selectOptions, defaultValue, isMulti }) => {
       const isStringArr = isString(selectOptions[0]);
+
+      if (isMulti) {
+        return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;
+      }
+
       return isStringArr
         ? { key: defaultValue, displayValue: defaultValue }
         : defaultValue;

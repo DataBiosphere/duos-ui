@@ -33,6 +33,10 @@ const validateFormInput = (config, value) => {
   return true;
 };
 
+const getKey = (config) => {
+  return (!isNil(config.name) ? config.name : config.id);
+};
+
 const normalizeValue = (value) => {
   if (typeof value === 'string') {
     return value.trim();
@@ -45,11 +49,13 @@ const normalizeValue = (value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
+  const { onChange, setFormValue } = config;
+
+  const key = getKey(config);
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
-  onChange({key: id, value: normalizedValue, isValid: isValidInput });
+  onChange({key: key, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
 };
 
@@ -183,6 +189,7 @@ export const formInputSelect = (config) => {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
     formValue, isCreatable, isMulti, setFormValue,
+    exclusiveValues,
     selectConfig = {}
   } = config;
 
@@ -202,22 +209,33 @@ export const formInputSelect = (config) => {
     isDisabled: disabled,
     placeholder: placeholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
-    onChange: (option) => {
+    onChange: (selected) => {
+      if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
+        const newSelection = selected[selected.length - 1];
+
+        if (exclusiveValues.includes(newSelection.displayValue)) {
+          selected.splice(0, selected.length - 1);
+        } else if (exclusiveValues.includes(selected[0].displayValue)) {
+          selected.splice(0, 1);
+        }
+      }
+
+
       if (isStringArr) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, option?.map((o) => o.displayValue));
-          setFormValue(option);
+          onFormInputChange(config, selected?.map((o) => o.displayValue));
+          setFormValue(selected);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, option?.displayValue);
-        setFormValue(option);
+        onFormInputChange(config, selected?.displayValue);
+        setFormValue(selected);
         return;
       }
       else {
         // object result
-        onFormInputChange(config, option);
+        onFormInputChange(config, selected);
       }
     },
     onMenuOpen: () => setError(),
@@ -313,7 +331,7 @@ export const formInputRadioGroup = (config) => {
               isRendered: option.type === 'string' && formValue.selected === option.name,
               id: `${id}_${optionId}_text_input`,
               type: 'text',
-              className: `form-control ${error ? 'errored' : ''}`,
+              className: `form-control radio-text-input ${error ? 'errored' : ''}`,
               placeholder: option.placeholder,
               value: formValue.value,
               style: {
@@ -341,23 +359,58 @@ export const formInputRadioGroup = (config) => {
 export const formInputCheckbox = (config) => {
   const {
     id, disabled, error, toggleText,
-    formValue, ariaDescribedby
+    formValue, ariaDescribedby,
+    valueType, placeholder, setError
   } = config;
 
-  return div({ className: 'checkbox' }, [
+  return div({
+    className: 'checkbox',
+    style: {
+      margin: '1.5rem 0 1.5rem 0',
+    },
+  }, [
     input({
       type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
-      checked: formValue,
+      id: id,
+      checked: (valueType === 'string' ? isString(formValue) : formValue),
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
-      onChange: (event) => onFormInputChange(config, event.target.checked),
+      onChange: (event) => {
+        if (valueType === 'string') {
+          onFormInputChange(config, (event.target.checked ? '' : undefined));
+        } else {
+          onFormInputChange(config, event.target.checked);
+        }
+      },
       disabled
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
-    }, [toggleText])
+      htmlFor: id,
+      style: {
+        fontFamily: 'Montserrat',
+        fontSize: '14px',
+      },
+    }, [toggleText]),
+    input({
+      isRendered: valueType === 'string' && isString(formValue),
+      id: id+'_text',
+      type: 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || '',
+      value: formValue,
+      style: {
+        ...styles.inputStyle,
+        ...{
+          marginTop: '1.0rem',
+        }
+      },
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+    }),
   ]);
 };
 
