@@ -386,7 +386,6 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: id,
       style: {
         fontFamily: 'Montserrat',
         fontSize: '14px',

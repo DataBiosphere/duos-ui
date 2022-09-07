@@ -74,7 +74,7 @@ export const ConsentGroupSummary = (props) => {
     id
   } = props;
 
-  const primaryGroupHtml = () => {
+  const summarizePrimaryGroup = () => {
     const field = findFirstSetField(consentGroup, primaryConsentFields);
 
     if (isNil(field)) {
@@ -97,7 +97,7 @@ export const ConsentGroupSummary = (props) => {
     return p({}, [primaryConsentText[field]]);
   };
 
-  const secondaryGroupHtml = () => {
+  const summarizeSecondaryGroup = () => {
     const fields = findAllSetFields(consentGroup, secondaryConsentFields);
 
     if (fields.length === 0) {
@@ -173,7 +173,7 @@ export const ConsentGroupSummary = (props) => {
             fontSize: '16px',
           }
         }, ['Primary Group']),
-        primaryGroupHtml(),
+        summarizePrimaryGroup(),
       ]),
 
       div({
@@ -188,7 +188,7 @@ export const ConsentGroupSummary = (props) => {
             fontSize: '16px',
           }
         }, ['Secondary Group(s)']),
-        secondaryGroupHtml(),
+        summarizeSecondaryGroup(),
       ]),
 
       div({
