@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isString, isNil, isArray, isEmpty } from 'lodash/fp';
-import { isEmailAddress } from '../../libs/utils';
-import { validateFormProps } from './formUtils';
+import { cloneDeep, isFunction } from 'lodash/fp';
+import {
+  validateFormProps,
+  customRadioPropValidation,
+  customSelectPropValidation,
+  requiredValidator,
+  urlValidator,
+  emailValidator,
+  updateSelectDefaultValue,
+} from './formUtils';
 import {
   formInputGeneric,
   formInputMultiText,
@@ -14,13 +21,30 @@ import {
 
 import './forms.css';
 
+export const commonRequiredProps = ['id'];
+export const commonOptionalProps = [
+  'name',
+  'disabled',
+  'description',
+  'title',
+  'ariaLevel',
+  'defaultValue',
+  'hideTitle',
+  'style',
+  'validators',
+  'onChange',
+  'type'
+];
+
+// ----------------------------------------------- //
+// ======       MAIN FORM FIELD TYPES       ====== //
+// ----------------------------------------------- //
 export const FormFieldTypes = {
   MULTITEXT: {
     defaultValue: [],
     component: formInputMultiText,
     requiredProps: [],
-    possibleProps: [
-      'title',
+    optionalProps: [
       'placeholder',
       'ariaDescribedby',
       'inputStyle'
@@ -30,7 +54,7 @@ export const FormFieldTypes = {
     defaultValue: false,
     component: formInputSlider,
     requiredProps: [],
-    possibleProps: [
+    optionalProps: [
       'toggleText',
     ],
   },
@@ -39,36 +63,22 @@ export const FormFieldTypes = {
     component: formInputRadioGroup,
     requiredProps: [
       'options',
+      // 'options' example:
+      // [
+      //  {name: 'opt_1', text: 'Option 1'},
+      //  {name: 'other', text: 'Other', type: 'string'} <-- will have textbox
+      // ]
     ],
-    possibleProps: [
+    optionalProps: [
       'ariaDescribedBy',
     ],
-    customPropValidation: (props) => {
-      if (!isArray(props.options)) {
-        throw '\'options\' prop must be an array.';
-      }
-
-      props.options.forEach((opt) => {
-        if (isNil(opt.name)) {
-          throw 'each option in \'options\' prop must have a \'name\' field';
-        }
-
-        if (isNil(opt.text)) {
-          throw 'each option in \'options\' prop must have a \'text\' field';
-        }
-
-        if (!isNil(opt.type) && !['boolean', 'string'].includes(opt.type)) {
-          throw `radio group option types can be 'boolean' or 'string', not: '${opt.type}'`;
-        }
-      });
-    }
+    customPropValidation: customRadioPropValidation,
   },
   TEXT: {
     defaultValue: '',
     component: formInputGeneric,
     requiredProps: [],
-    possibleProps: [
-      'type',
+    optionalProps: [
       'placeholder',
       'inputStyle',
       'ariaDescribedby',
@@ -78,8 +88,7 @@ export const FormFieldTypes = {
     defaultValue: '',
     component: formInputGeneric,
     requiredProps: [],
-    possibleProps: [
-      'type',
+    optionalProps: [
       'placeholder',
       'inputStyle',
       'ariaDescribedby',
@@ -89,112 +98,45 @@ export const FormFieldTypes = {
     defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
     component: formInputCheckbox,
     requiredProps: [],
-    possibleProps: [
+    optionalProps: [
       'placeholder',
       'inputStyle',
     ],
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: ({ selectOptions, defaultValue }) => {
-      const isStringArr = isString(selectOptions[0]);
-      return isStringArr
-        ? { key: defaultValue, displayText: defaultValue }
-        : defaultValue;
-    },
+    updateDefaultValue: updateSelectDefaultValue,
     component: formInputSelect,
     requiredProps: [
       'selectOptions'
+      // 'selectOptions' example:
+      // [
+      //  {displayText: 'Option 1'}
+      //   ^^^ can pass other fields in as extra info, e.g.:
+      //  {displayText: 'Dac 1', dacId: 213}
+      // ]
     ],
-    possibleProps: [
-      'isCreatable',
+    optionalProps: [
+      'isCreatable', // allows user to input their own
       'isMulti',
       'placeholder',
       'ariaDescribedby',
       'required',
-      'disabled',
       'selectConfig',
     ],
-    customPropValidation: (props) => {
-      if (!isArray(props.selectOptions)) {
-        throw 'prop \'selectOptions\' must be an array';
-      }
-
-      if (isEmpty(props.selectOptions)) {
-        throw '\'selectOptions\' cannot be empty';
-      }
-
-      const isStringArr = isString(props.selectOptions[0]);
-
-      props.selectOptions.forEach((opt) => {
-        if (isStringArr) {
-          if (!isString(opt)) {
-            throw 'all values in \'selectOptions\' must be string typed';
-          }
-
-          return;
-        }
-
-        if (isNil(opt.displayText)) {
-          throw 'every value in \'selectOptions\' needs a \'displayText\' field';
-        }
-      });
-    }
+    customPropValidation: customSelectPropValidation,
   },
 };
 
 export const FormValidators = {
-  REQUIRED: {
-    isValid: (value) => value !== undefined && value !== null && value !== '',
-    msg: 'Please enter a value'
-  },
-  URL: {
-    isValid: (val) => {
-      try {
-        new URL(val);
-      } catch (_) {
-        return false;
-      }
-      return true;
-    },
-    msg: 'Please enter a valid url (e.g., https://www.google.com)'
-  },
-  EMAIL: {
-    isValid: isEmailAddress,
-    msg: 'Please enter a valid email address (e.g., person@example.com)'
-  }
+  REQUIRED: requiredValidator,
+  URL: urlValidator,
+  EMAIL: emailValidator,
 };
 
-//---------------------------------------------
-// Main Components
-//---------------------------------------------
-/*
-* Config options:
-* id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
-*  * type == 'text'
-*  * type == 'multitext'
-*  * type == 'select'
-*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
-*    * isMulti: boolean - allow multiple simultaneous options
-*    * creatable: boolean - allow creating new values (not part of options)
-*  * type == 'radio'
-*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
-*       * if an option is of type string, a textbox will be added when selected.
-*  * type == 'checkbox'
-*    * toggleText
-*    * checkboxType
-*  * type === 'sliding-checkbox'
-* disabled: bool
-* placeholder, defaultValue,
-* style (for the formControl component)
-* inputStyle (for the input element)
-* onChange: func({key: '', value: '', isValid: boolean}),
-* validators: [{isValid: func, msg: ''}]
-* Accessibility: (defaults blank)
-*    * ariaDescribedby
-*    * ariaLevel
-*/
+// ----------------------------------------------- //
+// ======          MAIN COMPONENTS          ====== //
+// ----------------------------------------------- //
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,

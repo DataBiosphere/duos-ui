@@ -6,7 +6,7 @@ describe('VoteUtil - processMatchData()', () => {
     expect(processMatchData({})).to.equal('N/A');
   });
   it('returns "Yes" if failed === false and match === true', () => {
-    expect(processMatchData({match: true, failed: false})).to.equal("Yes");
+    expect(processMatchData({match: true, failed: false})).to.equal('Yes');
   });
   it('returns "Unable to determine a system match" if failed === true', () => {
     expect(processMatchData({ failed: true, match: false })).to.equal('Unable to determine a system match');
