@@ -3,6 +3,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
 import { isEmailAddress } from '../../../src/libs/utils';
+import { validateFormProps } from '../../../src/components/forms/formUtils';
 
 let props;
 const baseProps = {
@@ -617,5 +618,9 @@ describe('FormField - Tests', () => {
       });
     });
 
+  });
+
+  describe('Form Control - Validation', () => {
+    
   });
 });

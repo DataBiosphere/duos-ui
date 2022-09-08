@@ -60,7 +60,7 @@ export const FormFieldTypes = {
         if (!isNil(opt.type) && !['boolean', 'string'].includes(opt.type)) {
           throw `radio group option types can be 'boolean' or 'string', not: '${opt.type}'`;
         }
-      })
+      });
     }
   },
   TEXT: {
@@ -113,6 +113,7 @@ export const FormFieldTypes = {
       'ariaDescribedby',
       'required',
       'disabled',
+      'selectConfig',
     ],
     customPropValidation: (props) => {
       if (!isArray(props.selectOptions)) {
@@ -123,21 +124,21 @@ export const FormFieldTypes = {
         throw '\'selectOptions\' cannot be empty';
       }
 
-      const isStringArr = isString(props.selectOptions[0])
+      const isStringArr = isString(props.selectOptions[0]);
 
       props.selectOptions.forEach((opt) => {
         if (isStringArr) {
           if (!isString(opt)) {
             throw 'all values in \'selectOptions\' must be string typed';
           }
-          
+
           return;
         }
 
         if (isNil(opt.displayText)) {
           throw 'every value in \'selectOptions\' needs a \'displayText\' field';
         }
-      })
+      });
     }
   },
 };
@@ -219,7 +220,7 @@ export const FormField = (config) => {
 
   useEffect(() => {
     validateFormProps(config);
-  }, [config])
+  }, [config]);
 
   return div({
     key: `formControl_${id}`,
