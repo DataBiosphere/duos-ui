@@ -1,5 +1,5 @@
 import {FormFieldTypes} from './forms';
-import { isNil } from 'lodash/fp';
+import { isNil, isFunction } from 'lodash/fp';
 
 const alwaysRequiredProps = ['id'];
 const alwaysPossibleProps = [
@@ -40,8 +40,7 @@ export const validateFormProps = (props) => {
     }
   });
 
-  if (!isNil(type.customPropValidation)) {
+  if (isFunction(type.customPropValidation)) {
     type.customPropValidation(props);
   }
-
 };

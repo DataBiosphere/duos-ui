@@ -616,6 +616,64 @@ describe('FormField - Tests', () => {
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
     });
+  });
+  describe('Prop validation', () => {
+    it('should not allow mounting if unknown prop', (done) => {
+      // this event will automatically be unbound when this
+      // test ends because it's attached to 'cy'
+      cy.on('uncaught:exception', (err) => {
 
+        // ensure the error is about an unknown field
+        expect(err.message).to.include('unknown');
+
+        // using mocha's async done callback to finish
+        // this test so we prove that an uncaught exception
+        // was thrown
+        done();
+
+        // return false to prevent the error from
+        // failing this test
+        return false;
+      });
+
+      mount(<FormField {
+        ...{asdf: 'asdf', id: 'example'}
+      } />);
+    });
+
+    it('errors if required prop not given', (done) => {
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('id');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{type: FormFieldTypes.TEXT,} // requires id
+      } />);
+    });
+
+    it('errors based on custom validation', (done) => {
+
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('example failure');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{
+          type: {
+            ...FormFieldTypes.TEXT,
+            ...{
+              customPropValidation: () => {
+                throw 'example failure';
+              }
+            }
+          },
+          id: 'example',
+        } // requires id
+      } />);
+    });
   });
 });
