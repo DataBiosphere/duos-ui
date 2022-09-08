@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { div, img, h1, h2, h3, form, textarea, button, label, ul, li } from 'react-hyperscript-helpers';
+import { div, img, h1, h2, h3, form, textarea, button, label, ul, li, a, span } from 'react-hyperscript-helpers';
 import { cloneDeep, groupBy, isNil } from 'lodash/fp';
 import { Translate } from '../libs/ajax';
 import homeHeaderBackground from '../images/home_header_background.png';
+import { Spinner } from '../components/Spinner';
 
 const homeTitle = {
   color: '#FFFFFF',
@@ -26,10 +27,12 @@ const homeBannerDescription = {
 export default function Translator() {
   const [paragraph, setParagraph] = useState('');
   const [results, setResults] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const submit = async () => {
     let rawResults;
     try {
+      setIsLoading(true);
       rawResults = await Translate.translate({ paragraph });
     } catch (e) {
       // method doesnt exist yet, remove this when it's ready
@@ -60,10 +63,15 @@ export default function Translator() {
       .keys(rawResults)
       .map(key => {
         let normalizedRaw = cloneDeep(rawResults[key]);
+        let splitArr = key.split('/');
         normalizedRaw.key = key;
+        normalizedRaw.url = key;
+        normalizedRaw.urlDisplay = splitArr[splitArr.length - 1];
+        normalizedRaw.urlDomain = splitArr[2];
         return normalizedRaw;
       });
     setResults(groupBy('category', normalizedObjects));
+    setIsLoading(false);
   };
 
   return (
@@ -91,17 +99,23 @@ export default function Translator() {
               textarea({
                 rows: 3,
                 style: {
-                  width: '100%',
+                  width: '90%',
                   maxWidth: 800,
                   margin: '20px 30px',
-                  padding: 20
+                  padding: 20,
+                  borderRadius: 5
                 },
                 onChange: (e) => { setParagraph(e.target.value); }
               }),
               button({
-                className: 'button',
+                className: 'button button-blue',
                 type: 'button',
-                onClick: submit
+                onClick: submit,
+                style: {
+                  fontSize: 20,
+                  minWidth: 250,
+                  boxShadow: 'rgba(0, 0, 0, 0.3) 5px 5px 7px'
+                }
               }, ['Submit'])
             ])
           ])
@@ -113,7 +127,13 @@ export default function Translator() {
             ])
           ]),
 
-          div({ className: 'row no-margin' }, [
+          div({
+            isRendered: isLoading,
+            className: 'flex-row',
+            style: { width: '100%', justifyContent: 'center' }
+          }, [Spinner]),
+
+          div({ isRendered: !isLoading, className: 'row no-margin' }, [
             results && Object
               .keys(results)
               .map(key => {
@@ -130,7 +150,10 @@ export default function Translator() {
                         },
                         [
                           div([searchResult.title]),
-                          div([searchResult.key])
+                          div([
+                            a({href: searchResult.url}, [searchResult.urlDisplay]),
+                            span({ style: {fontSize: '1rem', opacity: 0.7, marginLeft: 6} }, `(${searchResult.urlDomain})`)
+                          ])
                         ]
                       );
                     })
