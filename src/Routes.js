@@ -75,12 +75,12 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props}
-      rolesAllowed={[USER_ROLES.researcher]} />
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props}
-      rolesAllowed={[USER_ROLES.researcher]} />
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />

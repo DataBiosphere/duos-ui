@@ -104,6 +104,7 @@ export default function ResearcherInfo(props) {
             ariaLevel: ariaLevel + 1,
             onChange: ({key: name, value}) => formFieldChange({name, value}),
             defaultValue: researcher,
+            disabled: true
           }),
         ]),
 
@@ -149,7 +150,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h(FormField, {
-            id: `principal_investigator`,
+            id: `principalInvestigator`,
             description: 'I certify that the prinicpal investigator listed below is aware of this study',
             placeholder: 'Firstname Lastname',
             title: '1.3 Principal Investigator',
@@ -268,7 +269,8 @@ export default function ResearcherInfo(props) {
               onChange: ({key: name, value}) => {
                 const normalizedValue = value && value.selected === 'yes';
                 formFieldChange({name, value: normalizedValue});
-              }
+              },
+              defaultValue: { selected: anvilUse ? 'yes' : 'no' }
             })
           ])
         ]),
@@ -290,7 +292,7 @@ export default function ResearcherInfo(props) {
                     validators: [FormValidators.REQUIRED],
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
-                    checked: cloudUse,
+                    defaultValue: cloudUse,
                     ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
@@ -304,7 +306,7 @@ export default function ResearcherInfo(props) {
                     validators: [FormValidators.REQUIRED],
                     type: FormFieldTypes.CHECKBOX,
                     toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
-                    checked: localUse,
+                    defaultValue: localUse,
                     ariaLevel: ariaLevel + 2,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
