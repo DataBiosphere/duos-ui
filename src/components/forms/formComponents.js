@@ -296,7 +296,8 @@ export const formInputRadioGroup = (config) => {
 
   const {
     id, disabled, error,
-    orientation = 'vertical', // [vertical, horizontal]
+    orientation = 'vertical', // [vertical, horizontal],
+    defaultValue,
     formValue, options, ariaDescribedby,
     setError
   } = config;
