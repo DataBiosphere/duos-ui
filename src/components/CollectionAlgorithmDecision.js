@@ -34,7 +34,7 @@ export default function CollectionAlgorithmDecision(props) {
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%'}}, ['Reason:']),
           span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
-            [!isEmpty(failureReasons) ? failureReasons.map((r) => p([r])) : 'N/A'])
+            [!isEmpty(failureReasons) ? failureReasons.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
         ])
       ])
     ])
