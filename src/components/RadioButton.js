@@ -7,7 +7,6 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
-    fontFamily: '\'Roboto\', sans-serif',
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };
@@ -61,7 +60,7 @@ export const RadioButton = (props) => {
             type: 'radio',
             name: props.name,
             value: props.value,
-            defaultChecked: props.defaultChecked,
+            checked: props.defaultChecked,
             onClick: props.onClick,
             disabled: props.disabled,
           }),

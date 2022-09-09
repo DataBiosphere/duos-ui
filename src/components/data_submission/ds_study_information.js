@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { h, h2, div } from 'react-hyperscript-helpers';
+import { h, h2, div, span } from 'react-hyperscript-helpers';
 import { isEmpty } from 'lodash/fp';
 
 import { Notifications, isEmailAddress } from '../../libs/utils';
@@ -53,6 +53,8 @@ export default function DataSubmissionStudyInformation(props) {
         'Case report', 'Case series', 'Cross-sectional',
         'Cohort study'
       ],
+      isCreatable: true,
+      selectConfig: {},
       onChange
     }),
     h(FormField, {
@@ -147,7 +149,10 @@ export default function DataSubmissionStudyInformation(props) {
       description: `Please select if you would like your dataset
         to be publicly visible for the requesters to see and select
         for an access request`,
-      toggleText: 'Visible',
+      toggleText: span({ style: {
+        fontWeight: 'normal',
+        fontStyle: 'italic'
+      }}, ['Visible']),
       onChange
     })
   ]);

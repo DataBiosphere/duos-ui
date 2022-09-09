@@ -1,288 +1,60 @@
 import { useState, useEffect } from 'react';
-import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep } from 'lodash/fp';
-import { SearchSelectOrText } from '../SearchSelectOrText';
+import { h, div, label, span, button } from 'react-hyperscript-helpers';
+import { cloneDeep, isFunction, isString } from 'lodash/fp';
+import { isEmailAddress } from '../../libs/utils';
+import {
+  formInputGeneric,
+  formInputMultiText,
+  formInputSelect,
+  formInputCheckbox,
+  formInputSlider,
+  formInputRadioGroup
+} from './formComponents';
+
 import './forms.css';
 
 export const FormFieldTypes = {
-  SELECT: { id: 'select', defaultValue: '' },
-  MULTITEXT: { id: 'multitext', defaultValue: [] },
-  CHECKBOX: { id: 'checkbox', defaultValue: false },
-  SLIDER: { id: 'slider', defaultValue: false },
-  TEXT: { id: 'text', defaultValue: '' },
-  NUMBER: { id: 'number', defaultValue: '' }
-};
-
-export const styles = {
-  inputStyle: {
-    padding: '25px 15px',
-    width: '100%'
+  MULTITEXT: { defaultValue: [], component: formInputMultiText },
+  SLIDER: { defaultValue: false, component: formInputSlider },
+  RADIO: { defaultValue: null, component: formInputRadioGroup },
+  TEXT: { defaultValue: '', component: formInputGeneric },
+  NUMBER: { defaultValue: '', component: formInputGeneric },
+  CHECKBOX: {
+    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    component: formInputCheckbox
   },
-  flexRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%'
-  }
+  SELECT: {
+    defaultValue: (config) => (config?.isMulti ? [] : ''),
+    updateDefaultValue: ({ selectOptions, defaultValue }) => {
+      const isStringArr = isString(selectOptions[0]);
+      return isStringArr
+        ? { key: defaultValue, displayValue: defaultValue }
+        : defaultValue;
+    },
+    component: formInputSelect
+  },
 };
 
 export const FormValidators = {
   REQUIRED: {
     isValid: (value) => value !== undefined && value !== null && value !== '',
     msg: 'Please enter a value'
-  }
-};
-
-//---------------------------------------------
-// Form Behavior
-//---------------------------------------------
-const validateFormInput = (config, value) => {
-  const { setError, validators } = config;
-  if (validators) {
-    const validationResults = validators
-      .filter(validator => !validator.isValid(value))
-      .map(x => x.msg);
-
-    const isValid = validationResults.length === 0;
-    setError(isValid ? undefined : validationResults);
-    return isValid;
-  }
-  setError();
-  return true;
-};
-
-const normalizeValue = (value) => {
-  if (typeof value === 'string') {
-    return value.trim();
-  } else if (Array.isArray(value)) {
-    return value
-      .map(x => normalizeValue(x))
-      .filter(x => x); // filter out null strings
-  }
-  return value;
-};
-
-const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
-  const normalizedValue = normalizeValue(value);
-  const isValidInput = validateFormInput(config, normalizedValue);
-
-  onChange({key: id, value: normalizedValue, isValid: isValidInput });
-  setFormValue(value);
-};
-
-//---------------------------------------------
-// Form Controls
-//---------------------------------------------
-const formInput = (config) => {
-  switch (config.type) {
-    case FormFieldTypes.SELECT: return formInputSelect(config);
-    case FormFieldTypes.MULTITEXT: return formInputMultiText(config);
-    case FormFieldTypes.CHECKBOX: return formInputCheckbox(config);
-    case FormFieldTypes.SLIDER: return formInputSlider(config);
-    case FormFieldTypes.TEXT:
-    default:
-      return formInputGeneric(config);
-  }
-};
-
-const formInputGeneric = (config) => {
-  const {
-    id, title, type, disabled,
-    placeholder,
-    inputStyle, ariaDescribedby,
-    formValue, error, setError
-  } = config;
-
-  return div([
-    input({
-      id: id,
-      type: type || 'text',
-      className: `form-control ${error ? 'errored' : ''}`,
-      placeholder: placeholder || title,
-      value: formValue,
-      style: { ...styles.inputStyle, ...inputStyle },
-      disabled: disabled,
-      onChange: (event) => onFormInputChange(config, event.target.value),
-      onFocus: () => setError(),
-      onBlur: (event) => validateFormInput(config, event.target.value),
-      'aria-describedby': ariaDescribedby,
-    }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
-  ]);
-};
-
-const formInputMultiText = (config) => {
-  const {
-    id, title, disabled,
-    placeholder, ariaDescribedby,
-    inputStyle, onChange,
-    formValue, setFormValue, error, setError
-  } = config;
-
-  const pushValue = (element) => {
-    const value = element.value.trim();
-
-    if (!value || !validateFormInput(config, value)) {
-      return;
-    }
-    if (formValue.indexOf(value) !== -1) {
-      element.value = '';
-      return;
-    }
-
-    const formValueClone = cloneDeep(formValue);
-    formValueClone.push(value);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
-    element.value = '';
-  };
-
-  const removePill = (index) => {
-    const formValueClone = cloneDeep(formValue);
-    formValueClone.splice(index, 1);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
-  };
-
-  return div({}, [
-    div({
-      className: 'formControl-group',
-      style: styles.flexRow
-    }, [
-      input({
-        id,
-        type: 'text',
-        className: `form-control ${error ? 'errored' : ''}`,
-        placeholder: placeholder || title,
-        style: { ...styles.inputStyle, ...inputStyle },
-        disabled,
-        'aria-describedby': ariaDescribedby,
-        onKeyUp: (event) => event.code === 'Enter' ? pushValue(event.target) : setError(),
-        onFocus: () => setError()
-      }),
-      h(button, {
-        className: 'form-btn btn-xs',
-        type: 'button',
-        disabled,
-        style: {
-          marginTop: 0,
-          minWidth: 'fit-content'
-        },
-        onClick: () => pushValue(document.getElementById(id))
-      }, [
-        span({
-          className: 'glyphicon glyphicon-plus',
-          'aria-label': 'Add',
-          style: { margin: '0 8px' },
-          isRendered: !disabled
-        })
-      ])
-    ]),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ]),
-    div({ style: { ...styles.flexRow, justifyContent: null } },
-      formValue.map((val, i) => {
-        return h(button, {
-          key: val,
-          className: 'pill btn-xs',
-          type: 'button',
-          disabled,
-          onClick: () => removePill(i)
-        }, [
-          val,
-          span({
-            className: 'glyphicon glyphicon-remove',
-            style: { marginLeft: '8px' },
-            isRendered: !disabled
-          })
-        ]);
-      })
-    )
-  ]);
-};
-
-const formInputSelect = (config) => {
-  const {
-    id, title, disabled, error, setError,
-    selectOptions, searchPlaceholder, ariaDescribedby
-  } = config;
-
-  return div({}, [
-    h(SearchSelectOrText, {
-      id,
-      'aria-describedby': ariaDescribedby,
-      onPresetSelection: async (selection) => onFormInputChange(config, selection),
-      onManualSelection: (selection) => onFormInputChange(config, selection),
-      onOpen: () => setError(),
-      options: selectOptions.map((x) => { return { key: x, displayText: x }; }),
-      searchPlaceholder: searchPlaceholder || `Search for ${title}...`,
-      className: 'form-control',
-      disabled, errored: error
-    }),
-    error && div({ className: `error-message fadein`}, [
-      span({ className: 'glyphicon glyphicon-play' }),
-      ...error.map((err) => div([err])),
-    ])
-  ]);
-};
-
-const formInputCheckbox = (config) => {
-  const {
-    id, disabled, error, toggleText,
-    formValue, ariaDescribedby
-  } = config;
-
-  return div({ className: 'checkbox' }, [
-    input({
-      type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
-      checked: formValue,
-      className: 'checkbox-inline',
-      'aria-describedby': ariaDescribedby,
-      onChange: (event) => onFormInputChange(config, event.target.checked),
-      disabled
-    }),
-    label({
-      className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
-      style: {
-        fontWeight: 'normal',
-        fontStyle: 'italic'
+  },
+  URL: {
+    isValid: (val) => {
+      try {
+        new URL(val);
+      } catch (_) {
+        return false;
       }
-    }, [toggleText])
-  ]);
-};
-
-const formInputSlider = (config) => {
-  const {
-    id, disabled, toggleText, formValue
-  } = config;
-
-  return div({ style: { ...styles.flexRow, justifyContent: 'unset', alignItems: 'center' } }, [
-    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
-      input({
-        type: 'checkbox',
-        id: `cb_${id}_${toggleText}`,
-        checked: formValue,
-        className: 'checkbox-inline',
-        onChange: (event) => onFormInputChange(config, event.target.checked),
-        disabled
-      }),
-      div({className: 'slider round'}),
-    ]),
-    div({
-      style: {
-        marginLeft: 15,
-        fontStyle: 'italic'
-      }
-    }, [toggleText])
-  ]);
+      return true;
+    },
+    msg: 'Please enter a valid url (e.g., https://www.google.com)'
+  },
+  EMAIL: {
+    isValid: isEmailAddress,
+    msg: 'Please enter a valid email address (e.g., person@example.com)'
+  }
 };
 
 //---------------------------------------------
@@ -291,35 +63,52 @@ const formInputSlider = (config) => {
 /*
 * Config options:
 * id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox')
-*  * type == select
-*    * selectOptions: [{key: string, displayText: string}]
-*    * searchPlaceholder
+* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
+*  * type == 'text'
+*  * type == 'multitext'
+*  * type == 'select'
+*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
+*    * isMulti: boolean - allow multiple simultaneous options
+*    * creatable: boolean - allow creating new values (not part of options)
+*  * type == 'radio'
+*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
+*       * if an option is of type string, a textbox will be added when selected.
 *  * type == 'checkbox'
 *    * toggleText
 *    * checkboxType
-* disabled
+*  * type === 'sliding-checkbox'
+* disabled: bool
 * placeholder, defaultValue,
 * style (for the formControl component)
 * inputStyle (for the input element)
-* onChange,
-* validators: [{isValid: func, msg: string}]
+* onChange: func({key: '', value: '', isValid: boolean}),
+* validators: [{isValid: func, msg: ''}]
+* Accessibility: (defaults blank)
+*    * ariaDescribedby
+*    * ariaLevel
 */
 export const FormField = (config) => {
   const {
-    id, title, hideTitle, description, type,
+    id, type = FormFieldTypes.TEXT, ariaLevel,
+    title, hideTitle, description,
     defaultValue, style, validators
   } = config;
 
   const [error, setError] = useState();
-  const [formValue, setFormValue] = useState(type?.defaultValue || '');
+
+  const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue;
+  const [formValue, setFormValue] = useState(typeDefaultValue || '');
+
   const required = (validators || []).includes(FormValidators.REQUIRED);
 
   useEffect(() => {
     if (defaultValue !== undefined) {
-      setFormValue(defaultValue);
+      const normalizedValue = isFunction(type.updateDefaultValue)
+        ? type.updateDefaultValue(config)
+        : defaultValue;
+      setFormValue(normalizedValue);
     }
-  }, [defaultValue]);
+  }, [defaultValue, config, type]);
 
   return div({
     key: `formControl_${id}`,
@@ -329,13 +118,14 @@ export const FormField = (config) => {
     title && !hideTitle && label({
       id: `lbl_${id}`,
       className: `control-label ${error ? 'errored' : ''}`,
-      htmlFor: `${id}`
+      htmlFor: `${id}`,
+      'aria-level': ariaLevel
     }, [
       title,
       required && '*'
     ]),
-    description && div({ style: { marginBottom: 15 } }, [description]),
-    formInput({
+    description && div({ style: { marginBottom: 15 } }, description),
+    h(type.component, {
       ...config,
       error, setError,
       formValue, setFormValue,
@@ -417,7 +207,8 @@ export const FormTable = (config) => {
           formValueClone.push({});
           setFormValue(formValueClone);
           onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
-        }
+        },
+        style: { marginTop: 10 }
       }, [
         (addRowLabel || 'Add New'),
         span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })
@@ -425,4 +216,3 @@ export const FormTable = (config) => {
     ])
   ]);
 };
-

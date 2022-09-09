@@ -1,0 +1,16 @@
+.button {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  box-shadow: none;
+  padding: 10px 20px;
+  border-radius: 3px;
+  border: 1px solid #094887;
+}
+
+.button-white,
+.button-secondary-default {
+  color: #0948B7;
+  border-color: #0948B7;
+  background-color: white;
+}
