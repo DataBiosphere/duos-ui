@@ -66,7 +66,7 @@ export const FormFieldTypes = {
       // 'options' example:
       // [
       //  {name: 'opt_1', text: 'Option 1'},
-      //  {name: 'other', text: 'Other', type: 'string'} <-- will have textbox
+      //  {name: 'other', text: 'Other', renderIfSelected: h(FormField, ...) }
       // ]
     ],
     optionalProps: [
@@ -98,10 +98,7 @@ export const FormFieldTypes = {
     defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
     component: formInputCheckbox,
     requiredProps: [],
-    optionalProps: [
-      'placeholder',
-      'inputStyle',
-    ],
+    optionalProps: [],
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),

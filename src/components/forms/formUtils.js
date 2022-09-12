@@ -72,9 +72,6 @@ export const customRadioPropValidation = (props) => {
       throw 'each option in \'options\' prop must have a \'text\' field';
     }
 
-    if (!isNil(opt.type) && !['boolean', 'string'].includes(opt.type)) {
-      throw `radio group option types can be 'boolean' or 'string', not: '${opt.type}'`;
-    }
   });
 };
 

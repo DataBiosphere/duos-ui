@@ -65,8 +65,8 @@ const errorMessage = (error) => {
 //---------------------------------------------
 export const formInputGeneric = (config) => {
   const {
-    id, title, type, disabled,
-    placeholder,
+    id, title, disabled,
+    placeholder, type,
     inputStyle, ariaDescribedby,
     formValue, error, setError
   } = config;
@@ -258,7 +258,7 @@ export const formInputRadioGroup = (config) => {
       {
         name: 'other',
         text: 'Other',
-        type: 'string',
+        renderIfSelected: div({}, [...]),
         placeholder: 'Please specify.',
       }
     ]
@@ -281,6 +281,8 @@ export const formInputRadioGroup = (config) => {
         },
         options.map(((option, idx) => {
           const optionId = (!isNil(option.id) ? option.id : option.name);
+          const selected = !isNil(formValue) && formValue.selected === option.name;
+          const renderIfSelected = option.renderIfSelected;
 
           return div({
             key: idx,
@@ -290,17 +292,10 @@ export const formInputRadioGroup = (config) => {
               id: `${id}_${optionId}`,
               name: `${id}_${optionId}`,
               key: idx,
-              defaultChecked: !isNil(formValue) && formValue.selected === option.name,
+              defaultChecked: selected,
               onClick: () => {
-                if (option.type === 'string') {
-                  onFormInputChange(config, {
-                    selected: option.name,
-                    value: '',
-                  });
-                  return;
-                }
 
-                onFormInputChange(config, { selected: option.name });
+                onFormInputChange(config, (!isNil(option.data) ? { selected: option.name, data: option.data } : { selected: option.name }));
               },
               style: {
                 fontFamily: 'Montserrat',
@@ -309,28 +304,7 @@ export const formInputRadioGroup = (config) => {
               description: option.text,
               disabled,
             }),
-            input({
-              isRendered: option.type === 'string' && formValue.selected === option.name,
-              id: `${id}_${optionId}_text_input`,
-              type: 'text',
-              className: `form-control ${error ? 'errored' : ''}`,
-              placeholder: option.placeholder,
-              value: formValue.value,
-              style: {
-                ...styles.inputStyle,
-                ...{
-                  marginTop: '0.5rem',
-                }
-              },
-              disabled: disabled,
-              onChange: (event) => onFormInputChange(config, {
-                selected: option.name,
-                value: event.target.value,
-              }),
-              onFocus: () => setError(),
-              onBlur: (event) => validateFormInput(config, event.target.value),
-              'aria-describedby': ariaDescribedby,
-            }),
+            div({isRendered: (!isNil(renderIfSelected) && selected)}, [renderIfSelected]),
           ]);
         }))
       )
