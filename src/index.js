@@ -7,7 +7,7 @@ import 'jquery/src/jquery';
 import 'bootstrap/dist/js/bootstrap.min';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
 import { unregister } from './registerServiceWorker';
@@ -15,8 +15,6 @@ import { BrowserRouter } from 'react-router-dom';
 
 unregister();
 
-ReactDOM.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
-  , document.getElementById('root'));
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<BrowserRouter><App /></BrowserRouter>);
