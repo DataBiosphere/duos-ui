@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import { filter } from 'lodash';
 import {Config} from './config';
-import $ from 'jquery';
+import axios from 'axios';
 
 // https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
 const gcs = 'https://storage.googleapis.com/broad-duos-banners';
@@ -20,9 +20,8 @@ export const NotificationService = {
       env === 'local'
         ? `/broad-duos-banner/${hash}_${bannerFileName}`
         : gcs + '/' + env + '_' + bannerFileName;
-    return $.getJSON(url, (data) => {
-      return data;
-    });
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   },
 
   /**
