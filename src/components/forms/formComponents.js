@@ -267,9 +267,8 @@ export const formInputRadioGroup = (config) => {
   */
 
   const {
-    id, disabled, error,
-    formValue, options, ariaDescribedby,
-    setError
+    id, disabled,
+    formValue, options
   } = config;
 
   return div({},

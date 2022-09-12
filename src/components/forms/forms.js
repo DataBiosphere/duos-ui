@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction } from 'lodash/fp';
+import { cloneDeep, isFunction, isString } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
