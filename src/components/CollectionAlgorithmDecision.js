@@ -1,10 +1,10 @@
-import { div, h5, span, } from 'react-hyperscript-helpers';
+import { div, h5, p, span, } from 'react-hyperscript-helpers';
 import { formatDate } from '../libs/utils';
-import{ isNil } from 'lodash/fp';
+import{ isEmpty, isNil } from 'lodash/fp';
 
 export default function CollectionAlgorithmDecision(props) {
   const {algorithmResult = {}, styleOverride = {}} = props;
-  const { createDate, id, result } = algorithmResult;
+  const { createDate, id, result, failureReasons} = algorithmResult;
 
   const containerProps = {
     id: `collection-algorithm-id-${id}`,
@@ -30,6 +30,11 @@ export default function CollectionAlgorithmDecision(props) {
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-date-label`, style: {paddingRight: '1%'}}, ['Date:']),
           span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
+        ]),
+        div({style: {fontSize: '1.5rem'}}, [
+          span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%'}}, ['Reason:']),
+          span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
+            [!isEmpty(failureReasons) ? failureReasons.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
         ])
       ])
     ])
