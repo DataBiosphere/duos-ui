@@ -96,7 +96,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />}
-    <AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
+    {(props.env === 'local' || props.env === 'dev' || props.env === 'staging') &&<AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <Route path="*" component={NotFound} />
   </Switch>
 );
