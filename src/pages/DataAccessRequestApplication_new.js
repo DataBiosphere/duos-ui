@@ -26,7 +26,6 @@ const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
   { name: 'Research Purpose Statement' },
-  { name: 'Progress Report' },
   { name: 'Data Use Agreement', showStep: false }
 ];
 class DataAccessRequestApplication extends Component {
@@ -304,7 +303,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     window.scroll({
-      top: document.getElementById(`step-${step}`).offsetTop,
+      top: document.getElementsByClassName('step-container')[step - 1].offsetTop,
       behavior: 'smooth'
     });
   };
@@ -316,7 +315,7 @@ class DataAccessRequestApplication extends Component {
       const scrollPos = window.scrollY;
       const scrollBuffer = window.innerHeight * .25;
       const sectionIndex = ApplicationTabs
-        .map((tab, index) => document.getElementById(`step-${index + 1}`).offsetTop)
+        .map((tab, index) => document.getElementsByClassName('step-container')[index].offsetTop)
         .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
       this.setState(prev => {
@@ -993,7 +992,7 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-            div({id: 'step-1', className: 'step-container'}, [
+            div({className: 'step-container'}, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 checkNihDataOnly: checkNihDataOnly,
@@ -1030,7 +1029,7 @@ class DataAccessRequestApplication extends Component {
               }))
             ]),
 
-            div({id: 'step-2', className: 'step-container'}, [
+            div({className: 'step-container'}, [
               h(DataAccessRequest, {
                 darCode: darCode,
                 datasets: this.state.formData.datasets,
@@ -1063,7 +1062,7 @@ class DataAccessRequestApplication extends Component {
               })
             ]),
 
-            div({id: 'step-3', className: 'step-container'}, [
+            div({className: 'step-container'}, [
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
                 darCode: darCode,
@@ -1094,12 +1093,7 @@ class DataAccessRequestApplication extends Component {
               })
             ]),
 
-            div({id: 'step-4', className: 'step-container'}, [
-              // Progress Report Section
-              h2('Progress Report')
-            ]),
-
-            div({id: 'step-5', className: 'step-container'}, [
+            div({className: 'step-container'}, [
               h(DataUseAgreements, {
                 darCode: darCode,
                 problemSavingRequest,
