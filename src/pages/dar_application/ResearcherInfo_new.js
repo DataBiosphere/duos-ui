@@ -273,7 +273,11 @@ export default function ResearcherInfo(props) {
                 const normalizedValue = value && value.selected === 'yes';
                 formFieldChange({name, value: normalizedValue});
               },
-              defaultValue: { selected: anvilUse ? 'yes' : 'no' }
+              defaultValue: {
+                selected: anvilUse === true ? 'yes'
+                  : anvilUse === false ? 'no'
+                    : undefined
+              }
             })
           ])
         ]),
