@@ -8,7 +8,6 @@ import {
   requiredValidator,
   urlValidator,
   emailValidator,
-  updateSelectDefaultValue,
 } from './formUtils';
 import {
   formInputGeneric,
@@ -28,6 +27,7 @@ export const commonOptionalProps = [
   'description',
   'title',
   'ariaLevel',
+  'ariaDescribedby',
   'defaultValue',
   'hideTitle',
   'style',
@@ -36,9 +36,9 @@ export const commonOptionalProps = [
   'type'
 ];
 
-// ----------------------------------------------- //
-// ======       MAIN FORM FIELD TYPES       ====== //
-// ----------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                  MAIN FORM FIELD TYPES                                  ====== //
+// ----------------------------------------------------------------------------------------------------- //
 export const FormFieldTypes = {
   MULTITEXT: {
     defaultValue: [],
@@ -46,7 +46,6 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'ariaDescribedby',
       'inputStyle'
     ],
   },
@@ -69,9 +68,7 @@ export const FormFieldTypes = {
       //  {name: 'other', text: 'Other', renderIfSelected: h(FormField, ...) }
       // ]
     ],
-    optionalProps: [
-      'ariaDescribedBy',
-    ],
+    optionalProps: [],
     customPropValidation: customRadioPropValidation,
   },
   TEXT: {
@@ -80,9 +77,7 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle',
-      'ariaDescribedby',
-    ],
+      'inputStyle'],
   },
   NUMBER: {
     defaultValue: '',
@@ -90,8 +85,7 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle',
-      'ariaDescribedby',
+      'inputStyle'
     ],
   },
   CHECKBOX: {
@@ -102,7 +96,12 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: updateSelectDefaultValue,
+    updateDefaultValue: ({ selectOptions, defaultValue }) => {
+      const isStringArr = isString(selectOptions[0]);
+      return isStringArr
+        ? { key: defaultValue, displayText: defaultValue }
+        : defaultValue;
+    },
     component: formInputSelect,
     requiredProps: [
       'selectOptions'
@@ -117,23 +116,24 @@ export const FormFieldTypes = {
       'isCreatable', // allows user to input their own
       'isMulti',
       'placeholder',
-      'ariaDescribedby',
-      'required',
       'selectConfig',
     ],
     customPropValidation: customSelectPropValidation,
   },
 };
 
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                     FORM VALIDATORS                                     ====== //
+// ----------------------------------------------------------------------------------------------------- //
 export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
   EMAIL: emailValidator,
 };
 
-// ----------------------------------------------- //
-// ======          MAIN COMPONENTS          ====== //
-// ----------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                     MAIN COMPONENTS                                     ====== //
+// ----------------------------------------------------------------------------------------------------- //
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,

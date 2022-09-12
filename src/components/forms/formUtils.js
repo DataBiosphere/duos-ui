@@ -75,13 +75,6 @@ export const customRadioPropValidation = (props) => {
   });
 };
 
-export const updateSelectDefaultValue = ({ selectOptions, defaultValue }) => {
-  const isStringArr = isString(selectOptions[0]);
-  return isStringArr
-    ? { key: defaultValue, displayText: defaultValue }
-    : defaultValue;
-};
-
 export const requiredValidator = {
   isValid: (value) => value !== undefined && value !== null && value !== '',
   msg: 'Please enter a value',
