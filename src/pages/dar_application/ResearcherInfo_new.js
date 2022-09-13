@@ -289,6 +289,20 @@ export default function ResearcherInfo(props) {
                 }
               }, [
                 div({className: 'row no-margin'}, [
+                  div({className: 'row no-margin'}, [
+                    div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                      h(FormField, {
+                        id: 'localUse',
+                        disabled: !isNil(darCode),
+                        validators: [FormValidators.REQUIRED],
+                        type: FormFieldTypes.CHECKBOX,
+                        toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
+                        defaultValue: localUse,
+                        ariaLevel: ariaLevel + 2,
+                        onChange: ({ key: name, value }) => formFieldChange({name, value})
+                      })
+                    ])
+                  ]),
                   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                     h(FormField, {
                       id: 'cloudUse',
@@ -301,21 +315,7 @@ export default function ResearcherInfo(props) {
                       onChange: ({ key: name, value }) => formFieldChange({name, value})
                     })
                   ])
-                ]),
-                div({className: 'row no-margin'}, [
-                  div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                    h(FormField, {
-                      id: 'localUse',
-                      disabled: !isNil(darCode),
-                      validators: [FormValidators.REQUIRED],
-                      type: FormFieldTypes.CHECKBOX,
-                      toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
-                      defaultValue: localUse,
-                      ariaLevel: ariaLevel + 2,
-                      onChange: ({ key: name, value }) => formFieldChange({name, value})
-                    })
-                  ])
-                ]),
+                ])
               ]),
               div({className: 'row no-margin', isRendered: cloudUse === true}, [
                 div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
