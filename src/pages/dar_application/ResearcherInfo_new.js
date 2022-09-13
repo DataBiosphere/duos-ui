@@ -270,89 +270,91 @@ export default function ResearcherInfo(props) {
                 const normalizedValue = value && value.selected === 'yes';
                 formFieldChange({name, value: normalizedValue});
               },
-              defaultValue: { selected: anvilUse ? 'yes' : 'no' }
-            })
-          ])
-        ]),
-
-        div({className: 'dar-application-row'}, [
-          div({className: 'row no-margin'}, [
-            div({
-              isRendered: anvilUse === false,
-              className: 'computing-use-container',
-              style: {
-                backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
+              defaultValue: {
+                selected: anvilUse === true ? 'yes'
+                  : anvilUse === false ? 'no'
+                    : undefined
               }
-            }, [
-              div({className: 'row no-margin'}, [
-                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            }),
+
+            div({className: 'row no-margin'}, [
+              div({
+                isRendered: anvilUse === false,
+                className: 'computing-use-container',
+                style: {
+                  backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
+                }
+              }, [
+                div({className: 'row no-margin'}, [
+                  div({className: 'row no-margin'}, [
+                    div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                      h(FormField, {
+                        id: 'localUse',
+                        disabled: !isNil(darCode),
+                        validators: [FormValidators.REQUIRED],
+                        type: FormFieldTypes.CHECKBOX,
+                        toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
+                        defaultValue: localUse,
+                        ariaLevel: ariaLevel + 2,
+                        onChange: ({ key: name, value }) => formFieldChange({name, value})
+                      })
+                    ])
+                  ]),
+                  div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                    h(FormField, {
+                      id: 'cloudUse',
+                      disabled: !isNil(darCode),
+                      validators: [FormValidators.REQUIRED],
+                      type: FormFieldTypes.CHECKBOX,
+                      toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
+                      defaultValue: cloudUse,
+                      ariaLevel: ariaLevel + 2,
+                      onChange: ({ key: name, value }) => formFieldChange({name, value})
+                    })
+                  ])
+                ])
+              ]),
+              div({className: 'row no-margin', isRendered: cloudUse === true}, [
+                div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
                   h(FormField, {
-                    id: 'cloudUse',
-                    disabled: !isNil(darCode),
+                    id: 'cloudProvider',
+                    title: 'Name of Cloud Provider',
+                    onChange: ({ key: name, value }) => formFieldChange({name, value}),
+                    defaultValue: cloudProvider,
                     validators: [FormValidators.REQUIRED],
-                    type: FormFieldTypes.CHECKBOX,
-                    toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
-                    defaultValue: cloudUse,
-                    ariaLevel: ariaLevel + 2,
+                    disabled: !isEmpty(darCode),
+                    ariaLevel: ariaLevel + 3,
+                  })
+                ]),
+                div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+                  h(FormField, {
+                    id: 'cloudProviderType',
+                    title: 'Type of Cloud Provider',
+                    defaultValue: cloudProviderType,
+                    validators: [FormValidators.REQUIRED],
+                    disabled: !isNil(darCode),
+                    ariaLevel: ariaLevel + 3,
                     onChange: ({ key: name, value }) => formFieldChange({name, value})
                   })
                 ])
               ]),
-              div({className: 'row no-margin'}, [
+              div({className: 'row no-margin', isRendered: cloudUse === true}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                   h(FormField, {
-                    id: 'localUse',
+                    id: 'cloudProviderDescription',
+                    type: FormFieldTypes.TEXTAREA,
+                    defaultValue: cloudProviderDescription,
                     disabled: !isNil(darCode),
                     validators: [FormValidators.REQUIRED],
-                    type: FormFieldTypes.CHECKBOX,
-                    toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
-                    defaultValue: localUse,
-                    ariaLevel: ariaLevel + 2,
-                    onChange: ({ key: name, value }) => formFieldChange({name, value})
+                    placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
+                    + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
+                    + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
+                    rows: 6,
+                    maxLength: 2000,
+                    ariaLevel: ariaLevel + 3,
+                    onChange: ({ key: name, value}) => formFieldChange({name, value})
                   })
                 ])
-              ]),
-            ]),
-            div({className: 'row no-margin', isRendered: cloudUse === true}, [
-              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                h(FormField, {
-                  id: 'cloudProvider',
-                  title: 'Name of Cloud Provider',
-                  onChange: ({ key: name, value }) => formFieldChange({name, value}),
-                  defaultValue: cloudProvider,
-                  validators: [FormValidators.REQUIRED],
-                  disabled: !isEmpty(darCode),
-                  ariaLevel: ariaLevel + 3,
-                })
-              ]),
-              div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                h(FormField, {
-                  id: 'cloudProviderType',
-                  title: 'Type of Cloud Provider',
-                  defaultValue: cloudProviderType,
-                  validators: [FormValidators.REQUIRED],
-                  disabled: !isNil(darCode),
-                  ariaLevel: ariaLevel + 3,
-                  onChange: ({ key: name, value }) => formFieldChange({name, value})
-                })
-              ])
-            ]),
-            div({className: 'row no-margin', isRendered: cloudUse === true}, [
-              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                h(FormField, {
-                  id: 'cloudProviderDescription',
-                  type: FormFieldTypes.TEXTAREA,
-                  defaultValue: cloudProviderDescription,
-                  disabled: !isNil(darCode),
-                  validators: [FormValidators.REQUIRED],
-                  placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
-                  + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
-                  + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                  rows: 6,
-                  maxLength: 2000,
-                  ariaLevel: ariaLevel + 3,
-                  onChange: ({ key: name, value}) => formFieldChange({name, value})
-                })
               ])
             ])
           ])
