@@ -54,7 +54,7 @@ export default function ResearcherInfo(props) {
   const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);//
   const [signingOfficial, setSigningOfficial] = useState();//
   const [itDirector, setITDirector] = useState(props.itDirector || '');//
-  const [principalInvestigator, setPrincipalInvestigator] = useState(props.principalInvestigator || '');//
+  const [piName, setPIName] = useState(props.piName || '');//
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
@@ -70,12 +70,12 @@ export default function ResearcherInfo(props) {
     setCheckCollaborator(props.checkCollaborator);
     setCheckNihDataOnly(props.checkNihDataOnly);
     setITDirector(props.itDirector);
-    setPrincipalInvestigator(props.principalInvestigator);
+    setPIName(props.piName);
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.principalInvestigator, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   return (
     div({
@@ -160,7 +160,7 @@ export default function ResearcherInfo(props) {
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
             onChange: ({key: name, value}) => formFieldChange({name, value}),
-            defaultValue: principalInvestigator
+            defaultValue: piName
           })
         ]),
 
