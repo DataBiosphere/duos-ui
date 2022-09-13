@@ -238,7 +238,7 @@ export default function ResearcherInfo(props) {
           h(FormField, {
             id: 'itDirector',
             description: 'I certify that the individual listed below is my IT Director',
-            placeholder: 'IT Director',
+            placeholder: 'Enter Firstname Lastname',
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
