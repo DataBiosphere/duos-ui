@@ -28,39 +28,23 @@ export default function Translator() {
   const [paragraph, setParagraph] = useState('');
   const [results, setResults] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
 
   const submit = async () => {
     let rawResults;
     try {
       setIsLoading(true);
       rawResults = await Translate.translate({ paragraph });
+      setError();
     } catch (e) {
-      // method doesnt exist yet, remove this when it's ready
-      rawResults = {
-        'http://purl.obolibrary.org/obo/DUO_0000042': {
-          'title': 'General Research Use',
-          'category': 'Data Use Permission'
-        },
-        'http://purl.obolibrary.org/obo/DUO_0000045': {
-          'title': 'Not for Profit Organization Use Only',
-          'category': 'Data Use Modifier'
-        },
-        'http://purl.obolibrary.org/obo/DUO_0000041': {
-          'title': 'Non-Profit Organization Use Only',
-          'category': 'Data Use Modifier'
-        },
-        'http://purl.obolibrary.org/obo/DUO_0000007': {
-          'title': 'Disease Specific Research',
-          'category': 'Data Use Permission'
-        }
-      };
+      setError(e);
     }
     normalizeResults(rawResults);
   };
 
   const normalizeResults = (rawResults) => {
     const normalizedObjects = Object
-      .keys(rawResults)
+      .keys(rawResults || {})
       .map(key => {
         let normalizedRaw = cloneDeep(rawResults[key]);
         let splitArr = key.split('/');
@@ -133,7 +117,14 @@ export default function Translator() {
             style: { width: '100%', justifyContent: 'center' }
           }, [Spinner]),
 
-          div({ isRendered: !isLoading, className: 'row no-margin' }, [
+          div({ isRendered: error }, [
+            'There was an error running your request'
+          ]),
+
+          div({ isRendered: !isLoading && !error, className: 'row no-margin' }, [
+            results && Object.keys(results).length === 0 && div([
+              'No results found'
+            ]),
             results && Object
               .keys(results)
               .map(key => {
