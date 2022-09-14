@@ -15,7 +15,8 @@ import {
   formInputSelect,
   formInputCheckbox,
   formInputSlider,
-  formInputRadioGroup
+  formInputRadioGroup,
+  formInputTextarea
 } from './formComponents';
 
 import './forms.css';
@@ -68,7 +69,9 @@ export const FormFieldTypes = {
       //  {id: 'custom_id_other', name: 'other', text: 'Other'}
       // ]
     ],
-    optionalProps: [],
+    optionalProps: [
+      'orientation', // 'vertical' or 'horizontal'
+    ],
     customPropValidation: customRadioPropValidation,
   },
   TEXT: {
@@ -92,7 +95,9 @@ export const FormFieldTypes = {
     defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
     component: formInputCheckbox,
     requiredProps: [],
-    optionalProps: [],
+    optionalProps: [
+      'toggleText'
+    ],
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
@@ -120,6 +125,17 @@ export const FormFieldTypes = {
     ],
     customPropValidation: customSelectPropValidation,
   },
+  TEXTAREA: {
+    defaultValue: '',
+    component: formInputTextarea,
+    requiredProps: [],
+    optionalProps: [
+      'placeholder',
+      'inputStyle',
+      'rows',
+      'maxLength',
+    ]
+  }
 };
 
 // ----------------------------------------------------------------------------------------------------- //

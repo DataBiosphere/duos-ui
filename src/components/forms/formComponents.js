@@ -1,10 +1,9 @@
-import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-
+import { h, div, label, input, span, button, textarea } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import { FormValidators } from './forms';
-import {RadioButton} from '../RadioButton';
+import { RadioButton } from '../RadioButton';
 
 import './formComponents.css';
 
@@ -33,26 +32,16 @@ const validateFormInput = (config, value) => {
   return true;
 };
 
-const normalizeValue = (value) => {
-  if (typeof value === 'string') {
-    return value.trim();
-  } else if (Array.isArray(value)) {
-    return value
-      .map(x => normalizeValue(x))
-      .filter(x => x); // filter out null strings
-  }
-  return value;
-};
-
 const onFormInputChange = (config, value) => {
-  const { id, name, onChange, setFormValue } = config;
+  const { id, name, onChange, formValue, setFormValue } = config;
   const key = (!isNil(name) ? name : id);
 
-  const normalizedValue = normalizeValue(value);
-  const isValidInput = validateFormInput(config, normalizedValue);
+  const isValidInput = validateFormInput(config, value);
 
-  onChange({key: key, value: normalizedValue, isValid: isValidInput });
-  setFormValue(value);
+  if (value !== formValue) {
+    onChange({key: key, value, isValid: isValidInput });
+    setFormValue(value);
+  }
 };
 
 const errorMessage = (error) => {
@@ -75,7 +64,7 @@ export const formInputGeneric = (config) => {
 
   return div([
     input({
-      id: id,
+      id,
       type: type || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
@@ -86,6 +75,35 @@ export const formInputGeneric = (config) => {
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
+    }),
+    errorMessage(error)
+  ]);
+};
+
+export const formInputTextarea = (config) => {
+  const {
+    id, title, type, disabled,
+    placeholder,
+    inputStyle, ariaDescribedby,
+    rows, maxLength,
+    formValue, error, setError
+  } = config;
+
+  return div([
+    textarea({
+      id,
+      type: type || 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || title,
+      value: formValue,
+      style: { ...styles.inputStyle, ...inputStyle },
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+      rows,
+      maxLength
     }),
     errorMessage(error)
   ]);
@@ -247,7 +265,9 @@ export const formInputSelect = (config) => {
 
 export const formInputRadioGroup = (config) => {
   const {
+
     id, disabled,
+    orientation = 'vertical', // [vertical, horizontal],
     formValue, options
   } = config;
 
@@ -255,7 +275,7 @@ export const formInputRadioGroup = (config) => {
     [
       div(
         {
-          className: 'radio-group',
+          className: `radio-group ${orientation}`,
           id: id,
         },
         options.map(((option, idx) => {
@@ -271,7 +291,6 @@ export const formInputRadioGroup = (config) => {
               key: idx,
               defaultChecked: !isNil(formValue) && formValue === option.name,
               onClick: () => {
-
                 onFormInputChange(config, option.name);
               },
               style: {
@@ -297,7 +316,7 @@ export const formInputCheckbox = (config) => {
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
+      id: id,
       checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -306,7 +325,7 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
+      htmlFor: id,
     }, [toggleText])
   ]);
 };
@@ -317,10 +336,10 @@ export const formInputSlider = (config) => {
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
-    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
+    label({ className: 'switch', htmlFor: id }, [
       input({
         type: 'checkbox',
-        id: `cb_${id}_${toggleText}`,
+        id: id,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
