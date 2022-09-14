@@ -32,24 +32,14 @@ const validateFormInput = (config, value) => {
   return true;
 };
 
-const normalizeValue = (value) => {
-  if (typeof value === 'string') {
-    return value.trim();
-  } else if (Array.isArray(value)) {
-    return value
-      .map(x => normalizeValue(x))
-      .filter(x => x); // filter out null strings
-  }
-  return value;
-};
-
 const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
-  const normalizedValue = normalizeValue(value);
-  const isValidInput = validateFormInput(config, normalizedValue);
+  const { id, onChange, formValue, setFormValue } = config;
+  const isValidInput = validateFormInput(config, value);
 
-  onChange({key: id, value: normalizedValue, isValid: isValidInput });
-  setFormValue(value);
+  if (value !== formValue) {
+    onChange({key: id, value, isValid: isValidInput });
+    setFormValue(value);
+  }
 };
 
 const errorMessage = (error) => {

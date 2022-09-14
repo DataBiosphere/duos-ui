@@ -28,7 +28,7 @@ const ApplicationTabs = [
   { name: 'Research Purpose Statement' },
   { name: 'Data Use Agreement', showStep: false }
 ];
-class DataAccessRequestApplication extends Component {
+class DataAccessRequestApplicationNew extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -92,7 +92,7 @@ class DataAccessRequestApplication extends Component {
         irbDocumentName: '',
         collaborationLetterLocation: '',
         collaborationLetterName: '',
-        activeDULQuestions: {},
+        activeDULQuestions: {}
       },
       step1: {
         inputResearcher: {
@@ -873,6 +873,7 @@ class DataAccessRequestApplication extends Component {
       externalCollaborators,
       signingOfficial = '',
       itDirector = '',
+      piName = '',
       cloudUse = false,
       localUse = false,
       anvilUse = false,
@@ -1015,6 +1016,7 @@ class DataAccessRequestApplication extends Component {
                 allSigningOfficials: this.state.allSigningOfficials,
                 signingOfficial: {displayName: signingOfficial},
                 itDirector,
+                piName,
                 anvilUse,
                 cloudUse,
                 localUse,
@@ -1117,4 +1119,4 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
-export default DataAccessRequestApplication;
+export default DataAccessRequestApplicationNew;

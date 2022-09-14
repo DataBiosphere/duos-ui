@@ -50,15 +50,15 @@ export default function ResearcherInfo(props) {
   };
 
   //initial state variable assignment
-  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
-  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);
-  const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || ['']);
-  const [itDirector, setITDirector] = useState(props.itDirector || '');
-  const [principalInvestigator, setPrincipalInvestigator] = useState(props.principalInvestigator || '');
+  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);//
+  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);//
+  const [signingOfficial, setSigningOfficial] = useState();//
+  const [itDirector, setITDirector] = useState(props.itDirector || '');//
+  const [piName, setPIName] = useState(props.piName || '');//
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [researcherUser, setResearcherUser] = useState(props.researcherUser);
+  const [researcherUser, setResearcherUser] = useState(props.researcherUser);//
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
@@ -70,12 +70,12 @@ export default function ResearcherInfo(props) {
     setCheckCollaborator(props.checkCollaborator);
     setCheckNihDataOnly(props.checkNihDataOnly);
     setITDirector(props.itDirector);
-    setPrincipalInvestigator(props.principalInvestigator);
+    setPIName(props.piName);
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.principalInvestigator, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+}, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   return (
     div({ datacy: 'researcher-info'}, [
@@ -150,14 +150,14 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h(FormField, {
-            id: `principalInvestigator`,
+            id: `piName`,
             description: 'I certify that the prinicpal investigator listed below is aware of this study',
             placeholder: 'Firstname Lastname',
             title: '1.3 Principal Investigator',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
             onChange: ({key: name, value}) => formFieldChange({name, value}),
-            defaultValue: principalInvestigator
+            defaultValue: piName
           })
         ]),
 
@@ -235,7 +235,7 @@ export default function ResearcherInfo(props) {
           h(FormField, {
             id: 'itDirector',
             description: 'I certify that the individual listed below is my IT Director',
-            placeholder: 'IT Director',
+            placeholder: 'Enter Firstname Lastname',
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,

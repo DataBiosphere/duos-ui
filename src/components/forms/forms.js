@@ -39,7 +39,10 @@ export const FormFieldTypes = {
 
 export const FormValidators = {
   REQUIRED: {
-    isValid: (value) => value !== undefined && value !== null && value !== '',
+    isValid: (value) => {
+      return value !== undefined && value !== null &&
+        (typeof value === 'string' ? value.trim() !== '' : true);
+    },
     msg: 'Please enter a value'
   },
   URL: {
