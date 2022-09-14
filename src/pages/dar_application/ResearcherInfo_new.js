@@ -75,7 +75,7 @@ export default function ResearcherInfo(props) {
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-}, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   return (
     div({ datacy: 'researcher-info'}, [
