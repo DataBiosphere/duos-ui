@@ -34,8 +34,8 @@ export default function Translator() {
     let rawResults;
     try {
       setIsLoading(true);
-      rawResults = await Translate.translate({ paragraph });
       setError();
+      rawResults = await Translate.translate({ paragraph });
     } catch (e) {
       setError(e);
     }
@@ -117,8 +117,9 @@ export default function Translator() {
             style: { width: '100%', justifyContent: 'center' }
           }, [Spinner]),
 
-          div({ isRendered: error }, [
-            'There was an error running your request'
+          div({ isRendered: error !== undefined && error !== null }, [
+            'There was an error running your request',
+            error
           ]),
 
           div({ isRendered: !isLoading && !error, className: 'row no-margin' }, [
