@@ -325,7 +325,6 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: id,
     }, [toggleText])
   ]);
 };
@@ -336,7 +335,7 @@ export const formInputSlider = (config) => {
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
-    label({ className: 'switch', htmlFor: id }, [
+    label({ className: 'switch' }, [
       input({
         type: 'checkbox',
         id: id,
