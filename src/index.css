@@ -14,7 +14,7 @@ html, body, .body, #root {
 
 .main {
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-width: 100%;
   min-height: 100vh;
   /* must be same height as the footer */

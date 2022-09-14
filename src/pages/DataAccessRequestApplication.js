@@ -904,7 +904,7 @@ class DataAccessRequestApplication extends Component {
           ]),
           hr({ className: 'section-separator' }),
 
-          div({ className: 'row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin' }, [
+          div({ className: `row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin` }, [
 
             a({
               id: 'btn_step_1',
@@ -951,6 +951,7 @@ class DataAccessRequestApplication extends Component {
             ])
           ])
         ]),
+
         form({ name: 'form', 'noValidate': true }, [
           div({ id: 'form-views' }, [
 

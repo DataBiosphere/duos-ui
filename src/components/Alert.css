@@ -19,6 +19,7 @@
   background-color: white;
   border: 1px solid #6B0080;
   border-radius: 5px;
+  font-weight: bold;
 }
 
 .alert-title {
