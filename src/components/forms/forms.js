@@ -57,7 +57,7 @@ export const FormFieldTypes = {
       'toggleText',
     ],
   },
-  RADIO: {
+  RADIOGROUP: {
     defaultValue: null,
     component: formInputRadioGroup,
     requiredProps: [
@@ -65,7 +65,7 @@ export const FormFieldTypes = {
       // 'options' example:
       // [
       //  {name: 'opt_1', text: 'Option 1'},
-      //  {name: 'other', text: 'Other', renderIfSelected: h(FormField, ...) }
+      //  {id: 'custom_id_other', name: 'other', text: 'Other'}
       // ]
     ],
     optionalProps: [],

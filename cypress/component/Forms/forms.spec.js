@@ -3,7 +3,6 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
 import { isEmailAddress } from '../../../src/libs/utils';
-import { div } from 'react-hyperscript-helpers';
 
 let props;
 const baseProps = {
@@ -127,11 +126,11 @@ describe('FormField - Tests', () => {
     });
   });
 
-  describe('Form Control - Radio', () => {
+  describe('Form Control - Radio Group', () => {
     beforeEach(() => {
       props = {
         ...baseProps,
-        type: FormFieldTypes.RADIO,
+        type: FormFieldTypes.RADIOGROUP,
         id: 'radioGroup',
         options: [
           {
@@ -143,15 +142,11 @@ describe('FormField - Tests', () => {
             id: 'opt2',
             name: 'opt2',
             text: 'Option 2',
-            data: {
-              dacId: 102,
-            }
           },
           {
             id: 'opt3',
             name: 'opt3',
-            text: 'Option 3 (text)',
-            renderIfSelected: div({id: 'conditionallyRenderedDiv'}, []),
+            text: 'Option 3',
           }
         ]
       };
@@ -163,7 +158,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('exist');
       cy.get('#radioGroup_opt2').should('exist');
       cy.get('#radioGroup_opt3').should('exist');
-      cy.get('#conditionallyRenderedDiv').should('not.exist');
     });
 
     it('should able to check, only one at a time', () => {
@@ -173,14 +167,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#conditionallyRenderedDiv').should('not.exist');
 
       cy.get('#radioGroup_opt1').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt1',
-          },
+          value: 'opt1',
           isValid: true
         });
       });
@@ -188,17 +179,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#conditionallyRenderedDiv').should('not.exist');
 
       cy.get('#radioGroup_opt2').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt2',
-            data: {
-              dacId: 102,
-            }
-          },
+          value: 'opt2',
           isValid: true
         });
       });
@@ -206,14 +191,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#conditionallyRenderedDiv').should('not.exist');
 
       cy.get('#radioGroup_opt3').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt3',
-          },
+          value: 'opt3',
           isValid: true
         });
       });
@@ -221,7 +203,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('be.checked');
-      cy.get('#conditionallyRenderedDiv').should('exist');
     });
 
 

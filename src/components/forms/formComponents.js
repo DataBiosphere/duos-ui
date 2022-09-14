@@ -45,11 +45,13 @@ const normalizeValue = (value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, setFormValue } = config;
+  const { id, name, onChange, setFormValue } = config;
+  const key = (!isNil(name) ? name : id);
+
   const normalizedValue = normalizeValue(value);
   const isValidInput = validateFormInput(config, normalizedValue);
 
-  onChange({key: id, value: normalizedValue, isValid: isValidInput });
+  onChange({key: key, value: normalizedValue, isValid: isValidInput });
   setFormValue(value);
 };
 
@@ -244,28 +246,6 @@ export const formInputSelect = (config) => {
 };
 
 export const formInputRadioGroup = (config) => {
-  /* options example:
-    [
-      {
-        name: 'open_access',
-        text: 'Open Access'
-      },
-      {
-        id: 'closed_access', // can specify id, uses name as id otherwise
-        name: 'closed_access',
-        text: 'Closed Access',
-      },
-      {
-        name: 'other',
-        text: 'Other',
-        renderIfSelected: div({}, [...]),
-        placeholder: 'Please specify.',
-      }
-    ]
-    if type is 'string', then a textbox is rendered
-    when checked.
-  */
-
   const {
     id, disabled,
     formValue, options
@@ -280,8 +260,6 @@ export const formInputRadioGroup = (config) => {
         },
         options.map(((option, idx) => {
           const optionId = (!isNil(option.id) ? option.id : option.name);
-          const selected = !isNil(formValue) && formValue.selected === option.name;
-          const renderIfSelected = option.renderIfSelected;
 
           return div({
             key: idx,
@@ -291,10 +269,10 @@ export const formInputRadioGroup = (config) => {
               id: `${id}_${optionId}`,
               name: `${id}_${optionId}`,
               key: idx,
-              defaultChecked: selected,
+              defaultChecked: !isNil(formValue) && formValue === option.name,
               onClick: () => {
 
-                onFormInputChange(config, (!isNil(option.data) ? { selected: option.name, data: option.data } : { selected: option.name }));
+                onFormInputChange(config, option.name);
               },
               style: {
                 fontFamily: 'Montserrat',
@@ -303,7 +281,6 @@ export const formInputRadioGroup = (config) => {
               description: option.text,
               disabled,
             }),
-            div({isRendered: (!isNil(renderIfSelected) && selected)}, [renderIfSelected]),
           ]);
         }))
       )
