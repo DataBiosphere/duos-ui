@@ -20,6 +20,7 @@ import ResearcherProfile from './pages/ResearcherProfile';
 import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
+import Translator from './pages/Translator';
 import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
@@ -100,6 +101,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />}
+    {(props.env === 'local' || props.env === 'dev' || props.env === 'staging') &&<AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <Route path="*" component={NotFound} />
   </Switch>
 );
