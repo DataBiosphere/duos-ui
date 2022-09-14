@@ -15,12 +15,22 @@
   color: #004085;
 }
 
+.alert-wrapper.important {
+  background-color: white;
+  border: 1px solid #6B0080;
+  border-radius: 5px;
+}
+
 .alert-title {
   display: block;
   font-weight: 500;
   font-size: 16px;
   line-height: 25px;
   margin: 0;
+}
+
+.alert-wrapper.important .alert-title {
+  color: #6B0080;
 }
 
 .alert-description {

@@ -6,6 +6,7 @@ import { USER_ROLES } from './libs/utils';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
+import DataAccessRequestApplicationNew from './pages/DataAccessRequestApplication_new';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
 import Election404 from './pages/Election404';
@@ -74,8 +75,12 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props}
+      rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
