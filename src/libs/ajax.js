@@ -880,7 +880,7 @@ export const ToS = {
 
 export const Translate = {
   translate: async (body) => {
-    const url = `https://consent-ontology.dsde-dev.broadinstitute.org/translate/paragraph`;
+    const url = `${await getOntologyUrl()}translate/paragraph`;
     const res = await axios.post(url, body, Config.authOpts());
     return res.data;
   },
