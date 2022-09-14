@@ -358,7 +358,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider false', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -371,7 +371,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider true', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
