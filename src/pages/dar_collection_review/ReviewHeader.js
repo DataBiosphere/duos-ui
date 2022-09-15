@@ -39,7 +39,6 @@ export default function ReviewHeader(props) {
   const {
     darCode,
     projectTitle,
-    downloadLink,
     readOnly = false,
     isLoading
   } = props;
@@ -53,9 +52,6 @@ export default function ReviewHeader(props) {
           span({style: styles.darCode}, [darCode]),
           div({className: 'collection-project-title'}, [projectTitle])
         ]),
-        div({style: styles.containerRow}, [
-          downloadLink
-        ])
       ]),
       div({className: 'header-skeleton-loader', isRendered: isLoading}, [
         div({className: 'primary-header-skeleton', style: appliedPrimaryHeaderStyle}, [

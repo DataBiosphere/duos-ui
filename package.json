@@ -9,8 +9,6 @@
     "@mui/styled-engine": "5.10.0",
     "@material-ui/core": "4.12.4",
     "@material-ui/icons": "4.11.3",
-    "@react-pdf/renderer": "2.1.1",
-    "@react-pdf/font": "2.2.0",
     "axios": "^0.27.2",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
@@ -25,8 +23,8 @@
     "noty": "3.2.0-beta",
     "popper.js": "1.16.1",
     "query-string": "7.1.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "react-dropzone": "14.2.2",
     "react-ga": "3.3.1",
     "react-google-charts": "4.0.0",
@@ -68,7 +66,7 @@
     "google-auth-library": "8.1.1",
     "html-webpack-plugin": "4.5.2",
     "react-error-overlay": "6.0.9",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.1",
     "source-map-explorer": "2.5.2"
   },
   "browserslist": [
@@ -79,10 +77,6 @@
   ],
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom",
-    "@react-pdf/font": "2.2.0"
-  },
-  "resolutions": {
-    "@react-pdf/font": "2.2.0"
+    "react-dom": "$react-dom"
   }
 }
