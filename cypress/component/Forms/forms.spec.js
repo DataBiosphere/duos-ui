@@ -126,7 +126,7 @@ describe('FormField - Tests', () => {
     });
   });
 
-  describe('Form Control - Radio', () => {
+  describe('Form Control - Radio Group', () => {
     beforeEach(() => {
       props = {
         ...baseProps,
@@ -146,9 +146,7 @@ describe('FormField - Tests', () => {
           {
             id: 'opt3',
             name: 'opt3',
-            text: 'Option 3 (text)',
-            type: 'string',
-            placeholder: 'Please specify.',
+            text: 'Option 3',
           }
         ]
       };
@@ -160,7 +158,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('exist');
       cy.get('#radioGroup_opt2').should('exist');
       cy.get('#radioGroup_opt3').should('exist');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
     });
 
     it('should able to check, only one at a time', () => {
@@ -170,7 +167,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt1').click().then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -185,7 +181,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt2').click().then(() => {
         expect(props.onChange).to.be.calledWith({
@@ -200,14 +195,12 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt3').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
           value: {
             selected: 'opt3',
-            value: '',
           },
           isValid: true
         });
@@ -216,18 +209,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('exist');
-
-      cy.get('#radioGroup_opt3_text_input').type('Hello!').then(() => {
-        expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup',
-          value: {
-            selected: 'opt3',
-            value: 'Hello!',
-          },
-          isValid: true
-        });
-      });
     });
 
 
@@ -383,7 +364,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider false', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -396,7 +377,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider true', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -616,6 +597,5 @@ describe('FormField - Tests', () => {
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
     });
-
   });
 });

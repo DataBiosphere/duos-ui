@@ -236,7 +236,8 @@ export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable, isMulti, isAsync, setFormValue,
+    formValue, isCreatable = false, isMulti = false, 
+    isAsync = false, setFormValue,
     exclusiveValues, loadOptions,
     selectConfig = {}
   } = config;
@@ -249,7 +250,7 @@ export const formInputSelect = (config) => {
   // must be specified if async, since we can't guess the
   // array type until after querying.
   const optionsAreString = config.optionsAreString || (!isNil(selectOptions) && isString(selectOptions[0]));
-  const normalizedOptions = (!isNil(selectOptions) ? normalizeSelectOptions(selectOptions) : undefined);
+  const normalizedOptions = (!isNil(selectOptions) ? normalizeSelectOptions(selectOptions, optionsAreString) : undefined);
 
   return h(component, {
     key: id,
@@ -414,10 +415,10 @@ export const formInputSlider = (config) => {
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
-    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
+    label({ className: 'switch', htmlFor: `${id}` }, [
       input({
         type: 'checkbox',
-        id: `cb_${id}_${toggleText}`,
+        id: `${id}`,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
