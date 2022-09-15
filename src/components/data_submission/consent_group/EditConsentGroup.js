@@ -103,8 +103,8 @@ export const EditConsentGroup = (props) => {
 
     // primary
     h(FormField, {
-      title: 'Primary Consent Group',
-      description: 'asdf',
+      title: 'Consent Group - Primary Data Use Terms*',
+      description: 'Please select one of the following data use permissions for your dataset',
       type: FormFieldTypes.RADIOBUTTON,
       id: idx+'_primaryConsent_generalResearchUse',
       name: 'primaryConsent',
