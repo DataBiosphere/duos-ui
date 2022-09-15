@@ -9,7 +9,8 @@ import {
   formInputCheckbox,
   formInputSlider,
   formInputRadioGroup,
-  formInputTextarea
+  formInputTextarea,
+  formInputRadioButton,
 } from './formComponents';
 
 import './forms.css';
@@ -17,6 +18,7 @@ import './forms.css';
 export const FormFieldTypes = {
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
   RADIO: { defaultValue: null, component: formInputRadioGroup },
+  RADIOBUTTON: { defaultValue: null, component: formInputRadioButton },
   TEXT: { defaultValue: '', component: formInputGeneric },
   TEXTAREA: { defaultValue: '', component: formInputTextarea },
   NUMBER: { defaultValue: '', component: formInputGeneric },

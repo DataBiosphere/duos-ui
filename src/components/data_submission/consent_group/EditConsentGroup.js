@@ -5,27 +5,15 @@ import { FormFieldTypes, FormField, FormValidators } from '../../forms/forms';
 
 export const selectedPrimaryGroup = (consentGroup) => {
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
-    return {
-      selected: 'generalResearchUse',
-    };
+    return 'generalResearchUse';
   } else if (!isNil(consentGroup.hmb) && consentGroup.hmb) {
-    return {
-      selected: 'hmb',
-    };
+    return 'hmb';
   } else if (!isNil(consentGroup.diseaseSpecificUse) && isString(consentGroup.diseaseSpecificUse)) {
-    return {
-      selected: 'diseaseSpecificUse',
-      value: consentGroup.diseaseSpecificUse,
-    };
+    return 'diseaseSpecificUse';
   } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
-    return {
-      selected: 'poa',
-    };
+    return 'poa';
   } else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
-    return {
-      selected: 'otherPrimary',
-      value: consentGroup.otherPrimary,
-    };
+    return 'otherPrimary';
   }
 
   return undefined;
@@ -44,6 +32,11 @@ export const EditConsentGroup = (props) => {
   const [showGSText, setShowGSText] = useState(false);
   const [gsText, setGSText] = useState('');
 
+  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(false);
+  const [otherPrimaryText, setOtherPrimaryText] = useState('');
+
+  const [showDiseaseSpecificUseText, setShowDiseaseSpecificUseText] = useState(false);
+  const [diseaseSpecificUseText, setDiseaseSpecificUseText] = useState('');
 
   const onChange = ({key, value}) => {
     setConsentGroup({
@@ -65,9 +58,12 @@ export const EditConsentGroup = (props) => {
         otherPrimary: undefined,
       },
       ...{
-        [key]: value || true,
+        [key]: value,
       }
     });
+
+    setShowDiseaseSpecificUseText(key === 'diseaseSpecificUse');
+    setShowOtherPrimaryText(key === 'otherPrimary');
   };
 
   return div({
@@ -90,49 +86,93 @@ export const EditConsentGroup = (props) => {
     }),
 
     // primary
-    h(FormField,
-      {
-        type: FormFieldTypes.RADIO,
-        id: idx+'_primaryRadio',
-        name: 'primaryRadio',
-        title: 'Consent Group - Primary Data Use Terms',
-        validators: [FormValidators.REQUIRED],
-        description: 'Please select one of the following data use permissions for your dataset',
-        options: [
-          {
-            id: 'generalResearchUse',
-            name: 'generalResearchUse',
-            text: 'General Research Use',
-          },
-          {
-            id: 'hmb',
-            name: 'hmb',
-            text: 'Health/Medical/Biomedical Research Use',
-          },
-          {
-            id: 'diseaseSpecificUse',
-            name: 'diseaseSpecificUse',
-            text: 'Disease-Specific Research Use',
-            type: 'string',
-            placeholder: 'Please enter one or more diseases',
-          },
-          {
-            id: 'poa',
-            name: 'poa',
-            text: 'Populations, Origins, Ancestry Use',
-          },
-          {
-            id: 'otherPrimary',
-            name: 'otherPrimary',
-            text: 'Other',
-            type: 'string',
-            placeholder: 'Please specify',
-          },
-        ],
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => onPrimaryChange({key: value.selected, value: value.value}),
-      }
-    ),
+    h(FormField, {
+      type: FormFieldTypes.RADIOBUTTON,
+      id: idx+'_primaryConsent_generalResearchUse',
+      name: 'primaryConsent',
+      value: 'generalResearchUse',
+      toggleText: 'General Research Use',
+      defaultValue: selectedPrimaryGroup(consentGroup),
+      onChange: ({value}) => {
+        onPrimaryChange({key: value, value: true});
+      },
+    }),
+
+
+    h(FormField, {
+      type: FormFieldTypes.RADIOBUTTON,
+      id: idx+'_primaryConsent_hmb',
+      name: 'primaryConsent',
+      value: 'hmb',
+      toggleText: 'Health/Medical/Biomedical Research Use',
+      defaultValue: selectedPrimaryGroup(consentGroup),
+      onChange: ({value}) => {
+        onPrimaryChange({key: value, value: true});
+      },
+    }),
+
+    h(FormField, {
+      type: FormFieldTypes.RADIOBUTTON,
+      id: idx+'_primaryConsent_diseaseSpecificUse',
+      name: 'primaryConsent',
+      value: 'diseaseSpecificUse',
+      toggleText: 'Disease-Specific Research Use',
+      defaultValue: selectedPrimaryGroup(consentGroup),
+      onChange: ({value}) => {
+        onPrimaryChange({key: value, value: diseaseSpecificUseText});
+      },
+    }),
+
+    h(FormField, {
+      isRendered: showDiseaseSpecificUseText,
+      id: idx+'_diseaseSpecificUseText',
+      name: 'diseaseSpecificUse',
+      validators: [FormValidators.REQUIRED],
+      placeholder: 'Please enter one or more diseases',
+      defaultValue: diseaseSpecificUseText,
+      onChange: ({key, value, isValid}) => {
+        setDiseaseSpecificUseText(value);
+        onChange({key: key, value: value, isValid: isValid});
+      },
+    }),
+
+    h(FormField, {
+      type: FormFieldTypes.RADIOBUTTON,
+      id: idx+'_primaryConsent_poa',
+      name: 'primaryConsent',
+      value: 'poa',
+      toggleText: 'Populations, Origins, Ancestry Use',
+      defaultValue: selectedPrimaryGroup(consentGroup),
+      onChange: ({value}) => {
+        onPrimaryChange({key: value, value: true});
+      },
+    }),
+
+
+    h(FormField, {
+      type: FormFieldTypes.RADIOBUTTON,
+      id: idx+'_primaryConsent_otherPrimary',
+      name: 'primaryConsent',
+      value: 'otherPrimary',
+      toggleText: 'Other',
+      defaultValue: selectedPrimaryGroup(consentGroup),
+      onChange: ({value}) => {
+        onPrimaryChange({key: value, value: otherPrimaryText});
+      },
+    }),
+
+    h(FormField, {
+      isRendered: showOtherPrimaryText,
+      id: idx+'_otherPrimaryText',
+      name: 'otherPrimary',
+      validators: [FormValidators.REQUIRED],
+      placeholder: 'Please specify',
+      defaultValue: otherPrimaryText,
+      onChange: ({key, value, isValid}) => {
+        setOtherPrimaryText(value);
+        onChange({key: key, value: value, isValid: isValid});
+      },
+    }),
 
     // secondary
     h(FormField, {

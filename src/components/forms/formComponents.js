@@ -280,33 +280,10 @@ export const formInputSelect = (config) => {
 };
 
 export const formInputRadioGroup = (config) => {
-  /* options example:
-    [
-      {
-        name: 'open_access',
-        text: 'Open Access'
-      },
-      {
-        id: 'closed_access', // can specify id, uses name as id otherwise
-        name: 'closed_access',
-        text: 'Closed Access',
-      },
-      {
-        name: 'other',
-        text: 'Other',
-        type: 'string',
-        placeholder: 'Please specify.',
-      }
-    ]
-    if type is 'string', then a textbox is rendered
-    when checked.
-  */
-
   const {
-    id, disabled, error,
+    id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
-    formValue, options, ariaDescribedby,
-    setError
+    formValue, options,
   } = config;
 
   return div({},
@@ -329,14 +306,6 @@ export const formInputRadioGroup = (config) => {
               key: idx,
               defaultChecked: !isNil(formValue) && formValue.selected === option.name,
               onClick: () => {
-                if (option.type === 'string') {
-                  onFormInputChange(config, {
-                    selected: option.name,
-                    value: '',
-                  });
-                  return;
-                }
-
                 onFormInputChange(config, { selected: option.name });
               },
               style: {
@@ -346,33 +315,37 @@ export const formInputRadioGroup = (config) => {
               description: option.text,
               disabled,
             }),
-            input({
-              isRendered: option.type === 'string' && formValue.selected === option.name,
-              id: `${id}_${optionId}_text_input`,
-              type: 'text',
-              className: `form-control radio-text-input ${error ? 'errored' : ''}`,
-              placeholder: option.placeholder,
-              value: formValue.value,
-              style: {
-                ...styles.inputStyle,
-                ...{
-                  marginTop: '0.5rem',
-                }
-              },
-              disabled: disabled,
-              onChange: (event) => onFormInputChange(config, {
-                selected: option.name,
-                value: event.target.value,
-              }),
-              onFocus: () => setError(),
-              onBlur: (event) => validateFormInput(config, event.target.value),
-              'aria-describedby': ariaDescribedby,
-            }),
           ]);
         }))
       )
     ]
   );
+};
+
+export const formInputRadioButton = (config) => {
+  const {
+    id, disabled, value, toggleText,
+    formValue,
+  } = config;
+
+  return div({
+    className: 'radio-button-container',
+  }, [
+    h(RadioButton, {
+      id: id,
+      name: id,
+      defaultChecked: !isNil(formValue) && formValue === value,
+      onClick: () => {
+        onFormInputChange(config, value);
+      },
+      style: {
+        fontFamily: 'Montserrat',
+        fontSize: '14px',
+      },
+      description: toggleText,
+      disabled,
+    }),
+  ]);
 };
 
 export const formInputCheckbox = (config) => {
