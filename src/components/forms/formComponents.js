@@ -1,10 +1,9 @@
-import { h, div, label, input, span, button } from 'react-hyperscript-helpers';
-
+import { h, div, label, input, span, button, textarea } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import { FormValidators } from './forms';
-import {RadioButton} from '../RadioButton';
+import { RadioButton } from '../RadioButton';
 
 import './formComponents.css';
 
@@ -37,26 +36,16 @@ const getKey = (config) => {
   return (!isNil(config.name) ? config.name : config.id);
 };
 
-const normalizeValue = (value) => {
-  if (typeof value === 'string') {
-    return value.trim();
-  } else if (Array.isArray(value)) {
-    return value
-      .map(x => normalizeValue(x))
-      .filter(x => x); // filter out null strings
-  }
-  return value;
-};
-
 const onFormInputChange = (config, value) => {
-  const { onChange, setFormValue } = config;
+  const { onChange, formValue, setFormValue } = config;
 
   const key = getKey(config);
-  const normalizedValue = normalizeValue(value);
-  const isValidInput = validateFormInput(config, normalizedValue);
+  const isValidInput = validateFormInput(config, value);
 
-  onChange({key: key, value: normalizedValue, isValid: isValidInput });
-  setFormValue(value);
+  if (value !== formValue) {
+    onChange({key: key, value: value, isValid: isValidInput });
+    setFormValue(value);
+  }
 };
 
 const errorMessage = (error) => {
@@ -79,7 +68,7 @@ export const formInputGeneric = (config) => {
 
   return div([
     input({
-      id: id,
+      id,
       type: type || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
@@ -90,6 +79,35 @@ export const formInputGeneric = (config) => {
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
+    }),
+    errorMessage(error)
+  ]);
+};
+
+export const formInputTextarea = (config) => {
+  const {
+    id, title, type, disabled,
+    placeholder,
+    inputStyle, ariaDescribedby,
+    rows, maxLength,
+    formValue, error, setError
+  } = config;
+
+  return div([
+    textarea({
+      id,
+      type: type || 'text',
+      className: `form-control ${error ? 'errored' : ''}`,
+      placeholder: placeholder || title,
+      value: formValue,
+      style: { ...styles.inputStyle, ...inputStyle },
+      disabled: disabled,
+      onChange: (event) => onFormInputChange(config, event.target.value),
+      onFocus: () => setError(),
+      onBlur: (event) => validateFormInput(config, event.target.value),
+      'aria-describedby': ariaDescribedby,
+      rows,
+      maxLength
     }),
     errorMessage(error)
   ]);
@@ -286,6 +304,7 @@ export const formInputRadioGroup = (config) => {
 
   const {
     id, disabled, error,
+    orientation = 'vertical', // [vertical, horizontal],
     formValue, options, ariaDescribedby,
     setError
   } = config;
@@ -294,7 +313,7 @@ export const formInputRadioGroup = (config) => {
     [
       div(
         {
-          className: 'radio-group',
+          className: `radio-group ${orientation}`,
           id: id,
         },
         options.map(((option, idx) => {
@@ -359,57 +378,23 @@ export const formInputRadioGroup = (config) => {
 export const formInputCheckbox = (config) => {
   const {
     id, disabled, error, toggleText,
-    formValue, ariaDescribedby,
-    valueType, placeholder, setError
+    formValue, ariaDescribedby
   } = config;
 
-  return div({
-    className: 'checkbox',
-    style: {
-      margin: '1.5rem 0 1.5rem 0',
-    },
-  }, [
+  return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: id,
-      checked: (valueType === 'string' ? isString(formValue) : formValue),
+      id: `cb_${id}_${toggleText}`,
+      checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
-      onChange: (event) => {
-        if (valueType === 'string') {
-          onFormInputChange(config, (event.target.checked ? '' : undefined));
-        } else {
-          onFormInputChange(config, event.target.checked);
-        }
-      },
+      onChange: (event) => onFormInputChange(config, event.target.checked),
       disabled
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      style: {
-        fontFamily: 'Montserrat',
-        fontSize: '14px',
-      },
-    }, [toggleText]),
-    input({
-      isRendered: valueType === 'string' && isString(formValue),
-      id: id+'_text',
-      type: 'text',
-      className: `form-control ${error ? 'errored' : ''}`,
-      placeholder: placeholder || '',
-      value: formValue,
-      style: {
-        ...styles.inputStyle,
-        ...{
-          marginTop: '1.0rem',
-        }
-      },
-      disabled: disabled,
-      onChange: (event) => onFormInputChange(config, event.target.value),
-      onFocus: () => setError(),
-      onBlur: (event) => validateFormInput(config, event.target.value),
-      'aria-describedby': ariaDescribedby,
-    }),
+      htmlFor: `cb_${id}_${toggleText}`,
+    }, [toggleText])
   ]);
 };
 

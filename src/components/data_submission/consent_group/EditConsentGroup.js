@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { div, h, h3 } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../../forms/forms';
@@ -36,6 +37,13 @@ export const EditConsentGroup = (props) => {
     setConsentGroup,
     idx,
   } = props;
+
+  const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(false);
+  const [otherSecondaryText, setOtherSecondaryText] = useState('');
+
+  const [showGSText, setShowGSText] = useState(false);
+  const [gsText, setGSText] = useState('');
+
 
   const onChange = ({key, value}) => {
     setConsentGroup({
@@ -179,10 +187,29 @@ export const EditConsentGroup = (props) => {
       name: 'gs',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Geographic Restriction (GS-)',
-      valueType: 'string',
-      placeholder: 'Specify (TODO)',
-      defaultValue: consentGroup.gs,
-      onChange
+      defaultValue: showGSText,
+      onChange: ({key, value}) => {
+        setShowGSText(value);
+
+        if (value) {
+          onChange({key: key, value: gsText});
+        } else {
+          onChange({key: key, value: undefined});
+        }
+      }
+    }),
+
+    h(FormField, {
+      isRendered: showGSText,
+      id: idx+'_gs',
+      name: 'gs',
+      validators: [FormValidators.REQUIRED],
+      placeholder: 'Specify Geographic Restriction',
+      defaultValue: gsText,
+      onChange: ({key, value, isValid}) => {
+        setGSText(value);
+        onChange({key: key, value: value, isValid: isValid});
+      },
     }),
 
     h(FormField, {
@@ -208,10 +235,29 @@ export const EditConsentGroup = (props) => {
       name: 'otherSecondary',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Other',
-      valueType: 'string',
-      placeholder: 'Please specify.',
-      defaultValue: consentGroup.otherSecondary,
-      onChange
+      defaultValue: showOtherSecondaryText,
+      onChange: ({key, value}) => {
+        setShowOtherSecondaryText(value);
+
+        if (value) {
+          onChange({key: key, value: otherSecondaryText});
+        } else {
+          onChange({key: key, value: undefined});
+        }
+      }
+    }),
+
+    h(FormField, {
+      isRendered: showOtherSecondaryText,
+      id: idx+'_otherSecondaryText',
+      name: 'otherSecondary',
+      validators: [FormValidators.REQUIRED],
+      placeholder: 'Please specify',
+      defaultValue: otherSecondaryText,
+      onChange: ({key, value, isValid}) => {
+        setOtherSecondaryText(value);
+        onChange({key: key, value: value, isValid: isValid});
+      },
     }),
 
     // location

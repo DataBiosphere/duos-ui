@@ -8,17 +8,19 @@ import {
   formInputSelect,
   formInputCheckbox,
   formInputSlider,
-  formInputRadioGroup
+  formInputRadioGroup,
+  formInputTextarea
 } from './formComponents';
 
 import './forms.css';
 
 export const FormFieldTypes = {
   MULTITEXT: { defaultValue: [], component: formInputMultiText },
-  SLIDER: { defaultValue: false, component: formInputSlider },
   RADIO: { defaultValue: null, component: formInputRadioGroup },
   TEXT: { defaultValue: '', component: formInputGeneric },
+  TEXTAREA: { defaultValue: '', component: formInputTextarea },
   NUMBER: { defaultValue: '', component: formInputGeneric },
+  SLIDER: { defaultValue: false, component: formInputSlider },
   CHECKBOX: {
     defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
     component: formInputCheckbox
@@ -42,7 +44,10 @@ export const FormFieldTypes = {
 
 export const FormValidators = {
   REQUIRED: {
-    isValid: (value) => value !== undefined && value !== null && value !== '',
+    isValid: (value) => {
+      return value !== undefined && value !== null &&
+        (typeof value === 'string' ? value.trim() !== '' : true);
+    },
     msg: 'Please enter a value'
   },
   URL: {

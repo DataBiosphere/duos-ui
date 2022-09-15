@@ -1,13 +1,11 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {cloneDeep, find, flow, getOr, isNil, unset} from 'lodash/fp';
+import {cloneDeep, flow, getOr, isNil, unset} from 'lodash/fp';
 import {Config} from './config';
-import {Models} from './models';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
 import {Storage} from './storage';
 import axios from 'axios';
-import {DataUseTranslation} from './dataUseTranslation';
 import {isFileEmpty} from './utils';
 
 //define axios interceptor
@@ -162,11 +160,6 @@ export const DAC = {
 };
 
 export const Collections = {
-  getCollectionsForResearcher: async () => {
-    const url = `${await getApiUrl()}/api/collections`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
-  },
   cancelCollection: async(id, roleName) => {
     const url = `${await getApiUrl()}/api/collections/${id}/cancel`;
     const config = Object.assign({params: {roleName}}, Config.authOpts());
@@ -180,11 +173,6 @@ export const Collections = {
   },
   getCollectionById: async(id) => {
     const url = `${await getApiUrl()}/api/collections/${id}`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
-  },
-  getCollectionsByRoleName: async(roleName) => {
-    const url = `${await getApiUrl()}/api/collections/role/${roleName}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
@@ -206,77 +194,6 @@ export const Collections = {
 };
 
 export const DAR = {
-
-  //v2 get for DARs
-  describeDar: async (darId) => {
-    const apiUrl = await getApiUrl();
-    const authOpts = Config.authOpts();
-    const rawDarRes = await axios.get(`${apiUrl}/api/dar/v2/${darId}`, authOpts);
-    const rawDar = rawDarRes.data;
-    const researcher = await User.getById(rawDar.userId);
-
-    //NOTE: rewrite this, the dar should have the details needed on it (or the response) itself
-    let darInfo = Models.dar;
-    darInfo.hmb = rawDar.hmb;
-    darInfo.methods = rawDar.methods;
-    darInfo.controls = rawDar.controls;
-    darInfo.population = rawDar.population;
-    darInfo.other = rawDar.other;
-    darInfo.otherText = rawDar.otherText;
-    darInfo.forProfit = rawDar.forProfit;
-    darInfo.gender = rawDar.gender;
-    darInfo.pediatric = rawDar.pediatric;
-    darInfo.illegalBehavior = rawDar.illegalBehavior;
-    darInfo.addiction = rawDar.addiction;
-    darInfo.sexualDiseases = rawDar.sexualDiseases;
-    darInfo.stigmatizedDiseases = rawDar.stigmatizedDiseases;
-    darInfo.vulnerablePopulation = rawDar.vulnerablePopulation;
-    darInfo.populationMigration = rawDar.populationMigration;
-    darInfo.psychiatricTraits = rawDar.psychiatricTraits;
-    darInfo.notHealth = rawDar.notHealth;
-    darInfo.diseases = rawDar.ontologies || [];
-    darInfo.hasDiseases = !fp.isEmpty(darInfo.diseases);
-    darInfo.rus = rawDar.rus;
-    darInfo.researcherId = rawDar.userId;
-    darInfo.darCode = rawDar.darCode;
-    darInfo.projectTitle = rawDar.projectTitle;
-    darInfo.institution = isNil(researcher.institution) ? '' : researcher.institution.name;
-    darInfo.department = rawDar.department;
-    darInfo.city = rawDar.city;
-    darInfo.country = rawDar.country;
-    darInfo.status = rawDar.status;
-    darInfo.restrictions = rawDar.restrictions;
-    const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
-    const researchType = DataUseTranslation.generateResearchTypes(darInfo);
-    darInfo.hasPurposeStatements = purposeStatements && purposeStatements.length > 0;
-    if (darInfo.hasPurposeStatements) {
-      darInfo.purposeStatements = purposeStatements;
-      darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
-    } else {
-      darInfo.purposeStatements = [];
-    }
-    if (researchType && researchType.length > 0) {
-      darInfo.researchType = researchType;
-      darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
-    }
-
-    darInfo.datasets = rawDar.datasets;
-    darInfo.datasetIds = rawDar.datasetIds;
-    darInfo.pi = rawDar.investigator;
-    darInfo.havePI = rawDar.havePI || rawDar.isThePI;
-    //name from researcher bc name in props and on dar are not accurately populated
-    darInfo.profileName = researcher.displayName;
-    // dataUse from Models.dar has properties denoting what research the data will be used for.
-    // Get these properties directly from the DAR.
-    const dataUseModel = fp.keys(darInfo.dataUse);
-    dataUseModel.forEach(key => {
-      const value = rawDar[key];
-      if (!isNil(value)) {
-        darInfo.dataUse[key] = value;
-      }
-    });
-    return darInfo;
-  },
 
   //v2 get for DARs
   getPartialDarRequest: async darId => {
@@ -306,13 +223,6 @@ export const DAR = {
     return await res;
   },
 
-  //v2 get draft dars
-  getDraftDarRequestList: async () => {
-    const url = `${await getApiUrl()}/api/dar/v2/draft/manage`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   getDarConsent: async id => {
     const url = `${await getApiUrl()}/api/dar/find/${id}/consent`;
     const res = await fetchOk(url, Config.authOpts());
@@ -325,12 +235,6 @@ export const DAR = {
     const url = `${await getApiUrl()}/api/dar/v2`;
     const res = axios.post(url, filteredDar, Config.authOpts());
     return await res.data;
-  },
-
-  cancelDar: async referenceId => {
-    const url = `${await getApiUrl()}/api/dar/cancel/${referenceId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
-    return await res.json();
   },
 
   getAutoCompleteDS: async partial => {
@@ -626,51 +530,6 @@ export const Match = {
 
 export const PendingCases = {
 
-  findDataRequestPendingCases: async () => {
-    const url = `${await getApiUrl()}/api/dataRequest/cases/pending`;
-    const res = await fetchOk(url, Config.authOpts());
-    const dars = await res.json();
-    let resp = {
-      access: dars,
-      totalAccessPendingVotes: 0
-    };
-
-    resp.access.forEach(
-      dar => {
-        if (dar.alreadyVoted === false) {
-          resp.totalAccessPendingVotes += (dar.alreadyVoted === false ? 1 : 0);
-        }
-      }
-    );
-    return resp;
-  },
-
-
-  findConsentPendingCasesByUser: async (userId) => {
-    const url = `${await getApiUrl()}/api/consent/cases/pending/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    const duls = await res.json();
-
-    let resp = {
-      dul: duls,
-      totalDulPendingVotes: 0
-    };
-    resp.dul.forEach(
-      dul => {
-        if (dul.alreadyVoted === false) {
-          resp.totalDulPendingVotes += (dul.alreadyVoted === false ? 1 : 0);
-        }
-      }
-    );
-    return resp;
-  },
-
-  findDARUnReviewed: async () => {
-    const url = `${await getApiUrl()}/api/dar/cases/unreviewed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   findSummary: async () => {
     const consentUrl = `${await getApiUrl()}/api/consent/cases/summary`;
     const dataAccessUrl = `${await getApiUrl()}/api/dataRequest/cases/summary/DataAccess`;
@@ -737,15 +596,6 @@ export const StatFiles = {
 };
 
 export const User = {
-
-  //DEPRECATION NOTE: consider this method deprecated, a user's email can change with their employment
-  //Therefore the possibility that the email registered to a DAR will differ from the researcher's current email, leading to invalid queries
-  //Instead, use getById for more predictable results
-  getByEmail: async email => {
-    const url = `${await getApiUrl()}/api/dacuser/${email}`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
-  },
 
   getMe: async () => {
     const url = `${await getApiUrl()}/api/user/me`;
@@ -906,27 +756,6 @@ export const AuthenticateNIH = {
     return await res.json();
   },
 
-  parseProfile: (profile) => {
-    let fireCloudProfileObj = {};
-    const properties = profile.researcherProperties;
-    const instituteProp = find({'propertyKey': 'institution'})(properties);
-    const piProp = find({'propertyKey' : 'havePi'});
-    const isPiProp = find({'propertyKey' : 'isPi'});
-    const isPi = isNil(isPiProp) ? 'n/a' : Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.title = 'DUOS Researcher';
-    fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute = isNil(instituteProp) ? '' : getOr('', 'propertyValue')(instituteProp);
-    fireCloudProfileObj.institutionalProgram = 'n/a';
-    fireCloudProfileObj.programLocationCity = 'n/a';
-    fireCloudProfileObj.programLocationState = 'n/a';
-    fireCloudProfileObj.programLocationCountry = 'n/a';
-    fireCloudProfileObj.pi = isNil(piProp) ? isPi : getOr( 'n/a', 'propertyValue')(piProp);
-    fireCloudProfileObj.nonProfitStatus = 'n/a';
-    return fireCloudProfileObj;
-  },
-
   saveNihUsr: async (decodedData) => {
     const url = `${await getApiUrl()}/api/nih`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
@@ -1047,6 +876,14 @@ export const ToS = {
     const res = await axios.delete(url, Config.authOpts());
     return res.data;
   }
+};
+
+export const Translate = {
+  translate: async (body) => {
+    const url = `${await getOntologyUrl()}/translate/paragraph`;
+    const res = await axios.post(url, body, Config.authOpts());
+    return res.data;
+  },
 };
 
 const fetchOk = async (...args) => {
