@@ -2,10 +2,13 @@ import { h, div, label, input, span, button, textarea } from 'react-hyperscript-
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
+import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncCreatable from 'react-select/async-creatable';
 import { FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
 
 import './formComponents.css';
+import { isArray } from 'lodash';
 
 const styles = {
   inputStyle: {
@@ -201,22 +204,52 @@ export const formInputMultiText = (config) => {
   ]);
 };
 
+
+const normalizeSelectOptions = (options, optionsAreString) => {
+  // normalized options empty if async
+  const normalizedOptions = options &&
+    optionsAreString
+    ? options.map((option) => { return {key: option, displayValue: option }; })
+    : options;
+
+  return normalizedOptions;
+};
+
+// ensure form value is a valid select object
+const normalizeSelectFormValue = (value) => {
+  if (isString(value)) {
+    return {
+      key: value,
+      displayValue: value,
+    };
+  }
+
+  if (isArray(value) && value.length > 0 && isString(value[0])) {
+    return value.map((val) => {return {key: val, displayValue: val};});
+  }
+
+  return value;
+};
+
 // Using react-select/creatable - Passing config directly through!
 export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable, isMulti, setFormValue,
-    exclusiveValues,
+    formValue, isCreatable, isMulti, isAsync, setFormValue,
+    exclusiveValues, loadOptions,
     selectConfig = {}
   } = config;
 
-  const component = (isCreatable ? Creatable : Select);
+  const component =
+    (isCreatable
+      ? (isAsync ? AsyncCreatable : Creatable)
+      : (isAsync ? AsyncSelect : Select));
 
-  const isStringArr = isString(selectOptions[0]);
-  const normalizedOptions = isStringArr
-    ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
-    : selectOptions;
+  // must be specified if async, since we can't guess the
+  // array type until after querying.
+  const optionsAreString = config.optionsAreString || (!isNil(selectOptions) && isString(selectOptions[0]));
+  const normalizedOptions = (!isNil(selectOptions) ? normalizeSelectOptions(selectOptions) : undefined);
 
   return h(component, {
     key: id,
@@ -238,8 +271,7 @@ export const formInputSelect = (config) => {
         }
       }
 
-
-      if (isStringArr) {
+      if (optionsAreString) {
         if (isMulti) {
           // string result, multiple options
           onFormInputChange(config, selected?.map((o) => o.displayValue));
@@ -262,7 +294,6 @@ export const formInputSelect = (config) => {
         setError(FormValidators.REQUIRED.msg);
       }
     },
-    options: normalizedOptions,
     getOptionLabel: (option) => option.displayValue,
     getNewOptionData: (inputValue) => {
       return { key: inputValue, displayValue: inputValue };
@@ -271,9 +302,15 @@ export const formInputSelect = (config) => {
       if(isNil(option) || isEmpty(option.displayValue)) {
         return null;
       }
-      return isStringArr ? option.displayValue : option;
+      return optionsAreString ? option.displayValue : option;
     },
-    value: formValue,
+    options: normalizedOptions,
+    loadOptions: (query, callback) => {
+      loadOptions(query, (options) => {
+        callback(normalizeSelectOptions(options, optionsAreString));
+      });
+    },
+    value: normalizeSelectFormValue(formValue),
     ...selectConfig,
     'aria-describedby': ariaDescribedby
   }) ;

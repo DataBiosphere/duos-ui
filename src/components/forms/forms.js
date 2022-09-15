@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isString } from 'lodash/fp';
+import { cloneDeep, isFunction, isString, isNil } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 import {
   formInputGeneric,
@@ -29,8 +29,12 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: ({ selectOptions, defaultValue, isMulti }) => {
-      const isStringArr = isString(selectOptions[0]);
+    updateDefaultValue: (config) => {
+      const {
+        selectOptions, defaultValue, isMulti
+      } = config;
+
+      const isStringArr = config.isStringArr || (!isNil(selectOptions) && isString(selectOptions[0]));
 
       if (isMulti) {
         return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;

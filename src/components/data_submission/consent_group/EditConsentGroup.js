@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { div, h, h3 } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../../forms/forms';
+import { DAR } from '../../../libs/ajax';
 
 export const selectedPrimaryGroup = (consentGroup) => {
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
@@ -17,6 +18,21 @@ export const selectedPrimaryGroup = (consentGroup) => {
   }
 
   return undefined;
+};
+
+const searchOntologies = (query, callback) => {
+  let options = [];
+  DAR.getAutoCompleteOT(query).then(
+    items => {
+      options = items.map(function(item) {
+        return item.label;
+      });
+      callback(options);
+    });
+};
+
+const formatSelectedDiseases = (selected) => {
+  return selected.join(', ');
 };
 
 export const EditConsentGroup = (props) => {
@@ -35,8 +51,8 @@ export const EditConsentGroup = (props) => {
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(false);
   const [otherPrimaryText, setOtherPrimaryText] = useState('');
 
-  const [showDiseaseSpecificUseText, setShowDiseaseSpecificUseText] = useState(false);
-  const [diseaseSpecificUseText, setDiseaseSpecificUseText] = useState('');
+  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(false);
+  const [selectedDiseases, setSelectedDiseases] = useState([]);
 
   const onChange = ({key, value}) => {
     setConsentGroup({
@@ -62,7 +78,7 @@ export const EditConsentGroup = (props) => {
       }
     });
 
-    setShowDiseaseSpecificUseText(key === 'diseaseSpecificUse');
+    setShowDiseaseSpecificUseSearchbar(key === 'diseaseSpecificUse');
     setShowOtherPrimaryText(key === 'otherPrimary');
   };
 
@@ -87,6 +103,8 @@ export const EditConsentGroup = (props) => {
 
     // primary
     h(FormField, {
+      title: 'Primary Consent Group',
+      description: 'asdf',
       type: FormFieldTypes.RADIOBUTTON,
       id: idx+'_primaryConsent_generalResearchUse',
       name: 'primaryConsent',
@@ -119,22 +137,41 @@ export const EditConsentGroup = (props) => {
       toggleText: 'Disease-Specific Research Use',
       defaultValue: selectedPrimaryGroup(consentGroup),
       onChange: ({value}) => {
-        onPrimaryChange({key: value, value: diseaseSpecificUseText});
+        onPrimaryChange({
+          key: value,
+          value: formatSelectedDiseases(selectedDiseases)
+        });
       },
     }),
+    div({
+      isRendered: showDiseaseSpecificUseSearchbar,
+      style: {
+        marginBottom: '1.0rem'
+      }
+    }, [
+      h(FormField, {
+        type: FormFieldTypes.SELECT,
+        isMulti: true,
+        isCreatable: true,
+        isAsync: true,
+        optionsAreString: true,
+        loadOptions: searchOntologies,
+        id: idx+'_diseaseSpecificUseText',
+        name: 'diseaseSpecificUse',
+        validators: [FormValidators.REQUIRED],
+        placeholder: 'Please enter one or more diseases',
+        defaultValue: selectedDiseases,
+        onChange: ({key, value, isValid}) => {
+          setSelectedDiseases(value);
+          onChange({
+            key: key,
+            value: formatSelectedDiseases(value),
+            isValid: isValid
+          });
+        },
+      }),
+    ]),
 
-    h(FormField, {
-      isRendered: showDiseaseSpecificUseText,
-      id: idx+'_diseaseSpecificUseText',
-      name: 'diseaseSpecificUse',
-      validators: [FormValidators.REQUIRED],
-      placeholder: 'Please enter one or more diseases',
-      defaultValue: diseaseSpecificUseText,
-      onChange: ({key, value, isValid}) => {
-        setDiseaseSpecificUseText(value);
-        onChange({key: key, value: value, isValid: isValid});
-      },
-    }),
 
     h(FormField, {
       type: FormFieldTypes.RADIOBUTTON,
@@ -147,8 +184,6 @@ export const EditConsentGroup = (props) => {
         onPrimaryChange({key: value, value: true});
       },
     }),
-
-
     h(FormField, {
       type: FormFieldTypes.RADIOBUTTON,
       id: idx+'_primaryConsent_otherPrimary',
