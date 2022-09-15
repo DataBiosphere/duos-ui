@@ -316,7 +316,7 @@ export const formInputCheckbox = (config) => {
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: id,
+      id: `${id}`,
       checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -325,6 +325,7 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
+      htmlFor: `${id}`,
     }, [toggleText])
   ]);
 };
