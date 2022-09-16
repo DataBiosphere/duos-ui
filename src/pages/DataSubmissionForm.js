@@ -41,7 +41,12 @@ export const DataSubmissionForm = () => {
       ),
     ]),
 
-    form({}, [
+    form({
+      style: {
+        margin: 'auto',
+        maxWidth: 800,
+      }
+    }, [
       h(DataSubmissionStudyInformation, { onChange }),
       h(DataAccessGovernance, { onChange }),
     ])

@@ -5,6 +5,8 @@ import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
 import { FormFieldTypes, FormField } from '../forms/forms';
 
+import './ds_common.css';
+
 const OPEN_ACCESS = 'Open Access';
 const CLOSED_ACCESS = 'Closed Access';
 
@@ -81,11 +83,7 @@ export const DataAccessGovernance = (props) => {
   };
 
   return div({
-    style: {
-      padding: '50px 0',
-      maxWidth: 800,
-      margin: 'auto'
-    }
+    className: 'data-submitter-section',
   }, [
     h2('Data Access Governance'),
     div({}, [
