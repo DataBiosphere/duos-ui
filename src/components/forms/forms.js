@@ -104,7 +104,7 @@ export const FormFieldTypes = {
     ],
   },
   CHECKBOX: {
-    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    defaultValue: false,
     component: formInputCheckbox,
     requiredProps: [],
     optionalProps: [

@@ -1,5 +1,5 @@
 import { div, input, span, p } from 'react-hyperscript-helpers';
-import { isNil } from 'lodash/fp';
+import { isNil, isString } from 'lodash/fp';
 
 
 const primaryConsentText = {
@@ -83,7 +83,7 @@ export const ConsentGroupSummary = (props) => {
 
     const value = consentGroup[field];
 
-    if (typeof value == 'string' || value instanceof String) {
+    if (isString(value)) {
       return div({}, [
         span({}, [primaryConsentText[field] + ': ']),
         span({
@@ -109,7 +109,7 @@ export const ConsentGroupSummary = (props) => {
       const value = consentGroup[field];
       const text = secondaryConsentText[field];
 
-      if (typeof value == 'string' || value instanceof String) {
+      if (isString(value)) {
         return div({
           key: `secondaryGroup_${idx}`,
           style: {

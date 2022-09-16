@@ -94,7 +94,7 @@ export const customRadioPropValidation = (props) => {
 export const requiredValidator = {
   isValid: (value) => {
     return value !== undefined && value !== null &&
-      (typeof value === 'string' ? value.trim() !== '' : true);
+      (isString(value) ? value.trim() !== '' : true);
   },
   msg: 'Please enter a value',
 };
