@@ -126,11 +126,11 @@ describe('FormField - Tests', () => {
     });
   });
 
-  describe('Form Control - Radio', () => {
+  describe('Form Control - Radio Group', () => {
     beforeEach(() => {
       props = {
         ...baseProps,
-        type: FormFieldTypes.RADIO,
+        type: FormFieldTypes.RADIOGROUP,
         id: 'radioGroup',
         options: [
           {
@@ -146,9 +146,7 @@ describe('FormField - Tests', () => {
           {
             id: 'opt3',
             name: 'opt3',
-            text: 'Option 3 (text)',
-            type: 'string',
-            placeholder: 'Please specify.',
+            text: 'Option 3',
           }
         ]
       };
@@ -160,7 +158,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('exist');
       cy.get('#radioGroup_opt2').should('exist');
       cy.get('#radioGroup_opt3').should('exist');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
     });
 
     it('should able to check, only one at a time', () => {
@@ -170,14 +167,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt1').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt1',
-          },
+          value: 'opt1',
           isValid: true
         });
       });
@@ -185,14 +179,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt2').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt2',
-          },
+          value: 'opt2',
           isValid: true
         });
       });
@@ -200,15 +191,11 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('not.exist');
 
       cy.get('#radioGroup_opt3').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt3',
-            value: '',
-          },
+          value: 'opt3',
           isValid: true
         });
       });
@@ -216,18 +203,6 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').should('not.be.checked');
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('be.checked');
-      cy.get('#radioGroup_opt3_text_input').should('exist');
-
-      cy.get('#radioGroup_opt3_text_input').type('Hello!').then(() => {
-        expect(props.onChange).to.be.calledWith({
-          key: 'radioGroup',
-          value: {
-            selected: 'opt3',
-            value: 'Hello!',
-          },
-          isValid: true
-        });
-      });
     });
 
 
@@ -383,7 +358,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider false', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -396,7 +371,7 @@ describe('FormField - Tests', () => {
     it('should run onChange event when user toggles the slider true', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      const selector = '#cb_publicVisibility_Visible';
+      const selector = '#publicVisibility';
       cy.get(selector).should('be.checked');
       cy.get(selector)
         .click()
@@ -421,7 +396,7 @@ describe('FormField - Tests', () => {
           'Analytical', 'Prospective', 'Retrospective',
           'Case report', 'Case series', 'Cross-sectional',
           'Cohort study'
-        ].map((opt) => {return {displayName: opt, displayValue: opt};})
+        ].map((opt) => {return {displayName: opt, displayText: opt};})
       };
     });
 
@@ -436,7 +411,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayValue: 'Observational'}, isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayText: 'Observational'}, isValid: true});
       });
 
     });
@@ -454,7 +429,7 @@ describe('FormField - Tests', () => {
       props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayValue: 'asdf'}, isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayText: 'asdf'}, isValid: true});
       });
     });
 
@@ -477,11 +452,11 @@ describe('FormField - Tests', () => {
       props.isMulti = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
       });
 
       cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
       });
 
     });
@@ -492,15 +467,15 @@ describe('FormField - Tests', () => {
       props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
       });
 
       cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
       });
 
       cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}, {key: 'asdf', displayValue: 'asdf'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}, {key: 'asdf', displayText: 'asdf'}], isValid: true});
       });
 
     });
@@ -616,6 +591,64 @@ describe('FormField - Tests', () => {
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
     });
+  });
+  describe('Prop validation', () => {
+    it('should not allow mounting if unknown prop', (done) => {
+      // this event will automatically be unbound when this
+      // test ends because it's attached to 'cy'
+      cy.on('uncaught:exception', (err) => {
 
+        // ensure the error is about an unknown field
+        expect(err.message).to.include('unknown');
+
+        // using mocha's async done callback to finish
+        // this test so we prove that an uncaught exception
+        // was thrown
+        done();
+
+        // return false to prevent the error from
+        // failing this test
+        return false;
+      });
+
+      mount(<FormField {
+        ...{asdf: 'asdf', id: 'example'}
+      } />);
+    });
+
+    it('errors if required prop not given', (done) => {
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('id');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{type: FormFieldTypes.TEXT,} // requires id
+      } />);
+    });
+
+    it('errors based on custom validation', (done) => {
+
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('example failure');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{
+          type: {
+            ...FormFieldTypes.TEXT,
+            ...{
+              customPropValidation: () => {
+                throw 'example failure';
+              }
+            }
+          },
+          id: 'example',
+        } // requires id
+      } />);
+    });
   });
 });

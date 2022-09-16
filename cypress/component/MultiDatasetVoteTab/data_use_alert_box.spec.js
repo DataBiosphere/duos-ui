@@ -1,29 +1,29 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import DataUseAlertBox from "../../../src/components/collection_voting_slab/DataUseAlertBox";
+import DataUseAlertBox from '../../../src/components/collection_voting_slab/DataUseAlertBox';
 
 const dataUseManualReviewTrue = {
-  "code": "ABC",
-  "description": "data use 1",
-  "manualReview": true,
+  'code': 'ABC',
+  'description': 'data use 1',
+  'manualReview': true,
 };
 
 const dataUseManualReviewTrue2 = {
-  "code": "DEF",
-  "description": "data use 2",
-  "manualReview": true,
+  'code': 'DEF',
+  'description': 'data use 2',
+  'manualReview': true,
 };
 
 const dataUseManualReviewFalse = {
-  "code": "MNOP",
-  "description": "data use 3",
-  "manualReview": false,
+  'code': 'MNOP',
+  'description': 'data use 3',
+  'manualReview': false,
 };
 
 const dataUseNoManualReview = {
-  "code": "XYZ",
-  "description": "data use 4",
+  'code': 'XYZ',
+  'description': 'data use 4',
 };
 
 
@@ -32,7 +32,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the alert box and exclamation point when translated data use a manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseManualReviewTrue]}}
+        translatedDataUse={{'primary': [dataUseManualReviewTrue]}}
       />
     );
     const component = cy.get('[datacy=alert-box]').should('be.visible');
@@ -42,7 +42,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Does not render the alert box and exclamation point when translated data use a manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseManualReviewFalse]}}
+        translatedDataUse={{'primary': [dataUseManualReviewFalse]}}
       />
     );
     cy.get('[datacy=alert-box]').should('not.exist');
@@ -51,7 +51,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Does not render the description of a data use without a manuallyReviewed attribute', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseNoManualReview]}}
+        translatedDataUse={{'primary': [dataUseNoManualReview]}}
       />
     );
     cy.get('[datacy=alert-box]').should('not.exist');
@@ -60,7 +60,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the description of a primary use manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseManualReviewTrue], "secondary": [dataUseManualReviewFalse]}}
+        translatedDataUse={{'primary': [dataUseManualReviewTrue], 'secondary': [dataUseManualReviewFalse]}}
       />
     );
     cy.get('[datacy=alert-box]').should('be.visible');
@@ -71,7 +71,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the description of a secondary use manually reviewed data use', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseManualReviewFalse], "secondary": [dataUseManualReviewTrue]}}
+        translatedDataUse={{'primary': [dataUseManualReviewFalse], 'secondary': [dataUseManualReviewTrue]}}
       />
     );
     cy.get('[datacy=alert-box]').should('be.visible');
@@ -82,7 +82,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the description multiple manually reviewed data uses in the same category', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"Primary": [dataUseManualReviewTrue, dataUseManualReviewTrue2]}}
+        translatedDataUse={{'Primary': [dataUseManualReviewTrue, dataUseManualReviewTrue2]}}
       />
     );
     cy.get('[datacy=alert-box]').should('be.visible');
@@ -93,7 +93,7 @@ describe('DataUseAlertBox - Tests', function() {
   it('Renders the description multiple manually reviewed data uses in different categories', function() {
     mount(
       <DataUseAlertBox
-        translatedDataUse={{"primary": [dataUseManualReviewTrue2], "secondary": [dataUseManualReviewTrue]}}
+        translatedDataUse={{'primary': [dataUseManualReviewTrue2], 'secondary': [dataUseManualReviewTrue]}}
       />
     );
     cy.get('[datacy=alert-box]').should('be.visible');

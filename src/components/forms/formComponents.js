@@ -33,11 +33,13 @@ const validateFormInput = (config, value) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { id, onChange, formValue, setFormValue } = config;
+  const { id, name, onChange, formValue, setFormValue } = config;
+  const key = (!isNil(name) ? name : id);
+
   const isValidInput = validateFormInput(config, value);
 
   if (value !== formValue) {
-    onChange({key: id, value, isValid: isValidInput });
+    onChange({key: key, value, isValid: isValidInput });
     setFormValue(value);
   }
 };
@@ -54,8 +56,8 @@ const errorMessage = (error) => {
 //---------------------------------------------
 export const formInputGeneric = (config) => {
   const {
-    id, title, type, disabled,
-    placeholder,
+    id, title, disabled,
+    placeholder, type,
     inputStyle, ariaDescribedby,
     formValue, error, setError
   } = config;
@@ -208,7 +210,7 @@ export const formInputSelect = (config) => {
 
   const isStringArr = isString(selectOptions[0]);
   const normalizedOptions = isStringArr
-    ? selectOptions.map((option) => { return {key: option, displayValue: option }; })
+    ? selectOptions.map((option) => { return { displayText: option }; })
     : selectOptions;
 
   return h(component, {
@@ -224,12 +226,12 @@ export const formInputSelect = (config) => {
       if (isStringArr) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, option?.map((o) => o.displayValue));
+          onFormInputChange(config, option?.map((o) => o.displayText));
           setFormValue(option);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, option?.displayValue);
+        onFormInputChange(config, option?.displayText);
         setFormValue(option);
         return;
       }
@@ -245,15 +247,15 @@ export const formInputSelect = (config) => {
       }
     },
     options: normalizedOptions,
-    getOptionLabel: (option) => option.displayValue,
+    getOptionLabel: (option) => option.displayText,
     getNewOptionData: (inputValue) => {
-      return { key: inputValue, displayValue: inputValue };
+      return { key: inputValue, displayText: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayValue)) {
+      if(isNil(option) || isEmpty(option.displayText)) {
         return null;
       }
-      return isStringArr ? option.displayValue : option;
+      return isStringArr ? option.displayText : option;
     },
     value: formValue,
     ...selectConfig,
@@ -262,33 +264,11 @@ export const formInputSelect = (config) => {
 };
 
 export const formInputRadioGroup = (config) => {
-  /* options example:
-    [
-      {
-        name: 'open_access',
-        text: 'Open Access'
-      },
-      {
-        id: 'closed_access', // can specify id, uses name as id otherwise
-        name: 'closed_access',
-        text: 'Closed Access',
-      },
-      {
-        name: 'other',
-        text: 'Other',
-        type: 'string',
-        placeholder: 'Please specify.',
-      }
-    ]
-    if type is 'string', then a textbox is rendered
-    when checked.
-  */
-
   const {
-    id, disabled, error,
+
+    id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
-    formValue, options, ariaDescribedby,
-    setError
+    formValue, options
   } = config;
 
   return div({},
@@ -309,17 +289,9 @@ export const formInputRadioGroup = (config) => {
               id: `${id}_${optionId}`,
               name: `${id}_${optionId}`,
               key: idx,
-              defaultChecked: !isNil(formValue) && formValue.selected === option.name,
+              defaultChecked: !isNil(formValue) && formValue === option.name,
               onClick: () => {
-                if (option.type === 'string') {
-                  onFormInputChange(config, {
-                    selected: option.name,
-                    value: '',
-                  });
-                  return;
-                }
-
-                onFormInputChange(config, { selected: option.name });
+                onFormInputChange(config, option.name);
               },
               style: {
                 fontFamily: 'Montserrat',
@@ -327,28 +299,6 @@ export const formInputRadioGroup = (config) => {
               },
               description: option.text,
               disabled,
-            }),
-            input({
-              isRendered: option.type === 'string' && formValue.selected === option.name,
-              id: `${id}_${optionId}_text_input`,
-              type: 'text',
-              className: `form-control ${error ? 'errored' : ''}`,
-              placeholder: option.placeholder,
-              value: formValue.value,
-              style: {
-                ...styles.inputStyle,
-                ...{
-                  marginTop: '0.5rem',
-                }
-              },
-              disabled: disabled,
-              onChange: (event) => onFormInputChange(config, {
-                selected: option.name,
-                value: event.target.value,
-              }),
-              onFocus: () => setError(),
-              onBlur: (event) => validateFormInput(config, event.target.value),
-              'aria-describedby': ariaDescribedby,
             }),
           ]);
         }))
@@ -366,7 +316,7 @@ export const formInputCheckbox = (config) => {
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
+      id: `${id}`,
       checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -375,7 +325,7 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
+      htmlFor: `${id}`,
     }, [toggleText])
   ]);
 };
@@ -386,10 +336,10 @@ export const formInputSlider = (config) => {
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
-    label({ className: 'switch', htmlFor: `cb_${id}_${toggleText}` }, [
+    label({ className: 'switch' }, [
       input({
         type: 'checkbox',
-        id: `cb_${id}_${toggleText}`,
+        id: id,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),

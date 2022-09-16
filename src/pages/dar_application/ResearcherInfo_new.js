@@ -209,25 +209,13 @@ export default function ResearcherInfo(props) {
             title: '1.6 Institutional Signing Official',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            defaultValue: signingOfficial,
+            defaultValue: (!isNil(signingOfficial) ? formatSOString(signingOfficial.displayName, signingOfficial.email) : null),
             onChange: ({key: name, value}) => {
-              const formattedValue = isNil(value) ? '' : formatSOString(value.displayName, value.email);
-              formFieldChange({name, value: formattedValue});
+              formFieldChange({name, value: value});
             },
-            selectOptions: allSigningOfficials || [''],
-            selectConfig: {
-              placeholder: 'Signing Official',
-              getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
-              getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
-                return { displayName: inputValue };
-              },
-              getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-                if(isNil(option) || isEmpty(option.displayName)) {
-                  return null;
-                }
-                return option;
-              }
-            },
+            selectOptions: allSigningOfficials?.map((so) => {
+              return formatSOString(so.displayName, so.email);
+            }) || [''],
           }),
         ]),
 
@@ -248,7 +236,7 @@ export default function ResearcherInfo(props) {
           div([
             h(FormField, {
               id: 'anvilUse',
-              type: FormFieldTypes.RADIO,
+              type: FormFieldTypes.RADIOGROUP,
               title: '1.8 Cloud Use Statement',
               description: [span([
                 'Will you perform all of your data storage and analysis for this project on the ',
@@ -267,14 +255,12 @@ export default function ResearcherInfo(props) {
               ariaLevel: ariaLevel + 1,
               orientation: 'horizontal',
               onChange: ({key: name, value}) => {
-                const normalizedValue = value && value.selected === 'yes';
+                const normalizedValue = value === 'yes';
                 formFieldChange({name, value: normalizedValue});
               },
-              defaultValue: {
-                selected: anvilUse === true ? 'yes'
-                  : anvilUse === false ? 'no'
-                    : undefined
-              }
+              defaultValue: anvilUse === true ? 'yes'
+                : anvilUse === false ? 'no'
+                  : undefined
             }),
 
             div({className: 'row no-margin'}, [
