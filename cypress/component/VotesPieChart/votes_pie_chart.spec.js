@@ -4,7 +4,7 @@ import { mount } from 'cypress/react';
 import VotesPieChart from '../../../src/components/common/VotesPieChart';
 
 const testVotes = [{vote: true}, {vote: false}, {}];
-const keyString = "test";
+const keyString = 'test';
 
 //NOTE: I think we should consider using Jest or other snapshot libraries for testing svg-based graphs
 //It's a lot harder to obtain text from svg due lack of identifiers for pinpoint locations

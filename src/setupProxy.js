@@ -41,7 +41,7 @@ module.exports = function (app) {
   );
 
   app.use(
-    ['/autocomplete', '/search', '/ontology/status'],
+    ['/autocomplete', '/search', '/ontology/status', '/translate/paragraph'],
     createProxyMiddleware({
       target: configUrls.ontologyApiUrl,
       secure: false,

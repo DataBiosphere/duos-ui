@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { mount } from 'cypress/react';
-import VoteSummaryTable from "../../../src/components/vote_summary_table/VoteSummaryTable";
+import VoteSummaryTable from '../../../src/components/vote_summary_table/VoteSummaryTable';
 
 const dacVotes = [
   {
-    "displayName": "John Doe",
-    "updateDate": 1642032000000,
-    "vote": false,
+    'displayName': 'John Doe',
+    'updateDate': 1642032000000,
+    'vote': false,
   }
 ];
 
@@ -31,7 +31,7 @@ describe('VoteSummaryTable - Tests', function() {
       />
     );
     const component = cy.get('.table-data');
-    component.contains("No");
+    component.contains('No');
   });
 
   //this test works locally but fails on Github
@@ -56,7 +56,7 @@ describe('VoteSummaryTable - Tests', function() {
       />
     );
     const component = cy.get('.table-data');
-    component.contains("- -");
+    component.contains('- -');
   });
 
   it('Renders skeleton table if isLoading is true', function() {

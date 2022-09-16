@@ -63,8 +63,8 @@ const errorMessage = (error) => {
 //---------------------------------------------
 export const formInputGeneric = (config) => {
   const {
-    id, title, type, disabled,
-    placeholder,
+    id, title, disabled,
+    placeholder, type,
     inputStyle, ariaDescribedby,
     formValue, error, setError
   } = config;
@@ -209,7 +209,7 @@ const normalizeSelectOptions = (options, optionsAreString) => {
   // normalized options empty if async
   const normalizedOptions = options &&
     optionsAreString
-    ? options.map((option) => { return {key: option, displayValue: option }; })
+    ? options.map((option) => { return {key: option, displayText: option }; })
     : options;
 
   return normalizedOptions;
@@ -220,12 +220,12 @@ const normalizeSelectFormValue = (value) => {
   if (isString(value)) {
     return {
       key: value,
-      displayValue: value,
+      displayText: value,
     };
   }
 
   if (isArray(value) && value.length > 0 && isString(value[0])) {
-    return value.map((val) => {return {key: val, displayValue: val};});
+    return value.map((val) => {return {key: val, displayText: val};});
   }
 
   return value;
@@ -236,7 +236,7 @@ export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable = false, isMulti = false, 
+    formValue, isCreatable = false, isMulti = false,
     isAsync = false, setFormValue,
     exclusiveValues, loadOptions,
     selectConfig = {}
@@ -265,9 +265,9 @@ export const formInputSelect = (config) => {
       if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
         const newSelection = selected[selected.length - 1];
 
-        if (exclusiveValues.includes(newSelection.displayValue)) {
+        if (exclusiveValues.includes(newSelection.displayText)) {
           selected.splice(0, selected.length - 1);
-        } else if (exclusiveValues.includes(selected[0].displayValue)) {
+        } else if (exclusiveValues.includes(selected[0].displayText)) {
           selected.splice(0, 1);
         }
       }
@@ -275,12 +275,12 @@ export const formInputSelect = (config) => {
       if (optionsAreString) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, selected?.map((o) => o.displayValue));
+          onFormInputChange(config, selected?.map((o) => o.displayText));
           setFormValue(selected);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, selected?.displayValue);
+        onFormInputChange(config, selected?.displayText);
         setFormValue(selected);
         return;
       }
@@ -295,15 +295,15 @@ export const formInputSelect = (config) => {
         setError(FormValidators.REQUIRED.msg);
       }
     },
-    getOptionLabel: (option) => option.displayValue,
+    getOptionLabel: (option) => option.displayText,
     getNewOptionData: (inputValue) => {
-      return { key: inputValue, displayValue: inputValue };
+      return { key: inputValue, displayText: inputValue };
     },
     getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayValue)) {
+      if(isNil(option) || isEmpty(option.displayText)) {
         return null;
       }
-      return optionsAreString ? option.displayValue : option;
+      return optionsAreString ? option.displayText : option;
     },
     options: normalizedOptions,
     loadOptions: (query, callback) => {
@@ -321,7 +321,7 @@ export const formInputRadioGroup = (config) => {
   const {
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
-    formValue, options,
+    formValue, options
   } = config;
 
   return div({},
@@ -342,9 +342,9 @@ export const formInputRadioGroup = (config) => {
               id: `${id}_${optionId}`,
               name: `${id}_${optionId}`,
               key: idx,
-              defaultChecked: !isNil(formValue) && formValue.selected === option.name,
+              defaultChecked: !isNil(formValue) && formValue === option.name,
               onClick: () => {
-                onFormInputChange(config, { selected: option.name });
+                onFormInputChange(config, option.name);
               },
               style: {
                 fontFamily: 'Montserrat',
@@ -395,7 +395,7 @@ export const formInputCheckbox = (config) => {
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: `cb_${id}_${toggleText}`,
+      id: `${id}`,
       checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -404,7 +404,7 @@ export const formInputCheckbox = (config) => {
     }),
     label({
       className: `regular-checkbox ${error ? 'errored' : ''}`,
-      htmlFor: `cb_${id}_${toggleText}`,
+      htmlFor: `${id}`,
     }, [toggleText])
   ]);
 };

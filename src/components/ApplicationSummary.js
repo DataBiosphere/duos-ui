@@ -7,7 +7,6 @@ import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
-import ApplicationDownloadLink from './ApplicationDownloadLink';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends PureComponent {
 
@@ -60,10 +59,6 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
             label({ className: 'control-label access-color' }, ['Country: ']),
             span({ id: 'lbl_country', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.country])
           ]),
-          button({
-            id: 'btn_downloadFullApplication',
-            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 btn-secondary btn-download-pdf hover-color'
-          }, [h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})])
         ]),
 
         div({ className: 'col-lg-8 col-md-7 col-sm-7 col-xs-12' }, [

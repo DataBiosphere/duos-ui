@@ -130,7 +130,7 @@ describe('FormField - Tests', () => {
     beforeEach(() => {
       props = {
         ...baseProps,
-        type: FormFieldTypes.RADIO,
+        type: FormFieldTypes.RADIOGROUP,
         id: 'radioGroup',
         options: [
           {
@@ -171,9 +171,7 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt1').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt1',
-          },
+          value: 'opt1',
           isValid: true
         });
       });
@@ -185,9 +183,7 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt2').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt2',
-          },
+          value: 'opt2',
           isValid: true
         });
       });
@@ -199,9 +195,7 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt3').click().then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
-          value: {
-            selected: 'opt3',
-          },
+          value: 'opt3',
           isValid: true
         });
       });
@@ -402,7 +396,7 @@ describe('FormField - Tests', () => {
           'Analytical', 'Prospective', 'Retrospective',
           'Case report', 'Case series', 'Cross-sectional',
           'Cohort study'
-        ].map((opt) => {return {displayName: opt, displayValue: opt};})
+        ].map((opt) => {return {displayName: opt, displayText: opt};})
       };
     });
 
@@ -417,7 +411,7 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayValue: 'Observational'}, isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayText: 'Observational'}, isValid: true});
       });
 
     });
@@ -435,7 +429,7 @@ describe('FormField - Tests', () => {
       props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayValue: 'asdf'}, isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayText: 'asdf'}, isValid: true});
       });
     });
 
@@ -458,11 +452,11 @@ describe('FormField - Tests', () => {
       props.isMulti = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
       });
 
       cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
       });
 
     });
@@ -473,15 +467,15 @@ describe('FormField - Tests', () => {
       props.isCreatable = true;
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
       });
 
       cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
       });
 
       cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayValue: 'Observational'}, {displayName: 'Prospective', displayValue: 'Prospective'}, {key: 'asdf', displayValue: 'asdf'}], isValid: true});
+        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}, {key: 'asdf', displayText: 'asdf'}], isValid: true});
       });
 
     });
@@ -596,6 +590,65 @@ describe('FormField - Tests', () => {
         cy.get('.formTable-row.formTable-data-row').should('have.length', 1); // only columns left
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
+    });
+  });
+  describe('Prop validation', () => {
+    it('should not allow mounting if unknown prop', (done) => {
+      // this event will automatically be unbound when this
+      // test ends because it's attached to 'cy'
+      cy.on('uncaught:exception', (err) => {
+
+        // ensure the error is about an unknown field
+        expect(err.message).to.include('unknown');
+
+        // using mocha's async done callback to finish
+        // this test so we prove that an uncaught exception
+        // was thrown
+        done();
+
+        // return false to prevent the error from
+        // failing this test
+        return false;
+      });
+
+      mount(<FormField {
+        ...{asdf: 'asdf', id: 'example'}
+      } />);
+    });
+
+    it('errors if required prop not given', (done) => {
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('id');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{type: FormFieldTypes.TEXT,} // requires id
+      } />);
+    });
+
+    it('errors based on custom validation', (done) => {
+
+      cy.on('uncaught:exception', (err) => {
+        expect(err.message).to.include('example failure');
+        done();
+        return false;
+      });
+
+      mount(<FormField {
+        ...{
+          type: {
+            ...FormFieldTypes.TEXT,
+            ...{
+              customPropValidation: () => {
+                throw 'example failure';
+              }
+            }
+          },
+          id: 'example',
+        } // requires id
+      } />);
     });
   });
 });

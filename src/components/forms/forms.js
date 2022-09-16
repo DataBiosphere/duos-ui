@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isString, isNil } from 'lodash/fp';
-import { isEmailAddress } from '../../libs/utils';
+import { cloneDeep, isFunction } from 'lodash/fp';
+import {
+  validateFormProps,
+  customRadioPropValidation,
+  customSelectPropValidation,
+  requiredValidator,
+  urlValidator,
+  emailValidator,
+} from './formUtils';
 import {
   formInputGeneric,
   formInputMultiText,
@@ -15,94 +22,164 @@ import {
 
 import './forms.css';
 
+export const commonRequiredProps = ['id'];
+export const commonOptionalProps = [
+  'name',
+  'disabled',
+  'description',
+  'title',
+  'ariaLevel',
+  'ariaDescribedby',
+  'defaultValue',
+  'hideTitle',
+  'style',
+  'validators',
+  'onChange',
+  'type'
+];
+
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                  MAIN FORM FIELD TYPES                                  ====== //
+// ----------------------------------------------------------------------------------------------------- //
 export const FormFieldTypes = {
-  MULTITEXT: { defaultValue: [], component: formInputMultiText },
-  RADIO: { defaultValue: null, component: formInputRadioGroup },
-  RADIOBUTTON: { defaultValue: null, component: formInputRadioButton },
-  TEXT: { defaultValue: '', component: formInputGeneric },
-  TEXTAREA: { defaultValue: '', component: formInputTextarea },
-  NUMBER: { defaultValue: '', component: formInputGeneric },
-  SLIDER: { defaultValue: false, component: formInputSlider },
+  MULTITEXT: {
+    defaultValue: [],
+    component: formInputMultiText,
+    requiredProps: [],
+    optionalProps: [
+      'placeholder',
+      'inputStyle'
+    ],
+  },
+  SLIDER: {
+    defaultValue: false,
+    component: formInputSlider,
+    requiredProps: [],
+    optionalProps: [
+      'toggleText',
+    ],
+  },
+  RADIOGROUP: {
+    defaultValue: null,
+    component: formInputRadioGroup,
+    requiredProps: [
+      'options',
+      // 'options' example:
+      // [
+      //  {name: 'opt_1', text: 'Option 1'},
+      //  {id: 'custom_id_other', name: 'other', text: 'Other'}
+      // ]
+    ],
+    optionalProps: [
+      'orientation', // 'vertical' or 'horizontal'
+    ],
+    customPropValidation: customRadioPropValidation,
+  },
+  RADIOBUTTON: {
+    defaultValue: null,
+    requiredProps: [
+      'value',
+    ],
+    optionalProps: [
+      'toggleText',
+    ],
+    component: formInputRadioButton
+  },
+  TEXT: {
+    defaultValue: '',
+    component: formInputGeneric,
+    requiredProps: [],
+    optionalProps: [
+      'placeholder',
+      'inputStyle'],
+  },
+  NUMBER: {
+    defaultValue: '',
+    component: formInputGeneric,
+    requiredProps: [],
+    optionalProps: [
+      'placeholder',
+      'inputStyle'
+    ],
+  },
   CHECKBOX: {
     defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
-    component: formInputCheckbox
+    component: formInputCheckbox,
+    requiredProps: [],
+    optionalProps: [
+      'toggleText'
+    ],
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: (config) => {
-      const {
-        selectOptions, defaultValue, isMulti
-      } = config;
+    // updateDefaultValue: (config) => {
+    //   const {
+    //     selectOptions, defaultValue, isMulti
+    //   } = config;
+    //   const isStringArr = config.isStringArr || (!isNil(selectOptions) && isString(selectOptions[0]));
 
-      const isStringArr = config.isStringArr || (!isNil(selectOptions) && isString(selectOptions[0]));
+    //   if (isMulti) {
+    //     return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;
+    //   }
 
-      if (isMulti) {
-        return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;
-      }
-
-      return isStringArr
-        ? { key: defaultValue, displayValue: defaultValue }
-        : defaultValue;
-    },
-    component: formInputSelect
+    //   return isStringArr
+    //     ? { key: defaultValue, displayText: defaultValue }
+    //     : defaultValue;
+    // },
+    component: formInputSelect,
+    requiredNormalSelectProps: [
+      'selectOptions'
+      // 'selectOptions' example:
+      // [
+      //  {displayText: 'Option 1'}
+      //   ^^^ can pass other fields in as extra info, e.g.:
+      //  {displayText: 'Dac 1', dacId: 213}
+      // ]
+      // can also be array of stirngs: ['Option 1', 'Option 2']
+    ],
+    requiredAsyncSelectProps: [
+      'loadOptions',
+      // 'loadOptions': (query, callback) => callback(selectOptions)
+      'optionsAreString', // true if options are ['', ...], false if options are [{displayText: ''}, ...]
+    ],
+    optionalProps: [
+      'isCreatable', // allows user to input their own
+      'isMulti',
+      'isAsync', // if specified, options are loaded via 'loadOptions'
+      'placeholder',
+      'selectConfig',
+      'exclusiveValues', // e.g., ['Not Determined'], if not determined is selected, everything else will be cleared
+      'loadOptions',
+      'optionsAreString',
+      'selectOptions'
+    ],
+    customPropValidation: customSelectPropValidation,
   },
-};
-
-export const FormValidators = {
-  REQUIRED: {
-    isValid: (value) => {
-      return value !== undefined && value !== null &&
-        (typeof value === 'string' ? value.trim() !== '' : true);
-    },
-    msg: 'Please enter a value'
-  },
-  URL: {
-    isValid: (val) => {
-      try {
-        new URL(val);
-      } catch (_) {
-        return false;
-      }
-      return true;
-    },
-    msg: 'Please enter a valid url (e.g., https://www.google.com)'
-  },
-  EMAIL: {
-    isValid: isEmailAddress,
-    msg: 'Please enter a valid email address (e.g., person@example.com)'
+  TEXTAREA: {
+    defaultValue: '',
+    component: formInputTextarea,
+    requiredProps: [],
+    optionalProps: [
+      'placeholder',
+      'inputStyle',
+      'rows',
+      'maxLength',
+    ]
   }
 };
 
-//---------------------------------------------
-// Main Components
-//---------------------------------------------
-/*
-* Config options:
-* id, title, description
-* type (ENUM: 'text', 'multitext', 'select', 'sliding-checkbox', 'checkbox', 'radio')
-*  * type == 'text'
-*  * type == 'multitext'
-*  * type == 'select'
-*    * selectOptions: [{key: '', displayText: ''}] or ['', '']
-*    * isMulti: boolean - allow multiple simultaneous options
-*    * creatable: boolean - allow creating new values (not part of options)
-*  * type == 'radio'
-*    * options: [{name: '', displayText: '', type: ('boolean' || 'string')}]
-*       * if an option is of type string, a textbox will be added when selected.
-*  * type == 'checkbox'
-*    * toggleText
-*    * checkboxType
-*  * type === 'sliding-checkbox'
-* disabled: bool
-* placeholder, defaultValue,
-* style (for the formControl component)
-* inputStyle (for the input element)
-* onChange: func({key: '', value: '', isValid: boolean}),
-* validators: [{isValid: func, msg: ''}]
-* Accessibility: (defaults blank)
-*    * ariaDescribedby
-*    * ariaLevel
-*/
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                     FORM VALIDATORS                                     ====== //
+// ----------------------------------------------------------------------------------------------------- //
+export const FormValidators = {
+  REQUIRED: requiredValidator,
+  URL: urlValidator,
+  EMAIL: emailValidator,
+};
+
+// ----------------------------------------------------------------------------------------------------- //
+// ======                                     MAIN COMPONENTS                                     ====== //
+// ----------------------------------------------------------------------------------------------------- //
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,
@@ -125,6 +202,10 @@ export const FormField = (config) => {
       setFormValue(normalizedValue);
     }
   }, [defaultValue, config, type]);
+
+  useEffect(() => {
+    validateFormProps(config);
+  }, [config]);
 
   return div({
     key: `formControl_${id}`,

@@ -92,18 +92,18 @@ export const DataAccessGovernance = (props) => {
 
       h(FormField,
         {
-          type: FormFieldTypes.RADIO,
+          type: FormFieldTypes.RADIOGROUP,
           id: 'dataSharingPlan',
           title: 'Does the data need to be managed under Controlled or Open Access?',
           options: openClosedRadioOptions,
           onChange: ({ value, isValid }) => {
             onChange({
               key: 'alternativeDataSharingPlanControlledOpenAccess',
-              value: value.selected,
+              value: value,
               isValid: isValid,
             });
 
-            setIsClosedAccess(value.selected === CLOSED_ACCESS);
+            setIsClosedAccess(value === CLOSED_ACCESS);
           },
         }
       ),
@@ -117,9 +117,8 @@ export const DataAccessGovernance = (props) => {
           title: 'Data Access Committee*',
           description: 'Please select which DAC should govern requests for this dataset',
           type: FormFieldTypes.SELECT,
-          allowManualEntry: false,
           selectOptions: dacs.map((dac) => {
-            return { dacId: dac.dacId, displayValue: dac.name };
+            return { dacId: dac.dacId, displayText: dac.name };
           }),
           onChange: ({key, value}) => {
             onChange({key, value: value.dacId});

@@ -1,9 +1,8 @@
 import React from 'react';
-import {div, h, hh, span} from 'react-hyperscript-helpers';
+import {div, hh, span} from 'react-hyperscript-helpers';
 import {Theme} from '../../libs/theme';
 import {AppSummary} from './AppSummary';
 import {VoteSummary} from './VoteSummary';
-import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import { isEmpty, isNil, get, filter, find } from 'lodash/fp';
 import { processMatchData } from '../../utils/VoteUtils';
 
@@ -77,9 +76,6 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
             span({style: HEADER_BOLD}, darInfo.projectTitle),
             span({style: HEADER}, ' | ' + darInfo.darCode)
           ]),
-          span({style: {paddingLeft: '10px'}}, [
-            h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
-          ])
         ]),
         div({style: SECTION}, [
           span({style: HEADER_BOLD}, ['Dataset: ']),

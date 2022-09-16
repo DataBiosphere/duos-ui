@@ -2,7 +2,6 @@ import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import {Notifications} from '../../libs/utils';
 import { Collections, User } from '../../libs/ajax';
-import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
@@ -183,11 +182,6 @@ export default function DarCollectionReview(props) {
         h(ReviewHeader, {
           darCode: collection.darCode || '- -',
           projectTitle: darInfo.projectTitle || '- -',
-          downloadLink: h(ApplicationDownloadLink, {
-            darInfo,
-            researcherProfile,
-            datasets: collection.datasets || [],
-          }),
           isLoading,
           readOnly: readOnly || adminPage
         }),
