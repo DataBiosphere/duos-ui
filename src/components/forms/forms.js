@@ -8,6 +8,7 @@ import {
   requiredValidator,
   urlValidator,
   emailValidator,
+  dateValidator,
 } from './formUtils';
 import {
   formInputGeneric,
@@ -175,6 +176,7 @@ export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
   EMAIL: emailValidator,
+  DATE: dateValidator,
 };
 
 // ----------------------------------------------------------------------------------------------------- //

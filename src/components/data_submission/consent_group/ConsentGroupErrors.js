@@ -2,6 +2,7 @@ import { selectedPrimaryGroup } from './EditConsentGroup';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil } from 'lodash/fp';
 import { Notification } from '../../Notification';
+import { dateValidator } from '../../forms/formUtils';
 
 export const computeConsentGroupValidationErrors = (consentGroup) => {
   const errors = [];
@@ -38,6 +39,10 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
 
   if (!isNil(consentGroup.otherSecondary) && consentGroup.otherSecondary == '') {
     errors.push('Please specify the \'Other\' secondary consent.');
+  }
+
+  if (!isNil(consentGroup.mor) && !dateValidator.isValid(consentGroup.mor)) {
+    errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.')
   }
 
   return errors;

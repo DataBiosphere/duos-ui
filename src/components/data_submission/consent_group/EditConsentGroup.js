@@ -42,17 +42,20 @@ export const EditConsentGroup = (props) => {
     idx,
   } = props;
 
-  const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(false);
-  const [otherSecondaryText, setOtherSecondaryText] = useState('');
+  const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(!isNil(consentGroup.otherSecondary));
+  const [otherSecondaryText, setOtherSecondaryText] = useState(consentGroup.otherSecondary);
 
-  const [showGSText, setShowGSText] = useState(false);
-  const [gsText, setGSText] = useState('');
+  const [showGSText, setShowGSText] = useState(!isNil(consentGroup.gs));
+  const [gsText, setGSText] = useState(consentGroup.gs);
 
-  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(false);
-  const [otherPrimaryText, setOtherPrimaryText] = useState('');
+  const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
+  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary);
 
-  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(false);
-  const [selectedDiseases, setSelectedDiseases] = useState([]);
+  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
+  const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse?.split(', ') || []);
+
+  const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
+  const [morText, setMORText] = useState(consentGroup.mor);
 
   const onChange = ({key, value}) => {
     setConsentGroup({
@@ -292,8 +295,24 @@ export const EditConsentGroup = (props) => {
       name: 'mor',
       type: FormFieldTypes.CHECKBOX,
       toggleText: 'Publication Moratorium (MOR)',
-      defaultValue: consentGroup.mor,
-      onChange
+      defaultValue: showMORText,
+      onChange: ({key, value}) => {
+        setShowMORText(value);
+        onChange({key: key, value: (value ? morText : undefined)});
+      }
+    }),
+
+    h(FormField, {
+      isRendered: showMORText,
+      id: idx+'_morText',
+      name: 'mor',
+      validators: [FormValidators.REQUIRED, FormValidators.DATE],
+      placeholder: 'Please specify date (YYYY-MM-DD)',
+      defaultValue: morText,
+      onChange: ({key, value, isValid}) => {
+        setMORText(value);
+        onChange({key: key, value: value, isValid: isValid});
+      },
     }),
 
     h(FormField, {

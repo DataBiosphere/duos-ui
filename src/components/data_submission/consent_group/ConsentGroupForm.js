@@ -28,7 +28,7 @@ export const ConsentGroupForm = (props) => {
     col: false, // collaboration required
     irb: false, // irb approval required
     gs: null, // string: geographic restriction
-    mor: false, // publication moratorium
+    mor: undefined, // date (string): publication moratorium
     npu: false, // non profit only
     otherSecondary: null, // string
 
