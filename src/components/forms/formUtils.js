@@ -123,4 +123,4 @@ export const dateValidator = {
     return dateRegex.test(val);
   },
   msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
-}
+};

@@ -42,7 +42,7 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
   }
 
   if (!isNil(consentGroup.mor) && !dateValidator.isValid(consentGroup.mor)) {
-    errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.')
+    errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.');
   }
 
   return errors;

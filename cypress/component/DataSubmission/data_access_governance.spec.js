@@ -1,13 +1,25 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { DAC } from '../../../src/libs/ajax';
+import { DAC, User } from '../../../src/libs/ajax';
 import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
 import { mount } from 'cypress/react';
 
-const dacs = [];
+const dacs = [
+  {
+    name: 'asdf',
+    dacId: 1,
+  }
+];
+const user = {
+  userId: 1,
+  dacUserId: 2,
+  displayName: 'Cindy Crawford',
+  email: 'cc@c.com'
+};
 
 beforeEach(() => {
   cy.stub(DAC, 'list').returns(Promise.resolve(dacs));
+  cy.stub(User, 'getMe').returns(user);
 });
 
 describe('Data Access Governance', function () {

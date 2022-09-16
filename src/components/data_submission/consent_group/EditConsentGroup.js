@@ -279,7 +279,7 @@ export const EditConsentGroup = (props) => {
 
     h(FormField, {
       isRendered: showGSText,
-      id: idx+'_gs',
+      id: idx+'_gsText',
       name: 'gs',
       validators: [FormValidators.REQUIRED],
       placeholder: 'Specify Geographic Restriction',

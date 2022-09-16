@@ -35,7 +35,7 @@ describe('Consent Group', function () {
 
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
-    cy.get('#0_primaryRadio_hmb').check();
+    cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_dataLocation').type('Not Determined{enter}');
     cy.get('#0_saveConsentGroup').click().then(() => {
@@ -51,7 +51,7 @@ describe('Consent Group', function () {
           'col': true,
           'irb': false,
           'gs': null,
-          'mor': false,
+          'mor': undefined,
           'npu': false,
           'otherSecondary': null,
           'otherPrimary': undefined,
@@ -76,7 +76,7 @@ describe('Consent Group', function () {
 
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
-    cy.get('#0_primaryRadio_hmb').check();
+    cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_deleteConsentGroup').click().then(() => {
       expect(propCopy.deleteConsentGroup).to.be.called;
@@ -86,21 +86,21 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
-    cy.get('#0_gs_text').should('not.exist');
+    cy.get('#0_gsText').should('not.exist');
     cy.get('#0_gs').check();
-    cy.get('#0_gs_text').should('exist');
+    cy.get('#0_gsText').should('exist');
 
-    cy.get('#0_otherSecondary_text').should('not.exist');
+    cy.get('#0_otherSecondaryText').should('not.exist');
     cy.get('#0_otherSecondary').check();
-    cy.get('#0_otherSecondary_text').should('exist');
+    cy.get('#0_otherSecondaryText').should('exist');
 
-    cy.get('#0_primaryRadio_otherPrimary_text_input').should('not.exist');
-    cy.get('#0_primaryRadio_otherPrimary').check();
-    cy.get('#0_primaryRadio_otherPrimary_text_input').should('exist');
+    cy.get('#0_otherPrimaryText').should('not.exist');
+    cy.get('#0_primaryConsent_otherPrimary').check();
+    cy.get('#0_otherPrimaryText').should('exist');
 
-    cy.get('#0_primaryRadio_diseaseSpecificUse_text_input').should('not.exist');
-    cy.get('#0_primaryRadio_diseaseSpecificUse').check();
-    cy.get('#0_primaryRadio_diseaseSpecificUse_text_input').should('exist');
+    cy.get('#0_diseaseSpecificUseText').should('not.exist');
+    cy.get('#0_primaryConsent_diseaseSpecificUse').check();
+    cy.get('#0_diseaseSpecificUseText').should('exist');
 
 
   });
