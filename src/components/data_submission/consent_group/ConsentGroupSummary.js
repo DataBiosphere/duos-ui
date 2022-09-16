@@ -137,7 +137,9 @@ export const ConsentGroupSummary = (props) => {
         ]);
       }
 
-      return p({}, text);
+      return p({
+        key: `secondaryGroup_${idx}`,
+      }, text);
     });
 
   };
