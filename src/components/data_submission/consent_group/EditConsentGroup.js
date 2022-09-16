@@ -9,7 +9,7 @@ export const selectedPrimaryGroup = (consentGroup) => {
     return 'generalResearchUse';
   } else if (!isNil(consentGroup.hmb) && consentGroup.hmb) {
     return 'hmb';
-  } else if (!isNil(consentGroup.diseaseSpecificUse) && isString(consentGroup.diseaseSpecificUse)) {
+  } else if (!isNil(consentGroup.diseaseSpecificUse) && consentGroup.diseaseSpecificUse.length > 0) {
     return 'diseaseSpecificUse';
   } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
     return 'poa';
@@ -31,10 +31,6 @@ const searchOntologies = (query, callback) => {
     });
 };
 
-const formatSelectedDiseases = (selected) => {
-  return selected.join(', ');
-};
-
 export const EditConsentGroup = (props) => {
   const {
     consentGroup,
@@ -52,7 +48,7 @@ export const EditConsentGroup = (props) => {
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary);
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
-  const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse?.split(', ') || []);
+  const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
   const [morText, setMORText] = useState(consentGroup.mor);
@@ -142,7 +138,7 @@ export const EditConsentGroup = (props) => {
       onChange: ({value}) => {
         onPrimaryChange({
           key: value,
-          value: formatSelectedDiseases(selectedDiseases)
+          value: selectedDiseases
         });
       },
     }),
@@ -168,7 +164,7 @@ export const EditConsentGroup = (props) => {
           setSelectedDiseases(value);
           onChange({
             key: key,
-            value: formatSelectedDiseases(value),
+            value: value,
             isValid: isValid
           });
         },

@@ -1,5 +1,5 @@
 import { div, input, span, p } from 'react-hyperscript-helpers';
-import { isNil, isString } from 'lodash/fp';
+import { isNil, isString, isArray } from 'lodash/fp';
 
 
 const primaryConsentText = {
@@ -91,6 +91,17 @@ export const ConsentGroupSummary = (props) => {
             fontStyle: 'italic',
           }
         }, [value])
+      ]);
+    }
+
+    if (isArray(value)) {
+      return div({}, [
+        span({}, [primaryConsentText[field] + ': ']),
+        span({
+          style: {
+            fontStyle: 'italic',
+          }
+        }, [value.join(', ')])
       ]);
     }
 
