@@ -2,9 +2,15 @@ import {div, h, h2} from 'react-hyperscript-helpers';
 import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
-const I_DID = 'I did';
-const I_WILL = 'I will';
+const I_DID = 'I Did';
+const I_WILL = 'I Will';
 const NO = 'No';
+
+const nihAnvilUseLabels = {
+  i_did: I_DID,
+  i_will: I_WILL,
+  no: NO
+}
 
 const allNihAnvilUseFields = [
   'submittingToAnvil',
@@ -33,25 +39,27 @@ export default function NihAnvilUse(props) {
       title: 'Will you or did you submit data to the NIH?',
       type: FormFieldTypes.RADIOGROUP,
       options: [
-        {text: I_DID, name: I_DID},
-        {text: I_WILL, name: I_WILL},
-        {text: NO, name: NO},
+        {text: I_DID, name: 'i_did'},
+        {text: I_WILL, name: 'i_will'},
+        {text: NO, name: 'no'},
       ],
       validators: [FormValidators.REQUIRED],
       onChange: (config) => {
-        onChange(config);
+
+        const value = nihAnvilUseLabels[config.value];
+        onChange({key: config.key, value: value, isValid: config.isValid});
 
         // if going from did -> i will / no, then clear all values
-        if (nihAnvilUse == I_DID && config.value != I_DID) {
+        if (nihAnvilUse == I_DID && value != I_DID) {
           clearFormValues();
         }
 
         // if going from i will / no -> did, then clear all values
-        if ((nihAnvilUse === I_WILL || nihAnvilUse === NO) && (config.value !== I_WILL && config.value !== NO)) {
+        if ((nihAnvilUse === I_WILL || nihAnvilUse === NO) && (value !== I_WILL && value !== NO)) {
           clearFormValues();
         }
 
-        setNihAnvilUse(config.value);
+        setNihAnvilUse(value);
       },
     }),
 
