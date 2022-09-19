@@ -99,3 +99,12 @@ export const emailValidator = {
   isValid: isEmailAddress,
   msg: 'Please enter a valid email address (e.g., person@example.com)',
 };
+
+// regex source: https://regexland.com/regex-dates/
+const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/;
+export const dateValidator = {
+  isValid: (val) => {
+    return dateRegex.test(val);
+  },
+  msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
+};
