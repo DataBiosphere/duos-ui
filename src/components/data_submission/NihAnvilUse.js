@@ -10,7 +10,7 @@ const nihAnvilUseLabels = {
   i_did: I_DID,
   i_will: I_WILL,
   no: NO
-}
+};
 
 const allNihAnvilUseFields = [
   'submittingToAnvil',
