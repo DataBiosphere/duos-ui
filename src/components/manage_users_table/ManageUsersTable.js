@@ -34,21 +34,23 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    username: '30%',
+    username: '20%',
     usernameMargin: '5%',
-    googleId: '30%',
-    googleIdMargin: '5%',
-    role: '30%',
+    email: '20%',
+    emailMargin: '5%',
+    institution: '20%',
+    institutionMargin: '5%',
+    perms: '20%',
   },
   color: {
     username: '#000000',
-    googleId: '#000000',
-    role: '#000000',
+    email: '#000000',
+    perms: '#000000',
   },
   fontSize: {
     username: '1.6rem',
-    googleId: '1.4rem',
-    role: '1.4rem',
+    email: '1.4rem',
+    perms: '1.4rem',
   },
 };
 
@@ -62,21 +64,33 @@ const columnHeaderConfig = {
     cellDataFn: cellData.usernameCellData,
     sortable: true
   },
-  googleId: {
-    label: 'Google Account ID',
+  email: {
+    label: 'Email',
     cellStyle: {
-      width: styles.cellWidth.googleId,
-      margin: `0% ${styles.cellWidth.googleIdMargin} 0% 0%`
+      width: styles.cellWidth.email,
+      margin: `0% ${styles.cellWidth.emailMargin} 0% 0%`
     },
-    cellDataFn: cellData.googleIdCellData,
+    cellDataFn: cellData.emailCellData,
     sortable: false
   },
-  role: {
-    label: 'User Role',
-    cellStyle: { width: styles.cellWidth.role },
-    cellDataFn: cellData.roleCellData,
+  institution: {
+    label: 'Insitution',
+    cellStyle: {
+      width: styles.cellWidth.institution,
+      margin: `0% ${styles.cellWidth.institutionMargin} 0% 0%`
+    },
+    cellDataFn: cellData.institutionCellData,
     sortable: false
-  }
+  },
+  perms: {
+    label: 'Permissions',
+    cellStyle: {
+      width: styles.cellWidth.perms,
+    },
+    cellDataFn: cellData.permissionsCellData,
+    sortable: false
+  },
+
 };
 
 const columns = Object.keys(columnHeaderConfig);
@@ -92,11 +106,13 @@ const processUserRowData = ({ users, columns = columns }) => {
         roles,
         userId,
         displayName,
+        libraryCards,
+        institution,
         email
       } = user;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          user, roles, userId, displayName, email
+          user, roles, userId, displayName, email, institution, libraryCards
         });
       });
     });

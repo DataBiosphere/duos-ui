@@ -1,10 +1,11 @@
 import {map, sortedUniq} from 'lodash';
-import {h, button} from 'react-hyperscript-helpers';
+import {h} from 'react-hyperscript-helpers';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
 
 export function usernameCellData({displayName, userId, label= 'user-name'}) {
   return {
+    // clicking on username lets you edit user
     data: h(Link, {to: `/admin_edit_user/${userId}`}, [displayName]),
     value: displayName,
     id: userId,
@@ -17,51 +18,44 @@ export function usernameCellData({displayName, userId, label= 'user-name'}) {
   };
 }
 
-export function googleIdCellData({userId, email, label = 'google-id'}) {
+export function emailCellData({userId, email, label = 'email'}) {
   return {
     data: email,
     value: email,
     id: userId,
     style: {
-      color: styles.color.googleId,
-      fontSize: styles.fontSize.googleId,
+      color: styles.color.email,
+      fontSize: styles.fontSize.email,
       fontWeight: '500'
     },
     label
   };
 }
 
-//Redirect for admin review page, only used in admin manage dar collections table
-export function roleCellData({userId, roles, label = 'user-role'}) {
+export function permissionsCellData({userId, roles, libraryCards, institution, label = 'permissions'}) {
+  const hasLibraryCard = libraryCards?.map((lc) => lc.institutionId)?.includes(institution?.id);
+  const roleNames = map(roles, 'name').filter((roleName) => roleName !== 'Researcher');
+  const perms = (hasLibraryCard ? roleNames.concat('Library Card') : roleNames);
   return {
     isComponent: true,
-    data: sortedUniq(map(roles, 'name')).join('   '),
+    data: sortedUniq(perms).join('   ') || 'None',
     label,
     id: userId,
   };
 }
 
-export function actionsCellData({userId, user, editUser}) {
+export function institutionCellData({userId, institution, label = 'insitution'}) {
   return {
     isComponent: true,
+    data: institution?.name || 'N/A',
+    label,
     id: userId,
-    style: {
-      color: styles.color.actions,
-      fontSize: styles.fontSize.actions
-    },
-    label: 'table-actions',
-    data: button({
-      id: userId + '_btnEditUser',
-      name: 'btn_editUser',
-      className: 'cell-button hover-color',
-      onClick: editUser(user)
-    }, ['Edit']),
   };
 }
 
 export default {
   usernameCellData,
-  googleIdCellData,
-  roleCellData,
-  actionsCellData
+  emailCellData,
+  permissionsCellData,
+  institutionCellData,
 };
