@@ -74,7 +74,7 @@ const columnHeaderConfig = {
     sortable: false
   },
   institution: {
-    label: 'Insitution',
+    label: 'Institution',
     cellStyle: {
       width: styles.cellWidth.institution,
       margin: `0% ${styles.cellWidth.institutionMargin} 0% 0%`
