@@ -12,7 +12,7 @@ export const Spinner =
 // ManageDac, AddDacModal, DataAccessRequest, AppSummary, AccessReview, SigningOfficialConsole,
 // ReviewResults, ResearcherProfile, NewMemberConsole, DataSharingLanguageTool,
 // DatasetStatistics, DatasetRegistration, DatasetCatalog, DataOwnerReview, DataAccessRequestApplication,
-// ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,
+// ChairConsole, BackgroundSignIn, AdminManageUser, AdminMaangeInstitutions,
 // SupportRequestModal, ElectionTimeoutModal,
 // DacDatasetsModal, EraCommons, ApplicationSummaryModa, AddUserModal, AddInstitutionModal,
 // LibraryCardTable, DarTable DarTableCancelButton, SubmitVoteBox

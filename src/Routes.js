@@ -28,7 +28,6 @@ import { SummaryVotes } from './pages/SummaryVotes';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
-import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from './pages/DatasetStatistics';
 import DarCollectionReview from './pages/dar_collection_review/DarCollectionReview';
 import AdminManageDarCollections from './pages/AdminManageDarCollections';
@@ -90,7 +89,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/signing_official_console/data_submitters" component={SigningOfficialDataSubmitters} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/access_review/:darId" component={AccessReview} props={props}

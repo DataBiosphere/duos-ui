@@ -78,7 +78,6 @@ export const headerTabsConfig = [
       { label: 'Statistics', link: '/summary_votes' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
-      { label: 'Library Cards', link: '/admin_manage_lc' }
     ],
     isRendered: (user) => user.isAdmin
   },
