@@ -3,7 +3,7 @@ import { a, div, form, h, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
-import DataUseAgreements from './dar_application/DataUseAgreements';
+import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import {
   isFileEmpty,
   Navigation,
@@ -16,7 +16,7 @@ import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, DataSet, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
+import { any, assign, cloneDeep, find, get, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -892,13 +892,15 @@ class DataAccessRequestApplicationNew extends Component {
 
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
-    const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
+    const { showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
-    const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
-    const step2Invalid = this.verifyStep2();
-    const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
+
+    // VALIDATION CHECKS:
+    // const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
+    // const step2Invalid = this.verifyStep2();
+    // const step3Invalid = this.step3InvalidResult();
+    // const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
@@ -920,19 +922,6 @@ class DataAccessRequestApplicationNew extends Component {
       otherTextHandler: this.setOtherText
     });
 
-    const ConfirmationDialogComponent = ConfirmationDialog({
-      title: 'Data Request Confirmation',
-      disableOkBtn: this.state.disableOkBtn,
-      disableNoBtn: this.state.disableOkBtn,
-      color: 'access',
-      showModal: this.state.showDialogSubmit,
-      action: {
-        label: 'Yes',
-        handler: this.dialogHandlerSubmit
-      }
-    }, [div({
-      className: 'dialog-description'
-    }, ['Are you sure you want to send this Data Access Request Application?'])]);
     return (
       div({ className: 'container', style: {paddingBottom: '2%'} }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -1098,18 +1087,8 @@ class DataAccessRequestApplicationNew extends Component {
             div({className: 'step-container'}, [
               h(DataUseAgreements, {
                 darCode: darCode,
-                problemSavingRequest,
-                attestAndSave: this.attestAndSave,
-                ConfirmationDialogComponent,
-                partialSave: this.partialSave,
-                prevPage: this.prevPage,
-                step1Invalid,
-                step2Invalid,
-                step3Invalid,
-                libraryCardInvalid,
-                showValidationMessages,
-                updateShowValidationMessages: this.updateShowValidationMessages,
-                goToStep: this.goToStep
+                attestAndSend: () => {},
+                save: () => {},
               })
             ])
           ])
