@@ -41,4 +41,3 @@ export default function AdminManageLC() {
   //props are expecting array format
   return h(LibraryCardTable, {users, institutions, libraryCards});
 }
-	
