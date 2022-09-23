@@ -568,12 +568,19 @@ export const getSearchFilterFunctions = () => {
 
       return filter(user => {
         const {
-          displayName, email, roles
+          displayName, email, roles, institution, libraryCards
         } = user;
 
         const matchable = [displayName, email];
         if (!isNil(roles)) {
           matchable.push(...map((r) => r.name)(roles));
+        }
+        if (!isNil(institution)) {
+          matchable.push(institution.name);
+        }
+
+        if (!isNil(libraryCards) && !isEmpty(libraryCards)) {
+          matchable.push('Library Card');
         }
 
         const match = find(isMatch)(matchable);
