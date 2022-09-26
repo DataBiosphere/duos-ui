@@ -35,7 +35,8 @@ module.exports = function (app) {
       target: configUrls.apiUrl,
       secure: false,
       pathRewrite: {
-        '/api/status': '/status'
+        '/api/status': '/status',
+        '/api/tos/text/duos': '/tos/text/duos'
       }
     })
   );

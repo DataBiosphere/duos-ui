@@ -844,7 +844,9 @@ export const LibraryCard = {
 
 export const ToS = {
   getDUOSText: async () => {
-    const url = `${await getApiUrl()}/tos/text/duos`;
+    const env = await Config.getEnv();
+    const baseUrl = env === 'local' ? '/api' : undefined;
+    const url = `${await getApiUrl(baseUrl)}tos/text/duos`;
     const res = await axios.get(url, Config.textPlain());
     return res.data;
   },
