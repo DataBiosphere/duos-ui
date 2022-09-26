@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { a, div, fieldset, h2, h3, h4, h, span } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
 import './dar_application_new.css';
@@ -66,6 +65,7 @@ export default function ResearchPurposeStatement(props) {
     illegalBehavior,
     notHealth,
     oneGender,
+    gender,
     pediatric,
     psychiatricTraits,
     sexualDiseases,
@@ -73,7 +73,6 @@ export default function ResearchPurposeStatement(props) {
     vulnerablePopulation
   } = props;
 
-  const [gender, setGender] = useState(props.gender);
 
   //NOTE: inputs have both isEmpty and isNil checks
   //currently values are initialized as emptry strings as a way to maintain controlled inputs in components
@@ -102,7 +101,7 @@ export default function ResearchPurposeStatement(props) {
             defaultValue: oneGender,
             onChange: ({key, value}) => {
               onChange({key, value});
-              onChange({key: 'gender', value: (value?gender:undefined)});
+              // onChange({key: 'gender', value: (value?gender:undefined)});
             },
           }),
 
@@ -137,7 +136,7 @@ export default function ResearchPurposeStatement(props) {
               ],
               defaultValue: gender,
               onChange: ({key, value}) => {
-                setGender(value);
+                // setGender(value);
                 onChange({key, value});
               },
             }),
