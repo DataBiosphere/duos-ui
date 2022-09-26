@@ -404,7 +404,7 @@ export default function ResearcherProfile(props) {
               }, [
                 h(FormField, {
                   title: 'Signing Official',
-                  description: 'Please select your Signing Official or enter your signing official’s email address.',
+                  description: 'Please select your Signing Official or enter your signing official’s email address. This is an individual who has the authority to engage your institution in legal contracts, likely someone in your grants department or office of sponsored research.',
                   validators: [FormValidators.REQUIRED],
                   id: 'signingOfficial',
                   type: FormFieldTypes.SELECT,
@@ -449,7 +449,6 @@ export default function ResearcherProfile(props) {
                         suggestedSigningOfficial: value?.suggestedSigningOfficial
                       }));
                   },
-
                 }),
                 p(
                   {
@@ -518,10 +517,6 @@ export default function ResearcherProfile(props) {
                   ])
                 ])
               ]),
-
-
-
-
               div({
                 className: 'row',
                 style: { margin: '20px 0' }
