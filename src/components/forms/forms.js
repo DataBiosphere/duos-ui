@@ -34,7 +34,8 @@ export const commonOptionalProps = [
   'style',
   'validators',
   'onChange',
-  'type'
+  'type',
+  'key',
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
@@ -154,7 +155,7 @@ export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,
     title, hideTitle, description,
-    defaultValue, style, validators
+    defaultValue, style, validators, key
   } = config;
 
   const [error, setError] = useState();

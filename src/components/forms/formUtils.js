@@ -37,11 +37,7 @@ export const customSelectPropValidation = (props) => {
     throw 'prop \'selectOptions\' must be an array';
   }
 
-  if (isEmpty(props.selectOptions)) {
-    throw '\'selectOptions\' cannot be empty';
-  }
-
-  const isStringArr = isString(props.selectOptions[0]);
+  const isStringArr = props.selectOptions.length > 0 && isString(props.selectOptions[0]);
 
   props.selectOptions.forEach((opt) => {
     if (isStringArr) {

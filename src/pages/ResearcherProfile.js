@@ -1,10 +1,10 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {find, isNil, isNumber} from 'lodash';
-import {button, div, form, h, h2, hr, input, label, p, a, textarea} from 'react-hyperscript-helpers';
+import {button, div, form, h, h2, hr, input, label, p, a} from 'react-hyperscript-helpers';
 import {eRACommons} from '../components/eRACommons';
 import {PageHeading} from '../components/PageHeading';
 import {Notification} from '../components/Notification';
-import {SearchSelectOrText} from '../components/SearchSelectOrText';
+import {FormField, FormFieldTypes, FormValidators} from '../components/forms/forms';
 import {Institution, Support, User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
 import {Storage} from '../libs/storage';
@@ -51,9 +51,13 @@ export default function ResearcherProfile(props) {
   });
 
   const [institutionList, setInstitutionList] = useState([]);
+
+  const [selectedInstitution, setSelectedInstitution] = useState();
   const [signingOfficialList, setSigningOfficialList] = useState([]);
+  const [currentSigningOfficial, setCurrentSigningOfficial] = useState(null);
 
   const [notificationData, setNotificationData] = useState();
+  const [user, setUser] = useState();
 
   useEffect(() => {
     const init = async () => {
@@ -82,10 +86,18 @@ export default function ResearcherProfile(props) {
           return;
         }
 
+        setSelectedInstitution(institution);
+
         setSigningOfficialList((institution.signingOfficials ? institution.signingOfficials : []));
       });
+    } else {
+      setSelectedInstitution(null);
     }
   }, [profile.institutionId]);
+
+  useEffect(() => {
+    setCurrentSigningOfficial(findSigningOfficial(profile.selectedSigningOfficialId));
+  }, [profile.selectedSigningOfficialId, signingOfficialList, findSigningOfficial]);
 
   const hasInstitution = () => {
     return (isNumber(profile.institutionId) && profile.institutionId !== 0) || (profile.suggestedInstitution !== undefined && profile.suggestedInstitution !== '');
@@ -109,6 +121,7 @@ export default function ResearcherProfile(props) {
 
   const getResearcherProfile = async () => {
     const user = await User.getMe();
+    setUser(user);
 
     const userProps = getPropertyValuesFromUser(user);
 
@@ -124,20 +137,8 @@ export default function ResearcherProfile(props) {
     });
   };
 
-  const handleChange = (event) => {
-    let field = event.target.name;
-    let value = event.target.value;
-
-    let newProfile = Object.assign({}, profile, {[field]: value});
-    setProfile(newProfile);
-  };
-
-  const handleSupportRequestsChange = (event) => {
-    let field = event.target.name;
-    let value = event.target.type === 'checkbox'
-      ? event.target.checked
-      : event.target.value;
-    let newSupportRequests = Object.assign({}, supportRequests, {[field]: value});
+  const handleSupportRequestsChange = ({key, value}) => {
+    let newSupportRequests = Object.assign({}, supportRequests, {[key]: value});
     setSupportRequests(newSupportRequests);
   };
 
@@ -216,37 +217,58 @@ export default function ResearcherProfile(props) {
     if (!isSigningOfficial() || (isNil(profile.institutionId) && isNil(profile.suggestedInstitution))) {
       return div({},
         [
-          h(SearchSelectOrText, {
-            id: 'Institution',
-            label: 'institution',
-            onPresetSelection: async (selection) => {
-              setSigningOfficialList([]); // reset
-
-              setProfile(Object.assign({}, profile, {institutionId: selection, suggestedInstitution: undefined}));
-            },
-            onManualSelection: (selection) => {
-              if (selection == '') {
-                setProfile(Object.assign({}, profile, {institutionId: undefined, suggestedInstitution: undefined}));
-              } else {
-                setProfile(Object.assign({}, profile, {institutionId: null, suggestedInstitution: selection}));
-              }
-            },
-            options: institutionList.map(institution => {
+          h(FormField, {
+            id: 'institutionId',
+            type: FormFieldTypes.SELECT,
+            selectOptions: (institutionList).map((i) => {
               return {
-                key: institution.id,
-                displayText: institution.name,
+                institutionId: i.id,
+                displayText: i.name,
               };
             }),
-            value: profile.institutionId,
-            freetextValue: profile.suggestedInstitution,
             placeholder: 'Search for Institution...',
-            className: 'form-control'
-          })
+            isCreatable: true,
+            defaultValue: {
+              instituionId: selectedInstitution?.institutionId,
+              suggestedInstitution: profile.suggestedInstitution,
+              displayText: (
+                (!isNil(selectedInstitution) && !isNil(profile.suggestedInstitution))
+                  ? `${user.institution.name} (suggested: ${profile.suggestedInstitution})`
+                  : (!isNil(selectedInstitution)
+                    ? `${selectedInstitution.name}`
+                    : (!isNil(profile.suggestedInstitution)
+                      ? `Suggested: ${profile.suggestedInstitution}`
+                      : ''))
+              ),
+            },
+            selectConfig: {
+              clearValue: () => {
+                setProfile(Object.assign({},
+                  profile,
+                  {
+                    institutionId: undefined,
+                    suggestedInstitution: undefined
+                  }));
+              },
+            },
+            onChange: ({value}) => {
+              if (!isNil(value?.institutionId)) {
+                setProfile(Object.assign({}, profile, {
+                  institutionId: value?.institutionId,
+                  suggestedInstitution: undefined
+                }));
+              } else {
+                setProfile(Object.assign({}, profile, {
+                  institutionId: undefined,
+                  suggestedInstitution: value?.displayText
+                }));
+              }
+            }
+          }),
         ]
       );
     } else {
       let institution = (profile.institutionId ? find(institutionList, {id: profile.institutionId}) : null);
-
       const institutionName = (institution ? institution.name : profile.suggestedInstitution);
 
 
@@ -274,12 +296,20 @@ export default function ResearcherProfile(props) {
     marginBottom: '1rem'
   };
 
+  const onChange = ({key, value}) => {
+    setProfile(Object.assign({}, profile, {[key]: value}));
+  };
+
+  const findSigningOfficial = useCallback((id) => {
+    return signingOfficialList.find((so) => so.userId === id);
+  }, [signingOfficialList]);
+
   return (
     div({
-      className: 'container' ,
+      className: 'container',
       style: {
         color: '#333F52',
-      }
+      },
     }, [
       div({ className: 'row no-margin' }, [
         div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
@@ -306,18 +336,13 @@ export default function ResearcherProfile(props) {
           }, [
             div({ className: 'form-group' }, [
               div({ className: 'col-xs-12' }, [
-                label({
-                  id: 'lbl_profileName',
-                  className: 'control-label',
-                  style: headerStyle,
-                }, ['Full Name*']),
-                input({
+                h(FormField, {
+                  type: FormFieldTypes.TEXT,
+                  title: 'Full Name',
+                  validators: [FormValidators.REQUIRED],
                   id: 'profileName',
-                  name: 'profileName',
-                  type: 'text',
-                  className: 'form-control',
                   defaultValue: profile.profileName,
-                  onBlur: handleChange,
+                  onChange,
                 }),
 
                 p(
@@ -369,8 +394,6 @@ export default function ResearcherProfile(props) {
                 ]),
                 p({}, ['Please select an institution or enter your institution name if not available from the dropdown.']),
                 generateInstitutionSelectionDisplay(),
-
-
               ]),
 
 
@@ -379,42 +402,55 @@ export default function ResearcherProfile(props) {
                 style: { 'marginTop': '20px' },
                 isRendered: hasInstitution() && !isSigningOfficial(),
               }, [
-                label({
-                  id: 'lbl_profileInstitution',
-                  className: 'control-label',
-                  style: headerStyle,
-                }, [
-                  'Signing Official* ',
-                ]),
-                p({}, ['Please select your Signing Official or enter your signing official’s email address.']),
-                div({},
-                  [
-                    h(SearchSelectOrText, {
-                      id: 'SigningOfficial',
-                      label: 'SigningOfficial',
-                      onPresetSelection: (selection) => {
-                        setProfile(Object.assign({}, profile, {selectedSigningOfficialId: selection, suggestedSigningOfficial: undefined}));
-                      },
-                      onManualSelection: (selection) => {
-                        if (selection == '') {
-                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: undefined, suggestedSigningOfficial: undefined}));
-                        } else {
-                          setProfile(Object.assign({}, profile, {selectedSigningOfficialId: null, suggestedSigningOfficial: selection}));
-                        }
-                      },
-                      options: signingOfficialList.map(signingOfficial => {
-                        return {
-                          key: signingOfficial.userId,
-                          displayText: signingOfficial.displayName,
-                        };
-                      }),
-                      placeholder: 'Please Select a Signing Official',
-                      searchPlaceholder: 'Search for a Signing Official...',
-                      value: profile.selectedSigningOfficialId,
-                      freetextValue: profile.suggestedSigningOfficial,
-                      className: 'form-control'
-                    })
-                  ]),
+                h(FormField, {
+                  title: 'Signing Official',
+                  description: 'Please select your Signing Official or enter your signing official’s email address.',
+                  validators: [FormValidators.REQUIRED],
+                  id: 'signingOfficial',
+                  type: FormFieldTypes.SELECT,
+                  defaultValue: {
+                    displayText: (
+                      (!isNil(currentSigningOfficial) && !isNil(profile.suggestedSigningOfficial))
+                        ? `${currentSigningOfficial.displayName} (suggested: ${profile.suggestedSigningOfficial})`
+                        : (!isNil(currentSigningOfficial))
+                          ? `${currentSigningOfficial.displayName}`
+                          : `Suggested: ${profile.suggestedSigningOfficial}`
+                    ),
+                  },
+                  selectOptions: (signingOfficialList).map((so) => {
+                    return {
+                      signingOfficialId: so.userId,
+                      displayText: so.displayName,
+                    };
+                  }),
+                  placeholder: 'Please Select a Signing Official',
+                  isCreatable: true,
+                  selectConfig: {
+                    getNewOptionData: (val) => {
+                      return {
+                        suggestedSigningOfficial: val,
+                        displayText: val,
+                      };
+                    },
+                    clearValue: () => {
+                      setProfile(Object.assign({},
+                        profile,
+                        {
+                          selectedSigningOfficialId: undefined,
+                          suggestedSigningOfficial: undefined
+                        }));
+                    }
+                  },
+                  onChange: ({value}) => {
+                    setProfile(Object.assign({},
+                      profile,
+                      {
+                        selectedSigningOfficialId: value?.signingOfficialId,
+                        suggestedSigningOfficial: value?.suggestedSigningOfficial
+                      }));
+                  },
+
+                }),
                 p(
                   {
                     isRendered: !suggestSigningOfficialValid(),
@@ -457,35 +493,28 @@ export default function ResearcherProfile(props) {
                   }, ['Which of the following are you looking to do?*']),
 
                   possibleSupportRequests.map(supportRequest => {
-                    return div({ className: 'col-xs-12 checkbox', key: supportRequest.key }, [
-                      input({
-                        type: 'checkbox',
-                        id: `chk_${supportRequest.key}`,
-                        name: supportRequest.key,
-                        className: 'checkbox-inline checkbox',
-                        checked: supportRequests[supportRequest.id],
-                        onChange: handleSupportRequestsChange
-                      }),
-                      label({ className: 'regular-checkbox', htmlFor: `chk_${supportRequest.key}` },
-                        [supportRequest.label])
-                    ]);
+                    return h(FormField, {
+                      toggleText: supportRequest.label,
+                      type: FormFieldTypes.CHECKBOX,
+
+                      key: supportRequest.key,
+                      id: supportRequest.key,
+                      onChange: handleSupportRequestsChange,
+                    });
                   }),
 
                   div({ className: 'col-xs-12' }, [
                     div({ style: { margin: '15px 0 10px' }}, [
                       `Is there anything else you'd like to request?`
                     ]),
-
-                    textarea({
-                      value: supportRequests.extraRequest,
-                      onChange: handleSupportRequestsChange,
-                      className: 'form-control col-xs-12',
-                      name: 'extraRequest',
-                      id: 'supportRequests_extraRequest',
+                    h(FormField, {
+                      type: FormFieldTypes.TEXTAREA,
+                      id: 'extraRequest',
+                      placeholder: 'Enter your request',
                       maxLength: '512',
                       rows: '3',
-                      placeholder: 'Enter your request'
-                    })
+                      onChange: handleSupportRequestsChange,
+                    }),
                   ])
                 ])
               ]),
