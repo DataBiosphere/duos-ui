@@ -155,7 +155,7 @@ export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,
     title, hideTitle, description,
-    defaultValue, style, validators, key
+    defaultValue, style, validators
   } = config;
 
   const [error, setError] = useState();
