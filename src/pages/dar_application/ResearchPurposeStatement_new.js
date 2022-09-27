@@ -101,7 +101,6 @@ export default function ResearchPurposeStatement(props) {
             defaultValue: oneGender,
             onChange: ({key, value}) => {
               onChange({key, value});
-              // onChange({key: 'gender', value: (value?gender:undefined)});
             },
           }),
 
@@ -136,7 +135,6 @@ export default function ResearchPurposeStatement(props) {
               ],
               defaultValue: gender,
               onChange: ({key, value}) => {
-                // setGender(value);
                 onChange({key, value});
               },
             }),
