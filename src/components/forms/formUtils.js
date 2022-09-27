@@ -101,14 +101,19 @@ export const requiredValidator = {
 
 export const urlValidator = {
   isValid: (val) => {
-    try {
-      new URL(val);
-    } catch (_) {
-      return false;
-    }
-    return true;
+    return validURLObject(val) || validURLObject('https://' + val);
   },
-  msg: 'Please enter a valid url (e.g., https://www.google.com)',
+  msg: 'Please enter a valid url (e.g., duos.org)',
+};
+
+const validURLObject = (val) => {
+  try {
+    new URL(val);
+  } catch (_) {
+    return false;
+  }
+
+  return true;
 };
 
 export const emailValidator = {
