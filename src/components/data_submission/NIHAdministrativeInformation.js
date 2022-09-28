@@ -2,6 +2,7 @@ import {div, h, h2, h3} from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { nihInstitutions } from './nih_institutions';
 import { isEmpty } from 'lodash/fp';
+import { useState } from 'react';
 
 export const NIHAdministrativeInformation = (props) => {
   const {
@@ -10,7 +11,15 @@ export const NIHAdministrativeInformation = (props) => {
     institutions,
   } = props;
 
-  return div({}, [
+  const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(formData.multiCenterStudy || false);
+  const [showGSRNotRequiredExplanation, setShowGSRNotRequiredExplanation] = useState(!formData.controlledAccessRequiredForGenomicSummaryResultsGSR || false);
+
+
+  const [showInadequateConsentProcessesQuestions, setShowInadequateConsentProcessesQuestions] = useState(formData.isInformedConsentProcessesInadequate || false);
+
+  return div({
+    className: 'data-submitter-section',
+  }, [
     h2('NIH Administrative Information'),
     h(FormField, {
       id: 'piName',
@@ -71,19 +80,20 @@ export const NIHAdministrativeInformation = (props) => {
       defaultValue: formData.nihGenomicProgramAdministratorName,
       onChange,
     }),
-    // //finish up
-    // // h(FormField, {
-    // //   id: 'multiCenterStudy',
-    // //   type: FormFieldTypes.RADIO,
-    // //   validators: [FormValidators.REQUIRED],
-    // //   defaultValue: multiCenterStudy,
-    // //   options: [
-    // //     { name: '', displayText: 'Yes' },
-    // //     { name: '', displayText: 'No' },
-    // //   ],
-    // // }),
+    h(FormField, {
+      id: 'multiCenterStudy',
+      title: 'Is this a multi-center study?',
+      type: FormFieldTypes.YESNORADIOGROUP,
+      validators: [FormValidators.REQUIRED],
+      defaultValue: formData.multiCenterStudy,
+      onChange: ({key, value}) => {
+        setShowMultiCenterStudy(value);
+        onChange({key, value});
+      }
+    }),
     h(FormField, {
       id: 'collaboratingSites',
+      isRendered: showMultiCenterStudy,
       title: 'What are the collaborating sites?',
       type: FormFieldTypes.MULTITEXT,
       placeholder: 'List site(s) here...',
@@ -91,26 +101,25 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       onChange,
     }),
-    // //NOTE: radio group not equipped to handle yes/no groupings
-    // // h(FormField, {
-    // //   id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
-    // //   defaultValue: controlledAccessRequiredForGenomicSummaryResultsGSR,
-    // //   type: FormFieldTypes.RADIO,
-    // //   validators: [FormFieldTypes.REQUIRED],
-    // //   onChange,
-    // //   options: [
-    // //     {
-    // //       id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
-    // //       displayText: 'Yes',
-    // //     },
-    // //   ],
-    // // }),
+    //NOTE: radio group not equipped to handle yes/no groupings
+    h(FormField, {
+      id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
+      title: 'Is controlled access required for genomic summary results (GSR)?',
+      defaultValue: formData.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      type: FormFieldTypes.YESNORADIOGROUP,
+      validators: [FormValidators.REQUIRED],
+      onChange: ({key, value}) => {
+        setShowGSRNotRequiredExplanation(!value);
+        onChange({key, value});
+      }
+    }),
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation',
+      title: 'If no, explain why controlled access is needed for GSR.',
+      isRendered: showGSRNotRequiredExplanation,
       defaultValue: formData.controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation,
-      validators: [FormFieldTypes.REQUIRED],
+      validators: [FormValidators.REQUIRED],
       onChange,
-      isRendered: true, // todo: controlledAccessRequiredForGenomicSummaryResultsGSR,
     }),
     div({ style: { marginTop: '7%' } }, [
       h3(
@@ -128,12 +137,20 @@ export const NIHAdministrativeInformation = (props) => {
         id: 'isInformedConsentProcessesInadequate',
         defaultValue: formData.isInformedConsentProcessesInadequate,
         type: FormFieldTypes.CHECKBOX,
-        onChange,
+        onChange: ({key, value}) => {
+          setShowInadequateConsentProcessesQuestions(value);
+          onChange({key, value});
+        },
         toggleText:
           'Informed consent processes are inadequate to support data for sharing for the following reasons:',
       }),
     ]),
-    div({ isRendered: true /* todo: isInformedConsentProcessesInadequate */ }, [
+    div({
+      isRendered: showInadequateConsentProcessesQuestions,
+      style: {
+        marginLeft: '2rem',
+      },
+    }, [
       h(FormField, {
         id: 'consentFormsUnavailable',
         defaultValue: formData.consentFormsUnavailable,
