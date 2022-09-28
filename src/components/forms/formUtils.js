@@ -1,5 +1,5 @@
 import { FormFieldTypes, commonRequiredProps, commonOptionalProps } from './forms';
-import { isNil, isFunction, isArray, isEmpty, isString } from 'lodash/fp';
+import { isNil, isFunction, isArray, isString } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 
 export const validateFormProps = (props) => {

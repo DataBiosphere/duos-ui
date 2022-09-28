@@ -57,7 +57,6 @@ export default function ResearcherProfile(props) {
   const [currentSigningOfficial, setCurrentSigningOfficial] = useState(null);
 
   const [notificationData, setNotificationData] = useState();
-  const [user, setUser] = useState();
 
   useEffect(() => {
     const init = async () => {
@@ -121,12 +120,10 @@ export default function ResearcherProfile(props) {
 
   const getResearcherProfile = async () => {
     const user = await User.getMe();
-    setUser(user);
-
     const userProps = getPropertyValuesFromUser(user);
 
     setProfile({
-      institutionId: userProps.institutionId,
+      institutionId: user.institutionId || userProps.institutionId,
       suggestedInstitution: userProps.suggestedInstitution,
       selectedSigningOfficialId: parseInt(userProps.selectedSigningOfficialId),
       suggestedSigningOfficial: userProps.suggestedSigningOfficial,
@@ -229,16 +226,14 @@ export default function ResearcherProfile(props) {
             placeholder: 'Search for Institution...',
             isCreatable: true,
             defaultValue: {
-              instituionId: selectedInstitution?.institutionId,
+              institutionId: selectedInstitution?.institutionId,
               suggestedInstitution: profile.suggestedInstitution,
               displayText: (
-                (!isNil(selectedInstitution) && !isNil(profile.suggestedInstitution))
-                  ? `${user.institution.name} (suggested: ${profile.suggestedInstitution})`
-                  : (!isNil(selectedInstitution)
-                    ? `${selectedInstitution.name}`
-                    : (!isNil(profile.suggestedInstitution)
-                      ? `Suggested: ${profile.suggestedInstitution}`
-                      : ''))
+                (!isNil(selectedInstitution)
+                  ? `${selectedInstitution.name}`
+                  : (!isNil(profile.suggestedInstitution)
+                    ? `${profile.suggestedInstitution}`
+                    : ''))
               ),
             },
             selectConfig: {
@@ -410,12 +405,10 @@ export default function ResearcherProfile(props) {
                   type: FormFieldTypes.SELECT,
                   defaultValue: {
                     displayText: (
-                      (!isNil(currentSigningOfficial) && !isNil(profile.suggestedSigningOfficial))
-                        ? `${currentSigningOfficial.displayName} (suggested: ${profile.suggestedSigningOfficial})`
-                        : (!isNil(currentSigningOfficial))
-                          ? `${currentSigningOfficial.displayName}`
-                          : `Suggested: ${profile.suggestedSigningOfficial}`
-                    ),
+                      (!isNil(currentSigningOfficial)
+                        ? `${currentSigningOfficial.displayName}`
+                        : `Suggested: ${profile.suggestedSigningOfficial}`
+                      )),
                   },
                   selectOptions: (signingOfficialList).map((so) => {
                     return {
