@@ -31,7 +31,9 @@ export default function DataSubmissionStudyInformation(props) {
     init();
   }, [onChange]);
 
-  return h(div, {}, [
+  return h(div, {
+    className: 'data-submitter-section',
+  }, [
     h2('Study Information'),
     h(FormField, {
       id: 'studyName',
