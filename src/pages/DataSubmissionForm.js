@@ -77,7 +77,7 @@ export const DataSubmissionForm = () => {
       }
     }, [
       h(DataSubmissionStudyInformation, { onChange }),
-      h(NIHAdministrativeInformation, { formData, onChange, institutions }),
+      h(NIHAdministrativeInformation, { initialFormData: formData, onChange, institutions }),
       h(DataAccessGovernance, { onChange }),
     ])
   ]);

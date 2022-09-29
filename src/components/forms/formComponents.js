@@ -382,7 +382,7 @@ export const formInputYesNoRadioGroup = (config) => {
             h(RadioButton, {
               id: `${id}_yes`,
               name: `${id}_yes`,
-              defaultChecked: !isNil(formValue) && formValue,
+              defaultChecked: !isNil(formValue) && formValue === true,
               onClick: () => {
                 onFormInputChange(config, true);
               },
@@ -396,7 +396,7 @@ export const formInputYesNoRadioGroup = (config) => {
             h(RadioButton, {
               id: `${id}_no`,
               name: `${id}_no`,
-              defaultChecked: !isNil(formValue) && !formValue,
+              defaultChecked: !isNil(formValue) && formValue === false,
               onClick: () => {
                 onFormInputChange(config, false);
               },
@@ -520,7 +520,7 @@ export const formInputFile = (config) => {
 
       ]),
       label({
-        for: id,
+        htmlFor: id,
         className: 'form-file-label',
       }, [
         h(PublishIcon, {}),
