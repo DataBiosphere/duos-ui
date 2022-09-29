@@ -132,10 +132,7 @@ export const NIHAdministrativeInformation = (props) => {
         onChange({key, value});
       },
     }),
-
-
     div({
-
       isRendered: showAlternativeDataSharingPlan,
     }, [
       h3(
@@ -209,7 +206,6 @@ export const NIHAdministrativeInformation = (props) => {
           toggleText: 'Other'
         }),
       ]),
-
       h(FormField, {
         isRendered: true, // todo: otherReasonForRequest,
         id: 'alternativeDataSharingPlanExplanation',
@@ -218,7 +214,6 @@ export const NIHAdministrativeInformation = (props) => {
         title: 'Explanation for request',
         validators: [FormValidators.REQUIRED]
       }),
-
       //Waiting on clarification about file upload buttons vs drag-and-drop/dropzones
       h(FormField, {
         type: FormFieldTypes.FILE,

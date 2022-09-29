@@ -367,8 +367,8 @@ export const formInputYesNoRadioGroup = (config) => {
     orientation = 'vertical', // [vertical, horizontal],
     formValue
   } = config;
-  
-    return div({},
+
+  return div({},
     [
       div(
         {
@@ -390,7 +390,7 @@ export const formInputYesNoRadioGroup = (config) => {
                 fontFamily: 'Montserrat',
                 fontSize: '14px',
               },
-              description: "Yes",
+              description: 'Yes',
               disabled,
             }),
             h(RadioButton, {
@@ -404,11 +404,11 @@ export const formInputYesNoRadioGroup = (config) => {
                 fontFamily: 'Montserrat',
                 fontSize: '14px',
               },
-              description: "No",
+              description: 'No',
               disabled,
             }),
           ])
-      ])
+        ])
     ]);
 };
 
@@ -490,9 +490,9 @@ export const formInputSlider = (config) => {
 export const formInputFile = (config) => {
   const {
     id,
-    uploadText = "Upload a file",
+    uploadText = 'Upload a file',
     multiple = false,
-    accept = "",
+    accept = '',
   } = config;
 
   return div({}, [
@@ -506,7 +506,7 @@ export const formInputFile = (config) => {
         accept,
         // make hidden:
         style: {
-          display: "none",
+          display: 'none',
         },
         onChange: (e) => {
           e.preventDefault();
@@ -517,7 +517,7 @@ export const formInputFile = (config) => {
           }
         },
       }, [
-        
+
       ]),
       label({
         for: id,
