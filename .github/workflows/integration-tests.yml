@@ -25,5 +25,5 @@ jobs:
           CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL_SA }}
         with:
           start: npm start
-          wait-on: 'https://local.broadinstitute.org:3000'
+          wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
