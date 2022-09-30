@@ -1,4 +1,4 @@
-import {map, sortedUniq} from 'lodash';
+import {isNil, isEmpty, map, sortedUniq} from 'lodash';
 import {h} from 'react-hyperscript-helpers';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
@@ -32,10 +32,10 @@ export function emailCellData({userId, email, label = 'email'}) {
   };
 }
 
-export function permissionsCellData({userId, roles, libraryCards, institution, label = 'permissions'}) {
-  const hasLibraryCard = libraryCards?.map((lc) => lc.institutionId)?.includes(institution?.id);
+export function permissionsCellData({userId, roles, libraryCards, label = 'permissions'}) {
+  const hasLibraryCard = !isNil(libraryCards) && !isEmpty(libraryCards);
   const roleNames = map(roles, 'name').filter((roleName) => roleName !== 'Researcher');
-  const perms = (hasLibraryCard ? roleNames.concat('Library Card') : roleNames);
+  const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
   return {
     isComponent: true,
     data: sortedUniq(perms).join('   ') || 'None',
