@@ -5,7 +5,7 @@ module.exports = defineConfig({
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
-    baseUrl: 'https://local.broadinstitute.org:3000/',
+    baseUrl: 'https://localhost:3000/',
   },
   component: {
     src: ['./src/components/common', './cypress/component/'],
