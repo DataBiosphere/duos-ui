@@ -31,7 +31,7 @@ Cypress.Commands.add('auth', async (roleName) => {
   const keys = Cypress.env(roleName);
   const client = auth.fromJSON(keys);
   client.scopes = ['email', 'profile'];
-  const url = `https://localhost:3000`;
+  const url = `https://local.broadinstitute.org:3000`;
   await client.request({ url });
   return client.credentials;
 });
