@@ -57,7 +57,7 @@ export function permissionsCellData({userId, roles, libraryCards, label = 'permi
   // use regex to split by case, then stitch back together with spaces
   // regex from: https://gist.github.com/JeffJacobson/3841577
   const splitByWordRegex = /($[a-z])|[A-Z][^A-Z]+/g;
-	const formattedPerms = perms.map((perm) => perm.match(splitByWordRegex).join(" "));
+  const formattedPerms = perms.map((perm) => perm.match(splitByWordRegex).join(' '));
 
   return {
     isComponent: true,
