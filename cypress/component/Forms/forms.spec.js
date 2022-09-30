@@ -612,7 +612,7 @@ describe('FormField - Tests', () => {
       });
 
       mount(<FormField {
-        ...{asdf: 'asdf', id: 'example'}
+        ...{asdf: 'asdf', id: 'example', onChange: () => {},}
       } />);
     });
 
@@ -624,7 +624,7 @@ describe('FormField - Tests', () => {
       });
 
       mount(<FormField {
-        ...{type: FormFieldTypes.TEXT,} // requires id
+        ...{type: FormFieldTypes.TEXT, onChange: () => {},} // requires id
       } />);
     });
 
@@ -647,6 +647,7 @@ describe('FormField - Tests', () => {
             }
           },
           id: 'example',
+          onChange: () => {},
         } // requires id
       } />);
     });

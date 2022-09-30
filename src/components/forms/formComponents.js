@@ -520,7 +520,7 @@ export const formInputFile = (config) => {
 
       ]),
       label({
-        htmlFor: id,
+        htmlFor: `${id}`,
         className: 'form-file-label',
       }, [
         h(PublishIcon, {}),
