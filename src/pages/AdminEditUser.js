@@ -157,7 +157,7 @@ export const AdminEditUser = hh(class AdminEditUser extends Component {
               iconSize: 'medium',
               color: 'common',
               title: 'Manage Users',
-              description: 'Manage Users in the system'
+              description: 'Select and manage users and their roles'
             }),
           ]),
           div({className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'}, [
