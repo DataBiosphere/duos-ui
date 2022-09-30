@@ -14,7 +14,7 @@ describe('Sign In Component', function() {
   it('Sign In Button Loads when client id is valid', function () {
     cy.viewport(600, 300);
     // Load the client id from perf so we can have a valid button
-    cy.readFile('config/perf.json').then((config) => {
+    cy.readFile('config/alpha.json').then((config) => {
       const clientId = config.clientId;
       cy.stub(Config, 'getGoogleClientId').returns(clientId);
       mount(<SignIn />);
