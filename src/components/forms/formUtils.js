@@ -33,29 +33,45 @@ export const validateFormProps = (props) => {
 
 
 export const customSelectPropValidation = (props) => {
-  if (!isArray(props.selectOptions)) {
-    throw 'prop \'selectOptions\' must be an array';
-  }
 
-  if (isEmpty(props.selectOptions)) {
-    throw '\'selectOptions\' cannot be empty';
-  }
+  if (isNil(props.isAsync) || !props.isAsync) {
+    if (isNil(props.selectOptions)) {
+      throw 'must specify \'selectOptions\' in select form fields';
+    }
 
-  const isStringArr = isString(props.selectOptions[0]);
+    if (!isArray(props.selectOptions)) {
+      throw 'prop \'selectOptions\' must be an array';
+    }
 
-  props.selectOptions.forEach((opt) => {
-    if (isStringArr) {
-      if (!isString(opt)) {
-        throw 'all values in \'selectOptions\' must be string typed';
+    if (isEmpty(props.selectOptions)) {
+      throw '\'selectOptions\' cannot be empty';
+    }
+
+    const isStringArr = isString(props.selectOptions[0]);
+
+    props.selectOptions.forEach((opt) => {
+      if (isStringArr) {
+        if (!isString(opt)) {
+          throw 'all values in \'selectOptions\' must be string typed';
+        }
+
+        return;
       }
 
-      return;
+      if (isNil(opt.displayText)) {
+        throw 'every value in \'selectOptions\' needs a \'displayText\' field';
+      }
+    });
+  } else {
+    if (isNil(props.loadOptions)) {
+      throw 'must specify \'loadOptions\' if select is async';
     }
 
-    if (isNil(opt.displayText)) {
-      throw 'every value in \'selectOptions\' needs a \'displayText\' field';
+    if (isNil(props.optionsAreString)) {
+      throw 'must specify \'optionsAreString\' if select is async';
     }
-  });
+  }
+
 };
 
 export const customRadioPropValidation = (props) => {
@@ -78,21 +94,26 @@ export const customRadioPropValidation = (props) => {
 export const requiredValidator = {
   isValid: (value) => {
     return value !== undefined && value !== null &&
-      (typeof value === 'string' ? value.trim() !== '' : true);
+      (isString(value) ? value.trim() !== '' : true);
   },
   msg: 'Please enter a value',
 };
 
 export const urlValidator = {
   isValid: (val) => {
-    try {
-      new URL(val);
-    } catch (_) {
-      return false;
-    }
-    return true;
+    return validURLObject(val) || validURLObject('https://' + val);
   },
-  msg: 'Please enter a valid url (e.g., https://www.google.com)',
+  msg: 'Please enter a valid url (e.g., duos.org)',
+};
+
+const validURLObject = (val) => {
+  try {
+    new URL(val);
+  } catch (_) {
+    return false;
+  }
+
+  return true;
 };
 
 export const emailValidator = {

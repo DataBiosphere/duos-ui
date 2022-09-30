@@ -32,6 +32,7 @@ export default function NihAnvilUse(props) {
   };
 
   return h(div, {
+    className: 'data-submitter-section',
   }, [
     h2('NIH and AnVIL use'),
     h(FormField, {
@@ -96,7 +97,7 @@ export default function NihAnvilUse(props) {
       h(FormField, {
         id: 'embargoReleaseDate',
         title: 'Embargo Release Date',
-        placeholder: '...',
+        placeholder: 'YYYY-MM-DD',
         validators: [FormValidators.REQUIRED, FormValidators.DATE],
         onChange
       }),

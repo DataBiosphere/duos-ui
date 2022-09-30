@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isString } from 'lodash/fp';
+import { cloneDeep, isFunction } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
@@ -17,7 +17,8 @@ import {
   formInputCheckbox,
   formInputSlider,
   formInputRadioGroup,
-  formInputTextarea
+  formInputTextarea,
+  formInputRadioButton,
 } from './formComponents';
 
 import './forms.css';
@@ -75,6 +76,16 @@ export const FormFieldTypes = {
     ],
     customPropValidation: customRadioPropValidation,
   },
+  RADIOBUTTON: {
+    defaultValue: null,
+    requiredProps: [
+      'value',
+    ],
+    optionalProps: [
+      'toggleText',
+    ],
+    component: formInputRadioButton
+  },
   TEXT: {
     defaultValue: '',
     component: formInputGeneric,
@@ -93,7 +104,7 @@ export const FormFieldTypes = {
     ],
   },
   CHECKBOX: {
-    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    defaultValue: false,
     component: formInputCheckbox,
     requiredProps: [],
     optionalProps: [
@@ -102,14 +113,22 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: ({ selectOptions, defaultValue }) => {
-      const isStringArr = isString(selectOptions[0]);
-      return isStringArr
-        ? { key: defaultValue, displayText: defaultValue }
-        : defaultValue;
-    },
+    // updateDefaultValue: (config) => {
+    //   const {
+    //     selectOptions, defaultValue, isMulti
+    //   } = config;
+    //   const isStringArr = config.isStringArr || (!isNil(selectOptions) && isString(selectOptions[0]));
+
+    //   if (isMulti) {
+    //     return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;
+    //   }
+
+    //   return isStringArr
+    //     ? { key: defaultValue, displayText: defaultValue }
+    //     : defaultValue;
+    // },
     component: formInputSelect,
-    requiredProps: [
+    requiredNormalSelectProps: [
       'selectOptions'
       // 'selectOptions' example:
       // [
@@ -117,12 +136,23 @@ export const FormFieldTypes = {
       //   ^^^ can pass other fields in as extra info, e.g.:
       //  {displayText: 'Dac 1', dacId: 213}
       // ]
+      // can also be array of stirngs: ['Option 1', 'Option 2']
+    ],
+    requiredAsyncSelectProps: [
+      'loadOptions',
+      // 'loadOptions': (query, callback) => callback(selectOptions)
+      'optionsAreString', // true if options are ['', ...], false if options are [{displayText: ''}, ...]
     ],
     optionalProps: [
       'isCreatable', // allows user to input their own
       'isMulti',
+      'isAsync', // if specified, options are loaded via 'loadOptions'
       'placeholder',
       'selectConfig',
+      'exclusiveValues', // e.g., ['Not Determined'], if not determined is selected, everything else will be cleared
+      'loadOptions',
+      'optionsAreString',
+      'selectOptions'
     ],
     customPropValidation: customSelectPropValidation,
   },
