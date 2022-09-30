@@ -38,7 +38,7 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '10%',
+    darCode: '12.5%',
     projectTitle: '18%',
     submissionDate: '12.5%',
     researcher: '10%',
