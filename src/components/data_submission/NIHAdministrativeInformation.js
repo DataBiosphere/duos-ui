@@ -266,7 +266,6 @@ export const NIHAdministrativeInformation = (props) => {
         title: 'Explanation for request',
         validators: [FormValidators.REQUIRED]
       }),
-      //Waiting on clarification about file upload buttons vs drag-and-drop/dropzones
       h(FormField, {
         type: FormFieldTypes.FILE,
         title: 'Upload your alternative sharing plan.',
