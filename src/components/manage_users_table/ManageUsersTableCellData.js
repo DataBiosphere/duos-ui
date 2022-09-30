@@ -1,12 +1,28 @@
 import {isNil, isEmpty, map, sortedUniq} from 'lodash';
-import {h} from 'react-hyperscript-helpers';
+import {h, div} from 'react-hyperscript-helpers';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 export function usernameCellData({displayName, userId, label= 'user-name'}) {
   return {
     // clicking on username lets you edit user
-    data: h(Link, {to: `/admin_edit_user/${userId}`}, [displayName]),
+    data: div({}, [
+      h(Link, {
+        to: `/admin_edit_user/${userId}`,
+        'data-for': `tip_${userId}_edit`,
+        'data-tip': `Edit ${displayName}`
+      }, [
+        displayName
+      ]),
+      h(ReactTooltip, {
+        id: `tip_${userId}_edit`,
+        place: 'right',
+        effect: 'solid',
+        multiline: true,
+        className: 'tooltip-wrapper'
+      })
+    ]),
     value: displayName,
     id: userId,
     style : {
@@ -36,9 +52,16 @@ export function permissionsCellData({userId, roles, libraryCards, label = 'permi
   const hasLibraryCard = !isNil(libraryCards) && !isEmpty(libraryCards);
   const roleNames = map(roles, 'name').filter((roleName) => roleName !== 'Researcher');
   const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
+
+  // need to split, e.g., SigningOfficial -> Signing Official
+  // use regex to split by case, then stitch back together with spaces
+  // regex from: https://gist.github.com/JeffJacobson/3841577
+  const splitByWordRegex = /($[a-z])|[A-Z][^A-Z]+/g;
+	const formattedPerms = perms.map((perm) => perm.match(splitByWordRegex).join(" "));
+
   return {
     isComponent: true,
-    data: sortedUniq(perms).join('   ') || 'None',
+    data: sortedUniq(formattedPerms).join('   ') || 'None',
     label,
     id: userId,
   };
