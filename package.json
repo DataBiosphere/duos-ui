@@ -41,7 +41,7 @@
     "react-tooltip": "4.2.21",
     "stackdriver-errors-js": "0.12.0",
     "usa-states": "0.0.6",
-    "uuid": "8.3.2"
+    "uuid": "9.0.0"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
