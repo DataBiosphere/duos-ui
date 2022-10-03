@@ -6,7 +6,7 @@ import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
-import './dar_application.css';
+import './dar_application_new.css';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
@@ -79,7 +79,7 @@ export default function ResearcherInfo(props) {
 
   return (
     div({ datacy: 'researcher-info'}, [
-      div({ style: { backgroundColor: 'rgba(184, 205, 211, .15)', padding: '20px 30px' } }, [
+      div({ className: 'dar-step-card' }, [
         div({
           datacy: 'researcher-info-profile-submitted',
           isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [

@@ -1,0 +1,36 @@
+.dar-application-row {
+  clear: both;
+  margin-top: 15px;
+}
+
+.dar-application-row:first-of-type {
+  margin-top: 0;
+}
+
+.dar-step-card {
+  background-color: rgba(184, 205, 211, .15);
+  padding: 20px 30px;
+  margin-bottom: '2rem';
+}
+
+.rp-row {
+  margin: 2rem 1rem;
+  max-width: 80%;
+}
+
+.rp-subrow {
+  margin: 0 2rem;
+}
+
+.rp-row-title {
+  font-weight: 500;
+  color: #333F52;
+  font-size: 14px;
+}
+
+.rp-row-description {
+  font-weight: 100;
+  color: #333F52;
+  font-size: 14px;
+}
+
