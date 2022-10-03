@@ -3,6 +3,7 @@ import {h, div} from 'react-hyperscript-helpers';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
+import voca from 'voca';
 
 export function usernameCellData({displayName, userId, label= 'user-name'}) {
   return {
@@ -54,10 +55,7 @@ export function permissionsCellData({userId, roles, libraryCards, label = 'permi
   const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
 
   // need to split, e.g., SigningOfficial -> Signing Official
-  // use regex to split by case, then stitch back together with spaces
-  // regex from: https://gist.github.com/JeffJacobson/3841577
-  const splitByWordRegex = /($[a-z])|[A-Z][^A-Z]+/g;
-  const formattedPerms = perms.map((perm) => perm.match(splitByWordRegex).join(' '));
+  const formattedPerms = perms.map((perm) => voca.words(perm).join(' '));
 
   return {
     isComponent: true,
