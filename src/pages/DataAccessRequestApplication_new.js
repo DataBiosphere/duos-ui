@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { a, div, form, h, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
-import DataAccessRequest from './dar_application/DataAccessRequest';
+import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
 import DataUseAgreements from './dar_application/DataUseAgreements';
 import {

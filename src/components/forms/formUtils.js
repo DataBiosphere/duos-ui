@@ -66,10 +66,6 @@ export const customSelectPropValidation = (props) => {
     if (isNil(props.loadOptions)) {
       throw 'must specify \'loadOptions\' if select is async';
     }
-
-    if (isNil(props.optionsAreString)) {
-      throw 'must specify \'optionsAreString\' if select is async';
-    }
   }
 
 };
