@@ -10,6 +10,7 @@ import {Styles} from '../libs/theme';
 import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
+import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 
 
 export const DataSubmissionForm = () => {
@@ -78,6 +79,7 @@ export const DataSubmissionForm = () => {
     }, [
       h(DataSubmissionStudyInformation, { onChange }),
       h(NIHAdministrativeInformation, { initialFormData: formData, onChange, institutions }),
+      h(NIHDataManagement, { initialFormData: formData, onChange }),
       h(DataAccessGovernance, { onChange }),
     ])
   ]);
