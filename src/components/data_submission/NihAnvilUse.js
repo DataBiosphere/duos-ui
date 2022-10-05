@@ -51,7 +51,7 @@ export default function NihAnvilUse(props) {
         onChange({key: config.key, value: value, isValid: config.isValid});
 
         // if going from did -> i will / no, then clear all values
-        if (nihAnvilUse == I_DID && value != I_DID) {
+        if (nihAnvilUse === I_DID && value !== I_DID) {
           clearFormValues();
         }
 
