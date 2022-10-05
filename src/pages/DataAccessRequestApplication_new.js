@@ -181,7 +181,6 @@ class DataAccessRequestApplicationNew extends Component {
     let datasets;
     if (!isNil(dsIds)) {
       datasets = await Promise.all(map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-      datasets = map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
     } else {
       datasets = [];
     }
@@ -233,14 +232,6 @@ class DataAccessRequestApplicationNew extends Component {
     window.addEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }
 
-  formatDatasetForAutocomplete = (dataset) => {
-    const nameProp = find({'propertyName':'Dataset Name'})(dataset.properties);
-    return {
-      key: dataset.dataSetId,
-      value: dataset.dataSetId,
-      label: nameProp.propertyValue
-    };
-  };
 
   formatOntologyItems = (ontologies) => {
     return map((ontology) => {

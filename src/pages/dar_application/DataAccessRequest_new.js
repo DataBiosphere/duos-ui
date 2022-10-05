@@ -79,10 +79,9 @@ export default function DataAccessRequest(props) {
 
   const formatSearchDataset = (ds) => {
     return {
-      key: ds.id,
-      value: ds.id,
-      dataset: ds,
-      displayText: ds.name
+      key: ds.key,
+      value: ds.value,
+      displayText: ds.label
     }
   }
 

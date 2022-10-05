@@ -360,6 +360,57 @@ export const formInputRadioGroup = (config) => {
   );
 };
 
+export const formInputYesNoRadioGroup = (config) => {
+  const {
+    id, disabled,
+    orientation = 'vertical', // [vertical, horizontal],
+    formValue
+  } = config;
+
+  return div({},
+    [
+      div(
+        {
+          className: `radio-group ${orientation}`,
+          id: id,
+        },
+        [
+          div({
+            className: 'radio-button-container',
+          }, [
+            h(RadioButton, {
+              id: `${id}_yes`,
+              name: `${id}_yes`,
+              defaultChecked: !isNil(formValue) && formValue === true,
+              onClick: () => {
+                onFormInputChange(config, true);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'Yes',
+              disabled,
+            }),
+            h(RadioButton, {
+              id: `${id}_no`,
+              name: `${id}_no`,
+              defaultChecked: !isNil(formValue) && formValue === false,
+              onClick: () => {
+                onFormInputChange(config, false);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'No',
+              disabled,
+            }),
+          ])
+        ])
+    ]);
+};
+
 export const formInputRadioButton = (config) => {
   const {
     id, disabled, value, toggleText,

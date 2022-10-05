@@ -19,6 +19,7 @@ import {
   formInputRadioGroup,
   formInputTextarea,
   formInputRadioButton,
+  formInputYesNoRadioGroup,
 } from './formComponents';
 
 import './forms.css';
@@ -75,6 +76,13 @@ export const FormFieldTypes = {
       'orientation', // 'vertical' or 'horizontal'
     ],
     customPropValidation: customRadioPropValidation,
+  },
+  YESNORADIOGROUP: {
+    defaultValue: null,
+    component: formInputYesNoRadioGroup,
+    optionalProps: [
+      'orientation', // 'vertical' or 'horizontal'
+    ],
   },
   RADIOBUTTON: {
     defaultValue: null,
