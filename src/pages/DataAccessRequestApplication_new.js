@@ -2,8 +2,9 @@ import { Component } from 'react';
 import { a, div, form, h, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest';
-import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements_new';
+import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
+
 import {
   isFileEmpty,
   Navigation,
@@ -51,7 +52,7 @@ class DataAccessRequestApplicationNew extends Component {
         checkNihDataOnly: false,
         rus: '',
         nonTechRus: '',
-        oneGender: '',
+        oneGender: null,
         methods: '',
         controls: '',
         population: '',
@@ -63,15 +64,15 @@ class DataAccessRequestApplicationNew extends Component {
         otherText: '',
         forProfit: '',
         gender: '',
-        pediatric: '',
-        illegalBehavior: '',
+        pediatric: null,
+        illegalBehavior: null,
         addiction: '',
-        sexualDiseases: '',
-        stigmatizedDiseases: '',
-        vulnerablePopulation: '',
+        sexualDiseases: null,
+        stigmatizedDiseases: null,
+        vulnerablePopulation: null,
         populationMigration: '',
-        psychiatricTraits: '',
-        notHealth: '',
+        psychiatricTraits: null,
+        notHealth: null,
         researcher: '',
         projectTitle: '',
         profileName: '',

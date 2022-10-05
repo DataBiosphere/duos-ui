@@ -6,6 +6,8 @@ import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormTable, FormValidators } from '../forms/forms';
 
+import './ds_common.css';
+
 export default function DataSubmissionStudyInformation(props) {
   const { onChange } = props;
   const [user, setUser] = useState();
@@ -29,13 +31,7 @@ export default function DataSubmissionStudyInformation(props) {
     init();
   }, [onChange]);
 
-  return h(div, {
-    style: {
-      padding: '50px 0',
-      maxWidth: 800,
-      margin: 'auto'
-    }
-  }, [
+  return h(div, {}, [
     h2('Study Information'),
     h(FormField, {
       id: 'studyName',

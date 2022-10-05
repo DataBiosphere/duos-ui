@@ -386,7 +386,7 @@ export default function ResearcherProfile(props) {
                 }, [
                   'Signing Official* ',
                 ]),
-                p({}, ['Please select your Signing Official or enter your signing official’s email address.']),
+                p({}, ['Please select your Signing Official or enter your signing official’s email address. This is an individual who has the authority to engage your institution in legal contracts, likely someone in your grants department or office of sponsored research.']),
                 div({},
                   [
                     h(SearchSelectOrText, {
