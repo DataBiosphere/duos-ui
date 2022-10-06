@@ -445,7 +445,7 @@ export default function ResearcherProfile(props) {
                 }),
                 p(
                   {
-                    isRendered: isNil(profile.signingOfficialId) && !suggestSigningOfficialValid(),
+                    isRendered: isNil(currentSigningOfficial) && isNil(profile.signingOfficialId) && !suggestSigningOfficialValid(),
                     style: {
                       fontStyle: 'italic',
                       color: '#D13B07',
