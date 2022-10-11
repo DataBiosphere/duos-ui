@@ -17,13 +17,18 @@ import {
   formInputCheckbox,
   formInputSlider,
   formInputRadioGroup,
+  formInputYesNoRadioGroup,
   formInputTextarea,
   formInputRadioButton,
+  formInputFile,
 } from './formComponents';
 
 import './forms.css';
 
-export const commonRequiredProps = ['id'];
+export const commonRequiredProps = [
+  'id',
+  'onChange'
+];
 export const commonOptionalProps = [
   'name',
   'disabled',
@@ -77,6 +82,14 @@ export const FormFieldTypes = {
     ],
     customPropValidation: customRadioPropValidation,
   },
+
+  YESNORADIOGROUP: {
+    defaultValue: null,
+    component: formInputYesNoRadioGroup,
+    optionalProps: [
+      'orientation', // 'vertical' or 'horizontal'
+    ],
+  },
   RADIOBUTTON: {
     defaultValue: null,
     requiredProps: [
@@ -85,7 +98,7 @@ export const FormFieldTypes = {
     optionalProps: [
       'toggleText',
     ],
-    component: formInputRadioButton
+    component: formInputRadioButton,
   },
   TEXT: {
     defaultValue: '',
@@ -102,6 +115,14 @@ export const FormFieldTypes = {
     optionalProps: [
       'placeholder',
       'inputStyle'
+    ],
+  },
+  FILE: {
+    defaultValue: null,
+    component: formInputFile,
+    requiredProps: [],
+    optionalProps: [
+      'uploadText',
     ],
   },
   CHECKBOX: {

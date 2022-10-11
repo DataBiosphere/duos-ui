@@ -6,6 +6,7 @@ import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import AsyncCreatable from 'react-select/async-creatable';
 import { FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
+import PublishIcon from '@material-ui/icons/Publish';
 
 import './formComponents.css';
 import { isArray } from 'lodash';
@@ -360,6 +361,57 @@ export const formInputRadioGroup = (config) => {
   );
 };
 
+export const formInputYesNoRadioGroup = (config) => {
+  const {
+    id, disabled,
+    orientation = 'vertical', // [vertical, horizontal],
+    formValue
+  } = config;
+
+  return div({},
+    [
+      div(
+        {
+          className: `radio-group ${orientation}`,
+          id: id,
+        },
+        [
+          div({
+            className: 'radio-button-container',
+          }, [
+            h(RadioButton, {
+              id: `${id}_yes`,
+              name: `${id}_yes`,
+              defaultChecked: !isNil(formValue) && formValue === true,
+              onClick: () => {
+                onFormInputChange(config, true);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'Yes',
+              disabled,
+            }),
+            h(RadioButton, {
+              id: `${id}_no`,
+              name: `${id}_no`,
+              defaultChecked: !isNil(formValue) && formValue === false,
+              onClick: () => {
+                onFormInputChange(config, false);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'No',
+              disabled,
+            }),
+          ])
+        ])
+    ]);
+};
+
 export const formInputRadioButton = (config) => {
   const {
     id, disabled, value, toggleText,
@@ -432,6 +484,49 @@ export const formInputSlider = (config) => {
         fontStyle: 'italic'
       }
     }, [toggleText])
+  ]);
+};
+
+export const formInputFile = (config) => {
+  const {
+    id,
+    uploadText = 'Upload a file',
+    multiple = false,
+    accept = '',
+  } = config;
+
+  return div({}, [
+    div({
+      className: 'form-file-upload',
+    }, [
+      input({
+        id,
+        type: 'file',
+        multiple,
+        accept,
+        // make hidden:
+        style: {
+          display: 'none',
+        },
+        onChange: (e) => {
+          e.preventDefault();
+          if (multiple) {
+            onFormInputChange(config, e.target.files);
+          } else {
+            onFormInputChange(config, e.target.files[0]);
+          }
+        },
+      }, [
+
+      ]),
+      label({
+        htmlFor: `${id}`,
+        className: 'form-file-label',
+      }, [
+        h(PublishIcon, {}),
+        uploadText,
+      ])
+    ])
   ]);
 };
 
