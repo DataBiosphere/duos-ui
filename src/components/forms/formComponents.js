@@ -6,6 +6,7 @@ import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import AsyncCreatable from 'react-select/async-creatable';
 import { FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
+import PublishIcon from '@material-ui/icons/Publish';
 
 import './formComponents.css';
 import { isArray } from 'lodash';
@@ -483,6 +484,49 @@ export const formInputSlider = (config) => {
         fontStyle: 'italic'
       }
     }, [toggleText])
+  ]);
+};
+
+export const formInputFile = (config) => {
+  const {
+    id,
+    uploadText = 'Upload a file',
+    multiple = false,
+    accept = '',
+  } = config;
+
+  return div({}, [
+    div({
+      className: 'form-file-upload',
+    }, [
+      input({
+        id,
+        type: 'file',
+        multiple,
+        accept,
+        // make hidden:
+        style: {
+          display: 'none',
+        },
+        onChange: (e) => {
+          e.preventDefault();
+          if (multiple) {
+            onFormInputChange(config, e.target.files);
+          } else {
+            onFormInputChange(config, e.target.files[0]);
+          }
+        },
+      }, [
+
+      ]),
+      label({
+        htmlFor: `${id}`,
+        className: 'form-file-label',
+      }, [
+        h(PublishIcon, {}),
+        uploadText,
+      ])
+    ])
   ]);
 };
 

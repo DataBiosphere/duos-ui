@@ -9,7 +9,7 @@
     "@mui/styled-engine": "5.10.7",
     "@material-ui/core": "4.12.4",
     "@material-ui/icons": "4.11.3",
-    "axios": "^0.27.2",
+    "axios": "^1.0.0",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
     "dompurify": "2.4.0",
@@ -41,7 +41,9 @@
     "react-tooltip": "4.2.21",
     "stackdriver-errors-js": "0.12.0",
     "usa-states": "0.0.6",
+    "voca": "1.4.0",
     "uuid": "9.0.0"
+
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
@@ -67,7 +69,7 @@
     "html-webpack-plugin": "4.5.2",
     "react-error-overlay": "6.0.9",
     "react-scripts": "5.0.1",
-    "source-map-explorer": "2.5.2"
+    "source-map-explorer": "2.5.3"
   },
   "browserslist": [
     ">0.2%",

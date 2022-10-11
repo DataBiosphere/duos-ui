@@ -1,5 +1,5 @@
 import { FormFieldTypes, commonRequiredProps, commonOptionalProps } from './forms';
-import { isNil, isFunction, isArray, isEmpty, isString } from 'lodash/fp';
+import { isNil, isFunction, isArray, isString } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 
 export const validateFormProps = (props) => {
@@ -43,18 +43,13 @@ export const customSelectPropValidation = (props) => {
       throw 'prop \'selectOptions\' must be an array';
     }
 
-    if (isEmpty(props.selectOptions)) {
-      throw '\'selectOptions\' cannot be empty';
-    }
-
-    const isStringArr = isString(props.selectOptions[0]);
+    const isStringArr = props.selectOptions.length > 0 && isString(props.selectOptions[0]);
 
     props.selectOptions.forEach((opt) => {
       if (isStringArr) {
         if (!isString(opt)) {
           throw 'all values in \'selectOptions\' must be string typed';
         }
-
         return;
       }
 
