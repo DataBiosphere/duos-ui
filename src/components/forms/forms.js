@@ -40,7 +40,9 @@ export const commonOptionalProps = [
   'hideTitle',
   'style',
   'validators',
-  'type'
+  'onChange',
+  'type',
+  'key',
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
