@@ -180,7 +180,7 @@ class DataAccessRequestApplicationNew extends Component {
     const dsIds = get('datasetIds')(formData);
     let datasets;
     if (!isNil(dsIds)) {
-      datasets = await Promise.all(map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+      datasets = await Promise.all(map((id) => DataSet.getDatasetByIdV2(id))(dsIds));
     } else {
       datasets = [];
     }
@@ -207,7 +207,7 @@ class DataAccessRequestApplicationNew extends Component {
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
-      formData.datasets =  map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+      formData.datasets = datasets;
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id

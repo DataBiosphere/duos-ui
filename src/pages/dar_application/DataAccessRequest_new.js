@@ -8,7 +8,7 @@ import cloneDeep from 'lodash/fp/cloneDeep';
 import isEqual from 'lodash/fp/isEqual';
 import every from 'lodash/fp/every';
 import any from 'lodash/fp/some';
-import { DAR } from '../../libs/ajax';
+import { DataSet, DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 import UploadLabelButton from '../../components/UploadLabelButton';
 import { isFileEmpty } from '../../libs/utils';
@@ -21,6 +21,26 @@ const uploadFileDiv = (showValidationMessages, uploadedFile, currentDocumentLoca
   };
 };
 
+const searchOntologies = (query, callback) => {
+  let options = [];
+  DAR.getAutoCompleteOT(query).then(
+    items => {
+      options = items.map(function(item) {
+        return item.label;
+      });
+      callback(options);
+    });
+};
+
+const searchDatasets = (query, callback) => {
+  DataSet.searchDatasets(query).then(items => {
+    let options = items.map(function (item) {
+      return formatSearchDataset(item);
+    });
+    callback(options);
+  });
+};
+
 const dulQuestionDiv = (showValidationMessages, questionBool) => {
   return {
     backgroundColor: showValidationMessages && !questionBool ?
@@ -29,6 +49,18 @@ const dulQuestionDiv = (showValidationMessages, questionBool) => {
     margin: '0.5rem 0'
   };
 };
+
+const formatSearchDataset = (ds) => {
+
+  console.log(ds);
+  return {
+    key: ds.dataSetId,
+    value: ds.dataSetId,
+    dataset: ds,
+    displayText: span({}, [
+      span({style: {fontWeight: 'bold'}}, [ds.datasetIdentifier]), ' | ', ds.name]),
+  }
+}
 
 const uploadFileDescription = {
   paddingBottom: '1.5rem'
@@ -67,6 +99,8 @@ export default function DataAccessRequest(props) {
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
   const [datasets, setDatasets] = useState(props.datasets || []);
+  const [diseaseSpecificUse, setDiseaseSpecificUse] = useState(props.diseaseSpecificUse || [])
+  const [showDiseaseSearchbar, setShowDiseaseSearchbar] = useState(props.diseases || false)
   const [activeDULQuestions, setActiveDULQuestions] = useState({});
   //parent needs to initialize defaults if value not present
   const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
@@ -76,23 +110,6 @@ export default function DataAccessRequest(props) {
   const onChange = ({key, value}) => {
     formFieldChange({name: key, value});
   }
-
-  const formatSearchDataset = (ds) => {
-    return {
-      key: ds.key,
-      value: ds.value,
-      displayText: ds.label
-    }
-  }
-
-  const searchDatasets = (query, callback) => {
-    DAR.getAutoCompleteDS(query).then(items => {
-      let options = items.map(function (item) {
-        return formatSearchDataset(item);
-      });
-      callback(options);
-    });
-  };
 
   //function needed to update state for checkboxes
   const checkedStateChange = (dataset, setter) => {
@@ -228,7 +245,9 @@ export default function DataAccessRequest(props) {
           defaultValue: datasets.map((ds) => formatSearchDataset(ds)),
           loadOptions: (query, callback) => searchDatasets(query, callback),
           placeholder: 'Dataset Name, Sample Collection ID, or PI',
-          onChange,
+          onChange: ({key, value}) => {
+            onChange({key, value: value.map((val) => val.dataset)});
+          },
         }),
 
         h(FormField, {
@@ -251,40 +270,71 @@ export default function DataAccessRequest(props) {
           id: 'primaryPurpose',
           type: FormFieldTypes.YESNORADIOGROUP,
           orientation: 'horizontal',
-          onChange,
+          onChange: ({key, value, isValid}) => {
+            onChange({key, value, isValid});
+            setShowDiseaseSearchbar(value);
+          },
         }),
 
-        h3({}, ['2.4 Research Designations']),
-        p({}, ['Select all applicable options that describe your proposed research.']),
-        p({}, ['I am proposing to:']),
+        div({
+          isRendered: showDiseaseSearchbar,
+          style: {
+            marginBottom: '1.0rem'
+          }
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.SELECT,
+            isMulti: true,
+            isCreatable: true,
+            isAsync: true,
+            optionsAreString: true,
+            loadOptions: searchOntologies,
+            id: 'diseaseSpecificUse',
+            validators: [FormValidators.REQUIRED],
+            placeholder: 'Please enter one or more diseases',
+            defaultValue: diseaseSpecificUse,
+            onChange: ({key, value, isValid}) => {
+              setDiseaseSpecificUse(value);
+              onChange({
+                key: key,
+                value: value,
+                isValid: isValid
+              });
+            },
+          }),
+        ]),
+        
+        // h3({}, ['2.4 Research Designations']),
+        // p({}, ['Select all applicable options that describe your proposed research.']),
+        // p({}, ['I am proposing to:']),
 
-        h(FormField, {
-          id: 'developNewMethods',
-          type: FormFieldTypes.CHECKBOX,
-          toggleText: 'Develop or validate new methods for analysing/interpreting data.',
-          onChange,
-        }),
+        // h(FormField, {
+        //   id: 'developNewMethods',
+        //   type: FormFieldTypes.CHECKBOX,
+        //   toggleText: 'Develop or validate new methods for analysing/interpreting data.',
+        //   onChange,
+        // }),
 
-        h(FormField, {
-          id: 'caseControl',
-          type: FormFieldTypes.CHECKBOX,
-          toggleText: 'Increase controls available for a comparison group (e.g. a case-control study).',
-          onChange,
-        }),
+        // h(FormField, {
+        //   id: 'caseControl',
+        //   type: FormFieldTypes.CHECKBOX,
+        //   toggleText: 'Increase controls available for a comparison group (e.g. a case-control study).',
+        //   onChange,
+        // }),
 
-        h(FormField, {
-          id: 'generalPop',
-          type: FormFieldTypes.CHECKBOX,
-          toggleText: 'Study variation in the general population.',
-          onChange,
-        }),
+        // h(FormField, {
+        //   id: 'generalPop',
+        //   type: FormFieldTypes.CHECKBOX,
+        //   toggleText: 'Study variation in the general population.',
+        //   onChange,
+        // }),
 
-        h(FormField, {
-          id: 'commercial',
-          type: FormFieldTypes.CHECKBOX,
-          toggleText: 'Conduct research for an exclusively or partially commercial purpose.',
-          onChange,
-        }),
+        // h(FormField, {
+        //   id: 'commercial',
+        //   type: FormFieldTypes.CHECKBOX,
+        //   toggleText: 'Conduct research for an exclusively or partially commercial purpose.',
+        //   onChange,
+        // }),
 
         h(FormField, {
           id: 'rus',
