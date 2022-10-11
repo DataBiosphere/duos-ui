@@ -51,6 +51,7 @@ export const NIHAdministrativeInformation = (props) => {
       placeholder: 'Institute/Center Name',
       onChange,
       type: FormFieldTypes.SELECT,
+      isMulti: true,
       validators: [FormValidators.REQUIRED],
       defaultValue: initialFormData?.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
