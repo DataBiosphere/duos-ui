@@ -91,7 +91,7 @@ export const AdminManageUsers = function AdminManageUsers() {
               fontWeight: 600,
               fontSize: '2.8rem'
             } }, [
-              'Edit User',
+              'Manage Users',
             ]),
             div(
               {
@@ -100,7 +100,7 @@ export const AdminManageUsers = function AdminManageUsers() {
                   fontSize: '1.6rem'
                 },
               },
-              ['Edit a User in the system']
+              ['Select and manage users and their roles']
             ),
           ]),
         ]

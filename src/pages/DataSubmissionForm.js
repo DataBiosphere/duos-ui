@@ -11,6 +11,7 @@ import DataAccessGovernance from '../components/data_submission/DataAccessGovern
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
+import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 
 
 export const DataSubmissionForm = () => {
@@ -78,6 +79,7 @@ export const DataSubmissionForm = () => {
       }
     }, [
       h(DataSubmissionStudyInformation, { onChange }),
+      h(NihAnvilUse, { onChange, initialFormData: formData }),
       h(NIHAdministrativeInformation, { initialFormData: formData, onChange, institutions }),
       h(NIHDataManagement, { initialFormData: formData, onChange }),
       h(DataAccessGovernance, { onChange }),
