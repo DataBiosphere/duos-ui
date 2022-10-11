@@ -20,7 +20,6 @@ import {
   formInputYesNoRadioGroup,
   formInputTextarea,
   formInputRadioButton,
-  formInputYesNoRadioGroup,
   formInputFile,
 } from './formComponents';
 

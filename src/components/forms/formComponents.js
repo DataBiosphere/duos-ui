@@ -393,6 +393,10 @@ export const formInputYesNoRadioGroup = (config) => {
               description: 'Yes',
               disabled,
             }),
+          ]),
+          div({
+            className: 'radio-button-container',
+          }, [
             h(RadioButton, {
               id: `${id}_no`,
               name: `${id}_no`,
@@ -490,12 +494,18 @@ export const formInputSlider = (config) => {
 export const formInputFile = (config) => {
   const {
     id,
+    formValue,
     uploadText = 'Upload a file',
     multiple = false,
     accept = '',
   } = config;
 
-  return div({}, [
+  return div({
+    style: {
+      display: 'flex',
+      flexDirection: 'row',
+    }
+  }, [
     div({
       className: 'form-file-upload',
     }, [
@@ -526,6 +536,13 @@ export const formInputFile = (config) => {
         h(PublishIcon, {}),
         uploadText,
       ])
+    ]),
+    div({}, [
+      input({
+        id: `${id}_fileName`,
+        value: formValue.name,
+        readOnly: true,
+      })
     ])
   ]);
 };

@@ -33,24 +33,12 @@ const ResearchPurposeRow = (props) => {
       }
     }, [
       h(FormField, {
-        type: FormFieldTypes.RADIOGROUP,
+        type: FormFieldTypes.YESNORADIOGROUP,
         id: id,
         validators: [FormValidators.REQUIRED],
+        defaultValue,
         orientation: 'horizontal',
-        options: [
-          {
-            text: 'Yes',
-            name: 'yes',
-          },
-          {
-            text: 'No',
-            name: 'no',
-          }
-        ],
-        defaultValue: defaultValue ? 'yes' : 'no',
-        onChange: ({key, value, isValid}) => {
-          onChange({key: key, value: (value === 'yes'), isValid: isValid});
-        }
+        onChange,
       }),
 
     ])
@@ -93,15 +81,43 @@ export default function ResearchPurposeStatement(props) {
           h3({ className: '' },
             ['In order to ensure appropriate review, please answer the questions below:']),
 
+          h4({}, ['I am proposing to:']),
+
+          h(ResearchPurposeRow, {
+            title: 'Develop or validate new methods for analysing/interpreting data.',
+            id: 'oneGender',
+            defaultValue: oneGender,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Increase controls available for a comparison group (e.g. a case-control study).',
+            id: 'oneGender',
+            defaultValue: oneGender,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Study variation in the general population.',
+            id: 'oneGender',
+            defaultValue: oneGender,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Conduct research for an exclusively or partially commercial purpose.',
+            id: 'oneGender',
+            defaultValue: oneGender,
+            onChange,
+          }),
+
           h4({}, ['Is this study:']),
 
           h(ResearchPurposeRow, {
             title: 'Limited to one gender',
             id: 'oneGender',
             defaultValue: oneGender,
-            onChange: ({key, value}) => {
-              onChange({key, value});
-            },
+            onChange,
           }),
 
           div({
@@ -134,9 +150,7 @@ export default function ResearchPurposeStatement(props) {
                 }
               ],
               defaultValue: gender,
-              onChange: ({key, value}) => {
-                onChange({key, value});
-              },
+              onChange,
             }),
           ]),
 

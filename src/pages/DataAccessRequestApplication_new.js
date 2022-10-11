@@ -1026,6 +1026,7 @@ class DataAccessRequestApplicationNew extends Component {
               h(DataAccessRequest, {
                 darCode: darCode,
                 datasets: this.state.formData.datasets,
+                formData: this.state.formData,
                 onDatasetsChange: this.onDatasetsChange,
                 showValidationMessages: showValidationMessages,
                 formFieldChange: this.formFieldChange,
