@@ -6,6 +6,7 @@ import {Styles} from '../libs/theme';
 
 import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
+import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 
 
 export const DataSubmissionForm = () => {
@@ -48,6 +49,7 @@ export const DataSubmissionForm = () => {
       }
     }, [
       h(DataSubmissionStudyInformation, { onChange }),
+      h(NihAnvilUse, { onChange, initialFormData: formData }),
       h(DataAccessGovernance, { onChange }),
     ])
   ]);
