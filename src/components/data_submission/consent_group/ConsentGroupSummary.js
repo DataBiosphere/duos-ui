@@ -224,6 +224,15 @@ export const ConsentGroupSummary = (props) => {
           className: 'form-control',
           value: consentGroup.url,
         }),
+        p({
+          style: {
+            fontWeight: 'bold',
+            fontSize: '16px',
+          }
+        }, ['File Type']),
+        p({}, [
+          consentGroup?.fileType || '',
+        ]),
       ]),
     ]),
   ]);

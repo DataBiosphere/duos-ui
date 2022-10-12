@@ -37,7 +37,8 @@ export const ConsentGroupForm = (props) => {
     // "TDR Location", "Not Determined"
     dataLocation: [],
 
-    url: ''
+    url: '',
+    fileType: '',
   });
 
 

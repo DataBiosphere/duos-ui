@@ -381,5 +381,15 @@ export const EditConsentGroup = (props) => {
       defaultValue: consentGroup.url,
       onChange
     }),
+
+    h(FormField, {
+      id: idx+'_fileType',
+      name: 'fileType',
+      title: 'File Type',
+      type: FormFieldTypes.SELECT,
+      selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
+      validators: [FormValidators.REQUIRED],
+      onChange,
+    })
   ]);
 };

@@ -3,6 +3,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import { isNil } from 'lodash/fp';
 import { Notification } from '../../Notification';
 import { dateValidator } from '../../forms/formUtils';
+import { FormValidators } from '../../forms/forms';
 
 export const computeConsentGroupValidationErrors = (consentGroup) => {
   const errors = [];
@@ -12,21 +13,21 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
   }
 
   if (isNil(consentGroup.url) || consentGroup.url === '') {
-    errors.push('Must specify the URL of the data.');
+    errors.push('Please specify the URL of the data.');
   } else {
     try {
-      new URL(consentGroup.url);
+      FormValidators.URL.isValid(consentGroup.url);
     } catch(err) {
       errors.push('The data location URL must be a valid URL.');
     }
   }
 
   if (isNil(consentGroup.consentGroupName) || consentGroup.consentGroupName === '') {
-    errors.push('Must specify the name of the consent group');
+    errors.push('Please specify the name of the consent group');
   }
 
   if (isNil(consentGroup.dataLocation) || consentGroup.dataLocation.length === 0) {
-    errors.push('Must specify data location (or specify \'Not Determined\')');
+    errors.push('Please specify data location (or specify \'Not Determined\')');
   }
 
   if (!isNil(consentGroup.gs) && consentGroup.gs == '') {
@@ -43,6 +44,10 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
 
   if (!isNil(consentGroup.mor) && !dateValidator.isValid(consentGroup.mor)) {
     errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.');
+  }
+
+  if (!isNil(consentGroup.fileType) && consentGroup.fileType == '') {
+    errors.push('Please specify the file type.');
   }
 
   return errors;
