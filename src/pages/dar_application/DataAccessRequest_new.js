@@ -1,25 +1,8 @@
 import { useState, useEffect, useCallback} from 'react';
 import { a, br, div, fieldset, h, h4, h3, input, label, span, textarea, p } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
-import isEmpty from 'lodash/fp/isEmpty';
-import forEach from 'lodash/fp/forEach';
-import includes from 'lodash/fp/includes';
-import cloneDeep from 'lodash/fp/cloneDeep';
-import isEqual from 'lodash/fp/isEqual';
-import every from 'lodash/fp/every';
-import any from 'lodash/fp/some';
 import { DataSet, DAR } from '../../libs/ajax';
-import AsyncSelect from 'react-select/async';
-import UploadLabelButton from '../../components/UploadLabelButton';
-import { isFileEmpty } from '../../libs/utils';
-import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms';
-
-const uploadFileDiv = (showValidationMessages, uploadedFile, currentDocumentLocation) => {
-  return {
-    padding: '1rem',
-    backgroundColor: showValidationMessages && (isFileEmpty(uploadedFile) && isEmpty(currentDocumentLocation)) ? errorBackgroundColor : 'inherit'
-  };
-};
+import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
 
 const searchOntologies = (query, callback) => {
   let options = [];
@@ -41,55 +24,78 @@ const searchDatasets = (query, callback) => {
   });
 };
 
-const dulQuestionDiv = (showValidationMessages, questionBool) => {
-  return {
-    backgroundColor: showValidationMessages && !questionBool ?
-      errorBackgroundColor : 'inherit',
-    padding: '1rem',
-    margin: '0.5rem 0'
-  };
-};
-
 const formatSearchDataset = (ds) => {
 
-  console.log(ds);
   return {
     key: ds.dataSetId,
     value: ds.dataSetId,
     dataset: ds,
-    displayText: span({}, [
+    displayText: ds.datasetIdentifier,
+    label: span({}, [
       span({style: {fontWeight: 'bold'}}, [ds.datasetIdentifier]), ' | ', ds.name]),
   }
 }
 
-const uploadFileDescription = {
-  paddingBottom: '1.5rem'
-};
+const datasetsContainDataUseFlag = (datasets, flag) => {
+  return datasets.some((ds) => ds?.dataUse[flag] === true);
 
-const errorBackgroundColor = 'rgba(243, 73, 73, 0.19)';
+};
 
 //NOTE: need to change props to account for file locations for previous uploaded file
 export default function DataAccessRequest(props) {
   const {
     formFieldChange,
     formData,
+    setIrbDocument,
+    setCollaborationLetter,
     ariaLevel = 2
   } = props;
 
-  const [datasets, setDatasets] = useState(props.datasets || []);
-  const [diseaseSpecificUse, setDiseaseSpecificUse] = useState(formData.diseaseSpecificUse || [])
-  const [isDiseaseSpecific, setIsDiseaseSpecific] = useState(formData.diseases === true)
+  const [datasets, setDatasets] = useState([]);
+  const today = new Date();
+  const irbProtocolExpiration = formData.irbProtocolExpiration || `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+
+
+  const fetchAllDatasets = async () => {
+    const dsIds = formData.datasetIds;
+    let datasets;
+    if (!isNil(dsIds)) {
+      datasets = await Promise.all(dsIds.map((id) => DataSet.getDatasetByIdV2(id)));
+    } else {
+      datasets = [];
+    }
+
+    return datasets;
+  }
+
+  useEffect(() => {
+    fetchAllDatasets().then((datasets) => {
+      setDatasets(datasets);
+    })
+  }, [formData.datasetIds])
 
   const onChange = ({key, value}) => {
     formFieldChange({name: key, value});
   }
 
   const needsIrbApprovalDocument = useCallback(() => {
-    return datasets.some((ds) => ds.ethicsApprovalRequired === true);
+    return datasetsContainDataUseFlag(datasets, "ethicsApprovalRequired");
   }, [datasets]);
 
-  const needsCollaborationDocument = useCallback(() => {
-    return datasets.some((ds) => ds.collaboratorRequired === true);
+  const needsCollaborationLetter = useCallback(() => {
+    return datasetsContainDataUseFlag(datasets, "collaboratorRequired");
+  }, [datasets]);
+
+  const needsGsoAcknowledgement = useCallback(() => {
+    return datasetsContainDataUseFlag(datasets, "gsoAcknowledgement");
+  }, [datasets]);
+
+  const needsPubAcknowledgement = useCallback(() => {
+    return datasetsContainDataUseFlag(datasets, "publicationResults");
+  }, [datasets]);
+
+  const needsDsAcknowledgement = useCallback(() => {
+    return datasetsContainDataUseFlag(datasets, "diseaseRestrictions");
   }, [datasets]);
 
   return (
@@ -101,18 +107,26 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           type: FormFieldTypes.SELECT,
-          id: 'datasets',
+          id: 'datasetIds',
           isAsync: true,
           isMulti: true,
           title: '2.1 Select Dataset(s)',
           validators: [FormValidators.REQUIRED],
           description: 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:',
-          defaultValue: datasets.map((ds) => formatSearchDataset(ds)),
+          defaultValue: datasets?.map((ds) => formatSearchDataset(ds)),
+          selectConfig: {
+            // return custom html for displaying
+            // dataset options
+            formatOptionLabel: (opt) => opt.label,
+            // return string value of dataset
+            // for accessibility / html keys
+            getOptionLabel: (opt) => opt.displayText,
+          },
           loadOptions: (query, callback) => searchDatasets(query, callback),
           placeholder: 'Dataset Name, Sample Collection ID, or PI',
           onChange: ({key, value}) => {
             const datasets = value.map((val) => val.dataset);
-            onChange({key, value: datasets});
+            onChange({key, value: datasets?.map((ds) => ds.dataSetId)});
             setDatasets(datasets);
           },
         }),
@@ -122,10 +136,14 @@ export default function DataAccessRequest(props) {
           validators: [FormValidators.REQUIRED],
           description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
           id: 'projectTitle',
+          placeholder: 'Project Title',
+          defaultValue: formData.projectTitle,
           onChange,
         }),
 
-        div({}, [
+        div({
+          className: 'dar-form-notice-card',
+        }, [
           span({}, [
             'In sections 2.3, 2.4, and 2.5, you are attesting that your proposed research will remain with the scope of the items selected below, and will be liable for any deviations. Further, it is to your benefit to be as specific as possible in your selections, as it will maximize the data available to you.'
           ])
@@ -150,22 +168,21 @@ export default function DataAccessRequest(props) {
           rows: 6,
           maxLength: 2200,
           ariaLevel: ariaLevel + 3,
+          defaultValue: formData.rus,
           onChange,
         }),
 
         h(FormField, {
           title: h4({}, 'Is the primary purpose of this research to investigate a specific disease(s)?'),
-          id: 'primaryPurpose',
+          id: 'diseases',
           type: FormFieldTypes.YESNORADIOGROUP,
           orientation: 'horizontal',
-          onChange: ({key, value, isValid}) => {
-            onChange({key, value, isValid});
-            setIsDiseaseSpecific(value);
-          },
+          defaultValue: formData.diseases,
+          onChange,
         }),
 
         div({
-          isRendered: isDiseaseSpecific === true,
+          isRendered: formData.diseases === true,
           style: {
             marginBottom: '1.0rem'
           }
@@ -177,23 +194,16 @@ export default function DataAccessRequest(props) {
             isAsync: true,
             optionsAreString: true,
             loadOptions: searchOntologies,
-            id: 'diseaseSpecificUse',
+            id: 'ontologies',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
-            defaultValue: diseaseSpecificUse,
-            onChange: ({key, value, isValid}) => {
-              setDiseaseSpecificUse(value);
-              onChange({
-                key: key,
-                value: value,
-                isValid: isValid
-              });
-            },
+            defaultValue: formData.ontologies,
+            onChange,
           }),
         ]),
 
         div({
-          isRendered: isDiseaseSpecific === false,
+          isRendered: formData.diseases === false,
           style: {
             marginBottom: '1.0rem',
           }
@@ -202,6 +212,7 @@ export default function DataAccessRequest(props) {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
             id: 'hmb',
+            defaultValue: formData.hmb,
             onChange,
           }),
 
@@ -209,6 +220,7 @@ export default function DataAccessRequest(props) {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
             id: 'poa',
+            defaultValue: formData.poa,
             onChange,
           }),
 
@@ -217,9 +229,9 @@ export default function DataAccessRequest(props) {
           }, [
             h(FormField, {
               title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
-              id: 'otherPrimary',
+              id: 'otherText',
               placeholder: 'Please specify...',
-              defaultValue: formData.otherPrimary,
+              defaultValue: formData.otherText,
               onChange,
             }),
           ]),
@@ -227,7 +239,7 @@ export default function DataAccessRequest(props) {
       
 
         h(FormField, {
-          id: 'nonTechnicalSummary',
+          id: 'nonTechRus',
           type: FormFieldTypes.TEXTAREA,
           title: '2.4 Non-Technical Summary',
           validators: [FormValidators.REQUIRED],
@@ -236,44 +248,82 @@ export default function DataAccessRequest(props) {
           rows: 6,
           maxLength: 1100,
           ariaLevel: ariaLevel + 3,
+          defaultValue: formData.nonTechRus,
           onChange,
         }),
 
-        h(FormField, {
+        h(FormFieldTitle, {
           title: '2.5 Data Use Acknowledgements',
           description: 'Please confirm listed acknowledgements and/or document requirements below:',
-          id: 'gso',
+          isRendered: needsGsoAcknowledgement() || needsDsAcknowledgement() || needsPubAcknowledgement(),
+        }),
+
+        h(FormField, {
+          id: 'gsoAcknowledgement',
           type: FormFieldTypes.CHECKBOX,
+          isRendered: needsGsoAcknowledgement(),
           toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (SO). I attest that I will respect this data use condition.',
+          defaultValue: formData.gsoAcknowledgement,
           onChange,
         }),
 
         h(FormField, {
-          id: 'pub',
+          id: 'pubAcknowledgement',
+          isRendered: needsPubAcknowledgement(),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.',
+          defaultValue: formData.pubAcknowledgement,
           onChange,
         }),
 
         h(FormField, {
-          id: 'dul',
+          id: 'dsAckowledgement',
+          isRendered: needsDsAcknowledgement(),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
+          defaultValue: formData.dsAckowledgement,
           onChange,
         }), 
 
-        h(FormField, {
-          type: FormFieldTypes.FILE,
-          id: 'irbApprovalDocument',
+
+        h(FormFieldTitle, {
           description: 'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.',
-          onChange,
+          isRendered: needsIrbApprovalDocument(),
         }),
+        div({
+          isRendered: needsIrbApprovalDocument(),
+          style: {
+            display: 'flex',
+            justifyContent: 'space-between',
+          }
+        }, [
+          div({}, [
+            h(FormField, {
+              type: FormFieldTypes.FILE,
+              id: 'irbApprovalDocument',
+              onChange: ({value}) => setIrbDocument(value),
+            }),
+          ]),
+
+          div({
+            style: {
+              width: '250px',
+            }
+          }, [
+            h(FormField, {
+              readOnly: true,
+              id: 'irbProtocolExpiration',
+              defaultValue: `IRB Expires on ${irbProtocolExpiration}`,
+            }),
+          ]),
+        ]),
 
         h(FormField, {
           type: FormFieldTypes.FILE,
-          id: 'collaborationDocument',
+          isRendered: needsCollaborationLetter(),
+          id: 'collaborationLetter',
           description: 'One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here.',
-          onChange,
+          onChange: ({value}) => setCollaborationLetter(value),
         }),
       ]),
     ])

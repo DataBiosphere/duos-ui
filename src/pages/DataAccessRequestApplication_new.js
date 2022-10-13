@@ -42,7 +42,7 @@ class DataAccessRequestApplicationNew extends Component {
       showDialogSave: false,
       step: 1,
       formData: {
-        datasets: [],
+        datasetIds: [],
         darCode: null,
         labCollaborators: [],
         internalCollaborators: [],
@@ -154,6 +154,24 @@ class DataAccessRequestApplicationNew extends Component {
     }
   };
 
+  setCollaborationLetter = (letter) => {
+    const today = Date.now();
+    this.setState(state => {
+      state.formData[`collaborationLetterName`] = '';
+      state.formData[`collaborationLetterLocation`] = '';
+      state.formData['irbProtocolExpiration'] = `${today.getFullYear().padStart(4)}-${today.getMonth().toFixed(2)}-${today.getDate().toFixed(2)}`;
+      state.step2[`uploadedCollaborationLetter`] = letter;  
+    });
+  };
+
+  setIrbDocument = (document) => {
+    this.setState(state => {
+      state.formData[`irbDocumentName`] = '';
+      state.formData[`irbDocumentLocation`] = '';
+      state.step2[`uploadedIrbDocument`] = document;  
+    });
+  };
+
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
       this.setState(prev => {
@@ -176,17 +194,7 @@ class DataAccessRequestApplicationNew extends Component {
     window.removeEventListener('scroll', this.onScroll);
   }
 
-  async getDatasets(formData) {
-    const dsIds = get('datasetIds')(formData);
-    let datasets;
-    if (!isNil(dsIds)) {
-      datasets = await Promise.all(map((id) => DataSet.getDatasetByIdV2(id))(dsIds));
-    } else {
-      datasets = [];
-    }
 
-    return datasets;
-  }
 
   async init() {
     const { dataRequestId, collectionId } = this.props.match.params;
@@ -207,13 +215,11 @@ class DataAccessRequestApplicationNew extends Component {
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
-      formData.datasets = datasets;
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
-      formData.datasets = await this.getDatasets(formData);
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
@@ -231,20 +237,6 @@ class DataAccessRequestApplicationNew extends Component {
 
     window.addEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }
-
-
-  formatOntologyItems = (ontologies) => {
-    return map((ontology) => {
-      return {
-        //item being referenced as a way to backfill older ontologies that don't have a proper label attributes
-        id: ontology.id || ontology.item.id,
-        key: ontology.id || ontology.item.id,
-        value: ontology.id || ontology.item.id,
-        label: ontology.label || ontology.item.label,
-        item: ontology.item
-      };
-    })(ontologies);
-  };
 
   updateShowValidationMessages = (value) => {
     this.setState((state) => {
@@ -294,7 +286,7 @@ class DataAccessRequestApplicationNew extends Component {
       return prev;
     });
     window.scroll({
-      top: document.getElementsByClassName('step-container')[step - 1].offsetTop,
+      top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
       behavior: 'smooth'
     });
   };
@@ -306,7 +298,7 @@ class DataAccessRequestApplicationNew extends Component {
       const scrollPos = window.scrollY;
       const scrollBuffer = window.innerHeight * .25;
       const sectionIndex = ApplicationTabs
-        .map((tab, index) => document.getElementsByClassName('step-container')[index].offsetTop)
+        .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
         .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
       this.setState(prev => {
@@ -592,7 +584,7 @@ class DataAccessRequestApplicationNew extends Component {
       const userId = Storage.getCurrentUser().userId;
       const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
       let formattedFormData = cloneDeep(this.state.formData);
-      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+      const ontologies = this.state.formData.ontologies;
 
       if (ontologies.length > 0) {
         formattedFormData.ontologies = ontologies;
@@ -666,7 +658,7 @@ class DataAccessRequestApplicationNew extends Component {
       // DAR datasetIds needs to be a list of ids
       const datasetIds = map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
-      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+      const ontologies = this.state.formData.ontologies;
       this.setState(prev => {
         prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;
@@ -711,42 +703,6 @@ class DataAccessRequestApplicationNew extends Component {
       });
       NotyUtil.showError('Error saving partial Data Access Request update');
     }
-  };
-
-  addDataUseToDataset = async(currentDatasets) => {
-    //iterate through datasets array
-    //if dataUse is not on the object, api call to get the full dataset info
-    //method defined here rather than step 2 component since it is a dependency of another helper method here
-    if(isNil(currentDatasets) || isEmpty(currentDatasets)) {
-      return null;
-    }
-
-    let datasetPromises = map((partialDataset) => {
-      let mappedDataset;
-      if (isNil(partialDataset.dataUse)) {
-        mappedDataset = DataSet.getDataSetsByDatasetId(partialDataset.value);
-      } else {
-        mappedDataset = Promise.resolve(partialDataset);
-      }
-      return mappedDataset;
-    })(currentDatasets);
-
-    let dataUseArray = await Promise.all(datasetPromises);
-    dataUseArray.forEach((datasetRecord, index) => {
-      currentDatasets[index].dataUse = datasetRecord.dataUse || {};
-    });
-    return currentDatasets;
-  };
-
-  onDatasetsChange = async (currentDatasets) => {
-    let updatedDatasets = null;
-    if(!isNil(currentDatasets) && !isEmpty(currentDatasets)) {
-      updatedDatasets = await this.addDataUseToDataset(cloneDeep(currentDatasets));
-    }
-    this.setState(prev => {
-      prev.formData.datasets = updatedDatasets;
-      return prev;
-    }, () => this.checkValidations());
   };
 
   /**
@@ -885,7 +841,6 @@ class DataAccessRequestApplicationNew extends Component {
     const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
@@ -893,23 +848,6 @@ class DataAccessRequestApplicationNew extends Component {
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
-
-    const TORComponent = TypeOfResearch({
-      hmb: hmb,
-      hmbHandler: this.setHmb,
-      poa: poa,
-      populationMigration: this.state.formData.populationMigration,
-      poaHandler: this.setPoa,
-      diseases: diseases,
-      diseasesHandler: this.setDiseases,
-      disabled: (darCode !== null),
-      ontologies: ontologies,
-      ontologiesHandler: this.onOntologiesChange,
-      other: other,
-      otherHandler: this.setOther,
-      otherText: otherText,
-      otherTextHandler: this.setOtherText
-    });
 
     const ConfirmationDialogComponent = ConfirmationDialog({
       title: 'Data Request Confirmation',
@@ -1024,35 +962,10 @@ class DataAccessRequestApplicationNew extends Component {
 
             div({className: 'step-container'}, [
               h(DataAccessRequest, {
-                darCode: darCode,
-                datasets: this.state.formData.datasets,
                 formData: this.state.formData,
-                onDatasetsChange: this.onDatasetsChange,
-                showValidationMessages: showValidationMessages,
                 formFieldChange: this.formFieldChange,
-                projectTitle: this.state.formData.projectTitle,
-                initializeDatasets: this.addDataUseToDataset,
-                isTypeOfResearchInvalid: isTypeOfResearchInvalid,
-                TypeOfResearch: TORComponent,
-                methods,
-                controls,
-                population,
-                rus: this.state.formData.rus,
-                nonTechRus: this.state.formData.nonTechRus,
-                gsoAcknowledgement,
-                pubAcknowledgement,
-                dsAcknowledgement,
-                nextPage: this.nextPage,
-                prevPage: this.prevPage,
-                partialSave: this.partialSave,
-                irbDocumentLocation,
-                irbDocumentName,
-                collaborationLetterLocation,
-                collaborationLetterName,
-                changeDARDocument: this.changeDARDocument,
-                uploadedCollaborationLetter: this.state.step2.uploadedCollaborationLetter,
-                uploadedIrbDocument: this.state.step2.uploadedIrbDocument,
-                referenceId
+                setCollaborationLetter: this.setCollaborationLetter,
+                setIrbDocument: this.setIrbDocument,
               })
             ]),
 

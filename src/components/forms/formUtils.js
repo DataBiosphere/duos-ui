@@ -5,12 +5,8 @@ import { isEmailAddress } from '../../libs/utils';
 export const validateFormProps = (props) => {
   const type = (!isNil(props.type) ? props.type : FormFieldTypes.TEXT);
 
-  const requiredProps = type.requiredProps || [];
-  const optionalProps = type.optionalProps || [];
-
-  requiredProps.push(...commonRequiredProps);
-  optionalProps.push(...commonOptionalProps);
-  optionalProps.push(...requiredProps);
+  const requiredProps = (type.requiredProps || []).concat(commonRequiredProps);
+  const optionalProps = (type.optionalProps || []).concat(commonOptionalProps).concat(requiredProps);
 
   const propKeys = Object.keys(props);
 

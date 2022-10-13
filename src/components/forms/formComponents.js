@@ -4,7 +4,7 @@ import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import AsyncCreatable from 'react-select/async-creatable';
-import { FormValidators } from './forms';
+import { FormField, FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
 import PublishIcon from '@material-ui/icons/Publish';
 
@@ -67,6 +67,7 @@ export const formInputGeneric = (config) => {
     id, title, disabled,
     placeholder, type,
     inputStyle, ariaDescribedby,
+    readOnly,
     formValue, error, setError
   } = config;
 
@@ -77,6 +78,7 @@ export const formInputGeneric = (config) => {
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue,
+      readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => onFormInputChange(config, event.target.value),
@@ -504,6 +506,7 @@ export const formInputFile = (config) => {
     style: {
       display: 'flex',
       flexDirection: 'row',
+      alignItems: 'center',
     }
   }, [
     div({
@@ -537,10 +540,16 @@ export const formInputFile = (config) => {
         uploadText,
       ])
     ]),
-    div({}, [
-      input({
+    div({
+      style: {
+        marginLeft: '20px',
+        width: '450px',
+      }
+    }, [
+      h(FormField, {
         id: `${id}_fileName`,
-        value: formValue.name,
+        placeholder: 'Filename.txt',
+        defaultValue: formValue.name,
         readOnly: true,
       })
     ])
