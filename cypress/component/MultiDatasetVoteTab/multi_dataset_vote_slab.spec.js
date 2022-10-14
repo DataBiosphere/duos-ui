@@ -5,6 +5,7 @@ import MultiDatasetVoteSlab from '../../../src/components/collection_voting_slab
 import {Storage} from '../../../src/libs/storage';
 import {Votes} from '../../../src/libs/ajax';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
+import { calcTablePageCount } from '../../../src/libs/utils';
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -332,6 +333,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     const component = cy.get('.table-data');
     component.should('exist');
     component.should('contain', 'test1');
@@ -353,6 +356,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
@@ -371,6 +376,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'test1\ntest2');
   });
@@ -389,6 +396,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist').should('not.contain', 'undefined');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'test1');
   });
@@ -407,6 +416,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'No');
     cy.get('.row-data-3').should('contain.text', 'Matt').should('contain.text', 'Yes');
@@ -426,6 +437,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');

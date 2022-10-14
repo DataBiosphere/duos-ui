@@ -15,6 +15,7 @@ import VotesPieChart from '../common/VotesPieChart';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 import {convertLabelToKey} from '../../libs/utils';
 import {ScrollToTopButton} from '../ScrollButton';
+import MemberVoteSummary from './MemberVoteSummary';
 
 const styles = {
   baseStyle: {
@@ -200,7 +201,13 @@ export default function ResearchProposalVoteSlab(props) {
                   updateFinalVote,
                   key: bucket.key
                 }),
-                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
+                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
+                h(MemberVoteSummary, {
+                  title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
+                  isLoading,
+                  dacVotes,
+                  adminPage
+                })
               ]),
             ]),
           ])
