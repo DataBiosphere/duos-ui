@@ -26,14 +26,12 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
     const formFields = cy.get('.formField-container');
-    formFields.should('have.length', 13);
+    formFields.should('have.length', 11);
 
     cy.get('.formField-studyName').should('have.length', 1);
     cy.get('.formField-studyType').should('have.length', 1);
     cy.get('.formField-studyDescription').should('have.length', 1);
     cy.get('.formField-dataTypes').should('have.length', 1);
-    cy.get('.formField-fileTypes-0-functionalEquivalence').should('have.length', 1);
-    cy.get('.formField-fileTypes-0-numberOfParticipants').should('have.length', 1);
     cy.get('.formField-phenotypeIndication').should('have.length', 1);
     cy.get('.formField-species').should('have.length', 1);
     cy.get('.formField-piName').should('have.length', 1);
