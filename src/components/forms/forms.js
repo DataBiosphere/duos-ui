@@ -217,14 +217,6 @@ export const FormFieldTitle = (props) => {
   ]);
 };
 
-export const FormFieldDescription = (props) => {
-  const {
-    description,
-  } = props;
-
-  return div({ style: { marginBottom: 15 } }, description);
-};
-
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,

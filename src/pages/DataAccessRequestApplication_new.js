@@ -828,9 +828,6 @@ class DataAccessRequestApplicationNew extends Component {
     const step3Invalid = this.step3InvalidResult();
     const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
 
-    //NOTE: component is only here temporarily until component conversion has been complete
-    //ideally this, along with the other variable initialization should be done with a useEffect hook
-
     const ConfirmationDialogComponent = ConfirmationDialog({
       title: 'Data Request Confirmation',
       disableOkBtn: this.state.disableOkBtn,

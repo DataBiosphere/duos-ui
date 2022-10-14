@@ -52,7 +52,6 @@ const fetchAllDatasets = async (dsIds) => {
   return datasets;
 };
 
-//NOTE: need to change props to account for file locations for previous uploaded file
 export default function DataAccessRequest(props) {
   const {
     formFieldChange,
