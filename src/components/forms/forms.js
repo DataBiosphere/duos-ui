@@ -215,7 +215,7 @@ export const FormFieldTitle = (props) => {
     ]),
     description && div({ style: { marginBottom: 15 } }, description),
   ]);
-}
+};
 
 export const FormFieldDescription = (props) => {
   const {
@@ -223,8 +223,7 @@ export const FormFieldDescription = (props) => {
   } = props;
 
   return div({ style: { marginBottom: 15 } }, description);
-}
-
+};
 
 export const FormField = (config) => {
   const {

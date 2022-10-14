@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback} from 'react';
-import { a, br, div, fieldset, h, h4, h3, input, label, span, textarea, p } from 'react-hyperscript-helpers';
+import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
@@ -33,12 +33,23 @@ const formatSearchDataset = (ds) => {
     displayText: ds.datasetIdentifier,
     label: span({}, [
       span({style: {fontWeight: 'bold'}}, [ds.datasetIdentifier]), ' | ', ds.name]),
-  }
-}
+  };
+};
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets.some((ds) => ds?.dataUse[flag] === true);
 
+};
+
+const fetchAllDatasets = async (dsIds) => {
+  let datasets;
+  if (!isNil(dsIds)) {
+    datasets = await Promise.all(dsIds.map((id) => DataSet.getDatasetByIdV2(id)));
+  } else {
+    datasets = [];
+  }
+
+  return datasets;
 };
 
 //NOTE: need to change props to account for file locations for previous uploaded file
@@ -56,46 +67,34 @@ export default function DataAccessRequest(props) {
   const irbProtocolExpiration = formData.irbProtocolExpiration || `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
 
-  const fetchAllDatasets = async () => {
-    const dsIds = formData.datasetIds;
-    let datasets;
-    if (!isNil(dsIds)) {
-      datasets = await Promise.all(dsIds.map((id) => DataSet.getDatasetByIdV2(id)));
-    } else {
-      datasets = [];
-    }
-
-    return datasets;
-  }
-
   useEffect(() => {
-    fetchAllDatasets().then((datasets) => {
+    fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
-    })
-  }, [formData.datasetIds])
+    });
+  }, [formData.datasetIds]);
 
   const onChange = ({key, value}) => {
     formFieldChange({name: key, value});
-  }
+  };
 
   const needsIrbApprovalDocument = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, "ethicsApprovalRequired");
+    return datasetsContainDataUseFlag(datasets, 'ethicsApprovalRequired');
   }, [datasets]);
 
   const needsCollaborationLetter = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, "collaboratorRequired");
+    return datasetsContainDataUseFlag(datasets, 'collaboratorRequired');
   }, [datasets]);
 
   const needsGsoAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, "gsoAcknowledgement");
+    return datasetsContainDataUseFlag(datasets, 'gsoAcknowledgement');
   }, [datasets]);
 
   const needsPubAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, "publicationResults");
+    return datasetsContainDataUseFlag(datasets, 'publicationResults');
   }, [datasets]);
 
   const needsDsAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, "diseaseRestrictions");
+    return datasetsContainDataUseFlag(datasets, 'diseaseRestrictions');
   }, [datasets]);
 
   return (
@@ -156,13 +155,13 @@ export default function DataAccessRequest(props) {
           validators: [FormValidators.REQUIRED],
           description: p({}, [
             'A RUS is a brief description of the applicant\'s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
-            span({}, 
+            span({},
               ['Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
-              a({
+                a({
 
-              }, 'here'),
-              '.'
-            ]),
+                }, 'here'),
+                '.'
+              ]),
           ]),
           placeholder: 'Please limit your RUS to 2200 characters.',
           rows: 6,
@@ -184,6 +183,7 @@ export default function DataAccessRequest(props) {
         div({
           isRendered: formData.diseases === true,
           style: {
+            marginTop: '2.0rem',
             marginBottom: '1.0rem'
           }
         }, [
@@ -236,7 +236,7 @@ export default function DataAccessRequest(props) {
             }),
           ]),
         ]),
-      
+
 
         h(FormField, {
           id: 'nonTechRus',
@@ -283,7 +283,7 @@ export default function DataAccessRequest(props) {
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
           defaultValue: formData.dsAckowledgement,
           onChange,
-        }), 
+        }),
 
 
         h(FormFieldTitle, {

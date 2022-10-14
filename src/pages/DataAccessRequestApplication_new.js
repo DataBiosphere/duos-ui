@@ -9,14 +9,13 @@ import {
   Navigation,
   Notifications as NotyUtil
 } from '../libs/utils';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { Collections, DAR, DataSet, User } from '../libs/ajax';
+import { Collections, DAR, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
+import { any, assign, cloneDeep, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -52,24 +51,24 @@ class DataAccessRequestApplicationNew extends Component {
         rus: '',
         nonTechRus: '',
         oneGender: null,
-        methods: '',
-        controls: '',
+        methods: null,
+        controls: null,
         population: '',
-        hmb: false,
-        poa: false,
-        diseases: false,
+        hmb: null,
+        poa: null,
+        diseases: null,
         ontologies: [],
-        other: false,
+        other: null,
         otherText: '',
-        forProfit: '',
+        forProfit: null,
         gender: '',
         pediatric: null,
         illegalBehavior: null,
-        addiction: '',
+        addiction: null,
         sexualDiseases: null,
         stigmatizedDiseases: null,
         vulnerablePopulation: null,
-        populationMigration: '',
+        populationMigration: null,
         psychiatricTraits: null,
         notHealth: null,
         researcher: '',
@@ -155,20 +154,20 @@ class DataAccessRequestApplicationNew extends Component {
   };
 
   setCollaborationLetter = (letter) => {
-    const today = Date.now();
     this.setState(state => {
       state.formData[`collaborationLetterName`] = '';
       state.formData[`collaborationLetterLocation`] = '';
-      state.formData['irbProtocolExpiration'] = `${today.getFullYear().padStart(4)}-${today.getMonth().toFixed(2)}-${today.getDate().toFixed(2)}`;
-      state.step2[`uploadedCollaborationLetter`] = letter;  
+      state.step2[`uploadedCollaborationLetter`] = letter;
     });
   };
 
   setIrbDocument = (document) => {
     this.setState(state => {
+      const today = new Date();
       state.formData[`irbDocumentName`] = '';
       state.formData[`irbDocumentLocation`] = '';
-      state.step2[`uploadedIrbDocument`] = document;  
+      state.formData['irbProtocolExpiration'] = `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+      state.step2[`uploadedIrbDocument`] = document;
     });
   };
 
@@ -807,14 +806,6 @@ class DataAccessRequestApplicationNew extends Component {
       checkCollaborator = false,
       checkNihDataOnly = false,
       darCode,
-      hmb = false,
-      poa = false,
-      diseases = false,
-      other = false,
-      otherText = '',
-      population = false,
-      controls = false,
-      methods = false,
       labCollaborators,
       internalCollaborators,
       externalCollaborators,
@@ -826,21 +817,12 @@ class DataAccessRequestApplicationNew extends Component {
       anvilUse = false,
       cloudProvider = '',
       cloudProviderType = '',
-      irbDocumentLocation = '', //file storage location of uploaded file,
-      irbDocumentName = '', //name of uploaded file
-      collaborationLetterLocation = '', //file storage location of uploaded letter
-      collaborationLetterName = '', //name of uploaded letter
       cloudProviderDescription = '',
-      gsoAcknowledgement,
-      pubAcknowledgement,
-      dsAcknowledgement,
-      referenceId
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
-    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
@@ -971,32 +953,9 @@ class DataAccessRequestApplicationNew extends Component {
 
             div({className: 'step-container'}, [
               h(ResearchPurposeStatement, {
-                addiction: this.state.formData.addiction,
                 darCode: darCode,
                 formFieldChange: this.formFieldChange,
-                forProfit: this.state.formData.forProfit,
-                gender: this.state.formData.gender,
-                handleRadioChange: this.handleRadioChange,
-                illegalBehavior: this.state.formData.illegalBehavior,
-                nextPage: this.nextPage,
-                notHealth: this.state.formData.notHealth,
-                oneGender: this.state.formData.oneGender,
-                partialSave: this.partialSave,
-                pediatric: this.state.formData.pediatric,
-                /*
-                  NOTE: Assignment below is intentional. populationMigration and POA will have the same value with
-                  poa as the determinant variable. populationMigration will exists as an indicator of its presence on step 3.
-                  Values for both poa and populationMigration will be updated on selection handlers for step 2.
-                  Display value for step 3 need to be based off of poa since older DARs were not created under this standard
-                  Standard decision made on 01/28/2021, will add implementation date later
-                */
-                populationMigration: this.state.formData.poa,
-                prevPage: this.prevPage,
-                psychiatricTraits: this.state.formData.psychiatricTraits,
-                sexualDiseases: this.state.formData.sexualDiseases,
-                showValidationMessages: showValidationMessages,
-                stigmatizedDiseases: this.state.formData.stigmatizedDiseases,
-                vulnerablePopulation: this.state.formData.vulnerablePopulation
+                formData: this.state.formData,
               })
             ]),
 
