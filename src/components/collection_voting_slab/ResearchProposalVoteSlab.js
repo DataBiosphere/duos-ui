@@ -16,7 +16,8 @@ import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 import {convertLabelToKey} from '../../libs/utils';
 import {ScrollToTopButton} from '../ScrollButton';
-
+import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import './research_proposal_vote_slab.css';
 
 const styles = {
   baseStyle: {
@@ -122,6 +123,9 @@ const ResearchPurposeSummary = ({darInfo}) => {
 };
 
 export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}, adminPage = false}) => {
+
+  const [showMemberVotes, setShowMemberVotes] = useState(false);
+
   return div(
     {
       style: styles.chairVoteInfo,
@@ -151,12 +155,31 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           }),
         ]
       ),
-      div([adminPage ? 'DAC Votes' : "My DAC's Votes (detail)"]),
-      h(VoteSummaryTable, {
-        dacVotes: collapseVotesByUser(dacVotes),
-        isLoading,
-        adminPage
-      }),
+
+      div({}, [
+        div({
+          style: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: '10px',
+          }
+        }, [
+          adminPage ? 'DAC Member Votes' : "My DAC Member's Votes (detail)",
+          h((showMemberVotes? ArrowDropUp : ArrowDropDown), {
+            className: `sort-icon dac-member-vote-dropdown-arrow ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`,
+            onClick: () => {
+              setShowMemberVotes(!showMemberVotes);
+            },
+          }),
+        ]),
+        h(VoteSummaryTable, {
+          dacVotes: collapseVotesByUser(dacVotes),
+          isRendered: showMemberVotes,
+          isLoading,
+          adminPage
+        }),
+      ]),
     ]
   );
 };
