@@ -29,7 +29,7 @@ export const MemberVoteSummary = (props) => {
     }, [
       title,
       h((showMemberVotes? ArrowDropUp : ArrowDropDown), {
-        id: "show-member-vote-dropdown",
+        id: 'show-member-vote-dropdown',
         className: `sort-icon dac-member-vote-dropdown-arrow ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`,
         onClick: () => {
           setShowMemberVotes(!showMemberVotes);

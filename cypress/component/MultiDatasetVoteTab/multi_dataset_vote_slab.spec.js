@@ -5,7 +5,6 @@ import MultiDatasetVoteSlab from '../../../src/components/collection_voting_slab
 import {Storage} from '../../../src/libs/storage';
 import {Votes} from '../../../src/libs/ajax';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
-import { calcTablePageCount } from '../../../src/libs/utils';
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
