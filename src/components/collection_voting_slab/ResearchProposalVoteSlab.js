@@ -134,6 +134,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, algorithmResult = {}, adminPag
             display: 'flex',
             justifyContent: 'space-between',
             padding: '1% 0',
+            marginBottom: '10px',
           },
         },
         [
