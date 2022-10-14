@@ -38,7 +38,7 @@ export const ConsentGroupForm = (props) => {
     dataLocation: [],
 
     url: '',
-    fileType: '',
+    fileTypes: [{}],
   });
 
 

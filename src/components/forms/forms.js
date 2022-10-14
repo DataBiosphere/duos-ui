@@ -263,12 +263,15 @@ export const FormField = (config) => {
 */
 export const FormTable = (config) => {
   const {
-    id, formFields, defaultValue,
+    id, name, formFields, defaultValue,
     enableAddingRow, addRowLabel,
     disabled, onChange, minLength
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
+
+
+  const key = name || id;
 
   return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
@@ -287,12 +290,12 @@ export const FormTable = (config) => {
             ...formCol,
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-            defaultValue: formValue[i][formCol.id],
+            defaultValue: formValue[i][formCol.name || formCol.id],
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
-              formValueClone[i][formCol.id] = value;
+              formValueClone[i][formCol.name || formCol.id] = value;
               setFormValue(formValueClone);
-              onChange({key: `${id}.${i}.${formCol.id}`, value: value, isValid: true });
+              onChange({key: key, value: formValueClone, isValid: true });
             }
           });
         }),
@@ -306,7 +309,7 @@ export const FormTable = (config) => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.splice(i, 1);
             setFormValue(formValueClone);
-            onChange({ key: id, value: formValueClone, isValid: true });
+            onChange({ key: key, value: formValueClone, isValid: true });
           }
         }, [
           span({ className: 'glyphicon glyphicon-remove' })
@@ -327,7 +330,7 @@ export const FormTable = (config) => {
           const formValueClone = cloneDeep(formValue);
           formValueClone.push({});
           setFormValue(formValueClone);
-          onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
+          onChange({key: key, value: formValueClone, isValid: true });
         },
         style: { marginTop: 10 }
       }, [

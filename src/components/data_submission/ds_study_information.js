@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormFieldTypes, FormField, FormTable, FormValidators } from '../forms/forms';
+import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 import './ds_common.css';
 
@@ -67,28 +67,6 @@ export default function DataSubmissionStudyInformation(props) {
       placeholder: 'Type',
       defaultValue: [],
       type: FormFieldTypes.MULTITEXT,
-      onChange
-    }),
-    h(FormTable, {
-      id: 'fileTypes',
-      formFields: [
-        {
-          id: 'functionalEquivalence',
-          title: 'Functional Equivalence',
-          placeholder: 'Type',
-          validators: [FormValidators.REQUIRED]
-        }, {
-          id: 'numberOfParticipants',
-          title: '# of Participants',
-          placeholder: 'Number',
-          type: FormFieldTypes.NUMBER,
-          validators: [FormValidators.REQUIRED]
-        }
-      ],
-      defaultValue: [{}],
-      enableAddingRow: true,
-      addRowLabel: 'Add New Filetype',
-      minLength: 1,
       onChange
     }),
     h(FormField, {

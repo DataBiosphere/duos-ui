@@ -1,6 +1,6 @@
 import { selectedPrimaryGroup } from './EditConsentGroup';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil } from 'lodash/fp';
+import { isNil, isEmpty } from 'lodash/fp';
 import { Notification } from '../../Notification';
 import { dateValidator } from '../../forms/formUtils';
 import { FormValidators } from '../../forms/forms';
@@ -46,7 +46,7 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
     errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.');
   }
 
-  if (!isNil(consentGroup.fileType) && consentGroup.fileType == '') {
+  if (isNil(consentGroup.fileTypes) || isEmpty(consentGroup.fileTypes)) {
     errors.push('Please specify the file type.');
   }
 
