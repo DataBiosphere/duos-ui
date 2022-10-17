@@ -105,8 +105,6 @@ export default function ApplicationInformation(props) {
     isLoading = false,
     externalCollaborators = [],
     internalCollaborators = [],
-    signingOfficial = '- -',
-    itDirector = '- -',
     signingOfficialEmail = '- -',
     itDirectorEmail = '- -',
     internalLabStaff = [],
@@ -127,8 +125,6 @@ export default function ApplicationInformation(props) {
   ];
 
   const institutionLabels = [
-    {value: signingOfficial, title: 'Signing Official', key: 'signing-official'},
-    {value: itDirector, title: 'IT Director', key: 'it-director'},
     {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
     {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
   ];

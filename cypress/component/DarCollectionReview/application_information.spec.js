@@ -199,17 +199,9 @@ describe('Application Information', () => {
 
   it('renders the signing official and signing official email', () => {
     const props = {
-      signingOfficial: 'Person SO',
       signingOfficialEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#signing-official-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('Signing Official');
-
-    const nameSpan =  cy.get('#signing-official-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
 
     const emailLabel = cy.get('#signing-official-email-label');
     expect(emailLabel).to.exist;
@@ -222,17 +214,9 @@ describe('Application Information', () => {
 
   it('renders the IT director and IT director email', () => {
     const props = {
-      itDirector: 'Person SO',
       itDirectorEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#it-director-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('IT Director');
-
-    const nameSpan = cy.get('#it-director-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
 
     const emailLabel = cy.get('#it-director-email-label');
     expect(emailLabel).to.exist;
