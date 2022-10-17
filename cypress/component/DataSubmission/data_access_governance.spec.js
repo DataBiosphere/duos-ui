@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { DAC, User } from '../../../src/libs/ajax';
+import { DAC, User, Institution } from '../../../src/libs/ajax';
 import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
 import { mount } from 'cypress/react';
 
@@ -20,6 +20,7 @@ const user = {
 beforeEach(() => {
   cy.stub(DAC, 'list').returns(Promise.resolve(dacs));
   cy.stub(User, 'getMe').returns(user);
+  cy.stub(Institution, 'list').returns([{name: 'Test Instituion'}]);
 });
 
 describe('Data Access Governance', function () {
