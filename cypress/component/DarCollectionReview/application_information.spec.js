@@ -55,6 +55,16 @@ describe('Application Information', () => {
     textbox.contains('test');
   });
 
+  it('renders the RUS', () => {
+    const props = {rus: 'test'};
+    mount(<ApplicationInformation {...props} />);
+    const subheader = cy.get('.rus-subheader');
+    expect(subheader).to.exist;
+    const textbox = cy.get('.rus-textbox');
+    expect(textbox).to.exist;
+    textbox.contains('test');
+  });
+
   it('renders the collaborator details container and sub-header if any provided', () => {
     const props = {
       externalCollaborators: [{name: 'Person A'}, {name: 'Person B'}]
