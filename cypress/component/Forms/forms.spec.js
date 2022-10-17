@@ -546,9 +546,9 @@ describe('FormField - Tests', () => {
         cy.get('#fileTypes-0-functionalEquivalence').should('have.value', 'hello');
         expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
           {
-              "functionalEquivalence": "hello"
+            'functionalEquivalence': 'hello'
           }
-      ], isValid: true}); // code value
+        ], isValid: true}); // code value
       });
     });
 
@@ -572,11 +572,11 @@ describe('FormField - Tests', () => {
       cy.get('#fileTypes-1-functionalEquivalence').type('jello').then(() => {
         cy.get('#fileTypes-1-functionalEquivalence').should('have.value', 'jello');
         expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
-              {},
-              {
-                  "functionalEquivalence": "jello"
-              }
-          ], isValid: true }); // code value
+          {},
+          {
+            'functionalEquivalence': 'jello'
+          }
+        ], isValid: true }); // code value
       });
     });
 
