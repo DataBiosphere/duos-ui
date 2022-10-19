@@ -66,12 +66,12 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
 };
 
 //Row component that renders out rows for each element in the provided data collection
-const DataRows = ({rowData, baseStyle, columnHeaders}) => {
-  const rows = rowData.map((row, index) => {
+const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow}) => renderedRow}) => {
+  return rowData.map((rowData, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
-      row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
+    const renderedRow = div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
+      rowData.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
         //therefore extract width from columnHeader and apply to cell style
@@ -90,8 +90,10 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         }
         return output;
       }));
+
+    return rowWrapper({renderedRow, rowData})
   });
-  return rows;
+
 };
 
 //Simple table component, can be used alone, can be built on top of (like with LibraryCardTable)
@@ -106,6 +108,7 @@ export default function SimpleTable(props) {
     rowData = [], //rowData -> {data, component, style, onClick}
     isLoading,
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
+    rowWrapper = ({renderedRow}) => renderedRow, // ({rowData, renderedRow}) => ... : allows injecting custom container to row
     tableSize,
     paginationBar,
     sort,
@@ -114,7 +117,7 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
-  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, key: 'table-data-rows'})];
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, rowWrapper, key: 'table-data-rows'})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
   return div([
     div({className: 'table-data', style: containerOverride || Styles.TABLE.CONTAINER, role: 'table'},

@@ -1,12 +1,45 @@
-import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
-import {formatDate} from '../../libs/utils';
-import {h} from 'react-hyperscript-helpers';
-import {styles} from './DarCollectionTable';
-import Actions from './Actions';
-import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
-import {Link} from 'react-router-dom';
-import { consoleTypes } from '../dar_table/DarTableActions';
+import {styles} from './DarDatasetTable';
 
+export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
+  return {
+    data: '',
+    id: dataUseGroup,
+    style : {
+      color: '#354052',
+      fontSize: styles.fontSize.dataUseGroup,
+      paddingRight: '2%'
+    },
+    label
+  };
+}
+
+export function votes({dataUseGroup, label= 'votes'}) {
+  return {
+    data: '',
+    id: dataUseGroup,
+    style : {
+      color: '#354052',
+      fontSize: styles.fontSize.votes,
+      paddingRight: '2%'
+    },
+    label
+  };
+}
+
+export function votes({numberOfDatasets = 0, label= 'votes'}) {
+  return {
+    data: `${numberOfDatasets}`,
+    id: dataUseGroup,
+    style : {
+      color: '#354052',
+      fontSize: styles.fontSize.votes,
+      paddingRight: '2%'
+    },
+    label
+  };
+}
+
+/*
 export function projectTitleCellData({name = '- -', darCollectionId, label= 'project-title'}) {
   return {
     data: isEmpty(name) ? '- -' : name,
@@ -173,3 +206,4 @@ export default {
   consoleActionsCellData,
   darCodeAdminCellData
 };
+*/

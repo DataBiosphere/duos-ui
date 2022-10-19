@@ -1,0 +1,9 @@
+.dar-expand-dropdown-arrow {
+  width: 36px !important;
+  height: 36px !important;
+  margin-left: 0px;
+}
+
+.dar-expand-dropdown-arrow:hover {
+  cursor: pointer;
+}
