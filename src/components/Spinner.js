@@ -15,5 +15,5 @@ export const Spinner =
 // ChairConsole, BackgroundSignIn, AdminManageUser, AdminManageLC, AdminMaangeInstitutions,
 // SupportRequestModal, ElectionTimeoutModal,
 // DacDatasetsModal, EraCommons, ApplicationSummaryModa, AddUserModal, AddInstitutionModal,
-// LibraryCardTable, DarTable DarTableCancelButton, SubmitVoteBox
+// LibraryCardTable, DarTableCancelButton, SubmitVoteBox
 // See SignIn for example usage of this constant.
