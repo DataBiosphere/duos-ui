@@ -426,13 +426,6 @@ export const Election = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return await res.json();
   },
-
-  createDARElection: async (requestId) => {
-    const election = { status: 'Open', finalAccessVote: false };
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res.json();
-  }
 };
 
 export const Email = {
