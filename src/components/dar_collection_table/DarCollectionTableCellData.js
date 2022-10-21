@@ -5,7 +5,15 @@ import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
-import { consoleTypes } from '../dar_table/DarTableActions';
+
+export const consoleTypes = {
+  ADMIN: 'admin',
+  MEMBER: 'member',
+  MANAGE_ACCESS: 'manageAccess',
+  CHAIR: 'chair',
+  SIGNING_OFFICIAL: 'signingOfficial',
+  RESEARCHER: 'researcher',
+};
 
 export function projectTitleCellData({name = '- -', darCollectionId, label= 'project-title'}) {
   return {
