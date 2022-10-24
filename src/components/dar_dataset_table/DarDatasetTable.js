@@ -1,17 +1,26 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
 import { h } from 'react-hyperscript-helpers';
-import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarDatasetTableCellData';
-import './dar_collection_table.css';
+import {flow, isNil} from 'lodash/fp';
+import {
+  generatePreProcessedBucketData,
+  getMatchDataForBuckets,
+  processDataUseBuckets,
+  filterBucketsForUser,
+} from '../../utils/DarCollectionUtils';
+import {Notifications} from '../../libs/utils';
+import { Navigation } from '../../libs/utils';
+
 
 const storageDarDatasetSort = 'storageDarDatasetSort';
 
 export const styles = {
+  containerOverride: Styles.TABLE.CARDCONTAINER,
   baseStyle: {
     fontFamily: 'Montserrat',
     fontSize: '1.6rem',
@@ -38,34 +47,22 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '12.5%',
-    projectTitle: '18%',
-    submissionDate: '12.5%',
-    researcher: '10%',
-    institution: '12.5%',
-    datasetCount: '7.5%',
-    status: '10%',
-    actions: '14.5%',
+    dataUseGroup: '25%',
+    votes: '25%',
+    numberOfDatasets: '25%',
+    datasets: '25%',
   },
   color: {
-    darCode: '#000000',
-    projectTitle: '#000000',
-    submissionDate: '#000000',
-    researcher: '#000000',
-    institution: '#354052',
-    datasetCount: '#354052',
-    status: '#000000',
-    actions: '#000000',
+    dataUseGroup: '#000000',
+    votes: '#000000',
+    numberOfDatasets: '#000000',
+    datasets: '#000000',
   },
   fontSize: {
-    darCode: '1.6rem',
-    projectTitle: '1.4rem',
-    submissionDate: '1.4rem',
-    researcher: '1.4rem',
-    institution: '1.4rem',
-    datasetCount: '2.0rem',
-    status: '1.6rem',
-    actions: '1.6rem',
+    dataUseGroup: '1.4rem',
+    votes: '1.4rem',
+    numberOfDatasets: '1.4rem',
+    datasets: '1.4rem',
   },
 };
 
@@ -80,47 +77,50 @@ const columnHeaderConfig = {
   dataUseGroup: {
     label: 'Data Use Group',
     cellStyle: { width: styles.cellWidth.dataUseGroup },
-    cellDataFn: cellData.dataUseGroup,
+    cellDataFn: cellData.dataUseGroupCellData,
     sortable: true
   },
   votes: {
     label: 'Votes',
     cellStyle: { width: styles.cellWidth.votes },
-    cellDataFn: cellData.votes,
+    cellDataFn: cellData.votesCellData,
     sortable: false
   },
   numberOfDatasets: {
     label: '# of Datasets',
     cellStyle: { width: styles.cellWidth.numberOfDatasets },
-    cellDataFn: cellData.numberOfDatasets,
+    cellDataFn: cellData.numberOfDatasetsCellData,
     sortable: true
   },
   datasets: {
     label: 'Datasets',
     cellStyle: { width: styles.cellWidth.datasets },
-    cellDataFn: cellData.datasets,
+    cellDataFn: cellData.datasetsCellData,
     sortable: false
   },
 };
 
-const defaultColumns = Object.keys(columnHeaderConfig);
+const columns = Object.keys(columnHeaderConfig);
 
-const columnHeaderData = (columns = defaultColumns) => {
+const columnHeaderData = (columns = columns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
 const processBucketRowData = ({
   buckets
 }) => {
-  console.log(buckets);
   if(!isNil(buckets)) {
     return buckets.map((bucket) => {
       const {
-        a
+        key: dataUseGroup,
+        datasets,
+        votes,
       } = bucket;
-      return columns.map((col) => {
+      return columns.map((col, idx) => {
         return columnHeaderConfig[col].cellDataFn({
-          dataUseGroup: 'asdf'
+          dataUseGroup,
+          datasets,
+          votes
         });
       });
     });
@@ -129,7 +129,7 @@ const processBucketRowData = ({
 
 const getInitialSort = (columns = []) => {
   const sort = Storage.getCurrentUserSettings(storageDarDatasetSort) || {
-    field: DarCollectionTableColumnOptions.SUBMISSION_DATE,
+    field: DarDatasetTableColumnOptions.NUMBER_OF_DATASETS,
     dir: -1
   };
   const sortIndex = columns.indexOf(sort.field);
@@ -152,13 +152,16 @@ export const DarDatasetTable = (props) => {
   const [buckets, setBuckets] = useState([]);
 
   const {
-    collection, isLoading
+    collection, isLoading, adminPage
   } = props;
-
 
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser();
     try {
+      if (isNil(collection)) {
+        setBuckets([]);
+        return;
+      }
       const { dars, datasets } = collection;
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
@@ -168,14 +171,26 @@ export const DarDatasetTable = (props) => {
       const filteredBuckets = adminPage
         ? processedBuckets
         : filterBucketsForUser(user, processedBuckets);
-      setBuckets(filteredBuckets);
+      const filteredDataUseBuckets = filteredBuckets.filter(
+        (b) => b.isRP !== true
+      );
+      setBuckets(filteredDataUseBuckets);
     } catch (error) {
+      console.log(error);
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary. You have been redirected to your console',
       });
       Navigation.console(user, props.history);
     }
-  }, []);
+  }, [adminPage, collection]);
+
+  useEffect(() => {
+    try {
+      init();
+    } catch (error) {
+      Notifications.showError({ text: 'Failed to initialize collection' });
+    }
+  }, [init]);
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {

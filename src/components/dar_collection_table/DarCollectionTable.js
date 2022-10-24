@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
-import { h, div } from 'react-hyperscript-helpers';
+import { h, div, p } from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
@@ -8,10 +8,10 @@ import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/util
 import SimpleTable from '../SimpleTable';
 import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
-import { cloneDeep, divide } from 'lodash';
+import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
-import { Collections } from '@material-ui/icons';
 import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable';
+import { Collections } from '../../libs/ajax';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
 
@@ -75,7 +75,6 @@ export const styles = {
 
 export const DarCollectionTableColumnOptions = {
   DAR_CODE: 'darCode',
-  DAR_CODE_ADMIN: 'darCodeAdmin', //temp key for admin, will switch out once collection review page is implemented for all users
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
   RESEARCHER: 'researcher',
@@ -90,12 +89,6 @@ const columnHeaderConfig = {
     label: 'DAR Code',
     cellStyle: { width: styles.cellWidth.darCode },
     cellDataFn: cellData.darCodeCellData,
-    sortable: true
-  },
-  darCodeAdmin: {
-    label: 'DAR Code',
-    cellStyle: {width: styles.cellWidth.darCode},
-    cellDataFn: cellData.darCodeAdminCellData,
     sortable: true
   },
   name: {
@@ -148,7 +141,7 @@ const columnHeaderData = (columns = defaultColumns) => {
 };
 
 const processCollectionRowData = ({
-  collections, collectionIsExpanded, updateCollectionIsExpandedByIdx,
+  collections, collectionIsExpanded, updateCollectionIsExpandedById,
   showConfirmationModal, columns = defaultColumns, consoleType = '',
   goToVote, reviewCollection, resumeCollection, relevantDatasets
 }) => {
@@ -167,7 +160,7 @@ const processCollectionRowData = ({
           goToVote, reviewCollection, relevantDatasets,
             resumeCollection, actions,
             collectionIsExpanded: collectionIsExpanded(darCollectionId),
-            updateCollectionIsExpanded: (val) => updateCollectionIsExpandedByIdx(darCollectionId, val),
+            updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
         });
       });
     });
@@ -213,9 +206,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     This will be updated to account for token based requests on a later ticket
   */
 
-  const updateCollectionIsExpandedByIdx = useCallback((id, val) => {
+  const updateCollectionIsExpandedById = useCallback((id, val) => {
     if (collectionsExpandedState[id] !== val) {
-      const newCollectionsExpandedState = cloneDeep(collectionIsExpanded);
+      const newCollectionsExpandedState = cloneDeep(collectionsExpandedState);
       newCollectionsExpandedState[id] = val;
       setCollectionsExpandedState(newCollectionsExpandedState);
     }
@@ -230,15 +223,16 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       return darCollectionCache[darCollectionId];
     } else {
       return Collections.getCollectionById(darCollectionId).then((coll) => {
-        const cache = deepCopy(darCollectionCache);
+        const cache = cloneDeep(darCollectionCache);
         cache[darCollectionId] = coll;
         setDarCollectionCache(cache);
         return coll;
       }).catch((e) => {
+        return null;
         // todo
       });
     }
-  }, []);
+  }, [darCollectionCache, setDarCollectionCache]);
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -253,7 +247,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       filteredList: processCollectionRowData({
         collections,
         collectionIsExpanded,
-        updateCollectionIsExpandedByIdx,
+        updateCollectionIsExpandedById,
         columns,
         showConfirmationModal,
         consoleType,
@@ -267,7 +261,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       setVisibleList: setVisibleCollections,
       sort
     });
-  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedByIdx]);
+  }, [tableSize, currentPage, pageCount, collections, sort, columns, consoleType, openCollection, goToVote, relevantDatasets, collectionIsExpanded, updateCollectionIsExpandedById]);
 
   const showConfirmationModal = (collectionSummary, action = '') => {
     setConsoleAction(action);
@@ -284,18 +278,30 @@ export const DarCollectionTable = function DarCollectionTable(props) {
   );
 
   const rowWrapper = useCallback(({renderedRow, rowData}) => {
-    const {
-      darCollectionId
-    } = rowData;
+    const darCollectionId = rowData[0].id;
+
+    if (collectionIsExpanded(darCollectionId)) {
+      return div({}, [
+        renderedRow,
+        div({
+          style: {
+            width: '80%',
+            margin: 'auto',
+          }
+        }, [
+          h(DarDatasetTable, {
+            collection: fetchDarCollection(darCollectionId),
+            isLoading: isNil(darCollectionCache[darCollectionId]),
+          }),
+        ])
+
+      ])
+    }
 
     return div({}, [
       renderedRow,
-      h(DarDatasetTable, {
-        collection: fetchDarCollection(darCollectionId),
-        isLoading: isNil(darCollectionCache[darCollectionId]),
-      }),
     ])
-  }, [darCollectionCache, fetchDarCollection]);
+  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, collectionsExpandedState]);
 
   return h(Fragment, {}, [
     h(SimpleTable, {
@@ -310,8 +316,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         tableSize,
         goToPage,
         changeTableSize,
-        rowWrapper,
       }),
+      rowWrapper,
       sort,
       onSort: (sort) => {
         Storage.setCurrentUserSettings(storageDarCollectionSort, {

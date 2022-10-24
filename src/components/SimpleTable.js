@@ -67,11 +67,11 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
 
 //Row component that renders out rows for each element in the provided data collection
 const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow}) => renderedRow}) => {
-  return rowData.map((rowData, index) => {
+  return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
     const renderedRow = div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
-      rowData.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
+    row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
         //therefore extract width from columnHeader and apply to cell style
@@ -91,7 +91,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
         return output;
       }));
 
-    return rowWrapper({renderedRow, rowData})
+    return rowWrapper({renderedRow, rowData: row})
   });
 
 };

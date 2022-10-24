@@ -1,6 +1,7 @@
 import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
-import {h} from 'react-hyperscript-helpers';
+import {h, div, p} from 'react-hyperscript-helpers';
+import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
@@ -24,6 +25,9 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
   let darCodeData;
 
   switch (consoleType) {
+    case consoleTypes.ADMIN:
+      darCodeData = h(DarCollectionAdminReviewLink, { darCollectionId, darCode });
+      break;
     case consoleTypes.CHAIR:
     case consoleTypes.MEMBER:
     case consoleTypes.SIGNING_OFFICIAL:
@@ -34,7 +38,12 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
   }
 
   return {
-    data: div({}, [
+    data: div({
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+      }
+    }, [
       h((collectionIsExpanded ? ArrowDropUp : ArrowDropDown), {
         id: `${darCollectionId}_dropdown`,
         className: `sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`,
@@ -56,16 +65,16 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
   };
 }
 
-//Redirect for admin review page, only used in admin manage dar collections table
-export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
-  return {
-    isComponent: true,
-    data: h(DarCollectionAdminReviewLink, { darCollectionId, darCode }),
-    label,
-    id: darCollectionId,
-    value: darCode
-  };
-}
+// //Redirect for admin review page, only used in admin manage dar collections table
+// export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
+//   return {
+//     isComponent: true,
+//     data: h(DarCollectionAdminReviewLink, { darCollectionId, darCode }),
+//     label,
+//     id: darCollectionId,
+//     value: darCode
+//   };
+// }
 const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   const hasOpenElections = includes('open')(toLower(status));
   const path = hasOpenElections ?
@@ -171,5 +180,4 @@ export default {
   datasetCountCellData,
   statusCellData,
   consoleActionsCellData,
-  darCodeAdminCellData
 };

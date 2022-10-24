@@ -186,6 +186,15 @@ export const Styles = {
       color: '#7B7B7B',
       fontFamily: 'Montserrat',
     },
+    CARDCONTAINER: {
+      marginTop: '2rem',
+      border: '1px solid #979797',
+      backgroundColor: 'rgb(184,205,211,0.08)',
+      borderRadius: '5px',
+      padding: '2rem 4rem',
+      color: '#7B7B7B',
+      fontFamily: 'Montserrat',
+    },
     HEADER_ROW: {
       textTransform: 'uppercase',
       display: 'flex',
