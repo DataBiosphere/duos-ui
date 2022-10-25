@@ -4,7 +4,7 @@ import {
   collapseVotesByUser,
 } from '../../utils/DarCollectionUtils';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
-import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
 
 import './member_vote_summary.css';
 
@@ -28,7 +28,7 @@ export const MemberVoteSummary = (props) => {
       }
     }, [
       title,
-      h((showMemberVotes? ArrowDropUp : ArrowDropDown), {
+      h((showMemberVotes? ExpandLess : ExpandMore), {
         id: 'show-member-vote-dropdown',
         className: `sort-icon dac-member-vote-dropdown-arrow ${showMemberVotes ? 'sort-icon-up' : 'sort-icon-down'}`,
         onClick: () => {

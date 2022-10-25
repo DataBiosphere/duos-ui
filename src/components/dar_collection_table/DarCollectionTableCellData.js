@@ -1,7 +1,7 @@
 import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
 import {h, div} from 'react-hyperscript-helpers';
-import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { ExpandMore, ExpandLess } from '@material-ui/icons';
 import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
@@ -44,7 +44,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
         alignItems: 'center',
       }
     }, [
-      h((collectionIsExpanded ? ArrowDropUp : ArrowDropDown), {
+      h((collectionIsExpanded ? ExpandLess : ExpandMore), {
         id: `${darCollectionId}_dropdown`,
         className: `sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`,
         onClick: () => {
