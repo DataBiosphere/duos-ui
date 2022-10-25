@@ -11,10 +11,8 @@ import {
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  filterBucketsForUser,
 } from '../../utils/DarCollectionUtils';
 import {Notifications} from '../../libs/utils';
-import { Navigation } from '../../libs/utils';
 
 
 const storageDarDatasetSort = 'storageDarDatasetSort';
@@ -47,10 +45,10 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    dataUseGroup: '25%',
-    votes: '25%',
-    numberOfDatasets: '25%',
-    datasets: '25%',
+    dataUseGroup: '30%',
+    votes: '15%',
+    numberOfDatasets: '15%',
+    datasets: '40%',
   },
   color: {
     dataUseGroup: '#000000',
@@ -113,14 +111,16 @@ const processBucketRowData = ({
     return buckets.map((bucket) => {
       const {
         key: dataUseGroup,
-        datasets,
         votes,
+        datasets,
+        elections,
       } = bucket;
-      return columns.map((col, idx) => {
+      return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           dataUseGroup,
           datasets,
-          votes
+          elections: elections[0],
+          votes: votes[0]?.dataAccess || [],
         });
       });
     });
@@ -152,37 +152,34 @@ export const DarDatasetTable = (props) => {
   const [buckets, setBuckets] = useState([]);
 
   const {
-    collection, isLoading, adminPage
+    collection, isLoading
   } = props;
 
+  const [isInitializing, setIsInitializing] = useState(true);
+
   const init = useCallback(async () => {
-    const user = Storage.getCurrentUser();
     try {
-      if (isNil(collection)) {
+      const { dars, datasets } = collection;
+      if (isNil(dars) || isNil(datasets)) {
         setBuckets([]);
         return;
       }
-      const { dars, datasets } = collection;
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
         processDataUseBuckets,
       ])({ dars, datasets });
       await getMatchDataForBuckets(processedBuckets);
-      const filteredBuckets = adminPage
-        ? processedBuckets
-        : filterBucketsForUser(user, processedBuckets);
-      const filteredDataUseBuckets = filteredBuckets.filter(
+      const filteredDataUseBuckets = processedBuckets.filter(
         (b) => b.isRP !== true
       );
       setBuckets(filteredDataUseBuckets);
     } catch (error) {
-      console.log(error);
       Notifications.showError({
-        text: 'Error initializing DAR Collection Dataset summary. You have been redirected to your console',
+        text: 'Error initializing DAR Collection Dataset summary.',
       });
-      Navigation.console(user, props.history);
     }
-  }, [adminPage, collection]);
+    setIsInitializing(false);
+  }, [collection]);
 
   useEffect(() => {
     try {
@@ -211,7 +208,7 @@ export const DarDatasetTable = (props) => {
       setVisibleList: setVisibleBuckets,
       sort
     });
-  }, [tableSize, currentPage, pageCount, buckets, sort, columns]);
+  }, [tableSize, currentPage, pageCount, buckets, sort]);
 
   //Helper function to update page
   const goToPage = useCallback(
@@ -223,7 +220,7 @@ export const DarDatasetTable = (props) => {
 
   return h(Fragment, {}, [
     h(SimpleTable, {
-      isLoading,
+      isLoading: isLoading || isInitializing,
       'rowData': visibleBuckets,
       'columnHeaders': columnHeaderData(columns),
       styles,

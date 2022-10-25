@@ -7,20 +7,29 @@ export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
     style : {
       color: '#354052',
       fontSize: styles.fontSize.dataUseGroup,
+      fontWeight: 'bold',
       paddingRight: '2%'
     },
     label
   };
 }
 
-export function votesCellData({votes, dataUseGroup, label= 'votes'}) {
-  console.log(votes);
+export function votesCellData({elections, votes, dataUseGroup, label= 'votes'}) {
+  const dataAccess = elections?.find((election) => election.electionType === 'DataAccess');
+
+  let status = dataAccess?.status || 'N/A';
+
+  if (status === 'Closed') {
+    status = votes?.finalVotes?.some((v) => v.vote === true) ? 'Approved' : 'Denied';
+  }
+
   return {
-    data: '',
+    data: status,
     id: dataUseGroup,
     style : {
       color: '#354052',
       fontSize: styles.fontSize.votes,
+      fontWeight: 'bold',
       paddingRight: '2%'
     },
     label
@@ -34,6 +43,7 @@ export function numberOfDatasetsCellData({datasets = [], dataUseGroup, label= 'n
     style : {
       color: '#354052',
       fontSize: styles.fontSize.numberOfDatasets,
+      fontWeight: 'bold',
       paddingRight: '2%'
     },
     label
