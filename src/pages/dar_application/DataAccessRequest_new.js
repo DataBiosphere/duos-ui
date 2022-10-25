@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback} from 'react';
 import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
+import { isEqual } from 'lodash/fp';
 import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
+import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 
 const searchOntologies = (query, callback) => {
   let options = [];
@@ -62,6 +64,8 @@ export default function DataAccessRequest(props) {
   } = props;
 
   const [datasets, setDatasets] = useState([]);
+  const [dataUseTranslations, setDataUseTranslations] = useState([]);
+
   const today = new Date();
   const irbProtocolExpiration = formData.irbProtocolExpiration || `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
@@ -71,6 +75,13 @@ export default function DataAccessRequest(props) {
       setDatasets(datasets);
     });
   }, [formData.datasetIds]);
+
+  useEffect(() => {
+    translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
+      setDataUseTranslations(translations);
+    });
+
+  }, [datasets]);
 
   const onChange = ({key, value}) => {
     formFieldChange({name: key, value});
@@ -93,8 +104,9 @@ export default function DataAccessRequest(props) {
   }, [datasets]);
 
   const needsDsAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'diseaseRestrictions');
-  }, [datasets]);
+    // if any data use translations are different, then this must be displayed.
+    return dataUseTranslations.length > 1 && !dataUseTranslations.reduceRight((prevValue, currValue) => isEqual(prevValue, currValue));
+  }, [dataUseTranslations]);
 
   return (
     div({ datacy: 'data-access-request' }, [
