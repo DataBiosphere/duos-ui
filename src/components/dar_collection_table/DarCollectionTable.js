@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment, useCallback } from 'react';
-import { h, div, p } from 'react-hyperscript-helpers';
+import { h, div } from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
 import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable';
 import { Collections } from '../../libs/ajax';
+import { Notifications } from '@material-ui/icons';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
 
@@ -158,9 +159,9 @@ const processCollectionRowData = ({
           submissionDate, researcherName, institutionName,
           showConfirmationModal, consoleType,
           goToVote, reviewCollection, relevantDatasets,
-            resumeCollection, actions,
-            collectionIsExpanded: collectionIsExpanded(darCollectionId),
-            updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
+          resumeCollection, actions,
+          collectionIsExpanded: collectionIsExpanded(darCollectionId),
+          updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
         });
       });
     });
@@ -185,9 +186,9 @@ const getInitialSort = (columns = []) => {
 export const DarCollectionTable = function DarCollectionTable(props) {
   const [visibleCollection, setVisibleCollections] = useState([]);
   const [collectionsExpandedState, setCollectionsExpandedState] = useState({});
-  
+
   const [darCollectionCache, setDarCollectionCache] = useState({});
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [sort, setSort] = useState(getInitialSort(props.columns));
@@ -212,11 +213,11 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       newCollectionsExpandedState[id] = val;
       setCollectionsExpandedState(newCollectionsExpandedState);
     }
-  }, [collectionIsExpanded, collectionsExpandedState]);
+  }, [collectionsExpandedState]);
 
   const collectionIsExpanded = useCallback((id) => {
     return collectionsExpandedState[id] === true;
-  }, [collectionsExpandedState])
+  }, [collectionsExpandedState]);
 
   const fetchDarCollection = useCallback((darCollectionId) => {
     if (!isNil(darCollectionCache[darCollectionId])) {
@@ -227,9 +228,13 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         cache[darCollectionId] = coll;
         setDarCollectionCache(cache);
         return coll;
-      }).catch((e) => {
+      }).catch(() => {
+        const cache = cloneDeep(darCollectionCache);
+        cache[darCollectionId] = {}; // save it in the cache as empty
+        setDarCollectionCache(cache);
+
+        Notifications.showError('Could not load DAR Collection.');
         return null;
-        // todo
       });
     }
   }, [darCollectionCache, setDarCollectionCache]);
@@ -295,13 +300,13 @@ export const DarCollectionTable = function DarCollectionTable(props) {
           }),
         ])
 
-      ])
+      ]);
     }
 
     return div({}, [
       renderedRow,
-    ])
-  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, collectionsExpandedState]);
+    ]);
+  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded]);
 
   return h(Fragment, {}, [
     h(SimpleTable, {

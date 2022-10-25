@@ -1,6 +1,6 @@
 import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
-import {h, div, p} from 'react-hyperscript-helpers';
+import {h, div} from 'react-hyperscript-helpers';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 import {styles} from './DarCollectionTable';
 import Actions from './Actions';
@@ -65,16 +65,6 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
   };
 }
 
-// //Redirect for admin review page, only used in admin manage dar collections table
-// export function darCodeAdminCellData({darCode = '- -', darCollectionId, label = 'dar-code'}) {
-//   return {
-//     isComponent: true,
-//     data: h(DarCollectionAdminReviewLink, { darCollectionId, darCode }),
-//     label,
-//     id: darCollectionId,
-//     value: darCode
-//   };
-// }
 const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   const hasOpenElections = includes('open')(toLower(status));
   const path = hasOpenElections ?

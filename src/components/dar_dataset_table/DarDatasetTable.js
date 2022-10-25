@@ -9,7 +9,6 @@ import cellData from './DarDatasetTableCellData';
 import {flow, isNil} from 'lodash/fp';
 import {
   generatePreProcessedBucketData,
-  getMatchDataForBuckets,
   processDataUseBuckets,
 } from '../../utils/DarCollectionUtils';
 import {Notifications} from '../../libs/utils';
@@ -168,7 +167,6 @@ export const DarDatasetTable = (props) => {
         generatePreProcessedBucketData,
         processDataUseBuckets,
       ])({ dars, datasets });
-      await getMatchDataForBuckets(processedBuckets);
       const filteredDataUseBuckets = processedBuckets.filter(
         (b) => b.isRP !== true
       );
