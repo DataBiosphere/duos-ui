@@ -20,7 +20,17 @@ export function votesCellData({elections, votes, dataUseGroup, label= 'votes'}) 
   let status = dataAccess?.status || 'N/A';
 
   if (status === 'Closed') {
-    status = votes?.finalVotes?.some((v) => v.vote === true) ? 'Approved' : 'Denied';
+    // if there is some true vote, approved.
+    // if there is some false vote, denied.
+    // if there is no such vote, then still in progress.
+    status = (
+      votes?.finalVotes?.some((v) => v.vote === true)
+        ? 'Approved'
+        : (
+          votes?.finalVotes?.some((v) => v.vote === false)
+            ? 'Denied'
+            : 'N/A'
+        ));
   }
 
   return {
