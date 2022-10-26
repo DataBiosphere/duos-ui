@@ -197,32 +197,32 @@ describe('Application Information', () => {
     requestSpan.contains('Person E, Person F');
   });
 
-  it('renders the signing official and signing official email', () => {
+  it('renders the signing official and signing official', () => {
     const props = {
       signingOfficialEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
 
-    const emailLabel = cy.get('#signing-official-email-label');
+    const emailLabel = cy.get('#signing-official-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('Signing Official Email');
+    emailLabel.contains('Signing Official');
 
-    const emailSpan = cy.get('#signing-official-email-span');
+    const emailSpan = cy.get('#signing-official-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
 
-  it('renders the IT director and IT director email', () => {
+  it('renders the IT director and IT director', () => {
     const props = {
       itDirectorEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
 
-    const emailLabel = cy.get('#it-director-email-label');
+    const emailLabel = cy.get('#it-director-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('IT Director Email');
+    emailLabel.contains('IT Director');
 
-    const emailSpan = cy.get('#it-director-email-span');
+    const emailSpan = cy.get('#it-director-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
