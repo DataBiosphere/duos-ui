@@ -125,8 +125,8 @@ export default function ApplicationInformation(props) {
   ];
 
   const institutionLabels = [
-    {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
-    {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
+    {value: signingOfficialEmail, title: 'Signing Official', key: 'signing-official'},
+    {value: itDirectorEmail, title: 'IT Director', key: 'it-director'},
   ];
 
   const cloudUseLabels = [
