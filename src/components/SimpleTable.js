@@ -8,11 +8,15 @@ import loadingImage from '../images/loading-indicator.svg';
 
 // Renders spinning circle while table loading
 const TableLoading = () => {
-  return h(SpinnerComponent, {
-    show: true,
-    name: 'loadingSpinner',
-    loadingImage
-  }, []);
+  return div({className: 'table-loading-placeholder'},
+    [
+      h(SpinnerComponent, {
+        show: true,
+        name: 'loadingSpinner',
+        loadingImage
+      }, [])
+    ]
+  );
 };
 
 //Simple cell text display
