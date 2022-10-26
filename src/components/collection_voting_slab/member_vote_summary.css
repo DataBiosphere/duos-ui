@@ -1,0 +1,9 @@
+.dac-member-vote-dropdown-arrow {
+  width: 36px !important;
+  height: 36px !important;
+  margin-left: 0px;
+}
+
+.dac-member-vote-dropdown-arrow:hover {
+  cursor: pointer;
+}

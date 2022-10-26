@@ -544,7 +544,11 @@ describe('FormField - Tests', () => {
       mount(<FormTable {...props}/>);
       cy.get('#fileTypes-0-functionalEquivalence').type('hello').then(() => {
         cy.get('#fileTypes-0-functionalEquivalence').should('have.value', 'hello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes.0.functionalEquivalence', value: 'hello', isValid: true}); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
+          {
+            'functionalEquivalence': 'hello'
+          }
+        ], isValid: true}); // code value
       });
     });
 
@@ -555,7 +559,7 @@ describe('FormField - Tests', () => {
       cy.get('#add-new-table-row-fileTypes')
         .click()
         .then(() => {
-          expect(props.onChange).to.be.calledWith({ key: 'fileTypes.1', value: {} }); // code value
+          expect(props.onChange).to.be.calledWith({ key: 'fileTypes', value: [{}, {}], isValid: true }); // code value
           cy.get('.formTable-row').should('have.length', 3);
           cy.get('.control-label').should('have.length', 3); // still only 3 column headers
         });
@@ -567,7 +571,12 @@ describe('FormField - Tests', () => {
       cy.get('#add-new-table-row-fileTypes').click();
       cy.get('#fileTypes-1-functionalEquivalence').type('jello').then(() => {
         cy.get('#fileTypes-1-functionalEquivalence').should('have.value', 'jello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes.1.functionalEquivalence', value: 'jello', isValid: true }); // code value
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
+          {},
+          {
+            'functionalEquivalence': 'jello'
+          }
+        ], isValid: true }); // code value
       });
     });
 

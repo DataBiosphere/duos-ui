@@ -218,7 +218,8 @@ export default function DarCollectionReview(props) {
           localComputing: darInfo.localUse,
           cloudComputing: darInfo.cloudUse,
           cloudProvider: darInfo.cloudProvider,
-          cloudProviderDescription: darInfo.cloudProviderDescription
+          cloudProviderDescription: darInfo.cloudProviderDescription,
+          rus: darInfo.rus,
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,

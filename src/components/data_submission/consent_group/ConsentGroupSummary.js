@@ -172,14 +172,6 @@ export const ConsentGroupSummary = (props) => {
           className: 'form-control',
           value: consentGroup.consentGroupName,
         }),
-      ]),
-
-      div({
-        style: {
-          flex: '1 1 100%',
-          marginRight: '1.5rem',
-        }
-      }, [
         p({
           style: {
             fontWeight: 'bold',
@@ -187,14 +179,6 @@ export const ConsentGroupSummary = (props) => {
           }
         }, ['Primary Group']),
         summarizePrimaryGroup(),
-      ]),
-
-      div({
-        style: {
-          flex: '1 1 100%',
-          marginRight: '1.5rem',
-        }
-      }, [
         p({
           style: {
             fontWeight: 'bold',
@@ -224,6 +208,22 @@ export const ConsentGroupSummary = (props) => {
           className: 'form-control',
           value: consentGroup.url,
         }),
+        p({
+          style: {
+            fontWeight: 'bold',
+            fontSize: '16px',
+          }
+        }, ['File Types']),
+        div({}, consentGroup.fileTypes.map((ft, idx) => p({
+          key: idx,
+          style: {
+            marginBottom: '20px',
+          }
+        }, [
+          p({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
+          p({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
+          p({}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${ft.numberOfParticipants}`])]),
+        ]))),
       ]),
     ]),
   ]);

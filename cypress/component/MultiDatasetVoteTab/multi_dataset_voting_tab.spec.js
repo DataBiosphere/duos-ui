@@ -167,16 +167,18 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.contains('HMB');
   });
 
-  it('Renders vote summary tables if isChair is true', function () {
+  it('Renders vote summary tables', function () {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1]}
         collection={collection}
-        isChair={true}
       />
     );
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
+    cy.get('.table-data').should('exist');
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'No');
