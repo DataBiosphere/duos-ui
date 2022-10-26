@@ -105,7 +105,7 @@ export default function DataAccessRequest(props) {
 
   const needsDsAcknowledgement = useCallback(() => {
     // if any data use translations are different, then this must be displayed.
-    return dataUseTranslations.length > 1 && !dataUseTranslations.reduceRight((prevValue, currValue) => isEqual(prevValue, currValue));
+    return dataUseTranslations.length > 1 && !dataUseTranslations.every((translation) => isEqual(dataUseTranslations[0], translation));
   }, [dataUseTranslations]);
 
   return (
