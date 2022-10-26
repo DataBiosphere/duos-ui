@@ -114,6 +114,7 @@ export default function ApplicationInformation(props) {
     localComputing = false,
     cloudComputing = false,
     cloudProvider = '- -',
+    rus,
     cloudProviderDescription
   } = props;
 
@@ -155,6 +156,15 @@ export default function ApplicationInformation(props) {
       div({className: 'non-technical-summary-container'}, [
         !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.textBox}, [nonTechSummary])
           : div({className: 'text-placeholder', key: 'non-technical-summary-placeholder', style: { height: '18rem',
+            width: '100%',
+          }})
+      ]),
+
+      !isLoading ? div({className: 'rus-subheader', style: styles.subheader}, ['Research Use Statement'])
+        : div({className: 'text-placeholder', key: 'rus-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
+      div({className: 'rus-container'}, [
+        !isLoading ? div({className: 'rus-textbox', style: styles.textBox}, [rus])
+          : div({className: 'text-placeholder', key: 'rus-placeholder', style: { height: '18rem',
             width: '100%',
           }})
       ]),
