@@ -207,48 +207,32 @@ describe('Application Information', () => {
     requestSpan.contains('Person E, Person F');
   });
 
-  it('renders the signing official and signing official email', () => {
+  it('renders the signing official and signing official', () => {
     const props = {
-      signingOfficial: 'Person SO',
       signingOfficialEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#signing-official-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('Signing Official');
 
-    const nameSpan =  cy.get('#signing-official-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
-
-    const emailLabel = cy.get('#signing-official-email-label');
+    const emailLabel = cy.get('#signing-official-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('Signing Official Email');
+    emailLabel.contains('Signing Official');
 
-    const emailSpan = cy.get('#signing-official-email-span');
+    const emailSpan = cy.get('#signing-official-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
 
-  it('renders the IT director and IT director email', () => {
+  it('renders the IT director and IT director', () => {
     const props = {
-      itDirector: 'Person SO',
       itDirectorEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#it-director-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('IT Director');
 
-    const nameSpan = cy.get('#it-director-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
-
-    const emailLabel = cy.get('#it-director-email-label');
+    const emailLabel = cy.get('#it-director-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('IT Director Email');
+    emailLabel.contains('IT Director');
 
-    const emailSpan = cy.get('#it-director-email-span');
+    const emailSpan = cy.get('#it-director-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
