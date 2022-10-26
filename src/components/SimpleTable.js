@@ -3,23 +3,16 @@ import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { SpinnerComponent } from '../components/SpinnerComponent';
+import loadingImage from '../images/loading-indicator.svg';
 
-//Component that renders skeleton loader on loading
-const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
-  const rowTemplateArray = (columnRow, columnHeaders) => {
-    const rowsSkeleton = [columnRow];
-    let i = 0;
-    while(i < tableSize) {
-      let row = columnHeaders.map(({cellStyle}, index) => {
-        const style = Object.assign({height: '0.5rem'}, baseStyle, cellStyle);
-        return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
-      });
-      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`, className: `placeholder-row-${i}`}, row));
-      i++;
-    }
-    return rowsSkeleton;
-  };
-  return rowTemplateArray(columnRow, columnHeaders);
+// Renders spinning circle while table loading
+const TableLoading = () => {
+  return h(SpinnerComponent, {
+    show: true,
+    name: 'loadingSpinner',
+    loadingImage
+  }, []);
 };
 
 //Simple cell text display
@@ -109,7 +102,6 @@ export default function SimpleTable(props) {
     isLoading,
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
     rowWrapper = ({renderedRow}) => renderedRow, // ({rowData, renderedRow}) => ... : allows injecting custom container to row
-    tableSize,
     paginationBar,
     sort,
     onSort
@@ -118,7 +110,7 @@ export default function SimpleTable(props) {
   const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, rowWrapper, key: 'table-data-rows'})];
-  const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
+  const output = isLoading ? h(TableLoading, {}) : tableTemplate;
   return div([
     div({className: 'table-data', style: containerOverride || Styles.TABLE.CONTAINER, role: 'table'},
       [output, isNil(paginationBar) ? div() : paginationBar]),
