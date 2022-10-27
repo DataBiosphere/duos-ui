@@ -96,7 +96,7 @@ export default function DataAccessRequest(props) {
   }, [datasets]);
 
   const needsGsoAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'gsoAcknowledgement');
+    return datasetsContainDataUseFlag(datasets, 'geneticStudiesOnly');
   }, [datasets]);
 
   const needsPubAcknowledgement = useCallback(() => {
@@ -273,7 +273,7 @@ export default function DataAccessRequest(props) {
           id: 'gsoAcknowledgement',
           type: FormFieldTypes.CHECKBOX,
           isRendered: needsGsoAcknowledgement(),
-          toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (SO). I attest that I will respect this data use condition.',
+          toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.',
           defaultValue: formData.gsoAcknowledgement,
           onChange,
         }),

@@ -549,7 +549,7 @@ export const formInputFile = (config) => {
       h(FormField, {
         id: `${id}_fileName`,
         placeholder: 'Filename.txt',
-        defaultValue: formValue.name,
+        defaultValue: formValue?.name,
         readOnly: true,
       })
     ])
