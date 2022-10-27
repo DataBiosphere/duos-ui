@@ -182,6 +182,8 @@ export default function DarCollectionReview(props) {
         h(ReviewHeader, {
           darCode: collection.darCode || '- -',
           projectTitle: darInfo.projectTitle || '- -',
+          userName: researcherProfile.displayName || '- -',
+          institutionName: get('institution.name')(researcherProfile) || '- -',
           isLoading,
           readOnly: readOnly || adminPage
         }),
