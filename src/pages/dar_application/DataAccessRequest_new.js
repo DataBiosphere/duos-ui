@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback} from 'react';
 import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
-import isNil from 'lodash/fp/isNil';
-import { isEqual } from 'lodash/fp';
+import { isEqual, isEmpty } from 'lodash/fp';
 import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
@@ -17,9 +16,11 @@ const searchOntologies = (query, callback) => {
     });
 };
 
-const searchDatasets = (query, callback) => {
+const searchDatasets = (query, callback, currentDatasets) => {
+  const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
+
   DataSet.searchDatasets(query).then(items => {
-    let options = items.map(function (item) {
+    let options = items.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -27,9 +28,8 @@ const searchDatasets = (query, callback) => {
 };
 
 const formatSearchDataset = (ds) => {
-
   return {
-    key: ds.dataSetId,
+    key: ds.dataSetId.toString(),
     value: ds.dataSetId,
     dataset: ds,
     displayText: ds.datasetIdentifier,
@@ -44,14 +44,10 @@ const datasetsContainDataUseFlag = (datasets, flag) => {
 };
 
 const fetchAllDatasets = async (dsIds) => {
-  let datasets;
-  if (!isNil(dsIds)) {
-    datasets = await Promise.all(dsIds.map((id) => DataSet.getDatasetByIdV2(id)));
-  } else {
-    datasets = [];
+  if (isEmpty(dsIds)) {
+    return [];
   }
-
-  return datasets;
+  return DataSet.getDatasetsByIds(dsIds);
 };
 
 export default function DataAccessRequest(props) {
@@ -132,7 +128,7 @@ export default function DataAccessRequest(props) {
             // for accessibility / html keys
             getOptionLabel: (opt) => opt.displayText,
           },
-          loadOptions: (query, callback) => searchDatasets(query, callback),
+          loadOptions: (query, callback) => searchDatasets(query, callback, datasets),
           placeholder: 'Dataset Name, Sample Collection ID, or PI',
           onChange: ({key, value}) => {
             const datasets = value.map((val) => val.dataset);
