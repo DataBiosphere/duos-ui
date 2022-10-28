@@ -4,11 +4,10 @@ import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
-import CollaboratorForm from './collaborator/CollaboratorForm';
+import CollaboratorList_new from './CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
-import {cloneDeep} from 'lodash/fp';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
@@ -62,7 +61,6 @@ export default function ResearcherInfo(props) {
   const [localUse, setLocalUse] = useState(props.localUse || '');
   const [researcherUser, setResearcherUser] = useState(props.researcherUser);//
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
-  const [collaboratorsState, setCollaboratorsState] = useState([]);
 
   useEffect(() => {
     setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcherUser)) || checkNihDataOnly);
@@ -78,43 +76,7 @@ export default function ResearcherInfo(props) {
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
     setResearcherUser(props.researcherUser);
-
-    const filteredCollaboratorsState = collaboratorsState.filter(state => !isNil(state));
-    const collaborators = filteredCollaboratorsState.map(state => state.collaborator);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly, props.collaboratorsState]);
-
-  const addNewCollaborator = () => {
-    const newCollaboratorsState = cloneDeep(collaboratorsState);
-    newCollaboratorsState.push({
-      collaborator: {},
-      editMode: true,
-    });
-    setCollaboratorsState(newCollaboratorsState);
-  };
-
-  const deleteCollaborator = (index) => {
-    const newCollaboratorsState = cloneDeep(collaboratorsState);
-    newCollaboratorsState[index] = undefined;
-    setCollaboratorsState(newCollaboratorsState);
-  };
-
-  const updateCollaborator = (index, value) => {
-    const newCollaboratorsState = cloneDeep(collaboratorsState);
-    newCollaboratorsState[index] = {
-      editMode: false,
-      collaborator: {
-        ...collaboratorsState[index],
-        ...value,
-      }
-    };
-    setCollaboratorsState(newCollaboratorsState);
-  };
-
-  const startEditCollaborator = (index) => {
-    const newCollaboratorsState = cloneDeep(collaboratorsState);
-    newCollaboratorsState[index].editMode = true;
-    setCollaboratorsState(newCollaboratorsState);
-  };
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
 
   return (
     div({ datacy: 'researcher-info'}, [
@@ -209,30 +171,41 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white btn-xs',
-            style: { marginTop: 25 },
-            onClick: () => addNewCollaborator(),
-            onChange: ({key: name, value,}) => formFieldChange({name, value}),
-          }, [
-            span({}, ['Add Collaborator'])
-          ]),
-
-          collaboratorsState
-            .map((state, index) => {
-              if (isNil(state)) {
-                return div({}, []);
-              }
-
-              return h(CollaboratorForm, {
-                key: index,
-                idx: index,
-                saveCollaborator: (newCollaborator) => updateCollaborator(index, newCollaborator),
-                deleteCollaborator: () => deleteCollaborator(index),
-                startEditCollaborator: () => startEditCollaborator(index),
-              });
-            })
+          // non functional button
+          // button({
+          //   id: 'addNewCollaborator',
+          //   type: 'button', // default button element type inside a form is "submit".
+          //   className: 'button button-white',
+          //   style: { marginTop: 25 },
+          //   onClick: () => {}
+          // }, ['Add Collaborator']),
+          // old style button that adds a new collaborator
+          h(CollaboratorList_new, {
+            formFieldChange,
+            collaborators: labCollaborators,
+            collaboratorKey: 'labCollaborators',
+            collaboratorLabel: 'Internal Lab Member',
+            showApproval: true,
+            disabled: !isEmpty(darCode),
+            deleteBoolArray: (new Array(labCollaborators.length).fill(false)),
+            onChange: ({key: name, value}) => {
+              formFieldChange({name, value: value});
+            },
+          }),
+          // labCollaborators
+          //   .map((state, index) => {
+          //     if (isNil(state)) {
+          //       return div({}, []);
+          //     }
+          //
+          //     return h(CollaboratorForm, {
+          //       key: index,
+          //       idx: index,
+          //       saveCollaborator: (newCollaborator) => updateCollaborator(index, newCollaborator),
+          //       deleteCollaborator: () => deleteCollaborator(index),
+          //       startEditCollaborator: () => startEditCollaborator(index),
+          //     });
+          //   })
         ]),
 
         div({className: 'dar-application-row'}, [
