@@ -307,7 +307,10 @@ export default function DataAccessRequest(props) {
           div({}, [
             h(FormField, {
               type: FormFieldTypes.FILE,
-              id: 'irbApprovalDocument',
+              id: 'irbDocument',
+              defaultValue: {
+                name: formData.irbDocumentName,
+              },
               onChange: ({value}) => setIrbDocument(value),
             }),
           ]),
@@ -328,6 +331,9 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           type: FormFieldTypes.FILE,
           isRendered: needsCollaborationLetter(),
+          defaultValue: {
+            name: formData.collaborationLetterName,
+          },
           id: 'collaborationLetter',
           description: 'One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here.',
           onChange: ({value}) => setCollaborationLetter(value),
