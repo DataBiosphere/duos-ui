@@ -14,7 +14,6 @@ import {
   processDataUseBuckets,
   updateFinalVote
 } from '../../utils/DarCollectionUtils';
-import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
@@ -184,8 +183,7 @@ export default function DarCollectionReview(props) {
           projectTitle: darInfo.projectTitle || '- -',
           isLoading,
           readOnly: readOnly || adminPage
-        }),
-        h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
+        })
       ]
     ),
     div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
