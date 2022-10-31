@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormFieldTypes, FormField, FormTable, FormValidators } from '../forms/forms';
+import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 import './ds_common.css';
 
@@ -31,7 +31,9 @@ export default function DataSubmissionStudyInformation(props) {
     init();
   }, [onChange]);
 
-  return h(div, {}, [
+  return h(div, {
+    className: 'data-submitter-section',
+  }, [
     h2('Study Information'),
     h(FormField, {
       id: 'studyName',
@@ -65,34 +67,6 @@ export default function DataSubmissionStudyInformation(props) {
       placeholder: 'Type',
       defaultValue: [],
       type: FormFieldTypes.MULTITEXT,
-      onChange
-    }),
-    h(FormTable, {
-      id: 'fileTypes',
-      formFields: [
-        {
-          id: 'fileType',
-          title: 'File Type',
-          type: FormFieldTypes.SELECT,
-          selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
-          validators: [FormValidators.REQUIRED]
-        }, {
-          id: 'functionalEquivalence',
-          title: 'Functional Equivalence',
-          placeholder: 'Type',
-          validators: [FormValidators.REQUIRED]
-        }, {
-          id: 'numberOfParticipants',
-          title: '# of Participants',
-          placeholder: 'Number',
-          type: FormFieldTypes.NUMBER,
-          validators: [FormValidators.REQUIRED]
-        }
-      ],
-      defaultValue: [{}],
-      enableAddingRow: true,
-      addRowLabel: 'Add New Filetype',
-      minLength: 1,
       onChange
     }),
     h(FormField, {

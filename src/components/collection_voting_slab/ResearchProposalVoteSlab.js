@@ -8,15 +8,14 @@ import {AnimatePresence, motion} from 'framer-motion';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
 import {Storage} from '../../libs/storage';
 import {
-  collapseVotesByUser, extractDacRPVotesFromBucket,
+  extractDacRPVotesFromBucket,
   extractUserRPVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import VotesPieChart from '../common/VotesPieChart';
-import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
 import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 import {convertLabelToKey} from '../../libs/utils';
 import {ScrollToTopButton} from '../ScrollButton';
-
+import MemberVoteSummary from './MemberVoteSummary';
 
 const styles = {
   baseStyle: {
@@ -121,7 +120,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {}, adminPage = false}) => {
+export const ChairVoteInfo = ({dacVotes, isChair, algorithmResult = {}, adminPage = false}) => {
   return div(
     {
       style: styles.chairVoteInfo,
@@ -136,6 +135,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
             display: 'flex',
             justifyContent: 'space-between',
             padding: '1% 0',
+            marginBottom: '10px',
           },
         },
         [
@@ -151,12 +151,6 @@ export const ChairVoteInfo = ({dacVotes, isChair, isLoading, algorithmResult = {
           }),
         ]
       ),
-      div([adminPage ? 'DAC Votes' : "My DAC's Votes (detail)"]),
-      h(VoteSummaryTable, {
-        dacVotes: collapseVotesByUser(dacVotes),
-        isLoading,
-        adminPage
-      }),
     ]
   );
 };
@@ -207,7 +201,13 @@ export default function ResearchProposalVoteSlab(props) {
                   updateFinalVote,
                   key: bucket.key
                 }),
-                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage})
+                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
+                h(MemberVoteSummary, {
+                  title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
+                  isLoading,
+                  dacVotes,
+                  adminPage
+                })
               ]),
             ]),
           ])

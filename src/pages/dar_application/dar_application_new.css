@@ -41,3 +41,19 @@
 .data-use-list li:not(:last-child) {
   margin-bottom: 2rem;
 }
+
+.dar-form-notice-card {
+  box-sizing: border-box;
+  border: 1px solid #6B0080;
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #FFFFFF;
+  color: #6B0080;
+  font-family: Montserrat;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 24px;
+
+}

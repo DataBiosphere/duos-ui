@@ -1,8 +1,8 @@
 import { Component } from 'react';
 import { a, div, form, h, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
-import DataAccessRequest from './dar_application/DataAccessRequest';
 import DataUseAgreements from './dar_application/DataUseAgreements_new';
+import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
 
 import {
@@ -10,14 +10,13 @@ import {
   Navigation,
   Notifications as NotyUtil
 } from '../libs/utils';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { Collections, DAR, DataSet, User } from '../libs/ajax';
+import { Collections, DAR, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { any, assign, cloneDeep, find, get, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
+import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -43,7 +42,7 @@ class DataAccessRequestApplicationNew extends Component {
       showDialogSave: false,
       step: 1,
       formData: {
-        datasets: [],
+        datasetIds: [],
         darCode: null,
         labCollaborators: [],
         internalCollaborators: [],
@@ -53,24 +52,24 @@ class DataAccessRequestApplicationNew extends Component {
         rus: '',
         nonTechRus: '',
         oneGender: null,
-        methods: '',
-        controls: '',
+        methods: null,
+        controls: null,
         population: '',
-        hmb: false,
-        poa: false,
-        diseases: false,
+        hmb: null,
+        poa: null,
+        diseases: null,
         ontologies: [],
-        other: false,
+        other: null,
         otherText: '',
-        forProfit: '',
+        forProfit: null,
         gender: '',
         pediatric: null,
         illegalBehavior: null,
-        addiction: '',
+        addiction: null,
         sexualDiseases: null,
         stigmatizedDiseases: null,
         vulnerablePopulation: null,
-        populationMigration: '',
+        populationMigration: null,
         psychiatricTraits: null,
         notHealth: null,
         researcher: '',
@@ -155,6 +154,24 @@ class DataAccessRequestApplicationNew extends Component {
     }
   };
 
+  setCollaborationLetter = (letter) => {
+    this.setState(state => {
+      state.formData[`collaborationLetterName`] = '';
+      state.formData[`collaborationLetterLocation`] = '';
+      state.step2[`uploadedCollaborationLetter`] = letter;
+    });
+  };
+
+  setIrbDocument = (document) => {
+    this.setState(state => {
+      const today = new Date();
+      state.formData[`irbDocumentName`] = '';
+      state.formData[`irbDocumentLocation`] = '';
+      state.formData['irbProtocolExpiration'] = `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+      state.step2[`uploadedIrbDocument`] = document;
+    });
+  };
+
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
       this.setState(prev => {
@@ -177,18 +194,7 @@ class DataAccessRequestApplicationNew extends Component {
     window.removeEventListener('scroll', this.onScroll);
   }
 
-  async getDatasets(formData) {
-    const dsIds = get('datasetIds')(formData);
-    let datasets;
-    if (!isNil(dsIds)) {
-      datasets = await Promise.all(map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-      datasets = map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
-    } else {
-      datasets = [];
-    }
 
-    return datasets;
-  }
 
   async init() {
     const { dataRequestId, collectionId } = this.props.match.params;
@@ -209,13 +215,11 @@ class DataAccessRequestApplicationNew extends Component {
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
-      formData.datasets =  map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
-      formData.datasets = await this.getDatasets(formData);
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
@@ -233,28 +237,6 @@ class DataAccessRequestApplicationNew extends Component {
 
     window.addEventListener('scroll', this.onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }
-
-  formatDatasetForAutocomplete = (dataset) => {
-    const nameProp = find({'propertyName':'Dataset Name'})(dataset.properties);
-    return {
-      key: dataset.dataSetId,
-      value: dataset.dataSetId,
-      label: nameProp.propertyValue
-    };
-  };
-
-  formatOntologyItems = (ontologies) => {
-    return map((ontology) => {
-      return {
-        //item being referenced as a way to backfill older ontologies that don't have a proper label attributes
-        id: ontology.id || ontology.item.id,
-        key: ontology.id || ontology.item.id,
-        value: ontology.id || ontology.item.id,
-        label: ontology.label || ontology.item.label,
-        item: ontology.item
-      };
-    })(ontologies);
-  };
 
   updateShowValidationMessages = (value) => {
     this.setState((state) => {
@@ -304,7 +286,7 @@ class DataAccessRequestApplicationNew extends Component {
       return prev;
     });
     window.scroll({
-      top: document.getElementsByClassName('step-container')[step - 1].offsetTop,
+      top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
       behavior: 'smooth'
     });
   };
@@ -316,7 +298,7 @@ class DataAccessRequestApplicationNew extends Component {
       const scrollPos = window.scrollY;
       const scrollBuffer = window.innerHeight * .25;
       const sectionIndex = ApplicationTabs
-        .map((tab, index) => document.getElementsByClassName('step-container')[index].offsetTop)
+        .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
         .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
       this.setState(prev => {
@@ -602,7 +584,7 @@ class DataAccessRequestApplicationNew extends Component {
       const userId = Storage.getCurrentUser().userId;
       const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
       let formattedFormData = cloneDeep(this.state.formData);
-      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+      const ontologies = this.state.formData.ontologies;
 
       if (ontologies.length > 0) {
         formattedFormData.ontologies = ontologies;
@@ -676,7 +658,7 @@ class DataAccessRequestApplicationNew extends Component {
       // DAR datasetIds needs to be a list of ids
       const datasetIds = map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
-      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+      const ontologies = this.state.formData.ontologies;
       this.setState(prev => {
         prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;
@@ -721,42 +703,6 @@ class DataAccessRequestApplicationNew extends Component {
       });
       NotyUtil.showError('Error saving partial Data Access Request update');
     }
-  };
-
-  addDataUseToDataset = async(currentDatasets) => {
-    //iterate through datasets array
-    //if dataUse is not on the object, api call to get the full dataset info
-    //method defined here rather than step 2 component since it is a dependency of another helper method here
-    if(isNil(currentDatasets) || isEmpty(currentDatasets)) {
-      return null;
-    }
-
-    let datasetPromises = map((partialDataset) => {
-      let mappedDataset;
-      if (isNil(partialDataset.dataUse)) {
-        mappedDataset = DataSet.getDataSetsByDatasetId(partialDataset.value);
-      } else {
-        mappedDataset = Promise.resolve(partialDataset);
-      }
-      return mappedDataset;
-    })(currentDatasets);
-
-    let dataUseArray = await Promise.all(datasetPromises);
-    dataUseArray.forEach((datasetRecord, index) => {
-      currentDatasets[index].dataUse = datasetRecord.dataUse || {};
-    });
-    return currentDatasets;
-  };
-
-  onDatasetsChange = async (currentDatasets) => {
-    let updatedDatasets = null;
-    if(!isNil(currentDatasets) && !isEmpty(currentDatasets)) {
-      updatedDatasets = await this.addDataUseToDataset(cloneDeep(currentDatasets));
-    }
-    this.setState(prev => {
-      prev.formData.datasets = updatedDatasets;
-      return prev;
-    }, () => this.checkValidations());
   };
 
   /**
@@ -861,14 +807,6 @@ class DataAccessRequestApplicationNew extends Component {
       checkCollaborator = false,
       checkNihDataOnly = false,
       darCode,
-      hmb = false,
-      poa = false,
-      diseases = false,
-      other = false,
-      otherText = '',
-      population = false,
-      controls = false,
-      methods = false,
       labCollaborators,
       internalCollaborators,
       externalCollaborators,
@@ -880,49 +818,30 @@ class DataAccessRequestApplicationNew extends Component {
       anvilUse = false,
       cloudProvider = '',
       cloudProviderType = '',
-      irbDocumentLocation = '', //file storage location of uploaded file,
-      irbDocumentName = '', //name of uploaded file
-      collaborationLetterLocation = '', //file storage location of uploaded letter
-      collaborationLetterName = '', //name of uploaded letter
       cloudProviderDescription = '',
-      gsoAcknowledgement,
-      pubAcknowledgement,
-      dsAcknowledgement,
-      referenceId
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
-    const { showValidationMessages,  step1 } = this.state;
-    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+    const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
+    const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
+    const step2Invalid = this.verifyStep2();
+    const step3Invalid = this.step3InvalidResult();
+    const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
 
-    // VALIDATION CHECKS:
-    // const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
-    // const step2Invalid = this.verifyStep2();
-    // const step3Invalid = this.step3InvalidResult();
-    // const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
-
-    //NOTE: component is only here temporarily until component conversion has been complete
-    //ideally this, along with the other variable initialization should be done with a useEffect hook
-
-    const TORComponent = TypeOfResearch({
-      hmb: hmb,
-      hmbHandler: this.setHmb,
-      poa: poa,
-      populationMigration: this.state.formData.populationMigration,
-      poaHandler: this.setPoa,
-      diseases: diseases,
-      diseasesHandler: this.setDiseases,
-      disabled: (darCode !== null),
-      ontologies: ontologies,
-      ontologiesHandler: this.onOntologiesChange,
-      other: other,
-      otherHandler: this.setOther,
-      otherText: otherText,
-      otherTextHandler: this.setOtherText
-    });
-
+    const ConfirmationDialogComponent = ConfirmationDialog({
+      title: 'Data Request Confirmation',
+      disableOkBtn: this.state.disableOkBtn,
+      disableNoBtn: this.state.disableOkBtn,
+      color: 'access',
+      showModal: this.state.showDialogSubmit,
+      action: {
+        label: 'Yes',
+        handler: this.dialogHandlerSubmit
+      }
+    }, [div({
+      className: 'dialog-description'
+    }, ['Are you sure you want to send this Data Access Request Application?'])]);
     return (
       div({ className: 'container', style: {paddingBottom: '2%'} }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -1023,65 +942,18 @@ class DataAccessRequestApplicationNew extends Component {
 
             div({className: 'step-container'}, [
               h(DataAccessRequest, {
-                darCode: darCode,
-                datasets: this.state.formData.datasets,
-                onDatasetsChange: this.onDatasetsChange,
-                showValidationMessages: showValidationMessages,
+                formData: this.state.formData,
                 formFieldChange: this.formFieldChange,
-                projectTitle: this.state.formData.projectTitle,
-                initializeDatasets: this.addDataUseToDataset,
-                isTypeOfResearchInvalid: isTypeOfResearchInvalid,
-                TypeOfResearch: TORComponent,
-                methods,
-                controls,
-                population,
-                rus: this.state.formData.rus,
-                nonTechRus: this.state.formData.nonTechRus,
-                gsoAcknowledgement,
-                pubAcknowledgement,
-                dsAcknowledgement,
-                nextPage: this.nextPage,
-                prevPage: this.prevPage,
-                partialSave: this.partialSave,
-                irbDocumentLocation,
-                irbDocumentName,
-                collaborationLetterLocation,
-                collaborationLetterName,
-                changeDARDocument: this.changeDARDocument,
-                uploadedCollaborationLetter: this.state.step2.uploadedCollaborationLetter,
-                uploadedIrbDocument: this.state.step2.uploadedIrbDocument,
-                referenceId
+                setCollaborationLetter: this.setCollaborationLetter,
+                setIrbDocument: this.setIrbDocument,
               })
             ]),
 
             div({className: 'step-container'}, [
               h(ResearchPurposeStatement, {
-                addiction: this.state.formData.addiction,
                 darCode: darCode,
                 formFieldChange: this.formFieldChange,
-                forProfit: this.state.formData.forProfit,
-                gender: this.state.formData.gender,
-                handleRadioChange: this.handleRadioChange,
-                illegalBehavior: this.state.formData.illegalBehavior,
-                nextPage: this.nextPage,
-                notHealth: this.state.formData.notHealth,
-                oneGender: this.state.formData.oneGender,
-                partialSave: this.partialSave,
-                pediatric: this.state.formData.pediatric,
-                /*
-                  NOTE: Assignment below is intentional. populationMigration and POA will have the same value with
-                  poa as the determinant variable. populationMigration will exists as an indicator of its presence on step 3.
-                  Values for both poa and populationMigration will be updated on selection handlers for step 2.
-                  Display value for step 3 need to be based off of poa since older DARs were not created under this standard
-                  Standard decision made on 01/28/2021, will add implementation date later
-                */
-                populationMigration: this.state.formData.poa,
-                prevPage: this.prevPage,
-                psychiatricTraits: this.state.formData.psychiatricTraits,
-                sexualDiseases: this.state.formData.sexualDiseases,
-                showValidationMessages: showValidationMessages,
-                stigmatizedDiseases: this.state.formData.stigmatizedDiseases,
-                vulnerablePopulation: this.state.formData.vulnerablePopulation
+                formData: this.state.formData,
               })
             ]),
 

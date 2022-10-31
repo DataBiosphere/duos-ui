@@ -303,88 +303,6 @@ export const DataUseTranslation = {
    * @returns {{primary: [{code: '', description: ''}], secondary: [{code: '', description: ''}]}}
    */
 
-  //NOTE: backend categorization of purposeStatement/researchType differs from front-end primary/secondary designations
-  //Reminder to phase out purposeStatement/researchType as we transition to new front-end spec
-  generatePurposeStatement: (darInfo) => {
-    let statementArray = [];
-    if(darInfo.forProfit) {
-      statementArray = concat(statementArray)(srpTranslations.forProfit);
-    } else {
-      statementArray = concat(statementArray)(srpTranslations.notForProfit);
-    }
-
-    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      statementArray = concat(statementArray)(srpTranslations.genderFemale);
-    }
-
-    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      statementArray = concat(statementArray)(srpTranslations.genderMale);
-    }
-
-    if(darInfo.illegalBehavior) {
-      statementArray = concat(statementArray)(srpTranslations.illegalBehavior);
-    }
-
-    if(darInfo.addiction) {
-      statementArray = concat(statementArray)(srpTranslations.addiction);
-    }
-
-    if(darInfo.sexualDiseases) {
-      statementArray = concat(statementArray)(srpTranslations.sexualDiseases);
-    }
-
-    if(darInfo.stigmatizedDiseases) {
-      statementArray = concat(statementArray)(srpTranslations.stigmatizedDiseases);
-    }
-
-    if(darInfo.vulnerablePopulation) {
-      statementArray = concat(statementArray)(srpTranslations.vulnerablePopulation);
-    }
-
-    if(darInfo.populationMigration || darInfo.poa || darInfo.population) {
-      statementArray = concat(statementArray)(srpTranslations.poa);
-    }
-
-    if(darInfo.psychiatricTraits) {
-      statementArray = concat(statementArray)(srpTranslations.psychiatricTraits);
-    }
-
-    if(darInfo.notHealth) {
-      statementArray = concat(statementArray)(srpTranslations.notHealth);
-    }
-
-    return statementArray;
-  },
-
-  generateResearchTypes: (darInfo) => {
-    let statementArray = [];
-
-    if(darInfo.diseases) {
-      statementArray = concat(statementArray)(srpTranslations.researchTypeDisease);
-    }
-
-    if(darInfo.methods) {
-      statementArray = concat(statementArray)(srpTranslations.methods);
-    }
-
-    if(darInfo.controls) {
-      statementArray = concat(statementArray)(srpTranslations.controls);
-    }
-
-    if(darInfo.poa || darInfo.populationMigration) {
-      statementArray = concat(statementArray)(srpTranslations.poa);
-    }
-
-    if(darInfo.hmb) {
-      statementArray = concat(statementArray)(srpTranslations.hmb);
-    }
-
-    if(darInfo.other) {
-      statementArray = concat(statementArray)(srpTranslations.other(darInfo.otherText));
-    }
-    return statementArray;
-  },
-
   translateDarInfo: (darInfo) => {
     let dataUseSummary = {
       primary: [],
@@ -392,7 +310,6 @@ export const DataUseTranslation = {
     };
 
     // Primary Codes
-
     if (darInfo.hmb) {
       dataUseSummary.primary = concat(dataUseSummary.primary,
         srpTranslations.hmb);

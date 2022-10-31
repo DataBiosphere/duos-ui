@@ -11,7 +11,6 @@ import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
 import Election404 from './pages/Election404';
 import Home from './pages/Home';
-import AccessReview from './pages/access_review/AccessReview';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -21,7 +20,6 @@ import SigningOfficialResearchers from './pages/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
 import Translator from './pages/Translator';
-import ReviewResults from './pages/ReviewResults';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
@@ -93,10 +91,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/access_review/:darId" component={AccessReview} props={props}
-      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}/>
-    <AuthenticatedRoute path="/review_results/:referenceId/:status?" component={ReviewResults} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />

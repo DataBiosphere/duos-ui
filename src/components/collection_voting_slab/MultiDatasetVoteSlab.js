@@ -14,6 +14,8 @@ import {ScrollToTopButton} from '../ScrollButton';
 import {convertLabelToKey} from '../../libs/utils';
 import {DataUsePills} from './DataUsePill';
 
+import MemberVoteSummary from './MemberVoteSummary';
+
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
@@ -95,7 +97,13 @@ export default function MultiDatasetVoteSlab(props) {
         bucketKey: key,
         updateFinalVote
       }),
-      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage})
+      ChairVoteInfo({dacVotes, isChair, isLoading, algorithmResult, adminPage}),
+      h(MemberVoteSummary, {
+        dacVotes,
+        title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
+        isLoading,
+        adminPage,
+      }),
     ]);
   };
 

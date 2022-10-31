@@ -6,7 +6,7 @@ import { Styles } from '../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes } from '../components/dar_table/DarTableActions';
+import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
 
 export default function MemberConsole(props) {
   const [collections, setCollections] = useState([]);

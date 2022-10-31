@@ -38,6 +38,9 @@ describe('Consent Group', function () {
     cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_dataLocation').type('Not Determined{enter}');
+    cy.get('#0_fileTypes-0-0_fileType').type('Geno{enter}');
+    cy.get('#0_fileTypes-0-0_functionalEquivalence').type('asdf');
+    cy.get('#0_fileTypes-0-0_numberOfParticipants').type('123');
     cy.get('#0_saveConsentGroup').click().then(() => {
       expect(propCopy.saveConsentGroup).to.be.calledWith({
         'value': {
@@ -56,6 +59,13 @@ describe('Consent Group', function () {
           'otherSecondary': null,
           'otherPrimary': undefined,
           'diseaseSpecificUse': undefined,
+          'fileTypes': [
+            {
+              'fileType': 'Genome',
+              'functionalEquivalence': 'asdf',
+              'numberOfParticipants': '123',
+            }
+          ],
           'dataLocation': [
             'Not Determined'
           ],

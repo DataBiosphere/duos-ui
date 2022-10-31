@@ -1,8 +1,8 @@
-import {h} from "react-hyperscript-helpers";
-import SimpleButton from "../SimpleButton";
-import {includes} from "lodash/fp";
-import {Theme} from "../../libs/theme";
-import {darCollectionUtils} from "../../libs/utils";
+import {h} from 'react-hyperscript-helpers';
+import SimpleButton from '../SimpleButton';
+import {includes} from 'lodash/fp';
+import {Theme} from '../../libs/theme';
+import {darCollectionUtils} from '../../libs/utils';
 
 const { determineCollectionStatus, nonCancellableCollectionStatuses } = darCollectionUtils;
 export default function CancelCollectionButton(props) {

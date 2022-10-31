@@ -1,16 +1,12 @@
 import { FormFieldTypes, commonRequiredProps, commonOptionalProps } from './forms';
-import { isNil, isFunction, isArray, isEmpty, isString } from 'lodash/fp';
+import { isNil, isFunction, isArray, isString } from 'lodash/fp';
 import { isEmailAddress } from '../../libs/utils';
 
 export const validateFormProps = (props) => {
   const type = (!isNil(props.type) ? props.type : FormFieldTypes.TEXT);
 
-  const requiredProps = type.requiredProps || [];
-  const optionalProps = type.optionalProps || [];
-
-  requiredProps.push(...commonRequiredProps);
-  optionalProps.push(...commonOptionalProps);
-  optionalProps.push(...requiredProps);
+  const requiredProps = (type.requiredProps || []).concat(commonRequiredProps);
+  const optionalProps = (type.optionalProps || []).concat(commonOptionalProps).concat(requiredProps);
 
   const propKeys = Object.keys(props);
 
@@ -43,18 +39,13 @@ export const customSelectPropValidation = (props) => {
       throw 'prop \'selectOptions\' must be an array';
     }
 
-    if (isEmpty(props.selectOptions)) {
-      throw '\'selectOptions\' cannot be empty';
-    }
-
-    const isStringArr = isString(props.selectOptions[0]);
+    const isStringArr = props.selectOptions.length > 0 && isString(props.selectOptions[0]);
 
     props.selectOptions.forEach((opt) => {
       if (isStringArr) {
         if (!isString(opt)) {
           throw 'all values in \'selectOptions\' must be string typed';
         }
-
         return;
       }
 
@@ -65,10 +56,6 @@ export const customSelectPropValidation = (props) => {
   } else {
     if (isNil(props.loadOptions)) {
       throw 'must specify \'loadOptions\' if select is async';
-    }
-
-    if (isNil(props.optionsAreString)) {
-      throw 'must specify \'optionsAreString\' if select is async';
     }
   }
 

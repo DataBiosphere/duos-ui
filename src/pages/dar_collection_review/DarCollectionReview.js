@@ -1,23 +1,23 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import {Notifications} from '../../libs/utils';
-import { Collections, User } from '../../libs/ajax';
+import { User } from '../../libs/ajax';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  updateFinalVote
+  updateFinalVote,
+  filterBucketsForUser,
 } from '../../utils/DarCollectionUtils';
 import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
+import { Collections } from '../../libs/ajax';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -59,17 +59,6 @@ const userHasRole = (user, roleId) => {
   )(user);
   const matches = filter(id => id === roleId)(roleIds);
   return !isEmpty(matches);
-};
-
-export const filterBucketsForUser = (user, buckets) => {
-  const containsUserRpVote = (bucket) => {
-    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
-  };
-  const containsUserDataAccessVote = (bucket) => {
-    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
-  };
-
-  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
 export default function DarCollectionReview(props) {
@@ -182,6 +171,8 @@ export default function DarCollectionReview(props) {
         h(ReviewHeader, {
           darCode: collection.darCode || '- -',
           projectTitle: darInfo.projectTitle || '- -',
+          userName: researcherProfile.displayName || '- -',
+          institutionName: get('institution.name')(researcherProfile) || '- -',
           isLoading,
           readOnly: readOnly || adminPage
         }),
@@ -218,7 +209,8 @@ export default function DarCollectionReview(props) {
           localComputing: darInfo.localUse,
           cloudComputing: darInfo.cloudUse,
           cloudProvider: darInfo.cloudProvider,
-          cloudProviderDescription: darInfo.cloudProviderDescription
+          cloudProviderDescription: darInfo.cloudProviderDescription,
+          rus: darInfo.rus,
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,
