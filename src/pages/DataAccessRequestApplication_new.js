@@ -16,7 +16,7 @@ import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
+import { any, assign, cloneDeep, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -961,7 +961,7 @@ class DataAccessRequestApplicationNew extends Component {
               h(DataUseAgreements, {
                 darCode: darCode,
                 attestAndSend: () => {},
-                save: () => {},
+                save: () => this.saveDarDraft(),
               })
             ])
           ])

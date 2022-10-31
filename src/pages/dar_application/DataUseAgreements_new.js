@@ -65,14 +65,14 @@ export default function DataUseAgreements(props) {
 
       div({ className: 'flex flex-row', style: { justifyContent: 'flex-end' }, }, [
         a({
-          id: 'btn_save', isRendered: isNil(darCode), onClick: save(),
+          id: 'btn_save', isRendered: isNil(darCode), onClick: () => save(),
           className: 'button button-white',
           style: {
             marginRight: '2rem',
           }
         }, ['Save']),
         a({
-          id: 'btn_submit', isRendered: isNil(darCode), onClick: attestAndSend(),
+          id: 'btn_submit', isRendered: isNil(darCode), onClick: () => attestAndSend(),
           className: 'button button-blue '
         }, ['Attest and Send']),
       ])
