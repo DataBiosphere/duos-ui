@@ -282,7 +282,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     [pageCount]
   );
 
-  const rowWrapper = useCallback(({renderedRow, rowData}) => {
+  const showDatasetDropdownWrapper = useCallback(({renderedRow, rowData}) => {
     const darCollectionId = rowData[0].id;
 
     if (collectionIsExpanded(darCollectionId)) {
@@ -322,7 +322,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         goToPage,
         changeTableSize,
       }),
-      rowWrapper,
+      rowWrapper: showDatasetDropdownWrapper,
       sort,
       onSort: (sort) => {
         Storage.setCurrentUserSettings(storageDarCollectionSort, {
