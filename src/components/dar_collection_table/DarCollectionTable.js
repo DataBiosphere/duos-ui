@@ -6,7 +6,7 @@ import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import cellData, { consoleTypes } from './DarCollectionTableCellData';
+import cellData from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
@@ -322,7 +322,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         goToPage,
         changeTableSize,
       }),
-      rowWrapper: consoleType !== consoleTypes.RESEARCHER ? showDatasetDropdownWrapper : ({renderedRow}) => renderedRow,
+      rowWrapper: showDatasetDropdownWrapper,
       sort,
       onSort: (sort) => {
         Storage.setCurrentUserSettings(storageDarCollectionSort, {
