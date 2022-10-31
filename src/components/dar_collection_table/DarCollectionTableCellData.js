@@ -55,7 +55,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
       h((collectionIsExpanded ? ExpandLess : ExpandMore), {
         id: `${darCollectionId}_dropdown`,
         className: `sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`,
-        isRendered: status !== 'Draft',
+        isRendered: toLower(status) !== 'draft',
         onClick: () => {
           updateCollectionIsExpanded(!collectionIsExpanded);
         },
