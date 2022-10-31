@@ -16,7 +16,8 @@ import {
   findIndex,
   cloneDeep,
   groupBy,
-  flatten
+  flatten,
+  get
 } from 'lodash/fp';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import { formatDate, Notifications } from '../libs/utils';
@@ -218,6 +219,17 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   return filter(
     voteArray => includes(user.userId, userIdsOfVotes(voteArray))
   )(voteArrays);
+};
+
+export const filterBucketsForUser = (user, buckets) => {
+  const containsUserRpVote = (bucket) => {
+    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
+  };
+  const containsUserDataAccessVote = (bucket) => {
+    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
+  };
+
+  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
