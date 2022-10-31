@@ -27,7 +27,6 @@ import './forms.css';
 
 export const commonRequiredProps = [
   'id',
-  'onChange'
 ];
 export const commonOptionalProps = [
   'name',
@@ -43,6 +42,7 @@ export const commonOptionalProps = [
   'onChange',
   'type',
   'key',
+  'isRendered',
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
@@ -82,7 +82,6 @@ export const FormFieldTypes = {
     ],
     customPropValidation: customRadioPropValidation,
   },
-
   YESNORADIOGROUP: {
     defaultValue: null,
     component: formInputYesNoRadioGroup,
@@ -106,7 +105,9 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle'],
+      'inputStyle',
+      'readOnly',
+    ],
   },
   NUMBER: {
     defaultValue: '',
@@ -114,7 +115,8 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle'
+      'inputStyle',
+      'readOnly',
     ],
   },
   FILE: {
@@ -135,20 +137,6 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    // updateDefaultValue: (config) => {
-    //   const {
-    //     selectOptions, defaultValue, isMulti
-    //   } = config;
-    //   const isStringArr = config.isStringArr || (!isNil(selectOptions) && isString(selectOptions[0]));
-
-    //   if (isMulti) {
-    //     return isStringArr ? defaultValue.map((v) => {return { key: v, displayValue: v };}) : defaultValue;
-    //   }
-
-    //   return isStringArr
-    //     ? { key: defaultValue, displayText: defaultValue }
-    //     : defaultValue;
-    // },
     component: formInputSelect,
     requiredNormalSelectProps: [
       'selectOptions'
@@ -204,6 +192,31 @@ export const FormValidators = {
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     MAIN COMPONENTS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
+export const FormFieldTitle = (props) => {
+  const {
+    title,
+    hideTitle,
+    description,
+    formId,
+    ariaLevel,
+    required,
+    error,
+  } = props;
+
+  return div({}, [
+    title && !hideTitle && label({
+      id: `lbl_${formId}`,
+      className: `control-label ${error ? 'errored' : ''}`,
+      htmlFor: `${formId}`,
+      'aria-level': ariaLevel
+    }, [
+      title,
+      required && '*'
+    ]),
+    description && div({ style: { marginBottom: 15 } }, description),
+  ]);
+};
+
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,
@@ -236,16 +249,11 @@ export const FormField = (config) => {
     style,
     className: `formField-container formField-${id}`
   }, [
-    title && !hideTitle && label({
-      id: `lbl_${id}`,
-      className: `control-label ${error ? 'errored' : ''}`,
-      htmlFor: `${id}`,
-      'aria-level': ariaLevel
-    }, [
-      title,
-      required && '*'
-    ]),
-    description && div({ style: { marginBottom: 15 } }, description),
+    h(FormFieldTitle, {
+      title, hideTitle, description,
+      required, formId: id, ariaLevel,
+      error
+    }),
     h(type.component, {
       ...config,
       error, setError,

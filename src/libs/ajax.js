@@ -299,6 +299,18 @@ export const DataSet = {
     return await res.json();
   },
 
+  getDatasetsByIds: async (ids) => {
+    const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  searchDatasets: async (query) => {
+    const url = `${await getApiUrl()}/api/dataset/search?query=${query}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
   getDarDatasets: async (datasetIds) => {
     let datasets;
     const datasetsPromise = datasetIds.map((id) => {
@@ -310,6 +322,12 @@ export const DataSet = {
 
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await getApiUrl()}/api/dataset/${dataSetId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  getDatasetByIdV2: async id => {
+    const url = `${await getApiUrl()}/api/dataset/v2/${id}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

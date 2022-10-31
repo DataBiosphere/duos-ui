@@ -5,12 +5,8 @@ import { isEmailAddress } from '../../libs/utils';
 export const validateFormProps = (props) => {
   const type = (!isNil(props.type) ? props.type : FormFieldTypes.TEXT);
 
-  const requiredProps = type.requiredProps || [];
-  const optionalProps = type.optionalProps || [];
-
-  requiredProps.push(...commonRequiredProps);
-  optionalProps.push(...commonOptionalProps);
-  optionalProps.push(...requiredProps);
+  const requiredProps = (type.requiredProps || []).concat(commonRequiredProps);
+  const optionalProps = (type.optionalProps || []).concat(commonOptionalProps).concat(requiredProps);
 
   const propKeys = Object.keys(props);
 
@@ -60,10 +56,6 @@ export const customSelectPropValidation = (props) => {
   } else {
     if (isNil(props.loadOptions)) {
       throw 'must specify \'loadOptions\' if select is async';
-    }
-
-    if (isNil(props.optionsAreString)) {
-      throw 'must specify \'optionsAreString\' if select is async';
     }
   }
 
