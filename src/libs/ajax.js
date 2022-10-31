@@ -392,12 +392,6 @@ export const DatasetAssociation = {
 
 export const Election = {
 
-  getElectionVotes: async (electionId) => {
-    const url = `${await getApiUrl()}/api/election/${electionId}/votes`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
   findElectionByDarId: async (requestId) => {
     const url = `${await getApiUrl()}/api/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, Config.authOpts());
@@ -419,23 +413,15 @@ export const Election = {
       return {};
     }
     return await res.json();
-  },
-
-  updateElection: async (electionId, document) => {
-    const url = `${await getApiUrl()}/api/election/${electionId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
-    return await res.json();
-  },
+  }
 };
 
 export const Email = {
-
   sendReminderEmail: async (voteId) => {
     const url = `${await getApiUrl()}/api/emailNotifier/reminderMessage/${voteId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
     return res;
   }
-
 };
 
 export const Files = {
@@ -689,34 +675,6 @@ export const User = {
 };
 
 export const Votes = {
-
-  postDarVote: async (requestId, vote) => {
-    const postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    postObject.hasConcerns = vote.hasConcerns;
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
-    return res.json();
-  },
-
-  updateDarVote: async (requestId, vote) => {
-    const postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    postObject.hasConcerns = vote.hasConcerns;
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'PUT' }]));
-    return await res.json();
-  },
-
-  updateFinalAccessDarVote: async (requestId, vote) => {
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}/final`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
-    return await res.json();
-  },
 
   updateVotesByIds: async (voteIds, vote) => {
     const voteUpdate = {};
