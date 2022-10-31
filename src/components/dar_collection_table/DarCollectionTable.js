@@ -6,7 +6,7 @@ import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import cellData from './DarCollectionTableCellData';
+import cellData, { consoleTypes } from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
@@ -282,7 +282,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     [pageCount]
   );
 
-  const rowWrapper = useCallback(({renderedRow, rowData}) => {
+  const showDatasetDropdownWrapper = useCallback(({renderedRow, rowData}) => {
     const darCollectionId = rowData[0].id;
 
     if (collectionIsExpanded(darCollectionId)) {
@@ -322,7 +322,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         goToPage,
         changeTableSize,
       }),
-      rowWrapper,
+      rowWrapper: consoleType !== consoleTypes.RESEARCHER ? showDatasetDropdownWrapper : ({renderedRow}) => renderedRow,
       sort,
       onSort: (sort) => {
         Storage.setCurrentUserSettings(storageDarCollectionSort, {
