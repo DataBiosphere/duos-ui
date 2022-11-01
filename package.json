@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.10.4",
+    "@emotion/react": "^11.10.5",
     "@emotion/styled": "11.10.4",
     "@mui/material": "5.10.11",
     "@mui/styled-engine": "5.10.8",
