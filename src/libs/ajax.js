@@ -260,16 +260,6 @@ export const DAR = {
     return res.data;
   },
 
-  requiresManualReview: (object) => {
-    var manualReview = false;
-    object.forEach(function (element) {
-      if (element.manualReview === true) {
-        manualReview = true;
-      }
-    });
-    return manualReview;
-  },
-
   //NOTE: endpoints requires a dar id
   uploadDARDocument: async(file, darId, fileType) => {
     if(isFileEmpty(file)) {
@@ -322,12 +312,6 @@ export const DataSet = {
 
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await getApiUrl()}/api/dataset/${dataSetId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  getDatasetByIdV2: async id => {
-    const url = `${await getApiUrl()}/api/dataset/v2/${id}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -408,32 +392,6 @@ export const DatasetAssociation = {
 
 };
 
-export const Election = {
-
-  findElectionByDarId: async (requestId) => {
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findDataAccessElectionReview: async (electionId) => {
-    const url = `${await getApiUrl()}/api/electionReview/access/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  // RP Election Information. Can be null for manual review DARs.
-  // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
-  findRPElectionReview: async (electionId) => {
-    const url = `${await getApiUrl()}/api/electionReview/rp/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    if (res.status === 204) {
-      return {};
-    }
-    return await res.json();
-  }
-};
-
 export const Email = {
   sendReminderEmail: async (voteId) => {
     const url = `${await getApiUrl()}/api/emailNotifier/reminderMessage/${voteId}`;
@@ -509,12 +467,6 @@ export const Support = {
 };
 
 export const Match = {
-
-  findMatch: async (consentId, purposeId) => {
-    const url = `${await getApiUrl()}/api/match/${consentId}/${purposeId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
 
   findMatchBatch: async (purposeIdsArr = []) => {
     const purposeIds = purposeIdsArr.join(',');
