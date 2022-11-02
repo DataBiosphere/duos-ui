@@ -2,22 +2,30 @@ import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp
 import { searchOntology, extractDOIDFromUrl } from './ontologyService';
 import { Notifications } from './utils';
 
+export const ControlledAccessType = {
+  permissions: 'Permissions',
+  modifiers: 'Modifiers'
+};
+
 export const srpTranslations = {
   hmb: {
     code: 'HMB',
     description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.permissions
   },
   poa: {
     code: 'POA',
     description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.permissions
   },
   diseases: (diseases) => {
     let outputStruct = {
       code: 'DS',
       description: 'The dataset will be used for disease related studies',
-      manualReview: false
+      manualReview: false,
+      type: ControlledAccessType.permissions
     };
     if(!isEmpty(diseases)) {
       const diseaseArray = diseases.sort().map((disease) => disease.label);
@@ -29,89 +37,106 @@ export const srpTranslations = {
   researchTypeDisease: {
     code: 'DS',
     description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.permissions
   },
   other: (otherText) => {
     return {
       code: 'OTHER',
       description: isEmpty(otherText) ? 'Other: Not provided' : otherText,
-      manualReview: true
+      manualReview: true,
+      type: ControlledAccessType.permissions
     };
   },
   methods: {
     code: 'MDS',
     description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   controls: {
     code: 'CTRL',
     description: 'The reason for this request is to increase the number of controls available for a comparison group.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   forProfit: {
     code: 'NCU',
     description: 'The dataset will be used in a study related to a commercial purpose.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   notForProfit: {
     code: 'NPU',
     description: 'This dataset will not be used in a study related to a commercial purpose.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   genderFemale: {
     code: 'POP-F',
     description: 'The dataset will be used for the study of females.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   genderMale: {
     code: 'POP-M',
     description: 'The dataset will be used for the study of males.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   pediatric: {
     code: 'POP-P',
     description: 'The dataset will be used for the study of children.',
-    manualReview: false
+    manualReview: false,
+    type: ControlledAccessType.modifiers
   },
   illegalBehavior: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   addiction: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   sexualDiseases: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   stigmatizedDiseases: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of stigmatizing illnesses.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   vulnerablePopulation: {
     code: 'OTHER',
     description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   population: {
     code: 'OTHER',
     description: 'The dataset will be used to study variations within the general population (e.g., general substructure of a population).',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   psychiatricTraits: {
     code: 'OTHER',
     description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   },
   notHealth: {
     code: 'OTHER',
     description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
-    manualReview: true
+    manualReview: true,
+    type: ControlledAccessType.modifiers
   }
 };
 
@@ -119,10 +144,12 @@ export const consentTranslations = {
   generalUse: {
     code: 'GRU',
     description: 'Use is permitted for any research purpose',
+    type: ControlledAccessType.permissions,
   },
   hmbResearch: {
     code: 'HMB',
     description: 'Use is permitted for a health, medical, or biomedical research purpose',
+    type: ControlledAccessType.permissions,
   },
   diseaseRestrictions: (restrictions) => {
     if (isEmpty(restrictions)) {
@@ -133,47 +160,58 @@ export const consentTranslations = {
       code: 'DS',
       alternateLabel: `DS ${restrictions.join('-')}`,
       description: `Use is permitted for the specified disease(s): ${restrictionList}`,
+      type: ControlledAccessType.permissions,
     };
   },
   populationOriginsAncestry: {
     code: 'POA',
     description: 'Use is limited to population, origin, or ancestry research',
+    type: ControlledAccessType.permissions,
   },
   methodsResearch: {
     code: 'NMDS',
     description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations',
+    type: ControlledAccessType.modifiers,
   },
   geneticStudiesOnly: {
     code: 'GSO',
     description: 'Use is limited to genetic studies only',
+    type: ControlledAccessType.modifiers,
   },
   commercialUse: {
     code: 'NPU',
     description: 'Use is limited to non-profit and non-commercial research',
+    type: ControlledAccessType.modifiers,
   },
   publicationResults: {
     code: 'PUB',
     description: 'Use requires users to make results of studies using the data available to the larger scientific community',
+    type: ControlledAccessType.modifiers,
   },
   collaboratorRequired: {
     code: 'COL',
     description: 'Use requires users to collaborate with the primary study investigators',
+    type: ControlledAccessType.modifiers,
   },
   ethicsApprovalRequired: {
     code: 'IRB',
     description: 'Use requires users to provide documentation of local IRB/ERB approval',
+    type: ControlledAccessType.modifiers,
   },
   geographicalRestrictions: {
     code: 'GS',
     description: 'Use is limited to within a certain geographic area',
+    type: ControlledAccessType.modifiers,
   },
   gender: {
     code: 'RS-G',
     description: 'Use is limited to research involving a particular gender',
+    type: ControlledAccessType.modifiers,
   },
   pediatric: {
     code: 'RS-PD',
     description: 'Use is limited to pediatric research',
+    type: ControlledAccessType.modifiers,
   },
 };
 

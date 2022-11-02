@@ -5,6 +5,7 @@ import MultiDatasetVoteSlab from '../../../src/components/collection_voting_slab
 import {Storage} from '../../../src/libs/storage';
 import {Votes} from '../../../src/libs/ajax';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
+import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 
 const openElection1 = [
   {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'},
@@ -75,8 +76,9 @@ describe('MultiDatasetVoteSlab - Tests', function() {
         title={'GROUP 1'}
         bucket={{
           dataUses: [
-            {code: 'GRU', description: 'Use is permitted for any research purpose'},
-            {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose'}
+            {code: 'GRU', description: 'Use is permitted for any research purpose', type: ControlledAccessType.permissions},
+            {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose', type: ControlledAccessType.permissions},
+            {code: 'NCU', description: 'The dataset will be used in a study related to a commercial purpose.', type: ControlledAccessType.modifiers}
           ]
         }}
         dacDatasetIds={[10, 20]}
@@ -88,6 +90,9 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.contains('Use is permitted for any research purpose');
     cy.contains('HMB');
     cy.contains('Use is permitted for a health, medical, or biomedical research purpose');
+    cy.contains(ControlledAccessType.modifiers);
+    cy.contains('NCU');
+    cy.contains('The dataset will be used in a study related to a commercial purpose.');
   });
 
   it('Renders a selected vote button when all current user votes match (Member)', function() {
