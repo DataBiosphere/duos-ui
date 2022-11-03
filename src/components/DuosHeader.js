@@ -123,11 +123,11 @@ export const headerTabsConfig = [
   },
   {
     label: 'Researcher Console',
-    link: '/researcher_console',
+    link: '/dataset_catalog',
     search: 'researcher_console',
     children: [
-      { label: 'DAR Requests', link: '/researcher_console' },
-      { label: 'Data Catalog', link: '/dataset_catalog' }
+      { label: 'Data Catalog', link: '/dataset_catalog' },
+      { label: 'DAR Requests', link: '/researcher_console' }
     ],
     isRendered: (user) => user.isResearcher
   }
