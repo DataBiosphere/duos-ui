@@ -124,7 +124,7 @@ export const headerTabsConfig = [
   {
     label: 'Researcher Console',
     link: '/dataset_catalog',
-    search: 'researcher_console',
+    search: 'dataset_catalog',
     children: [
       { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'DAR Requests', link: '/researcher_console' }
@@ -181,7 +181,7 @@ const NavigationTabsComponent = (props) => {
               to: {
                 pathname: tab.link,
                 state: {
-                  selectedMenuTab: selectedMenuTab,
+                  selectedMenuTab: tabIndex,
                 },
               },
               component: Link
