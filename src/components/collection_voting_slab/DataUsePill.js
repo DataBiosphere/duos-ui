@@ -43,9 +43,9 @@ export function DataUsePills(dataUses){
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions);
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers);
   return(
-    div({},[map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})(permissionsUses),
+    div([map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})(permissionsUses),
       div({isRendered: modifierUses.length > 0},[
-        h2({}, ControlledAccessType.modifiers),
+        h2(ControlledAccessType.modifiers),
         map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})((modifierUses))
       ])
     ])
