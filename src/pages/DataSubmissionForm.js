@@ -43,9 +43,7 @@ export const DataSubmissionForm = () => {
 
   let formData = {};
 
-  const onChange = ({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('StudyInfo OnChange:', key, value, isValid);
+  const onChange = ({ key, value }) => {
     set(key, value, formData);
   };
 
