@@ -1,4 +1,4 @@
-import {div, h2, span} from 'react-hyperscript-helpers';
+import {div, h3, span} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash';
 import {map} from 'lodash/fp';
 import { ControlledAccessType } from '../../libs/dataUseTranslation';
@@ -23,6 +23,9 @@ const styles = {
     justifyContent: 'center',
     display: 'flex'
   },
+  subheading: {
+    fontWeight: 'bold',
+  },
   description: {
     color: '#333F52',
     fontWeight: '500',
@@ -45,7 +48,7 @@ export function DataUsePills(dataUses){
   return(
     div([map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})(permissionsUses),
       div({isRendered: modifierUses.length > 0},[
-        h2(ControlledAccessType.modifiers),
+        h3({style: styles.subheading}, ControlledAccessType.modifiers),
         map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})((modifierUses))
       ])
     ])
