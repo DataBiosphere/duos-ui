@@ -60,7 +60,7 @@ export default function ResearchPurposeStatement(props) {
   //isEmpty will give a false negative with booleans and isNil will give a false positive with empty strings
 
   const onChange = ({ key, value }) => {
-    formFieldChange({ name: key, value });
+    formFieldChange({ key, value });
   };
 
   return(

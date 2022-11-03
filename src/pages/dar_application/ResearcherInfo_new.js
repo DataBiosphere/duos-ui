@@ -20,27 +20,15 @@ export default function ResearcherInfo(props) {
     allSigningOfficials,
     completed,
     darCode,
-    cloudProviderDescription,
     eRACommonsDestination,
-    externalCollaborators,
     formFieldChange,
-    internalCollaborators,
-    labCollaborators,
     location,
     onNihStatusUpdate,
-    partialSave,
+    formData,
     researcher,
     showValidationMessages,
-    nextPage,
-    cloudProviderType,
-    cloudProvider,
-    isCloudUseInvalid,
     ariaLevel = 2
   } = props;
-
-  const navButtonContainerStyle = {
-    marginTop: '5rem'
-  };
 
   const formatSOString = (name, email) => {
     if(isEmpty(name)) { return '';}
@@ -49,33 +37,11 @@ export default function ResearcherInfo(props) {
     return nameString + emailString;
   };
 
-  //initial state variable assignment
-  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);//
-  const [checkNihDataOnly, setCheckNihDataOnly] = useState(props.checkNihDataOnly);//
-  const [signingOfficial, setSigningOfficial] = useState();//
-  const [itDirector, setITDirector] = useState(props.itDirector || '');//
-  const [piName, setPIName] = useState(props.piName || '');//
-  const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
-  const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
-  const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [researcherUser, setResearcherUser] = useState(props.researcherUser);//
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
-    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcherUser)) || checkNihDataOnly);
-  }, [checkNihDataOnly, researcherUser]);
-
-  useEffect(() => {
-    setSigningOfficial(props.signingOfficial);
-    setCheckCollaborator(props.checkCollaborator);
-    setCheckNihDataOnly(props.checkNihDataOnly);
-    setITDirector(props.itDirector);
-    setPIName(props.piName);
-    setAnvilUse(props.anvilUse);
-    setCloudUse(props.cloudUse);
-    setLocalUse(props.localUse);
-    setResearcherUser(props.researcherUser);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.piName, props.anvilUse, props.cloudUse, props.localUse, props.researcherUser, props.checkNihDataOnly]);
+    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)) || formData.checkNihDataOnly);
+  }, [formData.checkNihDataOnly, researcher]);
 
   return (
     div({ datacy: 'researcher-info'}, [
@@ -97,13 +63,12 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h(FormField, {
-            id: `researcher_name`,
+            id: `researcherName`,
             placeholder: 'Enter Firstname Lastname',
             title: '1.1 Researcher',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: ({key: name, value}) => formFieldChange({name, value}),
-            defaultValue: researcher,
+            defaultValue: researcher.displayName,
             disabled: true
           }),
         ]),
@@ -131,8 +96,8 @@ export default function ResearcherInfo(props) {
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
-              onChange: ({key: name, value}) => formFieldChange({name, value}),
-              defaultValue: checkNihDataOnly
+              onChange: ({key, value}) => formFieldChange({key, value}),
+              defaultValue: formData.checkNihDataOnly
             })
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
@@ -142,8 +107,8 @@ export default function ResearcherInfo(props) {
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
-              onChange: ({key: name, value}) => formFieldChange({name, value}),
-              defaultValue: checkCollaborator
+              onChange: ({key, value}) => formFieldChange({key, value}),
+              defaultValue: formData.checkCollaborator
             })
           ]),
         ]),
@@ -156,8 +121,8 @@ export default function ResearcherInfo(props) {
             title: '1.3 Principal Investigator',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: ({key: name, value}) => formFieldChange({name, value}),
-            defaultValue: piName
+            onChange: ({key, value}) => formFieldChange({key, value}),
+            defaultValue: formData.piName
           })
         ]),
 
@@ -209,9 +174,9 @@ export default function ResearcherInfo(props) {
             title: '1.6 Institutional Signing Official',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            defaultValue: (!isNil(signingOfficial) ? formatSOString(signingOfficial.displayName, signingOfficial.email) : null),
-            onChange: ({key: name, value}) => {
-              formFieldChange({name, value: value});
+            defaultValue: formData.signingOfficial,
+            onChange: ({key, value}) => {
+              formFieldChange({key, value: value});
             },
             selectOptions: allSigningOfficials?.map((so) => {
               return formatSOString(so.displayName, so.email);
@@ -227,8 +192,8 @@ export default function ResearcherInfo(props) {
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            onChange: ({key: name, value,}) => formFieldChange({name, value}),
-            defaultValue: itDirector
+            onChange: ({key, value,}) => formFieldChange({key, value}),
+            defaultValue: formData.itDirector
           })
         ]),
 
@@ -254,21 +219,21 @@ export default function ResearcherInfo(props) {
               validators: [FormValidators.REQUIRED],
               ariaLevel: ariaLevel + 1,
               orientation: 'horizontal',
-              onChange: ({key: name, value}) => {
+              onChange: ({key, value}) => {
                 const normalizedValue = value === 'yes';
-                formFieldChange({name, value: normalizedValue});
+                formFieldChange({key, value: normalizedValue});
               },
-              defaultValue: anvilUse === true ? 'yes'
-                : anvilUse === false ? 'no'
+              defaultValue: formData.anvilUse === true ? 'yes'
+                : formData.anvilUse === false ? 'no'
                   : undefined
             }),
 
             div({className: 'row no-margin'}, [
               div({
-                isRendered: anvilUse === false,
+                isRendered: formData.anvilUse === false,
                 className: 'computing-use-container',
                 style: {
-                  backgroundColor: showValidationMessages && isCloudUseInvalid ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
+                  backgroundColor: showValidationMessages ? 'rgba(243, 73, 73, 0.19)' : 'inherit'
                 }
               }, [
                 div({className: 'row no-margin'}, [
@@ -280,9 +245,9 @@ export default function ResearcherInfo(props) {
                         validators: [FormValidators.REQUIRED],
                         type: FormFieldTypes.CHECKBOX,
                         toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
-                        defaultValue: localUse,
+                        defaultValue: formData.localUse,
                         ariaLevel: ariaLevel + 2,
-                        onChange: ({ key: name, value }) => formFieldChange({name, value})
+                        onChange: ({ key, value }) => formFieldChange({key, value})
                       })
                     ])
                   ]),
@@ -293,20 +258,20 @@ export default function ResearcherInfo(props) {
                       validators: [FormValidators.REQUIRED],
                       type: FormFieldTypes.CHECKBOX,
                       toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
-                      defaultValue: cloudUse,
+                      defaultValue: formData.cloudUse,
                       ariaLevel: ariaLevel + 2,
-                      onChange: ({ key: name, value }) => formFieldChange({name, value})
+                      onChange: ({ key, value }) => formFieldChange({key, value})
                     })
                   ])
                 ])
               ]),
-              div({className: 'row no-margin', isRendered: cloudUse === true}, [
+              div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
                 div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
                   h(FormField, {
                     id: 'cloudProvider',
                     title: 'Name of Cloud Provider',
-                    onChange: ({ key: name, value }) => formFieldChange({name, value}),
-                    defaultValue: cloudProvider,
+                    onChange: ({ key, value }) => formFieldChange({key, value}),
+                    defaultValue: formData.cloudProvider,
                     validators: [FormValidators.REQUIRED],
                     disabled: !isEmpty(darCode),
                     ariaLevel: ariaLevel + 3,
@@ -316,20 +281,20 @@ export default function ResearcherInfo(props) {
                   h(FormField, {
                     id: 'cloudProviderType',
                     title: 'Type of Cloud Provider',
-                    defaultValue: cloudProviderType,
+                    defaultValue: formData.cloudProviderType,
                     validators: [FormValidators.REQUIRED],
                     disabled: !isNil(darCode),
                     ariaLevel: ariaLevel + 3,
-                    onChange: ({ key: name, value }) => formFieldChange({name, value})
+                    onChange: ({ key, value }) => formFieldChange({key, value})
                   })
                 ])
               ]),
-              div({className: 'row no-margin', isRendered: cloudUse === true}, [
+              div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
                 div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                   h(FormField, {
                     id: 'cloudProviderDescription',
                     type: FormFieldTypes.TEXTAREA,
-                    defaultValue: cloudProviderDescription,
+                    defaultValue: formData.cloudProviderDescription,
                     disabled: !isNil(darCode),
                     validators: [FormValidators.REQUIRED],
                     placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
@@ -338,7 +303,7 @@ export default function ResearcherInfo(props) {
                     rows: 6,
                     maxLength: 2000,
                     ariaLevel: ariaLevel + 3,
-                    onChange: ({ key: name, value}) => formFieldChange({name, value})
+                    onChange: ({ key, value}) => formFieldChange({key, value})
                   })
                 ])
               ])
@@ -399,15 +364,15 @@ export default function ResearcherInfo(props) {
               ]),
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              h(CollaboratorList, {
-                formFieldChange,
-                collaborators: labCollaborators,
-                collaboratorKey: 'labCollaborators',
-                collaboratorLabel: 'Internal Lab Member',
-                showApproval: true,
-                disabled: !isEmpty(darCode),
-                deleteBoolArray: (new Array(labCollaborators.length).fill(false))
-              })
+              // h(CollaboratorList, {
+              //   formFieldChange,
+              //   collaborators: formData.labCollaborators,
+              //   collaboratorKey: 'labCollaborators',
+              //   collaboratorLabel: 'Internal Lab Member',
+              //   showApproval: true,
+              //   disabled: !isEmpty(darCode),
+              //   deleteBoolArray: (new Array(formData.labCollaborators.length).fill(false))
+              // })
             ])
           ])
         ]),
@@ -430,10 +395,10 @@ export default function ResearcherInfo(props) {
               h(CollaboratorList, {
                 disabled: !isEmpty(darCode),
                 formFieldChange,
-                collaborators: internalCollaborators,
+                collaborators: formData.internalCollaborators,
                 collaboratorKey: 'internalCollaborators',
                 collaboratorLabel: 'Internal Collaborator',
-                deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
+                deleteBoolArray: (new Array(formData.internalCollaborators.length).fill(false)),
                 showApproval: false})
             ])
           ])
@@ -457,28 +422,16 @@ export default function ResearcherInfo(props) {
               h(CollaboratorList, {
                 disabled: !isEmpty(darCode),
                 formFieldChange,
-                collaborators: externalCollaborators,
+                collaborators: formData.externalCollaborators,
                 collaboratorKey: 'externalCollaborators',
                 collaboratorLabel: 'External Collaborator',
-                deleteBoolArray: (new Array(externalCollaborators.length).fill(false)),
+                deleteBoolArray: (new Array(formData.externalCollaborators.length).fill(false)),
                 showApproval: false
               })
             ])
           ])
         ])
       ]),
-
-      div({ className: 'row no-margin' }, [
-        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: navButtonContainerStyle }, [
-          a({ id: 'btn_next', onClick: nextPage, className: 'btn-primary f-right access-background' }, [
-            'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-          ]),
-          a({
-            id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
-            className: 'btn-secondary f-right access-color'
-          }, ['Save'])
-        ])
-      ])
     ])
   );
 }

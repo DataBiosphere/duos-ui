@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {cloneDeep, flow, getOr, isNil, unset} from 'lodash/fp';
+import {cloneDeep, flow, getOr, isNil, unset, isNumber} from 'lodash/fp';
 import {Config} from './config';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
@@ -300,7 +300,7 @@ export const DataSet = {
   },
 
   getDatasetsByIds: async (ids) => {
-    const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`;
+    const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.filter((id) => !isNil(id) && isNumber(id)).join('&ids=')}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

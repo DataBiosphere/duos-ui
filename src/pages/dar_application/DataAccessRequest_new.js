@@ -5,6 +5,10 @@ import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 
+import {
+  needsGsoAcknowledgement
+} from '../../libs/darFormUtils'
+
 const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
@@ -38,71 +42,22 @@ const formatSearchDataset = (ds) => {
   };
 };
 
-const datasetsContainDataUseFlag = (datasets, flag) => {
-  return datasets.some((ds) => ds?.dataUse[flag] === true);
-
-};
-
-const fetchAllDatasets = async (dsIds) => {
-  if (isEmpty(dsIds)) {
-    return [];
-  }
-  return DataSet.getDatasetsByIds(dsIds);
-};
-
 export default function DataAccessRequest(props) {
   const {
     formFieldChange,
     formData,
+    datasets,
+    dataUseTranslations,
     setIrbDocument,
     setCollaborationLetter,
     ariaLevel = 2
   } = props;
 
-  const [datasets, setDatasets] = useState([]);
-  const [dataUseTranslations, setDataUseTranslations] = useState([]);
-
-  const today = new Date();
-  const irbProtocolExpiration = formData.irbProtocolExpiration || `${today.getFullYear().toString().padStart(4, '0')}-${today.getMonth().toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-
-
-  useEffect(() => {
-    fetchAllDatasets(formData.datasetIds).then((datasets) => {
-      setDatasets(datasets);
-    });
-  }, [formData.datasetIds]);
-
-  useEffect(() => {
-    translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
-      setDataUseTranslations(translations);
-    });
-
-  }, [datasets]);
+  const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
 
   const onChange = ({key, value}) => {
-    formFieldChange({name: key, value});
+    formFieldChange({key, value});
   };
-
-  const needsIrbApprovalDocument = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'ethicsApprovalRequired');
-  }, [datasets]);
-
-  const needsCollaborationLetter = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'collaboratorRequired');
-  }, [datasets]);
-
-  const needsGsoAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'geneticStudiesOnly');
-  }, [datasets]);
-
-  const needsPubAcknowledgement = useCallback(() => {
-    return datasetsContainDataUseFlag(datasets, 'publicationResults');
-  }, [datasets]);
-
-  const needsDsAcknowledgement = useCallback(() => {
-    // if any data use translations are different, then this must be displayed.
-    return dataUseTranslations.length > 1 && !dataUseTranslations.every((translation) => isEqual(dataUseTranslations[0], translation));
-  }, [dataUseTranslations]);
 
   return (
     div({ datacy: 'data-access-request' }, [
@@ -262,13 +217,13 @@ export default function DataAccessRequest(props) {
         h(FormFieldTitle, {
           title: '2.5 Data Use Acknowledgements',
           description: 'Please confirm listed acknowledgements and/or document requirements below:',
-          isRendered: needsGsoAcknowledgement() || needsDsAcknowledgement() || needsPubAcknowledgement(),
+          isRendered: needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets),
         }),
 
         h(FormField, {
           id: 'gsoAcknowledgement',
           type: FormFieldTypes.CHECKBOX,
-          isRendered: needsGsoAcknowledgement(),
+          isRendered: needsGsoAcknowledgement(datasets),
           toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.',
           defaultValue: formData.gsoAcknowledgement,
           onChange,
@@ -276,7 +231,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'pubAcknowledgement',
-          isRendered: needsPubAcknowledgement(),
+          isRendered: needsPubAcknowledgement(datasets),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.',
           defaultValue: formData.pubAcknowledgement,
@@ -285,7 +240,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'dsAckowledgement',
-          isRendered: needsDsAcknowledgement(),
+          isRendered: needsDsAcknowledgement(dataUseTranslations),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
           defaultValue: formData.dsAckowledgement,
@@ -295,10 +250,10 @@ export default function DataAccessRequest(props) {
 
         h(FormFieldTitle, {
           description: 'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.',
-          isRendered: needsIrbApprovalDocument(),
+          isRendered: needsIrbApprovalDocument(datasets),
         }),
         div({
-          isRendered: needsIrbApprovalDocument(),
+          isRendered: needsIrbApprovalDocument(datasets),
           style: {
             display: 'flex',
             justifyContent: 'space-between',
