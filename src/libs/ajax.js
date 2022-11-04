@@ -260,16 +260,6 @@ export const DAR = {
     return res.data;
   },
 
-  requiresManualReview: (object) => {
-    var manualReview = false;
-    object.forEach(function (element) {
-      if (element.manualReview === true) {
-        manualReview = true;
-      }
-    });
-    return manualReview;
-  },
-
   //NOTE: endpoints requires a dar id
   uploadDARDocument: async(file, darId, fileType) => {
     if(isFileEmpty(file)) {
@@ -295,6 +285,18 @@ export const DataSet = {
 
   getDatasets: async () => {
     const url = `${await getApiUrl()}/api/dataset`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  getDatasetsByIds: async (ids) => {
+    const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  searchDatasets: async (query) => {
+    const url = `${await getApiUrl()}/api/dataset/search?query=${query}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -390,52 +392,12 @@ export const DatasetAssociation = {
 
 };
 
-export const Election = {
-
-  getElectionVotes: async (electionId) => {
-    const url = `${await getApiUrl()}/api/election/${electionId}/votes`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  findElectionByDarId: async (requestId) => {
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findDataAccessElectionReview: async (electionId) => {
-    const url = `${await getApiUrl()}/api/electionReview/access/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  // RP Election Information. Can be null for manual review DARs.
-  // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
-  findRPElectionReview: async (electionId) => {
-    const url = `${await getApiUrl()}/api/electionReview/rp/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    if (res.status === 204) {
-      return {};
-    }
-    return await res.json();
-  },
-
-  updateElection: async (electionId, document) => {
-    const url = `${await getApiUrl()}/api/election/${electionId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
-    return await res.json();
-  },
-};
-
 export const Email = {
-
   sendReminderEmail: async (voteId) => {
     const url = `${await getApiUrl()}/api/emailNotifier/reminderMessage/${voteId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
     return res;
   }
-
 };
 
 export const Files = {
@@ -505,12 +467,6 @@ export const Support = {
 };
 
 export const Match = {
-
-  findMatch: async (consentId, purposeId) => {
-    const url = `${await getApiUrl()}/api/match/${consentId}/${purposeId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
 
   findMatchBatch: async (purposeIdsArr = []) => {
     const purposeIds = purposeIdsArr.join(',');
@@ -689,34 +645,6 @@ export const User = {
 };
 
 export const Votes = {
-
-  postDarVote: async (requestId, vote) => {
-    const postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    postObject.hasConcerns = vote.hasConcerns;
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
-    return res.json();
-  },
-
-  updateDarVote: async (requestId, vote) => {
-    const postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    postObject.hasConcerns = vote.hasConcerns;
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'PUT' }]));
-    return await res.json();
-  },
-
-  updateFinalAccessDarVote: async (requestId, vote) => {
-    const url = `${await getApiUrl()}/api/dataRequest/${requestId}/vote/${vote.voteId}/final`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
-    return await res.json();
-  },
 
   updateVotesByIds: async (voteIds, vote) => {
     const voteUpdate = {};

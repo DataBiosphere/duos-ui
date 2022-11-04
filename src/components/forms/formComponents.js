@@ -4,7 +4,7 @@ import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import AsyncCreatable from 'react-select/async-creatable';
-import { FormValidators } from './forms';
+import { FormField, FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
 import PublishIcon from '@material-ui/icons/Publish';
 
@@ -67,6 +67,7 @@ export const formInputGeneric = (config) => {
     id, title, disabled,
     placeholder, type,
     inputStyle, ariaDescribedby,
+    readOnly,
     formValue, error, setError
   } = config;
 
@@ -77,6 +78,7 @@ export const formInputGeneric = (config) => {
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue,
+      readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => onFormInputChange(config, event.target.value),
@@ -393,6 +395,10 @@ export const formInputYesNoRadioGroup = (config) => {
               description: 'Yes',
               disabled,
             }),
+          ]),
+          div({
+            className: 'radio-button-container',
+          }, [
             h(RadioButton, {
               id: `${id}_no`,
               name: `${id}_no`,
@@ -490,12 +496,19 @@ export const formInputSlider = (config) => {
 export const formInputFile = (config) => {
   const {
     id,
+    formValue,
     uploadText = 'Upload a file',
     multiple = false,
     accept = '',
   } = config;
 
-  return div({}, [
+  return div({
+    style: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+    }
+  }, [
     div({
       className: 'form-file-upload',
     }, [
@@ -526,6 +539,19 @@ export const formInputFile = (config) => {
         h(PublishIcon, {}),
         uploadText,
       ])
+    ]),
+    div({
+      style: {
+        marginLeft: '20px',
+        width: '450px',
+      }
+    }, [
+      h(FormField, {
+        id: `${id}_fileName`,
+        placeholder: 'Filename.txt',
+        defaultValue: formValue?.name,
+        readOnly: true,
+      })
     ])
   ]);
 };

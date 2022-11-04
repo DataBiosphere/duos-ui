@@ -33,24 +33,12 @@ const ResearchPurposeRow = (props) => {
       }
     }, [
       h(FormField, {
-        type: FormFieldTypes.RADIOGROUP,
+        type: FormFieldTypes.YESNORADIOGROUP,
         id: id,
         validators: [FormValidators.REQUIRED],
+        defaultValue,
         orientation: 'horizontal',
-        options: [
-          {
-            text: 'Yes',
-            name: 'yes',
-          },
-          {
-            text: 'No',
-            name: 'no',
-          }
-        ],
-        defaultValue: defaultValue ? 'yes' : 'no',
-        onChange: ({key, value, isValid}) => {
-          onChange({key: key, value: (value === 'yes'), isValid: isValid});
-        }
+        onChange,
       }),
 
     ])
@@ -62,15 +50,7 @@ export default function ResearchPurposeStatement(props) {
   const {
     darCode,
     formFieldChange,
-    illegalBehavior,
-    notHealth,
-    oneGender,
-    gender,
-    pediatric,
-    psychiatricTraits,
-    sexualDiseases,
-    stigmatizedDiseases,
-    vulnerablePopulation
+    formData,
   } = props;
 
 
@@ -93,19 +73,47 @@ export default function ResearchPurposeStatement(props) {
           h3({ className: '' },
             ['In order to ensure appropriate review, please answer the questions below:']),
 
+          h4({}, ['I am proposing to:']),
+
+          h(ResearchPurposeRow, {
+            title: 'Develop or validate new methods for analysing/interpreting data.',
+            id: 'methods',
+            defaultValue: formData.methods,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Increase controls available for a comparison group (e.g. a case-control study).',
+            id: 'controls',
+            defaultValue: formData.controls,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Study variation in the general population.',
+            id: 'population',
+            defaultValue: formData.population,
+            onChange,
+          }),
+
+          h(ResearchPurposeRow, {
+            title: 'Conduct research for an exclusively or partially commercial purpose.',
+            id: 'forProfit',
+            defaultValue: formData.forProfit,
+            onChange,
+          }),
+
           h4({}, ['Is this study:']),
 
           h(ResearchPurposeRow, {
             title: 'Limited to one gender',
             id: 'oneGender',
-            defaultValue: oneGender,
-            onChange: ({key, value}) => {
-              onChange({key, value});
-            },
+            defaultValue: formData.oneGender,
+            onChange,
           }),
 
           div({
-            isRendered: oneGender,
+            isRendered: formData.oneGender,
             className: 'flex flex-row rp-subrow',
             style: {
               justifyContent: 'flex-start',
@@ -133,10 +141,8 @@ export default function ResearchPurposeStatement(props) {
                   name: 'F',
                 }
               ],
-              defaultValue: gender,
-              onChange: ({key, value}) => {
-                onChange({key, value});
-              },
+              defaultValue: formData.gender,
+              onChange,
             }),
           ]),
 
@@ -144,7 +150,7 @@ export default function ResearchPurposeStatement(props) {
           h(ResearchPurposeRow, {
             title: 'Limited to a pediatric population (under the age of 18)',
             id: 'pediatric',
-            defaultValue: pediatric,
+            defaultValue: formData.pediatric,
             onChange,
           }),
 
@@ -155,7 +161,7 @@ export default function ResearchPurposeStatement(props) {
             }, ['456 CFR'])]),
             description: '(children, prisoners, pregnant women, mentally disabled persons, or [“SIGNIFICANTLY”] economically or educationally disadvantaged persons)',
             id: 'vulnerablePopulation',
-            defaultValue: vulnerablePopulation,
+            defaultValue: formData.vulnerablePopulation,
             onChange,
           }),
 
@@ -164,35 +170,35 @@ export default function ResearchPurposeStatement(props) {
           h(ResearchPurposeRow, {
             title: 'Illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)',
             id: 'illegalBehavior',
-            defaultValue: illegalBehavior,
+            defaultValue: formData.illegalBehavior,
             onChange,
           }),
 
           h(ResearchPurposeRow, {
             title: 'Sexual preferences or sexually transmitted diseases',
             id: 'sexualDiseases',
-            defaultValue: sexualDiseases,
+            defaultValue: formData.sexualDiseases,
             onChange,
           }),
 
           h(ResearchPurposeRow, {
             title: 'Psychological traits, intelligence, or attention',
             id: 'psychiatricTraits',
-            defaultValue: psychiatricTraits,
+            defaultValue: formData.psychiatricTraits,
             onChange,
           }),
 
           h(ResearchPurposeRow, {
             title: 'Correlating ethnicity, race, or gender with genotypic or phenotypic variables for purposes beyond biomedical or health-related research, or in ways not easily related to health',
             id: 'notHealth',
-            defaultValue: notHealth,
+            defaultValue: formData.notHealth,
             onChange,
           }),
 
           h(ResearchPurposeRow, {
             title: 'Stigmatizing illnesses',
             id: 'stigmatizedDiseases',
-            defaultValue: stigmatizedDiseases,
+            defaultValue: formData.stigmatizedDiseases,
             onChange,
           }),
 

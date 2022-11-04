@@ -59,7 +59,7 @@ describe('DataUseVoteSummary - Tests', function() {
     );
     const component = cy.get('.table-data');
     component.should('exist');
-    const rows = cy.get('.placeholder-row-0');
+    const rows = cy.get('.table-loading-placeholder');
     rows.should('exist');
   });
 });

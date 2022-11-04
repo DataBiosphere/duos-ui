@@ -4,8 +4,9 @@ import { mount } from 'cypress/react';
 import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
-import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
+import {filterBucketsForUser} from '../../../src/utils/DarCollectionUtils.js';
 import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
+import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 
 const darInfo = {
   rus: 'test',
@@ -51,7 +52,7 @@ const bucket1 = {
     },
   ],
   dataUses: [
-    {code: 'GRU', description: 'Use is permitted for any research purpose'},
+    {code: 'GRU', description: 'Use is permitted for any research purpose', type: ControlledAccessType.permissions},
   ]
 };
 
@@ -92,7 +93,7 @@ const bucket2 = {
     },
   ],
   dataUses: [
-    {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose'}
+    {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose', type: ControlledAccessType.permissions}
   ]
 };
 
