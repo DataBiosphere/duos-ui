@@ -151,6 +151,22 @@ small {
   background: #00609f !important;
 }
 
+.icon-color {
+  color: #0948B7 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  font-size: 1.2em;
+}
+
+.block-icon-color {
+  color: #ffffff !important;
+  background: #0948B7 !important;
+  border-radius: 10% !important;
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 10% 10%;
+}
+
 .dul-color {
   color: #C16B0C !important;
 }
@@ -1400,6 +1416,11 @@ a .editable:hover, a .enabled:hover {
 
 .cm-icon-button {
   padding: 2px 0 0 10px;
+}
+
+.dar-icon-button {
+  padding: 2px 0 0 10px;
+  color: #0948B7;
 }
 
 .delete-dar {

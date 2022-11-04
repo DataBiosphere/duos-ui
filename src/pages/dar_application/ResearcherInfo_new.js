@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import CollaboratorList from './CollaboratorList';
-import CollaboratorList_new from './CollaboratorList_new';
+import CollaboratorList_new from './collaborator/CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -163,7 +163,6 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1753
           h3('1.4 Internal Lab Staff'),
           div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
@@ -171,15 +170,6 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          // non functional button
-          // button({
-          //   id: 'addNewCollaborator',
-          //   type: 'button', // default button element type inside a form is "submit".
-          //   className: 'button button-white',
-          //   style: { marginTop: 25 },
-          //   onClick: () => {}
-          // }, ['Add Collaborator']),
-          // old style button that adds a new collaborator
           h(CollaboratorList_new, {
             formFieldChange,
             collaborators: labCollaborators,
@@ -188,24 +178,7 @@ export default function ResearcherInfo(props) {
             showApproval: true,
             disabled: !isEmpty(darCode),
             deleteBoolArray: (new Array(labCollaborators.length).fill(false)),
-            onChange: ({key: name, value}) => {
-              formFieldChange({name, value: value});
-            },
           }),
-          // labCollaborators
-          //   .map((state, index) => {
-          //     if (isNil(state)) {
-          //       return div({}, []);
-          //     }
-          //
-          //     return h(CollaboratorForm, {
-          //       key: index,
-          //       idx: index,
-          //       saveCollaborator: (newCollaborator) => updateCollaborator(index, newCollaborator),
-          //       deleteCollaborator: () => deleteCollaborator(index),
-          //       startEditCollaborator: () => startEditCollaborator(index),
-          //     });
-          //   })
         ]),
 
         div({className: 'dar-application-row'}, [
@@ -418,29 +391,29 @@ export default function ResearcherInfo(props) {
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.3 Internal Lab Staff',
-                span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
-                that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
-                level here.`])
-              ]),
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              h(CollaboratorList, {
-                formFieldChange,
-                collaborators: labCollaborators,
-                collaboratorKey: 'labCollaborators',
-                collaboratorLabel: 'Internal Lab Member',
-                showApproval: true,
-                disabled: !isEmpty(darCode),
-                deleteBoolArray: (new Array(labCollaborators.length).fill(false))
-              })
-            ])
-          ])
-        ]),
+        // div({className: 'form-group'}, [
+        //   div({className: 'row no-margin'}, [
+        //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+        //       label({className: 'control-label rp-title-question'}, [
+        //         '1.3 Internal Lab Staff',
+        //         span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data
+        //         that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent
+        //         level here.`])
+        //       ]),
+        //     ]),
+        //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+        //       h(CollaboratorList, {
+        //         formFieldChange,
+        //         collaborators: labCollaborators,
+        //         collaboratorKey: 'labCollaborators',
+        //         collaboratorLabel: 'Internal Lab Member',
+        //         showApproval: true,
+        //         disabled: !isEmpty(darCode),
+        //         deleteBoolArray: (new Array(labCollaborators.length).fill(false))
+        //       })
+        //     ])
+        //   ])
+        // ]),
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
