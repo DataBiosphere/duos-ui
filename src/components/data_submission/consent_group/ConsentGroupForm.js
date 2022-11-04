@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { div, h, span, a, button } from 'react-hyperscript-helpers';
 import ConsentGroupSummary from './ConsentGroupSummary';
 import { EditConsentGroup } from './EditConsentGroup';
@@ -8,6 +8,7 @@ export const ConsentGroupForm = (props) => {
   const {
     idx,
     saveConsentGroup,
+    updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
   } = props;
 
@@ -41,6 +42,11 @@ export const ConsentGroupForm = (props) => {
     fileTypes: [{}],
   });
 
+  const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
+
+  useEffect(() => {
+    updateNihInstitutionalCertificationFile(nihInstitutionalCertificationFile);
+  }, [nihInstitutionalCertificationFile, updateNihInstitutionalCertificationFile]);
 
   const [consentGroupValidationErrors, setConsentGroupValidationErrors] = useState([]);
   const [editMode, setEditMode] = useState(true);
@@ -63,11 +69,11 @@ export const ConsentGroupForm = (props) => {
     (editMode
       ? h(EditConsentGroup, {
         ...props,
-        ...{consentGroup: consentGroup, setConsentGroup: setConsentGroup},
+        ...{consentGroup: consentGroup, setConsentGroup: setConsentGroup, nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile},
       })
       : h(ConsentGroupSummary, {
         ...props,
-        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary'},
+        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
       })),
 
     // save + delete

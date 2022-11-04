@@ -71,6 +71,7 @@ const secondaryConsentFields = [
 export const ConsentGroupSummary = (props) => {
   const {
     consentGroup,
+    nihInstitutionalCertificationFile,
     id
   } = props;
 
@@ -225,6 +226,22 @@ export const ConsentGroupSummary = (props) => {
           p({}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${ft.numberOfParticipants}`])]),
         ]))),
       ]),
+    ]),
+    div({
+      isRendered: !isNil(nihInstitutionalCertificationFile),
+    }, [
+      p({
+        style: {
+          fontWeight: 'bold',
+          fontSize: '16px',
+        }
+      }, ['NIH Institutional Certification File']),
+      input({
+        disabled: true,
+        type: 'text',
+        className: 'form-control',
+        value: nihInstitutionalCertificationFile?.name,
+      }),
     ]),
   ]);
 };
