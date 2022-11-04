@@ -94,7 +94,7 @@ const animationAttributes = {
 const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
-    return DataUsePills(dataUses);
+    return div({key: key},[DataUsePills(dataUses)]);
   })(keys(translatedDataUse));
 };
 
