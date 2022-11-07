@@ -1,3 +1,6 @@
+import {div, h} from 'react-hyperscript-helpers';
+import { Notification } from '../../components/Notification';
+
 export const DarValidationMessages = (props) => {
 
   const {
@@ -6,20 +9,20 @@ export const DarValidationMessages = (props) => {
   } = props;
 
   return div({
-    isRendered: showValidationErrors,
+    isRendered: showValidationMessages,
   },
-    validationErrors.map((err, idx) => {
-      return div({style: {marginBottom: '2rem'}}, [
-        h(Notification,
-          {
-            key: idx,
-            notificationData: {
-              level: 'danger',
-              message: err,
-            }
-          }),
-      ]);
-    }),
+  validationMessages?.map((err, idx) => {
+    return div({style: {marginBottom: '2rem'}}, [
+      h(Notification,
+        {
+          key: idx,
+          notificationData: {
+            level: 'danger',
+            message: err,
+          }
+        }),
+    ]);
+  }),
   );
 };
 

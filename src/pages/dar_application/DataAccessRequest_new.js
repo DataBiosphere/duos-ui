@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback} from 'react';
 import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
-import { isEqual, isEmpty } from 'lodash/fp';
 import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
-import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
-
 import {
-  needsGsoAcknowledgement
-} from '../../libs/darFormUtils'
+  needsDsAcknowledgement,
+  needsPubAcknowledgement,
+  needsIrbApprovalDocument,
+  needsCollaborationLetter,
+  needsGsoAcknowledgement,
+  newIrbDocumentExpirationDate,
+} from '../../libs/darFormUtils';
 
 const searchOntologies = (query, callback) => {
   let options = [];
@@ -50,6 +51,7 @@ export default function DataAccessRequest(props) {
     dataUseTranslations,
     setIrbDocument,
     setCollaborationLetter,
+    setDatasets,
     ariaLevel = 2
   } = props;
 

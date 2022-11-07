@@ -4,7 +4,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
-
+import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
 import {
   Navigation,
   Notifications as NotyUtil
@@ -12,7 +12,7 @@ import {
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { Collections, DAR, User } from '../libs/ajax';
+import { Collections, DAR, User, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, keys, map } from 'lodash/fp';
@@ -21,6 +21,10 @@ import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import DarValidationMessages from './dar_application/DarValidationMessages';
+
+import {
+  validateDARFormData
+} from '../libs/darFormUtils';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -75,9 +79,9 @@ const DataAccessRequestApplicationNew = (props) => {
     scientificUrl: '',
     signingOfficial: '',
     itDirector: '',
-    anvilUse: '',
-    localUse: '',
-    cloudUse: '',
+    anvilUse: null,
+    localUse: null,
+    cloudUse: null,
     cloudProvider: '',
     cloudProviderType: '',
     cloudProviderDescription: '',
@@ -89,15 +93,16 @@ const DataAccessRequestApplicationNew = (props) => {
     irbProtocolExpiration: '',
     collaborationLetterLocation: '',
     collaborationLetterName: '',
-  })
+  });
 
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
-  
+
   const [showValidationMessages, setShowValidationMessages] = useState(false);
   const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
-  
+
   const [showDialogSave, setShowDialogSave] = useState(false);
+  const [showDialogSubmit, setShowDialogSubmit] = useState(false);
   const [step, setStep] = useState(1);
   const [notificationData, setNotificationData] = useState(undefined);
 
@@ -107,30 +112,30 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState(null);
   const [uploadedCollaborationLetter, setUploadedCollaborationLetter] = useState(null);
-  
+
   const [problemSavingRequest, setProblemSavingRequest] = useState(false);
   const [forcedScroll, setForcedScroll] = useState(null);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({key, value}) => {
-      setFormData(
-        (formData) => {
-          return {
-            ...formData,
-            ...{
-              [key]: value,
-            }
-          };
-        }
-      );
+    setFormData(
+      (formData) => {
+        return {
+          ...formData,
+          ...{
+            [key]: value,
+          }
+        };
+      }
+    );
   }, []);
 
   const batchFormFieldChange = (updates) => {
     setFormData((formData) => {
       return {
-      ...formData,
-      ...updates,
-      }
+        ...formData,
+        ...updates,
+      };
     });
   };
 
@@ -160,8 +165,8 @@ const DataAccessRequestApplicationNew = (props) => {
     // ran on unmount;
     return () => {
       window.removeEventListener('scroll', onScroll);
-    }
-  }, [init, onScroll])
+    };
+  }, [init, onScroll]);
 
   const [datasets, setDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
@@ -181,12 +186,26 @@ const DataAccessRequestApplicationNew = (props) => {
   }, [datasets]);
 
 
+  useEffect(() => {
+    if (showValidationMessages) {
+      setValidationMessages(
+        validateDARFormData(
+          formData,
+          datasets,
+          dataUseTranslations,
+          uploadedIrbDocument,
+          uploadedCollaborationLetter));
+    } else {
+      setValidationMessages({researcherInfoErrors: [], darErrors: [], rusErrors: []});
+    }
+  }, [formData, datasets, dataUseTranslations, showValidationMessages, uploadedCollaborationLetter, uploadedIrbDocument]);
+
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
     const researcher = await User.getMe();
     const signingOfficials = await User.getSOsForCurrentUser();
-    
+
     setResearcher(researcher);
     setAllSigningOfficials(signingOfficials);
 
@@ -215,7 +234,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [ onScroll, props.match.params]);
+  }, [onScroll, props.match.params]);
 
   // useEffect(() => {
   //   if (showValidationMessages === true) {
@@ -243,7 +262,7 @@ const DataAccessRequestApplicationNew = (props) => {
       const sectionIndex = ApplicationTabs
         .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
         .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
-        
+
       let newStep;
       if (sectionIndex === 0) {
         newStep = 1;
@@ -674,59 +693,72 @@ const DataAccessRequestApplicationNew = (props) => {
             div({ className: 'dialog-description' },
               ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
           ]),
-          div({className: 'step-container'}, [
+          div({className: 'dar-steps'}, [
+            div({className: 'step-container'}, [
+              h(DarValidationMessages, {
+                validationMessages: validationMessages.researcherInfoErrors,
+                showValidationMessages
+              }),
 
-            h(DarValidationMessages, {
-              validationErrors: validationMessages.researcherInfoErrors,
-              showValidationErrors: showValidationMessages
-            }),
+              h(ResearcherInfo, ({
+                completed: !isNil(get('institutionId', researcher)),
+                darCode: formData.darCode,
+                formData,
+                eRACommonsDestination: eRACommonsDestination,
+                formFieldChange: formFieldChange,
+                location: props.location,
+                nihValid: nihValid,
+                onNihStatusUpdate: setNihValid,
+                partialSave,
+                researcher,
+                showValidationMessages: showValidationMessages,
+                allSigningOfficials: allSigningOfficials,
+              }))
+            ]),
 
-            h(ResearcherInfo, ({
-              completed: !isNil(get('institutionId', researcher)),
-              darCode: formData.darCode,
-              formData,
-              eRACommonsDestination: eRACommonsDestination,
-              formFieldChange: formFieldChange,
-              location: props.location,
-              nihValid: nihValid,
-              onNihStatusUpdate: setNihValid,
-              partialSave,
-              researcher,
-              showValidationMessages: showValidationMessages,
-              allSigningOfficials: allSigningOfficials,
-            }))
+            div({className: 'step-container'}, [
+              h(DarValidationMessages, {
+                validationMessages: validationMessages.darErrors,
+                showValidationMessages
+              }),
+
+              h(DataAccessRequest, {
+                formData: formData,
+                datasets,
+                dataUseTranslations,
+                formFieldChange: formFieldChange,
+                setCollaborationLetter: updateCollaborationLetter,
+                setIrbDocument: updateIrbDocument,
+                setDatasets,
+              })
+            ]),
+
+            div({className: 'step-container'}, [
+              h(DarValidationMessages, {
+                validationMessages: validationMessages.rusErrors,
+                showValidationMessages
+              }),
+
+              h(ResearchPurposeStatement, {
+                darCode: formData.darCode,
+                formFieldChange: formFieldChange,
+                formData: formData,
+              })
+            ]),
+
+            div({className: 'step-container'}, [
+              h(DataUseAgreements, {
+                darCode: formData.darCode,
+                attestAndSend: () => {},
+                save: () => saveDarDraft(),
+              })
+            ])
           ]),
 
-          div({className: 'step-container'}, [
-            h(DataAccessRequest, {
-              formData: formData,
-              datasets,
-              dataUseTranslations,
-              formFieldChange: formFieldChange,
-              setCollaborationLetter: updateCollaborationLetter,
-              setIrbDocument: updateIrbDocument,
-            })
-          ]),
-
-          div({className: 'step-container'}, [
-            h(ResearchPurposeStatement, {
-              darCode: formData.darCode,
-              formFieldChange: formFieldChange,
-              formData: formData,
-            })
-          ]),
-
-          div({className: 'step-container'}, [
-            h(DataUseAgreements, {
-              darCode: formData.darCode,
-              attestAndSend: () => {},
-              save: () => saveDarDraft(),
-            })
-          ])
         ])
       ])
     ])
   );
-}
+};
 
 export default DataAccessRequestApplicationNew;
