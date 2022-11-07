@@ -6,7 +6,7 @@ import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
-import {setUserRoleStatuses} from '../libs/utils';
+import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
@@ -41,9 +41,17 @@ export default function SignIn(props) {
     const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Storage.setUserIsLogged(false);
-      history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
+      if (isNil(redirectPath)) {
+        history.push(`/tos_acceptance`);
+      } else {
+        history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
+      }
     } else {
-      history.push(redirectPath);
+      if (isNil(redirectPath)) {
+        Navigation.back(user, history);
+      } else {
+        history.push(redirectPath);
+      }
     }
   };
 
@@ -54,10 +62,11 @@ export default function SignIn(props) {
     // redirect to the page the user attempted to go to before
     // signing in.
     const queryParams = new URLSearchParams(window.location.search);
-    let currentPage = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : window.location.pathname;
+    const currentPage = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : window.location.pathname;
+    const shouldRedirect = currentPage !== '/' && currentPage !== '/home';
 
     try {
-      await checkToSAndRedirect(currentPage);
+      await checkToSAndRedirect(shouldRedirect ? currentPage : null);
     } catch (error) {
       try {
         // New users without an existing account will error out in the above call
@@ -65,7 +74,7 @@ export default function SignIn(props) {
         const registeredUser = await User.registerUser();
         setUserRoleStatuses(registeredUser, Storage);
         await onSignIn();
-        history.push(`/tos_acceptance?redirectTo=${currentPage}`);
+        history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${currentPage}` : ''}`);
       } catch (error) {
         // Handle common error cases
         try {
@@ -77,7 +86,7 @@ export default function SignIn(props) {
             case 409:
               // If the user exists, regardless of conflict state, log them in.
               try {
-                await checkToSAndRedirect(currentPage);
+                await checkToSAndRedirect(shouldRedirect ? currentPage : null);
               } catch (error) {
                 Storage.clearStorage();
               }
