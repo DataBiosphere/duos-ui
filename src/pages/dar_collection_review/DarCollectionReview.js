@@ -65,6 +65,7 @@ export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
+  const [referenceIdForDocuments, setReferenceIdForDocuments] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
@@ -82,6 +83,7 @@ export default function DarCollectionReview(props) {
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
+      const referenceIdForDocuments = find((d) => !isEmpty(d.referenceId))(collection.dars).referenceId;
       const researcherProfile = await User.getById(collection.createUserId);
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
@@ -99,6 +101,7 @@ export default function DarCollectionReview(props) {
       setTabs(tabsForUser(user, filteredBuckets, adminPage));
       setIsLoading(false);
       setSubcomponentLoading(false);
+      setReferenceIdForDocuments(referenceIdForDocuments);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
@@ -211,6 +214,11 @@ export default function DarCollectionReview(props) {
           cloudProvider: darInfo.cloudProvider,
           cloudProviderDescription: darInfo.cloudProviderDescription,
           rus: darInfo.rus,
+          referenceId: referenceIdForDocuments,
+          irbDocumentLocation: darInfo.irbDocumentLocation,
+          collaborationLetterLocation: darInfo.collaborationLetterLocation,
+          irbDocumentName: darInfo.irbDocumentName,
+          collaborationLetterName: darInfo.collaborationLetterName
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,
