@@ -116,7 +116,7 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h(FormField, {
             id: `piName`,
-            description: 'I certify that the prinicpal investigator listed below is aware of this study',
+            description: 'I certify that the principal investigator listed below is aware of this study',
             placeholder: 'Firstname Lastname',
             title: '1.3 Principal Investigator',
             validators: [FormValidators.REQUIRED],
