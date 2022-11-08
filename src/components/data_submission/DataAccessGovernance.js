@@ -1,6 +1,6 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
-import { useEffect, useState } from 'react';
-import { cloneDeep, isNil, every } from 'lodash/fp';
+import { useEffect, useState, useCallback } from 'react';
+import { isNil, every, cloneDeep } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
 import { FormFieldTypes, FormField } from '../forms/forms';
@@ -41,46 +41,70 @@ export const DataAccessGovernance = (props) => {
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
 
-    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
+    const groups = filteredConsentGroupsState.map(state => {
+      return {
+        ...state.consentGroup,
+        ...{
+          nihInsitutionalCertificationFileName: state?.nihInsitutionalCertificationFile?.name,
+        },
+      };
+    });
     const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
 
     onChange({key: 'consentGroups', value: groups, isValid: valid});
   }, [consentGroupsState, onChange]);
 
-  const addNewConsentGroup = () => {
-    const newConsentGroupsState = cloneDeep(consentGroupsState);
-    newConsentGroupsState.push({
-      consentGroup: {},
-      editMode: true,
-      valid: false,
+  const addNewConsentGroup = useCallback(() => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+      newConsentGroupsState.push({
+        consentGroup: {},
+        nihInsitutionalCertificationFile: null,
+        editMode: true,
+        valid: false,
+      });
+
+      return newConsentGroupsState;
     });
-    setConsentGroupsState(newConsentGroupsState);
-  };
+  }, []);
 
-  const deleteConsentGroup = (idx) => {
-    const newConsentGroupsState = cloneDeep(consentGroupsState);
-    newConsentGroupsState[idx] = undefined;
-    setConsentGroupsState(newConsentGroupsState);
-  };
+  const deleteConsentGroup = useCallback((idx) => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+      newConsentGroupsState[idx] = undefined; // if deleted directly, keys based on idx would break.
+      return newConsentGroupsState;
+    });
+  }, []);
 
-  const updateConsentGroup = (idx, value, isValid) => {
-    const newConsentGroupsState = cloneDeep(consentGroupsState);
-    newConsentGroupsState[idx] = {
-      editMode: false,
-      valid: isValid,
-      consentGroup: {
-        ...consentGroupsState[idx],
+  const updateConsentGroup = useCallback((idx, value, isValid) => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+
+      newConsentGroupsState[idx].editMode = false;
+      newConsentGroupsState[idx].valid = isValid;
+      newConsentGroupsState[idx].consentGroup = {
+        ...newConsentGroupsState[idx].consentGroup,
         ...value,
-      }
-    };
-    setConsentGroupsState(newConsentGroupsState);
-  };
+      };
+      return newConsentGroupsState;
+    });
+  }, []);
 
-  const startEditConsentGroup = (idx) => {
-    const newConsentGroupsState = cloneDeep(consentGroupsState);
-    newConsentGroupsState[idx].editMode = true;
-    setConsentGroupsState(newConsentGroupsState);
-  };
+  const updateNihInstitutionalCertificationFile = useCallback((idx, file) => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+      newConsentGroupsState[idx].nihInsitutionalCertificationFile = file;
+      return newConsentGroupsState;
+    });
+  }, []);
+
+  const startEditConsentGroup = useCallback((idx) => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+      newConsentGroupsState[idx].editMode = true;
+      return newConsentGroupsState;
+    });
+  }, []);
 
   return div({
     className: 'data-submitter-section',
@@ -134,7 +158,7 @@ export const DataAccessGovernance = (props) => {
             margin: '2rem 0 2rem 0'
           }}, [
           a({
-            id: 'btn_addInstitution',
+            id: 'btn_addConsentGroup',
             className: 'btn-primary btn-add common-background',
             onClick: () => addNewConsentGroup(),
           }, [
@@ -144,7 +168,7 @@ export const DataAccessGovernance = (props) => {
 
         // consent groups
         consentGroupsState
-          .map((state, idx) => {
+          ?.map((state, idx) => {
             if (isNil(state)) {
               return div({}, []);
             }
@@ -154,6 +178,7 @@ export const DataAccessGovernance = (props) => {
               idx: idx,
               saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
               deleteConsentGroup: () => deleteConsentGroup(idx),
+              updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
               startEditConsentGroup: () => startEditConsentGroup(idx),
             });
           })

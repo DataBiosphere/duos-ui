@@ -35,6 +35,8 @@ export const EditConsentGroup = (props) => {
   const {
     consentGroup,
     setConsentGroup,
+    nihInstitutionalCertificationFile,
+    setNihInstitutionalCertificationFile,
     idx,
   } = props;
 
@@ -418,5 +420,15 @@ export const EditConsentGroup = (props) => {
       minLength: 1,
       onChange
     }),
+
+    h(FormField, {
+      type: FormFieldTypes.FILE,
+      title: 'NIH Institutional Certification',
+      description: 'If an Institutional Certification for this consent group exists, please upload it here',
+      id: idx+'_nihInstituionalCertificationFile',
+      name: 'nihInstituionalCertificationFile',
+      defaultValue: nihInstitutionalCertificationFile,
+      onChange: ({value}) => setNihInstitutionalCertificationFile(value),
+    })
   ]);
 };

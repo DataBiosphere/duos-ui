@@ -8,6 +8,7 @@ export const ConsentGroupForm = (props) => {
   const {
     idx,
     saveConsentGroup,
+    updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
   } = props;
 
@@ -41,7 +42,7 @@ export const ConsentGroupForm = (props) => {
     fileTypes: [{}],
   });
 
-
+  const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
   const [consentGroupValidationErrors, setConsentGroupValidationErrors] = useState([]);
   const [editMode, setEditMode] = useState(true);
 
@@ -63,11 +64,19 @@ export const ConsentGroupForm = (props) => {
     (editMode
       ? h(EditConsentGroup, {
         ...props,
-        ...{consentGroup: consentGroup, setConsentGroup: setConsentGroup},
+        ...{
+          consentGroup: consentGroup,
+          setConsentGroup: setConsentGroup,
+          nihInstitutionalCertificationFile,
+          setNihInstitutionalCertificationFile: (file) => {
+            setNihInstitutionalCertificationFile(file);
+            updateNihInstitutionalCertificationFile(file);
+          }
+        },
       })
       : h(ConsentGroupSummary, {
         ...props,
-        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary'},
+        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
       })),
 
     // save + delete

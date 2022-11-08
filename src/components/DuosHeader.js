@@ -123,11 +123,11 @@ export const headerTabsConfig = [
   },
   {
     label: 'Researcher Console',
-    link: '/researcher_console',
-    search: 'researcher_console',
+    link: '/dataset_catalog',
+    search: 'dataset_catalog',
     children: [
-      { label: 'DAR Requests', link: '/researcher_console' },
-      { label: 'Data Catalog', link: '/dataset_catalog' }
+      { label: 'Data Catalog', link: '/dataset_catalog' },
+      { label: 'DAR Requests', link: '/researcher_console' }
     ],
     isRendered: (user) => user.isResearcher
   }
@@ -181,7 +181,7 @@ const NavigationTabsComponent = (props) => {
               to: {
                 pathname: tab.link,
                 state: {
-                  selectedMenuTab: selectedMenuTab,
+                  selectedMenuTab: tabIndex,
                 },
               },
               component: Link

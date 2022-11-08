@@ -71,6 +71,7 @@ const secondaryConsentFields = [
 export const ConsentGroupSummary = (props) => {
   const {
     consentGroup,
+    nihInstitutionalCertificationFile,
     id
   } = props;
 
@@ -184,7 +185,7 @@ export const ConsentGroupSummary = (props) => {
             fontWeight: 'bold',
             fontSize: '16px',
           }
-        }, ['Secondary Group(s)']),
+        }, 'Secondary Group(s)'),
         summarizeSecondaryGroup(),
       ]),
 
@@ -198,7 +199,7 @@ export const ConsentGroupSummary = (props) => {
             fontWeight: 'bold',
             fontSize: '16px',
           }
-        }, ['Data Location']),
+        }, 'Data Location'),
         p({}, [
           (!isNil(consentGroup.dataLocation)? consentGroup.dataLocation.join(', ') : ''),
         ]),
@@ -214,17 +215,33 @@ export const ConsentGroupSummary = (props) => {
             fontSize: '16px',
           }
         }, ['File Types']),
-        div({}, consentGroup.fileTypes.map((ft, idx) => p({
+        div({}, consentGroup.fileTypes.map((ft, idx) => div({
           key: idx,
           style: {
             marginBottom: '20px',
           }
         }, [
-          p({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
-          p({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
-          p({}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${ft.numberOfParticipants}`])]),
+          div({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
+          div({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
+          div({}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${ft.numberOfParticipants}`])]),
         ]))),
       ]),
+    ]),
+    div({
+      isRendered: !isNil(nihInstitutionalCertificationFile),
+    }, [
+      p({
+        style: {
+          fontWeight: 'bold',
+          fontSize: '16px',
+        }
+      }, 'NIH Institutional Certification File'),
+      input({
+        disabled: true,
+        type: 'text',
+        className: 'form-control',
+        value: nihInstitutionalCertificationFile?.name,
+      }),
     ]),
   ]);
 };
