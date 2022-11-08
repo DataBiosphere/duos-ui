@@ -22,7 +22,12 @@ export default function TermsOfServiceAcceptance(props) {
     await TosService.acceptTos();
     await Storage.setUserIsLogged(true);
 
-    history.push('/profile');
+    // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
+    // user's profile.
+    const queryParams = new URLSearchParams(window.location.search);
+    const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/profile';
+
+    history.push(redirect);
   }, [history]);
 
   const acceptButton = h(SimpleButton, {
