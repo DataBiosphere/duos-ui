@@ -69,7 +69,6 @@ const calcResearcherInfoErrors = (formData) => {
     errors.push(requiredFieldMsg('the Principal Investigator'));
   }
 
-
   if (isEmpty(formData.signingOfficial)) {
     errors.push(requiredFieldMsg('your Institutional Signing Official'));
   }

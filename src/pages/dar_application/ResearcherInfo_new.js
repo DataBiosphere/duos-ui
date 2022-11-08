@@ -1,9 +1,8 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList from './CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -176,7 +175,7 @@ export default function ResearcherInfo(props) {
             ariaLevel: ariaLevel + 1,
             defaultValue: formData.signingOfficial,
             onChange: ({key, value}) => {
-              formFieldChange({key, value: value});
+              formFieldChange({key, value});
             },
             selectOptions: allSigningOfficials?.map((so) => {
               return formatSOString(so.displayName, so.email);
@@ -352,85 +351,6 @@ export default function ResearcherInfo(props) {
           isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
-
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.3 Internal Lab Staff',
-                span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
-                that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
-                level here.`])
-              ]),
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              // h(CollaboratorList, {
-              //   formFieldChange,
-              //   collaborators: formData.labCollaborators,
-              //   collaboratorKey: 'labCollaborators',
-              //   collaboratorLabel: 'Internal Lab Member',
-              //   showApproval: true,
-              //   disabled: !isEmpty(darCode),
-              //   deleteBoolArray: (new Array(formData.labCollaborators.length).fill(false))
-              // })
-            ])
-          ])
-        ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.4 Internal Collaborators',
-                span([
-                  `Please add Internal Collaborators here Internal Collaborators are defined as individuals who are not under the direct supervision of 
-                  the PI (e.g., not a member of the PI's laboratory) who assists with the PI's research project involving controlled-access data subject to 
-                  the NIH GDS Policy. Internal collaborators are employees of the Requesting PI's institution and work at the same location/campus as
-                  the PI. Internal Collaborators must be at the PI or equivalent level and are required to have a Library Card in order to access data
-                  through this request. Internal Collaborators will have Data Downloader/Approver status so that they may add their own
-                  relevant Internal Lab Staff. Internal Collaborators will not be required to submit an independent DAR to collaborate on this project.`
-                ])
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              h(CollaboratorList, {
-                disabled: !isEmpty(darCode),
-                formFieldChange,
-                collaborators: formData.internalCollaborators,
-                collaboratorKey: 'internalCollaborators',
-                collaboratorLabel: 'Internal Collaborator',
-                deleteBoolArray: (new Array(formData.internalCollaborators.length).fill(false)),
-                showApproval: false})
-            ])
-          ])
-        ]),
-        div({ className: 'form-group'}, [
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              label({ className: 'control-label rp-title-question' }, [
-                '1.8 External Collaborators',
-                span([
-                  `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work
-                at the same location as the PI, and consequently must be independently approved to access controlled-access data subject to the GDS 
-                Policy. External Collaborators must be at the PI or equivalent level and are not required to have a Library Card in order to access data,
-                although it is encouraged. Note: External Collaborators must submit an independent DAR approved by their signing Official
-                to collaborate on this project. External Collaborators will be able to add their Lab Staff, as needed, via their independent DAR. Approval of
-                this Data Access Request does not indicate approval of the External Collaborators listed.`
-                ])
-              ])
-            ]),
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              h(CollaboratorList, {
-                disabled: !isEmpty(darCode),
-                formFieldChange,
-                collaborators: formData.externalCollaborators,
-                collaboratorKey: 'externalCollaborators',
-                collaboratorLabel: 'External Collaborator',
-                deleteBoolArray: (new Array(formData.externalCollaborators.length).fill(false)),
-                showApproval: false
-              })
-            ])
-          ])
-        ])
       ]),
     ])
   );

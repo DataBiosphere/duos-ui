@@ -9,7 +9,7 @@ import {
   Navigation,
   Notifications as NotyUtil
 } from '../libs/utils';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { ConfirmationDialog } from '../components/ConfirmationDialog_new';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User, DataSet } from '../libs/ajax';
@@ -462,7 +462,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
         div({ id: 'form-views' }, [
           ConfirmationDialog({
-            title: 'Save changes?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: 'access',
+            title: 'Save changes?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: '',
             showModal: showDialogSave, action: { label: 'Yes', handler: dialogHandlerSave }
           }, [
             div({ className: 'dialog-description' },
@@ -501,9 +501,10 @@ const DataAccessRequestApplicationNew = (props) => {
                 formData: formData,
                 datasets,
                 dataUseTranslations,
-                formFieldChange: formFieldChange,
-                setCollaborationLetter: updateCollaborationLetter,
-                setIrbDocument: updateIrbDocument,
+                formFieldChange,
+                batchFormFieldChange,
+                updateCollaborationLetter,
+                updateUploadedIrbDocument: updateIrbDocument,
                 setDatasets,
               })
             ]),
@@ -525,7 +526,7 @@ const DataAccessRequestApplicationNew = (props) => {
               h(DataUseAgreements, {
                 darCode: formData.darCode,
                 attestAndSend: () => {},
-                save: () => saveDarDraft(),
+                save: () => setShowDialogSave(true),
               })
             ])
           ]),

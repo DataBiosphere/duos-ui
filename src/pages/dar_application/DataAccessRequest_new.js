@@ -15,7 +15,10 @@ const searchOntologies = (query, callback) => {
   DAR.getAutoCompleteOT(query).then(
     items => {
       options = items.map(function(item) {
-        return item.label;
+        return {
+          value: item.id,
+          displayText: item.label,
+        };
       });
       callback(options);
     });
@@ -46,11 +49,12 @@ const formatSearchDataset = (ds) => {
 export default function DataAccessRequest(props) {
   const {
     formFieldChange,
+    batchFormFieldChange,
     formData,
     datasets,
     dataUseTranslations,
-    setIrbDocument,
-    setCollaborationLetter,
+    updateUploadedIrbDocument,
+    updateCollaborationLetter,
     setDatasets,
     ariaLevel = 2
   } = props;
@@ -58,6 +62,38 @@ export default function DataAccessRequest(props) {
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
 
   const onChange = ({key, value}) => {
+    formFieldChange({key, value});
+  };
+
+  const primaryChange = ({key, value}) => {
+    if (key === 'diseases' && value === true) {
+      // in this case, reset all fields.
+      batchFormFieldChange({
+        diseases: true,
+        hmb: false,
+        poa: false,
+        other: false,
+      });
+      return;
+    }
+
+
+    const newFormData = {
+      ...formData,
+      ...{
+        [key]: value,
+      },
+    };
+
+    // if, after updating, 'hmb', 'diseases', and 'poa' are false, then 'other' is true.
+    if (newFormData['hmb'] === false && newFormData['diseases'] === false && newFormData['poa'] === false) {
+      batchFormFieldChange({
+        [key]: value,
+        other: true,
+      });
+      return;
+    }
+
     formFieldChange({key, value});
   };
 
@@ -141,7 +177,7 @@ export default function DataAccessRequest(props) {
           type: FormFieldTypes.YESNORADIOGROUP,
           orientation: 'horizontal',
           defaultValue: formData.diseases,
-          onChange,
+          onChange: primaryChange,
         }),
 
         div({
@@ -156,13 +192,13 @@ export default function DataAccessRequest(props) {
             isMulti: true,
             isCreatable: true,
             isAsync: true,
-            optionsAreString: true,
+            optionsAreString: false,
             loadOptions: searchOntologies,
             id: 'ontologies',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
             defaultValue: formData.ontologies,
-            onChange,
+            onChange: ({key, value}) => onChange({key, value: value.map(v => v.value)}),
           }),
         ]),
 
@@ -177,7 +213,7 @@ export default function DataAccessRequest(props) {
             title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
             id: 'hmb',
             defaultValue: formData.hmb,
-            onChange,
+            onChange: primaryChange,
           }),
 
           h(FormField, {
@@ -185,7 +221,7 @@ export default function DataAccessRequest(props) {
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
             id: 'poa',
             defaultValue: formData.poa,
-            onChange,
+            onChange: primaryChange,
           }),
 
           div({
@@ -268,7 +304,7 @@ export default function DataAccessRequest(props) {
               defaultValue: {
                 name: formData.irbDocumentName,
               },
-              onChange: ({value}) => setIrbDocument(value),
+              onChange: ({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration),
             }),
           ]),
 
@@ -287,13 +323,13 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           type: FormFieldTypes.FILE,
-          isRendered: needsCollaborationLetter(),
+          isRendered: needsCollaborationLetter(datasets),
           defaultValue: {
             name: formData.collaborationLetterName,
           },
           id: 'collaborationLetter',
           description: 'One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here.',
-          onChange: ({value}) => setCollaborationLetter(value),
+          onChange: ({value}) => updateCollaborationLetter(value),
         }),
       ]),
     ])
