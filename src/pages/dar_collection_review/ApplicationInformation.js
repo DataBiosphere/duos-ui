@@ -1,5 +1,7 @@
 import { div, label, span } from 'react-hyperscript-helpers';
-import {chunk, filter, isEmpty} from 'lodash/fp';
+import {chunk, filter, isEmpty, isNil} from 'lodash/fp';
+import { DAR } from '../../libs/ajax';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const styles = {
   flexRowElement: {
@@ -47,7 +49,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: '3rem',
-  },
+  }
 };
 
 const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
@@ -61,6 +63,14 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
       div({className: 'text-placeholder', key:`${label}-text-placeholder`, id: `${label}-label-placeholder`, style: {width: '70%', height: '3.2rem'}}),
     ]
   );
+};
+
+const generateLinkContents = (key, id, type, text, fileName, location) => {
+  return div(
+    {id: key, isRendered: !isNil(location) && !isNil(id)},
+    [
+      DownloadLink({label: text, onDownload: ()=>{DAR.downloadDARDocument(id, type, fileName);}})
+    ]);
 };
 
 // function to generate application details content
@@ -113,7 +123,12 @@ export default function ApplicationInformation(props) {
     cloudComputing = false,
     cloudProvider = '- -',
     rus,
-    cloudProviderDescription
+    cloudProviderDescription,
+    referenceId,
+    irbDocumentLocation,
+    collaborationLetterLocation,
+    irbDocumentName,
+    collaborationLetterName
   } = props;
 
   const processCollaborators = (collaborators) =>
@@ -187,6 +202,11 @@ export default function ApplicationInformation(props) {
               }})
           ])  : ''
       ]),
+
+      div({className: 'document-link-container', style: { margin: '1rem 0'}}, [
+        generateLinkContents('irb-doc',referenceId, 'irbDocument', 'Download IRB Protocol', irbDocumentName, irbDocumentLocation),
+        generateLinkContents('collab-letter', referenceId, 'collaborationDocument', 'Download Collaboration Letter', collaborationLetterName, collaborationLetterLocation)
+      ])
     ])
   );
 }
