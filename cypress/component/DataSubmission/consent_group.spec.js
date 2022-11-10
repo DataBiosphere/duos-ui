@@ -9,6 +9,9 @@ const props = {
   parentConsentGroup: {},
   saveConsentGroup: () => {},
   deleteConsentGroup: () => {},
+  nihInstitutionalCertificationFile: null,
+  updateNihInstitutionalCertificationFile: () => {},
+
 };
 
 let propCopy = {};
