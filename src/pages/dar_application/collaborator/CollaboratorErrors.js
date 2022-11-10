@@ -26,7 +26,7 @@ export const computeCollaboratorErrors = (collaborator, showApproval) => {
 
   if (showApproval) {
     if (isEmpty(collaborator.approverStatus)) {
-      errors.push('Must specify the approval status.');
+      errors.push('Must specify the Designated Download/Approval status.');
     }
   }
 
