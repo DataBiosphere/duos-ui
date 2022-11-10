@@ -1,6 +1,7 @@
 import { div, h } from 'react-hyperscript-helpers';
 import { isEmpty, isNil } from 'lodash/fp';
 import { Notification } from '../../../components/Notification';
+import { FormValidators } from '../../../components/forms/forms';
 
 export const computeCollaboratorErrors = (collaborator, showApproval) => {
   const errors = [];
@@ -20,8 +21,8 @@ export const computeCollaboratorErrors = (collaborator, showApproval) => {
   if (isNil(collaborator.email) || collaborator.email === '') {
     errors.push('Must specify the email of the collaborator.');
   } else {
-    var testEmail = /\S+@\S+\.\S+/.test(collaborator.email);
-    if(testEmail === false) errors.push('The email must be a valid email.');
+    var testEmail = FormValidators.EMAIL.isValid(collaborator.email);
+    if(testEmail === false) errors.push(FormValidators.EMAIL.msg);
   }
 
   if (showApproval) {

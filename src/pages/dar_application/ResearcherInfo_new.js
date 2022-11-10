@@ -390,30 +390,6 @@ export default function ResearcherInfo(props) {
           isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
-
-        // div({className: 'form-group'}, [
-        //   div({className: 'row no-margin'}, [
-        //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-        //       label({className: 'control-label rp-title-question'}, [
-        //         '1.3 Internal Lab Staff',
-        //         span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data
-        //         that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent
-        //         level here.`])
-        //       ]),
-        //     ]),
-        //     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-        //       h(CollaboratorList, {
-        //         formFieldChange,
-        //         collaborators: labCollaborators,
-        //         collaboratorKey: 'labCollaborators',
-        //         collaboratorLabel: 'Internal Lab Member',
-        //         showApproval: true,
-        //         disabled: !isEmpty(darCode),
-        //         deleteBoolArray: (new Array(labCollaborators.length).fill(false))
-        //       })
-        //     ])
-        //   ])
-        // ]),
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
