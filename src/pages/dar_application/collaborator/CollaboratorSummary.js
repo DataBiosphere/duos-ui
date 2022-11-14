@@ -6,40 +6,12 @@ export const CollaboratorSummary = (props) => {
     index
   } = props;
 
-  const cardStyle = {
-    display: 'flex',
-    padding: '2% 5%',
-    border: '1px solid #0948B7',
-    borderRadius: '5px',
-    background: '#FFFFFFFF',
-    boxShadow: 'rgb(234, 227, 227) -4px 6px 9px 0px',
-    marginBottom: '2%',
-    margin: '1.5rem 0 1.5rem 0',
-    justifyContent: 'space-around',
-  };
-
-  const editButtonStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    color: '#0948B7',
-    marginTop: 25,
-    padding: '0 1%',
-  };
-
-  const deleteButtonControlStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: 25,
-    padding: '0 1%',
-  };
-
   return div({}, [
     div({}, [
     ]),
-    div({
+    div( {
       id: index,
-
-      style: cardStyle,
+      className: 'collaborator-summary-card',
     }, [
       div({
         style: {
@@ -77,8 +49,7 @@ export const CollaboratorSummary = (props) => {
       ]),
       // Edit Button
       div({
-        className: 'edit-button-control',
-        style: editButtonStyle
+        className: 'collaborator-summary-edit-button',
       }),
       a({
         id: index+'_editCollaborator',
@@ -98,8 +69,7 @@ export const CollaboratorSummary = (props) => {
       ]),
       // Delete Button
       div({
-        className: 'delete-button-control',
-        style: deleteButtonControlStyle,
+        className: 'collaborator-summary-delete-button',
       }),
       a({
         id: index+'_deleteMember',

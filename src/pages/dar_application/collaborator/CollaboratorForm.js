@@ -32,40 +32,6 @@ export default function CollaboratorForm (props) {
     }
   }, [collaborator]);
 
-  const addSaveButtonStyle = {
-    flex: 1,
-    margin: '2px',
-    border: '1px solid #0948B7',
-    color: '#FFFFFFFF',
-    backgroundColor: '#0948B7',
-    padding: '10px 20px',
-  };
-
-  const cancelDeleteButtonStyle = {
-    flex: 1,
-    margin: '2px',
-    border: '1px solid #0948B7',
-    color: '#0948B7',
-    backgroundColor: '#FFFFFFFF',
-    padding: '10px 20px'
-  };
-
-  const deleteButtonControlStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    marginTop: 25
-  };
-
-  const cardStyle = {
-    padding: '2% 7%',
-    border: '1px solid #0948B7',
-    borderRadius: '5px',
-    background: '#FFFFFFFF',
-    boxShadow: 'rgb(234, 227, 227) -4px 6px 9px 0px',
-    marginTop: '2%',
-    marginBottom: '2%'
-  };
-
   const saveUpdate = () => {
     props.saveCollaborator({name, eraCommonsId, title, email, approverStatus, uuid});
     props.updateEditState(false);
@@ -74,14 +40,16 @@ export default function CollaboratorForm (props) {
   return div({
     className: 'form-group row no-margin',
   }, [
-    div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: cardStyle, key: `collaborator-item-${uuid}`}, [
-      h(CollaboratorErrors,
-        {
-          errors: collaboratorValidationErrors,
-        }),
-      h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
+    div({
+      className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12, collaborator-edit-card',
+      key: `collaborator-item-${uuid}`}, [
       // name and eraCommonsId
       div({ className: 'row'}, [
+        h(CollaboratorErrors,
+          {
+            errors: collaboratorValidationErrors,
+          }),
+        h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {
           id: index+'_collaboratorName',
           name: `collaborator-${uuid}-name`,
@@ -157,15 +125,13 @@ export default function CollaboratorForm (props) {
       div({className: 'f-right row'}, [
         // Cancel Button
         div({
-          className: 'cancel-delete-btn btn',
-          style: cancelDeleteButtonStyle,
+          className: 'collaborator-edit-cancel-button btn',
           role: 'button',
           onClick: () => props.updateEditState(false)
         },['Cancel']),
         // Add/Save Button
         div({
-          className: 'add-btn btn',
-          style: addSaveButtonStyle,
+          className: 'collaborator-edit-add-save-button btn',
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
@@ -181,8 +147,7 @@ export default function CollaboratorForm (props) {
       // Delete button
       div({className: 'row', style: { marginTop: 20 }, isRendered: !isNil(props.collaborator)}, [
         div({
-          className: 'delete-button-control col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10',
-          style: deleteButtonControlStyle
+          className: 'col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10 collaborator-edit-delete-button',
         }),
         a({
           id: index+'_deleteMember',
