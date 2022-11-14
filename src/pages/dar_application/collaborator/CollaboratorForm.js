@@ -114,7 +114,9 @@ export default function CollaboratorForm (props) {
           ],
           validators: [FormValidators.REQUIRED],
           orientation: 'horizontal',
-          defaultValue: approverStatus,
+          defaultValue: (approverStatus === true || approverStatus ===  'yes') ? 'yes'
+            : (approverStatus === false || approverStatus === 'no') ? 'no'
+              : undefined,
           onChange: ({value}) => {
             setApproverStatus(value);
           }
