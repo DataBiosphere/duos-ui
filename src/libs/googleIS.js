@@ -1,5 +1,4 @@
 import React from 'react';
-import {Config} from './config';
 
 /**
  * This utility is a wrapper around Google's Identity Services API
@@ -18,8 +17,7 @@ export const GoogleIS = {
 
   accessToken: null,
 
-  initTokenClient: async (onSuccess, onFailure) => {
-    const clientId = await Config.getGoogleClientId();
+  initTokenClient: async (clientId, onSuccess, onFailure) => {
     GoogleIS.client = await window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPES,
@@ -34,10 +32,10 @@ export const GoogleIS = {
     });
   },
 
-  requestAccessToken: async (onSuccess, onFailure) => {
+  requestAccessToken: async (clientId, onSuccess, onFailure) => {
     try {
       if (GoogleIS.client === null) {
-        await GoogleIS.initTokenClient(onSuccess, onFailure);
+        await GoogleIS.initTokenClient(clientId, onSuccess, onFailure);
       }
       GoogleIS.accessToken = await GoogleIS.client.requestAccessToken();
     } catch (e) {
@@ -59,7 +57,7 @@ export const GoogleIS = {
     }
   },
 
-  signInButton: (onSuccess, onFailure) => <button
+  signInButton: (clientId, onSuccess, onFailure) => <button
     type='button'
     style={{
       backgroundColor: 'rgb(66, 133, 244)',
@@ -75,7 +73,7 @@ export const GoogleIS = {
       fontFamily: 'Roboto, sans-serif'
     }}
     onClick={() => {
-      GoogleIS.requestAccessToken(onSuccess, onFailure);
+      GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
     }}>
     <div style={{marginRight: '10px', background: 'rgb(255, 255, 255)', padding: '10px', borderRadius: '2px'}}>
       <svg width='18' height='18' xmlns='http://www.w3.org/2000/svg'>
@@ -100,4 +98,5 @@ export const GoogleIS = {
         Sign-in/Register
     </span>
   </button>
+
 };

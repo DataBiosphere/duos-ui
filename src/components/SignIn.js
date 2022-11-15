@@ -24,7 +24,7 @@ export default function SignIn(props) {
       if (isSubscribed) {
         setClientId(`${await Config.getGoogleClientId()}`);
         if (GoogleIS.client === null) {
-          await GoogleIS.initTokenClient(onSuccess, onFailure);
+          await GoogleIS.initTokenClient(clientId, onSuccess, onFailure);
         }
       }
       ReactTooltip.rebuild();
@@ -128,7 +128,7 @@ export default function SignIn(props) {
           display: 'flex'
         }
       }, [
-        GoogleIS.signInButton(onSuccess, onFailure),
+        GoogleIS.signInButton(clientId, onSuccess, onFailure),
         a({
           className: 'navbar-duos-icon-help',
           style: {
