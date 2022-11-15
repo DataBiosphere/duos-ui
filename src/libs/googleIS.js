@@ -1,7 +1,5 @@
 import React from 'react';
 import {Config} from './config';
-import axios from 'axios';
-import {getApiUrl} from './ajax';
 
 /**
  * This utility is a wrapper around Google's Identity Services API
@@ -20,10 +18,6 @@ export const GoogleIS = {
 
   accessToken: null,
 
-  authenticated: false,
-
-  userInfo: {},
-
   initTokenClient: async (onSuccess, onFailure) => {
     const clientId = await Config.getGoogleClientId();
     GoogleIS.client = await window.google.accounts.oauth2.initTokenClient({
@@ -32,10 +26,7 @@ export const GoogleIS = {
       callback: (tokenResponse) => {
         try {
           GoogleIS.accessToken = tokenResponse.access_token;
-          GoogleIS.authenticated = true;
-          const userInfo = GoogleIS.getUserInfo();
-          GoogleIS.userInfo = Object.assign({accessToken: GoogleIS.accessToken}, userInfo);
-          onSuccess(GoogleIS.userInfo);
+          onSuccess({accessToken: GoogleIS.accessToken});
         } catch (e) {
           onFailure(e);
         }
@@ -54,18 +45,6 @@ export const GoogleIS = {
     }
   },
 
-  /**
-   * Note that we could, instead, use Google's token lookup url
-   * 'https://www.googleapis.com/oauth2/v3/userinfo' with a
-   * bearer token rather than querying Consent's /api/user/me
-   * endpoint.
-   */
-  getUserInfo: async () => {
-    const url = `${await getApiUrl()}/api/user/me`;
-    const response = await axios.get(url, Config.authOpts(GoogleIS.accessToken));
-    return response.data;
-  },
-
   revokeAccessToken: async () => {
     if (GoogleIS.accessToken !== null) {
       if (GoogleIS.client === null) {
@@ -76,8 +55,6 @@ export const GoogleIS = {
         // Reset internal state
         GoogleIS.client = null;
         GoogleIS.accessToken = null;
-        GoogleIS.authenticated = false;
-        GoogleIS.userInfo = null;
       });
     }
   },
