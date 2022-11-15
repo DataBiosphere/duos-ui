@@ -1,20 +1,20 @@
-import {isEmpty, isNil} from 'lodash/fp';
 import {useEffect, useState} from 'react';
-import GoogleLogin from 'react-google-login';
-import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
+import {isEmpty, isNil} from 'lodash/fp';
+import {a, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
-import { Navigation, setUserRoleStatuses } from '../libs/utils';
+import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
+import {GoogleIS} from '../libs/googleOauth';
 
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState({});
-  const {onSignIn, history, customStyle} = props;
+  const {onSignIn, history} = props;
 
   useEffect(() => {
     // Using `isSubscribed` resolves the
@@ -23,12 +23,15 @@ export default function SignIn(props) {
     const init = async () => {
       if (isSubscribed) {
         setClientId(`${await Config.getGoogleClientId()}`);
+        if (GoogleIS.client === null) {
+          await GoogleIS.initTokenClient(onSuccess, onFailure);
+        }
       }
       ReactTooltip.rebuild();
     };
     init();
     return () => (isSubscribed = false);
-  }, []);
+  });
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
@@ -116,19 +119,8 @@ export default function SignIn(props) {
     }
   };
 
-  const spinnerOrSigninButton = () => {
+  const spinnerOrSignInButton = () => {
     const disabled = clientId === '';
-    const defaultProps = {
-      buttonText: 'Sign-in/Register',
-      scope: 'openid email profile',
-      height: '44px',
-      width: '180px',
-      theme: 'dark',
-      clientId: clientId,
-      onSuccess: onSuccess,
-      onFailure: onFailure,
-      disabledStyle: {'opacity': '25%', 'cursor': 'not-allowed'}
-    };
     return disabled ?
       Spinner :
       div({
@@ -136,15 +128,7 @@ export default function SignIn(props) {
           display: 'flex'
         }
       }, [
-        h(GoogleLogin,
-          isNil(customStyle) ? defaultProps : {
-            render: (props) => button({
-              className: 'btn-primary',
-              onClick: props.onClick,
-              style: customStyle
-            }, 'Submit a Data Access Request'),
-            ...defaultProps
-          }),
+        GoogleIS.signInButton(onSuccess, onFailure),
         a({
           className: 'navbar-duos-icon-help',
           style: {
@@ -176,7 +160,7 @@ export default function SignIn(props) {
           description: errorDisplay.description
         })
       ]),
-      div({isRendered: isEmpty(errorDisplay)}, [spinnerOrSigninButton()])
+      div({isRendered: isEmpty(errorDisplay)}, [spinnerOrSignInButton()])
     ])
   );
 }
