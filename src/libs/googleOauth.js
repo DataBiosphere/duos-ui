@@ -67,8 +67,7 @@ export const GoogleIS = {
       if (GoogleIS.client === null) {
         await GoogleIS.initTokenClient(() => {}, () => {});
       }
-      await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {
-      });
+      await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {});
     }
   },
 
