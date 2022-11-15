@@ -31,7 +31,7 @@ describe('Google IS Utility', function () {
         () => {})
         .then(() => {
           expect(GoogleIS.client).to.not.equal(null);
-          GoogleIS.revokeAccessToken().then(() => {
+          GoogleIS.revokeAccessToken(clientId).then(() => {
             expect(GoogleIS.client).to.equal(null);
             expect(GoogleIS.accessToken).to.equal(null);
           });

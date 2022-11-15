@@ -43,11 +43,11 @@ export const GoogleIS = {
     }
   },
 
-  revokeAccessToken: async () => {
+  revokeAccessToken: async (clientId) => {
     if (GoogleIS.accessToken !== null) {
       if (GoogleIS.client === null) {
         // We're initializing a client here purely for logout purposes.
-        await GoogleIS.initTokenClient(() => {}, () => {});
+        await GoogleIS.initTokenClient(clientId, () => {}, () => {});
       }
       await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {
         // Reset internal state
