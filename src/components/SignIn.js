@@ -22,9 +22,10 @@ export default function SignIn(props) {
     let isSubscribed = true;
     const init = async () => {
       if (isSubscribed) {
-        setClientId(`${await Config.getGoogleClientId()}`);
+        const googleClientId = await Config.getGoogleClientId();
+        setClientId(googleClientId);
         if (GoogleIS.client === null) {
-          await GoogleIS.initTokenClient(clientId, onSuccess, onFailure);
+          await GoogleIS.initTokenClient(googleClientId, onSuccess, onFailure);
         }
       }
       ReactTooltip.rebuild();

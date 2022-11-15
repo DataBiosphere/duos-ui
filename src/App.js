@@ -63,7 +63,7 @@ function App() {
   }, [history]);
 
   const signOut = async () => {
-    const clientId = Config.getGoogleClientId();
+    const clientId = await Config.getGoogleClientId();
     await GoogleIS.revokeAccessToken(clientId);
     await Storage.setUserIsLogged(false);
     await Storage.clearStorage();
