@@ -33,7 +33,7 @@ export const GoogleIS = {
         try {
           GoogleIS.accessToken = tokenResponse.access_token;
           GoogleIS.authenticated = true;
-          const userInfo = GoogleIS.getUserInfo(tokenResponse.access_token);
+          const userInfo = GoogleIS.getUserInfo();
           GoogleIS.userInfo = Object.assign({accessToken: GoogleIS.accessToken}, userInfo);
           onSuccess(GoogleIS.userInfo);
         } catch (e) {
@@ -54,16 +54,22 @@ export const GoogleIS = {
     }
   },
 
-  getUserInfo: async (token) => {
-    // const url = 'https://www.googleapis.com/oauth2/v3/userinfo';
+  /**
+   * Note that we could, instead, use Google's token lookup url
+   * 'https://www.googleapis.com/oauth2/v3/userinfo' with a
+   * bearer token rather than querying Consent's /api/user/me
+   * endpoint.
+   */
+  getUserInfo: async () => {
     const url = `${await getApiUrl()}/api/user/me`;
-    const response = await axios.get(url, Config.authOpts(token));
+    const response = await axios.get(url, Config.authOpts(GoogleIS.accessToken));
     return response.data;
   },
 
   revokeAccessToken: async () => {
     if (GoogleIS.accessToken !== null) {
       if (GoogleIS.client === null) {
+        // We're initializing a client here purely for logout purposes.
         await GoogleIS.initTokenClient(() => {}, () => {});
       }
       await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {

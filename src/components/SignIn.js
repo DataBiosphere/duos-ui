@@ -9,7 +9,7 @@ import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
-import {GoogleIS} from '../libs/googleOauth';
+import {GoogleIS} from '../libs/googleIS';
 
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');

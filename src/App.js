@@ -13,7 +13,7 @@ import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
-import {GoogleIS} from './libs/googleOauth';
+import {GoogleIS} from './libs/googleIS';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
