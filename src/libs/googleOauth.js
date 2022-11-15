@@ -67,7 +67,13 @@ export const GoogleIS = {
       if (GoogleIS.client === null) {
         await GoogleIS.initTokenClient(() => {}, () => {});
       }
-      await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {});
+      await window.google.accounts.oauth2.revoke(GoogleIS.accessToken, () => {
+        // Reset internal state
+        GoogleIS.client = null;
+        GoogleIS.accessToken = null;
+        GoogleIS.authenticated = false;
+        GoogleIS.userInfo = null;
+      });
     }
   },
 
