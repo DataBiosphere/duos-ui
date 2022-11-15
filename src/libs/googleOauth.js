@@ -26,8 +26,7 @@ export const GoogleIS = {
 
   initTokenClient: async (onSuccess, onFailure) => {
     const clientId = await Config.getGoogleClientId();
-    const google = window.google;
-    GoogleIS.client = await google.accounts.oauth2.initTokenClient({
+    GoogleIS.client = await window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPES,
       callback: (tokenResponse) => {
