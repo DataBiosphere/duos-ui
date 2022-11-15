@@ -44,11 +44,14 @@ export const NotificationService = {
    * @returns {Promise<JSON>}
    */
   getBannerObjectById: async (id) => {
-    const banners = await NotificationService.getBanners();
-    if (!fp.isEmpty(banners)) {
-      return fp.find({active: true, id: id})(banners);
+    try {
+      const banners = await NotificationService.getBanners();
+      if (!fp.isEmpty(banners)) {
+        return fp.find({active: true, id: id})(banners);
+      }
+    } catch(error) {
+      return null;
     }
-    return undefined;
   },
 
 };
