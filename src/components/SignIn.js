@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {isEmpty, isNil} from 'lodash/fp';
 import {a, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
@@ -14,7 +14,7 @@ import {GoogleIS} from '../libs/googleIS';
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState({});
-  const {onSignIn, history} = props;
+  const {onSignIn, history, customStyle} = props;
 
   useEffect(() => {
     // Using `isSubscribed` resolves the
@@ -129,8 +129,13 @@ export default function SignIn(props) {
           display: 'flex'
         }
       }, [
-        GoogleIS.signInButton(clientId, onSuccess, onFailure),
+        isNil(customStyle) ?
+          GoogleIS.signInButton(clientId, onSuccess, onFailure) :
+          <button className={'btn-primary'} style={customStyle} onClick={() => {
+            GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
+          }}>Submit a Data Access Request</button>,
         a({
+          isRendered: isNil(customStyle),
           className: 'navbar-duos-icon-help',
           style: {
             color: 'white',
