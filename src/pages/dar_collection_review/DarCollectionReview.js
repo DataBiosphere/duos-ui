@@ -71,7 +71,6 @@ export default function DarCollectionReview(props) {
     applicationInformation: 'Application Information'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
-  const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
@@ -94,7 +93,6 @@ export default function DarCollectionReview(props) {
         : filterBucketsForUser(user, processedBuckets);
       setDataUseBuckets(filteredBuckets);
       setCollection(collection);
-      setCurrentUser(user);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
       setTabs(tabsForUser(user, filteredBuckets, adminPage));
