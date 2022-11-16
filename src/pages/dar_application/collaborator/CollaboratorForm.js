@@ -41,7 +41,7 @@ export default function CollaboratorForm (props) {
     className: 'form-group row no-margin',
   }, [
     div({
-      className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12, collaborator-edit-card',
+      className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12, collaborator-form-card',
       key: `collaborator-item-${uuid}`}, [
       // name and eraCommonsId
       div({ className: 'row'}, [
@@ -127,13 +127,13 @@ export default function CollaboratorForm (props) {
       div({className: 'f-right row'}, [
         // Cancel Button
         div({
-          className: 'collaborator-edit-cancel-button btn',
+          className: 'collaborator-form-cancel-button btn',
           role: 'button',
           onClick: () => props.updateEditState(false)
         },['Cancel']),
         // Add/Save Button
         div({
-          className: 'collaborator-edit-add-save-button btn',
+          className: 'collaborator-form-add-save-button btn',
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
@@ -149,14 +149,14 @@ export default function CollaboratorForm (props) {
       // Delete button
       div({className: 'row', style: { marginTop: 20 }, isRendered: !isNil(props.collaborator)}, [
         div({
-          className: 'col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10 collaborator-edit-delete-button',
+          className: 'col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10',
         }),
         a({
           id: index+'_deleteMember',
           onClick: () => props.deleteCollaborator(),
         }, [
           span({
-            className: 'dar-icon-button glyphicon glyphicon-trash',
+            className: 'collaborator-delete-icon glyphicon glyphicon-trash',
             'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
           }),
           span({

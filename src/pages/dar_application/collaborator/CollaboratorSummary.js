@@ -58,7 +58,7 @@ export const CollaboratorSummary = (props) => {
         },
       }, [
         span({
-          className: 'glyphicon glyphicon-pencil caret-margin block-icon-color', 'aria-hidden': 'true',
+          className: 'glyphicon glyphicon-pencil caret-margin collaborator-edit-icon', 'aria-hidden': 'true',
           'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
         }),
         span({
@@ -76,7 +76,7 @@ export const CollaboratorSummary = (props) => {
         onClick: () => props.deleteCollaborator(),
       }, [
         span({
-          className: 'glyphicon glyphicon-trash icon-color',
+          className: 'glyphicon glyphicon-trash collaborator-delete-icon',
           'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
         }),
         span({

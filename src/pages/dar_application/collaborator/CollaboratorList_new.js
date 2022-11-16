@@ -2,6 +2,7 @@ import CollaboratorForm from './CollaboratorForm';
 import CollaboratorRow from './CollaboratorRow';
 import { useState, useEffect} from 'react';
 import { button, div, h } from 'react-hyperscript-helpers';
+import './collaborator.css';
 
 export default function CollaboratorList_new(props) {
   const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval} = props;
