@@ -40,6 +40,10 @@ const fetchAllDatasets = async (dsIds) => {
   return DataSet.getDatasetsByIds(dsIds);
 };
 
+const validationFailed = (validation) => {
+  return Object.keys(validation).some((key) => !isEmpty(validation[key]));
+};
+
 const DataAccessRequestApplicationNew = (props) => {
   const [formData, setFormData] = useState({
     datasetIds: [],
@@ -113,7 +117,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState(null);
   const [uploadedCollaborationLetter, setUploadedCollaborationLetter] = useState(null);
 
-  const [problemSavingRequest, setProblemSavingRequest] = useState(false);
   const [forcedScroll, setForcedScroll] = useState(null);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -286,10 +289,6 @@ const DataAccessRequestApplicationNew = (props) => {
     }, 200));
   }, [forcedScroll]);
 
-  const partialSave = () => {
-    setShowDialogSave(true);
-  };
-
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
   const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
@@ -309,65 +308,96 @@ const DataAccessRequestApplicationNew = (props) => {
     return darPartialResponse;
   };
 
-  const submitDARFormData = async (answer) => {
-    if (answer === true) {
-      const userId = Storage.getCurrentUser().userId;
-      let formattedFormData = cloneDeep(formData);
+  const scrollToFormErrors = (validationMessages) => {
+    if (!isEmpty(validationMessages.researcherInfoErrors)) {
+      goToStep(1);
+    } else if (!isEmpty(validationMessages.darErrors)) {
+      goToStep(2);
+    } else if (!isEmpty(validationMessages.rusErrors)) {
+      goToStep(3);
+    } else {
+      goToStep(1);
+    }
+  };
 
-      for (var key in formattedFormData) {
-        if (formattedFormData[key] === '') {
-          formattedFormData[key] = undefined;
-        }
+  const attemptSubmit = () => {
+    const validation = validateDARFormData(
+      formData,
+      datasets,
+      dataUseTranslations,
+      uploadedIrbDocument,
+      uploadedCollaborationLetter);
+
+    setValidationMessages(validation);
+    const isInvalidForm = validationFailed(validation);
+    setShowValidationMessages(isInvalidForm);
+
+    if (isInvalidForm) {
+      scrollToFormErrors(validation);
+    } else {
+      setShowDialogSubmit(true);
+    }
+  };
+
+  const submitDARFormData = async () => {
+    const userId = Storage.getCurrentUser().userId;
+    let formattedFormData = cloneDeep(formData);
+
+    for (var key in formattedFormData) {
+      if (formattedFormData[key] === '') {
+        formattedFormData[key] = undefined;
       }
-      formattedFormData.userId = userId;
+    }
+    formattedFormData.userId = userId;
 
-      try {
-        //NOTE: the pre-processing saves are adding time to record generation (makes front-end seem slow)
-        //pre-prcessing saves are needed since you can't save documents without a reference id
-        //saves ensure record has a reference id
-        //actual fix would involve generating a blank draft record that is saved on console button click
-        //however that would fall outside the scope of this pr, which is already large enough due to refactored code
-        let referenceId = formattedFormData.referenceId;
-        let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
-        referenceId = darPartialResponse.referenceId;
+    try {
+      //NOTE: the pre-processing saves are adding time to record generation (makes front-end seem slow)
+      //pre-prcessing saves are needed since you can't save documents without a reference id
+      //saves ensure record has a reference id
+      //actual fix would involve generating a blank draft record that is saved on console button click
+      //however that would fall outside the scope of this pr, which is already large enough due to refactored code
+      let referenceId = formattedFormData.referenceId;
+      let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
+      referenceId = darPartialResponse.referenceId;
 
-        if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
-          darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
-        }
-        let updatedFormData = assign(formattedFormData, darPartialResponse);
-        await DAR.postDar(updatedFormData);
-        setShowDialogSubmit({
-          showDialogSubmit: false
-        }, Navigation.console(Storage.getCurrentUser(), props.history).response);
-      } catch (error) {
-        setShowDialogSubmit(false);
-        NotyUtil.showError({
-          text: 'Error: Data Access Request submission failed'
-        });
+      if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
+        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
+      let updatedFormData = assign(formattedFormData, darPartialResponse);
+      await DAR.postDar(updatedFormData);
+      setShowDialogSubmit({
+        showDialogSubmit: false
+      }, Navigation.console(Storage.getCurrentUser(), props.history).response);
+    } catch (error) {
+      setShowDialogSubmit(false);
+      NotyUtil.showError({
+        text: 'Error: Data Access Request submission failed'
+      });
+    }
+  };
+
+  const onSaveConfirmation = (selectedOk) => () => {
+    setDisableOkButton(true);
+    if (selectedOk === true) {
+      saveDarDraft();
+      setDisableOkButton(false);
+    } else {
+      showDialogSave(false);
+      setDisableOkButton(false);
+    }
+  };
+
+  const onSubmitConfirmation = (selectedOk) => () => {
+    setDisableOkButton(true);
+    if (selectedOk === true) {
+      submitDARFormData();
+      setDisableOkButton(false);
     } else {
       setShowDialogSubmit(false);
+      setDisableOkButton(false);
     }
   };
 
-  const dialogHandlerSubmit = (answer) => () => {
-    setDisableOkButton(true);
-    submitDARFormData(answer);
-  };
-
-  const updateShowDialogSave = (value) => {
-    setShowDialogSave(value);
-    setDisableOkButton(false);
-  };
-
-  const dialogHandlerSave = (answer) => () => {
-    setDisableOkButton(true);
-    if (answer === true) {
-      saveDarDraft();
-    } else {
-      updateShowDialogSave(false);
-    }
-  };
 
   const saveDarDraft = async () => {
     let formattedFormData = cloneDeep(formData);
@@ -378,6 +408,15 @@ const DataAccessRequestApplicationNew = (props) => {
     try {
       let referenceId = formattedFormData.referenceId;
       console.log(formattedFormData);
+
+      const validation = validateDARFormData(
+        formData,
+        datasets,
+        dataUseTranslations,
+        uploadedIrbDocument,
+        uploadedCollaborationLetter);
+
+      setValidationMessages(validation);
       setShowValidationMessages(!showValidationMessages);
       return;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
@@ -461,12 +500,22 @@ const DataAccessRequestApplicationNew = (props) => {
         ]),
 
         div({ id: 'form-views' }, [
-          ConfirmationDialog({
+          h(ConfirmationDialog, {
             title: 'Save changes?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: '',
-            showModal: showDialogSave, action: { label: 'Yes', handler: dialogHandlerSave }
+            showModal: showDialogSave, action: { label: 'Yes', handler: onSaveConfirmation }
+          }, [
+            div({ isRendered: validationFailed(validationMessages) }, [
+              'There are issues saving this Data Access Request. Please fix them and save again.'
+            ]),
+            div({ className: 'dialog-description' },
+              ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.']),
+          ]),
+          h(ConfirmationDialog, {
+            title: 'Submit Data Access Request?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: '',
+            showModal: showDialogSubmit, action: { label: 'Yes', handler: onSubmitConfirmation }
           }, [
             div({ className: 'dialog-description' },
-              ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
+              ['Are you sure you want to submit this Data Access Request? This cannot be undone.']),
           ]),
           div({className: 'dar-steps'}, [
             div({className: 'step-container'}, [
@@ -484,7 +533,6 @@ const DataAccessRequestApplicationNew = (props) => {
                 location: props.location,
                 nihValid: nihValid,
                 onNihStatusUpdate: setNihValid,
-                partialSave,
                 researcher,
                 showValidationMessages: showValidationMessages,
                 allSigningOfficials: allSigningOfficials,
@@ -525,7 +573,7 @@ const DataAccessRequestApplicationNew = (props) => {
             div({className: 'step-container'}, [
               h(DataUseAgreements, {
                 darCode: formData.darCode,
-                attestAndSend: () => {},
+                attestAndSend: () => attemptSubmit(),
                 save: () => setShowDialogSave(true),
               })
             ])

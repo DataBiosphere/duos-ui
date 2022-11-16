@@ -1,6 +1,5 @@
 import { mergeAll } from 'lodash/fp';
-import { Component } from 'react';
-import { a, div, h, h2, hh } from 'react-hyperscript-helpers';
+import { a, div, h, h2 } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import { Alert } from './Alert';
 import CloseIconComponent from './CloseIconComponent';
@@ -31,45 +30,29 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export const ConfirmationDialog = hh(class ConfirmationDialog extends Component {
+export const ConfirmationDialog = (props) => {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      alertMessage: undefined,
-      alertTitle: undefined
-    };
-  }
+  const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props;
 
-  static getDerivedStateFromProps(nextProps) {
-    return {
-      alertMessage: nextProps.alertMessage,
-      alertTitle: nextProps.alertTitle
-    };
-  }
+  return (
+    h(Modal, {
+      isOpen: props.showModal,
+      onAfterOpen: props.afterOpenModal,
+      onRequestClose: props.onRequestClose,
+      style: mergeAll([customStyles, props.style]),
+      contentLabel: 'Modal'
+    }, [
+      div({ className: 'dialog-header' }, [
+        h(CloseIconComponent, {closeFn: props.action.handler(false)}),
+        h2({ id: 'lbl_dialogTitle', className: 'dialog-title ' }, [props.title]),
+      ]),
 
-  render() {
-    const { disableOkBtn = false, disableNoBtn = false } = this.props;
-
-    return (
-      h(Modal, {
-        isOpen: this.props.showModal,
-        onAfterOpen: this.props.afterOpenModal,
-        onRequestClose: this.props.onRequestClose,
-        style: mergeAll([customStyles, this.props.style]),
-        contentLabel: 'Modal'
-      }, [
-        div({ className: 'dialog-header' }, [
-          h(CloseIconComponent, {closeFn: this.props.action.handler(false)}),
-          h2({ id: 'lbl_dialogTitle', className: 'dialog-title ' }, [this.props.title]),
-        ]),
-
-        div({ id: 'lbl_dialogContent', className: 'dialog-content' }, [
-          this.props.children,
-          div({ isRendered: this.state.alertTitle !== undefined, className: 'dialog-alert' }, [
-            Alert({ id: 'dialog', type: 'danger', title: this.state.alertTitle, description: this.state.alertMessage })
-          ])
-        ]),
+      div({ id: 'lbl_dialogContent', className: 'dialog-content' }, [
+        props.children,
+        div({ isRendered: alertTitle !== undefined, className: 'dialog-alert' }, [
+          Alert({ id: 'dialog', type: 'danger', title: alertTitle, description: alertMessage })
+        ])
+      ]),
 
 
       div({ className: 'flex flex-row', style: {
@@ -82,19 +65,18 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
           style: {
             marginRight: '2rem',
           },
-          onClick: this.props.action.handler(false),
+          onClick: props.action.handler(false),
           disabled: disableNoBtn
         }, ['No']),
         a({
           id: 'btn_submit',
           className: 'button button-blue',
-          onClick: this.props.action.handler(true), 
+          onClick: props.action.handler(true),
           isabled: disableOkBtn
         }, [
-            this.props.action.label
+          props.action.label
         ]),
-    ])
       ])
-    );
-  }
-});
+    ])
+  );
+};

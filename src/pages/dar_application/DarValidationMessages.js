@@ -10,9 +10,12 @@ export const DarValidationMessages = (props) => {
 
   return div({
     isRendered: showValidationMessages,
+    style: {
+      paddingTop: '10px',
+    }
   },
   validationMessages?.map((err, idx) => {
-    return div({style: {marginBottom: '2rem'}}, [
+    return div({style: {marginBottom: '10px'}}, [
       h(Notification,
         {
           key: idx,
