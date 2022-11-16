@@ -251,5 +251,54 @@ describe('Application Information', () => {
     expect(anvilLabel).to.exist;
     anvilLabel.contains('Using AnVIL only for storage and analysis');
   });
+
+  it('redners expected document links', ()=> {
+    const props = {
+      irbDocumentLocation: 'some-uuid',
+      collaborationLetterLocation: 'some-other-uuid',
+      referenceId: 'dar-uuid',
+      irbDocumentName: 'irbdoc.txt',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+    const irbDocLink = cy.get('#irb-doc');
+    expect(irbDocLink).to.exist;
+    irbDocLink.contains('Download IRB Protocol');
+
+    const collabDocLink = cy.get('#collab-letter');
+    expect(collabDocLink).to.exist;
+    collabDocLink.contains('Download Collaboration Letter');
+
+  });
+
+  it('doesnt render a missing document link', ()=> {
+    const props = {
+      collaborationLetterLocation: 'some-other-uuid',
+      referenceId: 'dar-uuid',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+
+    cy.get('#irb-doc').should('not.exist');
+    const collabDocLink = cy.get('#collab-letter');
+    expect(collabDocLink).to.exist;
+    collabDocLink.contains('Download Collaboration Letter');
+  });
+
+  it('doesnt render without referenceId', ()=> {
+    const props = {
+      irbDocumentLocation: 'some-uuid',
+      collaborationLetterLocation: 'some-other-uuid',
+      irbDocumentName: 'irbdoc.txt',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+
+    cy.get('#irb-doc').should('not.exist');
+    cy.get('#collab-letter').should('not.exist');
+  });
 });
 

@@ -260,6 +260,18 @@ export const DAR = {
     return res.data;
   },
 
+  downloadDARDocument: async (referenceId, fileType, fileName) => {
+    const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream'
+    });
+    const url = `${await getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`;
+    axios.get(url, authOpts).then((response) =>{
+      fileDownload(response.data, fileName);
+    });
+  },
+
   //NOTE: endpoints requires a dar id
   uploadDARDocument: async(file, darId, fileType) => {
     if(isFileEmpty(file)) {

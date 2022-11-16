@@ -1,12 +1,12 @@
 import {isEmpty, isNil} from 'lodash/fp';
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState} from 'react';
 import GoogleLogin from 'react-google-login';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
-import {Navigation, setUserRoleStatuses} from '../libs/utils';
+import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
@@ -32,7 +32,7 @@ export default function SignIn(props) {
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
-  const checkToSAndRedirect = async () => {
+  const checkToSAndRedirect = async (redirectPath) => {
     // Check if the user has accepted ToS yet or not:
     const user = await User.getMe();
     setUserRoleStatuses(user, Storage);
@@ -41,16 +41,32 @@ export default function SignIn(props) {
     const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Storage.setUserIsLogged(false);
-      history.push('/tos_acceptance');
+      if (isNil(redirectPath)) {
+        history.push(`/tos_acceptance`);
+      } else {
+        history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
+      }
     } else {
-      redirect(user);
+      if (isNil(redirectPath)) {
+        Navigation.back(user, history);
+      } else {
+        history.push(redirectPath);
+      }
     }
   };
 
   const onSuccess = async (response) => {
     Storage.setGoogleData(response);
+
+    // if 'redirectTo' exists, redirect there. otherwise,
+    // redirect to the page the user attempted to go to before
+    // signing in.
+    const queryParams = new URLSearchParams(window.location.search);
+    const currentPage = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : window.location.pathname;
+    const shouldRedirect = currentPage !== '/' && currentPage !== '/home';
+
     try {
-      await checkToSAndRedirect();
+      await checkToSAndRedirect(shouldRedirect ? currentPage : null);
     } catch (error) {
       try {
         // New users without an existing account will error out in the above call
@@ -58,7 +74,7 @@ export default function SignIn(props) {
         const registeredUser = await User.registerUser();
         setUserRoleStatuses(registeredUser, Storage);
         await onSignIn();
-        history.push('/tos_acceptance');
+        history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${currentPage}` : ''}`);
       } catch (error) {
         // Handle common error cases
         try {
@@ -70,7 +86,7 @@ export default function SignIn(props) {
             case 409:
               // If the user exists, regardless of conflict state, log them in.
               try {
-                await checkToSAndRedirect();
+                await checkToSAndRedirect(shouldRedirect ? currentPage : null);
               } catch (error) {
                 Storage.clearStorage();
               }
@@ -99,10 +115,6 @@ export default function SignIn(props) {
       setErrorDisplay({'title': response.error, 'description': response.details});
     }
   };
-
-  const redirect = useCallback( (user) => {
-    Navigation.back(user, history);
-  }, [history]);
 
   const spinnerOrSigninButton = () => {
     const disabled = clientId === '';

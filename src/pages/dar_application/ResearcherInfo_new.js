@@ -1,8 +1,10 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, span, button, label } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
+import CollaboratorList from './CollaboratorList';
+import CollaboratorList_new from './collaborator/CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -126,7 +128,6 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1753
           h3('1.4 Internal Lab Staff'),
           div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
@@ -134,12 +135,15 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white btn-xs',
-            style: { marginTop: 25 },
-            onClick: () => {}
-          }, ['Add Collaborator'])
+          h(CollaboratorList_new, {
+            formFieldChange,
+            collaborators: formData.labCollaborators,
+            collaboratorKey: 'labCollaborators',
+            collaboratorLabel: 'Internal Lab Member',
+            showApproval: true,
+            disabled: !isEmpty(darCode),
+            deleteBoolArray: (new Array(formData.labCollaborators.length).fill(false)),
+          }),
         ]),
 
         div({className: 'dar-application-row'}, [

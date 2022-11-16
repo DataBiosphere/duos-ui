@@ -11,7 +11,7 @@ const collections = [
   }
 ];
 
-describe('DataUseVoteSummary - Tests', function() {
+describe('DarCollectionTable - Tests', function() {
   it('renders a single column of the data', function() {
     const columns = [
       DarCollectionTableColumnOptions.DAR_CODE

@@ -153,7 +153,7 @@ export const isFileEmpty = (file) => {
 };
 
 export const isEmailAddress = (email) => {
-  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  const re = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/;
   return re.test(email);
 };
 
