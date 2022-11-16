@@ -1,6 +1,6 @@
 import { mergeAll } from 'lodash/fp';
 import { Component } from 'react';
-import { button, div, h, h2, hh } from 'react-hyperscript-helpers';
+import { a, div, h, h2, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import { Alert } from './Alert';
 import CloseIconComponent from './CloseIconComponent';
@@ -71,10 +71,29 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
           ])
         ]),
 
-        div({ className: 'dialog-footer row no-margin' }, [
-          button({ 'data-value': false, isRendered: this.props.type !== 'informative', id: 'btn_cancel', className: 'col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background', onClick: this.props.action.handler(false), disabled: disableNoBtn }, ['No']),
-          button({ 'data-value': true, id: 'btn_action', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ' + (this.props.type === 'informative' ? 'f-right' : ''), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
-        ])
+
+      div({ className: 'flex flex-row', style: {
+        justifyContent: 'flex-end',
+        marginTop: '20px',
+      }, }, [
+        a({
+          id: 'btn_save',
+          className: 'button button-white',
+          style: {
+            marginRight: '2rem',
+          },
+          onClick: this.props.action.handler(false),
+          disabled: disableNoBtn
+        }, ['No']),
+        a({
+          id: 'btn_submit',
+          className: 'button button-blue',
+          onClick: this.props.action.handler(true), 
+          isabled: disableOkBtn
+        }, [
+            this.props.action.label
+        ]),
+    ])
       ])
     );
   }

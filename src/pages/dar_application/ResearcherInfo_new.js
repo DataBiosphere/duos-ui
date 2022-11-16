@@ -1,10 +1,9 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, span, button, label } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, span, button } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList from './CollaboratorList';
-import CollaboratorList_new from './collaborator/CollaboratorList_new';
+import CollaboratorList from './collaborator/CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -135,7 +134,7 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          h(CollaboratorList_new, {
+          h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.labCollaborators,
             collaboratorKey: 'labCollaborators',
