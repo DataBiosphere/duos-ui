@@ -1,6 +1,5 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactGA from 'react-ga';
-import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
 import {Config} from './libs/config';
@@ -14,10 +13,12 @@ import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
 import {GoogleIS} from './libs/googleIS';
+import {GoogleOAuthProvider} from '@react-oauth/google';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [env, setEnv] = useState('');
+  const [clientId, setClientId] = useState(null);
   let history = useHistory();
 
   const trackPageView = (location) => {
@@ -50,12 +51,18 @@ function App() {
       setEnv(environment);
     };
 
+    const setGoogleClientId = async () => {
+      const id = await Config.getGoogleClientId();
+      setClientId(id);
+    }
+
     const initApp = async () => {
       Modal.setAppElement(document.getElementById('modal-root'));
       await initializeReactGA(history);
       await setUserIsLogged();
       await setEnvironment();
       await stackdriverStart();
+      await setGoogleClientId();
     };
 
     initApp();
@@ -76,18 +83,18 @@ function App() {
   };
 
   return (
-    div({ className: 'body' }, [
-      div({ className: 'wrap' }, [
-        div({ className: 'main' }, [
-          h(DuosHeader, { onSignOut: signOut }),
-          h(Spinner, {
-            name: 'mainSpinner', group: 'duos', loadingImage
-          }),
-          h(Routes, { onSignOut: signOut, onSignIn: signIn, isLogged: isLoggedIn, env: env })
-        ])
-      ]),
-      DuosFooter()
-    ])
+    <GoogleOAuthProvider clientId={clientId}>
+      <div className={'body'}>
+        <div className={'wrap'}>
+          <div className={'main'}>
+            <DuosHeader onSignOut={signOut}/>
+            <Spinner name={'mainSpinner'} group={'duos'} loadingImage={loadingImage}/>
+            <Routes onSignOut={signOut} onSignIn={signIn} isLogged={isLoggedIn} env={env}/>
+          </div>
+          <DuosFooter/>
+        </div>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
 

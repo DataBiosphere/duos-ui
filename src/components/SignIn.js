@@ -10,6 +10,8 @@ import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
 import {GoogleIS} from '../libs/googleIS';
+import { GoogleLogin } from '@react-oauth/google';
+import jwt_decode from 'jwt-decode';
 
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');
@@ -134,6 +136,16 @@ export default function SignIn(props) {
           <button className={'btn-primary'} style={customStyle} onClick={() => {
             GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
           }}>Submit a Data Access Request</button>,
+        isNil(customStyle) ?
+          <GoogleLogin
+            onSuccess={credentialResponse => {
+              console.log(credentialResponse);
+              console.log(jwt_decode(credentialResponse.credential));
+            }}
+            onError={() => {
+              console.log('Login Failed');
+            }}
+          /> : null,
         a({
           isRendered: isNil(customStyle),
           className: 'navbar-duos-icon-help',
