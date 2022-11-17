@@ -6,9 +6,11 @@ import SigningOfficialTable from '../components/signing_official_table/SigningOf
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
 import SigningOfficialDAAModal from '../components/modals/SigningOfficialDAAModal';
+import Acknowledgments, { hasAccepted } from '../libs/acknowledgements';
 
-const hasAcceptedDaas = (user) => {
-  return false;
+
+const hasAcceptedDaas = async () => {
+  return await hasAccepted(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
 };
 
 export default function SigningOfficialResearchers() {
@@ -27,7 +29,8 @@ export default function SigningOfficialResearchers() {
         const soUser = await User.getMe();
         const researcherList = await User.list(USER_ROLES.signingOfficial);
 
-        if (!hasAcceptedDaas(soUser)) {
+        const acceptedDaas = await hasAcceptedDaas();
+        if (!acceptedDaas) {
           setShowDaaModal(true);
         }
 

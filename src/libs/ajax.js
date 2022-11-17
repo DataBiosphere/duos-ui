@@ -641,6 +641,16 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/me/dac/datasets`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
+  },
+  getAcknowledgements: async () => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  acceptAcknowledgments: async (...keys) => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(keys), { method: 'POST' }]));
+    return res.data;
   }
 };
 
