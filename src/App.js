@@ -1,18 +1,19 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import ReactGA from 'react-ga';
-import { div, h } from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
-import { Config } from './libs/config';
+import {Config} from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory} from 'react-router-dom';
 import loadingImage from './images/loading-indicator.svg';
 
-import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
-import { StackdriverReporter } from './libs/stackdriverReporter';
-import { Storage } from './libs/storage';
+import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
+import {StackdriverReporter} from './libs/stackdriverReporter';
+import {Storage} from './libs/storage';
 import Routes from './Routes';
+import {GoogleIS} from './libs/googleIS';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -62,6 +63,8 @@ function App() {
   }, [history]);
 
   const signOut = async () => {
+    const clientId = await Config.getGoogleClientId();
+    await GoogleIS.revokeAccessToken(clientId);
     await Storage.setUserIsLogged(false);
     await Storage.clearStorage();
     await setIsLoggedIn(false);
