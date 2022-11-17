@@ -121,10 +121,10 @@ export default function CollaboratorForm (props) {
             setApproverStatus(value);
           }
         }),
-        p({className: 'control-label rp-choice-questions', style: { fontSize: 14, marginTop: 5, marginBottom: 20 } },
+        p({className: 'control-label rp-choice-questions', style: { fontSize: 14, marginTop: 5, marginBottom: 5 } },
           [`Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as their Internal Lab Staff.`])
       ]),
-      div({className: 'f-right row'}, [
+      div({className: 'f-right row', style: { marginTop: 20 } }, [
         // Cancel Button
         div({
           className: 'collaborator-form-cancel-button btn',
@@ -147,7 +147,7 @@ export default function CollaboratorForm (props) {
         [`${isNil(collaborator) ? 'Add' : 'Save'}`])
       ]),
       // Delete button
-      div({className: 'row', style: { marginTop: 20 }, isRendered: !isNil(props.collaborator)}, [
+      div({className: 'row', style: { marginTop: 40, marginBottom: 15 }, isRendered: !isNil(props.collaborator)}, [
         div({
           className: 'col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10',
         }),

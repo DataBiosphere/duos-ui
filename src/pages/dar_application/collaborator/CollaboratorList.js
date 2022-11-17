@@ -4,7 +4,7 @@ import { useState, useEffect} from 'react';
 import { button, div, h } from 'react-hyperscript-helpers';
 import './collaborator.css';
 
-export default function CollaboratorList_new(props) {
+export default function CollaboratorList(props) {
   const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval} = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);

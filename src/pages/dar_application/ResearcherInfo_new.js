@@ -1,10 +1,9 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, label, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList from './CollaboratorList';
-import CollaboratorList_new from './collaborator/CollaboratorList_new';
+import CollaboratorList from './collaborator/CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -170,7 +169,7 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          h(CollaboratorList_new, {
+          h(CollaboratorList, {
             formFieldChange,
             collaborators: labCollaborators,
             collaboratorKey: 'labCollaborators',
@@ -182,7 +181,6 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1754
           h3('1.5 Internal Collaborators'),
           div(
             `Please add Internal Collaborators here Internal Collaborators are defined as individuals
@@ -196,12 +194,15 @@ export default function ResearcherInfo(props) {
             Internal Collaborators will not be required to submit an independent DAR to collaborate 
             on this project.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white',
-            style: { marginTop: 25 },
-            onClick: () => {}
-          }, ['Add Collaborator'])
+          h(CollaboratorList, {
+            formFieldChange,
+            collaborators: internalCollaborators,
+            collaboratorKey: 'internalCollaborators',
+            collaboratorLabel: 'Internal Collaborator',
+            showApproval: false,
+            disabled: !isEmpty(darCode),
+            deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
+          }),
         ]),
 
         div({className: 'dar-application-row'}, [
@@ -350,7 +351,6 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1754
           h3('1.9 External Collaborators'),
           div(
             `Please list External collaborators here. External Collaborators are not employees of the 
@@ -363,14 +363,16 @@ export default function ResearcherInfo(props) {
             as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
             the External Collaborators listed.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white',
-            style: { marginTop: 25 },
-            onClick: () => {}
-          }, ['Add Collaborator'])
+          h(CollaboratorList, {
+            formFieldChange,
+            collaborators: externalCollaborators,
+            collaboratorKey: 'externalCollaborators',
+            collaboratorLabel: 'External Collaborator',
+            showApproval: false,
+            disabled: !isEmpty(darCode),
+            deleteBoolArray: (new Array(externalCollaborators.length).fill(false)),
+          }),
         ])
-
       ]),
 
       fieldset({ disabled: !isNil(darCode) }, [
@@ -390,61 +392,6 @@ export default function ResearcherInfo(props) {
           isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
-        div({className: 'form-group'}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              label({className: 'control-label rp-title-question'}, [
-                '1.4 Internal Collaborators',
-                span([
-                  `Please add Internal Collaborators here Internal Collaborators are defined as individuals who are not under the direct supervision of 
-                  the PI (e.g., not a member of the PI's laboratory) who assists with the PI's research project involving controlled-access data subject to 
-                  the NIH GDS Policy. Internal collaborators are employees of the Requesting PI's institution and work at the same location/campus as
-                  the PI. Internal Collaborators must be at the PI or equivalent level and are required to have a Library Card in order to access data
-                  through this request. Internal Collaborators will have Data Downloader/Approver status so that they may add their own
-                  relevant Internal Lab Staff. Internal Collaborators will not be required to submit an independent DAR to collaborate on this project.`
-                ])
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              h(CollaboratorList, {
-                disabled: !isEmpty(darCode),
-                formFieldChange,
-                collaborators: internalCollaborators,
-                collaboratorKey: 'internalCollaborators',
-                collaboratorLabel: 'Internal Collaborator',
-                deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
-                showApproval: false})
-            ])
-          ])
-        ]),
-        div({ className: 'form-group'}, [
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              label({ className: 'control-label rp-title-question' }, [
-                '1.8 External Collaborators',
-                span([
-                  `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work
-                at the same location as the PI, and consequently must be independently approved to access controlled-access data subject to the GDS 
-                Policy. External Collaborators must be at the PI or equivalent level and are not required to have a Library Card in order to access data,
-                although it is encouraged. Note: External Collaborators must submit an independent DAR approved by their signing Official
-                to collaborate on this project. External Collaborators will be able to add their Lab Staff, as needed, via their independent DAR. Approval of
-                this Data Access Request does not indicate approval of the External Collaborators listed.`
-                ])
-              ])
-            ]),
-            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-              h(CollaboratorList, {
-                disabled: !isEmpty(darCode),
-                formFieldChange,
-                collaborators: externalCollaborators,
-                collaboratorKey: 'externalCollaborators',
-                collaboratorLabel: 'External Collaborator',
-                deleteBoolArray: (new Array(externalCollaborators.length).fill(false)),
-                showApproval: false
-              })
-            ])
-          ])
-        ])
       ]),
 
       div({ className: 'row no-margin' }, [
