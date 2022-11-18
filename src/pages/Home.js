@@ -82,11 +82,11 @@ class Home extends Component {
 
     const buttonStyle = {
       borderRadius: '5px',
-      backgroundColor: '#00689F',
+      backgroundColor: 'rgb(0, 104, 159)',
       fontFamily: 'Montserrat',
       fontSize: '16px',
       fontWeight: 500,
-      color: '#FFFFFF',
+      color: 'rgb(255, 255, 255)',
       padding: '0 5rem',
       margin: '2rem auto'
     };
