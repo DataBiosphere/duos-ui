@@ -1,5 +1,7 @@
 import { div, label, span } from 'react-hyperscript-helpers';
-import {chunk, filter, isEmpty} from 'lodash/fp';
+import {chunk, filter, isEmpty, isNil} from 'lodash/fp';
+import { DAR } from '../../libs/ajax';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const styles = {
   flexRowElement: {
@@ -47,7 +49,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: '3rem',
-  },
+  }
 };
 
 const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
@@ -61,6 +63,14 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
       div({className: 'text-placeholder', key:`${label}-text-placeholder`, id: `${label}-label-placeholder`, style: {width: '70%', height: '3.2rem'}}),
     ]
   );
+};
+
+const generateLinkContents = (key, id, type, text, fileName, location) => {
+  return div(
+    {id: key, isRendered: !isNil(location) && !isNil(id)},
+    [
+      DownloadLink({label: text, onDownload: ()=>{DAR.downloadDARDocument(id, type, fileName);}})
+    ]);
 };
 
 // function to generate application details content
@@ -105,8 +115,6 @@ export default function ApplicationInformation(props) {
     isLoading = false,
     externalCollaborators = [],
     internalCollaborators = [],
-    signingOfficial = '- -',
-    itDirector = '- -',
     signingOfficialEmail = '- -',
     itDirectorEmail = '- -',
     internalLabStaff = [],
@@ -114,7 +122,13 @@ export default function ApplicationInformation(props) {
     localComputing = false,
     cloudComputing = false,
     cloudProvider = '- -',
-    cloudProviderDescription
+    rus,
+    cloudProviderDescription,
+    referenceId,
+    irbDocumentLocation,
+    collaborationLetterLocation,
+    irbDocumentName,
+    collaborationLetterName
   } = props;
 
   const processCollaborators = (collaborators) =>
@@ -127,10 +141,8 @@ export default function ApplicationInformation(props) {
   ];
 
   const institutionLabels = [
-    {value: signingOfficial, title: 'Signing Official', key: 'signing-official'},
-    {value: itDirector, title: 'IT Director', key: 'it-director'},
-    {value: signingOfficialEmail, title: 'Signing Official Email', key: 'signing-official-email'},
-    {value: itDirectorEmail, title: 'IT Director Email', key: 'it-director-email'},
+    {value: signingOfficialEmail, title: 'Signing Official', key: 'signing-official'},
+    {value: itDirectorEmail, title: 'IT Director', key: 'it-director'},
   ];
 
   const cloudUseLabels = [
@@ -159,6 +171,15 @@ export default function ApplicationInformation(props) {
           }})
       ]),
 
+      !isLoading ? div({className: 'rus-subheader', style: styles.subheader}, ['Research Use Statement'])
+        : div({className: 'text-placeholder', key: 'rus-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
+      div({className: 'rus-container'}, [
+        !isLoading ? div({className: 'rus-textbox', style: styles.textBox}, [rus])
+          : div({className: 'text-placeholder', key: 'rus-placeholder', style: { height: '18rem',
+            width: '100%',
+          }})
+      ]),
+
       div({className: 'collaborator-details-container', style: { margin: '3rem 0'}}, [
         div({className: 'collaborator-details-subheader', style: styles.subheader,
           isRendered: !(isEmpty(internalCollaborators) && isEmpty(externalCollaborators) && isEmpty(internalLabStaff))}, ['Collaborators']),
@@ -181,6 +202,11 @@ export default function ApplicationInformation(props) {
               }})
           ])  : ''
       ]),
+
+      div({className: 'document-link-container', style: { margin: '1rem 0'}}, [
+        generateLinkContents('irb-doc',referenceId, 'irbDocument', 'Download IRB Protocol', irbDocumentName, irbDocumentLocation),
+        generateLinkContents('collab-letter', referenceId, 'collaborationDocument', 'Download Collaboration Letter', collaborationLetterName, collaborationLetterLocation)
+      ])
     ])
   );
 }

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { h, div, span } from 'react-hyperscript-helpers';
+import { h, div, span, p } from 'react-hyperscript-helpers';
 
 const styles = {
   header: {
@@ -26,6 +26,14 @@ const styles = {
     fontSize: '2.1rem',
     marginBottom: '3.2rem'
   },
+  projectTitle: {
+    fontWeight: 'normal',
+    fontSize: '2.5rem',
+  },
+  user: {
+    fontWeight: 'normal',
+    fontSize: '2rem'
+  },
   secondaryHeaderRow: {
     fontSize: '3rem',
     fontWeight: 600,
@@ -39,6 +47,8 @@ export default function ReviewHeader(props) {
   const {
     darCode,
     projectTitle,
+    userName,
+    institutionName,
     readOnly = false,
     isLoading
   } = props;
@@ -49,8 +59,13 @@ export default function ReviewHeader(props) {
           span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`])
         ]),
         div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
-          span({style: styles.darCode}, [darCode]),
-          div({className: 'collection-project-title'}, [projectTitle])
+          p({}, [darCode]),
+        ]),
+        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
+          p({className: 'collection-project-title', style: styles.projectTitle}, [projectTitle])
+        ]),
+        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
+          p({style: styles.user}, [`${userName}, ${institutionName}`])
         ]),
       ]),
       div({className: 'header-skeleton-loader', isRendered: isLoading}, [

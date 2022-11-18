@@ -1,23 +1,22 @@
 import {useCallback, useEffect, useState} from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import {Notifications} from '../../libs/utils';
-import { Collections, User } from '../../libs/ajax';
+import { User } from '../../libs/ajax';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
 import {
-  extractUserDataAccessVotesFromBucket,
-  extractUserRPVotesFromBucket,
   generatePreProcessedBucketData,
   getMatchDataForBuckets,
   processDataUseBuckets,
-  updateFinalVote
+  updateFinalVote,
+  filterBucketsForUser,
 } from '../../utils/DarCollectionUtils';
-import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
+import { Collections } from '../../libs/ajax';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -61,28 +60,17 @@ const userHasRole = (user, roleId) => {
   return !isEmpty(matches);
 };
 
-export const filterBucketsForUser = (user, buckets) => {
-  const containsUserRpVote = (bucket) => {
-    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
-  };
-  const containsUserDataAccessVote = (bucket) => {
-    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
-  };
-
-  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
-};
-
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
+  const [referenceIdForDocuments, setReferenceIdForDocuments] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
     applicationInformation: 'Application Information'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
-  const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
@@ -93,6 +81,7 @@ export default function DarCollectionReview(props) {
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
+      const referenceIdForDocuments = find((d) => !isEmpty(d.referenceId))(collection.dars).referenceId;
       const researcherProfile = await User.getById(collection.createUserId);
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
@@ -104,12 +93,12 @@ export default function DarCollectionReview(props) {
         : filterBucketsForUser(user, processedBuckets);
       setDataUseBuckets(filteredBuckets);
       setCollection(collection);
-      setCurrentUser(user);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
       setTabs(tabsForUser(user, filteredBuckets, adminPage));
       setIsLoading(false);
       setSubcomponentLoading(false);
+      setReferenceIdForDocuments(referenceIdForDocuments);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
@@ -182,10 +171,11 @@ export default function DarCollectionReview(props) {
         h(ReviewHeader, {
           darCode: collection.darCode || '- -',
           projectTitle: darInfo.projectTitle || '- -',
+          userName: researcherProfile.displayName || '- -',
+          institutionName: get('institution.name')(researcherProfile) || '- -',
           isLoading,
           readOnly: readOnly || adminPage
-        }),
-        h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
+        })
       ]
     ),
     div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
@@ -218,7 +208,13 @@ export default function DarCollectionReview(props) {
           localComputing: darInfo.localUse,
           cloudComputing: darInfo.cloudUse,
           cloudProvider: darInfo.cloudProvider,
-          cloudProviderDescription: darInfo.cloudProviderDescription
+          cloudProviderDescription: darInfo.cloudProviderDescription,
+          rus: darInfo.rus,
+          referenceId: referenceIdForDocuments,
+          irbDocumentLocation: darInfo.irbDocumentLocation,
+          collaborationLetterLocation: darInfo.collaborationLetterLocation,
+          irbDocumentName: darInfo.irbDocumentName,
+          collaborationLetterName: darInfo.collaborationLetterName
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,

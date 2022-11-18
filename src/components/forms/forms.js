@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isString } from 'lodash/fp';
+import { cloneDeep, isFunction } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
@@ -8,6 +8,7 @@ import {
   requiredValidator,
   urlValidator,
   emailValidator,
+  dateValidator,
 } from './formUtils';
 import {
   formInputGeneric,
@@ -16,12 +17,17 @@ import {
   formInputCheckbox,
   formInputSlider,
   formInputRadioGroup,
-  formInputTextarea
+  formInputYesNoRadioGroup,
+  formInputTextarea,
+  formInputRadioButton,
+  formInputFile,
 } from './formComponents';
 
 import './forms.css';
 
-export const commonRequiredProps = ['id'];
+export const commonRequiredProps = [
+  'id',
+];
 export const commonOptionalProps = [
   'name',
   'disabled',
@@ -34,7 +40,9 @@ export const commonOptionalProps = [
   'style',
   'validators',
   'onChange',
-  'type'
+  'type',
+  'key',
+  'isRendered',
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
@@ -74,13 +82,32 @@ export const FormFieldTypes = {
     ],
     customPropValidation: customRadioPropValidation,
   },
+  YESNORADIOGROUP: {
+    defaultValue: null,
+    component: formInputYesNoRadioGroup,
+    optionalProps: [
+      'orientation', // 'vertical' or 'horizontal'
+    ],
+  },
+  RADIOBUTTON: {
+    defaultValue: null,
+    requiredProps: [
+      'value',
+    ],
+    optionalProps: [
+      'toggleText',
+    ],
+    component: formInputRadioButton,
+  },
   TEXT: {
     defaultValue: '',
     component: formInputGeneric,
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle'],
+      'inputStyle',
+      'readOnly',
+    ],
   },
   NUMBER: {
     defaultValue: '',
@@ -88,11 +115,20 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'placeholder',
-      'inputStyle'
+      'inputStyle',
+      'readOnly',
+    ],
+  },
+  FILE: {
+    defaultValue: null,
+    component: formInputFile,
+    requiredProps: [],
+    optionalProps: [
+      'uploadText',
     ],
   },
   CHECKBOX: {
-    defaultValue: (config) => (config?.valueType === 'string' ? '' : false),
+    defaultValue: false,
     component: formInputCheckbox,
     requiredProps: [],
     optionalProps: [
@@ -101,14 +137,8 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    updateDefaultValue: ({ selectOptions, defaultValue }) => {
-      const isStringArr = isString(selectOptions[0]);
-      return isStringArr
-        ? { key: defaultValue, displayText: defaultValue }
-        : defaultValue;
-    },
     component: formInputSelect,
-    requiredProps: [
+    requiredNormalSelectProps: [
       'selectOptions'
       // 'selectOptions' example:
       // [
@@ -116,12 +146,23 @@ export const FormFieldTypes = {
       //   ^^^ can pass other fields in as extra info, e.g.:
       //  {displayText: 'Dac 1', dacId: 213}
       // ]
+      // can also be array of stirngs: ['Option 1', 'Option 2']
+    ],
+    requiredAsyncSelectProps: [
+      'loadOptions',
+      // 'loadOptions': (query, callback) => callback(selectOptions)
+      'optionsAreString', // true if options are ['', ...], false if options are [{displayText: ''}, ...]
     ],
     optionalProps: [
       'isCreatable', // allows user to input their own
       'isMulti',
+      'isAsync', // if specified, options are loaded via 'loadOptions'
       'placeholder',
       'selectConfig',
+      'exclusiveValues', // e.g., ['Not Determined'], if not determined is selected, everything else will be cleared
+      'loadOptions',
+      'optionsAreString',
+      'selectOptions'
     ],
     customPropValidation: customSelectPropValidation,
   },
@@ -145,11 +186,37 @@ export const FormValidators = {
   REQUIRED: requiredValidator,
   URL: urlValidator,
   EMAIL: emailValidator,
+  DATE: dateValidator,
 };
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     MAIN COMPONENTS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
+export const FormFieldTitle = (props) => {
+  const {
+    title,
+    hideTitle,
+    description,
+    formId,
+    ariaLevel,
+    required,
+    error,
+  } = props;
+
+  return div({}, [
+    title && !hideTitle && label({
+      id: `lbl_${formId}`,
+      className: `control-label ${error ? 'errored' : ''}`,
+      htmlFor: `${formId}`,
+      'aria-level': ariaLevel
+    }, [
+      title,
+      required && '*'
+    ]),
+    description && div({ style: { marginBottom: 15 } }, description),
+  ]);
+};
+
 export const FormField = (config) => {
   const {
     id, type = FormFieldTypes.TEXT, ariaLevel,
@@ -182,16 +249,11 @@ export const FormField = (config) => {
     style,
     className: `formField-container formField-${id}`
   }, [
-    title && !hideTitle && label({
-      id: `lbl_${id}`,
-      className: `control-label ${error ? 'errored' : ''}`,
-      htmlFor: `${id}`,
-      'aria-level': ariaLevel
-    }, [
-      title,
-      required && '*'
-    ]),
-    description && div({ style: { marginBottom: 15 } }, description),
+    h(FormFieldTitle, {
+      title, hideTitle, description,
+      required, formId: id, ariaLevel,
+      error
+    }),
     h(type.component, {
       ...config,
       error, setError,
@@ -209,12 +271,15 @@ export const FormField = (config) => {
 */
 export const FormTable = (config) => {
   const {
-    id, formFields, defaultValue,
+    id, name, formFields, defaultValue,
     enableAddingRow, addRowLabel,
     disabled, onChange, minLength
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
+
+
+  const key = name || id;
 
   return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
@@ -233,12 +298,12 @@ export const FormTable = (config) => {
             ...formCol,
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-            defaultValue: formValue[i][formCol.id],
+            defaultValue: formValue[i][formCol.name || formCol.id],
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
-              formValueClone[i][formCol.id] = value;
+              formValueClone[i][formCol.name || formCol.id] = value;
               setFormValue(formValueClone);
-              onChange({key: `${id}.${i}.${formCol.id}`, value: value, isValid: true });
+              onChange({key: key, value: formValueClone, isValid: true });
             }
           });
         }),
@@ -252,7 +317,7 @@ export const FormTable = (config) => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.splice(i, 1);
             setFormValue(formValueClone);
-            onChange({ key: id, value: formValueClone, isValid: true });
+            onChange({ key: key, value: formValueClone, isValid: true });
           }
         }, [
           span({ className: 'glyphicon glyphicon-remove' })
@@ -273,7 +338,7 @@ export const FormTable = (config) => {
           const formValueClone = cloneDeep(formValue);
           formValueClone.push({});
           setFormValue(formValueClone);
-          onChange({ key: `${id}.${formValueClone.length - 1}`, value: {} });
+          onChange({key: key, value: formValueClone, isValid: true });
         },
         style: { marginTop: 10 }
       }, [

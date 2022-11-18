@@ -55,6 +55,16 @@ describe('Application Information', () => {
     textbox.contains('test');
   });
 
+  it('renders the RUS', () => {
+    const props = {rus: 'test'};
+    mount(<ApplicationInformation {...props} />);
+    const subheader = cy.get('.rus-subheader');
+    expect(subheader).to.exist;
+    const textbox = cy.get('.rus-textbox');
+    expect(textbox).to.exist;
+    textbox.contains('test');
+  });
+
   it('renders the collaborator details container and sub-header if any provided', () => {
     const props = {
       externalCollaborators: [{name: 'Person A'}, {name: 'Person B'}]
@@ -197,48 +207,32 @@ describe('Application Information', () => {
     requestSpan.contains('Person E, Person F');
   });
 
-  it('renders the signing official and signing official email', () => {
+  it('renders the signing official and signing official', () => {
     const props = {
-      signingOfficial: 'Person SO',
       signingOfficialEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#signing-official-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('Signing Official');
 
-    const nameSpan =  cy.get('#signing-official-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
-
-    const emailLabel = cy.get('#signing-official-email-label');
+    const emailLabel = cy.get('#signing-official-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('Signing Official Email');
+    emailLabel.contains('Signing Official');
 
-    const emailSpan = cy.get('#signing-official-email-span');
+    const emailSpan = cy.get('#signing-official-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
 
-  it('renders the IT director and IT director email', () => {
+  it('renders the IT director and IT director', () => {
     const props = {
-      itDirector: 'Person SO',
       itDirectorEmail: 'test@test.com',
     };
     mount(<ApplicationInformation {...props} />);
-    const nameLabel = cy.get('#it-director-label');
-    expect(nameLabel).to.exist;
-    nameLabel.contains('IT Director');
 
-    const nameSpan = cy.get('#it-director-span');
-    expect(nameSpan).to.exist;
-    nameSpan.contains('Person SO');
-
-    const emailLabel = cy.get('#it-director-email-label');
+    const emailLabel = cy.get('#it-director-label');
     expect(emailLabel).to.exist;
-    emailLabel.contains('IT Director Email');
+    emailLabel.contains('IT Director');
 
-    const emailSpan = cy.get('#it-director-email-span');
+    const emailSpan = cy.get('#it-director-span');
     expect(emailSpan).to.exist;
     emailSpan.contains('test@test.com');
   });
@@ -256,6 +250,55 @@ describe('Application Information', () => {
     const anvilLabel = cy.get('#anvil-storage-label');
     expect(anvilLabel).to.exist;
     anvilLabel.contains('Using AnVIL only for storage and analysis');
+  });
+
+  it('redners expected document links', ()=> {
+    const props = {
+      irbDocumentLocation: 'some-uuid',
+      collaborationLetterLocation: 'some-other-uuid',
+      referenceId: 'dar-uuid',
+      irbDocumentName: 'irbdoc.txt',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+    const irbDocLink = cy.get('#irb-doc');
+    expect(irbDocLink).to.exist;
+    irbDocLink.contains('Download IRB Protocol');
+
+    const collabDocLink = cy.get('#collab-letter');
+    expect(collabDocLink).to.exist;
+    collabDocLink.contains('Download Collaboration Letter');
+
+  });
+
+  it('doesnt render a missing document link', ()=> {
+    const props = {
+      collaborationLetterLocation: 'some-other-uuid',
+      referenceId: 'dar-uuid',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+
+    cy.get('#irb-doc').should('not.exist');
+    const collabDocLink = cy.get('#collab-letter');
+    expect(collabDocLink).to.exist;
+    collabDocLink.contains('Download Collaboration Letter');
+  });
+
+  it('doesnt render without referenceId', ()=> {
+    const props = {
+      irbDocumentLocation: 'some-uuid',
+      collaborationLetterLocation: 'some-other-uuid',
+      irbDocumentName: 'irbdoc.txt',
+      collaborationLetterName: 'collab-letter.txt',
+    };
+
+    mount(<ApplicationInformation {...props} />);
+
+    cy.get('#irb-doc').should('not.exist');
+    cy.get('#collab-letter').should('not.exist');
   });
 });
 

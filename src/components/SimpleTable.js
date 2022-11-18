@@ -3,23 +3,20 @@ import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { SpinnerComponent } from '../components/SpinnerComponent';
+import loadingImage from '../images/loading-indicator.svg';
 
-//Component that renders skeleton loader on loading
-const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
-  const rowTemplateArray = (columnRow, columnHeaders) => {
-    const rowsSkeleton = [columnRow];
-    let i = 0;
-    while(i < tableSize) {
-      let row = columnHeaders.map(({cellStyle}, index) => {
-        const style = Object.assign({height: '0.5rem'}, baseStyle, cellStyle);
-        return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
-      });
-      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}-container`, className: `placeholder-row-${i}`}, row));
-      i++;
-    }
-    return rowsSkeleton;
-  };
-  return rowTemplateArray(columnRow, columnHeaders);
+// Renders spinning circle while table loading
+const TableLoading = () => {
+  return div({className: 'table-loading-placeholder'},
+    [
+      h(SpinnerComponent, {
+        show: true,
+        name: 'loadingSpinner',
+        loadingImage
+      }, [])
+    ]
+  );
 };
 
 //Simple cell text display
@@ -66,11 +63,11 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
 };
 
 //Row component that renders out rows for each element in the provided data collection
-const DataRows = ({rowData, baseStyle, columnHeaders}) => {
-  const rows = rowData.map((row, index) => {
+const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow}) => renderedRow}) => {
+  return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
+    const renderedRow = div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
@@ -90,8 +87,10 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         }
         return output;
       }));
+
+    return rowWrapper({renderedRow, rowData: row});
   });
-  return rows;
+
 };
 
 //Simple table component, can be used alone, can be built on top of (like with LibraryCardTable)
@@ -106,7 +105,7 @@ export default function SimpleTable(props) {
     rowData = [], //rowData -> {data, component, style, onClick}
     isLoading,
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
-    tableSize,
+    rowWrapper = ({renderedRow}) => renderedRow, // ({rowData, renderedRow}) => ... : allows injecting custom container to row
     paginationBar,
     sort,
     onSort
@@ -114,8 +113,8 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle, sort, onSort});
-  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, key: 'table-data-rows'})];
-  const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders, rowWrapper, key: 'table-data-rows'})];
+  const output = isLoading ? h(TableLoading, {}) : tableTemplate;
   return div([
     div({className: 'table-data', style: containerOverride || Styles.TABLE.CONTAINER, role: 'table'},
       [output, isNil(paginationBar) ? div() : paginationBar]),

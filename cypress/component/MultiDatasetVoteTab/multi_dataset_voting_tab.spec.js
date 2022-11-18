@@ -4,8 +4,9 @@ import { mount } from 'cypress/react';
 import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
-import {filterBucketsForUser} from '../../../src/pages/dar_collection_review/DarCollectionReview';
+import {filterBucketsForUser} from '../../../src/utils/DarCollectionUtils.js';
 import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
+import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 
 const darInfo = {
   rus: 'test',
@@ -51,7 +52,7 @@ const bucket1 = {
     },
   ],
   dataUses: [
-    {code: 'GRU', description: 'Use is permitted for any research purpose'},
+    {code: 'GRU', description: 'Use is permitted for any research purpose', type: ControlledAccessType.permissions},
   ]
 };
 
@@ -92,7 +93,7 @@ const bucket2 = {
     },
   ],
   dataUses: [
-    {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose'}
+    {code: 'HMB', description: 'Use is permitted for a health, medical, or biomedical research purpose', type: ControlledAccessType.permissions}
   ]
 };
 
@@ -167,16 +168,18 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.contains('HMB');
   });
 
-  it('Renders vote summary tables if isChair is true', function () {
+  it('Renders vote summary tables', function () {
     mount(
       <MultiDatasetVotingTab
         darInfo={darInfo}
         buckets={[bucket1]}
         collection={collection}
-        isChair={true}
       />
     );
 
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
+    cy.get('.table-data').should('exist');
     cy.get('[datacy=dataset-vote-slab]').should('be.visible');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'No');

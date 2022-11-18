@@ -92,6 +92,35 @@
 }
 
 /* ----------------------------------------------------
+  formInputFile
+------------------------------------------------------*/
+.form-file-upload {
+  display: inline-flex;
+
+  color: #0948B7;
+}
+
+.form-file-upload:hover {
+  color: #2FA4E7 !important;
+  cursor: pointer !important;
+}
+
+.form-file-upload > * {
+  cursor: pointer !important;
+}
+
+.form-file-label > svg {
+  vertical-align: text-top;
+  width: 20px;
+}
+
+.form-file-label {
+  line-height: 16px;
+  font-size: 14px;
+  height: 16px;
+}
+
+/* ----------------------------------------------------
   External Overrides
 ------------------------------------------------------*/
 .formField-container .dropdown ul {

@@ -2,10 +2,14 @@ import { h, div, label, input, span, button, textarea } from 'react-hyperscript-
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
-import { FormValidators } from './forms';
+import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncCreatable from 'react-select/async-creatable';
+import { FormField, FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
+import PublishIcon from '@material-ui/icons/Publish';
 
 import './formComponents.css';
+import { isArray } from 'lodash';
 
 const styles = {
   inputStyle: {
@@ -32,14 +36,18 @@ const validateFormInput = (config, value) => {
   return true;
 };
 
-const onFormInputChange = (config, value) => {
-  const { id, name, onChange, formValue, setFormValue } = config;
-  const key = (!isNil(name) ? name : id);
+const getKey = (config) => {
+  return (!isNil(config.name) ? config.name : config.id);
+};
 
+const onFormInputChange = (config, value) => {
+  const { onChange, formValue, setFormValue } = config;
+
+  const key = getKey(config);
   const isValidInput = validateFormInput(config, value);
 
   if (value !== formValue) {
-    onChange({key: key, value, isValid: isValidInput });
+    onChange({key: key, value: value, isValid: isValidInput });
     setFormValue(value);
   }
 };
@@ -59,6 +67,7 @@ export const formInputGeneric = (config) => {
     id, title, disabled,
     placeholder, type,
     inputStyle, ariaDescribedby,
+    readOnly,
     formValue, error, setError
   } = config;
 
@@ -69,6 +78,7 @@ export const formInputGeneric = (config) => {
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue,
+      readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => onFormInputChange(config, event.target.value),
@@ -197,21 +207,53 @@ export const formInputMultiText = (config) => {
   ]);
 };
 
+
+const normalizeSelectOptions = (options, optionsAreString) => {
+  // normalized options empty if async
+  const normalizedOptions = options &&
+    optionsAreString
+    ? options.map((option) => { return {key: option, displayText: option }; })
+    : options;
+
+  return normalizedOptions;
+};
+
+// ensure form value is a valid select object
+const normalizeSelectFormValue = (value) => {
+  if (isString(value)) {
+    return {
+      key: value,
+      displayText: value,
+    };
+  }
+
+  if (isArray(value) && value.length > 0 && isString(value[0])) {
+    return value.map((val) => {return {key: val, displayText: val};});
+  }
+
+  return value;
+};
+
 // Using react-select/creatable - Passing config directly through!
 export const formInputSelect = (config) => {
   const {
     id, title, disabled, required, error, setError,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable, isMulti, setFormValue,
+    formValue, isCreatable = false, isMulti = false,
+    isAsync = false, setFormValue,
+    exclusiveValues, loadOptions,
     selectConfig = {}
   } = config;
 
-  const component = (isCreatable ? Creatable : Select);
+  const component =
+    (isCreatable
+      ? (isAsync ? AsyncCreatable : Creatable)
+      : (isAsync ? AsyncSelect : Select));
 
-  const isStringArr = isString(selectOptions[0]);
-  const normalizedOptions = isStringArr
-    ? selectOptions.map((option) => { return { displayText: option }; })
-    : selectOptions;
+  // must be specified if async, since we can't guess the
+  // array type until after querying.
+  const optionsAreString = config.optionsAreString || (!isNil(selectOptions) && isString(selectOptions[0]));
+  const normalizedOptions = (!isNil(selectOptions) ? normalizeSelectOptions(selectOptions, optionsAreString) : undefined);
 
   return h(component, {
     key: id,
@@ -222,22 +264,32 @@ export const formInputSelect = (config) => {
     isDisabled: disabled,
     placeholder: placeholder || `Search for ${title}...`,
     className: `form-select ${error ? 'errored' : ''}`,
-    onChange: (option) => {
-      if (isStringArr) {
+    onChange: (selected) => {
+      if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
+        const newSelection = selected[selected.length - 1];
+
+        if (exclusiveValues.includes(newSelection.displayText)) {
+          selected.splice(0, selected.length - 1);
+        } else if (exclusiveValues.includes(selected[0].displayText)) {
+          selected.splice(0, 1);
+        }
+      }
+
+      if (optionsAreString) {
         if (isMulti) {
           // string result, multiple options
-          onFormInputChange(config, option?.map((o) => o.displayText));
-          setFormValue(option);
+          onFormInputChange(config, selected?.map((o) => o.displayText));
+          setFormValue(selected);
           return;
         }
         // string result, only one option
-        onFormInputChange(config, option?.displayText);
-        setFormValue(option);
+        onFormInputChange(config, selected?.displayText);
+        setFormValue(selected);
         return;
       }
       else {
         // object result
-        onFormInputChange(config, option);
+        onFormInputChange(config, selected);
       }
     },
     onMenuOpen: () => setError(),
@@ -246,7 +298,6 @@ export const formInputSelect = (config) => {
         setError(FormValidators.REQUIRED.msg);
       }
     },
-    options: normalizedOptions,
     getOptionLabel: (option) => option.displayText,
     getNewOptionData: (inputValue) => {
       return { key: inputValue, displayText: inputValue };
@@ -255,9 +306,15 @@ export const formInputSelect = (config) => {
       if(isNil(option) || isEmpty(option.displayText)) {
         return null;
       }
-      return isStringArr ? option.displayText : option;
+      return optionsAreString ? option.displayText : option;
     },
-    value: formValue,
+    options: normalizedOptions,
+    loadOptions: (query, callback) => {
+      loadOptions(query, (options) => {
+        callback(normalizeSelectOptions(options, optionsAreString));
+      });
+    },
+    value: normalizeSelectFormValue(formValue),
     ...selectConfig,
     'aria-describedby': ariaDescribedby
   }) ;
@@ -265,7 +322,6 @@ export const formInputSelect = (config) => {
 
 export const formInputRadioGroup = (config) => {
   const {
-
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
     formValue, options
@@ -307,6 +363,87 @@ export const formInputRadioGroup = (config) => {
   );
 };
 
+export const formInputYesNoRadioGroup = (config) => {
+  const {
+    id, disabled,
+    orientation = 'vertical', // [vertical, horizontal],
+    formValue
+  } = config;
+
+  return div({},
+    [
+      div(
+        {
+          className: `radio-group ${orientation}`,
+          id: id,
+        },
+        [
+          div({
+            className: 'radio-button-container',
+          }, [
+            h(RadioButton, {
+              id: `${id}_yes`,
+              name: `${id}_yes`,
+              defaultChecked: !isNil(formValue) && formValue === true,
+              onClick: () => {
+                onFormInputChange(config, true);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'Yes',
+              disabled,
+            }),
+          ]),
+          div({
+            className: 'radio-button-container',
+          }, [
+            h(RadioButton, {
+              id: `${id}_no`,
+              name: `${id}_no`,
+              defaultChecked: !isNil(formValue) && formValue === false,
+              onClick: () => {
+                onFormInputChange(config, false);
+              },
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '14px',
+              },
+              description: 'No',
+              disabled,
+            }),
+          ])
+        ])
+    ]);
+};
+
+export const formInputRadioButton = (config) => {
+  const {
+    id, disabled, value, toggleText,
+    formValue,
+  } = config;
+
+  return div({
+    className: 'radio-button-container',
+  }, [
+    h(RadioButton, {
+      id: id,
+      name: id,
+      defaultChecked: !isNil(formValue) && formValue === value,
+      onClick: () => {
+        onFormInputChange(config, value);
+      },
+      style: {
+        fontFamily: 'Montserrat',
+        fontSize: '14px',
+      },
+      description: toggleText,
+      disabled,
+    }),
+  ]);
+};
+
 export const formInputCheckbox = (config) => {
   const {
     id, disabled, error, toggleText,
@@ -336,10 +473,10 @@ export const formInputSlider = (config) => {
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
-    label({ className: 'switch' }, [
+    label({ className: 'switch', htmlFor: `${id}` }, [
       input({
         type: 'checkbox',
-        id: id,
+        id: `${id}`,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
@@ -353,6 +490,69 @@ export const formInputSlider = (config) => {
         fontStyle: 'italic'
       }
     }, [toggleText])
+  ]);
+};
+
+export const formInputFile = (config) => {
+  const {
+    id,
+    formValue,
+    uploadText = 'Upload a file',
+    multiple = false,
+    accept = '',
+  } = config;
+
+  return div({
+    style: {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+    }
+  }, [
+    div({
+      className: 'form-file-upload',
+    }, [
+      input({
+        id,
+        type: 'file',
+        multiple,
+        accept,
+        // make hidden:
+        style: {
+          display: 'none',
+        },
+        onChange: (e) => {
+          e.preventDefault();
+          if (multiple) {
+            onFormInputChange(config, e.target.files);
+          } else {
+            onFormInputChange(config, e.target.files[0]);
+          }
+        },
+      }, [
+
+      ]),
+      label({
+        htmlFor: `${id}`,
+        className: 'form-file-label',
+      }, [
+        h(PublishIcon, {}),
+        uploadText,
+      ])
+    ]),
+    div({
+      style: {
+        marginLeft: '20px',
+        width: '450px',
+      }
+    }, [
+      h(FormField, {
+        id: `${id}_fileName`,
+        placeholder: 'Filename.txt',
+        defaultValue: formValue?.name,
+        readOnly: true,
+      })
+    ])
   ]);
 };
 

@@ -7,7 +7,7 @@ import {h, div, img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
 import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
-import { consoleTypes } from '../components/dar_table/DarTableActions';
+import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
 
 export default function AdminManageDarCollections() {
   const [collections, setCollections] = useState([]);
@@ -78,7 +78,7 @@ export default function AdminManageDarCollections() {
     h(DarCollectionTable, {
       collections: filteredList,
       columns: [
-        DarCollectionTableColumnOptions.DAR_CODE_ADMIN,
+        DarCollectionTableColumnOptions.DAR_CODE,
         DarCollectionTableColumnOptions.NAME,
         DarCollectionTableColumnOptions.SUBMISSION_DATE,
         DarCollectionTableColumnOptions.RESEARCHER,

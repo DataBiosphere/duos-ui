@@ -8,6 +8,7 @@
   margin-top: 2rem;
   margin-bottom: 1rem;
   transition: color .3s ease-in-out;
+  text-align: left;
 }
 
 /* ----------------------------------------------------
@@ -45,6 +46,10 @@
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   padding: 17px 10px;
+}
+
+.radio-text-input {
+  margin-bottom: 1.5rem;
 }
 
 /* ----------------------------------------------------

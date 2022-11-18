@@ -604,14 +604,7 @@ export default function DatasetCatalog(props) {
                           id: trIndex + '_datasetName', name: 'datasetName',
                           className: 'cell-size ' + (!dataset.active ? !!'dataset-disabled' : ''),
                           style: tableBody
-                        }, [
-                          a({
-                            href: `/dataset_statistics/${dataset.dataSetId}`,
-                            className: 'enabled'
-                          }, [
-                            findPropertyValue(dataset, 'Dataset Name')
-                          ])
-                        ]),
+                        }, [findPropertyValue(dataset, 'Dataset Name')]),
 
                         td({
                           id: trIndex + '_dac', name: 'dac',
