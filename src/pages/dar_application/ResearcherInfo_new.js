@@ -183,7 +183,7 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h3('1.5 Internal Collaborators'),
           div(
-            `Please add Internal Collaborators here Internal Collaborators are defined as individuals
+            `Please list Internal Collaborators here. Internal Collaborators are defined as individuals
             who are not under the direct supervision of the PI (e.g., not a member of the PI's 
             laboratory) who assists with the PI's research project involving controlled-access data 
             subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting 
