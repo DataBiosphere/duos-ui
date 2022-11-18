@@ -71,7 +71,7 @@ export default function CollaboratorList(props) {
             !props.disabled && setShowNewForm(true);
           },
           isRendered: !showNewForm
-        }, ['Add Collaborator']),
+        }, [`Add ${collaboratorLabel}`]),
         h(CollaboratorForm, {
           index: collaborators.length,
           saveCollaborator: (newCollaborator) => saveCollaborator(collaborators.length, newCollaborator),
