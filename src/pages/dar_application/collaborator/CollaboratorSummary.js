@@ -10,10 +10,11 @@ export const CollaboratorSummary = (props) => {
     div({}, [
     ]),
     div( {
-      id: index,
+      id: index+'_summary',
       className: 'collaborator-summary-card',
     }, [
       div({
+        id: index+'_name',
         style: {
           flex: '1 1 100%',
           marginRight: '1.5rem',
@@ -23,6 +24,7 @@ export const CollaboratorSummary = (props) => {
       ]),
 
       div({
+        id: index+'_title',
         style: {
           flex: '1 1 100%',
           marginRight: '1.5rem',
@@ -32,6 +34,7 @@ export const CollaboratorSummary = (props) => {
       ]),
 
       div({
+        id: index+'_eraCommonsId',
         style: {
           flex: '1 1 100%',
           marginRight: '1.5rem',
@@ -41,6 +44,7 @@ export const CollaboratorSummary = (props) => {
       ]),
 
       div({
+        id: index+'_email',
         style: {
           flex: '1 1 100%',
         }
