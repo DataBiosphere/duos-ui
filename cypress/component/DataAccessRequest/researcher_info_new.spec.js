@@ -2,6 +2,7 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo_new.js';
+import {User} from "../../../src/libs/ajax";
 import {BrowserRouter} from 'react-router-dom';
 
 const props = {
@@ -64,6 +65,17 @@ const WrappedResearcherInfo = (props) => {
     <ResearcherInfo {...props}/>
   </BrowserRouter>;
 };
+
+const user = {
+  userId: 1,
+  dacUserId: 2,
+  displayName: 'Cindy Crawford',
+  email: 'cc@c.com'
+};
+
+beforeEach(() => {
+  cy.stub(User, 'getMe').returns(Promise.resolve(user));
+});
 
 describe('Researcher Info', () => {
   it('renders the researcher info component', () => {
