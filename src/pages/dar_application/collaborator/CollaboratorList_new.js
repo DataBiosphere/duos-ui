@@ -5,7 +5,7 @@ import { button, div, h } from 'react-hyperscript-helpers';
 import './collaborator.css';
 
 export default function CollaboratorList_new(props) {
-  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval} = props;
+  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted} = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
@@ -21,6 +21,10 @@ export default function CollaboratorList_new(props) {
     setEditState(editCopy);
     setCollaborators(collaboratorCopy);
   };
+
+  useEffect(() => {
+    setCompleted(!showNewForm && editState.every((v) => v === false));
+  });
 
   const saveCollaborator = (index, newCollaborator) => {
     let newCollaborators = collaborators.slice();

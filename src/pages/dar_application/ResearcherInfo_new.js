@@ -26,6 +26,9 @@ export default function ResearcherInfo(props) {
     onNihStatusUpdate,
     formData,
     researcher,
+    setLabCollaboratorsCompleted,
+    setInternalCollaboratorsCompleted,
+    setExternalCollaboratorsCompleted,
     showValidationMessages,
     ariaLevel = 2
   } = props;
@@ -139,6 +142,7 @@ export default function ResearcherInfo(props) {
             collaborators: formData.labCollaborators,
             collaboratorKey: 'labCollaborators',
             collaboratorLabel: 'Internal Lab Member',
+            setCompleted: setLabCollaboratorsCompleted,
             showApproval: true,
             disabled: !isEmpty(darCode),
             deleteBoolArray: (new Array(formData.labCollaborators.length).fill(false)),

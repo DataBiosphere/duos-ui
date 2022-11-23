@@ -104,6 +104,9 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const [showValidationMessages, setShowValidationMessages] = useState(false);
   const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
+  const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
+  const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true);
+  const [externalCollaboratorsCompleted, setExternalCollaboratorsCompleted] = useState(true);
 
   const [showDialogSave, setShowDialogSave] = useState(false);
   const [showDialogSubmit, setShowDialogSubmit] = useState(false);
@@ -189,19 +192,19 @@ const DataAccessRequestApplicationNew = (props) => {
   }, [datasets]);
 
 
-  useEffect(() => {
-    if (showValidationMessages) {
-      setValidationMessages(
-        validateDARFormData(
-          formData,
-          datasets,
-          dataUseTranslations,
-          uploadedIrbDocument,
-          uploadedCollaborationLetter));
-    } else {
-      setValidationMessages({researcherInfoErrors: [], darErrors: [], rusErrors: []});
-    }
-  }, [formData, datasets, dataUseTranslations, showValidationMessages, uploadedCollaborationLetter, uploadedIrbDocument]);
+  // useEffect(() => {
+  //   if (showValidationMessages) {
+  //     setValidationMessages(
+  //       validateDARFormData(
+  //         formData,
+  //         datasets,
+  //         dataUseTranslations,
+  //         uploadedIrbDocument,
+  //         uploadedCollaborationLetter));
+  //   } else {
+  //     setValidationMessages({researcherInfoErrors: [], darErrors: [], rusErrors: []});
+  //   }
+  // }, [formData, datasets, dataUseTranslations, showValidationMessages, uploadedCollaborationLetter, uploadedIrbDocument]);
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
@@ -321,12 +324,16 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
   const attemptSubmit = () => {
-    const validation = validateDARFormData(
+    const validation = validateDARFormData({
       formData,
       datasets,
       dataUseTranslations,
-      uploadedIrbDocument,
-      uploadedCollaborationLetter);
+      irbDocument: uploadedIrbDocument,
+      collaborationLetter: uploadedCollaborationLetter,
+      internalCollaboratorsCompleted,
+      labCollaboratorsCompleted,
+      externalCollaboratorsCompleted,
+    });
 
     setValidationMessages(validation);
     const isInvalidForm = validationFailed(validation);
@@ -536,6 +543,9 @@ const DataAccessRequestApplicationNew = (props) => {
                 researcher,
                 showValidationMessages: showValidationMessages,
                 allSigningOfficials: allSigningOfficials,
+                setLabCollaboratorsCompleted,
+                setInternalCollaboratorsCompleted,
+                setExternalCollaboratorsCompleted,
               }))
             ]),
 

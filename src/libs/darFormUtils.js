@@ -3,6 +3,7 @@
 // ********************** DUL LOGIC ********************** //
 
 import { isEmpty, isNil, isEqual } from 'lodash';
+import { FormValidators } from '../components/forms/forms';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
   return datasets?.some((ds) => ds?.dataUse[flag] === true);
@@ -53,8 +54,40 @@ const mustAcceptMsg = (fieldName) => {
   return `Please accept ${fieldName}`;
 };
 
+export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) => {
+  const errors = [];
+
+  if (isNil(collaborator.name) || collaborator.name === '') {
+    errors.push('Must specify the name of the collaborator');
+  }
+
+  if (isNil(collaborator.eraCommonsId) || collaborator.eraCommonsId === '') {
+    errors.push('Must specify the eRA Commons ID of the collaborator');
+  }
+
+  if (isNil(collaborator.title) || collaborator.title === '') {
+    errors.push('Must specify the title of the collaborator');
+  }
+
+  if (isNil(collaborator.email) || collaborator.email === '') {
+    errors.push('Must specify the email of the collaborator.');
+  } else {
+    var testEmail = FormValidators.EMAIL.isValid(collaborator.email);
+    if(testEmail === false) errors.push(FormValidators.EMAIL.msg);
+  }
+
+  if (needsApproval) {
+    if (isEmpty(collaborator.approverStatus)) {
+      errors.push('Must specify the Designated Download/Approval status.');
+    }
+  }
+
+
+  return errors;
+};
+
 // errors for the Researcher Info section
-const calcResearcherInfoErrors = (formData) => {
+const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted) => {
   const errors = [];
 
   if (isEmpty(formData.researcher)) {
@@ -76,6 +109,21 @@ const calcResearcherInfoErrors = (formData) => {
   if (isEmpty(formData.itDirector)) {
     errors.push(requiredFieldMsg('your Information Technology (IT) Director'));
   }
+
+  if (!labCollaboratorsCompleted) {
+    errors.push('Please fill out and save Step 1.4: Lab Collaborators.');
+  }
+
+  if (!internalCollaboratorsCompleted) {
+    errors.push('Please fill out and save Step 1.5: Internal Collaborators.');
+  }
+
+  if (!externalCollaboratorsCompleted) {
+    errors.push('Please fill out and save Step 1.9: External Collaborators.');
+  }
+
+
+
 
   if(isNil(formData.anvilUse)) {
     errors.push(requiredFieldMsg('Cloud Use Statement'));
@@ -186,9 +234,18 @@ const calcRusErrors = (formData) => {
  *  rusErrors: []string,
  * }
  */
-export const validateDARFormData = (formData, datasets, dataUseTranslations, irbDocument, collaborationLetter) => {
+export const validateDARFormData = ({
+  formData,
+  datasets,
+  dataUseTranslations,
+  irbDocument,
+  collaborationLetter,
+  labCollaboratorsCompleted,
+  internalCollaboratorsCompleted,
+  externalCollaboratorsCompleted
+}) => {
   return {
-    researcherInfoErrors: calcResearcherInfoErrors(formData),
+    researcherInfoErrors: calcResearcherInfoErrors(formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted),
     darErrors: calcDarErrors(formData, datasets, dataUseTranslations, irbDocument, collaborationLetter),
     rusErrors: calcRusErrors(formData),
   };
