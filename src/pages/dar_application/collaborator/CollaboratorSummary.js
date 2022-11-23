@@ -53,41 +53,80 @@ export const CollaboratorSummary = (props) => {
       ]),
       // Edit Button
       div({
-        className: 'collaborator-summary-edit-button',
-      }),
-      a({
-        id: index+'_editCollaborator',
-        onClick: () => {
-          props.updateEditState(true);
-        },
+        className: 'collaborator-summary-edit-delete-buttons',
+        isRendered: !props.deleteMode,
       }, [
-        span({
-          className: 'glyphicon glyphicon-pencil caret-margin collaborator-edit-icon', 'aria-hidden': 'true',
-          'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
-        }),
-        span({
-          style: {
-            marginLeft: '1rem',
-          }
-        }),
+        a({
+          id: index+'_editCollaborator',
+          style: { marginLeft: 10, marginRight: 10 },
+          onClick: () => {
+            props.updateEditState(true);
+          },
+        }, [
+          span({
+            className: 'glyphicon glyphicon-pencil caret-margin collaborator-edit-icon', 'aria-hidden': 'true',
+            'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
+          }),
+          span({
+            style: {
+              marginLeft: '1rem',
+            }
+          }),
+        ]),
+        // Delete Button
+        a({
+          id: index+'_deleteMember',
+          style: { marginLeft: 10 },
+          onClick: () => props.toggleDeleteBool(true),
+        }, [
+          span({
+            className: 'glyphicon glyphicon-trash collaborator-delete-icon',
+            'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+          }),
+          span({
+            style: {
+              marginLeft: '1rem',
+            }
+          }),
+        ]),
       ]),
-      // Delete Button
+      // Delete Confirmation Buttons
+      // Cancel Delete
       div({
-        className: 'collaborator-summary-delete-button',
-      }),
-      a({
-        id: index+'_deleteMember',
-        onClick: () => props.deleteCollaborator(),
+        className: 'collaborator-summary-confirm-delete-buttons',
+        isRendered: props.deleteMode,
       }, [
-        span({
-          className: 'glyphicon glyphicon-trash collaborator-delete-icon',
-          'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
-        }),
-        span({
-          style: {
-            marginLeft: '1rem',
-          }
-        }),
+        a({
+          id: index+'_editCollaborator',
+          style: { marginLeft: 10, marginRight: 10 },
+          onClick: () => props.toggleDeleteBool(false),
+        }, [
+          span({
+            className: 'glyphicon glyphicon-remove caret-margin collaborator-cancel-delete-icon', 'aria-hidden': 'true',
+            'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
+          }),
+          span({
+            style: {
+              marginLeft: '1rem',
+            }
+          }),
+        ]),
+        // Confirm Delete
+        a({
+          id: index+'_deleteMember',
+          style: { marginLeft: 10 },
+          onClick: () => props.deleteCollaborator(),
+        }, [
+          span({
+            className: 'glyphicon glyphicon-trash collaborator-confirm-delete-icon',
+            'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+          }),
+          span({
+            style: {
+              marginLeft: '1rem',
+            }
+          }),
+        ]),
       ]),
     ]),
   ]);

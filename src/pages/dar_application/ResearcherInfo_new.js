@@ -3,7 +3,7 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h2, h3, h4, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList from './collaborator/CollaboratorList';
+import CollaboratorList_new from './collaborator/CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -169,14 +169,13 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          h(CollaboratorList, {
+          h(CollaboratorList_new, {
             formFieldChange,
             collaborators: labCollaborators,
             collaboratorKey: 'labCollaborators',
             collaboratorLabel: 'Internal Lab Member',
             showApproval: true,
-            disabled: !isEmpty(darCode),
-            deleteBoolArray: (new Array(labCollaborators.length).fill(false)),
+            disabled: !isEmpty(darCode)
           }),
         ]),
 
@@ -194,14 +193,13 @@ export default function ResearcherInfo(props) {
             Internal Collaborators will not be required to submit an independent DAR to collaborate 
             on this project.`
           ),
-          h(CollaboratorList, {
+          h(CollaboratorList_new, {
             formFieldChange,
             collaborators: internalCollaborators,
             collaboratorKey: 'internalCollaborators',
             collaboratorLabel: 'Internal Collaborator',
             showApproval: false,
-            disabled: !isEmpty(darCode),
-            deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
+            disabled: !isEmpty(darCode)
           }),
         ]),
 
@@ -363,14 +361,13 @@ export default function ResearcherInfo(props) {
             as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
             the External Collaborators listed.`
           ),
-          h(CollaboratorList, {
+          h(CollaboratorList_new, {
             formFieldChange,
             collaborators: externalCollaborators,
             collaboratorKey: 'externalCollaborators',
             collaboratorLabel: 'External Collaborator',
             showApproval: false,
-            disabled: !isEmpty(darCode),
-            deleteBoolArray: (new Array(externalCollaborators.length).fill(false)),
+            disabled: !isEmpty(darCode)
           }),
         ])
       ]),
