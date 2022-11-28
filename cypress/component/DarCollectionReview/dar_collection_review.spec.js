@@ -706,10 +706,15 @@ beforeEach(() => {
 describe('DAR Review', () => {
   it('renders the collections-review-page div', () => {
     mount(<DarCollectionReview {...props}/>);
-    const container = cy.get('.collection-review-page').find('.tab-selection-Chair');
-    container.should('exist').should('be.visible');
+    const chairContainer = cy.get('.collection-review-page').find('.tab-selection-Chair');
+    const memberContainer = cy.get('.collection-review-page').find('.tab-selection-Member');
+    chairContainer.should('exist').should('be.visible');
+    memberContainer.should('exist').should('be.visible');
     cy.get('.dataset-list-item').should('not.exist');
-    container.click().then(()=>{
+    chairContainer.click().then(()=>{
+      cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea');
+    });
+    memberContainer.click().then(()=>{
       cy.get('.dataset-list-item').should('exist').should('be.visible').contains('Sleep Apnea');
     });
   });
