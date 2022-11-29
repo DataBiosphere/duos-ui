@@ -41,7 +41,7 @@ export const CollaboratorErrors = (props) => {
     errors
   } = props;
 
-  return div({dataCy: 'collaborator-form-errors'},
+  return div({datacy: 'collaborator-form-errors'},
     errors.map((err, idx) => {
       return div({style: {marginBottom: '2rem'}}, [
         h(Notification,

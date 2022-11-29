@@ -161,7 +161,7 @@ export default function ResearcherInfo(props) {
           })
         ]),
 
-        div({className: 'dar-application-row', dataCy: 'internal-lab-staff'}, [
+        div({className: 'dar-application-row', datacy: 'internal-lab-staff'}, [
           h3('1.4 Internal Lab Staff'),
           div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
@@ -179,7 +179,7 @@ export default function ResearcherInfo(props) {
           }),
         ]),
 
-        div({className: 'dar-application-row', dataCy: 'internal-collaborators'}, [
+        div({className: 'dar-application-row', datacy: 'internal-collaborators'}, [
           h3('1.5 Internal Collaborators'),
           div(
             `Please list Internal Collaborators here. Internal Collaborators are defined as individuals
@@ -348,7 +348,7 @@ export default function ResearcherInfo(props) {
           ])
         ]),
 
-        div({className: 'dar-application-row', dataCy: 'external-collaborators'}, [
+        div({className: 'dar-application-row', datacy: 'external-collaborators'}, [
           h3('1.9 External Collaborators'),
           div(
             `Please list External collaborators here. External Collaborators are not employees of the 

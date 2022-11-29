@@ -147,15 +147,14 @@ export default function CollaboratorForm (props) {
         // Cancel Delete Button
         div({
           isRendered: !isNil(props.collaborator) && props.deleteMode,
-          // className: 'cancel-delete-btn btn',
           className: 'collaborator-form-cancel-button f-left btn',
           role: 'button',
           onClick: () => props.toggleDeleteBool(false),
         }, ['Cancel']),
         // Delete Button Confirmation
         div({
+          id: index+'_confirmDeleteMember',
           isRendered: !isNil(props.collaborator) && props.deleteMode,
-          // className: 'confirm-delete-btn btn btn-danger',
           className: 'collaborator-form-add-save-button f-left btn',
           role: 'button',
           onClick: () => props.deleteCollaborator()

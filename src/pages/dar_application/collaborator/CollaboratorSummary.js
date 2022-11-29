@@ -113,7 +113,7 @@ export const CollaboratorSummary = (props) => {
         ]),
         // Confirm Delete
         a({
-          id: index+'_deleteMember',
+          id: index+'_confimDeleteMember',
           style: { marginLeft: 10 },
           onClick: () => props.deleteCollaborator(),
         }, [

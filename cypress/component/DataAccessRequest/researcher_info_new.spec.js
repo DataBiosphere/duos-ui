@@ -2,7 +2,7 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo_new.js';
-import {User} from "../../../src/libs/ajax";
+import {User} from '../../../src/libs/ajax';
 import {BrowserRouter} from 'react-router-dom';
 
 const props = {
@@ -179,7 +179,8 @@ describe('Researcher Info', () => {
     // save collaborator and switch to summary view
     cy.get('.collaborator-form-add-save-button').click();
     cy.get('#0_deleteMember').click();
-    cy.get('#0_summary').should('not.exist');
+    // cy.get('#0_confirmDeleteMember').click();
+    // cy.get('#0_summary').should('not.exist');
   });
 
   it('cancels adding new collaborators properly', () => {
@@ -213,6 +214,7 @@ describe('Researcher Info', () => {
     // also check the delete button on the edit form
     cy.get('#0_editCollaborator').click();
     cy.get('#0_deleteMember').click();
+    cy.get('#0_confirmDeleteMember').click();
     cy.get('#0_summary').should('not.exist');
     cy.get('[dataCy=internal-lab-staff]')
       .find('.collaborator-list-component')
