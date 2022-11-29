@@ -1,8 +1,8 @@
 import { h, h2, a, p, div, span } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import { Notifications } from '../libs/utils';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
-import NIHLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
+import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
 import {Styles} from '../libs/theme';
 import { User } from '../libs/ajax';
