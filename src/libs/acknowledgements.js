@@ -11,4 +11,9 @@ export const hasAccepted = async (...acknowledgements) => {
   return acknowledgements.every((acknowledgement) => acceptedAcknowledgements.includes(acknowledgement));
 };
 
+
+export const hasSOAcceptedDAAs = async () => {
+  return await hasAccepted(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
+};
+
 export default Acknowledgments;

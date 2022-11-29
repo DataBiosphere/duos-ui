@@ -5,13 +5,8 @@ import {Styles} from '../libs/theme';
 import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
-import SigningOfficialDAAModal from '../components/modals/SigningOfficialDAAModal';
-import Acknowledgments, { hasAccepted } from '../libs/acknowledgements';
+import SigningOfficialDAAPopup from '../components/modals/SigningOfficialDAAPopup';
 
-
-const hasAcceptedDaas = async () => {
-  return await hasAccepted(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
-};
 
 export default function SigningOfficialResearchers() {
   const [signingOfficial, setSiginingOfficial] = useState({});
@@ -20,7 +15,6 @@ export default function SigningOfficialResearchers() {
   //states to be added and used for manage researcher component
   const [isLoading, setIsLoading] = useState(true);
 
-  const [showDaaModal, setShowDaaModal] = useState(false);
 
   useEffect(() => {
     const init = async() => {
@@ -28,11 +22,6 @@ export default function SigningOfficialResearchers() {
         setIsLoading(true);
         const soUser = await User.getMe();
         const researcherList = await User.list(USER_ROLES.signingOfficial);
-
-        const acceptedDaas = await hasAcceptedDaas();
-        if (!acceptedDaas) {
-          setShowDaaModal(true);
-        }
 
         setResearchers(researcherList);
         setSiginingOfficial(soUser);
@@ -49,11 +38,8 @@ export default function SigningOfficialResearchers() {
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
         h(SigningOfficialTable, {researchers, signingOfficial, isLoading}, []),
-        h(SigningOfficialDAAModal, {
-          open: showDaaModal,
-          setOpen: setShowDaaModal,
-          user: signingOfficial,
-        })
+        // will automatically pop up if SO has not signed
+        h(SigningOfficialDAAPopup, {})
       ])
     ])
   );

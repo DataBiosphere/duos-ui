@@ -6,39 +6,63 @@ import NIHLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement
 
 import {Styles} from '../../libs/theme';
 import { User } from '../../libs/ajax';
-import Acknowledgments from '../../libs/acknowledgements';
+import Acknowledgments, { hasSOAcceptedDAAs } from '../../libs/acknowledgements';
+import { useEffect, useState } from 'react';
+import { spinnerService } from '../../libs/spinner-service';
+
 
 const acceptDaas = async () => {
   return await User.acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
 };
 
-export const SigningOfficialDAAModal = (props) => {
+export const SigningOfficialDAAPopup = () => {
 
-  const {
-    open,
-    setOpen,
-    user,
-  } = props;
+  const [hasAccepted, setHasAccepted] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const init = async() => {
+      try {
+        setIsLoading(true);
+        setHasAccepted(await hasSOAcceptedDAAs());
+        setIsLoading(false);
+      } catch(error) {
+        Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
+        setIsLoading(false);
+      }
+    };
+    init();
+  }, []);
 
   const acceptAndClose = () => {
-    acceptDaas(user).then(() => {
-      setOpen(false);
+    acceptDaas().then(() => {
+      setHasAccepted(true);
     }).catch(() => {
       Notifications.showError({text: 'Failed to accept DAA agreements.'});
-      setOpen(false);
+      setHasAccepted(false);
     });
   };
 
+  useEffect(() => {
+    if (isLoading) {
+      spinnerService.showAll();
+    } else {
+      spinnerService.hideAll();
+    }
+  }, [isLoading]);
+
   return h(Modal, {
-    isOpen: open,
+    isOpen: hasAccepted === false,
     onRequestClose: acceptAndClose,
     style: {
       content: {
         ...Styles.MODAL.CONTENT,
         height: '325px',
+        border: 'none',
       },
       overlay: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 1.0)',
+        'z-index': '450',
       },
     },
   }, [
@@ -80,4 +104,4 @@ export const SigningOfficialDAAModal = (props) => {
   ]);
 };
 
-export default SigningOfficialDAAModal;
+export default SigningOfficialDAAPopup;
