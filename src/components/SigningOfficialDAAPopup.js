@@ -1,14 +1,14 @@
 import { h, h2, a, p, div, span } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import { Notifications } from '../../libs/utils';
+import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
 import NIHLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
-import {Styles} from '../../libs/theme';
-import { User } from '../../libs/ajax';
-import Acknowledgments, { hasSOAcceptedDAAs } from '../../libs/acknowledgements';
+import {Styles} from '../libs/theme';
+import { User } from '../libs/ajax';
+import Acknowledgments, { hasSOAcceptedDAAs } from '../libs/acknowledgements';
 import { useEffect, useState } from 'react';
-import { spinnerService } from '../../libs/spinner-service';
+import { spinnerService } from '../libs/spinner-service';
 
 
 const acceptDaas = async () => {
