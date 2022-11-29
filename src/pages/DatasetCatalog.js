@@ -13,6 +13,8 @@ import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
+import {DataUseTranslation} from '../libs/dataUseTranslation';
+import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 
 const tableBody = {
@@ -28,6 +30,7 @@ export default function DatasetCatalog(props) {
   const [sort, setSort] = useState({ field: 'alias', dir: 1 });
   const [numDatasetsSelected, setNumDatasetsSelected] = useState(0);
   const [selectedDatasets, setSelectedDatasets] = useState([]);
+  const [datasetsOnPage, setDatasetsOnPage] = useState([]);
 
   // Selection States
   const [currentPageAllDatasets, setCurrentPageAllDatasets] = useState(1);
@@ -60,7 +63,6 @@ export default function DatasetCatalog(props) {
       row.ix = index;
       row.dbGapLink =
         getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
-
       // Extracting these fields to make sorting easier
       row['Dataset Id'] = row.alias;
       row['Data Access Committee'] = findDacName(localDacs, row);
@@ -68,7 +70,6 @@ export default function DatasetCatalog(props) {
       row['Principal Investigator (PI)'] = findPropertyValue(row, 'Principal Investigator(PI)');
       row['# of Participants'] = findPropertyValue(row, '# of participants');
       row['Data Custodian'] = findPropertyValue(row, 'Data Depositor');
-
       return row;
     })(datasets);
     applyDatasetSort(sort, datasets);
@@ -100,6 +101,40 @@ export default function DatasetCatalog(props) {
     };
     init();
   }, [getDatasets]);
+
+  useEffect( () => {
+    const doEnrichment = async() => {
+      spinnerService.showAll();
+      const theCurrentPage = filterToOnlySelected ? currentPageOnlySelected : currentPageAllDatasets;
+      const searchTable = (query) => (row) => {
+        if (query) {
+          let text = JSON.stringify(row);
+          return text.toLowerCase().includes(query.toLowerCase());
+        }
+        return true;
+      };
+      const visibleDatasets = filterToOnlySelected ? selectedDatasets : datasetList;
+      const results = visibleDatasets.filter(searchTable(searchDulText)).slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize);
+      await Promise.all(results.map(async(dataset) => {
+        if (isNil(dataset.codeList)) {
+          if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
+            dataset.codeList = 'None';
+          } else {
+            const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse);
+            const codes = [];
+            translations.map((restriction) => {
+              codes.push(restriction.alternateLabel || restriction.code);
+            });
+            dataset.codeList = codes.join(', ');
+          }
+        }
+      }));
+      setDatasetsOnPage(results);
+      spinnerService.hideAll();
+    };
+    doEnrichment();
+
+  },[searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets]);
 
   const applyDatasetSort = useCallback((sortParams, datasets) => {
     const sortedList = datasets.sort((a, b) => {
@@ -282,13 +317,10 @@ export default function DatasetCatalog(props) {
     return true;
   };
 
-  const filteredAndPaginatedDatasetList = () => {
-    return visibleDatasets().filter(searchTable(searchDulText)).slice((currentPage() - 1) * pageSize, currentPage() * pageSize);
-  };
 
   const allOnPageSelected = () => {
 
-    const filteredList = filteredAndPaginatedDatasetList();
+    const filteredList = datasetsOnPage;
 
     return filteredList.length > 0 &&  filteredList.every((row) => {
       return row.checked || (!row.active);
@@ -298,7 +330,7 @@ export default function DatasetCatalog(props) {
   const selectAllOnPage = (e) => {
     const checked = isNil(e.target.checked) ? false : e.target.checked;
 
-    const datasetIdsToCheck = filteredAndPaginatedDatasetList().map((row) => {
+    const datasetIdsToCheck = datasetsOnPage.map((row) => {
       return row.dataSetId;
     });
 
@@ -512,7 +544,7 @@ export default function DatasetCatalog(props) {
               ]),
 
               tbody({ isRendered: !isNil(visibleDatasets()) && !isEmpty(visibleDatasets()) }, [
-                filteredAndPaginatedDatasetList()
+                datasetsOnPage
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
                       tr({ className: 'tableRow' }, [
@@ -629,7 +661,7 @@ export default function DatasetCatalog(props) {
                             id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
                             onClick: () => openTranslatedDUL(dataset.dataUse),
                             className: (!dataset.active ? 'dataset-disabled' : 'enabled')
-                          }, ['Translated Use Restriction'])
+                          }, dataset.codeList)
                         ]),
 
                         td({
