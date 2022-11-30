@@ -74,7 +74,7 @@ const user = {
 };
 
 beforeEach(() => {
-  cy.stub(User, 'getMe').returns(Promise.resolve(user));
+  cy.stub(User, 'getMe').returns(user);
 });
 
 describe('Researcher Info', () => {
