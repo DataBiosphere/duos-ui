@@ -48,21 +48,20 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    User.getMe().then((response) => {
-      const props = response.researcherProperties;
-      const authProp = find({'propertyKey':'eraAuthorized'})(props);
-      const expProp = find({'propertyKey':'eraExpiration'})(props);
-      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
-      const nihValid = isAuthorized && expirationCount > 0;
-      const eraCommonsId = response.eraCommonsId;
-      this.props.onNihStatusUpdate(nihValid);
-      this.setState(prev => {
-        prev.isAuthorized = isAuthorized;
-        prev.expirationCount = expirationCount;
-        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
-        return prev;
-      });
+    const response = await User.getMe();
+    const props = response.researcherProperties;
+    const authProp = find({'propertyKey':'eraAuthorized'})(props);
+    const expProp = find({'propertyKey':'eraExpiration'})(props);
+    const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+    const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
+    const nihValid = isAuthorized && expirationCount > 0;
+    const eraCommonsId = response.eraCommonsId;
+    this.props.onNihStatusUpdate(nihValid);
+    this.setState(prev => {
+      prev.isAuthorized = isAuthorized;
+      prev.expirationCount = expirationCount;
+      prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
+      return prev;
     });
   };
 

@@ -123,51 +123,63 @@ export default function CollaboratorForm (props) {
             setApproverStatus(value);
           }
         }),
-        p({className: 'control-label rp-choice-questions', style: { fontSize: 14, marginTop: 5, marginBottom: 20 } },
+        p({className: 'control-label rp-choice-questions', style: { fontSize: 14, marginTop: 5, marginBottom: 5 } },
           [`Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as their Internal Lab Staff.`])
       ]),
-      div({className: 'f-right row'}, [
-        // Cancel Button
-        div({
-          className: 'collaborator-form-cancel-button btn',
-          role: 'button',
-          onClick: () => props.updateEditState(false)
-        },['Cancel']),
-        // Add/Save Button
-        div({
-          className: 'collaborator-form-add-save-button btn',
-          role: 'button',
-          onClick: () => {
-            let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
-            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproval: props.showApproval});
-            const valid = errors.length === 0;
-
-            setCollaboratorValidationErrors(errors);
-            valid && saveUpdate();
-          },
-        },
-        [`${isNil(collaborator) ? 'Add' : 'Save'}`])
-      ]),
-      // Delete button
-      div({className: 'row', style: { marginTop: 20 }, isRendered: !isNil(props.collaborator)}, [
-        div({
-          className: 'col-lg-2 col-md-2, col-sm-2 col-xs-2 col-lg-offset-10 col-md-offset-10 col-sm-offset-10 col-xs-offset-10',
-        }),
+      div({className: 'row', style: { marginTop: 20 } }, [
+        // Toggle Delete Buttons (Cancel/Delete)
         a({
           id: index+'_deleteMember',
-          onClick: () => props.deleteCollaborator(),
+          isRendered: !isNil(props.collaborator) && !props.deleteMode,
+          onClick: () => props.toggleDeleteBool(true),
+          style: { verticalAlign: 'middle', lineHeight: '4rem' }
         }, [
           span({
             className: 'collaborator-delete-icon glyphicon glyphicon-trash',
-            'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+            'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete',
           }),
           span({
             style: {
               marginLeft: '1rem',
               color: '#0948B7',
+              verticalAlign: 'middle'
             }
           }, ['Delete this entry']),
         ]),
+        // Cancel Delete Button
+        div({
+          isRendered: !isNil(props.collaborator) && props.deleteMode,
+          className: 'collaborator-form-cancel-button f-left btn',
+          role: 'button',
+          onClick: () => props.toggleDeleteBool(false),
+        }, ['Cancel']),
+        // Delete Button Confirmation
+        div({
+          id: index+'_confirmDeleteMember',
+          isRendered: !isNil(props.collaborator) && props.deleteMode,
+          className: 'collaborator-form-add-save-button f-left btn',
+          role: 'button',
+          onClick: () => props.deleteCollaborator()
+        },[`Delete`]),
+        // Add/Save Button
+        div({
+          className: 'collaborator-form-add-save-button f-right btn',
+          role: 'button',
+          onClick: () => {
+            let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
+            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproval: props.showApproval});
+            const valid = errors.length === 0;
+            setCollaboratorValidationErrors(errors);
+            valid && saveUpdate();
+          },
+        },
+        [`${isNil(collaborator) ? 'Add' : 'Save'}`]),
+        // Cancel Button for Add/Update
+        div({
+          className: 'collaborator-form-cancel-button f-right btn',
+          role: 'button',
+          onClick: () => props.updateEditState(false)
+        },['Cancel'])
       ]),
     ])
   ]);

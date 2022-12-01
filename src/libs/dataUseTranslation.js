@@ -281,7 +281,7 @@ export const processDefinedLimitations = (
 //Helper function to handle OTHER attribute translations in dataUse
 const processOtherInDataUse = (dataUse, restrictionStatements) => {
   //Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
-  if (dataUse.otherRestrictions === true && !isNil(dataUse.other)) {
+  if ((dataUse.otherRestrictions === true || (!isNil(dataUse.generalUse) && dataUse.generalUse === false)) && !isNil(dataUse.other)) {
     restrictionStatements.push(
       Promise.resolve({
         code: 'OTH1',

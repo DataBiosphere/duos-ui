@@ -1,9 +1,9 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h2, h3, h4, span, button } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h2, h3, h4, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList from './collaborator/CollaboratorList_new';
+import CollaboratorList_new from './collaborator/CollaboratorList_new';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
 import './dar_application_new.css';
@@ -129,7 +129,7 @@ export default function ResearcherInfo(props) {
           })
         ]),
 
-        div({className: 'dar-application-row'}, [
+        div({className: 'dar-application-row', datacy: 'internal-lab-staff'}, [
           h3('1.4 Internal Lab Staff'),
           div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
@@ -144,16 +144,14 @@ export default function ResearcherInfo(props) {
             collaboratorLabel: 'Internal Lab Member',
             setCompleted: setLabCollaboratorsCompleted,
             showApproval: true,
-            disabled: !isEmpty(darCode),
-            deleteBoolArray: (new Array(formData.labCollaborators.length).fill(false)),
+            disabled: !isEmpty(darCode)
           }),
         ]),
 
-        div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1754
+        div({className: 'dar-application-row', datacy: 'internal-collaborators'}, [
           h3('1.5 Internal Collaborators'),
           div(
-            `Please add Internal Collaborators here Internal Collaborators are defined as individuals
+            `Please list Internal Collaborators here. Internal Collaborators are defined as individuals
             who are not under the direct supervision of the PI (e.g., not a member of the PI's 
             laboratory) who assists with the PI's research project involving controlled-access data 
             subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting 
@@ -164,12 +162,14 @@ export default function ResearcherInfo(props) {
             Internal Collaborators will not be required to submit an independent DAR to collaborate 
             on this project.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white',
-            style: { marginTop: 25 },
-            onClick: () => {}
-          }, ['Add Collaborator'])
+          h(CollaboratorList_new, {
+            formFieldChange,
+            collaborators: internalCollaborators,
+            collaboratorKey: 'internalCollaborators',
+            collaboratorLabel: 'Internal Collaborator',
+            showApproval: false,
+            disabled: !isEmpty(darCode)
+          }),
         ]),
 
         div({className: 'dar-application-row'}, [
@@ -317,8 +317,7 @@ export default function ResearcherInfo(props) {
           ])
         ]),
 
-        div({className: 'dar-application-row'}, [
-          // TODO: DUOS-1754
+        div({className: 'dar-application-row', datacy: 'external-collaborators'}, [
           h3('1.9 External Collaborators'),
           div(
             `Please list External collaborators here. External Collaborators are not employees of the 
@@ -331,14 +330,15 @@ export default function ResearcherInfo(props) {
             as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
             the External Collaborators listed.`
           ),
-          button({
-            type: 'button', // default button element type inside a form is "submit".
-            className: 'button button-white',
-            style: { marginTop: 25 },
-            onClick: () => {}
-          }, ['Add Collaborator'])
+          h(CollaboratorList_new, {
+            formFieldChange,
+            collaborators: externalCollaborators,
+            collaboratorKey: 'externalCollaborators',
+            collaboratorLabel: 'External Collaborator',
+            showApproval: false,
+            disabled: !isEmpty(darCode)
+          }),
         ])
-
       ]),
 
       fieldset({ disabled: !isNil(darCode) }, [

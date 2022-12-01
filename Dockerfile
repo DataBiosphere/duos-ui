@@ -1,5 +1,5 @@
 # builder image
-FROM node:16.18.0-slim AS builder
+FROM node:19.1.0-slim AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory
@@ -19,7 +19,7 @@ RUN npm install --silent
 RUN npm run build --silent
 
 FROM us.gcr.io/broad-dsp-gcr-public/base/nginx:mainline-alpine
+COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
-COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]

@@ -10,16 +10,20 @@ export default function CollaboratorList_new(props) {
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
   const [showNewForm, setShowNewForm] = useState(false);
+  const [deleteBoolArray, setDeleteBoolArray] = useState(props.deleteBoolArray || []);
 
   const deleteCollaborator = (index) => {
+    let deleteCopy = deleteBoolArray.slice();
     let collaboratorCopy = collaborators.slice();
     let editCopy = editState.slice();
 
+    deleteCopy.splice(index, 1);
     collaboratorCopy.splice(index, 1);
     editCopy.splice(index, 1);
 
     setEditState(editCopy);
     setCollaborators(collaboratorCopy);
+    setDeleteBoolArray(deleteCopy);
   };
 
   useEffect(() => {
@@ -30,6 +34,8 @@ export default function CollaboratorList_new(props) {
     let newCollaborators = collaborators.slice();
     newCollaborators[index] = newCollaborator;
     setCollaborators(newCollaborators);
+    const deleteBoolCopy = [...deleteBoolArray, false];
+    setDeleteBoolArray(deleteBoolCopy);
   };
 
   const updateEditState = (index, bool) => {
@@ -38,13 +44,20 @@ export default function CollaboratorList_new(props) {
     setEditState(newEditState);
   };
 
+  const toggleDeleteBool = (index, bool) => {
+    let deleteCopy = [...deleteBoolArray];
+    deleteCopy[index] = bool;
+    setDeleteBoolArray(deleteCopy);
+  };
+
   useEffect(() => {
     return formFieldChange({name: collaboratorKey, value: collaborators});
   }, [formFieldChange, collaboratorKey, collaborators]);
 
   useEffect(() => {
     setCollaborators(props.collaborators);
-  }, [props.collaborators]);
+    setDeleteBoolArray((new Array(props.collaborators.length).fill(false)));
+  }, [props.collaborators, props.deleteBoolArray]);
 
   const ListItems = div({className: 'form-group row no-margin'}, [
     collaborators
@@ -54,11 +67,13 @@ export default function CollaboratorList_new(props) {
           saveCollaborator: (newCollaborator) => saveCollaborator(index, newCollaborator),
           deleteCollaborator: () => deleteCollaborator(index),
           updateEditState: (bool) => updateEditState(index, bool),
+          toggleDeleteBool: (bool) => toggleDeleteBool(index, bool),
           collaborator,
           collaboratorLabel,
           showApproval,
           editMode: editState[index],
-          key: collaborator?.uuid
+          key: collaborator?.uuid,
+          deleteMode: deleteBoolArray[index]
         });
       })
   ]);
@@ -75,7 +90,7 @@ export default function CollaboratorList_new(props) {
             !props.disabled && setShowNewForm(true);
           },
           isRendered: !showNewForm
-        }, ['Add Collaborator']),
+        }, [`Add ${collaboratorLabel}`]),
         h(CollaboratorForm, {
           index: collaborators.length,
           saveCollaborator: (newCollaborator) => saveCollaborator(collaborators.length, newCollaborator),
