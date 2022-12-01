@@ -6,41 +6,26 @@ import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11
 
 import {Styles} from '../libs/theme';
 import { User } from '../libs/ajax';
-import Acknowledgments, { hasSOAcceptedDAAs } from '../libs/acknowledgements';
+import Acknowledgments from '../libs/acknowledgements';
 import { useEffect, useState } from 'react';
 import { spinnerService } from '../libs/spinner-service';
+import { isNil } from 'lodash';
 
 
-const acceptDaas = async () => {
-  return await User.acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
-};
 
-export const SigningOfficialDAAPopup = () => {
 
-  const [hasAccepted, setHasAccepted] = useState();
+export const SigningOfficialDAAPopup = (props) => {
+  const {
+    onAccept
+  } = props;
+
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const init = async() => {
-      try {
-        setIsLoading(true);
-        setHasAccepted(await hasSOAcceptedDAAs());
-        setIsLoading(false);
-      } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
-        setIsLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  const acceptAndClose = () => {
-    acceptDaas().then(() => {
-      setHasAccepted(true);
-    }).catch(() => {
-      Notifications.showError({text: 'Failed to accept DAA agreements.'});
-      setHasAccepted(false);
-    });
+  const acceptDaas = async () => {
+    await User.acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
+    if (!isNil(onAccept)) {
+      onAccept();
+    }
   };
 
   useEffect(() => {
@@ -93,7 +78,7 @@ export const SigningOfficialDAAPopup = () => {
 
     div({ className: 'flex flex-row', style: { justifyContent: 'flex-end', }, }, [
       a({
-        id: 'btn_save', onClick: acceptAndClose,
+        id: 'btn_save', onClick: acceptDaas(),
         className: 'button button-blue',
         style: {
           marginRight: '2rem',

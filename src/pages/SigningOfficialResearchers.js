@@ -5,7 +5,7 @@ import {Styles} from '../libs/theme';
 import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
-import SigningOfficialDAAPopup from '../components/SigningOfficialDAAPopup';
+import SigningOfficialDAAPopup from '../components/SigningOfficialDaaAgreement';
 
 
 export default function SigningOfficialResearchers() {

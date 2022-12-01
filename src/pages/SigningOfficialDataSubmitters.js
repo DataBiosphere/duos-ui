@@ -5,7 +5,7 @@ import {Styles} from '../libs/theme';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
 import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
-import SigningOfficialDAAPopup from '../components/SigningOfficialDAAPopup';
+import SigningOfficialDAAPopup from '../components/SigningOfficialDaaAgreement';
 
 
 export default function SigningOfficialConsole() {
