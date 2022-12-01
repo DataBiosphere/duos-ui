@@ -7,7 +7,7 @@ import {Collections} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
-import SigningOfficialDAAPopup from '../components/SigningOfficialDaaAgreement';
+import SigningOfficialDaaAgreementWrapper from '../components/SigningOfficialDaaAgreementWrapper';
 
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([]);
@@ -32,43 +32,44 @@ export default function SigningOfficialDarRequests() {
 
   return (
     div({style: Styles.PAGE}, [
-      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
-        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
-          div({style: Styles.ICON_CONTAINER}, [
-            img({
-              id: 'lock-icon',
-              src: lockIcon,
-              style: Styles.HEADER_IMG
-            })
-          ]),
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, [`My Institution's Data Access Requests`]),
-            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
-              'Your Institution\'s Data Access Requests: Records from all current and closed data access requests.',
+      h(SigningOfficialDaaAgreementWrapper, {}, [
+
+        div({style: {display: 'flex', justifyContent: 'space-between'}}, [
+          div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
+            div({style: Styles.ICON_CONTAINER}, [
+              img({
+                id: 'lock-icon',
+                src: lockIcon,
+                style: Styles.HEADER_IMG
+              })
             ]),
+            div({style: Styles.HEADER_CONTAINER}, [
+              div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, [`My Institution's Data Access Requests`]),
+              div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
+                'Your Institution\'s Data Access Requests: Records from all current and closed data access requests.',
+              ]),
+            ])
           ])
-        ])
-      ]),
-      div({style: {}, className: 'signing-official-tabs'}, [
-        h(DarCollectionTable, {
-          collections: collectionList,
-          columns: [
-            DarCollectionTableColumnOptions.DAR_CODE,
-            DarCollectionTableColumnOptions.NAME,
-            DarCollectionTableColumnOptions.SUBMISSION_DATE,
-            DarCollectionTableColumnOptions.RESEARCHER,
-            DarCollectionTableColumnOptions.INSTITUTION,
-            DarCollectionTableColumnOptions.DATASET_COUNT,
-            DarCollectionTableColumnOptions.STATUS
-          ],
-          isLoading,
-          cancelCollection: null,
-          reviseCollection: null,
-          consoleType: consoleTypes.SIGNING_OFFICIAL
-        }, [])
-      ]),
-      // will automatically pop up if SO has not signed
-      h(SigningOfficialDAAPopup, {})
+        ]),
+        div({style: {}, className: 'signing-official-tabs'}, [
+          h(DarCollectionTable, {
+            collections: collectionList,
+            columns: [
+              DarCollectionTableColumnOptions.DAR_CODE,
+              DarCollectionTableColumnOptions.NAME,
+              DarCollectionTableColumnOptions.SUBMISSION_DATE,
+              DarCollectionTableColumnOptions.RESEARCHER,
+              DarCollectionTableColumnOptions.INSTITUTION,
+              DarCollectionTableColumnOptions.DATASET_COUNT,
+              DarCollectionTableColumnOptions.STATUS
+            ],
+            isLoading,
+            cancelCollection: null,
+            reviseCollection: null,
+            consoleType: consoleTypes.SIGNING_OFFICIAL
+          }, [])
+        ]),
+      ])
     ])
   );
 }
