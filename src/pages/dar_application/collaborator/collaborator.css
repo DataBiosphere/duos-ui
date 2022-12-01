@@ -10,17 +10,17 @@
   justify-content: space-around;
 }
 
-.collaborator-summary-edit-button {
+.collaborator-summary-edit-delete-buttons {
   display: flex;
   justify-content: flex-end;
   color: #0948B7;
   padding: 0 1%;
 }
 
-.collaborator-summary-delete-button {
+.collaborator-summary-confirm-delete-buttons {
   display: flex;
   justify-content: flex-end;
-  margin: 0 0 0 5px;
+  color: #0948B7;
   padding: 0 1%;
 }
 
@@ -67,4 +67,20 @@
   color: #0948B7;
   background-color: #FFFFFFFF;
   padding: 10px 20px;
+}
+
+.collaborator-cancel-delete-icon {
+  color: #ffffff !important;
+  background: #0948B7 !important;
+  border-radius: 10% !important;
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 10% 10%;
+}
+
+.collaborator-confirm-delete-icon {
+  color: #DB3214 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  font-size: 1.2em;
 }
