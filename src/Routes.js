@@ -10,7 +10,6 @@ import DataAccessRequestApplicationNew from './pages/DataAccessRequestApplicatio
 import DatasetCatalog from './pages/DatasetCatalog';
 import DACDatasets from './pages/DACDatasets';
 import DatasetRegistration from './pages/DatasetRegistration';
-import Election404 from './pages/Election404';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
@@ -53,7 +52,6 @@ const Routes = (props) => (
             : <NotFound />
           : <div />
     } />
-    <Route path="/election404" component={Election404} />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
     <Route path="/privacy" component={PrivacyPolicy} />
