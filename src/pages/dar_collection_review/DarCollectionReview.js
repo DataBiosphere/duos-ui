@@ -60,6 +60,30 @@ const userHasRole = (user, roleId) => {
   return !isEmpty(matches);
 };
 
+const tabsForUser = (user, buckets, adminPage = false) => {
+  if (adminPage) {
+    return {
+      applicationInformation: 'Application Information',
+      chairVote: 'Chair Vote'
+    };
+  }
+  const dataAccessBucketsForUser = filter(
+    (bucket) => get('isRP')(bucket) !== true
+  )(buckets);
+  const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
+
+  const updatedTabs = { applicationInformation: 'Application Information' };
+  if (userHasVotesForCollection) {
+    if (userHasRole(user, chairpersonRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+      updatedTabs.chairVote = 'Chair Vote';
+    } else if (userHasRole(user, memberRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+    }
+  }
+  return updatedTabs;
+};
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
@@ -105,38 +129,13 @@ export default function DarCollectionReview(props) {
       });
       Navigation.console(user, props.history);
     }
-  }, [adminPage, props.history, tabsForUser, collectionId]);
+  }, [adminPage, props.history, collectionId]);
 
   //Remember, votes are contained within buckets, so updating final votes will update the bucket
   //define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
     return updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
   }, [dataUseBuckets]);
-
-  const tabsForUser = useCallback((user, buckets, adminPage = false) => {
-    if (adminPage) {
-      return {
-        applicationInformation: 'Application Information',
-        chairVote: 'Chair Vote'
-      };
-    }
-    const dataAccessBucketsForUser = filter(
-      (bucket) => get('isRP')(bucket) !== true
-    )(buckets);
-    const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
-
-    const updatedTabs = { applicationInformation: 'Application Information' };
-    if (userHasVotesForCollection) {
-      if (userHasRole(user, chairpersonRoleId)) {
-        updatedTabs.memberVote = 'Member Vote';
-        updatedTabs.chairVote = 'Chair Vote';
-      } else if (userHasRole(user, memberRoleId)) {
-        updatedTabs.memberVote = 'Member Vote';
-      }
-    }
-
-    return updatedTabs;
-  }, []);
 
   useEffect(() => {
     try {
