@@ -72,7 +72,7 @@ export const ConfirmationDialog = (props) => {
           id: 'btn_submit',
           className: 'button button-blue',
           onClick: props.action.handler(true),
-          isabled: disableOkBtn
+          disabled: disableOkBtn
         }, [
           props.action.label
         ]),

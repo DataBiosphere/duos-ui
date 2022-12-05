@@ -1,7 +1,8 @@
 
 import { a, div, h2, h3, span, li, ol, p} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
-import LibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
+import NihLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
 import './dar_application_new.css';
 
@@ -39,7 +40,7 @@ export default function DataUseAgreements(props) {
           li({}, ['Acknowledge the Intellectual Property terms as specified in the Library Card Agreement; ']),
           li({}, ['Provide appropriate acknowledgement in any dissemination of research findings including the investigator(s) who generated the data, the funding source, accession numbers of the dataset, and the data repository from which the data were accessed; and,']),
           li({}, [
-            'Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the ', a({target: '_blank', href: LibraryCardAgreementLink}, ['Library Card Agreement']), ' and ', a({target: '_blank', href: ''}, ['NIH Data Use Certification.'])]),
+            'Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the ', a({target: '_blank', href: BroadLibraryCardAgreementLink}, ['Library Card Agreement']), ' and ', a({target: '_blank', href: NihLibraryCardAgreementLink}, ['NIH Data Use Certification.'])]),
         ])
       ]),
 
@@ -49,13 +50,13 @@ export default function DataUseAgreements(props) {
 
       div({ className: 'flex flex-row', style: { justifyContent: 'flex-start', }, }, [
         div({}, [
-          a({ target: '_blank', href: LibraryCardAgreementLink, className: 'button button-white', style: { marginRight: '2rem', }, }, [
+          a({ target: '_blank', href: BroadLibraryCardAgreementLink, className: 'button button-white', style: { marginRight: '2rem', }, }, [
             span({className: 'glyphicon glyphicon-download'}),
             ' Broad Library Card Agreement'
           ])
         ]),
         div({}, [
-          a({ target: '_blank', href: '', className: 'button button-white' }, [
+          a({ target: '_blank', href: NihLibraryCardAgreementLink, className: 'button button-white' }, [
             span({className: 'glyphicon glyphicon-download'}),
             ' NIH Library Card Agreement'
           ])

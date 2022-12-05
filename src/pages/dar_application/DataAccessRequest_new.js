@@ -10,16 +10,29 @@ import {
   newIrbDocumentExpirationDate,
 } from '../../libs/darFormUtils';
 
-const searchOntologies = (query, callback) => {
+const formatOntologyForSelect = (ontology) => {
+  return {
+    value: ontology.id,
+    displayText: ontology.label,
+    item: ontology,
+  };
+};
+
+const formatOntologyForFormData = (ontology) => {
+  return {
+    id: ontology.id || ontology.item.id,
+    key: ontology.id || ontology.item.id,
+    value: ontology.id || ontology.item.id,
+    label: ontology.label || ontology.item.label,
+    item: ontology.item || ontology
+  };
+};
+
+const autocompleteOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
     items => {
-      options = items.map(function(item) {
-        return {
-          value: item.id,
-          displayText: item.label,
-        };
-      });
+      options = items.map(formatOntologyForSelect);
       callback(options);
     });
 };
@@ -53,7 +66,9 @@ export default function DataAccessRequest(props) {
     formData,
     datasets,
     dataUseTranslations,
+    uploadedIrbDocument,
     updateUploadedIrbDocument,
+    uploadedCollaborationLetter,
     updateCollaborationLetter,
     setDatasets,
     ariaLevel = 2
@@ -190,15 +205,15 @@ export default function DataAccessRequest(props) {
           h(FormField, {
             type: FormFieldTypes.SELECT,
             isMulti: true,
-            isCreatable: true,
+            isCreatable: false,
             isAsync: true,
             optionsAreString: false,
-            loadOptions: searchOntologies,
+            loadOptions: autocompleteOntologies,
             id: 'ontologies',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
-            defaultValue: formData.ontologies,
-            onChange: ({key, value}) => onChange({key, value: value.map(v => v.value)}),
+            defaultValue: formData.ontologies.map(formatOntologyForSelect),
+            onChange: ({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)}),
           }),
         ]),
 
@@ -277,11 +292,11 @@ export default function DataAccessRequest(props) {
         }),
 
         h(FormField, {
-          id: 'dsAckowledgement',
+          id: 'dsAcknowledgement',
           isRendered: needsDsAcknowledgement(dataUseTranslations),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
-          defaultValue: formData.dsAckowledgement,
+          defaultValue: formData.dsAcknowledgement,
           onChange,
         }),
 
@@ -301,7 +316,7 @@ export default function DataAccessRequest(props) {
             h(FormField, {
               type: FormFieldTypes.FILE,
               id: 'irbDocument',
-              defaultValue: {
+              defaultValue: uploadedIrbDocument || {
                 name: formData.irbDocumentName,
               },
               onChange: ({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration),
@@ -324,7 +339,7 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           type: FormFieldTypes.FILE,
           isRendered: needsCollaborationLetter(datasets),
-          defaultValue: {
+          defaultValue: uploadedCollaborationLetter ||{
             name: formData.collaborationLetterName,
           },
           id: 'collaborationLetter',

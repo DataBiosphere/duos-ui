@@ -113,7 +113,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [step, setStep] = useState(1);
   const [notificationData, setNotificationData] = useState(undefined);
 
-
   const [researcher, setResearcher] = useState({});
   const [allSigningOfficials, setAllSigningOfficials] = useState([]);
 
@@ -191,21 +190,6 @@ const DataAccessRequestApplicationNew = (props) => {
 
   }, [datasets]);
 
-
-  // useEffect(() => {
-  //   if (showValidationMessages) {
-  //     setValidationMessages(
-  //       validateDARFormData(
-  //         formData,
-  //         datasets,
-  //         dataUseTranslations,
-  //         uploadedIrbDocument,
-  //         uploadedCollaborationLetter));
-  //   } else {
-  //     setValidationMessages({researcherInfoErrors: [], darErrors: [], rusErrors: []});
-  //   }
-  // }, [formData, datasets, dataUseTranslations, showValidationMessages, uploadedCollaborationLetter, uploadedIrbDocument]);
-
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
@@ -241,14 +225,6 @@ const DataAccessRequestApplicationNew = (props) => {
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }, [onScroll, props.match.params]);
-
-  // useEffect(() => {
-  //   if (showValidationMessages === true) {
-  //     setStep1Verified(verifyStep1());
-  //     setStep2Verified(verifyStep2());
-  //     setStep3Verified(verifyStep3());
-  //   }
-  // }, [showValidationMessages, verifyStep1, verifyStep2, verifyStep3]);
 
   const goToStep = (step = 1) => {
     resetForcedScrollDebounce();
@@ -414,18 +390,7 @@ const DataAccessRequestApplicationNew = (props) => {
     const { dataRequestId } = props.match.params;
     try {
       let referenceId = formattedFormData.referenceId;
-      console.log(formattedFormData);
 
-      const validation = validateDARFormData(
-        formData,
-        datasets,
-        dataUseTranslations,
-        uploadedIrbDocument,
-        uploadedCollaborationLetter);
-
-      setValidationMessages(validation);
-      setShowValidationMessages(!showValidationMessages);
-      return;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
       if(isNil(dataRequestId)) {
@@ -561,7 +526,9 @@ const DataAccessRequestApplicationNew = (props) => {
                 dataUseTranslations,
                 formFieldChange,
                 batchFormFieldChange,
+                uploadedCollaborationLetter,
                 updateCollaborationLetter,
+                uploadedIrbDocument,
                 updateUploadedIrbDocument: updateIrbDocument,
                 setDatasets,
               })

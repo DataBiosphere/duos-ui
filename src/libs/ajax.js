@@ -249,6 +249,12 @@ export const DAR = {
     return await res.json();
   },
 
+  searchOT: async id => {
+    const url = `${await getOntologyUrl()}/search?id=${id}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
   getDARDocument: async (referenceId, fileType) => {
     const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
     authOpts.headers = Object.assign(authOpts.headers, {

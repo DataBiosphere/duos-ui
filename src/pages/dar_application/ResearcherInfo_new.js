@@ -137,7 +137,7 @@ export default function ResearcherInfo(props) {
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
             level here.`
           ),
-          h(CollaboratorList, {
+          h(CollaboratorList_new, {
             formFieldChange,
             collaborators: formData.labCollaborators,
             collaboratorKey: 'labCollaborators',
@@ -164,9 +164,10 @@ export default function ResearcherInfo(props) {
           ),
           h(CollaboratorList_new, {
             formFieldChange,
-            collaborators: internalCollaborators,
+            collaborators: formData.internalCollaborators,
             collaboratorKey: 'internalCollaborators',
             collaboratorLabel: 'Internal Collaborator',
+            setCompleted: setInternalCollaboratorsCompleted,
             showApproval: false,
             disabled: !isEmpty(darCode)
           }),
@@ -332,9 +333,10 @@ export default function ResearcherInfo(props) {
           ),
           h(CollaboratorList_new, {
             formFieldChange,
-            collaborators: externalCollaborators,
+            collaborators: formData.externalCollaborators,
             collaboratorKey: 'externalCollaborators',
             collaboratorLabel: 'External Collaborator',
+            setCompleted: setExternalCollaboratorsCompleted,
             showApproval: false,
             disabled: !isEmpty(darCode)
           }),

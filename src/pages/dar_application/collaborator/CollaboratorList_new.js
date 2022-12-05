@@ -51,7 +51,7 @@ export default function CollaboratorList_new(props) {
   };
 
   useEffect(() => {
-    return formFieldChange({name: collaboratorKey, value: collaborators});
+    return formFieldChange({key: collaboratorKey, value: collaborators});
   }, [formFieldChange, collaboratorKey, collaborators]);
 
   useEffect(() => {
