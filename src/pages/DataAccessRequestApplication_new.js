@@ -3,7 +3,7 @@ import { a, div, form, h, i } from 'react-hyperscript-helpers';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
-import DataUseAgreements from './dar_application/DataUseAgreements';
+import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import {
   isFileEmpty,
   Navigation,
@@ -959,18 +959,8 @@ class DataAccessRequestApplicationNew extends Component {
             div({className: 'step-container'}, [
               h(DataUseAgreements, {
                 darCode: darCode,
-                problemSavingRequest,
-                attestAndSave: this.attestAndSave,
-                ConfirmationDialogComponent,
-                partialSave: this.partialSave,
-                prevPage: this.prevPage,
-                step1Invalid,
-                step2Invalid,
-                step3Invalid,
-                libraryCardInvalid,
-                showValidationMessages,
-                updateShowValidationMessages: this.updateShowValidationMessages,
-                goToStep: this.goToStep
+                attestAndSend: () => {},
+                save: () => {},
               })
             ])
           ])

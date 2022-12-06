@@ -19,3 +19,9 @@
   color: white;
   background-color: #005D9A;
 }
+
+.button-blue:hover {
+  color: white;
+  background-color: #0948B7;
+}
+
