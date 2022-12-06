@@ -37,6 +37,7 @@ import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import { HealthCheck } from './pages/HealthCheck';
 import DataSubmissionForm from './pages/DataSubmissionForm';
+import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 
 const Routes = (props) => (
   <Switch>
@@ -83,9 +84,9 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
-    <AuthenticatedRoute path="/signing_official_console/researchers" component={SigningOfficialResearchers} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/dar_requests" component={SigningOfficialDarRequests} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={SigningOfficialDataSubmitters} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />

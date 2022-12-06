@@ -5,7 +5,6 @@ import {Styles} from '../libs/theme';
 import {User} from '../libs/ajax';
 import { USER_ROLES } from '../libs/utils';
 import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
-import SigningOfficialDaaAgreementWrapper from '../components/SigningOfficialDaaAgreementWrapper';
 
 
 export default function SigningOfficialConsole() {
@@ -44,10 +43,7 @@ export default function SigningOfficialConsole() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        h(SigningOfficialDaaAgreementWrapper, {}, [
-          //NOTE: Links to this custodian table have been removed, we are retaining it with the intention of repurposing it for data submitters
-          h(DataCustodianTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
-        ]),
+        h(DataCustodianTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       ])
     ])
   );

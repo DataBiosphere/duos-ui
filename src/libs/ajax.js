@@ -654,7 +654,7 @@ export const User = {
 
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(keys), { method: 'POST' }]));
-    return res.data;
+    return res.json();
   }
 };
 

@@ -3,14 +3,11 @@ import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
 import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
-import { User } from '../libs/ajax';
-import Acknowledgments, {hasSOAcceptedDAAs} from '../libs/acknowledgements';
+import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import { useEffect, useState } from 'react';
 import { spinnerService } from '../libs/spinner-service';
 import { isNil } from 'lodash';
-
-
-
+import { Styles } from '../libs/theme';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
@@ -18,7 +15,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     children
   } = props;
 
-  const [hasAccepted, setHasAccepted] = useState();
+  const [hasAccepted, setHasAccepted] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -28,7 +25,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         setHasAccepted(await hasSOAcceptedDAAs());
         setIsLoading(false);
       } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
+        Notifications.showError({text: 'Error: Unable to retrieve user acknowledgements from server'});
         setIsLoading(false);
       }
     };
@@ -36,7 +33,8 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
   }, []);
 
   const acceptDaas = async () => {
-    await User.acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
+    await acceptAcknowledgments(Acknowledgments.broadLcaAcknowledgement, Acknowledgments.nihLcaAcknowledgement);
+
     setHasAccepted(true);
     if (!isNil(onAccept)) {
       onAccept();
@@ -51,9 +49,9 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     }
   }, [isLoading]);
 
-  return h(div, {}, [
+  return h(div, {style: Styles.PAGE}, [
     h(div, {
-      isRendered: hasAccepted !== false,
+      isRendered: hasAccepted === true,
     }, [
       children
     ]),
@@ -95,6 +93,15 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         }, ['I Agree']),
       ]),
     ])
+  ]);
+};
+
+// Wraps component and ensures that SO agrees to the
+// Broad and NIH agreements before proceeding to the given
+// component.
+export const ensureSoHasDaaAcknowledgement = (component) => {
+  return (props) => h(SigningOfficialDaaAgreementWrapper, {}, [
+    h(component, props),
   ]);
 };
 
