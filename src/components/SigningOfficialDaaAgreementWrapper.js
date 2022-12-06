@@ -1,4 +1,4 @@
-import { h, h2, a, p, div, span } from 'react-hyperscript-helpers';
+import { h, h2, a, p, div, span, button } from 'react-hyperscript-helpers';
 import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
 import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
@@ -84,13 +84,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
       ]),
 
       div({ className: 'flex flex-row', style: { justifyContent: 'flex-end', }, }, [
-        a({
-          id: 'btn_save', onClick: acceptDaas,
-          className: 'button button-blue',
-          style: {
-            marginRight: '2rem',
-          }
-        }, ['I Agree']),
+        button({onClick: acceptDaas, className: 'button button-blue'},[span({},), 'I AGREE']),
       ]),
     ])
   ]);
