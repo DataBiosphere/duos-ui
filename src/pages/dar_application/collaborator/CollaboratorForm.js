@@ -50,6 +50,7 @@ export default function CollaboratorForm (props) {
           {
             validationMessages: collaboratorValidationErrors,
             showValidationMessages: true,
+            datacy: 'collaborator-form-errors',
           }),
         h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {

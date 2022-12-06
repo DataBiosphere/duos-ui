@@ -51,7 +51,7 @@ export default function ResearcherInfo(props) {
       div({ className: 'dar-step-card' }, [
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          isRendered: (completed === false && libraryCardReqSatisfied === false), className: 'rp-alert' }, [
           Alert({
             id: 'profileSubmitted',
             type: 'important',
@@ -343,21 +343,21 @@ export default function ResearcherInfo(props) {
         ])
       ]),
 
-      fieldset({ disabled: !isNil(darCode) }, [
+      fieldset({ }, [
 
         div({
           datacy: 'researcher-info-missing-library-cards',
-          isRendered: !libraryCardReqSatisfied, className: 'rp-alert' }, [
+          isRendered: libraryCardReqSatisfied === false, className: 'rp-alert' }, [
           Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
         ]),
         div({
           datacy: 'researcher-info-profile-unsubmitted',
-          isRendered: (completed === false && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          isRendered: (completed === false && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === true && libraryCardReqSatisfied), className: 'rp-alert' }, [
+          isRendered: (completed === true && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
       ]),

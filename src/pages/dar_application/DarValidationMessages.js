@@ -6,10 +6,12 @@ export const DarValidationMessages = (props) => {
   const {
     validationMessages,
     showValidationMessages,
+    datacy='dar-validation-errors',
   } = props;
 
   return div({
     isRendered: showValidationMessages,
+    datacy: datacy,
     style: {
       paddingTop: '10px',
     }
