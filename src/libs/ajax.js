@@ -653,8 +653,8 @@ export const User = {
     }
 
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(keys), { method: 'POST' }]));
-    return res.json();
+    const res = await axios.post(url, keys, Config.authOpts());
+    return res.data;
   }
 };
 
