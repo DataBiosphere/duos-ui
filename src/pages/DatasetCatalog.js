@@ -16,6 +16,7 @@ import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { findPropertyValue, getDataUseCodes } from '../utils/DatasetUtils';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -116,18 +117,7 @@ export default function DatasetCatalog(props) {
       const visibleDatasets = filterToOnlySelected ? selectedDatasets : datasetList;
       const results = visibleDatasets.filter(searchTable(searchDulText)).slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize);
       await Promise.all(results.map(async(dataset) => {
-        if (isNil(dataset.codeList)) {
-          if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
-            dataset.codeList = 'None';
-          } else {
-            const translations = await DataUseTranslation.translateDataUseRestrictions(dataset.dataUse);
-            const codes = [];
-            translations.map((restriction) => {
-              codes.push(restriction.alternateLabel || restriction.code);
-            });
-            dataset.codeList = codes.join(', ');
-          }
-        }
+        getDataUseCodes(dataset);
       }));
       setDatasetsOnPage(results);
       spinnerService.hideAll();
@@ -368,11 +358,6 @@ export default function DatasetCatalog(props) {
       return {cursor: 'default', opacity: '50%'};
     }
     return {};
-  };
-
-  const findPropertyValue = (dataSet, propName, defaultVal) => {
-    const defaultValue = isNil(defaultVal) ? '' : defaultVal;
-    return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties));
   };
 
   const findDacName = (dacs, dataSet) => {

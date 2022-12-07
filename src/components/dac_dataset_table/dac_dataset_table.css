@@ -1,0 +1,22 @@
+.btn-add-dataset {
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid #0948B7;
+    border-radius: 5px;
+    height: 40px;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    flex: 1;
+    margin: 20px 0px 20px 16px;
+    color: #0948B7;
+    background-color: #FFFFFFFF;
+    padding: 10px 20px;
+}
+
+.add-icon {
+    color: #0948B7 !important;
+    background: #ffffff !important;
+    vertical-align: middle !important;
+    font-size: 1.2em;
+}

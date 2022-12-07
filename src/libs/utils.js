@@ -7,6 +7,7 @@ import {Theme, Styles } from './theme';
 import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import {User} from './ajax';
 import { headerTabsConfig } from '../components/DuosHeader';
+import {getDataUseCodes} from '../utils/DatasetUtils';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -590,7 +591,20 @@ export const getSearchFilterFunctions = () => {
         const match = find(isMatch)(matchable);
         return !isNil(match);
       })(targetList);
-    }
+    },
+    datasets: (term, targetList) => filter(dataset => {
+      const duosId = dataset.alias;
+      const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
+      const datasetName = findPropertyValue(dataset, 'Dataset Name');
+      const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
+      getDataUseCodes(dataset);
+      const dataUse = dataset.codeList;
+      return includes(term, toLower(duosId)) ||
+          includes(term, toLower(dataSubmitter)) ||
+          includes(term, formatDate(datasetName)) ||
+          includes(term, formatDate(dataCustodian)) ||
+          includes(term, toLower(dataUse));
+    }, targetList),
   };
 };
 
