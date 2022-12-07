@@ -13,7 +13,6 @@ import {
   updateFinalVote,
   filterBucketsForUser,
 } from '../../utils/DarCollectionUtils';
-import DataUseVoteSummary from '../../components/common/DataUseVoteSummary/DataUseVoteSummary';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
@@ -61,17 +60,41 @@ const userHasRole = (user, roleId) => {
   return !isEmpty(matches);
 };
 
+const tabsForUser = (user, buckets, adminPage = false) => {
+  if (adminPage) {
+    return {
+      applicationInformation: 'Application Information',
+      chairVote: 'Chair Vote'
+    };
+  }
+  const dataAccessBucketsForUser = filter(
+    (bucket) => get('isRP')(bucket) !== true
+  )(buckets);
+  const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
+
+  const updatedTabs = { applicationInformation: 'Application Information' };
+  if (userHasVotesForCollection) {
+    if (userHasRole(user, chairpersonRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+      updatedTabs.chairVote = 'Chair Vote';
+    } else if (userHasRole(user, memberRoleId)) {
+      updatedTabs.memberVote = 'Member Vote';
+    }
+  }
+  return updatedTabs;
+};
+
 export default function DarCollectionReview(props) {
   const collectionId = props.match.params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
+  const [referenceIdForDocuments, setReferenceIdForDocuments] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
     applicationInformation: 'Application Information'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
-  const [currentUser, setCurrentUser] = useState({});
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
@@ -82,6 +105,7 @@ export default function DarCollectionReview(props) {
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
+      const referenceIdForDocuments = find((d) => !isEmpty(d.referenceId))(collection.dars).referenceId;
       const researcherProfile = await User.getById(collection.createUserId);
       const processedBuckets = await flow([
         generatePreProcessedBucketData,
@@ -93,50 +117,25 @@ export default function DarCollectionReview(props) {
         : filterBucketsForUser(user, processedBuckets);
       setDataUseBuckets(filteredBuckets);
       setCollection(collection);
-      setCurrentUser(user);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
       setTabs(tabsForUser(user, filteredBuckets, adminPage));
       setIsLoading(false);
       setSubcomponentLoading(false);
+      setReferenceIdForDocuments(referenceIdForDocuments);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
       Navigation.console(user, props.history);
     }
-  }, [adminPage, props.history, tabsForUser, collectionId]);
+  }, [adminPage, props.history, collectionId]);
 
   //Remember, votes are contained within buckets, so updating final votes will update the bucket
   //define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket
   const updateFinalVoteFn = useCallback((key, votePayload, voteIds) => {
     return updateFinalVote({key, votePayload, voteIds, dataUseBuckets, setDataUseBuckets});
   }, [dataUseBuckets]);
-
-  const tabsForUser = useCallback((user, buckets, adminPage = false) => {
-    if (adminPage) {
-      return {
-        applicationInformation: 'Application Information',
-        chairVote: 'Chair Vote'
-      };
-    }
-    const dataAccessBucketsForUser = filter(
-      (bucket) => get('isRP')(bucket) !== true
-    )(buckets);
-    const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
-
-    const updatedTabs = { applicationInformation: 'Application Information' };
-    if (userHasVotesForCollection) {
-      if (userHasRole(user, chairpersonRoleId)) {
-        updatedTabs.memberVote = 'Member Vote';
-        updatedTabs.chairVote = 'Chair Vote';
-      } else if (userHasRole(user, memberRoleId)) {
-        updatedTabs.memberVote = 'Member Vote';
-      }
-    }
-
-    return updatedTabs;
-  }, []);
 
   useEffect(() => {
     try {
@@ -175,8 +174,7 @@ export default function DarCollectionReview(props) {
           institutionName: get('institution.name')(researcherProfile) || '- -',
           isLoading,
           readOnly: readOnly || adminPage
-        }),
-        h(DataUseVoteSummary, { dataUseBuckets, currentUser, isLoading, adminPage }),
+        })
       ]
     ),
     div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
@@ -211,6 +209,11 @@ export default function DarCollectionReview(props) {
           cloudProvider: darInfo.cloudProvider,
           cloudProviderDescription: darInfo.cloudProviderDescription,
           rus: darInfo.rus,
+          referenceId: referenceIdForDocuments,
+          irbDocumentLocation: darInfo.irbDocumentLocation,
+          collaborationLetterLocation: darInfo.collaborationLetterLocation,
+          irbDocumentName: darInfo.irbDocumentName,
+          collaborationLetterName: darInfo.collaborationLetterName
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,

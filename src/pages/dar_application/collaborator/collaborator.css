@@ -1,0 +1,86 @@
+/*///////////////////////////////////////////////////////Summary*/
+
+.collaborator-summary-card {
+  display: flex;
+  padding: 2% 5%;
+  border: 1px solid #0948B7;
+  border-radius: 5px;
+  background: #FFFFFFFF;
+  margin: 1.5rem 0 1.5rem 0;
+  justify-content: space-around;
+}
+
+.collaborator-summary-edit-delete-buttons {
+  display: flex;
+  justify-content: flex-end;
+  color: #0948B7;
+  padding: 0 1%;
+}
+
+.collaborator-summary-confirm-delete-buttons {
+  display: flex;
+  justify-content: flex-end;
+  color: #0948B7;
+  padding: 0 1%;
+}
+
+.collaborator-edit-icon {
+  color: #ffffff !important;
+  background: #0948B7 !important;
+  border-radius: 10% !important;
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 10% 10%;
+}
+
+.collaborator-delete-icon {
+  color: #0948B7 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  font-size: 1.2em;
+}
+
+/*///////////////////////////////////////////////////////Form*/
+
+.collaborator-form-card {
+  padding: 2% 7%;
+  border: 1px solid #0948B7;
+  border-radius: 5px;
+  background: #FFFFFFFF;
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+
+.collaborator-form-add-save-button {
+  flex: 1;
+  margin: 2px;
+  border: 1px solid #0948B7;
+  color: #FFFFFFFF;
+  background-color: #0948B7;
+  padding: 10px 20px;
+}
+
+.collaborator-form-cancel-button {
+  flex: 1;
+  margin: 2px;
+  border: 1px solid #0948B7;
+  color: #0948B7;
+  background-color: #FFFFFFFF;
+  padding: 10px 20px;
+}
+
+.collaborator-cancel-delete-icon {
+  color: #ffffff !important;
+  background: #0948B7 !important;
+  border-radius: 10% !important;
+  vertical-align: middle !important;
+  text-align: center;
+  padding: 10% 10%;
+}
+
+.collaborator-confirm-delete-icon {
+  color: #DB3214 !important;
+  background: #ffffff !important;
+  vertical-align: middle !important;
+  font-size: 1.2em;
+}

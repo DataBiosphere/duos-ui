@@ -23,12 +23,12 @@ const defaultHoverStyle = {fontWeight: 600, cursor: 'pointer'};
 export default function SelectableText({label, setSelected, selectedType, styleOverride = {}, isDisabled = false}) {
 
   const {baseStyle, tabSelected, tabUnselected, tabHover} = styleOverride;
-  const [style, setStyle] = useState(utilizedUnselectedStyle);
 
 
   const utilizedUnselectedStyle = useMemo(() => {
     return Object.assign({}, tabUnselected || defaultUnselectedStyle, baseStyle);
   }, [tabUnselected, baseStyle]);
+  const [style, setStyle] = useState(utilizedUnselectedStyle);
   const utilizedHoverStyle = useMemo(() => {
     return Object.assign({}, style, tabHover || defaultHoverStyle, baseStyle);
   }, [tabHover, baseStyle, style]);

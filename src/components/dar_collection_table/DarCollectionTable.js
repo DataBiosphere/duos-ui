@@ -303,9 +303,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
       ]);
     }
 
-    return div({}, [
-      renderedRow,
-    ]);
+    return renderedRow;
   }, [darCollectionCache, fetchDarCollection, collectionIsExpanded]);
 
   return h(Fragment, {}, [
