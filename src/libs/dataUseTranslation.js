@@ -1,5 +1,5 @@
 import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
-import { searchOntology, extractDOIDFromUrl } from './ontologyService';
+import { OntologyService } from './ontologyService';
 import { Notifications } from './utils';
 
 export const ControlledAccessType = {
@@ -216,9 +216,9 @@ export const consentTranslations = {
 };
 
 const getOntologyName = async(urls) => {
-  const doidArr = extractDOIDFromUrl(urls);
+  const doidArr = OntologyService.extractDOIDFromUrl(urls);
   const params = doidArr.join(',');
-  const ontology = await searchOntology(params);
+  const ontology = await OntologyService.searchOntology(params);
   return ontology.map(data => data.label);
 };
 
