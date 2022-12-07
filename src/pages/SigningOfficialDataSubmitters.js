@@ -43,7 +43,6 @@ export default function SigningOfficialConsole() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        //NOTE: Links to this custodian table have been removed, we are retaining it with the intention of repurposing it for data submitters
         h(DataCustodianTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       ])
     ])
