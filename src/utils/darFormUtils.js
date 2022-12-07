@@ -6,7 +6,13 @@ import { isEmpty, isNil, isEqual } from 'lodash';
 import { FormValidators } from '../components/forms/forms';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
-  return datasets?.some((ds) => ds?.dataUse[flag] === true);
+  return datasets?.some((ds) => {
+    const dataUse = ds?.dataUse;
+    if (!isEmpty(dataUse)) {
+      return dataUse[flag] === true;
+    }
+    return false;
+  });
 };
 
 export const needsIrbApprovalDocument = (datasets) => {
