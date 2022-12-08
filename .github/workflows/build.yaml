@@ -20,14 +20,8 @@ jobs:
     - name: Get Short Sha
       id: short-sha
       run: echo "::set-output name=sha::$(git rev-parse --short=12 HEAD)"
-    - name: Auth to GCR
-      uses: google-github-actions/setup-gcloud@v0
-      with:
-        version: '270.0.0'
-        service_account_email: ${{ secrets.GCR_PUBLISH_EMAIL }}
-        service_account_key: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
-    - name: Auth Docker for GCR
-      run: gcloud auth configure-docker --quiet
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
     - name: Construct tags
       id: construct-tags
       run: |
@@ -48,6 +42,14 @@ jobs:
         .
     - name: Log Github Actor
       run: echo "${{ github.actor }}"
+    - name: Auth to GCR
+      if: github.actor != 'dependabot[bot]'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
+    - name: Auth Docker for GCR
+      if: github.actor != 'dependabot[bot]'
+      run: gcloud auth configure-docker --quiet
     - name: Push Image to GCR
       if: github.actor != 'dependabot[bot]'
       run: |

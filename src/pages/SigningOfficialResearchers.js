@@ -14,12 +14,14 @@ export default function SigningOfficialResearchers() {
   //states to be added and used for manage researcher component
   const [isLoading, setIsLoading] = useState(true);
 
+
   useEffect(() => {
     const init = async() => {
       try {
         setIsLoading(true);
         const soUser = await User.getMe();
         const researcherList = await User.list(USER_ROLES.signingOfficial);
+
         setResearchers(researcherList);
         setSiginingOfficial(soUser);
         setIsLoading(false);
@@ -34,7 +36,7 @@ export default function SigningOfficialResearchers() {
   return (
     div({style: Styles.PAGE}, [
       div({style: {}, className: 'signing-official-tabs'}, [
-        h(SigningOfficialTable, {researchers, signingOfficial, isLoading}, [])
+        h(SigningOfficialTable, {researchers, signingOfficial, isLoading}, []),
       ])
     ])
   );

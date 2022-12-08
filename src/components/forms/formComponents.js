@@ -2,7 +2,7 @@ import { h, div, label, input, span, button, textarea } from 'react-hyperscript-
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
-import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncSelect from 'react-select/async';
 import AsyncCreatable from 'react-select/async-creatable';
 import { FormField, FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';

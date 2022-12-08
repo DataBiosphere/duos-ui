@@ -323,7 +323,7 @@ export const DataSet = {
   },
 
   getDataSetsByDatasetId: async dataSetId => {
-    const url = `${await getApiUrl()}/api/dataset/${dataSetId}`;
+    const url = `${await getApiUrl()}/api/dataset/v2/${dataSetId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -652,6 +652,20 @@ export const User = {
   getUserRelevantDatasets: async() => {
     const url = `${await getApiUrl()}/api/user/me/dac/datasets`;
     const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  getAcknowledgements: async () => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  acceptAcknowledgments: async (...keys) => {
+    if (keys.length === 0) {
+      return {};
+    }
+
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.post(url, keys, Config.authOpts());
     return res.data;
   }
 };
