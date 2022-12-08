@@ -30,7 +30,7 @@ const configUrls = require('../public/config.json');
 
 module.exports = function (app) {
   app.use(
-    '/api',
+    ['/api'],
     createProxyMiddleware({
       target: configUrls.apiUrl,
       secure: false,

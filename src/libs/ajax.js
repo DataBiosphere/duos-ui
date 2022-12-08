@@ -792,8 +792,9 @@ export const LibraryCard = {
 export const ToS = {
   getDUOSText: async () => {
     const env = await Config.getEnv();
-    const baseUrl = env === 'local' ? '/api' : undefined;
-    const url = `${await getApiUrl(baseUrl)}tos/text/duos`;
+    // When running locally, '/api' urls are rewritten in `setupProxy.js` so they're forwarded properly to the back end
+    const baseUrl = env === 'local' ? '/api' : '';
+    const url = `${await getApiUrl(baseUrl)}/tos/text/duos`;
     const res = await axios.get(url, Config.textPlain());
     return res.data;
   },
