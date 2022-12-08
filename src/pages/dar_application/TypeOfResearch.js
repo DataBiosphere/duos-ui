@@ -1,7 +1,7 @@
 import {div, h, hh, textarea, label, input, span} from 'react-hyperscript-helpers';
 import {RadioButton} from '../../components/RadioButton';
 import {Component} from 'react';
-import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncSelect from 'react-select/async';
 import {DAR} from '../../libs/ajax';
 import * as fp from 'lodash/fp';
 
