@@ -70,7 +70,9 @@ export const SupportRequestModal = hh(
               text: 'Unable to add attachment',
               layout: 'topRight',
             });
-            this.state.validAttachment = false;
+            this.setState((prev) => {
+              prev.validAttachment = false;
+            });
             break;
           }
         }
@@ -81,7 +83,9 @@ export const SupportRequestModal = hh(
               text: 'Unable to add attachment',
               layout: 'topRight',
             });
-            this.state.validAttachment = false;
+            this.setState((prev) => {
+              prev.validAttachment = false;
+            });
           }
           if (this.state.validAttachment){
             attachmentToken.push(allToken[t].token);
