@@ -15,7 +15,7 @@ import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { any, assign, cloneDeep, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
+import { any, assign, cloneDeep, get, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -822,25 +822,8 @@ class DataAccessRequestApplicationNew extends Component {
 
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
-    const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
-    const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
-    const step2Invalid = this.verifyStep2();
-    const step3Invalid = this.step3InvalidResult();
-    const libraryCardInvalid = isEmpty(getOr([], 'libraryCards', this.state.researcher)) && !checkNihDataOnly;
+    const { showValidationMessages,  step1 } = this.state;
 
-    const ConfirmationDialogComponent = ConfirmationDialog({
-      title: 'Data Request Confirmation',
-      disableOkBtn: this.state.disableOkBtn,
-      disableNoBtn: this.state.disableOkBtn,
-      color: 'access',
-      showModal: this.state.showDialogSubmit,
-      action: {
-        label: 'Yes',
-        handler: this.dialogHandlerSubmit
-      }
-    }, [div({
-      className: 'dialog-description'
-    }, ['Are you sure you want to send this Data Access Request Application?'])]);
     return (
       div({ className: 'container', style: {paddingBottom: '2%'} }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
