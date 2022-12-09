@@ -65,7 +65,7 @@ export default function SigningOfficialDarRequests() {
           reviseCollection: null,
           consoleType: consoleTypes.SIGNING_OFFICIAL
         }, [])
-      ])
+      ]),
     ])
   );
 }

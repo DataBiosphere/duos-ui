@@ -30,6 +30,7 @@
 .navbar-duos .navbar-sub {
   width: 100%;
   padding: 0 20px 0 80px;
+  background: #fff;
   border-bottom: 2px solid rgba(0, 0, 0, 0.1);
 }
 

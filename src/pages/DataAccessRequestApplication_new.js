@@ -4,6 +4,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
+import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User, DataSet } from '../libs/ajax';
@@ -412,24 +413,13 @@ const DataAccessRequestApplicationNew = (props) => {
             ]),
 
             div({className: 'step-container'}, [
-              // just here to mock save/submit
-              div({ className: 'flex flex-row', style: { justifyContent: 'flex-end' }, }, [
-                a({
-                  id: 'btn_save', isRendered: isNil(formData.darCode), onClick: () => {},
-                  className: 'button button-white',
-                  style: {
-                    marginRight: '2rem',
-                  }
-                }, ['Save']),
-                a({
-                  id: 'btn_submit', isRendered: isNil(formData.darCode), onClick: () => mockSubmit(),
-                  className: 'button button-blue '
-                }, ['Attest and Send']),
-              ])
-            ]),
-
-          ]),
-
+              h(DataUseAgreements, {
+                darCode: formData.darCode,
+                attestAndSend: mockSubmit,
+                save: () => {},
+              })
+            ])
+          ])
         ])
       ])
     ])
