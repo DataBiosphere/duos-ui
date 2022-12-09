@@ -3,7 +3,8 @@ import { FormFieldTypes, FormField, FormValidators } from '../../../components/f
 import { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
-import { computeCollaboratorErrors, CollaboratorErrors } from './CollaboratorErrors';
+import { DarValidationMessages } from '../DarValidationMessages';
+import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
 
 export default function CollaboratorForm (props) {
   const {
@@ -45,9 +46,11 @@ export default function CollaboratorForm (props) {
       key: `collaborator-item-${uuid}`}, [
       // name and eraCommonsId
       div({ className: 'row'}, [
-        h(CollaboratorErrors,
+        h(DarValidationMessages,
           {
-            errors: collaboratorValidationErrors,
+            validationMessages: collaboratorValidationErrors,
+            showValidationMessages: true,
+            datacy: 'collaborator-form-errors',
           }),
         h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {
@@ -165,7 +168,7 @@ export default function CollaboratorForm (props) {
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
-            const errors = computeCollaboratorErrors(newCollaborator, props.showApproval);
+            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproval: props.showApproval});
             const valid = errors.length === 0;
             setCollaboratorValidationErrors(errors);
             valid && saveUpdate();
