@@ -34,7 +34,13 @@
   font-size: 14px;
 }
 
+.data-use-paragraph {
+  margin-bottom: 2rem;
+}
 
+.data-use-list li:not(:last-child) {
+  margin-bottom: 2rem;
+}
 
 .dar-form-notice-card {
   box-sizing: border-box;
