@@ -7,14 +7,10 @@
   margin-top: 0;
 }
 
-.dar-steps {
+.dar-step-card {
   background-color: rgba(184, 205, 211, .15);
   padding: 20px 30px;
-}
-
-.dar-step-card {
   margin-bottom: '2rem';
-  padding: 20px 0px;
 }
 
 .rp-row {
