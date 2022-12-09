@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
 import { DarValidationMessages } from '../DarValidationMessages';
-import { computeCollaboratorErrors } from '../../../libs/darFormUtils';
+import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
 
 export default function CollaboratorForm (props) {
   const {
@@ -50,6 +50,7 @@ export default function CollaboratorForm (props) {
           {
             validationMessages: collaboratorValidationErrors,
             showValidationMessages: true,
+            datacy: 'collaborator-form-errors',
           }),
         h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {

@@ -9,29 +9,30 @@ const props = {
   allSigningOfficials: [],
   completed: true,
   darCode: undefined,
-  cloudProviderDescription: '',
   eRACommonsDestination: undefined,
-  externalCollaborators: [],
   formFieldChange: () => {},
-  internalCollaborators: [],
   invalidResearcher: false,
-  labCollaborators: [],
   location: undefined,
-  nihValid: true,
   onNihStatusUpdate: () => {},
   partialSave: () => {},
-  researcher: '',
-  researcherUser: {},
+  setLabCollaboratorsCompleted: () => {},
+  setInternalCollaboratorsCompleted: () => {},
+  setExternalCollaboratorsCompleted: () => {},
+  researcher: {},
   showValidationMessages: false,
   nextPage: () => {},
-  cloudProviderType: '',
-  cloudProvider: '',
-  isCloudUseInvalid: false,
-  isCloudProviderInvalid: false,
-  isAnvilUseInvalid: false,
+  formData: {
+    cloudProviderType: '',
+    cloudProvider: '',
+    cloudProviderDescription: '',
+    internalCollaborators: [],
+    externalCollaborators: [],
+    labCollaborators: [],
+    checkNihDataOnly: true,
+  }
 };
 
-const researcherUserWithLibraryCards = {
+const researcherWithLibraryCards = {
   libraryCards: [
     {
       'id': 1,
@@ -84,7 +85,7 @@ describe('Researcher Info', () => {
   });
 
   it('renders the missing library cards alert correctly', () => {
-    const mergedProps = {...props, ...{checkNihDataOnly: false}};
+    const mergedProps = {...props, ...{formData: {...props.formData, ...{checkNihDataOnly: false}}}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
@@ -92,7 +93,7 @@ describe('Researcher Info', () => {
   });
 
   it('renders the profile submitted alert', () => {
-    const mergedProps = {...props, ...{completed: true, researcherUser: researcherUserWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
@@ -108,7 +109,7 @@ describe('Researcher Info', () => {
   });
 
   it('renders the profile unsubmitted alert', () => {
-    const mergedProps = {...props, ...{completed: false, researcherUser: researcherUserWithLibraryCards}};
+    const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');

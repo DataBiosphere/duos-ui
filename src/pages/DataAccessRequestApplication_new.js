@@ -24,7 +24,7 @@ import DarValidationMessages from './dar_application/DarValidationMessages';
 
 import {
   validateDARFormData
-} from '../libs/darFormUtils';
+} from '../utils/darFormUtils';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -102,6 +102,7 @@ const DataAccessRequestApplicationNew = (props) => {
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
 
+
   const [showValidationMessages, setShowValidationMessages] = useState(false);
   const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
@@ -110,6 +111,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const [showDialogSave, setShowDialogSave] = useState(false);
   const [showDialogSubmit, setShowDialogSubmit] = useState(false);
+
   const [step, setStep] = useState(1);
   const [notificationData, setNotificationData] = useState(undefined);
 
@@ -176,7 +178,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [datasets, setDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
 
-
   useEffect(() => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
@@ -187,7 +188,6 @@ const DataAccessRequestApplicationNew = (props) => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
       setDataUseTranslations(translations);
     });
-
   }, [datasets]);
 
   const init = useCallback(async () => {
@@ -286,6 +286,7 @@ const DataAccessRequestApplicationNew = (props) => {
     }
     return darPartialResponse;
   };
+
 
   const scrollToFormErrors = (validationMessages) => {
     if (!isEmpty(validationMessages.researcherInfoErrors)) {
@@ -414,7 +415,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const back = () => {
     props.history.goBack();
   };
-
 
   const { dataRequestId } = props.match.params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);

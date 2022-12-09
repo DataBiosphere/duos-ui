@@ -8,7 +8,7 @@ import {
   needsCollaborationLetter,
   needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
-} from '../../libs/darFormUtils';
+} from '../../utils/darFormUtils';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -82,7 +82,7 @@ export default function DataAccessRequest(props) {
 
   const primaryChange = ({key, value}) => {
     if (key === 'diseases' && value === true) {
-      // in this case, reset all fields.
+      // in this case, reset all primary data use fields.
       batchFormFieldChange({
         diseases: true,
         hmb: false,

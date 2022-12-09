@@ -659,6 +659,20 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/me/dac/datasets`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
+  },
+  getAcknowledgements: async () => {
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  acceptAcknowledgments: async (...keys) => {
+    if (keys.length === 0) {
+      return {};
+    }
+
+    const url = `${await getApiUrl()}/api/user/acknowledgements`;
+    const res = await axios.post(url, keys, Config.authOpts());
+    return res.data;
   }
 };
 
@@ -783,7 +797,10 @@ export const LibraryCard = {
 
 export const ToS = {
   getDUOSText: async () => {
-    const url = `${await getApiUrl()}/tos/text/duos`;
+    const env = await Config.getEnv();
+    // When running locally, '/api' urls are rewritten in `setupProxy.js` so they're forwarded properly to the back end
+    const baseUrl = env === 'local' ? '/api' : '';
+    const url = `${await getApiUrl(baseUrl)}/tos/text/duos`;
     const res = await axios.get(url, Config.textPlain());
     return res.data;
   },

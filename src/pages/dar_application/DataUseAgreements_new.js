@@ -19,7 +19,7 @@ export default function DataUseAgreements(props) {
       className: 'dar-step-card'
     }, [
 
-      h2({}, ['Step 4: Attestation and Agreement(s)']),
+      h2({}, ['Data Use Agreements']),
 
       div({ className: 'form-group' }, [
         h3({}, [

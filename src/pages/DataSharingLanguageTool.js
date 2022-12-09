@@ -1,7 +1,7 @@
 import {Styles} from '../libs/theme';
 import {a, br, button, div, h, input, label, span, textarea} from 'react-hyperscript-helpers';
 import {RadioButton} from '../components/RadioButton';
-import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncSelect from 'react-select/async';
 import {isNil, isEmpty, head} from 'lodash/fp';
 import {Notifications, searchOntologies} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
