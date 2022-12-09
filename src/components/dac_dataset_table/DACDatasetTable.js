@@ -72,8 +72,8 @@ const columnHeaderConfig = {
   dataSubmitter: {label: 'Data Submitter', cellStyle: {width: styles.cellWidths.dataSubmitter}, cellDataFn: cellData.dataSubmitterCellData, sortable: true},
   datasetName: {label: 'Dataset Name', cellStyle: {width: styles.cellWidths.datasetName}, cellDataFn: cellData.datasetNameCellData, sortable: true},
   dataCustodian: {label: 'Data Custodian', cellStyle: {width: styles.cellWidths.dataCustodian}, cellDataFn: cellData.dataCustodianCellData, sortable: true},
-  dataUse: {label: 'Data Use', cellStyle: {width: styles.cellWidths.dataUse}, cellDataFn: cellData.dataUseCellData, sortable: true},
-  status: {label: 'Status', cellStyle: {width: styles.cellWidths.status}, cellDataFn: cellData.statusCellData, sortable: true},
+  dataUse: {label: 'Data Use', cellStyle: {width: styles.cellWidths.dataUse}, cellDataFn: cellData.dataUseCellData, sortable: false},
+  status: {label: 'Status', cellStyle: {width: styles.cellWidths.status}, cellDataFn: cellData.statusCellData, sortable: false},
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);

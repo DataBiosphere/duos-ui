@@ -146,6 +146,13 @@ export const DAC = {
     return res.status;
   },
 
+  updateApprovalStatus: async (dacId, datasetId, approvalStatus) => {
+    const url = `${await getApiUrl()}/api/dac/${dacId}/dataset/${datasetId}`;
+    const approval = { 'approval': approvalStatus };
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(approval), { method: 'PUT' }]));
+    return res.json();
+  },
+
   addDacMember: async (dacId, userId) => {
     const url = `${await getApiUrl()}/api/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));

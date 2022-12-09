@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { button, div, h, span } from 'react-hyperscript-helpers';
-import {User} from '../libs/ajax';
+import {DataSet, User} from '../libs/ajax';
 import {Styles} from '../libs/theme';
 import {img} from 'react-hyperscript-helpers';
 import lockIcon from '../images/lock-icon.png';
@@ -26,11 +26,21 @@ export default function DACDatasets(props) {
     setFilteredList
   ), [datasets, filterFn]);
 
+  const getDatasets = useCallback(async () => {
+    const userDatasets = await User.getUserRelevantDatasets();
+    userDatasets.map(async dataset => {
+      const datasetObject = await DataSet.getDataSetsByDatasetId(dataset.dataSetId);
+      dataset.dacApproval = datasetObject.dacApproval;
+    });
+    return userDatasets;
+  }, []);
+
   useEffect(() => {
     const init = async() => {
       try {
         setIsLoading(true);
-        const listOfDatasets = await User.getUserRelevantDatasets();
+        // const listOfDatasets = await User.getUserRelevantDatasets();
+        const listOfDatasets = await getDatasets();
         setDatasets(listOfDatasets);
         setFilteredList(listOfDatasets);
         setIsLoading(false);
@@ -39,7 +49,7 @@ export default function DACDatasets(props) {
       }
     };
     init();
-  }, []);
+  }, [getDatasets]);
 
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
@@ -86,7 +96,7 @@ export default function DACDatasets(props) {
     div([
       button({
         id: 'btn_addDataset',
-        className: 'btn-add-dataset',
+        className: 'btn-primary-dac-datasets',
         onClick: () => history.push({ pathname: 'data_submission_form' }),
       }, [
         span({ className: 'add-icon glyphicon glyphicon-plus-sign ', style: {color: '#0948B7', background: '#ffffff', 'marginRight': '5px'}, 'aria-hidden': 'true'}),
@@ -104,7 +114,7 @@ export default function DACDatasets(props) {
         DACDatasetTableColumnOptions.STATUS
       ],
       isLoading,
-      consoleType: consoleTypes.CHAIR
+      consoleType: consoleTypes.CHAIR,
     }),
   ]);
 }

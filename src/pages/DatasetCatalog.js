@@ -13,7 +13,6 @@ import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
-import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
 import { findPropertyValue, getDataUseCodes } from '../utils/DatasetUtils';
