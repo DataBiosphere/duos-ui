@@ -223,12 +223,6 @@ export const DAR = {
     return await res;
   },
 
-  getDarConsent: async id => {
-    const url = `${await getApiUrl()}/api/dar/find/${id}/consent`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   //v2 endpoint for DAR POST
   postDar: async (dar) => {
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
@@ -311,15 +305,6 @@ export const DataSet = {
     const url = `${await getApiUrl()}/api/dataset/search?query=${query}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-  },
-
-  getDarDatasets: async (datasetIds) => {
-    let datasets;
-    const datasetsPromise = datasetIds.map((id) => {
-      return DataSet.getDataSetsByDatasetId(id);
-    });
-    datasets = await Promise.all(datasetsPromise);
-    return datasets;
   },
 
   getDataSetsByDatasetId: async dataSetId => {

@@ -180,27 +180,6 @@ export const getDatasetNames = (datasets) => {
   return datasetNames.join('\n');
 };
 
-export const getDatasets = async (darDetails) => {
-  let datasets;
-  await DataSet.getDarDatasets(darDetails.datasetIds).then((resp) => {
-    datasets = resp;
-  });
-  datasets = datasets.map((dataset) => {
-    return find({'propertyName':'Dataset Name'})(dataset.properties);
-  });
-  datasets = map(prop => prop.propertyValue)(datasets);
-  return datasets;
-};
-
-export const applyTextHover = (e) => {
-  e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
-  e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
-};
-
-export const removeTextHover = (e, color) => {
-  e.target.style.color = color;
-};
-
 //helper function to generate keys for rendered elements; splits on commas and whitespace
 export const convertLabelToKey = (label = '') => {
   return label.split(/[\s,]+/) .join('-');
@@ -302,40 +281,6 @@ export const Notifications = {
   },
 };
 
-export const NavigationUtils = {
-  accessReviewPath: () => {
-    return 'access_review';
-  }
-};
-
-//get information on datasets, consent, researcher, and access request
-export const getDarData = async (darId) => {
-  let datasets;
-  let darInfo;
-  let consent;
-  let researcherProfile;
-
-  try {
-    darInfo = await DAR.getPartialDarRequest(darId);
-    const researcherPromise = await User.getById(darInfo.userId);
-    const datasetsPromise = darInfo.datasetIds.map((id) => {
-      return DataSet.getDataSetsByDatasetId(id);
-    });
-    const consentPromise = await DAR.getDarConsent(darId);
-    [consent, datasets, researcherProfile] = await Promise.all([
-      consentPromise,
-      Promise.all(datasetsPromise),
-      researcherPromise
-    ]);
-
-  } catch (error) {
-    Notifications.showError({text: 'Error retrieving Data Access Request information, please contact support.'});
-    return Promise.reject(error);
-  }
-
-  return {datasets, darInfo, consent, researcherProfile};
-};
-
 /**
  * Serialize the execution of an array of promise functions
  *
@@ -363,14 +308,6 @@ export const outputCommaSeperatedElectionStatuses = (elections) => {
     return 'Unreviewed';
   }
   return statuses.join(', ');
-};
-
-// Returns a comma separated list of states for all elections the user has
-// access to in a DAR Collection
-export const processCollectionElectionStatus = (collection, user) => {
-  // Filter elections for my DACs by looking for elections with votes that have my user id
-  const filteredElections = filterCollectionElectionsByUser(collection, user);
-  return outputCommaSeperatedElectionStatuses(filteredElections);
 };
 
 // Filter elections in a DAR Collection by which ones the user has votes in
@@ -459,53 +396,6 @@ export const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
   }
 };
 
-export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
-  return (updatedElection, darId, i, successText, votes = undefined) => {
-    const index = calcFilteredListPosition(i, currentPage, tableSize);
-    let filteredListCopy = cloneDeep(filteredList);
-    let electionListCopy = cloneDeep(electionList);
-    const targetFilterRow = filteredListCopy[index];
-    const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
-    targetFilterRow.election = updatedElection;
-    targetElectionRow.election = cloneDeep(updatedElection);
-    if(!isNil(votes)) {
-      targetFilterRow.votes = votes;
-      targetElectionRow.votes = cloneDeep(votes);
-    }
-    setFilteredList(filteredListCopy);
-    setElectionList(electionListCopy);
-    Notifications.showSuccess({text: successText});
-  };
-};
-
-//Helper function, search bar handler for DAC Chair console
-//NOTE: need to replace this in favor of the generic function. Will remove once substitutions in code is completed
-export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
-  return (searchTerms) => {
-    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
-    if(isEmpty(searchTermValues)) {
-      setFilteredList(electionList);
-    } else {
-      let newFilteredList = cloneDeep(electionList);
-      lodashFPForEach((splitTerm) => {
-        const term = splitTerm.trim();
-        if(!isEmpty(term)) {
-          newFilteredList = filter(electionData => {
-            const { election, dac, votes} = electionData;
-            const dar = electionData.dar ? electionData.dar.data : undefined;
-            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
-            const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-            const targetElectionAttrs = JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]);
-            return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
-          }, newFilteredList);
-        }
-      })(searchTermValues);
-      setFilteredList(newFilteredList);
-    }
-    setCurrentPage(1);
-  };
-};
-
 export const getSearchFilterFunctions = () => {
   return {
     dar: (term, targetList) => filter(electionData => {
@@ -553,15 +443,6 @@ export const getSearchFilterFunctions = () => {
           })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate]);
           return !isNil(matched);
         })(targetList),
-    darDrafts: (term, targetList) => filter(draftRecord => {
-      const lowerCaseTerm = toLower(term);
-      const { data, draft, createDate, updateDate } = draftRecord;
-      const { partialDarCode, projectTitle } = data;
-      const matched = find((phrase) =>
-        includes(lowerCaseTerm, toLower(phrase))
-      )([partialDarCode, ...(projectTitle.split(' ')), (updateDate || createDate)]);
-      return !isNil(matched) && (draft !== false || draft !== 'false');
-    })(targetList),
     users: (term, targetList) => {
       const lowerCaseTerm = toLower(term);
       const isMatch = (userField) => includes(lowerCaseTerm, toLower(userField));
@@ -650,40 +531,6 @@ export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter
   return attributes;
 };
 
-export const getColumnSort = (getList, callback) => {
-  return ({ sortKey, getValue, descendantOrder = false } = {}) => () => {
-    let data = getList();
-    let sortedData = data.sort(function (a, b) {
-      if (isNil(a) || isNil(b)) {
-        return 0;
-      }
-
-      const aVal = getValue ? getValue(a) : get(sortKey)(a);
-      const bVal = getValue ? getValue(b) : get(sortKey)(b);
-      if (isNil(aVal) || isNil(bVal)) {
-        return 0;
-      }
-
-      const varA = (typeof aVal === 'string') ?
-        aVal.toLowerCase() : aVal;
-
-      const varB = (typeof bVal === 'string') ?
-        bVal.toLowerCase() : bVal;
-
-      let comparison = 0;
-
-      if (varA > varB) {
-        comparison = 1;
-      } else if (varA < varB) {
-        comparison = -1;
-      }
-      return (descendantOrder) ? (comparison * -1) : comparison;
-    });
-
-    callback(sortedData, descendantOrder);
-  };
-};
-
 //each item in the list is an array of metadata representing a single table row
 //the metadata for each cell needs a data (exactly what is displayed in the table)
 //or value (string or number alternative) property which determines sorting
@@ -750,16 +597,4 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
     }
   }
   return false;
-};
-
-export const evaluateTrueString = (boolString) => {
-  return !isEmpty(boolString) && toLower(boolString) === 'true';
-};
-
-//helper method for ResearcherInfo component in DAR application page
-export const completedResearcherInfoCheck = (properties) => {
-  const {
-    institutionId
-  } = properties;
-  return !isNil(institutionId);
 };
