@@ -37,7 +37,8 @@ const fetchAllDatasets = async (dsIds) => {
   if (isEmpty(dsIds)) {
     return [];
   }
-  return DataSet.getDatasetsByIds(dsIds);
+  // filter just for safety
+  return DataSet.getDatasetsByIds(dsIds);//.filter((id) => !isNil(id) && isNumber(id)));
 };
 
 const validationFailed = (validation) => {
@@ -335,11 +336,6 @@ const DataAccessRequestApplicationNew = (props) => {
     formattedFormData.userId = userId;
 
     try {
-      //NOTE: the pre-processing saves are adding time to record generation (makes front-end seem slow)
-      //pre-prcessing saves are needed since you can't save documents without a reference id
-      //saves ensure record has a reference id
-      //actual fix would involve generating a blank draft record that is saved on console button click
-      //however that would fall outside the scope of this pr, which is already large enough due to refactored code
       let referenceId = formattedFormData.referenceId;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
@@ -366,7 +362,7 @@ const DataAccessRequestApplicationNew = (props) => {
       saveDarDraft();
       setDisableOkButton(false);
     } else {
-      showDialogSave(false);
+      setShowDialogSave(false);
       setDisableOkButton(false);
     }
   };
