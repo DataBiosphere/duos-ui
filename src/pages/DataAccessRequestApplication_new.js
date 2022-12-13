@@ -1,5 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
-import { a, div, form, h, i } from 'react-hyperscript-helpers';
+import React, { useEffect, useState, useCallback } from 'react';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
 import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import DataAccessRequest from './dar_application/DataAccessRequest_new';
@@ -256,7 +255,6 @@ const DataAccessRequestApplicationNew = (props) => {
       }
 
       setStep(newStep);
-
     }
   }, [forcedScroll, resetForcedScrollDebounce]);
 
@@ -416,145 +414,148 @@ const DataAccessRequestApplicationNew = (props) => {
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
-    div({ className: 'container', style: {paddingBottom: '2%'} }, [
-      div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-        div({ className: 'row no-margin' }, [
-          Notification({notificationData: notificationData}),
-          div({
-            className: (formData.darCode !== null ?
-              'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')
-          }, [
-            PageHeading({
-              id: 'requestApplication', imgSrc: headingIcon, iconSize: 'medium', color: 'access',
-              title: 'Data Access Request Application',
-              description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
-            })
-          ]),
-          div({ isRendered: formData.darCode !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
-            a({ id: 'btn_back', onClick: back, className: 'btn-primary btn-back' }, [
-              i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
-            ])
-          ])
-        ])
-      ]),
+    <div className='container' style={{paddingBottom: '2%'}}>
+      <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
+        <div className='row no-margin'>
+          <Notification notificationData={notificationData}/>
+          <div
+            className={(formData.darCode !== null ?
+              'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
+            <PageHeading
+              id='requestApplication' imgSrc={headingIcon} iconSize='medium' color='access'
+              title='Data Access Request Application'
+              description='The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
+            />
+          </div>
+          {formData.darCode !== null &&
+            <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
+              <a id='btn_back' onClick={back} className='btn-primary btn-back'>
+                <i className='glyphicon glyphicon-chevron-left' />
+                Back
+              </a>
+            </div>
+          }
+        </div>
+      </div>
 
-      div({ style: { clear: 'both' } }),
-      form({ name: 'form', 'noValidate': true, className: 'forms-v2' }, [
-        div({ className: 'multi-step-buttons-container' }, [
-          h(Tabs, {
-            value: step,
-            variant: 'scrollable',
-            scrollButtons: 'auto',
-            orientation: 'vertical',
-            TabIndicatorProps: {
+      <div style={{ clear: 'both' }} />
+      <form name='form' noValidate={true} className='forms-v2'>
+        <div className='multi-step-buttons-container'>
+          <Tabs
+            value={step}
+            variant='scrollable'
+            scrollButtons='auto'
+            orientation='vertical'
+            TabIndicatorProps={{
               style: { background: '#2BBD9B' }
-            },
-            onChange: (event, step) => {
+            }}
+            onChange={(event, step) => {
               goToStep(step);
+            }}
+          >
+            {
+              ApplicationTabs.map((tabConfig, index) => {
+                const { name, showStep = true } = tabConfig;
+                return <Tab
+                  key={`step-${index}-${name}`}
+                  label={<div>
+                    {showStep && <div className='step'>{`Step ${index + 1}`}</div>}
+                    <div className='title'>{name}</div>
+                  </div>}
+                  value={index + 1}
+                />;
+              })
             }
-          }, [
-            ...ApplicationTabs.map((tabConfig, index) => {
-              const { name, showStep = true } = tabConfig;
-              return h(Tab, {
-                key: `step-${index}-${name}`,
-                label: div([
-                  div({ isRendered: showStep, className: 'step' }, `Step ${index + 1}`),
-                  div({ className: 'title' }, name)
-                ]),
-                value: index + 1
-              });
-            })
-          ])
-        ]),
+          </Tabs>
+        </div>
 
-        div({ id: 'form-views' }, [
-          h(ConfirmationDialog, {
-            title: 'Save changes?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: '',
-            showModal: showDialogSave, action: { label: 'Yes', handler: onSaveConfirmation }
-          }, [
-            div({ isRendered: validationFailed(validationMessages) }, [
-              'There are issues saving this Data Access Request. Please fix them and save again.'
-            ]),
-            div({ className: 'dialog-description' },
-              ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.']),
-          ]),
-          h(ConfirmationDialog, {
-            title: 'Submit Data Access Request?', disableOkBtn: disableOkBtn, disableNoBtn: disableOkBtn, color: '',
-            showModal: showDialogSubmit, action: { label: 'Yes', handler: onSubmitConfirmation }
-          }, [
-            div({ className: 'dialog-description' },
-              ['Are you sure you want to submit this Data Access Request? This cannot be undone.']),
-          ]),
-          div({className: 'dar-steps'}, [
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.researcherInfoErrors,
+        <div id='form-views'>
+          <ConfirmationDialog
+            title='Save changes?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+            showModal={showDialogSave} action={{ label: 'Yes', handler: onSaveConfirmation }}
+          >
+            <div className='dialog-description'>
+              Are you sure you want to save this Data Access Request? Previous changes will be overwritten.
+            </div>
+          </ConfirmationDialog>
+          <ConfirmationDialog
+            title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+            showModal={showDialogSubmit} action={{ label: 'Yes', handler: onSubmitConfirmation }}
+          >
+            <div className='dialog-description'>
+              Are you sure you want to submit this Data Access Request? This cannot be undone.
+            </div>
+          </ConfirmationDialog>
+
+          <div className='dar-steps'>
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.researcherInfoErrors}
                 showValidationMessages
-              }),
+              />
 
-              h(ResearcherInfo, ({
-                completed: !isNil(get('institutionId', researcher)),
-                darCode: formData.darCode,
-                formData,
-                eRACommonsDestination: eRACommonsDestination,
-                formFieldChange: formFieldChange,
-                location: props.location,
-                nihValid: nihValid,
-                onNihStatusUpdate: setNihValid,
-                researcher,
-                showValidationMessages: showValidationMessages,
-                allSigningOfficials: allSigningOfficials,
-                setLabCollaboratorsCompleted,
-                setInternalCollaboratorsCompleted,
-                setExternalCollaboratorsCompleted,
-              }))
-            ]),
+              <ResearcherInfo
+                completed={!isNil(get('institutionId', researcher))}
+                darCode={formData.darCode}
+                formData={formData}
+                eRACommonsDestination={eRACommonsDestination}
+                formFieldChange={formFieldChange}
+                location={props.location}
+                nihValid={nihValid}
+                onNihStatusUpdate={setNihValid}
+                researcher={researcher}
+                showValidationMessages={showValidationMessages}
+                allSigningOfficials={allSigningOfficials}
+                setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
+                setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
+                setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.darErrors,
-                showValidationMessages
-              }),
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.darErrors}
+                showValidationMessages={showValidationMessages}
+              />
 
-              h(DataAccessRequest, {
-                formData: formData,
-                datasets,
-                dataUseTranslations,
-                formFieldChange,
-                batchFormFieldChange,
-                uploadedCollaborationLetter,
-                updateCollaborationLetter,
-                uploadedIrbDocument,
-                updateUploadedIrbDocument: updateIrbDocument,
-                setDatasets,
-              })
-            ]),
+              <DataAccessRequest
+                formData={formData}
+                datasets={datasets}
+                dataUseTranslations={dataUseTranslations}
+                formFieldChange={formFieldChange}
+                batchFormFieldChange={batchFormFieldChange}
+                uploadedCollaborationLetter={uploadedCollaborationLetter}
+                updateCollaborationLetter={updateCollaborationLetter}
+                uploadedIrbDocument={uploadedIrbDocument}
+                updateUploadedIrbDocument={updateIrbDocument}
+                setDatasets={setDatasets}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.rusErrors,
-                showValidationMessages
-              }),
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.rusErrors}
+                showValidationMessages={showValidationMessages}
+              />
 
-              h(ResearchPurposeStatement, {
-                darCode: formData.darCode,
-                formFieldChange: formFieldChange,
-                formData: formData,
-              })
-            ]),
+              <ResearchPurposeStatement
+                darCode={formData.darCode}
+                formFieldChange={formFieldChange}
+                formData={formData}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DataUseAgreements, {
-                darCode: formData.darCode,
-                attestAndSend: () => attemptSubmit(),
-                save: () => setShowDialogSave(true),
-              })
-            ])
-          ]),
-
-        ])
-      ])
-    ])
+            <div className='step-container'>
+              <DataUseAgreements
+                darCode={formData.darCode}
+                attestAndSend={attemptSubmit}
+                save={() => setShowDialogSave(true)}
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
 

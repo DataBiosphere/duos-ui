@@ -6,7 +6,7 @@ import { USER_ROLES } from './libs/utils';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
-import DataAccessRequestApplicationNew from './pages/DataAccessRequestApplication_new_jsx';
+import DataAccessRequestApplicationNew from './pages/DataAccessRequestApplication_new';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DatasetRegistration from './pages/DatasetRegistration';
 import Home from './pages/Home';
