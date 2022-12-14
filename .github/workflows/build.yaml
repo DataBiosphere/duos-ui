@@ -15,7 +15,7 @@ jobs:
   tag-build-push:
     runs-on: ubuntu-latest
     outputs:
-      sha-tag: ${{ steps.construct-tags.outputs.sha-tag }}
+      sherlock-version: ${{ steps.short-sha.outputs.sha }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -75,7 +75,7 @@ jobs:
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [tag-build-push]
     with:
-      new-version: ${{ needs.tag-build-push.outputs.sha-tag }}
+      new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
       chart-name: 'duos'
     permissions:
       contents: 'read'
@@ -86,7 +86,7 @@ jobs:
     uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
     needs: [tag-build-push, report-to-sherlock]
     with:
-      new-version: ${{ needs.tag-build-push.outputs.sha-tag }}
+      new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
       chart-name: 'duos'
       environment-name: 'dev'
     secrets:
