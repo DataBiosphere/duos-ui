@@ -141,6 +141,8 @@ const columnHeaderData = (columns = defaultColumns) => {
   return columns.map((col) => columnHeaderConfig[col]);
 };
 
+const collectionsSummaryMap = [];
+
 const processCollectionRowData = ({
   collections, collectionIsExpanded, updateCollectionIsExpandedById,
   showConfirmationModal, columns = defaultColumns, consoleType = '',
@@ -153,6 +155,7 @@ const processCollectionRowData = ({
         submissionDate, status, actions,
         researcherName, name, institutionName
       } = collection;
+      collectionsSummaryMap[collection.darCollectionId] = collection;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           collection, darCollectionId, datasetIds, darCode, status, name,
@@ -200,7 +203,6 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
   } = props;
-
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -295,6 +297,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
           }
         }, [
           h(DarDatasetTable, {
+            summary: collectionsSummaryMap[darCollectionId],
             collection: fetchDarCollection(darCollectionId),
             isLoading: isNil(darCollectionCache[darCollectionId]),
           }),

@@ -6,12 +6,13 @@ import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarDatasetTableCellData';
-import {flow, isNil} from 'lodash/fp';
+import {flow, isNil, intersection, cloneDeep} from 'lodash/fp';
 import {
   generatePreProcessedBucketData,
   processDataUseBuckets,
 } from '../../utils/DarCollectionUtils';
 import {Notifications} from '../../libs/utils';
+import { isEmpty } from 'lodash';
 
 
 const storageDarDatasetSort = 'storageDarDatasetSort';
@@ -151,14 +152,32 @@ export const DarDatasetTable = (props) => {
   const [buckets, setBuckets] = useState([]);
 
   const {
-    collection, isLoading
+    collection, isLoading, summary
   } = props;
 
   const [isInitializing, setIsInitializing] = useState(true);
 
   const init = useCallback(async () => {
     try {
-      const { dars, datasets } = collection;
+      if (isEmpty(collection)) {
+        setBuckets([]);
+        return;
+      }
+      let { dars, datasets } = cloneDeep(collection);
+      datasets = datasets ? datasets.filter(dataset => summary.datasetIds.includes(dataset.dataSetId)) : null;
+      const darKeys = Object.keys(dars);
+      darKeys.forEach(darKey => {
+        if(intersection(summary.datasetIds, dars[darKey].datasetIds).length > 0) {
+          const electionKeys = Object.keys(dars[darKey].elections);
+          electionKeys.forEach(electionKey => {
+            if (!summary.datasetIds.includes(dars[darKey].elections[electionKey].datasetId)) {
+              delete dars[darKey].elections[electionKey];
+            }
+          });
+        } else {
+          delete dars[darKey];
+        }
+      });
       if (isNil(dars) || isNil(datasets)) {
         setBuckets([]);
         return;
@@ -177,7 +196,7 @@ export const DarDatasetTable = (props) => {
       });
     }
     setIsInitializing(false);
-  }, [collection]);
+  }, [collection, summary]);
 
   useEffect(() => {
     try {
