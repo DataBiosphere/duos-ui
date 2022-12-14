@@ -86,7 +86,7 @@ jobs:
     uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
     needs: [tag-build-push, report-to-sherlock]
     with:
-      new-version: ${{ needs.tag.outputs.sha-tag }}
+      new-version: ${{ needs.tag-build-push.outputs.sha-tag }}
       chart-name: 'duos'
       environment-name: 'dev'
     secrets:
