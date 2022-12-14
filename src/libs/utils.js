@@ -2,10 +2,9 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import {map as lodashMap, forEach as lodashForEach, isArray} from 'lodash';
-import { DAR, DataSet } from './ajax';
-import {Theme, Styles } from './theme';
+import { DAR } from './ajax';
+import {Theme } from './theme';
 import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
-import {User} from './ajax';
 import { headerTabsConfig } from '../components/DuosHeader';
 
 export const UserProperties = {
