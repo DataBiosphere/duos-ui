@@ -14,6 +14,8 @@ env:
 jobs:
   tag-build-push:
     runs-on: ubuntu-latest
+    outputs:
+      sha-tag: ${{ steps.construct-tags.outputs.sha-tag }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -55,14 +57,7 @@ jobs:
       run: |
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
-    - name: Dispatch to terra-helmfile
-      if: github.event_name == 'push'
-      uses: broadinstitute/repository-dispatch@master
-      with:
-        token: ${{ secrets.BROADBOT_TOKEN }}
-        repository: broadinstitute/terra-helmfile
-        event-type: update-service
-        client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
+
     - name: Notify Slack
       # only notify for develop branch build
       if: github.event_name == 'push'
@@ -75,4 +70,27 @@ jobs:
         channel: "#duos-notifications"
         fields: repo,commit,author,action,eventName,ref,workflow,job,took
 
+  report-to-sherlock:
+    if: github.event_name == 'push'
+    uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
+    needs: [tag-build-push]
+    with:
+      new-version: ${{ needs.tag-build-push.outputs.sha-tag }}
+      chart-name: 'duos'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+  set-version-in-dev:
+    if: github.event_name == 'push'
+    uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
+    needs: [tag-build-push, report-to-sherlock]
+    with:
+      new-version: ${{ needs.tag-build-push.outputs.sha-tag }}
+      chart-name: 'duos'
+      environment-name: 'dev'
+    secrets:
+      sync-git-token: ${{ secrets.BROADBOT_TOKEN }}
+    permissions:
+      id-token: 'write'
 
