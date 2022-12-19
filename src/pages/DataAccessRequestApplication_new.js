@@ -14,7 +14,7 @@ import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { assign, cloneDeep, get, head, isEmpty, isNil, keys, map } from 'lodash/fp';
+import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -327,7 +327,7 @@ const DataAccessRequestApplicationNew = (props) => {
     let formattedFormData = cloneDeep(formData);
 
     for (var key in formattedFormData) {
-      if (formattedFormData[key] === '') {
+      if (isString(formattedFormData[key]) && formattedFormData[key].trim()) {
         formattedFormData[key] = undefined;
       }
     }
@@ -349,7 +349,7 @@ const DataAccessRequestApplicationNew = (props) => {
     } catch (error) {
       setShowDialogSubmit(false);
       NotyUtil.showError({
-        text: 'Error: Data Access Request submission failed'
+        text: 'Data Access Request submission failed. Please save and try submitting again.'
       });
     }
   };
@@ -402,7 +402,7 @@ const DataAccessRequestApplicationNew = (props) => {
     } catch(error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
-      NotyUtil.showError('Error saving partial Data Access Request update');
+      NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
     }
   };
 
