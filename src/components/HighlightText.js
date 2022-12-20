@@ -1,3 +1,4 @@
+import { isNil } from 'lodash';
 import React, {useCallback} from 'react';
 
 export const HighlightText = (props) => {
@@ -19,6 +20,10 @@ export const HighlightText = (props) => {
   // searches through text one character at a time
   // looking for words to highlight
   const splitAndHighlight = useCallback(() => {
+    if (isNil(text)) {
+      return <div></div>;
+    }
+
     const output = [];
 
     const pushOutput = ({
