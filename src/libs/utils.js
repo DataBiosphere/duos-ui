@@ -115,11 +115,29 @@ export const applyHoverEffects = (e, style) => {
   });
 };
 
-export const highlightExactMatches = (highlightedWords, content) => {
+export const highlightExactMatches = (highlightedWords, bgColor, textColor, content) => {
   const regexWords = highlightedWords.map(w => '\\b' + w + '\\b');
   const regexString = '(' + regexWords.join('|') + ')';
   const regex = new RegExp(regexString, 'gi');
-  return content.replace(regex, '<span style=\'background-color: yellow\'>$1</span>');
+  return content.replace(regex, `<span style='background-color: ${bgColor}'>$1</span>`);
+};
+
+/**
+ * Highlights according to given config.
+ * highlightConfig: [{bgColor: ..., textColor: ..., words: [...]}]
+ */
+export const highlight = (highlightConfig, content) => {
+  let finalContent = content;
+
+  highlightConfig.forEach((config) => {
+    console.log(config);
+    const words = config.words;
+    const bgColor = config.bgColor;
+    const textColor = config.textColor;
+    finalContent = highlightExactMatches(words, bgColor, textColor, finalContent);
+  });
+
+  return finalContent;
 };
 
 //currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
