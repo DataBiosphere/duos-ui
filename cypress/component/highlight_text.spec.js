@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import HighlightText from '../../src/components/HighlightText';
 import { mount } from 'cypress/react';
 
