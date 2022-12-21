@@ -1,6 +1,58 @@
 import { isNil } from 'lodash';
 import React, {useCallback} from 'react';
 
+/**
+ * Checks within a text that the characters between
+ * startIdx and endIdx are complete words.
+ *
+ * E.g.,
+ *    text="Biometric", startIdx=3 (m), endIdx=8 (c) => false
+ *    text="The metric", startIdx=4 (m), endIdx=9 (c) => true
+ */
+const punctuation = ['.', ',', ':', ';', '!', '?'];
+const isStandaloneWord = (text, startIdx, endIdx) => {
+  if (startIdx !== 0) {
+    const char = text.charAt(startIdx-1);
+
+    if (char.trim() !== '' && !punctuation.includes(char)) {
+      return false;
+    }
+  }
+
+  if (endIdx !== text.length-1) {
+    const char = text.charAt(endIdx);
+
+    if (char.trim() !== '' && !punctuation.includes(char)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
+const findHighlightableMatch = (highlight, text, idx) => {
+  for (const highlightConfig of highlight) {
+    for (const word of highlightConfig.words) {
+      const textAtCurrWordLength = text.slice(idx, idx+word.length);
+
+
+      const textIsStandalone = isStandaloneWord(text, idx, idx+word.length);
+      const textMatchesHighlightableWord = textAtCurrWordLength.toLowerCase() === word.toLowerCase();
+
+      if (textIsStandalone && textMatchesHighlightableWord) {
+        return {
+          word: textAtCurrWordLength,
+          bgColor: highlightConfig.bgColor,
+          textColor: highlightConfig.textColor,
+        };
+      }
+    }
+  }
+
+  return null;
+};
+
 export const HighlightText = (props) => {
   const {
     /**
@@ -35,6 +87,7 @@ export const HighlightText = (props) => {
       return (
         <span
           key={output.length}
+          data-cy={`highlight-${output.length}`}
           style={{
             backgroundColor: bgColor,
             color: textColor,
@@ -47,48 +100,42 @@ export const HighlightText = (props) => {
 
 
     // keeps track of last unhighlighted text
-    let lastIndex = 0;
+    let endOfLastHighlight = 0;
 
     // scan through text by character
     for (let idx = 0; idx < text.length; idx++) {
+      const match = findHighlightableMatch(highlight, text, idx);
 
-      // scan through all of the highlightable words to
-      // see if the current index matches any of the words
-      for (const highlightConfig of highlight) {
-        for (const word of highlightConfig.words) {
-          if (idx+word.length >= text.length) {
-            continue;
-          }
-
-          const textAtCurrWordLength = text.slice(idx, idx+word.length);
-
-          // if there is a highlightable word here, then
-          // render the text up until now, and the current
-          // word with the highlighted background and text
-          // color.
-          if (textAtCurrWordLength.toLowerCase() === word.toLowerCase()) {
-            output.push(pushOutput({
-              text: text.slice(lastIndex, idx)
-            }));
-            output.push(pushOutput({
-              text: textAtCurrWordLength,
-              bgColor: highlightConfig.bgColor,
-              textColor: highlightConfig.textColor,
-              fontWeight: 'bold'
-            }));
-
-            // update indices:
-            // lastIndex now allows slicing after last highlighted word
-            // idx now scans after the new highlighted word
-            lastIndex = idx+word.length;
-            idx = lastIndex-1;
-          }
-        }
+      if (isNil(match)) {
+        continue;
       }
+
+      const {
+        word,
+        bgColor,
+        textColor
+      } = match;
+
+      if (endOfLastHighlight !== idx) {
+        output.push(pushOutput({
+          text: text.slice(endOfLastHighlight, idx)
+        }));
+      }
+      output.push(pushOutput({
+        text: word,
+        bgColor: bgColor,
+        textColor: textColor,
+        fontWeight: 'bold'
+      }));
+
+      // update indices:
+      // idx now scans after the new highlighted word
+      endOfLastHighlight = idx+word.length;
+      idx = endOfLastHighlight-1;
     }
 
-    if (lastIndex !== text.length) {
-      output.push(pushOutput({text: text.slice(lastIndex, text.length)}));
+    if (endOfLastHighlight !== text.length) {
+      output.push(pushOutput({text: text.slice(endOfLastHighlight, text.length)}));
     }
 
 
