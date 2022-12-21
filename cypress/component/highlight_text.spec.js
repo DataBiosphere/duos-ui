@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import HighlightText from '../../src/components/HighlightText';
 import { mount } from 'cypress/react';
+import React from 'react';
 
 describe('HighlightText - Tests', function() {
   it('Renders text with no highlighting if no matches', function() {
