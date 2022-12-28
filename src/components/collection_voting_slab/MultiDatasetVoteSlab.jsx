@@ -39,7 +39,16 @@ const styles = {
       padding: '10px 10px 20px 20px'
     }
   },
-  slabTitle: {display: 'flex'},
+  slabTitle: {
+    display: 'flex'
+  },
+  slatTitleText: {
+    display: 'flex',
+    fontSize: '1.6rem',
+    height: '32px',
+    padding: '1.5rem',
+    columnGap: '2rem'
+  },
   dataUses: {},
   voteInfo: {},
   chairVoteInfo: {},
@@ -162,7 +171,7 @@ export default function MultiDatasetVoteSlab(props) {
   return(
     <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
       <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
-        <span style={{display:'flex'}}>{title}</span>
+        <span style={styles.slatTitleText}>{title}</span>
       </div>
       {!isLoading ? <div style={{display:'inline'}}>
         <DatasetDisplayTable/>
