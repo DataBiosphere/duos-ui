@@ -77,7 +77,7 @@ describe('CollectionAlgorithmDecision component', () => {
     container.contains('N/A');
   });
 
-  it('renders "Yes" if provided by algorithmResult', () => {
+  it('renders "YES" if provided by algorithmResult', () => {
     const id = 1;
     const props = {
       algorithmResult: {
@@ -89,9 +89,9 @@ describe('CollectionAlgorithmDecision component', () => {
 
     const container = cy.get(`#collection-${id}-decision-value`);
     container.should('exist');
-    container.contains('Yes');
+    container.contains('YES');
   });
-  it('renders "No" if provided by algorithmResult', () => {
+  it('renders "NO" if provided by algorithmResult', () => {
     const id = 1;
     const props = {
       algorithmResult: {
@@ -103,7 +103,7 @@ describe('CollectionAlgorithmDecision component', () => {
 
     const container = cy.get(`#collection-${id}-decision-value`);
     container.should('exist');
-    container.contains('No');
+    container.contains('NO');
   });
 
   it('renders createDate if provided by algorithmResult', () => {

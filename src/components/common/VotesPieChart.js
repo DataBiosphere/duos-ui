@@ -15,11 +15,11 @@ const processVotes = (votes) => {
   const decisionMap = {
     'Yes' : 0,
     'No': 0,
-    'Not submitted' : 0
+    'Not Yet Voted' : 0
   };
 
   votes.forEach((v) => {
-    const value = v.vote ? 'Yes' : !isNil(v.vote) ? 'No' : 'Not submitted';
+    const value = v.vote ? 'Yes' : !isNil(v.vote) ? 'No' : 'Not Yet Voted';
     decisionMap[value]++;
   });
   const decisionDataArray = map(decisionMap, (count, key) => [key, count]);

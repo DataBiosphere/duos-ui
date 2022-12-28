@@ -1,5 +1,4 @@
-import {div, h, span, textarea} from 'react-hyperscript-helpers';
-import {useEffect, useState} from 'react';
+import {React, useEffect, useState} from 'react';
 import {isEmpty, isNil, map, every} from 'lodash/fp';
 import CollectionVoteYesButton from './CollectionVoteYesButton';
 import CollectionVoteNoButton from './CollectionVoteNoButton';
@@ -26,8 +25,6 @@ const styles = {
   },
   subsection: {
     display: 'flex',
-    flexDirection: 'column',
-    rowGap: '1.5rem'
   },
   voteButtons: {
     display: 'flex',
@@ -62,10 +59,12 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   // determines if text is needed to remind the user that their vote will be final once submitting
   const votableChairView = !adminPage && !isVotingDisabled && isFinal;
 
-  return div({ datacy: 'vote-subsection-heading' }, [
-    heading,
-    votableChairView && span({ style: { marginLeft: 5, fontWeight: 'normal' } }, ['(Vote and Rationale cannot be updated after submitting)'])
-  ]);
+  return (
+    <div data-cy={'vote-subsection-heading'}>
+      {heading}
+      {votableChairView && <span style={{ marginLeft: 5, fontWeight: 'normal' }} >(Vote and Rationale cannot be updated after submitting)</span>}
+    </div>
+  );
 };
 
 export default function CollectionSubmitVoteBox(props) {
@@ -126,40 +125,65 @@ export default function CollectionSubmitVoteBox(props) {
   };
 
   return (
-    div({style: Object.assign({paddingBottom: '2%'}, styles.baseStyle), datacy: 'collection-vote-box'}, [
-      div({style: styles.question}, [question]),
-      div({style: styles.content}, [
-        div({style: styles.subsection}, [
-          h(VoteSubsectionHeading, { vote, adminPage, isFinal, isVotingDisabled }),
-          div({style: styles.voteButtons}, [
-            h(CollectionVoteYesButton, {
-              onClick: () => updateVote(true, !isNil(updateFinalVote)),
-              disabled: isVotingDisabled || isApprovalDisabled || isLoading,
-              isSelected: vote === true,
-              isRendered: !isVotingDisabled
-            }),
-            h(CollectionVoteNoButton, {
-              onClick: () => updateVote(false, !isNil(updateFinalVote)),
-              disabled: isLoading || isVotingDisabled,
-              isSelected: vote === false,
-              isRendered: !isVotingDisabled
-            })
-          ])
-        ]),
-        div({style: styles.subsection}, [
-          span(['Rationale (optional):']),
-          textarea({
-            name: 'Rationale Input',
-            value: rationale,
-            placeholder: 'Optional: Enter your comments and describe your rationale prior to voting.',
-            onChange: e => setRationale(e.target.value),
-            onBlur: updateRationale,
-            style: styles.rationaleTextArea,
-            rows: 4,
-            disabled: isVotingDisabled || isLoading
-          }),
-        ])
-      ]),
-    ])
+    <div
+      style={Object.assign({paddingBottom: '2%'}, styles.baseStyle)}
+      data-cy={'collection-vote-box'}>
+      <table className={'layout-table'}>
+        <tbody>
+          <tr>
+            <td>
+              <div style={styles.question}>{question}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style={styles.subsection}>
+                <VoteSubsectionHeading
+                  vote={vote}
+                  adminPage={adminPage}
+                  isFinal={isFinal}
+                  isVotingDisabled={isVotingDisabled}
+                />
+                <div style={styles.voteButtons}>
+                  {!isVotingDisabled && <CollectionVoteYesButton
+                    onClick={() => updateVote(true, !isNil(updateFinalVote))}
+                    disabled={isVotingDisabled || isApprovalDisabled || isLoading}
+                    isSelected={vote === true}
+                  />}
+                  {!isVotingDisabled && <CollectionVoteNoButton
+                    onClick={() => updateVote(false, !isNil(updateFinalVote))}
+                    disabled={isLoading || isVotingDisabled}
+                    isSelected={vote === false}
+                  />}
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style={styles.subsection}>
+                <span style={styles.rationaleTitle}>Rationale (optional):</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style={styles.subsection}>
+                <textarea
+                  name={'Rationale Input'}
+                  value={rationale}
+                  placeholder={'Optional: Enter your comments and describe your rationale prior to voting.'}
+                  onChange={e => setRationale(e.target.value)}
+                  onBlur={updateRationale}
+                  style={styles.rationaleTextArea}
+                  rows={4}
+                  disabled={isVotingDisabled || isLoading}
+                />
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }

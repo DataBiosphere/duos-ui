@@ -12,19 +12,17 @@ import {
   extractUserRPVotesFromBucket,
 } from '../../utils/DarCollectionUtils';
 import VotesPieChart from '../common/VotesPieChart';
-import CollectionAlgorithmDecision from '../CollectionAlgorithmDecision';
 import {convertLabelToKey} from '../../libs/utils';
-import {ScrollToTopButton} from '../ScrollButton';
 import MemberVoteSummary from './MemberVoteSummary';
 
 const styles = {
   baseStyle: {
     fontFamily: 'Montserrat',
-    paddingBottom: '35px'
+    borderRadius: '0 8px 8px 8px',
+    border: '#84a3db 2px solid',
   },
   slabTitle: {
     color: '#000000',
-    backgroundColor: '#F1EDE8',
     fontSize: '1.6rem',
     fontWeight: 'bold',
     width: 'fit-content',
@@ -46,20 +44,15 @@ const styles = {
   },
   collapsedData: {
     color: '#333F52',
-    backgroundColor: '#F1EDE8',
-    borderRadius: '0 4px 4px 4px',
-    borderBottom: '4px #646464 solid',
     padding: '15px 25px'
   },
   expandedData: {
-    backgroundColor: '#F9F8F6',
-    borderRadius: '8px',
-    padding: '15px 25px'
+    paddingLeft: '15px'
   },
   researchPurposeTitle: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
-    marginTop: '1rem',
+    marginTop: '2rem',
     display: 'inline-block'
   },
   researchPurposeSummary: {
@@ -105,7 +98,7 @@ const SkeletonLoader = () => {
 const CollapseExpandLink = ({expanded, setExpanded}) => {
   const linkMessage = expanded ?
     'Hide Research Use Statement (Narrative)' :
-    'Expand to view Research Use Statement (Narrative)';
+    'Expand to view Research Purpose and Vote';
 
   return a({
     style: styles.link,
@@ -120,7 +113,7 @@ const ResearchPurposeSummary = ({darInfo}) => {
     div();
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, algorithmResult = {}, adminPage = false}) => {
+export const ChairVoteInfo = ({dacVotes, isChair, adminPage = false}) => {
   return div(
     {
       style: styles.chairVoteInfo,
@@ -142,12 +135,7 @@ export const ChairVoteInfo = ({dacVotes, isChair, algorithmResult = {}, adminPag
           h(VotesPieChart, {
             votes: dacVotes,
             title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)",
-            styleOverride: { width: isEmpty(algorithmResult) ? '100%' : '50%' }
-          }),
-          h(CollectionAlgorithmDecision, {
-            algorithmResult,
-            styleOverride: { borderLeft: '1px solid #333F52' },
-            isRendered: !isEmpty(algorithmResult)
+            styleOverride: {}
           }),
         ]
       ),
@@ -169,8 +157,7 @@ export default function ResearchProposalVoteSlab(props) {
 
   return div({ datacy: 'rp-slab', style: styles.baseStyle }, [
     div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
-      'Research Use Statement (GA4GH DUO)',
-      h(ScrollToTopButton, {to: '.header-container'})
+      'RUS (GA4GH DUO)'
     ]),
     div({ isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}} ),
     div({ isRendered: !isLoading }, [
@@ -180,39 +167,39 @@ export default function ResearchProposalVoteSlab(props) {
           expanded,
           setExpanded,
           isRendered: !isLoading
-        })
-      ]),
-      h(AnimatePresence, { initial: false }, [
-        expanded && (
-          h(motion.section, animationAttributes, [
-            div({ datacy: 'rp-expanded', style: styles.expandedData }, [
-              div({ datacy: 'research-purpose' }, [
-                span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
-                h(ResearchPurposeSummary, {darInfo}),
-                h(DataUseAlertBox, {translatedDataUse}),
-                h(CollectionSubmitVoteBox, {
-                  question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
-                  votes: currentUserVotes,
-                  isFinal: false,
-                  isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
-                  isLoading,
-                  adminPage,
-                  bucketKey: bucket.key,
-                  updateFinalVote,
-                  key: bucket.key
-                }),
-                h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
-                h(MemberVoteSummary, {
-                  title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
-                  isLoading,
-                  dacVotes,
-                  adminPage
-                })
+        }),
+        h(AnimatePresence, { initial: false }, [
+          expanded && (
+            h(motion.section, animationAttributes, [
+              div({ datacy: 'rp-expanded', style: styles.expandedData }, [
+                div({ datacy: 'research-purpose' }, [
+                  span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
+                  h(ResearchPurposeSummary, {darInfo}),
+                  h(DataUseAlertBox, {translatedDataUse}),
+                  h(CollectionSubmitVoteBox, {
+                    question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
+                    votes: currentUserVotes,
+                    isFinal: false,
+                    isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
+                    isLoading,
+                    adminPage,
+                    bucketKey: bucket.key,
+                    updateFinalVote,
+                    key: bucket.key
+                  }),
+                  h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
+                  h(MemberVoteSummary, {
+                    title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
+                    isLoading,
+                    dacVotes,
+                    adminPage
+                  })
+                ]),
               ]),
-            ]),
-          ])
-        )
-      ])
+            ])
+          )
+        ])
+      ]),
     ])
   ]);
 }

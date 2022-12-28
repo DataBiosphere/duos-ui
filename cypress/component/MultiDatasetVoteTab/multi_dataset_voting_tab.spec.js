@@ -147,7 +147,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
       />
     );
 
-    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
+    cy.get('[data-cy=dataset-vote-slab]').should('be.visible');
     cy.contains('GRU');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.no);
@@ -163,7 +163,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
       />
     );
 
-    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
+    cy.get('[data-cy=dataset-vote-slab]').should('be.visible');
     cy.contains('GRU');
     cy.contains('HMB');
   });
@@ -180,7 +180,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
-    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
+    cy.get('[data-cy=dataset-vote-slab]').should('be.visible');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
     cy.get('.row-data-1').should('contain.text', 'Sarah').should('contain.text', 'No');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', 'Yes');
@@ -196,7 +196,7 @@ describe('MultiDatasetVoteTab - Tests', function() {
       />
     );
 
-    cy.get('[datacy=dataset-vote-slab]').should('be.visible');
+    cy.get('[data-cy=dataset-vote-slab]').should('be.visible');
     cy.get('.table-data').should('not.exist');
   });
 

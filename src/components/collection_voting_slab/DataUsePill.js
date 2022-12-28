@@ -1,6 +1,5 @@
 import {div, h3, span} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash';
-import {map} from 'lodash/fp';
 import { ControlledAccessType } from '../../libs/dataUseTranslation';
 
 const styles = {
@@ -34,9 +33,9 @@ const styles = {
 
 
 export function DataUsePill(props) {
-  const {dataUse} = props;
+  const {dataUse, key} = props;
 
-  return div({key: `data_use_pill_${dataUse.type}_${dataUse.code}`, style: styles.baseStyle}, [
+  return div({key: `data_use_pill_${dataUse.type}_${dataUse.code}_${key}`, style: styles.baseStyle}, [
     span({ style: styles.code }, !isNil(dataUse) ? [dataUse.code] : []),
     span({ style: styles.description }, !isNil(dataUse) ? [dataUse.description] : [])
   ]);
@@ -46,10 +45,10 @@ export function DataUsePills(dataUses){
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions);
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers);
   return(
-    div([map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})(permissionsUses),
+    div([permissionsUses.map((dataUse, idx)=>{return DataUsePill({dataUse, key: `${dataUse.code}-${idx}`});}),
       div({isRendered: modifierUses.length > 0},[
         h3({style: styles.subheading}, ControlledAccessType.modifiers),
-        map(dataUse=>{return DataUsePill({dataUse, key: dataUse.code});})((modifierUses))
+        modifierUses.map((dataUse,idx)=>{return DataUsePill({dataUse, key: `${dataUse.code}-${idx}`});})
       ])
     ])
   );
