@@ -288,7 +288,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     const darCollectionId = rowData[0].id;
 
     if (collectionIsExpanded(darCollectionId)) {
-      return div({}, [
+      return div({key:`expanded-${darCollectionId}`}, [
         renderedRow,
         div({
           style: {
