@@ -128,7 +128,7 @@ export default function CollectionSubmitVoteBox(props) {
     <div
       style={Object.assign({paddingBottom: '2%'}, styles.baseStyle)}
       data-cy={'collection-vote-box'}>
-      <table className={'layout-table'}>
+      <table className={'layout-table'} role='presentation'>
         <tbody>
           <tr>
             <td>

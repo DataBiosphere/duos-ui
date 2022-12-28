@@ -114,7 +114,7 @@ export default function MultiDatasetVoteSlab(props) {
   function DatasetDisplayTable() {
     return (
       <>
-        <table className={'layout-table'} style={{role:'presentation', width:'-webkit-fill-available'}}>
+        <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
           <tbody>
             <tr>
               <td><DataUseSummary/></td>
