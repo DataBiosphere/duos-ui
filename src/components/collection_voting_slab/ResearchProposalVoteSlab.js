@@ -206,7 +206,8 @@ export default function ResearchProposalVoteSlab(props) {
                   title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
                   isLoading,
                   dacVotes,
-                  adminPage
+                  adminPage,
+                  isChair
                 })
               ]),
             ]),
