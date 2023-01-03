@@ -52,13 +52,13 @@ const columnHeaderData = () => {
   return [vote, name, date, rationale];
 };
 
-const processVoteSummaryRowData = ({ dacVotes }) => {
+const processVoteSummaryRowData = ({ dacVotes, isChair = false }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
       const { vote, displayName, voteId, lastUpdated, rationale } =
         dacVote;
       return [
-        voteCellData({ vote, voteId }),
+        voteCellData({ vote, voteId, isChair }),
         nameCellData({ name: displayName, voteId }),
         dateCellData({ date: lastUpdated, voteId }),
         rationaleCellData({ rationale, voteId }),
@@ -68,13 +68,24 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 };
 
 
-function voteCellData({vote, voteId, label = 'vote'}) {
+const voteToString = (vote) => {
+  return isNil(vote) ? '- -' : (vote ? 'Yes' : 'No');
+}
+
+const reminderLink = (voteId) => {
+  return <a onClick={() => {Email.sendReminderEmail(voteId);}}>
+  Send Reminder
+  </a>;
+};
+
+function voteCellData({vote, voteId, isChair, label = 'vote'}) {
+  const data = 
+    (isChair && (isNil(vote) || isNil(voteId))
+      ? reminderLink(voteId)
+      : voteToString(vote));
+
   return {
-    data: (isNil(vote) || isNil(voteId)) ? (
-      <a onClick={() => {Email.sendReminderEmail(voteId);}}>
-      Send Reminder
-      </a>
-    ) : vote ? 'Yes' : 'No',
+    data: data,
     value: isNil(vote) ? '-' : (vote ? 'Yes' : 'No'),
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
@@ -114,12 +125,12 @@ export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
   const [visibleVotes, setVisibleVotes] = useState([]);
   const [tableSize, setTableSize] = useState(5);
-  const { dacVotes, isLoading } = props;
+  const { dacVotes, isLoading, isChair = false } = props;
 
   useEffect(() => {
     setVisibleVotes(
       sortVisibleTable({
-        list: processVoteSummaryRowData({ dacVotes }),
+        list: processVoteSummaryRowData({ dacVotes, isChair }),
         sort
       })
     );

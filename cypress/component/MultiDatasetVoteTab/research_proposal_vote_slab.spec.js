@@ -542,7 +542,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
         bucket={{
           votes: [votesForElection2]
         }}
-        isChair={true}
+        isChair={false}
       />
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
@@ -554,6 +554,27 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
     cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
+    cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
+  });
+
+  it('Allows sending reminder if no vote', function() {
+    mount(
+      <ResearchProposalVoteSlab
+        bucket={{
+          votes: [votesForElection2]
+        }}
+        isChair={true}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
+
+    const link = cy.contains(expandSlabLinkText);
+    link.click();
+
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'Send Reminder');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
   });
 
