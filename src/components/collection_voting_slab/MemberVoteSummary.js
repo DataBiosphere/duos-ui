@@ -42,7 +42,7 @@ export const MemberVoteSummary = (props) => {
       isRendered: showMemberVotes,
       isLoading,
       adminPage,
-      isChair
+      isChair,
     }),
   ]);
 };

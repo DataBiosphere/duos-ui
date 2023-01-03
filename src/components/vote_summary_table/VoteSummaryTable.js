@@ -52,7 +52,7 @@ const columnHeaderData = () => {
   return [vote, name, date, rationale];
 };
 
-const processVoteSummaryRowData = ({ dacVotes, isChair = false }) => {
+const processVoteSummaryRowData = ({ dacVotes, isChair }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
       const { vote, displayName, voteId, lastUpdated, rationale } =
@@ -70,7 +70,7 @@ const processVoteSummaryRowData = ({ dacVotes, isChair = false }) => {
 
 const voteToString = (vote) => {
   return isNil(vote) ? '- -' : (vote ? 'Yes' : 'No');
-}
+};
 
 const reminderLink = (voteId) => {
   return <a onClick={() => {Email.sendReminderEmail(voteId);}}>
@@ -79,10 +79,11 @@ const reminderLink = (voteId) => {
 };
 
 function voteCellData({vote, voteId, isChair, label = 'vote'}) {
-  const data = 
-    (isChair && (isNil(vote) || isNil(voteId))
+  const data = (
+    isChair && (isNil(vote) || isNil(voteId))
       ? reminderLink(voteId)
-      : voteToString(vote));
+      : voteToString(vote)
+  );
 
   return {
     data: data,
@@ -135,7 +136,7 @@ export default function VoteSummaryTable(props) {
       })
     );
     if(!isEmpty(dacVotes)){ setTableSize(dacVotes.length);}
-  }, [sort, dacVotes]);
+  }, [sort, dacVotes, isChair]);
 
   return <SimpleTable
     isLoading={isLoading}
