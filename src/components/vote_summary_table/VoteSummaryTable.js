@@ -1,9 +1,10 @@
+import React from 'react';
 import SimpleTable from '../SimpleTable';
-import {h} from 'react-hyperscript-helpers';
 import {Styles} from '../../libs/theme';
 import {isNil, isEmpty} from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import {sortVisibleTable} from '../../libs/utils';
+import { Email } from '../../libs/ajax';
 
 const styles = {
   baseStyle: {
@@ -69,7 +70,12 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 
 function voteCellData({vote, voteId, label = 'vote'}) {
   return {
-    data: isNil(vote) ? '- -' : vote ? 'Yes' : 'No',
+    data: (isNil(vote) || isNil(voteId)) ? (
+      <a onClick={() => {Email.sendReminderEmail(voteId);}}>
+      Send Reminder
+      </a>
+    ) : vote ? 'Yes' : 'No',
+    value: isNil(vote) ? '-' : (vote ? 'Yes' : 'No'),
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label
@@ -120,13 +126,13 @@ export default function VoteSummaryTable(props) {
     if(!isEmpty(dacVotes)){ setTableSize(dacVotes.length);}
   }, [sort, dacVotes]);
 
-  return h(SimpleTable, {
-    isLoading,
-    rowData: visibleVotes,
-    columnHeaders: columnHeaderData(),
-    tableSize,
-    styles,
-    sort,
-    onSort: setSort
-  });
+  return <SimpleTable
+    isLoading={isLoading}
+    rowData={visibleVotes}
+    columnHeaders={columnHeaderData()}
+    tableSize={tableSize}
+    styles={styles}
+    sort={sort}
+    onSort={setSort}
+  />;
 }
