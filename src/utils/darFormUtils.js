@@ -2,7 +2,7 @@
 
 // ********************** DUL LOGIC ********************** //
 
-import { isEmpty, isNil, isEqual } from 'lodash';
+import { isEmpty, isNil, isEqual, isString } from 'lodash';
 import { FormValidators } from '../components/forms/forms';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
@@ -60,22 +60,26 @@ const mustAcceptMsg = (fieldName) => {
   return `Please accept ${fieldName}`;
 };
 
+const isStringEmpty = (str) => {
+  return isNil(str) || (isString(str) && str.trim() === '');
+};
+
 export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) => {
   const errors = [];
 
-  if (isNil(collaborator.name) || collaborator.name === '') {
+  if (isStringEmpty(collaborator.name)) {
     errors.push('Must specify the name of the collaborator.');
   }
 
-  if (isNil(collaborator.eraCommonsId) || collaborator.eraCommonsId === '') {
+  if (isStringEmpty(collaborator.eraCommonsId)) {
     errors.push('Must specify the eRA Commons ID of the collaborator.');
   }
 
-  if (isNil(collaborator.title) || collaborator.title === '') {
+  if (isStringEmpty(collaborator.title)) {
     errors.push('Must specify the title of the collaborator.');
   }
 
-  if (isNil(collaborator.email) || collaborator.email === '') {
+  if (isStringEmpty(collaborator.email)) {
     errors.push('Must specify the email of the collaborator.');
   } else {
     var testEmail = FormValidators.EMAIL.isValid(collaborator.email);
@@ -96,7 +100,7 @@ export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) =>
 const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted) => {
   const errors = [];
 
-  if (isEmpty(formData.researcher)) {
+  if (isStringEmpty(formData.researcher)) {
     errors.push(requiredFieldMsg('Researcher'));
   }
 
@@ -104,15 +108,15 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     errors.push('Please provide your NIH eRA Commons ID.');
   }
 
-  if (isEmpty(formData.piName)) {
+  if (isStringEmpty(formData.piName)) {
     errors.push(requiredFieldMsg('the Principal Investigator'));
   }
 
-  if (isEmpty(formData.signingOfficial)) {
+  if (isStringEmpty(formData.signingOfficial)) {
     errors.push(requiredFieldMsg('your Institutional Signing Official'));
   }
 
-  if (isEmpty(formData.itDirector)) {
+  if (isStringEmpty(formData.itDirector)) {
     errors.push(requiredFieldMsg('your Information Technology (IT) Director'));
   }
 
@@ -137,7 +141,7 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     if(!formData.anvilUse && !formData.localUse && !formData.cloudUse) {
       errors.push('You must request data storage and analysis on cloud computing, local computing, or both.');
     }
-    if(formData.cloudUse && (isEmpty(formData.cloudProvider) || isEmpty(formData.cloudProviderType) || isEmpty(formData.cloudProviderDescription))){
+    if(formData.cloudUse && (isStringEmpty(formData.cloudProvider) || isStringEmpty(formData.cloudProviderType) || isStringEmpty(formData.cloudProviderDescription))){
       errors.push('Please fill out more information about your cloud provider.');
     }
 
@@ -156,11 +160,11 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
     errors.push(emptyArrayMsg('dataset'));
   }
 
-  if (isEmpty(formData.projectTitle)) {
+  if (isStringEmpty(formData.projectTitle)) {
     errors.push(requiredFieldMsg('Project Title'));
   }
 
-  if (isEmpty(formData.rus)) {
+  if (isStringEmpty(formData.rus)) {
     errors.push(requiredFieldMsg('Research Use Statement'));
   }
 
@@ -172,7 +176,7 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
     errors.push(requiredFieldMsg('the diseases studied'));
   }
 
-  if (isEmpty(formData.nonTechRus)) {
+  if (isStringEmpty(formData.nonTechRus)) {
     errors.push(requiredFieldMsg('Non-Technical Summary'));
   }
 

@@ -1,16 +1,20 @@
-import { useEffect, useState, useCallback } from 'react';
-import { a, div, form, h, i } from 'react-hyperscript-helpers';
+import React, { useEffect, useState, useCallback } from 'react';
 import ResearcherInfo from './dar_application/ResearcherInfo_new';
+import DataUseAgreements from './dar_application/DataUseAgreements_new';
 import DataAccessRequest from './dar_application/DataAccessRequest_new';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
 import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
-import DataUseAgreements from './dar_application/DataUseAgreements_new';
+import {
+  Navigation,
+  Notifications as NotyUtil
+} from '../libs/utils';
+import { ConfirmationDialog } from '../components/ConfirmationDialog_new';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { Collections, DAR, User, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { get, head, isEmpty, isNil, keys, map } from 'lodash/fp';
+import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
@@ -32,7 +36,8 @@ const fetchAllDatasets = async (dsIds) => {
   if (isEmpty(dsIds)) {
     return [];
   }
-  return DataSet.getDatasetsByIds(dsIds);
+  // filter just for safety
+  return DataSet.getDatasetsByIds(dsIds);//.filter((id) => !isNil(id) && isNumber(id)));
 };
 
 const validationFailed = (validation) => {
@@ -95,12 +100,17 @@ const DataAccessRequestApplicationNew = (props) => {
   });
 
   const [nihValid, setNihValid] = useState(false);
+  const [disableOkBtn, setDisableOkButton] = useState(false);
+
 
   const [showValidationMessages, setShowValidationMessages] = useState(false);
   const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
   const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true);
   const [externalCollaboratorsCompleted, setExternalCollaboratorsCompleted] = useState(true);
+
+  const [showDialogSave, setShowDialogSave] = useState(false);
+  const [showDialogSubmit, setShowDialogSubmit] = useState(false);
 
   const [step, setStep] = useState(1);
   const [notificationData, setNotificationData] = useState(undefined);
@@ -168,7 +178,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [datasets, setDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
 
-
   useEffect(() => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
@@ -179,7 +188,6 @@ const DataAccessRequestApplicationNew = (props) => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
       setDataUseTranslations(translations);
     });
-
   }, [datasets]);
 
   const init = useCallback(async () => {
@@ -247,7 +255,6 @@ const DataAccessRequestApplicationNew = (props) => {
       }
 
       setStep(newStep);
-
     }
   }, [forcedScroll, resetForcedScrollDebounce]);
 
@@ -259,6 +266,26 @@ const DataAccessRequestApplicationNew = (props) => {
       setForcedScroll(null);
     }, 200));
   }, [forcedScroll]);
+
+  //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
+  //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
+  const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
+    let irbUpdate, collaborationUpdate;
+    irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+    collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
+    return assign(irbUpdate.data, collaborationUpdate.data);
+  };
+
+  const updateDraftResponse = (formattedFormData, referenceId) => {
+    let darPartialResponse;
+    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+      darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
+    } else {
+      darPartialResponse = DAR.postDarDraft(formattedFormData);
+    }
+    return darPartialResponse;
+  };
+
 
   const scrollToFormErrors = (validationMessages) => {
     if (!isEmpty(validationMessages.researcherInfoErrors)) {
@@ -272,7 +299,7 @@ const DataAccessRequestApplicationNew = (props) => {
     }
   };
 
-  const mockSubmit = () => {
+  const attemptSubmit = () => {
     const validation = validateDARFormData({
       formData,
       datasets,
@@ -290,6 +317,92 @@ const DataAccessRequestApplicationNew = (props) => {
 
     if (isInvalidForm) {
       scrollToFormErrors(validation);
+    } else {
+      setShowDialogSubmit(true);
+    }
+  };
+
+  const submitDARFormData = async () => {
+    const userId = Storage.getCurrentUser().userId;
+    let formattedFormData = cloneDeep(formData);
+
+    for (var key in formattedFormData) {
+      if (isString(formattedFormData[key]) && formattedFormData[key].trim()) {
+        formattedFormData[key] = undefined;
+      }
+    }
+    formattedFormData.userId = userId;
+
+    try {
+      let referenceId = formattedFormData.referenceId;
+      let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
+      referenceId = darPartialResponse.referenceId;
+
+      if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
+        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      }
+      let updatedFormData = assign(formattedFormData, darPartialResponse);
+      await DAR.postDar(updatedFormData);
+      setShowDialogSubmit({
+        showDialogSubmit: false
+      }, Navigation.console(Storage.getCurrentUser(), props.history).response);
+    } catch (error) {
+      setShowDialogSubmit(false);
+      NotyUtil.showError({
+        text: 'Data Access Request submission failed. Please save and try submitting again.'
+      });
+    }
+  };
+
+  const onSaveConfirmation = (selectedOk) => () => {
+    setDisableOkButton(true);
+    if (selectedOk === true) {
+      saveDarDraft();
+      setDisableOkButton(false);
+    } else {
+      setShowDialogSave(false);
+      setDisableOkButton(false);
+    }
+  };
+
+  const onSubmitConfirmation = (selectedOk) => () => {
+    setDisableOkButton(true);
+    if (selectedOk === true) {
+      submitDARFormData();
+      setDisableOkButton(false);
+    } else {
+      setShowDialogSubmit(false);
+      setDisableOkButton(false);
+    }
+  };
+
+
+  const saveDarDraft = async () => {
+    let formattedFormData = cloneDeep(formData);
+    // DAR datasetIds needs to be a list of ids
+
+    // Make sure we navigate back to the current DAR after saving.
+    const { dataRequestId } = props.match.params;
+    try {
+      let referenceId = formattedFormData.referenceId;
+
+      let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
+      referenceId = darPartialResponse.referenceId;
+      if(isNil(dataRequestId)) {
+        props.history.replace('/dar_application/' + referenceId);
+      }
+      //execute saveDARDocuments method only if documents are required for the DAR
+      //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
+      if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
+        darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      }
+      batchFormFieldChange(darPartialResponse);
+      setShowDialogSave(false);
+      setDisableOkButton(false);
+    } catch(error) {
+      setShowDialogSave(false);
+      setDisableOkButton(false);
+      NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
     }
   };
 
@@ -297,132 +410,152 @@ const DataAccessRequestApplicationNew = (props) => {
     props.history.goBack();
   };
 
-
   const { dataRequestId } = props.match.params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
-    div({ className: 'container', style: {paddingBottom: '2%'} }, [
-      div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-        div({ className: 'row no-margin' }, [
-          Notification({notificationData: notificationData}),
-          div({
-            className: (formData.darCode !== null ?
-              'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')
-          }, [
-            PageHeading({
-              id: 'requestApplication', imgSrc: headingIcon, iconSize: 'medium', color: 'access',
-              title: 'Data Access Request Application',
-              description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
-            })
-          ]),
-          div({ isRendered: formData.darCode !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
-            a({ id: 'btn_back', onClick: back, className: 'btn-primary btn-back' }, [
-              i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
-            ])
-          ])
-        ])
-      ]),
+    <div className='container' style={{paddingBottom: '2%'}}>
+      <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
+        <div className='row no-margin'>
+          <Notification notificationData={notificationData}/>
+          <div
+            className={(formData.darCode !== null ?
+              'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
+            <PageHeading
+              id='requestApplication' imgSrc={headingIcon} iconSize='medium' color='access'
+              title='Data Access Request Application'
+              description='The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
+            />
+          </div>
+          {formData.darCode !== null &&
+            <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
+              <a id='btn_back' onClick={back} className='btn-primary btn-back'>
+                <i className='glyphicon glyphicon-chevron-left' />
+                Back
+              </a>
+            </div>
+          }
+        </div>
+      </div>
 
-      div({ style: { clear: 'both' } }),
-      form({ name: 'form', 'noValidate': true, className: 'forms-v2' }, [
-        div({ className: 'multi-step-buttons-container' }, [
-          h(Tabs, {
-            value: step,
-            variant: 'scrollable',
-            scrollButtons: 'auto',
-            orientation: 'vertical',
-            TabIndicatorProps: {
+      <div style={{ clear: 'both' }} />
+      <form name='form' noValidate={true} className='forms-v2'>
+        <div className='multi-step-buttons-container'>
+          <Tabs
+            value={step}
+            variant='scrollable'
+            scrollButtons='auto'
+            orientation='vertical'
+            TabIndicatorProps={{
               style: { background: '#2BBD9B' }
-            },
-            onChange: (event, step) => {
+            }}
+            onChange={(event, step) => {
               goToStep(step);
+            }}
+          >
+            {
+              ApplicationTabs.map((tabConfig, index) => {
+                const { name, showStep = true } = tabConfig;
+                return <Tab
+                  key={`step-${index}-${name}`}
+                  label={<div>
+                    {showStep && <div className='step'>{`Step ${index + 1}`}</div>}
+                    <div className='title'>{name}</div>
+                  </div>}
+                  value={index + 1}
+                />;
+              })
             }
-          }, [
-            ...ApplicationTabs.map((tabConfig, index) => {
-              const { name, showStep = true } = tabConfig;
-              return h(Tab, {
-                key: `step-${index}-${name}`,
-                label: div([
-                  div({ isRendered: showStep, className: 'step' }, `Step ${index + 1}`),
-                  div({ className: 'title' }, name)
-                ]),
-                value: index + 1
-              });
-            })
-          ])
-        ]),
+          </Tabs>
+        </div>
 
-        div({ id: 'form-views' }, [
-          div({className: 'dar-steps'}, [
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.researcherInfoErrors,
+        <div id='form-views'>
+          <ConfirmationDialog
+            title='Save changes?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+            showModal={showDialogSave} action={{ label: 'Yes', handler: onSaveConfirmation }}
+          >
+            <div className='dialog-description'>
+              Are you sure you want to save this Data Access Request? Previous changes will be overwritten.
+            </div>
+          </ConfirmationDialog>
+          <ConfirmationDialog
+            title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+            showModal={showDialogSubmit} action={{ label: 'Yes', handler: onSubmitConfirmation }}
+          >
+            <div className='dialog-description'>
+              Are you sure you want to submit this Data Access Request? This cannot be undone.
+            </div>
+          </ConfirmationDialog>
+
+          <div className='dar-steps'>
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.researcherInfoErrors}
                 showValidationMessages
-              }),
+              />
 
-              h(ResearcherInfo, ({
-                completed: !isNil(get('institutionId', researcher)),
-                darCode: formData.darCode,
-                formData,
-                eRACommonsDestination: eRACommonsDestination,
-                formFieldChange: formFieldChange,
-                location: props.location,
-                nihValid: nihValid,
-                onNihStatusUpdate: setNihValid,
-                researcher,
-                showValidationMessages: showValidationMessages,
-                allSigningOfficials: allSigningOfficials,
-                setLabCollaboratorsCompleted,
-                setInternalCollaboratorsCompleted,
-                setExternalCollaboratorsCompleted,
-              }))
-            ]),
+              <ResearcherInfo
+                completed={!isNil(get('institutionId', researcher))}
+                darCode={formData.darCode}
+                formData={formData}
+                eRACommonsDestination={eRACommonsDestination}
+                formFieldChange={formFieldChange}
+                location={props.location}
+                nihValid={nihValid}
+                onNihStatusUpdate={setNihValid}
+                researcher={researcher}
+                showValidationMessages={showValidationMessages}
+                allSigningOfficials={allSigningOfficials}
+                setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
+                setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
+                setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.darErrors,
-                showValidationMessages
-              }),
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.darErrors}
+                showValidationMessages={showValidationMessages}
+              />
 
-              h(DataAccessRequest, {
-                formData: formData,
-                datasets,
-                dataUseTranslations,
-                formFieldChange,
-                batchFormFieldChange,
-                uploadedCollaborationLetter,
-                updateCollaborationLetter,
-                uploadedIrbDocument,
-                updateUploadedIrbDocument: updateIrbDocument,
-                setDatasets,
-              })
-            ]),
+              <DataAccessRequest
+                formData={formData}
+                datasets={datasets}
+                dataUseTranslations={dataUseTranslations}
+                formFieldChange={formFieldChange}
+                batchFormFieldChange={batchFormFieldChange}
+                uploadedCollaborationLetter={uploadedCollaborationLetter}
+                updateCollaborationLetter={updateCollaborationLetter}
+                uploadedIrbDocument={uploadedIrbDocument}
+                updateUploadedIrbDocument={updateIrbDocument}
+                setDatasets={setDatasets}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DarValidationMessages, {
-                validationMessages: validationMessages.rusErrors,
-                showValidationMessages
-              }),
+            <div className='step-container'>
+              <DarValidationMessages
+                validationMessages={validationMessages.rusErrors}
+                showValidationMessages={showValidationMessages}
+              />
 
-              h(ResearchPurposeStatement, {
-                darCode: formData.darCode,
-                formFieldChange: formFieldChange,
-                formData: formData,
-              })
-            ]),
+              <ResearchPurposeStatement
+                darCode={formData.darCode}
+                formFieldChange={formFieldChange}
+                formData={formData}
+              />
+            </div>
 
-            div({className: 'step-container'}, [
-              h(DataUseAgreements, {
-                darCode: formData.darCode,
-                attestAndSend: mockSubmit,
-                save: () => {},
-              })
-            ])
-          ])
-        ])
-      ])
-    ])
+            <div className='step-container'>
+              <DataUseAgreements
+                darCode={formData.darCode}
+                attestAndSend={attemptSubmit}
+                save={() => setShowDialogSave(true)}
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 };
 
