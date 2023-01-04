@@ -5,6 +5,7 @@ import {isNil, isEmpty} from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import {sortVisibleTable} from '../../libs/utils';
 import { Email } from '../../libs/ajax';
+import { Notifications } from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -73,7 +74,11 @@ const voteToString = (vote) => {
 };
 
 const reminderLink = (voteId) => {
-  return <a onClick={() => {Email.sendReminderEmail(voteId);}}>
+  return <a onClick={() => {
+    Email.sendReminderEmail(voteId)
+      .then(() => Notifications.showSuccess({text: 'Successfully sent reminder.'}))
+      .catch(() => Notifications.showError({text: 'There was an issue sending the reminder. Please try again later.'}));
+  }}>
   Send Reminder
   </a>;
 };
