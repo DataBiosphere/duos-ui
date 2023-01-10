@@ -190,7 +190,9 @@ class DatasetRegistration extends Component {
     let moratorium = dataUse.publicationMoratorium;
     let nonProfit = fp.isNil(dataUse.commercialUse) ? false : !dataUse.commercialUse;
     let hmb = dataUse.hmbResearch;
-    let npoa = dataUse.populationOriginsAncestry;
+    // if the dataset's POA value is set to false, we need to check the NPOA (or NOT POA) option
+    // if the dataset's POA value is set to true, leave this unchecked
+    let npoa = (dataUse.populationOriginsAncestry === false);
     let diseases = dataUse.diseaseRestrictions;
     let other = dataUse.otherRestrictions;
     let primaryOtherText = dataUse.other;
@@ -643,7 +645,7 @@ class DatasetRegistration extends Component {
       result.publicationMoratorium = data.moratorium;
     }
     if (data.npoa) {
-      result.populationOriginsAncestry = data.npoa;
+      result.populationOriginsAncestry = false;
     }
     if (data.nonProfit) {
       result.commercialUse = !data.nonProfit;

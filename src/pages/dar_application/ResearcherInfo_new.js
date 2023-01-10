@@ -286,48 +286,48 @@ export default function ResearcherInfo(props) {
                       onChange: ({ key, value }) => formFieldChange({key, value})
                     })
                   ])
-                ])
-              ]),
-              div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
-                div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                  h(FormField, {
-                    id: 'cloudProvider',
-                    title: 'Name of Cloud Provider',
-                    onChange: ({ key, value }) => formFieldChange({key, value}),
-                    defaultValue: formData.cloudProvider,
-                    validators: [FormValidators.REQUIRED],
-                    disabled: !isEmpty(darCode),
-                    ariaLevel: ariaLevel + 3,
-                  })
                 ]),
-                div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
-                  h(FormField, {
-                    id: 'cloudProviderType',
-                    title: 'Type of Cloud Provider',
-                    defaultValue: formData.cloudProviderType,
-                    validators: [FormValidators.REQUIRED],
-                    disabled: !isNil(darCode),
-                    ariaLevel: ariaLevel + 3,
-                    onChange: ({ key, value }) => formFieldChange({key, value})
-                  })
-                ])
-              ]),
-              div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
-                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                  h(FormField, {
-                    id: 'cloudProviderDescription',
-                    type: FormFieldTypes.TEXTAREA,
-                    defaultValue: formData.cloudProviderDescription,
-                    disabled: !isNil(darCode),
-                    validators: [FormValidators.REQUIRED],
-                    placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
+                div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
+                  div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+                    h(FormField, {
+                      id: 'cloudProvider',
+                      title: 'Name of Cloud Provider',
+                      onChange: ({ key, value }) => formFieldChange({key, value}),
+                      defaultValue: formData.cloudProvider,
+                      validators: [FormValidators.REQUIRED],
+                      disabled: !isEmpty(darCode),
+                      ariaLevel: ariaLevel + 3,
+                    })
+                  ]),
+                  div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
+                    h(FormField, {
+                      id: 'cloudProviderType',
+                      title: 'Type of Cloud Provider',
+                      defaultValue: formData.cloudProviderType,
+                      validators: [FormValidators.REQUIRED],
+                      disabled: !isNil(darCode),
+                      ariaLevel: ariaLevel + 3,
+                      onChange: ({ key, value }) => formFieldChange({key, value})
+                    })
+                  ])
+                ]),
+                div({className: 'row no-margin', isRendered: formData.cloudUse === true}, [
+                  div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                    h(FormField, {
+                      id: 'cloudProviderDescription',
+                      type: FormFieldTypes.TEXTAREA,
+                      defaultValue: formData.cloudProviderDescription,
+                      disabled: !isNil(darCode),
+                      validators: [FormValidators.REQUIRED],
+                      placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
                     + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
                     + ' analysis, storage, and tools and/or software to be used. Please limit your statement to 2000 characters',
-                    rows: 6,
-                    maxLength: 2000,
-                    ariaLevel: ariaLevel + 3,
-                    onChange: ({ key, value}) => formFieldChange({key, value})
-                  })
+                      rows: 6,
+                      maxLength: 2000,
+                      ariaLevel: ariaLevel + 3,
+                      onChange: ({ key, value}) => formFieldChange({key, value})
+                    })
+                  ])
                 ])
               ])
             ])
