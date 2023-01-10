@@ -27,7 +27,7 @@ describe('HighlightText - Tests', function() {
 
   it('Highlights with the correct color, irrelevant of casing.', function() {
     const text = (
-      'The quick brown fox jumps over the lazy log.'
+      'ThE quick BroWn fox jUMpS over tHe laZy log.'
     );
 
     mount(
