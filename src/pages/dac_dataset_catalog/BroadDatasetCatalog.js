@@ -10,7 +10,7 @@ export const BroadDatasetCatalog = (props) => {
       customDacDatasetPage={{
         icon: BroadLogoIcon,
         dacName: 'Broad Institute',
-        dacIds: [10],
+        dacIds: [1],
         color: 'broad',
       }}
       history={props.history}
