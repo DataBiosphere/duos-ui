@@ -43,17 +43,17 @@ describe('HighlightText - Tests', function() {
       />
     );
     // first highlight chunk; regex allows us to ensure there is no extra text
-    cy.get('[data-cy="highlight-0"]').contains(/^The$/);
+    cy.get('[data-cy="highlight-0"]').contains(/^ThE$/);
     // highlighted CSS props
     cy.get('[data-cy="highlight-0"]').should('have.css', 'background-color', 'rgb(0, 0, 0)');
     cy.get('[data-cy="highlight-0"]').should('have.css', 'color', 'rgb(255, 255, 255)');
 
-    cy.get('[data-cy="highlight-1"]').contains(/^ quick brown fox $/);
+    cy.get('[data-cy="highlight-1"]').contains(/^ quick BroWn fox $/);
     // default, unchanged CSS props
     cy.get('[data-cy="highlight-1"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
     cy.get('[data-cy="highlight-1"]').should('have.css', 'color', 'rgb(0, 0, 0)');
 
-    cy.get('[data-cy="highlight-2"]').contains(/^jumps$/);
+    cy.get('[data-cy="highlight-2"]').contains(/^jUMpS$/);
     // highlighted CSS props
     cy.get('[data-cy="highlight-2"]').should('have.css', 'background-color', 'rgb(0, 0, 0)');
     cy.get('[data-cy="highlight-2"]').should('have.css', 'color', 'rgb(255, 255, 255)');
@@ -63,12 +63,12 @@ describe('HighlightText - Tests', function() {
     cy.get('[data-cy="highlight-3"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
     cy.get('[data-cy="highlight-3"]').should('have.css', 'color', 'rgb(0, 0, 0)');
 
-    cy.get('[data-cy="highlight-4"]').contains(/^the$/);
+    cy.get('[data-cy="highlight-4"]').contains(/^tHe$/);
     // highlighted CSS props
     cy.get('[data-cy="highlight-4"]').should('have.css', 'background-color', 'rgb(0, 0, 0)');
     cy.get('[data-cy="highlight-4"]').should('have.css', 'color', 'rgb(255, 255, 255)');
 
-    cy.get('[data-cy="highlight-5"]').contains(/^ lazy log.$/);
+    cy.get('[data-cy="highlight-5"]').contains(/^ laZy log.$/);
     // default, unchanged CSS props
     cy.get('[data-cy="highlight-5"]').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)');
     cy.get('[data-cy="highlight-5"]').should('have.css', 'color', 'rgb(0, 0, 0)');
