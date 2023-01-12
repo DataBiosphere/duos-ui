@@ -115,13 +115,6 @@ export const applyHoverEffects = (e, style) => {
   });
 };
 
-export const highlightExactMatches = (highlightedWords, content) => {
-  const regexWords = highlightedWords.map(w => '\\b' + w + '\\b');
-  const regexString = '(' + regexWords.join('|') + ')';
-  const regex = new RegExp(regexString, 'gi');
-  return content.replace(regex, '<span style=\'background-color: yellow\'>$1</span>');
-};
-
 //currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
 //go through the list of datasets and get the name of the dataset whose id is in the datasetId list
 export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {

@@ -14,6 +14,7 @@ import {
 import VotesPieChart from '../common/VotesPieChart';
 import {convertLabelToKey} from '../../libs/utils';
 import MemberVoteSummary from './MemberVoteSummary';
+import HighlightText from '../HighlightText';
 
 const styles = {
   baseStyle: {
@@ -84,6 +85,27 @@ const animationAttributes = {
   transition:{duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
 };
 
+const highlightedWords = [
+  {
+    bgColor: 'rgba(0,0,100,.2)',
+    textColor: '#0948B7',
+    words: [
+      'Health',
+      'Medical',
+      'Biomedical',
+      'Disease',
+      'Methods',
+      'Algorithm',
+      'Population',
+      'Origin',
+      'Ancestry',
+      'Controls',
+      'Commercial',
+      'Profit'
+    ]
+  }
+];
+
 const DataUseSummary = ({translatedDataUse}) => {
   return flatMap( key => {
     const dataUses = translatedDataUse[key];
@@ -109,7 +131,12 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
 
 const ResearchPurposeSummary = ({darInfo}) => {
   return !isNil(darInfo) ?
-    div({style: styles.researchPurposeSummary}, [darInfo.rus]) :
+    div({style: styles.researchPurposeSummary}, [
+      h(HighlightText, {
+        highlight: highlightedWords,
+        text: darInfo.rus,
+      })
+    ]) :
     div();
 };
 
