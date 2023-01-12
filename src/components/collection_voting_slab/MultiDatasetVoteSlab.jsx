@@ -126,17 +126,17 @@ export default function MultiDatasetVoteSlab(props) {
         <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
           <tbody>
             <tr>
-              <td><DataUseSummary/></td>
-              <td><VoteInfoSubsection/></td>
+              <td style={{width: '50%'}}><DataUseSummary/></td>
+              <td style={{width: '50%'}}><VoteInfoSubsection/></td>
             </tr>
             <tr>
-              <td><ChairVoteInfo
+              <td style={{width: '50%'}}><ChairVoteInfo
                 dacVotes={dacVotes}
                 isChair={isChair}
                 isLoading={isLoading}
                 adminPage={adminPage}/>
               </td>
-              <td>
+              <td style={{width: '50%'}}>
                 {!isEmpty(algorithmResult) && <CollectionAlgorithmDecision
                   algorithmResult={algorithmResult}
                 />}
