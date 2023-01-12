@@ -1,6 +1,6 @@
 import {filter, find, flow, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState, useCallback } from 'react';
-import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
+import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import {ConnectDatasetModal} from '../components/modals/ConnectDatasetModal';
@@ -24,6 +24,13 @@ const tableBody = {
 
 export default function DatasetCatalog(props) {
 
+  const {
+    customDacDatasetPage
+  } = props;
+
+  const isCustomDacDatasetPage = !isNil(customDacDatasetPage);
+  const color = isCustomDacDatasetPage ? customDacDatasetPage.color : 'dataset';
+
   // Data states
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
@@ -35,6 +42,8 @@ export default function DatasetCatalog(props) {
   // Selection States
   const [currentPageAllDatasets, setCurrentPageAllDatasets] = useState(1);
   const [currentPageOnlySelected, setCurrentPageOnlySelected] = useState(1);
+
+  const [filterToDacIds, setFilterToDacIds] = useState(customDacDatasetPage?.dacIds);
 
   const [dataUse, setDataUse] = useState();
   const [errorMessage, setErrorMessage] = useState();
@@ -114,7 +123,13 @@ export default function DatasetCatalog(props) {
         return true;
       };
       const visibleDatasets = filterToOnlySelected ? selectedDatasets : datasetList;
-      const results = visibleDatasets.filter(searchTable(searchDulText)).slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize);
+      const results = (
+        visibleDatasets
+          .filter(searchTable(searchDulText))
+          .filter((row) => {
+            return (!isNil(filterToDacIds) ? filterToDacIds.includes(row['dacId']) : true);
+          })
+          .slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize));
       await Promise.all(results.map(async(dataset) => {
         getDataUseCodes(dataset);
       }));
@@ -123,7 +138,7 @@ export default function DatasetCatalog(props) {
     };
     doEnrichment();
 
-  },[searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets]);
+  }, [searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets, filterToDacIds]);
 
   const applyDatasetSort = useCallback((sortParams, datasets) => {
     const sortedList = datasets.sort((a, b) => {
@@ -421,25 +436,70 @@ export default function DatasetCatalog(props) {
       div({ className: 'container container-wide' }, [
 
         div({ className: 'row no-margin' }, [
-          div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
+          div({
+            className: ' no-padding',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+            }
+          }, [
             PageHeading({
               id: 'datasetCatalog',
-              imgSrc: datasetIcon,
-              iconSize: 'large',
-              color: 'dataset',
-              title: 'Dataset Catalog',
+              imgSrc: isCustomDacDatasetPage ? undefined : datasetIcon,
+              iconSize: isCustomDacDatasetPage ? 'none' : 'large',
+              color: color,
+              title: (!isCustomDacDatasetPage ? 'Dataset Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
               description: 'Search and select datasets then click \'Apply for Access\' to request access'
             }),
+            div({
+              isRendered: isCustomDacDatasetPage,
+              style: {
+                width: '100%'
+              }
+            }, [
+              img({
+                isRendered: isCustomDacDatasetPage,
+                src: customDacDatasetPage?.icon,
+                style: {
+                  float: 'right',
+                }
+              })
+            ])
           ]),
-          div({ className: 'right'}, [
-            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
-              h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' })
+          div({
+            className: 'right'
+          }, [
+            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper', style: { display: 'flex' } }, [
+              h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' }),
+              div({
+                className: 'checkbox',
+                isRendered: isCustomDacDatasetPage,
+                style: {
+                  marginLeft: '10px',
+                  width: '50%'
+                }
+              }, [
+                input({
+                  checked: filterToDacIds === customDacDatasetPage?.dacIds,
+                  type: 'checkbox',
+                  'select-all': 'true',
+                  className: 'checkbox-inline',
+                  id: 'chk_filterDacId',
+                  onChange: () => {
+                    setFilterToDacIds(isNil(filterToDacIds) ? customDacDatasetPage?.dacIds : undefined);
+                    setCurrentPageOnlySelected(1);
+                    setCurrentPageAllDatasets(1);
+                  },
+                }),
+                label({ className: 'regular-checkbox', htmlFor: 'chk_filterDacId' }, [`Filter to only ${customDacDatasetPage?.dacName} data`]),
+              ]),
             ]),
+
             button({
               id: 'btn_addDataset',
               isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
-              className: 'f-right btn-primary dataset-background search-wrapper',
+              className: `f-right btn-primary ${color}-background search-wrapper`,
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
             }, ['Add Dataset',
               span({ className: 'glyphicon glyphicon-plus-sign', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
@@ -500,7 +560,7 @@ export default function DatasetCatalog(props) {
               }),
               label({ id: 'lbl_onlySelected', className: 'regular-checkbox', htmlFor: 'chk_onlySelected' },
                 [`Show ${numDatasetsSelected} Dataset${(numDatasetsSelected != 1?'s':'')} Selected`])
-            ])
+            ]),
           ]),
 
           div({ className: currentUser.isAdmin ? 'table-scroll-admin' : 'table-scroll' }, [
@@ -567,7 +627,7 @@ export default function DatasetCatalog(props) {
                               disabled: !isEditDatasetEnabled(dataset)
                             }, [
                               span({
-                                className: 'cm-icon-button glyphicon glyphicon-pencil caret-margin dataset-color', 'aria-hidden': 'true',
+                                className: `cm-icon-button glyphicon glyphicon-pencil caret-margin ${color}-color`, 'aria-hidden': 'true',
                                 'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
                               })
                             ]),
@@ -578,7 +638,7 @@ export default function DatasetCatalog(props) {
                               disabled: !isEditDatasetEnabled(dataset)
                             }, [
                               span({
-                                className: 'cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color', 'aria-hidden': 'true',
+                                className: `cm-icon-button glyphicon glyphicon-ok-circle caret-margin ${color}-color`, 'aria-hidden': 'true',
                                 'data-tip': 'Disable dataset', 'data-for': 'tip_disable'
                               })
                             ]),
@@ -601,7 +661,7 @@ export default function DatasetCatalog(props) {
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
-                                  (dataset.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), 'aria-hidden': 'true',
+                                  (dataset.isAssociatedToDataOwners ? `${color}-color` : 'default-color'), 'aria-hidden': 'true',
                                 'data-tip': 'Connect with Data Owner', 'data-for': 'tip_connect'
                               })
                             ])
@@ -745,7 +805,7 @@ export default function DatasetCatalog(props) {
             download: '',
             disabled: selectedDatasets.length === 0,
             onClick: download,
-            className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
+            className: `col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary ${color}-background`
           }, [
             'Download Dataset List',
             span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
@@ -757,7 +817,7 @@ export default function DatasetCatalog(props) {
             isRendered: currentUser.isResearcher,
             disabled: (selectedDatasets.length === 0),
             onClick: () => exportToRequest(),
-            className: 'btn-primary dataset-background search-wrapper',
+            className: `btn-primary ${color}-background search-wrapper`,
             'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
           }, ['Apply for Access'])
         ]),

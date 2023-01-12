@@ -38,6 +38,7 @@ import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import { HealthCheck } from './pages/HealthCheck';
 import DataSubmissionForm from './pages/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
+import BroadDatasetCatalog from './pages/dac_dataset_catalog/BroadDatasetCatalog';
 
 const Routes = (props) => (
   <Switch>
@@ -91,6 +92,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
+    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/broad_dataset_catalog" component={BroadDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
