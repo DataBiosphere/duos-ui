@@ -84,7 +84,7 @@ export const headerTabsConfig = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/researchers',
+    link: '/signing_official_console/data_submitters',
     children: [
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
