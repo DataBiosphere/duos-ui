@@ -497,7 +497,7 @@ export default function ResearcherProfile(props) {
 
                   div({
                     isRendered: supportRequests.checkRequestDataAccess,
-                    style: {border: '1px solid purple', color: 'purple'}}, [
+                    style: {border: '1px solid purple', color: 'purple', padding: "10px"}}, [
                     'Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS'
                   ]),
 
