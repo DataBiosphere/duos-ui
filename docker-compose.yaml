@@ -8,6 +8,8 @@
 #   * site.conf
 # Ensure that /etc/hosts contains an entry for:
 # 	127.0.0.1	local.broadinstitute.org
+# Ensure that `public/config.json` is pointing to the correct env (not local), i.e.:
+#   ... "env": "dev", ...
 # Build:
 #   docker build . -t duos
 # Run:
@@ -27,7 +29,7 @@ services:
     restart: always
 
   proxy:
-    image: broadinstitute/openidc-proxy:tcell_3_1_0
+    image: us.gcr.io/broad-dsp-gcr-public/httpd-terra-proxy:v0.1.16
     container_name: duos-proxy
     hostname: local.broadinstitute.org
     links:
@@ -36,10 +38,10 @@ services:
       - 80:8080
       - 443:443
     volumes:
+      - ./ca-bundle.crt:/etc/ssl/certs/server-ca-bundle.crt:ro
       - ./server.crt:/etc/ssl/certs/server.crt:ro
       - ./server.key:/etc/ssl/private/server.key:ro
-      - ./ca-bundle.crt:/etc/ssl/certs/ca-bundle.crt:ro
-      - ./site.conf:/etc/apache2/sites-available/site.conf:ro
+      - ./site.conf:/etc/httpd/conf.d/site.conf:ro
     environment:
       AUTH_TYPE: AuthType None
       LOG_LEVEL: warn

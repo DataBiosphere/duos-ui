@@ -1,9 +1,11 @@
+import React, {useCallback} from 'react';
 import SimpleTable from '../SimpleTable';
-import {h} from 'react-hyperscript-helpers';
 import {Styles} from '../../libs/theme';
 import {isNil, isEmpty} from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import {sortVisibleTable} from '../../libs/utils';
+import { Email } from '../../libs/ajax';
+import { Notifications } from '../../libs/utils';
 
 const styles = {
   baseStyle: {
@@ -46,18 +48,29 @@ const columnHeaderFormat = {
   rationale: {label: 'Rationale', cellStyle: {width: styles.cellWidths.rationale}, sortable: true},
 };
 
+const ReminderStates = {
+  SENT: 'sent',
+  SENDING: 'sending',
+};
+
 const columnHeaderData = () => {
   const { vote, name, date, rationale } = columnHeaderFormat;
   return [vote, name, date, rationale];
 };
 
-const processVoteSummaryRowData = ({ dacVotes }) => {
+const processVoteSummaryRowData = ({ dacVotes, isChair, getReminderSentState, sendReminder }) => {
   if(!isNil(dacVotes)) {
     return dacVotes.map((dacVote) => {
       const { vote, displayName, voteId, lastUpdated, rationale } =
         dacVote;
       return [
-        voteCellData({ vote, voteId }),
+        voteCellData({
+          vote,
+          voteId,
+          reminderSentState: getReminderSentState(voteId),
+          sendReminder: () => sendReminder(voteId),
+          isChair
+        }),
         nameCellData({ name: displayName, voteId }),
         dateCellData({ date: lastUpdated, voteId }),
         rationaleCellData({ rationale, voteId }),
@@ -67,9 +80,33 @@ const processVoteSummaryRowData = ({ dacVotes }) => {
 };
 
 
-function voteCellData({vote, voteId, label = 'vote'}) {
+const voteToString = (vote) => {
+  return isNil(vote) ? '- -' : (vote ? 'Yes' : 'No');
+};
+
+const reminderLink = ({reminderSentState, sendReminder}) => {
+  switch (reminderSentState) {
+    case ReminderStates.SENDING:
+      return <p style={{ fontStyle: 'italic' }}>Sending...</p>;
+    case ReminderStates.SENT:
+      return <p style={{ fontStyle: 'italic', color: 'green' }}>Sent Reminder</p>;
+    default:
+      return <a onClick={() => sendReminder()}>
+      Send Reminder
+      </a>;
+  }
+};
+
+function voteCellData({vote, voteId, isChair, reminderSentState, sendReminder, label = 'vote'}) {
+  const data = (
+    isChair && (isNil(vote) || isNil(voteId))
+      ? reminderLink({reminderSentState, sendReminder})
+      : voteToString(vote)
+  );
+
   return {
-    data: isNil(vote) ? '- -' : vote ? 'Yes' : 'No',
+    data: data,
+    value: isNil(vote) ? '-' : (vote ? 'Yes' : 'No'),
     id: voteId,
     cellStyle: { width: styles.cellWidths.vote },
     label
@@ -108,25 +145,61 @@ export default function VoteSummaryTable(props) {
   const [sort, setSort] = useState({ colIndex: 0, dir: 1 });
   const [visibleVotes, setVisibleVotes] = useState([]);
   const [tableSize, setTableSize] = useState(5);
-  const { dacVotes, isLoading } = props;
+  const { dacVotes, isLoading, isChair = false } = props;
+
+  // key: voteId, value: boolean
+  const [reminderSentState, setReminderSentState] = useState({});
+
+  const getReminderSentState = useCallback((voteId) => {
+    return reminderSentState[voteId];
+  }, [reminderSentState]);
+
+  const updateReminderState = (voteId, sentState) => {
+    setReminderSentState((state) => {
+      const newState = {
+        ...state,
+        ...{
+          [voteId]: sentState,
+        },
+      };
+      return newState;
+    });
+  };
+
+
 
   useEffect(() => {
+    const sendReminder = (voteId) => {
+      updateReminderState(voteId, ReminderStates.SENDING);
+
+      Email.sendReminderEmail(voteId)
+        .then(() => {
+          Notifications.showSuccess({text: 'Successfully sent reminder.'});
+          updateReminderState(voteId, ReminderStates.SENT);
+        })
+        .catch(() => {
+          Notifications.showError({text: 'There was an issue sending the reminder. Please try again later.'});
+          updateReminderState(voteId, undefined);
+        });
+
+    };
+
     setVisibleVotes(
       sortVisibleTable({
-        list: processVoteSummaryRowData({ dacVotes }),
+        list: processVoteSummaryRowData({ dacVotes, isChair, getReminderSentState, sendReminder }),
         sort
       })
     );
     if(!isEmpty(dacVotes)){ setTableSize(dacVotes.length);}
-  }, [sort, dacVotes]);
+  }, [sort, dacVotes, isChair, getReminderSentState]);
 
-  return h(SimpleTable, {
-    isLoading,
-    rowData: visibleVotes,
-    columnHeaders: columnHeaderData(),
-    tableSize,
-    styles,
-    sort,
-    onSort: setSort
-  });
+  return <SimpleTable
+    isLoading={isLoading}
+    rowData={visibleVotes}
+    columnHeaders={columnHeaderData()}
+    tableSize={tableSize}
+    styles={styles}
+    sort={sort}
+    onSort={setSort}
+  />;
 }
