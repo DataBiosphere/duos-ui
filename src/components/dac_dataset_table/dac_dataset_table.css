@@ -20,3 +20,12 @@
     vertical-align: middle !important;
     font-size: 1.2em;
 }
+
+.cell-data {
+    display: flex;
+    alignItems: center;
+    margin: 10px 10px 10px 10px;
+    border-spacing: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

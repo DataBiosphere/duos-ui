@@ -1,7 +1,7 @@
 import {button, div, h} from 'react-hyperscript-helpers';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
-import {styles} from './DACDatasetTable';
+import {styles} from './DACDatasetsTable';
 import { findPropertyValue, getDataUseCodes } from '../../utils/DatasetUtils';
 import {span} from 'react-hyperscript-helpers';
 import {DAC} from '../../libs/ajax';
@@ -14,10 +14,7 @@ export const consoleTypes = {
 export function duosIdCellData({dataset, label='duosIdCellData'}) {
   return {
     data: div({
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-      }
+      className: 'cell-data',
     }, [h(Link, {to: `dataset_statistics/${dataset.dataSetId}`}, [dataset.alias])]),
     value: dataset.alias,
     id: dataset.dataSetId,
@@ -29,7 +26,9 @@ export function duosIdCellData({dataset, label='duosIdCellData'}) {
 export function dataSubmitterCellData({dataset, label='dataSubmitterCellData'}) {
   const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
   return {
-    data: dataSubmitter,
+    data: div({
+      className: 'cell-data',
+    }, dataSubmitter),
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataSubmitter },
     label
@@ -40,10 +39,7 @@ export function datasetNameCellData({dataset, label='datasetNameCellData'}) {
   const datasetName = findPropertyValue(dataset, 'Dataset Name');
   return {
     data: div({
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-      }
+      className: 'cell-data',
     }, [h(Link, {to: `dataset_registration/${dataset.dataSetId}`}, [datasetName])]),
     value: datasetName,
     id: dataset.dataSetId,
@@ -55,7 +51,9 @@ export function datasetNameCellData({dataset, label='datasetNameCellData'}) {
 export function dataCustodianCellData({dataset, label='dataCustodianCellData'}) {
   const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
   return {
-    data: dataCustodian,
+    data: div({
+      className: 'cell-data',
+    }, dataCustodian),
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataCustodian },
     label
@@ -65,7 +63,9 @@ export function dataCustodianCellData({dataset, label='dataCustodianCellData'}) 
 export function dataUseCellData({dataset, label='dataUseCellData'}) {
   getDataUseCodes(dataset);
   return {
-    data: dataset.codeList,
+    data: div({
+      className: 'cell-data',
+    }, dataset.codeList),
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataUse },
     label
@@ -77,7 +77,6 @@ export function statusCellData({dataset, label='statusCellData'}) {
     await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, status);
   };
 
-  // todo: update isRendered/ disabldisabledfor each
   const dacAccepted = div({
     style: {color: '#1ea371', fontWeight: 'bold'}
   },[

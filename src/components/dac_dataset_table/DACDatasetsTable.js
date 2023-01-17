@@ -113,7 +113,7 @@ const getInitialSort = (columns = []) => {
   }
 };
 
-export const DACDatasetTable = function DACDatasetTable(props) {
+export const DACDatasetsTable = function DACDatasetTable(props) {
   const [visibleDatasets, setVisibleDatasets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
