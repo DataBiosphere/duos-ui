@@ -427,7 +427,29 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('.row-data-3').should('contain.text', 'Matt').should('contain.text', 'Yes');
   });
 
+
   it('Renders filler text when some fields of vote are empty', function() {
+    mount(
+      <MultiDatasetVoteSlab
+        title={'GROUP 1'}
+        bucket={{
+          elections: [openElection2],
+          votes: [votesForOpenElection2]
+        }}
+        dacDatasetIds={[20]}
+        isChair={false}
+      />
+    );
+    cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
+
+    cy.get('.table-data').should('not.exist');
+    cy.get('#show-member-vote-dropdown').click();
+    cy.get('.table-data').should('exist');
+    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
+    cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
+  });
+
+  it('Renders send reminder button when user is chair and no vote', function() {
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -444,7 +466,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.get('.table-data').should('not.exist');
     cy.get('#show-member-vote-dropdown').click();
     cy.get('.table-data').should('exist');
-    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', '- -');
+    cy.get('.row-data-0').should('contain.text', 'Joe').should('contain.text', 'Send Reminder');
     cy.get('.row-data-2').should('contain.text', 'Matt').should('contain.text', '- -');
   });
 });
