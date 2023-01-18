@@ -153,7 +153,8 @@ export default function MultiDatasetVoteSlab(props) {
                 ? "My DAC Member's Votes (detail)"
                 : "Other DAC Member's Votes"}
             isLoading={isLoading}
-            adminPage={adminPage}/>
+            adminPage={adminPage}
+            isChair={isChair}/>
         </div>
       </>
     );
