@@ -12,6 +12,7 @@ export const MemberVoteSummary = (props) => {
     isLoading = false,
     title = 'DAC Member Votes (detail)',
     adminPage = false,
+    isChair = false,
     dacVotes
   } = props;
 
@@ -35,6 +36,7 @@ export const MemberVoteSummary = (props) => {
       dacVotes={collapseVotesByUser(dacVotes)}
       isLoading={isLoading}
       adminPage={adminPage}
+      isChair={isChair}
     />
     }
   </div>);
