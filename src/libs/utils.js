@@ -538,7 +538,11 @@ export const sortVisibleTable = ({ list = [], sort }) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+        if (aVal === null || bVal === null) {
+          return (aVal > bVal ? -1 : 1) * sort.dir;
+        } else {
+          return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+        }
       }
     });
   }

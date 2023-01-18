@@ -28,7 +28,8 @@ const styles = {
     fontFamily: 'Montserrat',
     fontSize: '2.4rem',
     fontWeight: 'bold',
-    paddingBottom: '20px'
+    paddingBottom: '20px',
+    paddingTop: '35px'
   }
 };
 

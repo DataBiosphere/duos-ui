@@ -1980,3 +1980,22 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .noty_type__success {
   background-color: #00928A;
 }
+
+.layout-table td:first-child {
+  position: inherit;
+  margin-left: -40px;
+}
+
+.layout-table th,td {
+  padding-top: 2px;
+  padding-right: 30px;
+  padding-bottom: 10px;
+  padding-left: 30px;
+}
+
+.layout-table table {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: stretch;
+    width: -moz-available;
+}
