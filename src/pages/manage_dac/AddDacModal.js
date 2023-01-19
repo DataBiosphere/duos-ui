@@ -40,9 +40,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     if (this.state.dirtyFlag) {
       if (this.props.userRole === ADMIN) {
         if (this.state.isEditMode) {
-          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          currentDac = await DAC.create(currentDac.name, currentDac.description);
+          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
         }
       }
 
