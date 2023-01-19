@@ -199,6 +199,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           prev.dirtyFlag = true;
           return prev;
         });
+        break;
       default:
         break;
     }
