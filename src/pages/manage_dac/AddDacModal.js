@@ -302,7 +302,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
             ])
           ]),
 
-          div({ className: 'form-group' }, [
+          div({ className: 'form-group first-form-group' }, [
             label({
               id: 'lbl_dacEmail',
               className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
