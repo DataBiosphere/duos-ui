@@ -191,6 +191,14 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           return prev;
         });
         break;
+      case 'email':
+        this.setState(prev => {
+          let newDac = Object.assign({}, prev.dac);
+          newDac.email = value;
+          prev.dac = newDac;
+          prev.dirtyFlag = true;
+          return prev;
+        });
       default:
         break;
     }
@@ -287,6 +295,24 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 defaultValue: this.state.dac.description,
                 onChange: this.handleChange,
                 name: 'description',
+                className: 'form-control col-lg-12 vote-input',
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
+              })
+            ])
+          ]),
+
+          div({ className: 'form-group' }, [
+            label({
+              id: 'lbl_dacEmail',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['Email']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              textarea({
+                id: 'txt_dacEmail',
+                defaultValue: this.state.dac.email,
+                onChange: this.handleChange,
+                name: 'email',
                 className: 'form-control col-lg-12 vote-input',
                 required: true,
                 disabled: this.props.userRole === CHAIRPERSON
