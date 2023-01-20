@@ -102,9 +102,9 @@ export const DAC = {
     return res.json();
   },
 
-  update: async (dacId, name, description) => {
+  update: async (dacId, name, description, email) => {
     const url = `${await getApiUrl()}/api/dac`;
-    const dac = { 'dacId': dacId, 'name': name, 'description': description };
+    const dac = { dacId, name, description, email };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
     return res.json();
   },
