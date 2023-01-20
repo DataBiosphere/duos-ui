@@ -95,7 +95,7 @@ export const DAC = {
     return res.json();
   },
 
-  create: async (name, descriptionl) => {
+  create: async (name, description) => {
     const url = `${await getApiUrl()}/api/dac`;
     const dac = { 'name': name, 'description': description };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
