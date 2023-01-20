@@ -507,7 +507,11 @@ export const searchOntologies = (query, callback) => {
 
 export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
   let appliedStyle = disabled ? {[targetColorAttribute] : Theme.palette.disabled} : {};
-  return Object.assign(baseStyle, appliedStyle);
+  try {
+    return Object.assign(baseStyle, appliedStyle);
+  } catch (e) {
+    return baseStyle;
+  }
 };
 
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
