@@ -95,16 +95,16 @@ export const DAC = {
     return res.json();
   },
 
-  create: async (name, description, email) => {
+  create: async (name, descriptionl) => {
     const url = `${await getApiUrl()}/api/dac`;
-    const dac = { 'name': name, 'description': description, 'email': email };
+    const dac = { 'name': name, 'description': description };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
     return res.json();
   },
 
-  update: async (dacId, name, description) => {
+  update: async (dacId, name, description, email) => {
     const url = `${await getApiUrl()}/api/dac`;
-    const dac = { 'dacId': dacId, 'name': name, 'description': description };
+    const dac = { 'dacId': dacId, 'name': name, 'description': description, 'email': email };
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
     return res.json();
   },
