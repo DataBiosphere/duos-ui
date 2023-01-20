@@ -1,0 +1,95 @@
+.base-style {
+  font-family: 'Montserrat';
+  font-size: 16px;
+  font-weight: 400;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  background-repeat: no-repeat;
+  margin-top: -20px;
+  padding: 60px 0;
+}
+
+.section {
+  padding: 10px;
+}
+.section-text {
+  width: 80%;
+  margin: auto;
+}
+
+.info-box {
+  background-color: #ececec;
+  padding: 10px 20px;
+  border-radius: 0 8px 8px 0;
+  border-left: 6px solid #74ae43;
+  display: flex;
+  margin-top: 20px;
+}
+.info-box svg {
+  margin-right: 20px;
+}
+
+.title-text {
+  color: #ffffff;
+}
+
+.subtitle-section {
+  margin: auto;
+  margin-top: 200px;
+  padding-bottom: 30px;
+  background-color: #ffffff;
+}
+.subtitle-section img {
+  height: 300px;
+  margin: auto;
+  margin-top: -200px;
+  display: block;
+}
+.subtitle-section .section-text {
+  padding-top: 10px;
+}
+
+.store-data-section {
+  background-color: #ececec; /* d8d8d8d with 0.5 opacity over white */
+  padding: 50px 0;
+}
+.store-data-section img {
+  width: 100%;
+  padding-left: 40px;
+}
+
+.share-data-section img {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.manage-access-section {
+  background-color: #ececec;
+  padding: 50px 0;
+}
+.manage-access-section img {
+  width: 100%;
+  padding-left: 40px;
+}
+
+.advantages-section {
+  margin-top: 20px;
+}
+
+.centered {
+  text-align: center;
+}
+
+.vertical-centered {
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+p {
+  margin-top: 10px;
+}
+
+b {
+  font-weight: 600!important;
+}
