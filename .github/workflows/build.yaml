@@ -14,33 +14,31 @@ env:
 jobs:
   tag-build-push:
     runs-on: ubuntu-latest
-    outputs:
-      sherlock-version: ${{ steps.short-sha.outputs.sha }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Get Short Sha
       id: short-sha
-      run: echo "::set-output name=sha::$(git rev-parse --short=12 HEAD)"
+      run: echo "sha=$(git rev-parse --short=12 HEAD)" >> $GITHUB_ENV
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
     - name: Construct tags
       id: construct-tags
       run: |
-        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
+        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ env.sha }}"
         ENVIRONMENT_TAG=""
         if ${{ github.event_name == 'pull_request'}}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${{ steps.short-sha.outputs.sha }}"
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${{ env.sha }}"
         elif ${{github.event_name == 'push' }}; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
         fi
-        echo ::set-output name=sha-tag::$SHA_TAG
-        echo ::set-output name=environment-tag::$ENVIRONMENT_TAG
+        echo "sha-tag=$SHA_TAG" >> $GITHUB_ENV
+        echo "environment-tag=$ENVIRONMENT_TAG" >> $GITHUB_ENV
     - name: Build Image
       run: |
         docker build \
-        -t ${{ steps.construct-tags.outputs.sha-tag }} \
-        -t ${{ steps.construct-tags.outputs.environment-tag }} \
+        -t ${{ env.sha-tag }} \
+        -t ${{ env.environment-tag }} \
         .
     - name: Log Github Actor
       run: echo "${{ github.actor }}"
@@ -55,9 +53,8 @@ jobs:
     - name: Push Image to GCR
       if: github.actor != 'dependabot[bot]'
       run: |
-        docker push ${{ steps.construct-tags.outputs.sha-tag }}
-        docker push ${{ steps.construct-tags.outputs.environment-tag }}
-
+        docker push ${{ env.sha-tag }}
+        docker push ${{ env.environment-tag }}
     - name: Notify Slack
       # only notify for develop branch build
       if: github.event_name == 'push'
@@ -69,28 +66,25 @@ jobs:
         status: ${{ job.status }}
         channel: "#duos-notifications"
         fields: repo,commit,author,action,eventName,ref,workflow,job,took
-
   report-to-sherlock:
     if: github.event_name == 'push'
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [tag-build-push]
     with:
-      new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
+      new-version: ${{ env.sha }}
       chart-name: 'duos'
     permissions:
       contents: 'read'
       id-token: 'write'
-
   set-version-in-dev:
     if: github.event_name == 'push'
     uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
     needs: [tag-build-push, report-to-sherlock]
     with:
-      new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
+      new-version: ${{ env.sha }}
       chart-name: 'duos'
       environment-name: 'dev'
     secrets:
       sync-git-token: ${{ secrets.BROADBOT_TOKEN }}
     permissions:
       id-token: 'write'
-
