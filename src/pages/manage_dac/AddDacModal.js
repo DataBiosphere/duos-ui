@@ -172,16 +172,15 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-    switch (name) {
-      case 'name':
-        this.setState(prev => {
-          let newDac = Object.assign({}, prev.dac);
-          newDac.name = value;
-          prev.dac = newDac;
-          prev.dirtyFlag = true;
-          return prev;
-        });
-        break;
+
+    this.setState(prev => {
+      let newDac = Object.assign({}, prev.dac);
+      newDac[name] = value;
+      prev.dac = newDac;
+      prev.dirtyFlag = true;
+      return prev;
+  });
+    /*break;
       case 'description':
         this.setState(prev => {
           let newDac = Object.assign({}, prev.dac);
@@ -203,7 +202,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       default:
         break;
     }
-  };
+  };*/
 
   removeDacMember = (dacId, userId, role) => {
     switch (role) {
@@ -241,7 +240,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         break;
     }
   };
-
+  }
+  
   render() {
     return (
       BaseModal({
