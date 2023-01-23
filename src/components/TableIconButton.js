@@ -43,8 +43,7 @@ export default function TableIconButton(props) {
   } = props;
   const Icon = props.icon;
   const classes = useStyles();
-  //const appliedStyle = setStyle(disabled, style, 'color');
-  const appliedStyle = Object.assign(disabled, {});
+  const appliedStyle = setStyle(disabled, style, 'color');
   const attributes = setDivAttributes(disabled, onClick, appliedStyle, dataTip, onMouseEnter, onMouseLeave, keyProp);
 
   //NOTE: span wrapper is needed for svg child elements due to flaky behavior onMouseEnter and onMouseLeave
