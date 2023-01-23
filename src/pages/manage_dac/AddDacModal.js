@@ -172,11 +172,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-    this.setState(prev => { 
-      let newDac = Object.assign({}, prev.dac); 
-      newDac[name] = value; 
-      prev.dac = newDac; 
-      prev.dirtyFlag = true; 
+    this.setState(prev => {
+      let newDac = Object.assign({}, prev.dac);
+      newDac[name] = value;
+      prev.dac = newDac;
+      prev.dirtyFlag = true;
       return prev; });
   };
 
