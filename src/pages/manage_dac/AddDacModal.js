@@ -174,7 +174,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     const name = target.name;
     this.setState(prev => { 
       let newDac = Object.assign({}, prev.dac); 
-      newDac[name] = value; 
+      newDac[name] = value;
       prev.dac = newDac;
       prev.dirtyFlag = true;
       return prev; });
