@@ -176,7 +176,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       let newDac = Object.assign({}, prev.dac); 
       newDac[name] = value; 
       prev.dac = newDac; 
-      prev.dirtyFlag = true; 
+      prev.dirtyFlag = true;
       return prev; });
   };
 
