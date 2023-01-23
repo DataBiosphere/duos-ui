@@ -172,37 +172,13 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-
-    this.setState(prev => {
-      let newDac = Object.assign({}, prev.dac);
-      newDac[name] = value;
-      prev.dac = newDac;
-      prev.dirtyFlag = true;
-      return prev;
-  });
-    /*break;
-      case 'description':
-        this.setState(prev => {
-          let newDac = Object.assign({}, prev.dac);
-          newDac.description = value;
-          prev.dac = newDac;
-          prev.dirtyFlag = true;
-          return prev;
-        });
-        break;
-      case 'email':
-        this.setState(prev => {
-          let newDac = Object.assign({}, prev.dac);
-          newDac.email = value;
-          prev.dac = newDac;
-          prev.dirtyFlag = true;
-          return prev;
-        });
-        break;
-      default:
-        break;
-    }
-  };*/
+    this.setState(prev => { 
+      let newDac = Object.assign({}, prev.dac); 
+      newDac[name] = value; 
+      prev.dac = newDac; 
+      prev.dirtyFlag = true; 
+      return prev; });
+  };
 
   removeDacMember = (dacId, userId, role) => {
     switch (role) {
@@ -240,8 +216,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         break;
     }
   };
-  }
-  
+
   render() {
     return (
       BaseModal({
@@ -307,12 +282,12 @@ export const AddDacModal = hh(class AddDacModal extends Component {
             label({
               id: 'lbl_dacEmail',
               className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-            }, ['Email']),
+            }, ['DAC Email']),
             div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
               input({
                 id: 'txt_dacEmail',
                 type: 'text',
-                defaultValue: this.state.dac.email,
+                defaultValue: this.state.dac.name,
                 onChange: this.handleChange,
                 name: 'email',
                 className: 'form-control col-lg-12 vote-input',
