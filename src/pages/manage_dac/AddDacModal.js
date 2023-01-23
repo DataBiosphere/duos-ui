@@ -287,7 +287,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               input({
                 id: 'txt_dacEmail',
                 type: 'text',
-                defaultValue: this.state.dac.name,
+                defaultValue: this.state.dac.email,
                 onChange: this.handleChange,
                 name: 'email',
                 className: 'form-control col-lg-12 vote-input',
