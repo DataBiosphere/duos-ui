@@ -466,16 +466,21 @@ export const getSearchFilterFunctions = () => {
       })(targetList);
     },
     datasets: (term, targetList) => filter(dataset => {
+      const findDatasetPropertyValue = (properties, propertyName) => {
+        const prop = find({ propertyName: propertyName })(properties);
+        return isNil(prop) ? '' : prop.propertyValue;
+      };
       const duosId = dataset.alias;
-      const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
-      const datasetName = findPropertyValue(dataset, 'Dataset Name');
-      const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
+      const dataSubmitter = findDatasetPropertyValue(dataset.properties, 'Data Submitter');
+      const datasetName = findDatasetPropertyValue(dataset.properties, 'Dataset Name');
+      // Data Depositor == Data Custodian
+      const dataCustodian = findDatasetPropertyValue(dataset.properties, 'Data Depositor');
       getDataUseCodes(dataset);
       const dataUse = dataset.codeList;
       return includes(term, toLower(duosId)) ||
           includes(term, toLower(dataSubmitter)) ||
-          includes(term, formatDate(datasetName)) ||
-          includes(term, formatDate(dataCustodian)) ||
+          includes(term, toLower(datasetName)) ||
+          includes(term, toLower(dataCustodian)) ||
           includes(term, toLower(dataUse));
     }, targetList),
   };
