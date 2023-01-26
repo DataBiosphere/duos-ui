@@ -467,7 +467,7 @@ export const getSearchFilterFunctions = () => {
     },
     datasets: (term, targetList) => filter(dataset => {
       const findDatasetPropertyValue = (properties, propertyName) => {
-        const prop = find({ propertyName: propertyName })(properties);
+        const prop = find({propertyName: propertyName})(properties);
         return isNil(prop) ? '' : prop.propertyValue;
       };
       const duosId = dataset.alias;
