@@ -5,6 +5,7 @@ import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
 import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
+import ConfirmationModal from '/Users/koflaher/Code/duos-ui/src/components/modals/ConfirmationModal.js';
 
 export default function CollaboratorForm (props) {
   const {
@@ -19,6 +20,7 @@ export default function CollaboratorForm (props) {
   const [approverStatus, setApproverStatus] = useState('');
   const [uuid, setUuid] = useState('');
   const [collaboratorValidationErrors, setCollaboratorValidationErrors] = useState([]);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   useEffect(() => {
     if (!isEmpty(collaborator)) {
@@ -36,6 +38,10 @@ export default function CollaboratorForm (props) {
   const saveUpdate = () => {
     props.saveCollaborator({name, eraCommonsId, title, email, approverStatus, uuid});
     props.updateEditState(false);
+  };
+
+  const closeConfirmation = () => {
+    setShowConfirmationModal(false);
   };
 
   return div({
@@ -132,8 +138,8 @@ export default function CollaboratorForm (props) {
         a({
           id: index+'_deleteMember',
           isRendered: !isNil(props.collaborator) && !props.deleteMode,
-          onClick: () => props.toggleDeleteBool(true),
-          style: { verticalAlign: 'middle', lineHeight: '4rem' }
+          onClick: () => setShowConfirmationModal(true),
+          style: { verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }
         }, [
           span({
             className: 'collaborator-delete-icon glyphicon glyphicon-trash',
@@ -147,24 +153,9 @@ export default function CollaboratorForm (props) {
             }
           }, ['Delete this entry']),
         ]),
-        // Cancel Delete Button
-        div({
-          isRendered: !isNil(props.collaborator) && props.deleteMode,
-          className: 'collaborator-form-cancel-button f-left btn',
-          role: 'button',
-          onClick: () => props.toggleDeleteBool(false),
-        }, ['Cancel']),
-        // Delete Button Confirmation
-        div({
-          id: index+'_confirmDeleteMember',
-          isRendered: !isNil(props.collaborator) && props.deleteMode,
-          className: 'collaborator-form-add-save-button f-left btn',
-          role: 'button',
-          onClick: () => props.deleteCollaborator()
-        },[`Delete`]),
         // Add/Save Button
         div({
-          className: 'collaborator-form-add-save-button f-right btn',
+          className: 'collaborator-form-add-save-button f-left btn',
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
@@ -177,10 +168,18 @@ export default function CollaboratorForm (props) {
         [`${isNil(collaborator) ? 'Add' : 'Save'}`]),
         // Cancel Button for Add/Update
         div({
-          className: 'collaborator-form-cancel-button f-right btn',
+          className: 'collaborator-form-cancel-button f-left btn',
           role: 'button',
           onClick: () => props.updateEditState(false)
-        },['Cancel'])
+        },['Cancel']),
+        // Delete Confirmation Modal
+        h(ConfirmationModal, {
+          showConfirmation: showConfirmationModal,
+          closeConfirmation: closeConfirmation,
+          title: 'Delete entry?',
+          message: 'Are you sure you want to delete this entry?',
+          onConfirm: () => props.deleteCollaborator(),
+        }),
       ]),
     ])
   ]);
