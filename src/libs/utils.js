@@ -521,7 +521,11 @@ export const searchOntologies = (query, callback) => {
 
 export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
   let appliedStyle = disabled ? {[targetColorAttribute] : Theme.palette.disabled} : {};
-  return Object.assign(baseStyle, appliedStyle);
+  try {
+    return Object.assign(baseStyle, appliedStyle);
+  } catch (e) {
+    return baseStyle;
+  }
 };
 
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
@@ -552,7 +556,11 @@ export const sortVisibleTable = ({ list = [], sort }) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+        if (aVal === null || bVal === null) {
+          return (aVal > bVal ? -1 : 1) * sort.dir;
+        } else {
+          return (aVal.localeCompare(bVal, 'en', { sensitivity: 'base', numeric: true }) * sort.dir);
+        }
       }
     });
   }

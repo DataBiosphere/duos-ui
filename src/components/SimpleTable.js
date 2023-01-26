@@ -67,7 +67,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
   return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
-    const renderedRow = div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
+    const renderedRow = div({style: Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${mapKey}`, role: 'row', className: `row-data-${index}`},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,

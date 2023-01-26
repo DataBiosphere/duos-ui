@@ -1,6 +1,5 @@
 import {h} from 'react-hyperscript-helpers';
 import Box from '@mui/material/Box';
-import {KeyboardArrowUp} from '@material-ui/icons';
 
 export function ScrollButton(props) {
   const { children, to, additionalStyle = {}, verticalAlignment = 'start' } = props;
@@ -20,16 +19,5 @@ export function ScrollButton(props) {
 
   return h(Box, { onClick, style }, [
     children
-  ]);
-}
-
-export function ScrollToTopButton(props) {
-  const { to } = props;
-
-  return h(ScrollButton, {
-    to,
-    verticalAlignment: 'center'
-  }, [
-    h(KeyboardArrowUp)
   ]);
 }

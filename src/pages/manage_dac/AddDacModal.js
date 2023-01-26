@@ -40,9 +40,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     if (this.state.dirtyFlag) {
       if (this.props.userRole === ADMIN) {
         if (this.state.isEditMode) {
-          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          currentDac = await DAC.create(currentDac.name, currentDac.description);
+          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
         }
       }
 
@@ -172,28 +172,12 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-    switch (name) {
-      case 'name':
-        this.setState(prev => {
-          let newDac = Object.assign({}, prev.dac);
-          newDac.name = value;
-          prev.dac = newDac;
-          prev.dirtyFlag = true;
-          return prev;
-        });
-        break;
-      case 'description':
-        this.setState(prev => {
-          let newDac = Object.assign({}, prev.dac);
-          newDac.description = value;
-          prev.dac = newDac;
-          prev.dirtyFlag = true;
-          return prev;
-        });
-        break;
-      default:
-        break;
-    }
+    this.setState(prev => {
+      let newDac = Object.assign({}, prev.dac);
+      newDac[name] = value;
+      prev.dac = newDac;
+      prev.dirtyFlag = true;
+      return prev; });
   };
 
   removeDacMember = (dacId, userId, role) => {
@@ -287,6 +271,25 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 defaultValue: this.state.dac.description,
                 onChange: this.handleChange,
                 name: 'description',
+                className: 'form-control col-lg-12 vote-input',
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
+              })
+            ])
+          ]),
+
+          div({ className: 'form-group first-form-group' }, [
+            label({
+              id: 'lbl_dacEmail',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['DAC Email']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              input({
+                id: 'txt_dacEmail',
+                type: 'text',
+                defaultValue: this.state.dac.email,
+                onChange: this.handleChange,
+                name: 'email',
                 className: 'form-control col-lg-12 vote-input',
                 required: true,
                 disabled: this.props.userRole === CHAIRPERSON

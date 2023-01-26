@@ -23,7 +23,7 @@ const darInfoPrimarySecondaryUse = {
 const primaryUseCode = 'DS';
 const secondaryUseCode = 'OTHER';
 
-const expandSlabLinkText = 'Expand to view Research Use Statement (Narrative)';
+const expandSlabLinkText = 'Expand to view Research Purpose and Vote';
 const collapseSlabLinkText = 'Hide Research Use Statement (Narrative)';
 
 const votesForElection1 = {
@@ -353,7 +353,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains(expandSlabLinkText);
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -375,7 +375,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
     const link = cy.contains(expandSlabLinkText);
     link.click();
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');
@@ -587,7 +587,7 @@ describe('ResearchProposalVoteSlab - Tests', function() {
       adminPage={true}
     />);
     cy.get('#expand-rp-vote-button').click();
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'The final vote is: NO');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'The final vote is: NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
     cy.get('textarea').should('be.disabled');

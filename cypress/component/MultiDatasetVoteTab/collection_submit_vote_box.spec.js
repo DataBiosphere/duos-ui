@@ -27,7 +27,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('not.be.visible');
+    cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.yes);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -41,7 +41,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('not.be.visible');
+    cy.get('[data-cy=vote-subsection-heading]').should('not.be.visible');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -55,7 +55,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=collection-vote-box]').should('exist');
+    cy.get('[data-cy=collection-vote-box]').should('exist');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -69,7 +69,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=collection-vote-box]').should('exist');
+    cy.get('[data-cy=collection-vote-box]').should('exist');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -82,7 +82,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=collection-vote-box]').should('exist');
+    cy.get('[data-cy=collection-vote-box]').should('exist');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
   });
@@ -196,11 +196,11 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', '(Vote and Rationale cannot be updated after submitting)');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', '(Vote and Rationale cannot be updated after submitting)');
     cy.get('[datacy=yes-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').should('have.css', 'background-color', votingColors.default);
     cy.get('[datacy=no-collection-vote-button]').click();
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NO');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NO');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -214,7 +214,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={false}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'YES');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'YES');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -250,7 +250,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
     );
     cy.stub(Votes, 'updateVotesByIds');
 
-    cy.get('[datacy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
+    cy.get('[data-cy=vote-subsection-heading]').should('have.text', 'NOT SELECTED');
     cy.get('textarea').should('be.disabled');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
@@ -304,7 +304,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       isApprovalDisabled={true}
       adminPage={true}
     />);
-    cy.get('[datacy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized');
+    cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -318,7 +318,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
       isApprovalDisabled={true}
       adminPage={true}
     />);
-    cy.get('[datacy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized');
+    cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The vote has not been finalized');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
   });
@@ -334,7 +334,7 @@ describe('CollectionSubmitVoteBox - Tests', function() {
         adminPage={true}
       />
     );
-    cy.get('[datacy=vote-subsection-heading]').should('exist').contains('The final vote is: YES');
+    cy.get('[data-cy=vote-subsection-heading]').should('exist').contains('The final vote is: YES');
     cy.get('textarea').should('be.disabled');
     cy.get('[datacy=yes-collection-vote-button]').should('not.exist');
     cy.get('[datacy=no-collection-vote-button]').should('not.exist');
