@@ -60,7 +60,7 @@
   padding-top: 10px;
 }
 /*
-  This means that when the window is less than 80px wide (e.g. grid breakpoint = l) then the laptop image will be hidden
+  This means that when the window is less than 800px wide (e.g. grid breakpoint = l) then the laptop image will be hidden
 */
 @media (max-width: 800px) { 
   .subtitle-section {
