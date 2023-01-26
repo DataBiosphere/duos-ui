@@ -138,7 +138,7 @@ export default function CollaboratorForm (props) {
         a({
           id: index+'_deleteMember',
           isRendered: !isNil(props.collaborator) && !props.deleteMode,
-          onClick: () => setShowConfirmationModal(true),
+          onClick: () => { setShowConfirmationModal(true), props.toggleDeleteBool(false) },
           style: { verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }
         }, [
           span({
