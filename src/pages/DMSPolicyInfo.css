@@ -17,6 +17,15 @@
   width: 80%;
   margin: auto;
 }
+/*
+  600 is from the material UI grid system.
+  This means that when the window is less than 600px wide (e.g. grid breakpoint = sm) then text will be center aligned 
+*/
+@media (max-width: 600px) { 
+  .section-text {
+    text-align: center;
+  }
+}
 
 .info-box {
   background-color: #ececec;
@@ -25,6 +34,7 @@
   border-left: 6px solid #74ae43;
   display: flex;
   margin-top: 20px;
+  text-align: left;
 }
 .info-box svg {
   margin-right: 20px;
@@ -49,6 +59,18 @@
 .subtitle-section .section-text {
   padding-top: 10px;
 }
+/*
+  This means that when the window is less than 80px wide (e.g. grid breakpoint = l) then the laptop image will be hidden
+*/
+@media (max-width: 800px) { 
+  .subtitle-section {
+    margin-top: 0;
+    
+  }
+  .subtitle-section img {
+    display: none;
+  }
+}
 
 .store-data-section {
   background-color: #ececec; /* d8d8d8d with 0.5 opacity over white */
@@ -56,12 +78,24 @@
 }
 .store-data-section img {
   width: 100%;
-  padding-left: 40px;
 }
-
+/* remove padding in mobile mode */
+@media (min-width: 600px) { 
+  .store-data-section img {
+    padding-left: 40px;
+  }
+}
+.share-data-section {
+  background-color: #ffffff;
+}
 .share-data-section img {
   width: 100%;
-  padding-right: 40px;
+}
+/* remove padding in mobile mode */
+@media (min-width: 600px) { 
+  .share-data-section img {
+    padding-right: 40px;
+  }
 }
 
 .manage-access-section {
@@ -70,10 +104,16 @@
 }
 .manage-access-section img {
   width: 100%;
-  padding-left: 40px;
+}
+/* remove padding in mobile mode */
+@media (min-width: 600px) { 
+  .manage-data-section img {
+    padding-left: 40px;
+  }
 }
 
 .advantages-section {
+  background-color: #ffffff;
   margin-top: 20px;
 }
 
