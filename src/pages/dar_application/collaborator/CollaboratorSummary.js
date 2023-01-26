@@ -1,6 +1,6 @@
 import { a, h, div, span } from 'react-hyperscript-helpers';
 import { useState } from 'react';
-import ConfirmationModal from '/Users/koflaher/Code/duos-ui/src/components/modals/ConfirmationModal.js';
+import ConfirmationModal from '../../../components/modals/ConfirmationModal';
 
 export const CollaboratorSummary = (props) => {
   const {

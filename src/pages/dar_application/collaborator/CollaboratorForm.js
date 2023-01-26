@@ -5,7 +5,7 @@ import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
 import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
-import ConfirmationModal from '/Users/koflaher/Code/duos-ui/src/components/modals/ConfirmationModal.js';
+import  ConfirmationModal  from '../../../components/modals/ConfirmationModal';
 
 export default function CollaboratorForm (props) {
   const {
