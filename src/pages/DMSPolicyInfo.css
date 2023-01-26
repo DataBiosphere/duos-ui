@@ -79,7 +79,7 @@
 .store-data-section img {
   width: 100%;
 }
-/* remove padding in mobile mode */
+/* add padding in desktop mode */
 @media (min-width: 600px) { 
   .store-data-section img {
     padding-left: 40px;
@@ -91,7 +91,7 @@
 .share-data-section img {
   width: 100%;
 }
-/* remove padding in mobile mode */
+/* add padding in desktop mode */
 @media (min-width: 600px) { 
   .share-data-section img {
     padding-right: 40px;
@@ -105,7 +105,7 @@
 .manage-access-section img {
   width: 100%;
 }
-/* remove padding in mobile mode */
+/* add padding in desktop mode */
 @media (min-width: 600px) { 
   .manage-data-section img {
     padding-left: 40px;
