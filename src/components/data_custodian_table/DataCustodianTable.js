@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles, Theme } from '../../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
