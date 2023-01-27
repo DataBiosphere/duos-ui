@@ -136,6 +136,7 @@ See the `DEVNOTES.md` file in each repository for setup and local development.
 1. [Google Drive](https://drive.google.com/drive/folders/1xYnk_-LrKM7CT2SVrqcuHJXPSsWpUQBH)
 2. [DUOS Architecture](https://docs.google.com/document/d/1KFSxrS_nLKu3VLil-KutKNX_fJUwF_H8rbhzwWYTl5Q/edit)
 
-### DevOps Resources
+### Other Resources
 
 1. [How to Onboard](https://docs.google.com/document/d/11pZE-GqeZFeSOG0UpGg_xyTDQpgBRfr0MLxpxvvQgEw/edit?usp=sharing)
+2. [How to Develop](https://docs.google.com/document/d/1foRggv6wfgz0PwO-mcl61a6OGdrSc0gN-a0YNpEaY-M/edit?usp=sharing)
