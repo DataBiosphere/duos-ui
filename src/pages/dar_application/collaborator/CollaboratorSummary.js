@@ -84,7 +84,7 @@ export const CollaboratorSummary = (props) => {
         a({
           id: index+'_deleteMember',
           style: { marginLeft: 10 },
-          onClick: () => { setShowConfirmationModal(true); props.toggleDeleteBool(false); },
+          onClick: () => { setShowConfirmationModal(true), props.toggleDeleteBool(false); },
         }, [
           span({
             className: 'glyphicon glyphicon-trash collaborator-delete-icon',
