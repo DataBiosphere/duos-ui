@@ -5,11 +5,11 @@ import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
 import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetsTable';
-import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../libs/utils';
+import {getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES} from '../libs/utils';
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import '../components/dac_dataset_table/dac_dataset_table.css';
 import {Storage} from '../libs/storage';
-import {map, filter, isNil} from 'lodash/fp';
+import {filter, flow, isNil, map} from 'lodash/fp';
 
 export default function DACDatasets() {
   const [datasets, setDatasets] = useState([]);
@@ -28,8 +28,11 @@ export default function DACDatasets() {
   useEffect(() => {
     const init = async () => {
       const user = Storage.getCurrentUser();
-      const chairRoles = filter(r => r.name === 'Chairperson')(user.roles);
-      const dacIds = filter(id => !isNil(id))(map('dacId')(chairRoles));
+      const dacIds = flow(
+        filter(r => r.name === USER_ROLES.chairperson),
+        map('dacId'),
+        filter(id => !isNil(id))
+      )(user.roles);
       try {
         setIsLoading(true);
         const dacDatasets = (await Promise.all(
