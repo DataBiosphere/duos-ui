@@ -15,8 +15,8 @@ export function duosIdCellData({dataset, label='duosIdCellData'}) {
   return {
     data: div({
       className: 'cell-data',
-    }, [h(Link, {to: `dataset_statistics/${dataset.dataSetId}`}, [dataset.alias])]),
-    value: dataset.alias,
+    }, [h(Link, {to: `dataset_statistics/${dataset.dataSetId}`}, [dataset.datasetIdentifier])]),
+    value: dataset.datasetIdentifier,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.duosId },
     label

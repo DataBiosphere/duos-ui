@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {button, div, h, img, span} from 'react-hyperscript-helpers';
-import {User} from '../libs/ajax';
+import {DAC} from '../libs/ajax';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
@@ -8,6 +8,8 @@ import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../libs/utils';
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import '../components/dac_dataset_table/dac_dataset_table.css';
+import {Storage} from '../libs/storage';
+import {map, filter, isNil} from 'lodash/fp';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
@@ -65,11 +67,16 @@ export default function DACDatasets(props) {
 
   useEffect(() => {
     const init = async () => {
+      const user = Storage.getCurrentUser();
+      const chairRoles = filter(r => r.name === 'Chairperson')(user.roles);
+      const dacIds = filter(id => !isNil(id))(map('dacId')(chairRoles));
       try {
         setIsLoading(true);
-        const listOfDatasets = await User.getUserRelevantDatasets();
-        setDatasets(listOfDatasets);
-        setFilteredList(listOfDatasets);
+        const dacDatasets = (await Promise.all(
+          dacIds.map(id => DAC.datasets(id))
+        )).flat();
+        setDatasets(dacDatasets);
+        setFilteredList(dacDatasets);
         setIsLoading(false);
       } catch (error) {
         Notifications.showError({text: 'Error initializing datasets table'});
