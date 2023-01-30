@@ -29,6 +29,7 @@ export function dataSubmitterCellData({dataset, label='dataSubmitterCellData'}) 
     data: div({
       className: 'cell-data',
     }, dataSubmitter),
+    value: dataSubmitter,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataSubmitter },
     label
@@ -54,6 +55,7 @@ export function dataCustodianCellData({dataset, label='dataCustodianCellData'}) 
     data: div({
       className: 'cell-data',
     }, dataCustodian),
+    value: dataCustodian,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataCustodian },
     label
@@ -66,6 +68,7 @@ export function dataUseCellData({dataset, label='dataUseCellData'}) {
     data: div({
       className: 'cell-data',
     }, dataset.codeList),
+    value: dataset.codeList,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.dataUse },
     label
