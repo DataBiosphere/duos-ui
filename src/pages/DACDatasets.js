@@ -27,14 +27,14 @@ export default function DACDatasets() {
 
   useEffect(() => {
     const init = async () => {
-      const user = Storage.getCurrentUser();
-      const dacIds = flow(
-        filter(r => r.name === USER_ROLES.chairperson),
-        map('dacId'),
-        filter(id => !isNil(id))
-      )(user.roles);
       try {
         setIsLoading(true);
+        const user = Storage.getCurrentUser();
+        const dacIds = flow(
+          filter(r => r.name === USER_ROLES.chairperson),
+          map('dacId'),
+          filter(id => !isNil(id))
+        )(user.roles);
         const dacDatasets = (await Promise.all(
           dacIds.map(id => DAC.datasets(id))
         )).flat();
