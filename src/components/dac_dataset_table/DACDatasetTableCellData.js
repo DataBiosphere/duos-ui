@@ -7,8 +7,7 @@ import {span} from 'react-hyperscript-helpers';
 import {DAC} from '../../libs/ajax';
 
 export const consoleTypes = {
-  CHAIR: 'chair',
-  DATA_SUBMITTER: 'dataSubmitter',
+  CHAIR: 'chair'
 };
 
 export function duosIdCellData({dataset, label='duosIdCellData'}) {
