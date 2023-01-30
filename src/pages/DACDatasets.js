@@ -6,10 +6,10 @@ import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
 import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetsTable';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES} from '../libs/utils';
+import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import '../components/dac_dataset_table/dac_dataset_table.css';
 import {Storage} from '../libs/storage';
 import {filter, flow, isNil, map} from 'lodash/fp';
-import {consoleTypes} from '../components/dar_collection_table/DarCollectionTableCellData';
 
 export default function DACDatasets() {
   const [datasets, setDatasets] = useState([]);
