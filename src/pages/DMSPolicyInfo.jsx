@@ -2,7 +2,7 @@ import { Grid } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import homeHeaderBackground from '../images/home_header_background.png';
-import anvilBackground from '../images/anvil_background.png';
+import anvilBackground from '../images/anvil_background.jpg';
 import subtitleImageNih from '../images/duos_laptops.png';
 import subtitleImageAnvil from '../images/anvil_laptops.png';
 import storeDataImageNih from '../images/duos_chart.png';
@@ -30,6 +30,10 @@ function DMSPolicyInfo(props) {
   const {
     variant, // Variant can be NIH or ANVIL
   } = props;
+
+  const renderSectionImage = (url, alt) => (
+    <img src={url} alt={alt}/>
+  );
 
   const renderInfoBox = (text, index) => (
     <div className="info-box" key={`${index}`}>
@@ -136,7 +140,7 @@ function DMSPolicyInfo(props) {
       <div className="section store-data-section">
         <div className="section-text">
           <Grid container>
-            <Grid item xs={7} className="vertical-centered">
+            <Grid item xs={12} sm={6} className="vertical-centered">
               <div style={Styles.TITLE}>
                 Store Data Anywhere
               </div>
@@ -144,8 +148,8 @@ function DMSPolicyInfo(props) {
                 {datastoreText}
               </div>
             </Grid>
-            <Grid item xs={5} className="vertical-centered">
-              <img src={datastoreImage}/>
+            <Grid item xs={12} sm={6} className="vertical-centered">
+              {renderSectionImage(datastoreImage, 'data store section image')}
             </Grid>
           </Grid>
         </div>
@@ -154,10 +158,10 @@ function DMSPolicyInfo(props) {
       <div className="section share-data-section">
         <div className="section-text">
           <Grid container>
-            <Grid item xs={7} className="vertical-centered">
-              <img src={shareDataImage}/>
+            <Grid item xs={12} sm={6} className="vertical-centered">
+              {renderSectionImage(shareDataImage, 'data sharing section image')}
             </Grid>
-            <Grid item xs={5} className="vertical-centered">
+            <Grid item xs={12} sm={6} className="vertical-centered">
               <div style={Styles.TITLE}>
                 Share Data
               </div>
@@ -176,7 +180,7 @@ function DMSPolicyInfo(props) {
       <div className="section manage-access-section">
         <div className="section-text">
           <Grid container>
-            <Grid item xs={7} className="vertical-centered">
+            <Grid item xs={12} sm={6} className="vertical-centered">
               <div style={Styles.TITLE}>
                 Manage Access
               </div>
@@ -192,8 +196,8 @@ function DMSPolicyInfo(props) {
                 </p>
               </div>
             </Grid>
-            <Grid item xs={5} className="vertical-centered">
-              <img src={manageAccessImage}/>
+            <Grid item xs={12} sm={6} className="vertical-centered">
+              {renderSectionImage(manageAccessImage, 'data management section image')}
             </Grid>
           </Grid>
         </div>
@@ -205,7 +209,7 @@ function DMSPolicyInfo(props) {
             {advantageText}
           </div>
           <Grid container spacing={10}>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <div>
                 <p>
                   Institutions can:
@@ -213,10 +217,10 @@ function DMSPolicyInfo(props) {
                 {institutionBullets.map(renderInfoBox)}
               </div>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <div>
                 <p>
-                  Researchers can...
+                  Researchers can:
                 </p>
                 {researcherBullets.map(renderInfoBox)}
               </div>
