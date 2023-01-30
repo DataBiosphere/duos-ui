@@ -2,9 +2,9 @@ import {find, getOr, isNil} from 'lodash/fp';
 import {isEmpty} from 'lodash/fp';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 
-export const findPropertyValue = (dataSet, propName, defaultVal) => {
+export const findPropertyValue = (dataset, propName, defaultVal) => {
   const defaultValue = isNil(defaultVal) ? '' : defaultVal;
-  return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties));
+  return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataset.properties));
 };
 
 export const getDataUseCodes = async (dataset) => {
@@ -20,8 +20,4 @@ export const getDataUseCodes = async (dataset) => {
       dataset.codeList = codes.join(', ');
     }
   }
-};
-
-export default {
-  findPropertyValue
 };
