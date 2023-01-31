@@ -126,10 +126,10 @@
   margin-bottom: auto !important;
 }
 
-p {
+.base-style p {
   margin-top: 10px;
 }
 
-b {
+.base-style b {
   font-weight: 600!important;
 }

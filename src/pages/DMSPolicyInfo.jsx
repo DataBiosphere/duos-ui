@@ -1,4 +1,5 @@
 import { Grid } from '@material-ui/core';
+import clsx from 'clsx';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import React from 'react';
 import homeHeaderBackground from '../images/home_header_background.png';
@@ -11,7 +12,7 @@ import shareDataImage from '../images/share_data.png';
 import manageAccessImage from '../images/duos_manages_access.png';
 import { Theme, Styles } from '../libs/theme';
 
-import './DMSPolicyInfo.css';
+import style from './DMSPolicyInfo.module.css';
 
 const styles = {
   baseStyle: {
@@ -36,7 +37,7 @@ function DMSPolicyInfo(props) {
   );
 
   const renderInfoBox = (text, index) => (
-    <div className="info-box" key={`${index}`}>
+    <div className={style['info-box']} key={`${index}`}>
       <CheckCircleIcon htmlColor="#74ae43" fontSize='large'/>
       <div>
         {text}
@@ -116,31 +117,31 @@ function DMSPolicyInfo(props) {
   }
 
   return(
-    <div className="base-style" style={{...styles.baseStyle, ...backgroundStyle}}>
-      <div className="section title-text">
-        <div className="section-text">
-          <div className="centered" style={Styles.TITLE}>
+    <div className={style['base-style']} style={{...styles.baseStyle, ...backgroundStyle}}>
+      <div className={clsx(style.section, style['title-text'])}>
+        <div className={style['section-text']}>
+          <div className={style.centered} style={Styles.TITLE}>
             Meet NIH&apos;s 2023 Data Management & Sharing (DMS) Policy requirements for your institution
           </div>
-          <div className="centered" style={Styles.SUB_HEADER}>
+          <div className={style.centered} style={Styles.SUB_HEADER}>
             An easy solution for grant compliance and research teams
           </div>
         </div>
       </div>
 
-      <div className="section subtitle-section">
+      <div className={clsx(style.section, style['subtitle-section'])}>
         <img src={subtitleImage}/>
-        <div className="section-text">
-          <div className="centered">
+        <div className={style['section-text']}>
+          <div className={style.centered}>
             {subtitleText}
           </div>
         </div>
       </div>
 
-      <div className="section store-data-section">
-        <div className="section-text">
+      <div className={clsx(style.section, style['store-data-section'])}>
+        <div className={style['section-text']}>
           <Grid container>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               <div style={Styles.TITLE}>
                 Store Data Anywhere
               </div>
@@ -148,20 +149,20 @@ function DMSPolicyInfo(props) {
                 {datastoreText}
               </div>
             </Grid>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               {renderSectionImage(datastoreImage, 'data store section image')}
             </Grid>
           </Grid>
         </div>
       </div>
 
-      <div className="section share-data-section">
-        <div className="section-text">
+      <div className={clsx(style.section, style['share-data-section'])}>
+        <div className={style['section-text']}>
           <Grid container>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               {renderSectionImage(shareDataImage, 'data sharing section image')}
             </Grid>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               <div style={Styles.TITLE}>
                 Share Data
               </div>
@@ -177,10 +178,10 @@ function DMSPolicyInfo(props) {
         </div>
       </div>
 
-      <div className="section manage-access-section">
-        <div className="section-text">
+      <div className={clsx(style.section, style['manage-access-section'])}>
+        <div className={style['section-text']}>
           <Grid container>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               <div style={Styles.TITLE}>
                 Manage Access
               </div>
@@ -196,16 +197,16 @@ function DMSPolicyInfo(props) {
                 </p>
               </div>
             </Grid>
-            <Grid item xs={12} sm={6} className="vertical-centered">
+            <Grid item xs={12} sm={6} className={style['vertical-centered']}>
               {renderSectionImage(manageAccessImage, 'data management section image')}
             </Grid>
           </Grid>
         </div>
       </div>
 
-      <div className="section advantages-section">
-        <div className="section-text">
-          <div className="centered" style={Styles.TITLE}>
+      <div className={clsx(style.section, style['advantages-section'])}>
+        <div className={style['section-text']}>
+          <div className={style.centered} style={Styles.TITLE}>
             {advantageText}
           </div>
           <Grid container spacing={10}>
