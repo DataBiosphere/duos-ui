@@ -9,6 +9,7 @@ import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellD
 import style from './DACDatasets.module.css';
 import {Storage} from '../libs/storage';
 import {filter, flow, isNil, map} from 'lodash/fp';
+import {Button} from '@mui/material';
 
 export default function DACDatasets() {
   const [datasets, setDatasets] = useState([]);
@@ -86,21 +87,18 @@ export default function DACDatasets() {
     </div>
 
     <div>
-      <button
-        id={'btn_addDataset'}
-        className={style['btn-primary-dac-datasets']}
-        style={{marginBottom: '5px'}}
-        onClick={() => history.push({pathname: 'data_submission_form'})}>
-        <span
-          className={style['add-icon']}>
+      <Button
+        className={style['add-button']}
+        onClick={() => history.push({pathname: 'data_submission_form'})}
+        variant="outlined">
+        <div style={{verticalAlign: 'center'}}>
           <span
-            className={'glyphicon glyphicon-plus-sign'}
-            style={{color: '#0948B7', background: '#ffffff', marginRight: '5px'}}
-            aria-hidden={'true'}>
-          </span>
+            aria-hidden={'true'}
+            style={{color: '#0948B7', marginRight: '5px'}}
+            className={'glyphicon glyphicon-plus-sign'}></span>
           ADD DATASET
-        </span>
-      </button>
+        </div>
+      </Button>
     </div>
     <DACDatasetsTable
       datasets={filteredList}

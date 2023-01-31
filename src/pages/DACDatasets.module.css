@@ -14,11 +14,13 @@
     padding: 10px 20px;
 }
 
-.add-icon {
-    color: #0948B7 !important;
-    background: #ffffff !important;
-    vertical-align: middle !important;
+.add-button {
+    margin-top: 1em;
     font-size: 1.2em;
+    color: #0948B7;
+    vertical-align: center;
+    border: 1px solid #0948B7;
+    border-radius: 5px;
 }
 
 .cell-data {
