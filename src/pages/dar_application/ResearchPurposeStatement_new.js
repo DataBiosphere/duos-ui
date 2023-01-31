@@ -76,13 +76,6 @@ export default function ResearchPurposeStatement(props) {
           h4({}, ['I am proposing to:']),
 
           h(ResearchPurposeRow, {
-            title: 'Develop or validate new methods for analysing/interpreting data.',
-            id: 'methods',
-            defaultValue: formData.methods,
-            onChange,
-          }),
-
-          h(ResearchPurposeRow, {
             title: 'Increase controls available for a comparison group (e.g. a case-control study).',
             id: 'controls',
             defaultValue: formData.controls,
