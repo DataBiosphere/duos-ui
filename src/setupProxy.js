@@ -52,12 +52,4 @@ module.exports = function (app) {
     })
   );
 
-  //Still need to work on this one
-  // app.use(
-  //   '/broad-duos-banner',
-  //   createProxyMiddleware({
-  //     target: 'https://storage.googleapis.com',
-  //     secure: false
-  //   })
-  // );
 };
