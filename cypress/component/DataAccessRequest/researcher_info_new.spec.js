@@ -215,7 +215,7 @@ describe('Researcher Info', () => {
     // also check the delete button on the edit form
     cy.get('#0_editCollaborator').click();
     cy.get('#0_deleteMember').click();
-    cy.get('.confirmation-modal-primary-button').click();
+    cy.get('.delete-modal-primary-button').click();
     cy.get('#0_summary').should('not.exist');
     cy.get('[dataCy=internal-lab-staff]')
       .find('.collaborator-list-component')
