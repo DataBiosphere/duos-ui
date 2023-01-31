@@ -90,7 +90,7 @@ export default function ResearchPurposeStatement(props) {
           }),
 
           h(ResearchPurposeRow, {
-            title: 'Study variation in the general population.',
+            title: 'Study variation in the general population (e.g. calling variants and/or studying their distribution).',
             id: 'population',
             defaultValue: formData.population,
             onChange,
