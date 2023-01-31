@@ -7,7 +7,7 @@ import SearchBar from '../components/SearchBar';
 import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetsTable';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES} from '../libs/utils';
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
-import '../components/dac_dataset_table/dac_dataset_table.css';
+import styles from './DACDatasets.module.css';
 import {Storage} from '../libs/storage';
 import {filter, flow, isNil, map} from 'lodash/fp';
 
@@ -98,15 +98,17 @@ export default function DACDatasets() {
     div([
       button({
         id: 'btn_addDataset',
-        className: 'btn-primary-dac-datasets',
+        className: styles['btn-primary-dac-datasets'],
         style: {marginBottom: '5px'},
         onClick: () => history.push({pathname: 'data_submission_form'}),
       }, [
-        span({
-          className: 'add-icon glyphicon glyphicon-plus-sign ',
-          style: {color: '#0948B7', background: '#ffffff', marginRight: '5px'},
-          'aria-hidden': 'true'
-        }),
+        span({className: styles['add-icon']}, [
+          span({
+            className: 'glyphicon glyphicon-plus-sign',
+            style: {color: '#0948B7', background: '#ffffff', marginRight: '5px'},
+            'aria-hidden': 'true'
+          }),
+        ]),
         'ADD DATASET'
       ])
     ]),

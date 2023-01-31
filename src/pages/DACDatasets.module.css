@@ -8,7 +8,7 @@
     cursor: pointer;
     text-align: center;
     flex: 1;
-    margin: 20px 0px 20px 16px;
+    margin: 20px 0 20px 16px;
     color: #0948B7;
     background-color: #FFFFFFFF;
     padding: 10px 20px;
@@ -23,7 +23,7 @@
 
 .cell-data {
     display: flex;
-    alignItems: center;
+    align-items: center;
     margin: 10px 10px 10px 10px;
     border-spacing: 10px;
     overflow: hidden;

@@ -1,6 +1,7 @@
 import {button, div, h} from 'react-hyperscript-helpers';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
+import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
 import { findPropertyValue, getDataUseCodes } from '../../utils/DatasetUtils';
 import {span} from 'react-hyperscript-helpers';
@@ -13,7 +14,7 @@ export const consoleTypes = {
 export function duosIdCellData({dataset, label='duosIdCellData'}) {
   return {
     data: div({
-      className: 'cell-data',
+      className: style['cell-data'],
     }, [h(Link, {to: `dataset_statistics/${dataset.dataSetId}`}, [dataset.datasetIdentifier])]),
     value: dataset.datasetIdentifier,
     id: dataset.dataSetId,
@@ -26,7 +27,7 @@ export function dataSubmitterCellData({dataset, label='dataSubmitterCellData'}) 
   const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
   return {
     data: div({
-      className: 'cell-data',
+      className: style['cell-data'],
     }, dataSubmitter),
     value: dataSubmitter,
     id: dataset.dataSetId,
@@ -39,7 +40,7 @@ export function datasetNameCellData({dataset, label='datasetNameCellData'}) {
   const datasetName = findPropertyValue(dataset, 'Dataset Name');
   return {
     data: div({
-      className: 'cell-data',
+      className: style['cell-data'],
     }, [h(Link, {to: `dataset_registration/${dataset.dataSetId}`}, [datasetName])]),
     value: datasetName,
     id: dataset.dataSetId,
@@ -52,7 +53,7 @@ export function dataCustodianCellData({dataset, label='dataCustodianCellData'}) 
   const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
   return {
     data: div({
-      className: 'cell-data',
+      className: style['cell-data'],
     }, dataCustodian),
     value: dataCustodian,
     id: dataset.dataSetId,
@@ -65,7 +66,7 @@ export function dataUseCellData({dataset, label='dataUseCellData'}) {
   getDataUseCodes(dataset);
   return {
     data: div({
-      className: 'cell-data',
+      className: style['cell-data'],
     }, dataset.codeList),
     value: dataset.codeList,
     id: dataset.dataSetId,
@@ -102,14 +103,14 @@ export function statusCellData({dataset, label='statusCellData'}) {
       isRendered: true,
       disabled: false,
       onClick: () => updateApprovalStatus(true),
-      className: 'btn-primary-dac-datasets'
+      className: style['btn-primary-dac-datasets']
     }, ['YES']),
     button({
       id: 'btn_rejectDataset',
       isRendered: true,
       disabled: false,
       onClick: () => updateApprovalStatus(false),
-      className: 'btn-primary-dac-datasets'
+      className: style['btn-primary-dac-datasets']
     }, ['NO'])
   ]);
 

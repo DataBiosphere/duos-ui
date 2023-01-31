@@ -8,7 +8,6 @@ import cellData from './DACDatasetTableCellData';
 import {isNil} from 'lodash/fp';
 import {goToPage as updatePage, recalculateVisibleTable} from '../../libs/utils';
 import {useCallback} from 'react';
-import './dac_dataset_table.css';
 
 export const styles = {
   baseStyle: {
