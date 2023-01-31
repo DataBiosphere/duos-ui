@@ -289,6 +289,12 @@ export const DataSet = {
     return await res.json();
   },
 
+  registerDataset: async (registration) => {
+    const url = `${await getApiUrl()}/api/dataset/v3`;
+    const res = axios.post(url, registration, Config.multiPartOpts());
+    return await res.data;
+  },
+
   getDatasets: async () => {
     const url = `${await getApiUrl()}/api/dataset`;
     const res = await fetchOk(url, Config.authOpts());
