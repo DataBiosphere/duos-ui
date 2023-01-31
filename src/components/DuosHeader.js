@@ -155,9 +155,9 @@ const NavigationTabsComponent = (props) => {
   return (div({
     className: `navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`
   }, [
+    makeNotifications(),
     ul({ className: 'navbar-main' }, [
       div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
-        makeNotifications(),
         h(Link, {
           isRendered: orientation === 'horizontal',
           id: 'link_logo',
