@@ -1,5 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {button, div, h, img, span} from 'react-hyperscript-helpers';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {DAC} from '../libs/ajax';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
@@ -7,7 +6,7 @@ import SearchBar from '../components/SearchBar';
 import {DACDatasetsTable, DACDatasetTableColumnOptions} from '../components/dac_dataset_table/DACDatasetsTable';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROLES} from '../libs/utils';
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
-import styles from './DACDatasets.module.css';
+import style from './DACDatasets.module.css';
 import {Storage} from '../libs/storage';
 import {filter, flow, isNil, map} from 'lodash/fp';
 
@@ -48,82 +47,74 @@ export default function DACDatasets() {
     init();
   }, []);
 
-  return div({style: Styles.PAGE}, [
-    div({
-      style: {
+  return <div style={Styles.PAGE}>
+    <div
+      style={{
         display: 'flex',
         justifyContent: 'space-between',
         width: '112%',
         marginLeft: '-6%',
         padding: '0 2.5%'
-      }
-    }, [
-      div(
-        {className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION},
-        [
-          div({style: Styles.ICON_CONTAINER}, [
-            img({
-              id: 'lock-icon',
-              src: lockIcon,
-              style: Styles.HEADER_IMG,
-            }),
-          ]),
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({
-              style: {
-                fontFamily: 'Montserrat',
-                fontWeight: 600,
-                fontSize: '2.8rem'
-              }
-            }, [
-              `My DAC's Datasets`,
-            ]),
-            div(
-              {
-                style: {
-                  fontFamily: 'Montserrat',
-                  fontSize: '1.6rem'
-                },
-              },
-              ['View the status of datasets submitted to your Data Access Committee']
-            ),
-          ]),
-        ]
-      ),
-      h(SearchBar, {
-        handleSearchChange,
-        searchRef,
-      }),
-    ]),
-    div([
-      button({
-        id: 'btn_addDataset',
-        className: styles['btn-primary-dac-datasets'],
-        style: {marginBottom: '5px'},
-        onClick: () => history.push({pathname: 'data_submission_form'}),
-      }, [
-        span({className: styles['add-icon']}, [
-          span({
-            className: 'glyphicon glyphicon-plus-sign',
-            style: {color: '#0948B7', background: '#ffffff', marginRight: '5px'},
-            'aria-hidden': 'true'
-          }),
-        ]),
-        'ADD DATASET'
-      ])
-    ]),
-    h(DACDatasetsTable, {
-      datasets: filteredList,
-      columns: [
+      }}>
+      <div
+        className={'left-header-section'}
+        style={Styles.LEFT_HEADER_SECTION}>
+        <div
+          style={Styles.ICON_CONTAINER}>
+          <img
+            alt={'Lock Icon'}
+            id={'lock-icon'}
+            src={lockIcon}
+            style={Styles.HEADER_IMG}/>
+        </div>
+        <div
+          style={Styles.HEADER_CONTAINER}>
+          <div
+            style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem'}}>
+            My DAC&apos;s Datasets
+          </div>
+          <div
+            style={{fontFamily: 'Montserrat', fontSize: '1.6rem'}}>
+            View the status of datasets submitted to your Data Access Committee
+          </div>
+        </div>
+      </div>
+
+      <SearchBar
+        handleSearchChange={handleSearchChange}
+        searchRef={searchRef}/>
+    </div>
+
+    <div>
+      <button
+        id={'btn_addDataset'}
+        className={style['btn-primary-dac-datasets']}
+        style={{marginBottom: '5px'}}
+        onClick={() => history.push({pathname: 'data_submission_form'})}>
+        <span
+          className={style['add-icon']}>
+          <span
+            className={'glyphicon glyphicon-plus-sign'}
+            style={{color: '#0948B7', background: '#ffffff', marginRight: '5px'}}
+            aria-hidden={'true'}>
+          </span>
+          ADD DATASET
+        </span>
+      </button>
+    </div>
+    <DACDatasetsTable
+      datasets={filteredList}
+      columns={[
         DACDatasetTableColumnOptions.DUOS_ID,
         DACDatasetTableColumnOptions.DATA_SUBMITTER,
         DACDatasetTableColumnOptions.DATASET_NAME,
         DACDatasetTableColumnOptions.DATA_CUSTODIAN,
         DACDatasetTableColumnOptions.DATA_USE,
         DACDatasetTableColumnOptions.STATUS
-      ],
-      isLoading,
-      consoleType: consoleTypes.CHAIR,
-    }),
-  ]);
+      ]}
+      isLoading={isLoading}
+      consoleType={consoleTypes.CHAIR}
+    />
+  </div>;
+
 }
