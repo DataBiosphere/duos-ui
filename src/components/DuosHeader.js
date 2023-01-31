@@ -68,8 +68,8 @@ const styles = {
 };
 
 const isOnlySigningOfficial = (user) => {
-  user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter)
-}
+  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
+};
 
 export const headerTabsConfig = [
   {
