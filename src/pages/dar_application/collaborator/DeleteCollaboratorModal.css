@@ -1,0 +1,55 @@
+
+.delete-modal {
+    inset: 30% 42%;
+    padding: 2%;
+    display: flex;
+    justify-content: left;
+    position: absolute;
+    height: 208px;
+    width: 480px;
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 6px 0 rgba(0,0,0,0.5);
+  }
+
+.delete-modal-header {
+    height: 24px;
+    width: 150px;
+    color: #333F52;
+    font-family: Montserrat;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 24px;
+    margin-bottom: 4%;
+    align-items: left;
+  }
+
+.delete-modal-title {
+    height: 28px;
+    width: 365px;
+    color: #333F52;
+    font-family: Montserrat;
+    font-size: 14px;
+    letter-spacing: 0;
+    line-height: 24px;
+    align-items: left;
+  }
+  
+.delete-modal-message {
+    height: 48px;
+    width: 365px;
+    color: #333F52;
+    font-family: Montserrat;
+    font-size: 14px;
+    font-style: italic;
+    letter-spacing: 0;
+    line-height: 24px;
+    align-items: left;
+  }
+
+.delete-modal-actions {
+    display: flex;
+    justify-content: left;
+    height: 41px;
+    width: 89px;
+  }

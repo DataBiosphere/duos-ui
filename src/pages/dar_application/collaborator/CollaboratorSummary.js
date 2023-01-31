@@ -1,6 +1,7 @@
+import React from 'react';
 import { a, h, div, span } from 'react-hyperscript-helpers';
 import { useState } from 'react';
-import ConfirmationModal from '../../../components/modals/ConfirmationModal';
+import DeleteCollaboratorModal from './DeleteCollaboratorModal'
 
 export const CollaboratorSummary = (props) => {
   const {
@@ -8,9 +9,9 @@ export const CollaboratorSummary = (props) => {
     index
   } = props;
 
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const closeConfirmation = () => {
-    setShowConfirmationModal(false);
+  const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
+  const closeDelete = () => {
+    setShowDeleteCollaboratorModal(false);
   };
 
   return div({}, [
@@ -84,7 +85,7 @@ export const CollaboratorSummary = (props) => {
         a({
           id: index+'_deleteMember',
           style: { marginLeft: 10 },
-          onClick: () => { setShowConfirmationModal(true), props.toggleDeleteBool(false); },
+          onClick: () => { setShowDeleteCollaboratorModal(true), props.toggleDeleteBool(false); },
         }, [
           span({
             className: 'glyphicon glyphicon-trash collaborator-delete-icon',
@@ -96,12 +97,13 @@ export const CollaboratorSummary = (props) => {
             }
           }),
         ]),
-        // Delete Confirmation Modal
-        h(ConfirmationModal, {
-          showConfirmation: showConfirmationModal,
-          closeConfirmation: closeConfirmation,
-          title: 'Delete entry?',
-          message: 'Are you sure you want to delete this entry?',
+        // Delete Modal
+        h(DeleteCollaboratorModal, {
+          showDelete: showDeleteCollaboratorModal,
+          closeDelete: closeDelete,
+          header: 'Delete Entry',
+          title:<div>Are you sure you want to delete <strong>{collaborator.name}</strong>?</div>,
+          message: <div><i>This action is permanent and cannot be undone.</i></div>,
           onConfirm: () => props.deleteCollaborator(),
         })
       ]),

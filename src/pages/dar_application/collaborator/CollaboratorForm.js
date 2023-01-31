@@ -1,3 +1,4 @@
+import React from 'react';
 import { a, div, h, h2, span, p } from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../../../components/forms/forms';
 import { useEffect, useState } from 'react';
@@ -5,7 +6,7 @@ import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
 import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
-import  ConfirmationModal  from '../../../components/modals/ConfirmationModal';
+import DeleteCollaboratorModal from './DeleteCollaboratorModal'
 
 export default function CollaboratorForm (props) {
   const {
@@ -20,7 +21,7 @@ export default function CollaboratorForm (props) {
   const [approverStatus, setApproverStatus] = useState('');
   const [uuid, setUuid] = useState('');
   const [collaboratorValidationErrors, setCollaboratorValidationErrors] = useState([]);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
 
   useEffect(() => {
     if (!isEmpty(collaborator)) {
@@ -40,8 +41,8 @@ export default function CollaboratorForm (props) {
     props.updateEditState(false);
   };
 
-  const closeConfirmation = () => {
-    setShowConfirmationModal(false);
+  const closeDelete = () => {
+    setShowDeleteCollaboratorModal(false);
   };
 
   return div({
@@ -138,7 +139,7 @@ export default function CollaboratorForm (props) {
         a({
           id: index+'_deleteMember',
           isRendered: !isNil(props.collaborator) && !props.deleteMode,
-          onClick: () => { setShowConfirmationModal(true), props.toggleDeleteBool(false); },
+          onClick: () => { setShowDeleteCollaboratorModal(true), props.toggleDeleteBool(false); },
           style: { verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }
         }, [
           span({
@@ -172,12 +173,13 @@ export default function CollaboratorForm (props) {
           role: 'button',
           onClick: () => props.updateEditState(false)
         },['Cancel']),
-        // Delete Confirmation Modal
-        h(ConfirmationModal, {
-          showConfirmation: showConfirmationModal,
-          closeConfirmation: closeConfirmation,
-          title: 'Delete entry?',
-          message: 'Are you sure you want to delete this entry?',
+        // Delete Modal
+        h(DeleteCollaboratorModal, {
+          showDelete: showDeleteCollaboratorModal,
+          closeDelete: closeDelete,
+          header: 'Delete Entry',
+          title:<div>Are you sure you want to delete <strong>{name}</strong>?</div>,
+          message: <div><i>This action is permanent and cannot be undone.</i></div>,
           onConfirm: () => props.deleteCollaborator(),
         }),
       ]),
