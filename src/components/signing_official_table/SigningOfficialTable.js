@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles, Theme } from '../../libs/theme';
 import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
@@ -369,45 +369,59 @@ export default function SigningOfficialTable(props) {
 
   const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
 
-  return h(Fragment, {}, [
-    div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'} }, [
-      div({ style: Styles.LEFT_HEADER_SECTION }, [
-        div({ style: { ...Styles.ICON_CONTAINER, textAlign: 'center' } }, [
-          img({
-            id: 'user-icon',
-            src: userIcon,
-          }),
-        ]),
-        div({ style: { ...Styles.HEADER_CONTAINER , marginRight: 15 }}, [
-          div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, ['Researchers',]),
-          div({
-            style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' } }, [
+      div(
+        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
+        [
+          div({ style: Styles.ICON_CONTAINER, textAlign: 'center'  }, [
+            img({
+              id: 'user-icon',
+              src: userIcon,
+              style: Styles.HEADER_IMG,
             }),
-          },[
-            'My Institution\'s Researchers. Issue or Remove Researcher privileges below. ',
-            a({
-              rel: 'noopener noreferrer',
-              href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
-              target: '_blank',
-              id: 'so-console-info-link'},
-            ['Click Here for more information'])
-          ])
-        ]),
-      ]),
+          ]),
+          div({ style: Styles.HEADER_CONTAINER, marginRight: 15 }, [
+            div({ style: {
+              marginTop: '0',
+              fontFamily: 'Montserrat',
+              fontWeight: 600,
+              fontSize: '2.8rem'
+            } }, [
+              `My Institution's Researchers`,
+            ]),
+            div(
+              {
+                style: {
+                  fontFamily: 'Montserrat',
+                  fontSize: '1.6rem'
+                },
+              },[
+                'Issue or Remove Library Card privileges to allow researchers to submit DARs.',
+                a({
+                  rel: 'noopener noreferrer',
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
+                  target: '_blank',
+                  id: 'so-console-info-link'},
+                ['i'])]
+            ),
+          ]),
+        ]
+      ),
+
       h(SearchBar, { handleSearchChange, searchRef }),
-      div({style: { marginLeft: 15 }}, [
+      div({ style: {marginLeft: 15} }, [
         h(SimpleButton, {
           onClick: () => showModalOnClick(),
           baseColor: Theme.palette.secondary,
           label: 'Add New Researcher',
           additionalStyle: {
-            width: '26rem',
-            padding: '4% 10%',
+            width: '23rem',
+            padding: '4% 1%',
             fontWeight: '600'
-          }
+          },
         }),
-      ])
+      ]),
     ]),
     h(SimpleTable, {
       isLoading,
