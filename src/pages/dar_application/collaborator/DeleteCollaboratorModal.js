@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import CloseIconComponent from '../../../components/CloseIconComponent';
@@ -23,7 +23,7 @@ const DeleteModal = (props) => {
     borderColor: duosBlue,
     '&:hover': {
       borderColor: duosBlueHover,
-      color: duosBlueHover
+      color: duosBlueHover,
     },
   }));
 
