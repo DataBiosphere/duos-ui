@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles, Theme } from '../../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
@@ -343,52 +343,51 @@ export default function DataCustodianTable(props) {
 
   const dpaContent = ScrollableMarkdownContainer({markdown: DpaMarkdown});
 
-  return h(Fragment, {}, [
-    div(
-      {
-        style: {
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-        },
-      },
-      [
-        div({ style: Styles.LEFT_HEADER_SECTION }, [
-          div({ style: { ...Styles.ICON_CONTAINER, textAlign: 'center' } }, [
-            img({
-              id: 'user-icon',
-              src: userIcon,
-            }),
-          ]),
-          div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, [
-              'Data Submitters',
-            ]),
-            div(
-              {
-                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-                  fontSize: '16px',
-                }),
-              },
-              [
-                'Your Institution\'s Data Submitters. Issue or remove Data Submitter privileges below.',
-              ]
-            ),
-          ]),
-        ]),
-        h(SearchBar, { handleSearchChange, searchRef }),
-        div({ style: {} }, [
-          h(SimpleButton, {
-            onClick: () => showModalOnClick(),
-            baseColor: Theme.palette.secondary,
-            label: 'Add New Data Submitter',
-            additionalStyle: {
-              width: '20rem',
-            },
+  return div({ style: Styles.PAGE }, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
+      div({ className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION }, [
+        div({ style: { ...Styles.ICON_CONTAINER } }, [
+          img({
+            id: 'user-icon',
+            src: userIcon,
+            style: Styles.HEADER_IMG,
           }),
         ]),
-      ]
-    ),
+        div({ style: Styles.HEADER_CONTAINER }, [
+          div({ style: {
+            fontFamily: 'Montserrat',
+            fontWeight: 600,
+            fontSize: '2.8rem'
+          } }, [
+            'My Institution’s Data Submitters',
+          ]),
+          div(
+            {
+              style: {
+                fontFamily: 'Montserrat',
+                fontSize: '1.6rem'
+              },
+            },
+            [
+              'Issue or remove Data Submitter privileges.',
+            ]
+          ),
+        ]),
+      ]),
+      h(SearchBar, { handleSearchChange, searchRef }),
+      div({style: { marginLeft: 20, marginTop: 50, display: 'flex', justifyContent: 'space-between' }}, [
+        h(SimpleButton, {
+          onClick: () => showModalOnClick(),
+          baseColor: Theme.palette.secondary,
+          label: 'Add New Data Submitter',
+          additionalStyle: {
+            width: '26rem',
+            padding: '4% 1%',
+            fontWeight: '600'
+          }
+        }),
+      ])
+    ]),
     h(SimpleTable, {
       isLoading,
       rowData: processResearcherRowData(visibleResearchers),
