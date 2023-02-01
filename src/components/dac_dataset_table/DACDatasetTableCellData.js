@@ -1,12 +1,10 @@
 import React from 'react';
-import {button, div, h} from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import {Link} from 'react-router-dom';
-import {isNil} from 'lodash/fp';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import { findPropertyValue, getDataUseCodes } from '../../utils/DatasetUtils';
-import {span} from 'react-hyperscript-helpers';
-import {DAC} from '../../libs/ajax';
+import {findPropertyValue, getDataUseCodes} from '../../utils/DatasetUtils';
+import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 
 export const consoleTypes = {
   CHAIR: 'chair'
@@ -77,53 +75,8 @@ export function dataUseCellData({dataset, label='dataUseCellData'}) {
 }
 
 export function statusCellData({dataset, label='statusCellData'}) {
-  const updateApprovalStatus = async (status) => {
-    await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, status);
-  };
-
-  const dacAccepted = <div
-    style={{color: '#1ea371', fontWeight: 'bold'}}>
-    <span>ACCEPTED</span>
-    <Link
-      style={{marginLeft: '15px'}}
-      id={`${dataset.dataSetId}_edit`}
-      className={'glyphicon glyphicon-pencil'}
-      to={`dataset_registration/${dataset.dataSetId}`}
-    />
-  </div>;
-
-  const dacRejected = <div
-    style={{color: '#000000', fontWeight: 'bold'}}>
-    <span>REJECTED</span>
-  </div>;
-
-  const approvalActions = div({}, [
-    button({
-      id: 'btn_approveDataset',
-      isRendered: true,
-      disabled: false,
-      onClick: () => updateApprovalStatus(true),
-      className: style['btn-primary-dac-datasets']
-    }, ['YES']),
-    button({
-      id: 'btn_rejectDataset',
-      isRendered: true,
-      disabled: false,
-      onClick: () => updateApprovalStatus(false),
-      className: style['btn-primary-dac-datasets']
-    }, ['NO'])
-  ]);
-
-  const status = (!isNil(dataset?.dacApproval))
-    ? dataset.dacApproval
-      ? dacAccepted
-      : dacRejected
-    : approvalActions;
-
-
   return {
-    data: <div style={{display: 'flex', alignItems: 'center'}}>{status}</div>,
-    value: status,
+    data: <DACDatasetApprovalStatus dataset={dataset}/>, //<div style={{display: 'flex', alignItems: 'center'}}>{status}</div>,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.status },
     label
