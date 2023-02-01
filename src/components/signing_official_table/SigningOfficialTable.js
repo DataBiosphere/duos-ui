@@ -379,7 +379,13 @@ export default function SigningOfficialTable(props) {
           }),
         ]),
         div({ style: { ...Styles.HEADER_CONTAINER , marginRight: 15 }}, [
-          div({ style: { ...Styles.SUB_HEADER, marginTop: '0', fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem'} }, ['My Institution\'s Researchers',]),
+          div({ style: { ...Styles.SUB_HEADER, 
+            marginTop: '0', 
+            fontFamily: 'Montserrat', 
+            fontWeight: 600, 
+            fontSize: '2.8rem'} 
+          }, [
+            'My Institution\'s Researchers',]),
           div({
             style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
