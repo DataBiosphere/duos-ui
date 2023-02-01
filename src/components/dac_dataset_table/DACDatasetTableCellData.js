@@ -1,3 +1,4 @@
+import React from 'react';
 import {button, div, h} from 'react-hyperscript-helpers';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
@@ -80,22 +81,21 @@ export function statusCellData({dataset, label='statusCellData'}) {
     await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, status);
   };
 
-  const dacAccepted = div({
-    style: {color: '#1ea371', fontWeight: 'bold'}
-  },[
-    span('ACCEPTED'),
-    h(Link,{
-      style: {marginLeft: '15px'},
-      id: `${dataset.dataSetId}_edit`,
-      className: 'glyphicon glyphicon-pencil',
-      isRendered: true,
-      to: `dataset_registration/${dataset.dataSetId}`
-    })
-  ]);
+  const dacAccepted = <div
+    style={{color: '#1ea371', fontWeight: 'bold'}}>
+    <span>ACCEPTED</span>
+    <Link
+      style={{marginLeft: '15px'}}
+      id={`${dataset.dataSetId}_edit`}
+      className={'glyphicon glyphicon-pencil'}
+      to={`dataset_registration/${dataset.dataSetId}`}
+    />
+  </div>;
 
-  const dacRejected = div({
-    style: {color: '#000000', fontWeight: 'bold'}
-  },[span('REJECTED')]);
+  const dacRejected = <div
+    style={{color: '#000000', fontWeight: 'bold'}}>
+    <span>REJECTED</span>
+  </div>;
 
   const approvalActions = div({}, [
     button({
@@ -118,16 +118,11 @@ export function statusCellData({dataset, label='statusCellData'}) {
     ? dataset.dacApproval
       ? dacAccepted
       : dacRejected
-    : approvalActions; // todo: add buttons and actions
+    : approvalActions;
 
 
   return {
-    data: div({
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-      }
-    }, [status]),
+    data: <div style={{display: 'flex', alignItems: 'center'}}>{status}</div>,
     value: status,
     id: dataset.dataSetId,
     cellStyle: { width: styles.cellWidths.status },

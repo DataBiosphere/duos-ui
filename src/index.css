@@ -64,7 +64,7 @@ a {
   text-decoration: underline !important;
 }
 
-a, input, button {
+a, input {
   outline: 0 !important;
   text-decoration: none !important;
 }
