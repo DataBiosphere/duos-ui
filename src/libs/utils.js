@@ -302,25 +302,6 @@ export const outputCommaSeperatedElectionStatuses = (elections) => {
   return statuses.join(', ');
 };
 
-// Filter elections in a DAR Collection by which ones the user has votes in
-export const filterCollectionElectionsByUser = (collection, user) => {
-  const {dars} = collection;
-  // 'dars' is a map of referenceId -> full DAR object
-  const darValues = values(dars);
-  // 'elections' is a map of election id -> full Election object
-  const electionMaps = map('elections')(darValues);
-  // electionValues is a list of actual election objects
-  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
-  // Filter elections for my DACs by looking for elections with votes that have my user id
-  return filter(e => {
-    // Votes is a map of vote id -> full Vote object
-    const voteMap = getOr({}, 'votes')(e);
-    const voteUserIds = map('dacUserId')(values(voteMap));
-    // If there is a vote for this user, then this is a valid election
-    return indexOf(user.userId)(voteUserIds) >= 0;
-  })(electionValues);
-};
-
 export const getElectionDate = (election) => {
   let formattedString = '- -';
   if(election) {
