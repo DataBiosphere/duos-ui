@@ -1,5 +1,4 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
 import {findPropertyValue, getDataUseCodes} from '../../utils/DatasetUtils';
@@ -11,9 +10,7 @@ export const consoleTypes = {
 
 export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
   return {
-    data: <div className={style['cell-data']}>
-      <Link to={`dataset_statistics/${dataset.dataSetId}`}>{dataset.datasetIdentifier}</Link>
-    </div>,
+    data: <div className={style['cell-data']}>{dataset.datasetIdentifier}</div>,
     value: dataset.datasetIdentifier,
     id: dataset.dataSetId,
     cellStyle: {width: styles.cellWidths.duosId},
@@ -35,9 +32,7 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
   const datasetName = findPropertyValue(dataset, 'Dataset Name');
   return {
-    data: <div className={style['cell-data']}>
-      <Link to={`dataset_registration/${dataset.dataSetId}`}>{datasetName}</Link>
-    </div>,
+    data: <div className={style['cell-data']}>{datasetName}</div>,
     value: datasetName,
     id: dataset.dataSetId,
     cellStyle: {width: styles.cellWidths.datasetName},
