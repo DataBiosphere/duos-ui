@@ -6,7 +6,7 @@ import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
 import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
-import DeleteCollaboratorModal from './DeleteCollaboratorModal'
+import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 
 export default function CollaboratorForm (props) {
   const {

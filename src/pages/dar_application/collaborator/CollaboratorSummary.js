@@ -1,7 +1,7 @@
 import React from 'react';
 import { a, h, div, span } from 'react-hyperscript-helpers';
 import { useState } from 'react';
-import DeleteCollaboratorModal from './DeleteCollaboratorModal'
+import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 
 export const CollaboratorSummary = (props) => {
   const {
