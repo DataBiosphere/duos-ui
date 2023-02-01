@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as lodashMap, forEach as lodashForEach, isArray} from 'lodash';
 import { DAR } from './ajax';
 import {Theme } from './theme';
-import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
+import { each, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
 
 export const UserProperties = {
@@ -158,10 +158,6 @@ export const USER_ROLES = {
   signingOfficial: 'SigningOfficial',
   dataSubmitter: 'DataSubmitter',
   all: 'All'
-};
-
-export const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
 
 export const getDatasetNames = (datasets) => {
@@ -348,10 +344,6 @@ export const processElectionStatus = (election, votes, showVotes) => {
     output = capitalize(electionStatus);
   }
   return output;
-};
-
-export const calcFilteredListPosition = (index, currentPage, tableSize) => {
-  return index + ((currentPage - 1) * tableSize);
 };
 
 export const calcTablePageCount = (tableSize, filteredList) => {
