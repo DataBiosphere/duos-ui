@@ -314,7 +314,7 @@ export default function DataCustodianTable(props) {
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
     const { displayName, email, userId } = selectedResearcher;
-    const searchableKey = !isNil(userId) ? 'dacUserId' : 'email';
+    const searchableKey = !isNil(userId) ? 'userId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
     try {
