@@ -11,7 +11,9 @@ import {Storage} from '../libs/storage';
 import {filter, flow, isNil, map} from 'lodash/fp';
 import {Button} from '@mui/material';
 
-export default function DACDatasets() {
+export default function DACDatasets(props) {
+
+  const {history} = props;
   const [datasets, setDatasets] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +91,7 @@ export default function DACDatasets() {
     <div>
       <Button
         className={style['add-button']}
-        onClick={() => history.push({pathname: 'data_submission_form'})}
+        onClick={() => history.push({pathname: 'dataset_registration'})}
         variant="outlined">
         <div style={{verticalAlign: 'center', color: '#0948B7'}}>
           <span
