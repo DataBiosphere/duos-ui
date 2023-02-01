@@ -91,10 +91,10 @@ export default function DACDatasets() {
         className={style['add-button']}
         onClick={() => history.push({pathname: 'data_submission_form'})}
         variant="outlined">
-        <div style={{verticalAlign: 'center'}}>
+        <div style={{verticalAlign: 'center', color: '#0948B7'}}>
           <span
             aria-hidden={'true'}
-            style={{color: '#0948B7', marginRight: '5px'}}
+            style={{marginRight: '5px'}}
             className={'glyphicon glyphicon-plus-sign'}></span>
           ADD DATASET
         </div>
