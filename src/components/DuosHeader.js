@@ -243,7 +243,7 @@ const NavigationTabsComponent = (props) => {
           style: styles.navButton
         }, [
           div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-            'Request Help'
+            'Contact Us'
           ])
         ]),
         supportrequestModal,
@@ -425,7 +425,7 @@ class DuosHeader extends Component {
 
     const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
-    const contactUsText = isLogged ? 'Request Help': span({ style: navbarDuosText }, ['Request Help']);
+    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
       id: 'btn_applyAcces',
       style: {
