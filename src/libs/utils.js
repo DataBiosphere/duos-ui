@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as lodashMap, forEach as lodashForEach, isArray} from 'lodash';
 import { DAR } from './ajax';
 import {Theme } from './theme';
-import { each, flatMap, flatten, flow, forEach as lodashFPForEach, get, getOr, indexOf, uniq, values, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
+import { each, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
 import {getDataUseCodes} from '../utils/DatasetUtils';
 
@@ -161,10 +161,6 @@ export const USER_ROLES = {
   all: 'All'
 };
 
-export const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds));
-};
-
 export const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
   const datasetNames = datasets.map((dataset) => {
@@ -303,25 +299,6 @@ export const outputCommaSeperatedElectionStatuses = (elections) => {
   return statuses.join(', ');
 };
 
-// Filter elections in a DAR Collection by which ones the user has votes in
-export const filterCollectionElectionsByUser = (collection, user) => {
-  const {dars} = collection;
-  // 'dars' is a map of referenceId -> full DAR object
-  const darValues = values(dars);
-  // 'elections' is a map of election id -> full Election object
-  const electionMaps = map('elections')(darValues);
-  // electionValues is a list of actual election objects
-  const electionValues = flatMap((e) => { return values(e); })(electionMaps);
-  // Filter elections for my DACs by looking for elections with votes that have my user id
-  return filter(e => {
-    // Votes is a map of vote id -> full Vote object
-    const voteMap = getOr({}, 'votes')(e);
-    const voteUserIds = map('dacUserId')(values(voteMap));
-    // If there is a vote for this user, then this is a valid election
-    return indexOf(user.userId)(voteUserIds) >= 0;
-  })(electionValues);
-};
-
 export const getElectionDate = (election) => {
   let formattedString = '- -';
   if(election) {
@@ -368,10 +345,6 @@ export const processElectionStatus = (election, votes, showVotes) => {
     output = capitalize(electionStatus);
   }
   return output;
-};
-
-export const calcFilteredListPosition = (index, currentPage, tableSize) => {
-  return index + ((currentPage - 1) * tableSize);
 };
 
 export const calcTablePageCount = (tableSize, filteredList) => {
