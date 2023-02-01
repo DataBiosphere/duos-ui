@@ -3,6 +3,7 @@ import {DAC} from '../../libs/ajax';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
+import ReactTooltip from 'react-tooltip';
 import style from '../../pages/DACDatasets.module.css';
 
 export default function DACDatasetApprovalStatus(props) {
@@ -30,24 +31,36 @@ export default function DACDatasetApprovalStatus(props) {
     <span>REJECTED</span>
   </div>;
 
-  const dacUndecided = () => <div style={{display: 'flex', alignItems: 'center'}}>
+  const dacUndecided = (dataset) => <div style={{display: 'flex', alignItems: 'center'}}>
     <Button
-      id={'btn_approveDataset'}
+      data-tip
+      data-for={`approve-dataset-button-${dataset.dataSetId}`}
+      id={`btn_approveDataset-${dataset.dataSetId}`}
       onClick={() => updateApprovalStatus(true)}
       className={style['btn-primary-dac-datasets']}>
       YES
     </Button>
+    <ReactTooltip
+      place={'left'}
+      effect={'solid'}
+      id={`approve-dataset-button-${dataset.dataSetId}`}>Approve dataset for Data Access Committee</ReactTooltip>
     <Button
-      id={'btn_approveDataset'}
+      data-tip
+      data-for={`reject-dataset-button-${dataset.dataSetId}`}
+      id={`btn_rejectDataset-${dataset.dataSetId}`}
       onClick={() => updateApprovalStatus(false)}
       className={style['btn-primary-dac-datasets']}>
       NO
     </Button>
+    <ReactTooltip
+      place={'right'}
+      effect={'solid'}
+      id={`reject-dataset-button-${dataset.dataSetId}`}>Reject dataset for Data Access Committee</ReactTooltip>
   </div>;
 
   return (!isNil(dataset?.dacApproval))
     ? dataset.dacApproval
       ? dacAccepted(dataset)
       : dacRejected()
-    : dacUndecided();
+    : dacUndecided(dataset);
 }
