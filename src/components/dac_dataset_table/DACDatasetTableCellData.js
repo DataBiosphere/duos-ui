@@ -1,5 +1,4 @@
 import React from 'react';
-import {div, h} from 'react-hyperscript-helpers';
 import {Link} from 'react-router-dom';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
@@ -10,75 +9,69 @@ export const consoleTypes = {
   CHAIR: 'chair'
 };
 
-export function duosIdCellData({dataset, label='duosIdCellData'}) {
+export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
   return {
-    data: div({
-      className: style['cell-data'],
-    }, [h(Link, {to: `dataset_statistics/${dataset.dataSetId}`}, [dataset.datasetIdentifier])]),
+    data: <div className={style['cell-data']}>
+      <Link to={`dataset_statistics/${dataset.dataSetId}`}>{dataset.datasetIdentifier}</Link>
+    </div>,
     value: dataset.datasetIdentifier,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.duosId },
+    cellStyle: {width: styles.cellWidths.duosId},
     label
   };
 }
 
-export function dataSubmitterCellData({dataset, label='dataSubmitterCellData'}) {
+export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}) {
   const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
   return {
-    data: div({
-      className: style['cell-data'],
-    }, dataSubmitter),
+    data: <div className={style['cell-data']}>{dataSubmitter}</div>,
     value: dataSubmitter,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.dataSubmitter },
+    cellStyle: {width: styles.cellWidths.dataSubmitter},
     label
   };
 }
 
-export function datasetNameCellData({dataset, label='datasetNameCellData'}) {
+export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
   const datasetName = findPropertyValue(dataset, 'Dataset Name');
   return {
-    data: div({
-      className: style['cell-data'],
-    }, [h(Link, {to: `dataset_registration/${dataset.dataSetId}`}, [datasetName])]),
+    data: <div className={style['cell-data']}>
+      <Link to={`dataset_registration/${dataset.dataSetId}`}>{datasetName}</Link>
+    </div>,
     value: datasetName,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.datasetName },
+    cellStyle: {width: styles.cellWidths.datasetName},
     label
   };
 }
 
-export function dataCustodianCellData({dataset, label='dataCustodianCellData'}) {
+export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
   const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
   return {
-    data: div({
-      className: style['cell-data'],
-    }, dataCustodian),
+    data: <div className={style['cell-data']}>{dataCustodian}</div>,
     value: dataCustodian,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.dataCustodian },
+    cellStyle: {width: styles.cellWidths.dataCustodian},
     label
   };
 }
 
-export function dataUseCellData({dataset, label='dataUseCellData'}) {
+export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   getDataUseCodes(dataset);
   return {
-    data: div({
-      className: style['cell-data'],
-    }, dataset.codeList),
+    data: <div className={style['cell-data']}>{dataset.codeList}</div>,
     value: dataset.codeList,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.dataUse },
+    cellStyle: {width: styles.cellWidths.dataUse},
     label
   };
 }
 
-export function statusCellData({dataset, label='statusCellData'}) {
+export function statusCellData({dataset, label = 'statusCellData'}) {
   return {
-    data: <DACDatasetApprovalStatus dataset={dataset}/>, //<div style={{display: 'flex', alignItems: 'center'}}>{status}</div>,
+    data: <DACDatasetApprovalStatus dataset={dataset}/>,
     id: dataset.dataSetId,
-    cellStyle: { width: styles.cellWidths.status },
+    cellStyle: {width: styles.cellWidths.status},
     label
   };
 }
