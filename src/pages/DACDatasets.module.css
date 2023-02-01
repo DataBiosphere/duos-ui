@@ -14,13 +14,14 @@
     padding: 10px 20px;
 }
 
+/* Button styles are also defined in index.css - need to override those */
 .add-button {
-    margin-top: 1em;
-    font-size: 1.2em;
-    color: #0948B7;
-    vertical-align: center;
-    border: 1px solid #0948B7;
-    border-radius: 5px;
+    margin-top: 1em !important;
+    font-size: 1.2em !important;
+    color: #0948B7 !important;
+    vertical-align: center !important;
+    border: 1px solid #0948B7 !important;
+    border-radius: 5px !important;
 }
 
 .cell-data {
