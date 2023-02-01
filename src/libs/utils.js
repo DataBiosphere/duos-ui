@@ -448,13 +448,20 @@ export const getSearchFilterFunctions = () => {
       const datasetName = findDatasetPropertyValue(dataset.properties, 'Dataset Name');
       // Data Depositor == Data Custodian
       const dataCustodian = findDatasetPropertyValue(dataset.properties, 'Data Depositor');
+      // Approval status
+      const status = !isNil(dataset.dacApproval)
+        ? dataset.dacApproval
+          ? 'accepted'
+          : 'rejected'
+        : 'yes no';
       getDataUseCodes(dataset);
       const dataUse = dataset.codeList;
       return includes(term, toLower(duosId)) ||
           includes(term, toLower(dataSubmitter)) ||
           includes(term, toLower(datasetName)) ||
           includes(term, toLower(dataCustodian)) ||
-          includes(term, toLower(dataUse));
+          includes(term, toLower(dataUse)) ||
+          includes(term, toLower(status));
     }, targetList),
   };
 };
