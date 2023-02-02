@@ -1,9 +1,10 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import {findDatasetPropertyValue, findDatasetPropertyValueList, getDataUseCodes} from '../../utils/DatasetUtils';
+import {findDatasetPropertyValue, findDatasetPropertyValueList} from '../../utils/DatasetUtils';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
-import {isEmpty, join} from 'lodash/fp';
+import {isEmpty, join, map} from 'lodash/fp';
+import ReactTooltip from 'react-tooltip';
 
 export const consoleTypes = {
   CHAIR: 'chair'
@@ -61,9 +62,22 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
 }
 
 export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
-  getDataUseCodes(dataset);
+  const translationList = map((translation) => {
+    return <li key={translation.code}>{translation.code}: {translation.description}</li>;
+  })(dataset.translations);
+  const display =
+    <div className={style['cell-data']}>
+      <span data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
+      {/* TODO Tooltip not displaying ... figure that out */}
+      <ReactTooltip
+        place={'right'}
+        effect={'solid'}
+        id={`dataset-data-use-${dataset.dataSetId}`}>
+        <ul>{translationList}</ul>
+      </ReactTooltip>
+    </div>;
   return {
-    data: <div className={style['cell-data']}>{dataset.codeList}</div>,
+    data: display,
     value: dataset.codeList,
     id: dataset.dataSetId,
     cellStyle: {width: styles.cellWidths.dataUse},
