@@ -67,8 +67,7 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   })(dataset.translations);
   const display =
     <div className={style['cell-data']}>
-      <span data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
-      {/* TODO Tooltip not displaying ... figure that out */}
+      <span className={style['data-use']} data-tip data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
       <ReactTooltip
         place={'right'}
         effect={'solid'}
