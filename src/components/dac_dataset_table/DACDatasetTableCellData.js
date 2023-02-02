@@ -6,9 +6,7 @@ import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import {isEmpty, join, map} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
 
-export const consoleTypes = {
-  CHAIR: 'chair'
-};
+export const consoleTypes = { CHAIR: 'chair' };
 
 export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
   return {

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { h } from 'react-hyperscript-helpers';
+import React, { useState, useEffect } from 'react';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
@@ -147,26 +146,25 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
     [pageCount]
   );
 
-  return h(SimpleTable, {
-    isLoading,
-    rowData: visibleDatasets,
-    columnHeaders: columnHeaderData(columns),
-    styles,
-    tableSize: tableSize,
-    paginationBar: h(PaginationBar, {
-      pageCount,
-      currentPage,
-      tableSize,
-      goToPage,
-      changeTableSize,
-    }),
-    sort,
-    onSort: (sort) => {
+  return <SimpleTable
+    isLoading={isLoading}
+    rowData={visibleDatasets}
+    columnHeaders={columnHeaderData(columns)}
+    styles={styles}
+    tableSize={tableSize}
+    paginationBar={<PaginationBar
+      pageCount={pageCount}
+      currentPage={currentPage}
+      tableSize={tableSize}
+      goToPage={goToPage}
+      changeTableSize={changeTableSize}/>}
+    sort={sort}
+    onSort={(sort) => {
       Storage.setCurrentUserSettings(storageDACDatasetSort, {
         field: columns[sort.colIndex],
         dir: sort.dir
       });
       setSort(sort);
-    }
-  });
+    }}
+  />;
 };

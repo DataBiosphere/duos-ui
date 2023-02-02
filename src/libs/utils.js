@@ -451,6 +451,7 @@ export const getSearchFilterFunctions = () => {
           ? 'accepted'
           : 'rejected'
         : 'yes no';
+      // TODO: Fix this mutation issue
       getDataUseCodes(dataset);
       const dataUse = dataset.codeList;
       return includes(term, toLower(alias)) ||

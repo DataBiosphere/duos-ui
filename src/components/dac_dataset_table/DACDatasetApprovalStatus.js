@@ -15,8 +15,7 @@ export default function DACDatasetApprovalStatus(props) {
     setDataset(updatedDataset);
   };
 
-  const dacAccepted = (dataset) => <div
-    style={{color: '#1ea371', fontWeight: 'bold'}}>
+  const dacAccepted = (dataset) => <div style={{color: '#1ea371', fontWeight: 'bold'}}>
     <span>ACCEPTED</span>
     <Link
       style={{marginLeft: '15px'}}
@@ -26,8 +25,7 @@ export default function DACDatasetApprovalStatus(props) {
     />
   </div>;
 
-  const dacRejected = () => <div
-    style={{color: '#000000', fontWeight: 'bold'}}>
+  const dacRejected = () => <div style={{color: '#000000', fontWeight: 'bold'}}>
     <span>REJECTED</span>
   </div>;
 
