@@ -439,7 +439,8 @@ export const getSearchFilterFunctions = () => {
       })(targetList);
     },
     datasets: (term, targetList) => filter(dataset => {
-      const duosId = dataset.alias;
+      const alias = dataset.alias;
+      const identifier = dataset.datasetIdentifier;
       const dataSubmitter = findDatasetPropertyValue(dataset.properties, 'Data Submitter');
       const datasetName = findDatasetPropertyValue(dataset.properties, 'Dataset Name');
       const dataDepositor = findDatasetPropertyValue(dataset.properties, 'Data Depositor');
@@ -452,7 +453,8 @@ export const getSearchFilterFunctions = () => {
         : 'yes no';
       getDataUseCodes(dataset);
       const dataUse = dataset.codeList;
-      return includes(term, toLower(duosId)) ||
+      return includes(term, toLower(alias)) ||
+          includes(term, toLower(identifier)) ||
           includes(term, toLower(dataSubmitter)) ||
           includes(term, toLower(datasetName)) ||
           includes(term, toLower(dataDepositor)) ||
