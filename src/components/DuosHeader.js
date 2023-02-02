@@ -67,6 +67,10 @@ const styles = {
   }
 };
 
+const isOnlySigningOfficial = (user) => {
+  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
+};
+
 export const headerTabsConfig = [
   {
     label: 'Admin Console',
@@ -131,7 +135,7 @@ export const headerTabsConfig = [
       { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'DAR Requests', link: '/researcher_console' }
     ],
-    isRendered: (user) => user.isResearcher
+    isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }
 ];
 
