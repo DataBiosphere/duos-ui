@@ -1,8 +1,9 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import {findPropertyValue, getDataUseCodes} from '../../utils/DatasetUtils';
+import {findPropertyValue, findPropertyValueList, getDataUseCodes} from '../../utils/DatasetUtils';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
+import {isEmpty, join} from 'lodash/fp';
 
 export const consoleTypes = {
   CHAIR: 'chair'
@@ -19,10 +20,14 @@ export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
 }
 
 export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}) {
-  const dataSubmitter = findPropertyValue(dataset, 'Data Depositor');
+  // We need an update to the dac-dataset API to get the data submitter value.
+  // The Data Submitter is always pre-populated with the user who originally created the dataset.
+  // See https://broadworkbench.atlassian.net/browse/DUOS-2291 for details
+  // Until that happens, we can rely on the data depositor field.
+  const dataDepositor = findPropertyValue(dataset, 'Data Depositor');
   return {
-    data: <div className={style['cell-data']}>{dataSubmitter}</div>,
-    value: dataSubmitter,
+    data: <div className={style['cell-data']}>{dataDepositor}</div>,
+    value: dataDepositor,
     id: dataset.dataSetId,
     cellStyle: {width: styles.cellWidths.dataSubmitter},
     label
@@ -41,10 +46,14 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 }
 
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
-  const dataCustodian = findPropertyValue(dataset, 'Data Depositor');
+  // Newer datasets have a list of data custodian emails.
+  // Older datasets may or may not have a data depositor
+  const dataCustodians = findPropertyValueList(dataset, 'Data Custodian Email');
+  const dataDepositor = findPropertyValue(dataset, 'Data Depositor');
+  const displayValue = isEmpty(dataCustodians) ? dataDepositor : join(', ')(dataCustodians);
   return {
-    data: <div className={style['cell-data']}>{dataCustodian}</div>,
-    value: dataCustodian,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
     id: dataset.dataSetId,
     cellStyle: {width: styles.cellWidths.dataCustodian},
     label

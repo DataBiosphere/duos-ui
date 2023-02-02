@@ -7,6 +7,11 @@ export const findPropertyValue = (dataset, propName, defaultVal) => {
   return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataset.properties));
 };
 
+export const findPropertyValueList = (dataset, propName, defaultVal) => {
+  const defaultValue = isNil(defaultVal) ? [] : defaultVal;
+  return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataset.properties));
+};
+
 export const getDataUseCodes = async (dataset) => {
   if (isNil(dataset.codeList)) {
     if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
