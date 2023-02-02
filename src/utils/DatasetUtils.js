@@ -2,12 +2,12 @@ import {find, getOr, isNil} from 'lodash/fp';
 import {isEmpty} from 'lodash/fp';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 
-export const findPropertyValue = (dataset, propName, defaultVal) => {
+export const findDatasetPropertyValue = (dataset, propName, defaultVal) => {
   const defaultValue = isNil(defaultVal) ? '' : defaultVal;
   return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataset.properties));
 };
 
-export const findPropertyValueList = (dataset, propName, defaultVal) => {
+export const findDatasetPropertyValueList = (dataset, propName, defaultVal) => {
   const defaultValue = isNil(defaultVal) ? [] : defaultVal;
   return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataset.properties));
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import {findPropertyValue, findPropertyValueList, getDataUseCodes} from '../../utils/DatasetUtils';
+import {findDatasetPropertyValue, findDatasetPropertyValueList, getDataUseCodes} from '../../utils/DatasetUtils';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import {isEmpty, join} from 'lodash/fp';
 
@@ -24,7 +24,7 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
   // The Data Submitter is always pre-populated with the user who originally created the dataset.
   // See https://broadworkbench.atlassian.net/browse/DUOS-2291 for details
   // Until that happens, we can rely on the data depositor field.
-  const dataDepositor = findPropertyValue(dataset, 'Data Depositor');
+  const dataDepositor = findDatasetPropertyValue(dataset, 'Data Depositor');
   return {
     data: <div className={style['cell-data']}>{dataDepositor}</div>,
     value: dataDepositor,
@@ -35,7 +35,7 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
 }
 
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
-  const datasetName = findPropertyValue(dataset, 'Dataset Name');
+  const datasetName = findDatasetPropertyValue(dataset, 'Dataset Name');
   return {
     data: <div className={style['cell-data']}>{datasetName}</div>,
     value: datasetName,
@@ -48,8 +48,8 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
   // Newer datasets have a list of data custodian emails.
   // Older datasets may or may not have a data depositor
-  const dataCustodians = findPropertyValueList(dataset, 'Data Custodian Email');
-  const dataDepositor = findPropertyValue(dataset, 'Data Depositor');
+  const dataCustodians = findDatasetPropertyValueList(dataset, 'Data Custodian Email');
+  const dataDepositor = findDatasetPropertyValue(dataset, 'Data Depositor');
   const displayValue = isEmpty(dataCustodians) ? dataDepositor : join(', ')(dataCustodians);
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
