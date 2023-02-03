@@ -4,8 +4,7 @@ import React from 'react';
 import {mount} from 'cypress/react';
 import DACDatasets from '../../../src/pages/DACDatasets';
 import {DatasetService} from '../../../src/utils/DatasetService';
-import {BrowserRouter} from "react-router-dom";
-import ResearcherInfo from "../../../src/pages/dar_application/ResearcherInfo_new";
+import {BrowserRouter} from 'react-router-dom';
 
 const sampleDataset = {
   'dataSetId': 1408,
