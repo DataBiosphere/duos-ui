@@ -89,7 +89,7 @@ export const headerTabsConfig = [
       { key: 'so_researchers', label: 'Researchers', link: '/signing_official_console/researchers' },
       { key: 'so_dars', label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
       { key: 'so_submitters', label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
-      { key: 'so_datsets', label: 'My Datasets', link: '/dataset_catalog'}
+      { key: 'so_datasets', label: 'My Datasets', link: '/dataset_catalog'}
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -191,7 +191,7 @@ const NavigationTabsComponent = (props) => {
           }))
         ]),
         ul({ isRendered: !isLogged, className: 'navbar-public' }, [
-          li({}, [
+          li({key: 'link_about'}, [
             a(
               {
                 id: 'link_about',
@@ -208,7 +208,7 @@ const NavigationTabsComponent = (props) => {
               ]
             ),
           ]),
-          li({}, [
+          li({key: 'link_help'}, [
             a(
               {
                 id: 'link_help',
@@ -249,6 +249,7 @@ const NavigationTabsComponent = (props) => {
         supportrequestModal,
 
         li({
+          key: 'dropdown-user',
           className: 'dropdown user-li',
           style: { listStyleType: 'none' }
         }, [
@@ -274,7 +275,7 @@ const NavigationTabsComponent = (props) => {
               top: orientation === 'vertical' ? '-100%' : '100%'
             }
           }, [
-            li([
+            li({key: 'link_profile'}, [
               h(Link, {
                 id: 'link_profile',
                 to: '/profile',
@@ -283,7 +284,7 @@ const NavigationTabsComponent = (props) => {
                 'Your Profile',
               ]),
             ]),
-            li({}, [
+            li({key: 'link_signOut'}, [
               a({ id: 'link_signOut', onClick: signOut }, [
                 'Sign out',
               ]),
