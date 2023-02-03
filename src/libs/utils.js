@@ -6,7 +6,7 @@ import { DAR } from './ajax';
 import {Theme } from './theme';
 import { each, join, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
-import {getDataUseCodes, findDatasetPropertyValueList, findDatasetPropertyValue} from '../utils/DatasetUtils';
+import {findDatasetPropertyValueList, findDatasetPropertyValue} from '../utils/DatasetUtils';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -439,6 +439,10 @@ export const getSearchFilterFunctions = () => {
       })(targetList);
     },
     datasets: (term, targetList) => filter(dataset => {
+      /**
+       * This filter function assumes that the dataset has been
+       * pre-populated with data use codes and translations
+       */
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
       const dataSubmitter = findDatasetPropertyValue(dataset.properties, 'Data Submitter');
@@ -451,8 +455,6 @@ export const getSearchFilterFunctions = () => {
           ? 'accepted'
           : 'rejected'
         : 'yes no';
-      // TODO: Fix this mutation issue
-      getDataUseCodes(dataset);
       const dataUse = dataset.codeList;
       return includes(term, toLower(alias)) ||
           includes(term, toLower(identifier)) ||

@@ -19,19 +19,18 @@ export default function DACDatasets(props) {
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
-  const filterFn = getSearchFilterFunctions().datasets;
 
   const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
     searchTerms,
     datasets,
-    filterFn,
+    getSearchFilterFunctions().datasets,
     setFilteredList
-  ), [datasets, filterFn]);
+  ), [datasets]);
 
   /**
    * Async utility to find all datasets a DAC Chairperson
    * has access to and populate their data use codes and translations
-   * @returns {Promise<void>}
+   * @returns {Promise<Awaited<{translations: ([]|[]|Awaited<unknown>[]), codeList: (string|string)}>[]>}
    */
   const populateDacDatasets = async () => {
     // Find all Chairperson DAC Ids for the user
@@ -44,7 +43,7 @@ export default function DACDatasets(props) {
     // find all datasets for all DACs the user has access to.
     const dacDatasets = (await Promise.all(dacIds.map(id => DAC.datasets(id)))).flat();
     // Enrich datasets with data use translations
-    return await Promise.all(await map(async (d) => {
+    return await Promise.all(map(async (d) => {
       const {codeList, translations} = await getDataUseTranslations(d);
       return Object.assign({}, d, {codeList: codeList, translations: translations});
     })(dacDatasets));
