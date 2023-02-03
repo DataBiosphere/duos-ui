@@ -219,9 +219,6 @@ export default function DataAccessRequest(props) {
 
         div({
           isRendered: formData.diseases === false,
-          style: {
-            marginBottom: '1.0rem',
-          }
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
@@ -230,7 +227,11 @@ export default function DataAccessRequest(props) {
             defaultValue: formData.hmb,
             onChange: primaryChange,
           }),
+        ]),
 
+        div({
+          isRendered: formData.diseases === false && formData.hmb === false,
+        }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
