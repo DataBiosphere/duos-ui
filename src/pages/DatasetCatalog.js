@@ -513,7 +513,7 @@ export default function DatasetCatalog(props) {
 
             button({
               id: 'btn_addDataset',
-              isRendered: (currentUser.isAdmin || currentUser.isChairPerson || currentUser.isMember || currentUser.isSigningOfficial ),
+              isRendered: (currentUser.isAdmin || currentUser.isChairPerson ),
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
               className: `f-right btn-primary ${color}-background search-wrapper`,
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
@@ -818,7 +818,7 @@ export default function DatasetCatalog(props) {
         div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
           button({
             id: 'btn_downloadSelection',
-            isRendered: currentUser.isAdmin || currentUser.isChairPerson,
+            isRendered: (currentUser.isAdmin || currentUser.isChairPerson || currentUser.isMember || currentUser.isSigningOfficial ),
             download: '',
             disabled: selectedDatasets.length === 0,
             onClick: download,
