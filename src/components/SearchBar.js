@@ -24,6 +24,7 @@ export default function SearchBar(props) {
 
   return div({className: 'right-header-section', style: Styles.RIGHT_HEADER_SECTION}, [
     input({
+      'data-cy': 'search-bar',
       type: 'text',
       placeholder: 'Enter search terms',
       //Styling seems to only work when defined here, variable reference doesn't work
