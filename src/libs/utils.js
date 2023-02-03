@@ -443,6 +443,7 @@ export const getSearchFilterFunctions = () => {
        * This filter function assumes that the dataset has been
        * pre-populated with data use codes and translations
        */
+      const loweredTerm = toLower(term);
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
       const dataSubmitter = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Submitter');
@@ -455,15 +456,15 @@ export const getSearchFilterFunctions = () => {
           ? 'accepted'
           : 'rejected'
         : 'yes no';
-      const dataUse = dataset.codeList;
-      return includes(term, toLower(alias)) ||
-          includes(term, toLower(identifier)) ||
-          includes(term, toLower(dataSubmitter)) ||
-          includes(term, toLower(datasetName)) ||
-          includes(term, toLower(dataDepositor)) ||
-          includes(term, toLower(join(' ')(dataCustodians))) ||
-          includes(term, toLower(dataUse)) ||
-          includes(term, toLower(status));
+      const dataUse = join(', ')(dataset.codeList);
+      return includes(loweredTerm, toLower(alias)) ||
+          includes(loweredTerm, toLower(identifier)) ||
+          includes(loweredTerm, toLower(dataSubmitter)) ||
+          includes(loweredTerm, toLower(datasetName)) ||
+          includes(loweredTerm, toLower(dataDepositor)) ||
+          includes(loweredTerm, toLower(join(' ')(dataCustodians))) ||
+          includes(loweredTerm, toLower(dataUse)) ||
+          includes(loweredTerm, toLower(status));
     }, targetList),
   };
 };

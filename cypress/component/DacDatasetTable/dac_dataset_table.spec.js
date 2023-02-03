@@ -7,7 +7,7 @@ import {DatasetService} from '../../../src/utils/DatasetService';
 import {BrowserRouter} from 'react-router-dom';
 
 const sampleDataset = {
-  'dataSetId': 1408,
+  'dataSetId': 1,
   'name': 'Name',
   'datasetName': 'Name',
   'createDate': 'Nov 22, 2022',
@@ -109,24 +109,54 @@ describe('Dac Dataset Table Component', function () {
   });
   it('Rejected dataset is visible on page', function () {
     cy.viewport(800, 500);
-    const datasetWithDataUseInfo = Object.assign(
+    const rejectedDataset = Object.assign(
       {},
       sampleDataset,
       {dacApproval: false});
-    const datasets = [datasetWithDataUseInfo];
+    const datasets = [rejectedDataset];
     cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
     mount(<DACDatasets/>);
     cy.contains('REJECTED').should('exist');
   });
   it('Accepted dataset is visible on page', function () {
     cy.viewport(800, 500);
-    const datasetWithDataUseInfo = Object.assign(
+    const approvedDataset = Object.assign(
       {},
       sampleDataset,
       {dacApproval: true});
-    const datasets = [datasetWithDataUseInfo];
+    const datasets = [approvedDataset];
     cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
     mount(WrappedDACDatasetsComponent({}));
     cy.contains('ACCEPTED').should('exist');
+  });
+  it('Datasets filter on data use', function () {
+    cy.viewport(800, 500);
+    const hmbDataset = Object.assign(
+      {},
+      sampleDataset,
+      {dataSetId: 1, codeList: ['HMB'], translations: [{code: 'HMB', description: 'HMB'}]});
+    const gruDataset = Object.assign(
+      {},
+      sampleDataset,
+      {dataSetId: 2, dataUse: {generalUse: true}, codeList: ['GRU'], translations: [{code: 'GRU', description: 'GRU'}]});
+    const datasets = [hmbDataset, gruDataset];
+    cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
+    mount(WrappedDACDatasetsComponent({}));
+    cy.contains('HMB').should('exist');
+    cy.contains('GRU').should('exist');
+    cy.get('[data-cy="search-bar"]')
+      .clear()
+      .type('HMB')
+      .then(() => {
+        cy.contains('HMB').should('exist');
+        cy.contains('GRU').should('not.exist');
+      });
+    cy.get('[data-cy="search-bar"]')
+      .clear()
+      .type('GRU')
+      .then(() => {
+        cy.contains('HMB').should('not.exist');
+        cy.contains('GRU').should('exist');
+      });
   });
 });
