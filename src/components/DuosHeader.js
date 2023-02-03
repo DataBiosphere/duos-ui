@@ -72,13 +72,13 @@ export const headerTabsConfig = [
     label: 'Admin Console',
     link: '/admin_manage_dar_collections',
     children: [
-      { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-      { label: 'Dataset Catalog', link: '/dataset_catalog' },
-      { label: 'DACs', link: '/manage_dac' },
-      { label: 'Statistics', link: '/summary_votes' },
-      { label: 'Users', link: '/admin_manage_users' },
-      { label: 'Institutions', link: '/admin_manage_institutions' },
-      { label: 'Library Cards', link: '/admin_manage_lc' }
+      { key: 'admin_dars', label: 'DAR Requests', link: '/admin_manage_dar_collections' },
+      { key: 'admin_catalog', label: 'Dataset Catalog', link: '/dataset_catalog' },
+      { key: 'admin_dacs', label: 'DACs', link: '/manage_dac' },
+      { key: 'admin_statistics', label: 'Statistics', link: '/summary_votes' },
+      { key: 'admin_users', label: 'Users', link: '/admin_manage_users' },
+      { key: 'admin_institutions', label: 'Institutions', link: '/admin_manage_institutions' },
+      { key: 'admin_library_cards', label: 'Library Cards', link: '/admin_manage_lc' }
     ],
     isRendered: (user) => user.isAdmin
   },
@@ -86,10 +86,10 @@ export const headerTabsConfig = [
     label: 'SO Console',
     link: '/signing_official_console/researchers',
     children: [
-      { label: 'Researchers', link: '/signing_official_console/researchers' },
-      { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
-      { label: 'My Datasets', link: '/dataset_catalog'}
+      { key: 'so_researchers', label: 'Researchers', link: '/signing_official_console/researchers' },
+      { key: 'so_dars', label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
+      { key: 'so_submitters', label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
+      { key: 'so_datsets', label: 'My Datasets', link: '/dataset_catalog'}
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -98,9 +98,9 @@ export const headerTabsConfig = [
     link: '/chair_console',
     search: 'chair_console',
     children: [
-      { label: 'DAR Requests', link: '/chair_console' },
-      { label: 'Datasets', link: '/dataset_catalog' },
-      { label: 'DAC Members', link: '/manage_dac' }
+      { key: 'chair_dars', label: 'DAR Requests', link: '/chair_console' },
+      { key: 'chair_datasets', label: 'Datasets', link: '/dataset_catalog' },
+      { key: 'chair_members', label: 'DAC Members', link: '/manage_dac' }
     ],
     isRendered: (user) => user.isChairPerson
   },
@@ -109,8 +109,8 @@ export const headerTabsConfig = [
     link: '/member_console',
     search: 'member_console',
     children: [
-      { label: 'DAR Requests', link: '/member_console' },
-      { label: 'Datasets', link: '/dataset_catalog' },
+      { key: 'member_dars', label: 'DAR Requests', link: '/member_console' },
+      { key: 'member_datasets', label: 'Datasets', link: '/dataset_catalog' },
     ],
     isRendered: (user) => user.isMember
   },
@@ -119,7 +119,7 @@ export const headerTabsConfig = [
     link: '/data_submission_form',
     search: 'data_submission_form',
     children: [
-      { label: 'Datasets', link: '/data_submission_form' }
+      { key: 'ds_datasets', label: 'Datasets', link: '/data_submission_form' }
     ],
     isRendered: (user) => user.isDataSubmitter
   },
@@ -128,8 +128,8 @@ export const headerTabsConfig = [
     link: '/dataset_catalog',
     search: 'dataset_catalog',
     children: [
-      { label: 'Data Catalog', link: '/dataset_catalog' },
-      { label: 'DAR Requests', link: '/researcher_console' }
+      { key: 'researcher_catalog', label: 'Data Catalog', link: '/dataset_catalog' },
+      { key: 'researcher_dars', label: 'DAR Requests', link: '/researcher_console' }
     ],
     isRendered: (user) => user.isResearcher
   }
