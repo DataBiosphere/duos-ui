@@ -563,7 +563,8 @@ class DuosHeader extends Component {
               [
                 h(NavigationTabsComponent, {
                   goToLink: this.goToLink,
-                  makeNotifications: this.makeNotifications,
+                  // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+                  makeNotifications: () => {},
                   duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
                   currentUser, isLogged, signOut: this.signOut,
                   contactUsButton, supportrequestModal,
