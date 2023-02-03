@@ -7,8 +7,8 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ReportIcon from '@material-ui/icons/Report';
 
 export const Notification = (props) => {
-  const {notificationData} = props;
-  let notificationDiv = <div style={{display: 'none'}}/>;
+  const {notificationData, key} = props;
+  let notificationDiv = <div key={key} style={{display: 'none'}}/>;
 
   if (!isEmpty(notificationData)) {
     const iconStyle = {
@@ -39,6 +39,7 @@ export const Notification = (props) => {
     // eslint-disable-next-line react/no-children-prop
     const content = <ReactMarkdown children={notificationData.message} linkTarget={'_blank'} className={'underlined'}/>;
     notificationDiv = <div
+      key={key}
       className={'row no-margin alert alert-' + notificationData.level}>
       <div style={{float: 'left'}}>{icon}</div>
       <div>{content}</div>

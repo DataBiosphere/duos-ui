@@ -181,6 +181,7 @@ const NavigationTabsComponent = (props) => {
             }
           }, tabs.map((tab, tabIndex) => {
             return h(Tab, {
+              key: `${tab.link}_${tabIndex}`,
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
               to: {
@@ -309,6 +310,7 @@ const NavigationTabsComponent = (props) => {
         onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
         return h(Tab, {
+          key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
           to: {
