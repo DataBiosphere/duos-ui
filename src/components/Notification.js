@@ -14,7 +14,7 @@ export const Notification = (props) => {
     const iconStyle = {
       marginRight: '2rem',
       marginLeft: '1rem',
-      marginBottom: '2px',
+      marginTop: '.5rem',
       height: 30,
       width: 30,
     };
