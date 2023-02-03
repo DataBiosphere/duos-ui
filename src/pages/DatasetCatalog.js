@@ -513,7 +513,7 @@ export default function DatasetCatalog(props) {
 
             button({
               id: 'btn_addDataset',
-              isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
+              isRendered: (currentUser.isAdmin || currentUser.isChairPerson || currentUser.isMember || currentUser.isSigningOfficial ),
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
               className: `f-right btn-primary ${color}-background search-wrapper`,
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
@@ -818,6 +818,7 @@ export default function DatasetCatalog(props) {
         div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
           button({
             id: 'btn_downloadSelection',
+            isRendered: currentUser.isAdmin || currentUser.isChairPerson,
             download: '',
             disabled: selectedDatasets.length === 0,
             onClick: download,
@@ -834,7 +835,8 @@ export default function DatasetCatalog(props) {
             disabled: (selectedDatasets.length === 0),
             onClick: () => exportToRequest(),
             className: `btn-primary ${color}-background search-wrapper`,
-            'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
+            'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess',
+            style: { marginBottom: '30%'}
           }, ['Apply for Access'])
         ]),
         h(TranslatedDulModal,{
