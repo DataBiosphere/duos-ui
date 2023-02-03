@@ -81,35 +81,21 @@ export default function DataAccessRequest(props) {
   };
 
   const primaryChange = ({key, value}) => {
-    if (key === 'diseases' && value === true) {
-      // in this case, reset all primary data use fields.
-      batchFormFieldChange({
-        diseases: true,
-        hmb: false,
-        poa: false,
-        other: false,
-      });
-      return;
-    }
-
-
-    const newFormData = {
-      ...formData,
-      ...{
-        [key]: value,
-      },
+    let newFormData = {
+      diseases: false,
+      hmb: false,
+      poa: false,
+      other: false,
     };
 
-    // if, after updating, 'hmb', 'diseases', and 'poa' are false, then 'other' is true.
-    if (newFormData['hmb'] === false && newFormData['diseases'] === false && newFormData['poa'] === false) {
-      batchFormFieldChange({
-        [key]: value,
-        other: true,
-      });
-      return;
+    newFormData[key] = value;
+
+    // if, after updating, 'diseases', 'hmb', and 'poa' are false, then 'other' is true.
+    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false) {
+      newFormData['other'] = true;
     }
 
-    formFieldChange({key, value});
+    batchFormFieldChange(newFormData);
   };
 
   return (
