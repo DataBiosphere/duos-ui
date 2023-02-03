@@ -6,7 +6,7 @@ import { DAR } from './ajax';
 import {Theme } from './theme';
 import { each, join, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
-import {findDatasetPropertyValueList, findDatasetPropertyValue} from '../utils/DatasetUtils';
+import {DatasetService} from '../utils/DatasetService';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -445,10 +445,10 @@ export const getSearchFilterFunctions = () => {
        */
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
-      const dataSubmitter = findDatasetPropertyValue(dataset.properties, 'Data Submitter');
-      const datasetName = findDatasetPropertyValue(dataset.properties, 'Dataset Name');
-      const dataDepositor = findDatasetPropertyValue(dataset.properties, 'Data Depositor');
-      const dataCustodians = findDatasetPropertyValueList(dataset.properties, 'Data Custodian Email');
+      const dataSubmitter = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Submitter');
+      const datasetName = DatasetService.findDatasetPropertyValue(dataset.properties, 'Dataset Name');
+      const dataDepositor = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Depositor');
+      const dataCustodians = DatasetService.findDatasetPropertyValueList(dataset.properties, 'Data Custodian Email');
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval

@@ -1,7 +1,7 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import {findDatasetPropertyValue, findDatasetPropertyValueList} from '../../utils/DatasetUtils';
+import {DatasetService} from '../../utils/DatasetService';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import {isEmpty, join, map} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
@@ -23,7 +23,7 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
   // The Data Submitter is always pre-populated with the user who originally created the dataset.
   // See https://broadworkbench.atlassian.net/browse/DUOS-2291 for details
   // Until that happens, we can rely on the data depositor field.
-  const dataDepositor = findDatasetPropertyValue(dataset, 'Data Depositor');
+  const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
   return {
     data: <div className={style['cell-data']}>{dataDepositor}</div>,
     value: dataDepositor,
@@ -34,7 +34,7 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
 }
 
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
-  const datasetName = findDatasetPropertyValue(dataset, 'Dataset Name');
+  const datasetName = DatasetService.findDatasetPropertyValue(dataset, 'Dataset Name');
   return {
     data: <div className={style['cell-data']}>{datasetName}</div>,
     value: datasetName,
@@ -47,8 +47,8 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
   // Newer datasets have a list of data custodian emails.
   // Older datasets may or may not have a data depositor
-  const dataCustodians = findDatasetPropertyValueList(dataset, 'Data Custodian Email');
-  const dataDepositor = findDatasetPropertyValue(dataset, 'Data Depositor');
+  const dataCustodians = DatasetService.findDatasetPropertyValueList(dataset, 'Data Custodian Email');
+  const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
   const displayValue = isEmpty(dataCustodians) ? dataDepositor : join(', ')(dataCustodians);
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
@@ -65,7 +65,7 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   })(dataset.translations);
   const display =
     <div className={style['cell-data']}>
-      <span className={style['data-use']} data-tip data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
+      <span className={style['data-use']} data-tip={true} data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
       <ReactTooltip
         place={'right'}
         effect={'solid'}

@@ -31,7 +31,7 @@ export default function DACDatasetApprovalStatus(props) {
 
   const dacUndecided = (dataset) => <div style={{display: 'flex', alignItems: 'center'}}>
     <Button
-      data-tip
+      data-tip={true}
       data-for={`approve-dataset-button-${dataset.dataSetId}`}
       id={`btn_approveDataset-${dataset.dataSetId}`}
       onClick={() => updateApprovalStatus(true)}
@@ -43,7 +43,7 @@ export default function DACDatasetApprovalStatus(props) {
       effect={'solid'}
       id={`approve-dataset-button-${dataset.dataSetId}`}>Approve dataset for Data Access Committee</ReactTooltip>
     <Button
-      data-tip
+      data-tip={true}
       data-for={`reject-dataset-button-${dataset.dataSetId}`}
       id={`btn_rejectDataset-${dataset.dataSetId}`}
       onClick={() => updateApprovalStatus(false)}
