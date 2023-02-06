@@ -225,7 +225,7 @@ export default function DataAccessRequest(props) {
         ]),
 
         div({
-          isRendered: formData.diseases === false && formData.hmb === false,
+          isRendered: formData.hmb === false,
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
@@ -235,20 +235,19 @@ export default function DataAccessRequest(props) {
             defaultValue: formData.poa,
             onChange: primaryChange,
           }),
-
-          div({
-            isRendered: formData.poa === false && formData.hmb === false,
-          }, [
-            h(FormField, {
-              title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
-              id: 'otherText',
-              placeholder: 'Please specify...',
-              defaultValue: formData.otherText,
-              onChange,
-            }),
-          ]),
         ]),
 
+        div({
+          isRendered: formData.poa === false,
+        }, [
+          h(FormField, {
+            title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
+            id: 'otherText',
+            placeholder: 'Please specify...',
+            defaultValue: formData.otherText,
+            onChange,
+          }),
+        ]),
 
         h(FormField, {
           id: 'nonTechRus',
