@@ -82,13 +82,21 @@ export default function DataAccessRequest(props) {
 
   const primaryChange = ({key, value}) => {
     let newFormData = {
-      diseases: false,
-      hmb: false,
-      poa: false,
-      other: false,
+      diseases: null,
+      hmb: null,
+      poa: null,
+      other: null,
     };
 
-    newFormData[key] = value;
+    // ensure that non visible fields are unselected
+    for (var key0 in newFormData) {
+      if (key === key0) {
+        newFormData[key0] = value;
+        break;
+      } else {
+        newFormData[key0] = false;
+      }
+    }
 
     // if, after updating, 'diseases', 'hmb', and 'poa' are false, then 'other' is true.
     if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false) {
@@ -210,6 +218,7 @@ export default function DataAccessRequest(props) {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
             id: 'hmb',
+            orientation: 'horizontal',
             defaultValue: formData.hmb,
             onChange: primaryChange,
           }),
@@ -222,6 +231,7 @@ export default function DataAccessRequest(props) {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
             id: 'poa',
+            orientation: 'horizontal',
             defaultValue: formData.poa,
             onChange: primaryChange,
           }),
