@@ -19,9 +19,9 @@
 }
 /*
   600 is from the material UI grid system.
-  This means that when the window is less than 600px wide (e.g. grid breakpoint = sm) then text will be center aligned
+  This means that when the window is less than 600px wide (e.g. grid breakpoint = sm) then text will be center aligned 
 */
-@media (max-width: 600px) {
+@media (max-width: 600px) { 
   .section-text {
     text-align: center;
   }
@@ -62,10 +62,10 @@
 /*
   This means that when the window is less than 800px wide (e.g. grid breakpoint = l) then the laptop image will be hidden
 */
-@media (max-width: 800px) {
+@media (max-width: 800px) { 
   .subtitle-section {
     margin-top: 0;
-
+    
   }
   .subtitle-section img {
     display: none;
@@ -80,7 +80,7 @@
   width: 100%;
 }
 /* add padding in desktop mode */
-@media (min-width: 600px) {
+@media (min-width: 600px) { 
   .store-data-section img {
     padding-left: 40px;
   }
@@ -92,7 +92,7 @@
   width: 100%;
 }
 /* add padding in desktop mode */
-@media (min-width: 600px) {
+@media (min-width: 600px) { 
   .share-data-section img {
     padding-right: 40px;
   }
@@ -106,7 +106,7 @@
   width: 100%;
 }
 /* add padding in desktop mode */
-@media (min-width: 600px) {
+@media (min-width: 600px) { 
   .manage-data-section img {
     padding-left: 40px;
   }
