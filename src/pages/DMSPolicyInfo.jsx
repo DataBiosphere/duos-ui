@@ -50,6 +50,8 @@ function DMSPolicyInfo(props) {
   let subtitleImage;
   // The text to use in the subtitle section
   let subtitleText;
+  // "Store Data ..." subtitle text
+  let storeDataTitle;
   // The image to use in the data storage section
   let datastoreImage;
   // The paragraph text to use in the data storage section
@@ -70,6 +72,7 @@ function DMSPolicyInfo(props) {
           your institutions&apos;s scientific data.
         </p>
       );
+      storeDataTitle = 'Store Data Anywhere';
       datastoreImage = storeDataImageNih;
       datastoreText = (
         <>
@@ -97,6 +100,7 @@ function DMSPolicyInfo(props) {
           ownership and gaining better visibility of your institution&apos;s scientific data.
         </p>
       );
+      storeDataTitle = 'Store Data';
       datastoreImage = storeDataImageAnvil;
       datastoreText = (
         <p>
@@ -142,7 +146,7 @@ function DMSPolicyInfo(props) {
           <Grid container>
             <Grid item xs={12} sm={6} className="vertical-centered">
               <div style={Styles.TITLE}>
-                Store Data Anywhere
+                {storeDataTitle}
               </div>
               <div>
                 {datastoreText}
