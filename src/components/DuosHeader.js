@@ -105,7 +105,7 @@ export const headerTabsConfig = [
       { label: 'DAR Requests', link: '/chair_console' },
       { label: 'Datasets', link: '/dataset_catalog' },
       { label: 'DAC Members', link: '/manage_dac' },
-      { label: 'My DAC\'s Datasets', link: '/dac_datasets' }
+      { label: "My DAC's Datasets", link: '/dac_datasets' }
     ],
     isRendered: (user) => user.isChairPerson
   },
