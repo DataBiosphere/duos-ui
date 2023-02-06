@@ -5,6 +5,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import InfoIcon from '@material-ui/icons/Info';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ReportIcon from '@material-ui/icons/Report';
+import style from './Notification.module.css';
 
 export const Notification = (props) => {
   const {notificationData, key} = props;
@@ -37,7 +38,7 @@ export const Notification = (props) => {
         break;
     }
     // eslint-disable-next-line react/no-children-prop
-    const content = <ReactMarkdown children={notificationData.message} linkTarget={'_blank'} className={'underlined'}/>;
+    const content = <ReactMarkdown children={notificationData.message} linkTarget={'_blank'} className={style['underlined']}/>;
     notificationDiv = <div
       key={key}
       className={'row no-margin alert alert-' + notificationData.level}>
