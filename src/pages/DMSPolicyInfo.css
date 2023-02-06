@@ -126,6 +126,10 @@
   margin-bottom: auto !important;
 }
 
+p {
+  margin-top: 10px;
+}
+
 b {
   font-weight: 600!important;
 }
