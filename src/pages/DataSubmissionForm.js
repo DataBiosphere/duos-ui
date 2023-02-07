@@ -1,5 +1,5 @@
 import React from 'react';
-import { set, cloneDeep } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
@@ -12,7 +12,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNil, set, omit } from 'lodash';
 
 
 export const DataSubmissionForm = () => {
@@ -42,20 +42,18 @@ export const DataSubmissionForm = () => {
     init();
   }, []);
 
-  let formData = {};
+  const formData = {};
 
-  const separateDatasetAndFiles = (formData) => {
-    const dataset = cloneDeep(formData);
-    console.log(dataset)
+  const separateRegistrationAndFiles = (formData) => {
+    const registration = cloneDeep(formData);
     const files = {};
 
-
-    if (!isEmpty(dataset.alternativeDataSharingPlanFile)) {
-      files.alternativeDataSharingPlan = dataset.alternativeDataSharingPlanFile;
-      delete dataset.alternativeDataSharingPlanFile;
+    if (!isEmpty(registration.alternativeDataSharingPlanFile)) {
+      files.alternativeDataSharingPlan = registration.alternativeDataSharingPlanFile;
+      delete registration.alternativeDataSharingPlanFile;
     }
     
-    const consentGroups = dataset['consentGroups'];
+    const consentGroups = registration['consentGroups'];
 
     for (let i = 0; i < consentGroups?.length; i++) {
       if (!isEmpty(consentGroups[i].nihInstitutionalCertificationFile)) {
@@ -64,31 +62,32 @@ export const DataSubmissionForm = () => {
       }
     }
 
-    return [dataset, files];
+    return [registration, files];
   }
 
   // return just the files from
   const getMultiPartFormData = () => {
     const multiPartFormData = new FormData();
-    const [dataset, files] = separateDatasetAndFiles(formData);
+    const [registration, files] = separateRegistrationAndFiles(formData);
 
-    multiPartFormData.append('dataset', dataset);
+    multiPartFormData.append('dataset', registration);
     for (const field of Object.keys(files)) {
       multiPartFormData.append(field, files[field]);
     }
     
     return multiPartFormData;
-  } 
+  }
 
   const submit = async () => {
     const multiPartFormData = getMultiPartFormData();
-    await DataSet.registerDataset(multiPartFormData);
-  };
+    await DataSet.registerDataset(multiPartFormData);  
+  }
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
     console.log('StudyInfo OnChange:', key, value, isValid);
-    formData = set(key, value, formData);
+
+    set(formData, key, value);
   };
 
 
