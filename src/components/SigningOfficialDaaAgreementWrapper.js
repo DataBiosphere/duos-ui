@@ -14,13 +14,17 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
     onAccept,
     children,
-    dataSubmitter = false,
   } = props;
+
+  const {
+    props: {
+      dataSubmitter,
+    },
+  } = children;
 
   const [hasAccepted, setHasAccepted] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const libraryCardText = 'Library Card';
-  const dataSubmitterText = 'Data Submitter';
+  const replacementText = dataSubmitter === true ? 'Data Submitter' : 'Library Card';
 
   useEffect(() => {
     const init = async() => {
@@ -64,13 +68,13 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     }, [
 
       h2({}, [
-        'Agree to ' + (dataSubmitter === true ? dataSubmitterText : libraryCardText) + ' Terms'
+        'Agree to ' + replacementText + ' Terms'
       ]),
 
       p({
         style: {marginBottom: '20px'}
       }, [
-        'To begin issuing ' + (dataSubmitter === true ? dataSubmitterText : libraryCardText) + 's to researchers from your institution, please review the terms of the data access agreements below and click \'I agree\' when finished.'
+        'To begin issuing ' + replacementText + 's to researchers from your institution, please review the terms of the data access agreement(s) below and click \'I agree\' when finished.'
       ]),
 
 
