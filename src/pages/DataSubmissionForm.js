@@ -12,7 +12,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-import { isEmpty, isNil, set, omit } from 'lodash';
+import { isEmpty, set } from 'lodash';
 
 
 export const DataSubmissionForm = () => {
@@ -52,18 +52,18 @@ export const DataSubmissionForm = () => {
       files.alternativeDataSharingPlan = registration.alternativeDataSharingPlanFile;
       delete registration.alternativeDataSharingPlanFile;
     }
-    
+
     const consentGroups = registration['consentGroups'];
 
     for (let i = 0; i < consentGroups?.length; i++) {
       if (!isEmpty(consentGroups[i].nihInstitutionalCertificationFile)) {
-        files['consentGroups['+i+'].nihInstitutionalCertification'] = dataset.nihInstitutionalCertificationFile;
+        files['consentGroups['+i+'].nihInstitutionalCertification'] = registration.nihInstitutionalCertificationFile;
         delete consentGroups[i].nihInstitutionalCertificationFile;
       }
     }
 
     return [registration, files];
-  }
+  };
 
   // return just the files from
   const getMultiPartFormData = () => {
@@ -74,14 +74,17 @@ export const DataSubmissionForm = () => {
     for (const field of Object.keys(files)) {
       multiPartFormData.append(field, files[field]);
     }
-    
+
     return multiPartFormData;
-  }
+  };
 
   const submit = async () => {
     const multiPartFormData = getMultiPartFormData();
-    await DataSet.registerDataset(multiPartFormData);  
-  }
+
+    DataSet.registerDataset(multiPartFormData).catch((e) => {
+      Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });
+    });
+  };
 
   const onChange = ({ key, value, isValid }) => {
     /* eslint-disable no-console */
