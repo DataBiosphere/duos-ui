@@ -2,21 +2,25 @@ import { h, h2, a, p, div, span, button } from 'react-hyperscript-helpers';
 import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
 import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
 
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import { useEffect, useState } from 'react';
 import { spinnerService } from '../libs/spinner-service';
-import { isNil } from 'lodash';
+import { isNil, isNull } from 'lodash';
 import { Styles } from '../libs/theme';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
     onAccept,
-    children
+    children,
+    dataSubmitter = false,
   } = props;
 
   const [hasAccepted, setHasAccepted] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const libraryCardText = 'Library Card';
+  const dataSubmitterText = 'Data Submitter';
 
   useEffect(() => {
     const init = async() => {
@@ -60,23 +64,27 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     }, [
 
       h2({}, [
-        'Agree to Library Card Terms',
+        'Agree to ' + (dataSubmitter === true ? dataSubmitterText : libraryCardText) + ' Terms'
       ]),
 
       p({
         style: {marginBottom: '20px'}
       }, [
-        'To begin issuing Library Cards to researchers from your institution, please review the terms of both data access agreements below and click \'I agree\' when finished.'
+        'To begin issuing ' + (dataSubmitter === true ? dataSubmitterText : libraryCardText) + 's to researchers from your institution, please review the terms of the data access agreements below and click \'I agree\' when finished.'
       ]),
 
 
-      div({style: { marginBottom: '25px', },}, [
+      div({style: { marginBottom: '25px', },}, [dataSubmitter === true ?
+        a({target: '_blank', href: DataSubmitterAgreementLink, className: 'button button-white', }, [
+          span({className: 'glyphicon glyphicon-download'}),
+          ' DUOS Data Submitter Agreement'
+        ]) :
         a({ target: '_blank', href: BroadLibraryCardAgreementLink, className: 'button button-white', }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' Broad Library Card Agreement'
         ])
       ]),
-      div({}, [
+      div({}, [dataSubmitter === true ? isNull :
         a({ target: '_blank', href: NIHLibraryCardAgreementLink, className: 'button button-white' }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' NIH Library Card Agreement'
