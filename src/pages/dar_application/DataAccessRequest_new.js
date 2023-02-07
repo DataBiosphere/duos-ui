@@ -85,6 +85,7 @@ export default function DataAccessRequest(props) {
       diseases: null,
       hmb: null,
       poa: null,
+      methods: null,
       other: null,
     };
 
@@ -98,8 +99,8 @@ export default function DataAccessRequest(props) {
       }
     }
 
-    // if, after updating, 'diseases', 'hmb', and 'poa' are false, then 'other' is true.
-    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false) {
+    // if, after updating, 'diseases', 'hmb', 'poa', and 'methods' are false, then 'other' is true.
+    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false && newFormData['methods'] === false) {
       newFormData['other'] = true;
     }
 
@@ -239,6 +240,19 @@ export default function DataAccessRequest(props) {
 
         div({
           isRendered: formData.poa === false,
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.YESNORADIOGROUP,
+            title: h4({}, 'Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?'),
+            id: 'methods',
+            orientation: 'horizontal',
+            defaultValue: formData.methods,
+            onChange: primaryChange,
+          }),
+        ]),
+
+        div({
+          isRendered: formData.methods === false,
         }, [
           h(FormField, {
             title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
