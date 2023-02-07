@@ -34,7 +34,7 @@ export default function DatasetCatalog(props) {
   // Data states
   const [currentUser, setCurrentUser] = useState({});
   const [datasetList, setDatasetList] = useState([]);
-  const [sort, setSort] = useState({ field: 'alias', dir: 1 });
+  const [sort, setSort] = useState({ field: 'datasetIdentifier', dir: 1 });
   const [numDatasetsSelected, setNumDatasetsSelected] = useState(0);
   const [selectedDatasets, setSelectedDatasets] = useState([]);
   const [datasetsOnPage, setDatasetsOnPage] = useState([]);
@@ -73,7 +73,7 @@ export default function DatasetCatalog(props) {
       row.dbGapLink =
         getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
       // Extracting these fields to make sorting easier
-      row['Dataset ID'] = row.alias;
+      row['Dataset ID'] = row.datasetIdentifier;
       row['Data Access Committee'] = findDacName(localDacs, row);
       row['Disease Studied'] = findPropertyValue(row, 'Phenotype/Indication');
       row['Principal Investigator (PI)'] = findPropertyValue(row, 'Principal Investigator(PI)');
@@ -582,7 +582,7 @@ export default function DatasetCatalog(props) {
                 tr({}, [
                   th(),
                   th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'alias', label: 'Dataset ID' })]),
+                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })]),
                   th({ className: 'cell-size' }, [getSortDisplay({ field: 'Dataset Name' })]),
                   th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Access Committee' })]),
                   th({ className: 'cell-size' }, ['Data Source']),
@@ -679,7 +679,7 @@ export default function DatasetCatalog(props) {
                         ]),
 
                         td({
-                          id: dataset.alias + '_dataset', name: 'alias',
+                          id: dataset.datasetIdentifier + '_dataset', name: 'datasetIdentifier',
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
