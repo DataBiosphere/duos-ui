@@ -56,14 +56,6 @@ a {
   cursor: pointer;
 }
 
-.underlined > p > a {
-  text-decoration: underline !important;
-}
-
-.underlined > p > a:hover {
-  text-decoration: underline !important;
-}
-
 a, input, button {
   outline: 0 !important;
   text-decoration: none !important;
