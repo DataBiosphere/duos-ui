@@ -81,35 +81,29 @@ export default function DataAccessRequest(props) {
   };
 
   const primaryChange = ({key, value}) => {
-    if (key === 'diseases' && value === true) {
-      // in this case, reset all primary data use fields.
-      batchFormFieldChange({
-        diseases: true,
-        hmb: false,
-        poa: false,
-        other: false,
-      });
-      return;
-    }
-
-
-    const newFormData = {
-      ...formData,
-      ...{
-        [key]: value,
-      },
+    let newFormData = {
+      diseases: null,
+      hmb: null,
+      poa: null,
+      other: null,
     };
 
-    // if, after updating, 'hmb', 'diseases', and 'poa' are false, then 'other' is true.
-    if (newFormData['hmb'] === false && newFormData['diseases'] === false && newFormData['poa'] === false) {
-      batchFormFieldChange({
-        [key]: value,
-        other: true,
-      });
-      return;
+    // ensure that non visible fields are unselected
+    for (var key0 in newFormData) {
+      if (key === key0) {
+        newFormData[key0] = value;
+        break;
+      } else {
+        newFormData[key0] = false;
+      }
     }
 
-    formFieldChange({key, value});
+    // if, after updating, 'diseases', 'hmb', and 'poa' are false, then 'other' is true.
+    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false) {
+      newFormData['other'] = true;
+    }
+
+    batchFormFieldChange(newFormData);
   };
 
   return (
@@ -219,39 +213,41 @@ export default function DataAccessRequest(props) {
 
         div({
           isRendered: formData.diseases === false,
-          style: {
-            marginBottom: '1.0rem',
-          }
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
             id: 'hmb',
+            orientation: 'horizontal',
             defaultValue: formData.hmb,
             onChange: primaryChange,
           }),
+        ]),
 
+        div({
+          isRendered: formData.hmb === false,
+        }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
             id: 'poa',
+            orientation: 'horizontal',
             defaultValue: formData.poa,
             onChange: primaryChange,
           }),
-
-          div({
-            isRendered: formData.poa === false && formData.hmb === false,
-          }, [
-            h(FormField, {
-              title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
-              id: 'otherText',
-              placeholder: 'Please specify...',
-              defaultValue: formData.otherText,
-              onChange,
-            }),
-          ]),
         ]),
 
+        div({
+          isRendered: formData.poa === false,
+        }, [
+          h(FormField, {
+            title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
+            id: 'otherText',
+            placeholder: 'Please specify...',
+            defaultValue: formData.otherText,
+            onChange,
+          }),
+        ]),
 
         h(FormField, {
           id: 'nonTechRus',
