@@ -21,7 +21,6 @@ export const DataSubmissionForm = () => {
   const [failedInit, setFailedInit] = useState(false);
 
   useEffect(() => {
-
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
       const institutionNames = institutions.map((institution) => institution.name);
@@ -44,6 +43,7 @@ export const DataSubmissionForm = () => {
 
   const formData = {};
 
+  // separate json object and files to send to consent
   const separateRegistrationAndFiles = (formData) => {
     const registration = cloneDeep(formData);
     const files = {};
@@ -65,7 +65,7 @@ export const DataSubmissionForm = () => {
     return [registration, files];
   };
 
-  // return just the files from
+  // compute multipart/form-data object, includes registration information and all files
   const getMultiPartFormData = () => {
     const multiPartFormData = new FormData();
     const [registration, files] = separateRegistrationAndFiles(formData);
