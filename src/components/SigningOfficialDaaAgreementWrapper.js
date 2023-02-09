@@ -13,7 +13,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
     onAccept,
     children,
-    isDataSubmitter,
+    isDataSubmitterTab,
   } = props;
 
   const [hasAccepted, setHasAccepted] = useState(null);
@@ -61,17 +61,17 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     }, [
 
       h2({}, [
-        'Agree to ' + (isDataSubmitter === true ? 'Data Submitter' : 'Library Card') + ' Terms'
+        'Agree to ' + (isDataSubmitterTab === true ? 'Data Submitter' : 'Library Card') + ' Terms'
       ]),
 
       p({
         style: {marginBottom: '20px'}
       }, [
-        'To begin issuing ' + (isDataSubmitter === true ? 'Data Submitter privilege' : 'Library Card') + 's to researchers from your institution, please review the terms of the data access agreement(s) below and click \'I agree\' when finished.'
+        'To begin issuing ' + (isDataSubmitterTab === true ? 'Data Submitter privilege' : 'Library Card') + 's to researchers from your institution, please review the terms of the data access agreement(s) below and click \'I agree\' when finished.'
       ]),
 
 
-      div({style: { marginBottom: '25px', },}, [isDataSubmitter === true ?
+      div({style: { marginBottom: '25px', },}, [isDataSubmitterTab === true ?
         a({target: '_blank', href: DataSubmitterAgreementLink, className: 'button button-white', }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' DUOS Data Submitter Agreement'
@@ -81,7 +81,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
           ' Broad Library Card Agreement'
         ])
       ]),
-      div({}, [isDataSubmitter === true ? isNull :
+      div({}, [isDataSubmitterTab === true ? isNull :
         a({ target: '_blank', href: NIHLibraryCardAgreementLink, className: 'button button-white' }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' NIH Library Card Agreement'
@@ -98,8 +98,8 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Wraps component and ensures that SO agrees to the
 // Broad and NIH agreements before proceeding to the given
 // component.
-export const ensureSoHasDaaAcknowledgement = (component, isDataSubmitter=false) => {
-  return (props) => h(SigningOfficialDaaAgreementWrapper, {isDataSubmitter}, [
+export const ensureSoHasDaaAcknowledgement = (component, isDataSubmitterTab=false) => {
+  return (props) => h(SigningOfficialDaaAgreementWrapper, {isDataSubmitterTab}, [
     h(component, props),
   ]);
 };
