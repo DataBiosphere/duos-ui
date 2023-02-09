@@ -4,8 +4,9 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as lodashMap, forEach as lodashForEach, isArray} from 'lodash';
 import { DAR } from './ajax';
 import {Theme } from './theme';
-import { each, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
+import { each, join, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
+import {DatasetService} from '../utils/DatasetService';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -436,7 +437,35 @@ export const getSearchFilterFunctions = () => {
         const match = find(isMatch)(matchable);
         return !isNil(match);
       })(targetList);
-    }
+    },
+    datasets: (term, targetList) => filter(dataset => {
+      /**
+       * This filter function assumes that the dataset has been
+       * pre-populated with data use codes and translations
+       */
+      const loweredTerm = toLower(term);
+      const alias = dataset.alias;
+      const identifier = dataset.datasetIdentifier;
+      const dataSubmitter = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Submitter');
+      const datasetName = DatasetService.findDatasetPropertyValue(dataset.properties, 'Dataset Name');
+      const dataDepositor = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Depositor');
+      const dataCustodians = DatasetService.findDatasetPropertyValueList(dataset.properties, 'Data Custodian Email');
+      // Approval status
+      const status = !isNil(dataset.dacApproval)
+        ? dataset.dacApproval
+          ? 'accepted'
+          : 'rejected'
+        : 'yes no';
+      const dataUse = join(', ')(dataset.codeList);
+      return includes(loweredTerm, toLower(alias)) ||
+          includes(loweredTerm, toLower(identifier)) ||
+          includes(loweredTerm, toLower(dataSubmitter)) ||
+          includes(loweredTerm, toLower(datasetName)) ||
+          includes(loweredTerm, toLower(dataDepositor)) ||
+          includes(loweredTerm, toLower(join(' ')(dataCustodians))) ||
+          includes(loweredTerm, toLower(dataUse)) ||
+          includes(loweredTerm, toLower(status));
+    }, targetList),
   };
 };
 
