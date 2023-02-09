@@ -187,10 +187,9 @@ export const Styles = {
       fontFamily: 'Montserrat',
     },
     CARDCONTAINER: {
-      margin: '2rem -12.5%',
+      margin: '-.75rem -12.5%',
       border: '1px solid #979797',
       backgroundColor: 'rgb(184,205,211,0.08)',
-      borderRadius: '5px',
       padding: '1rem 4rem',
       color: '#7B7B7B',
       fontFamily: 'Montserrat',
