@@ -446,8 +446,7 @@ export const getSearchFilterFunctions = () => {
       const loweredTerm = toLower(term);
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
-      const datasetName = DatasetService.findDatasetPropertyValue(dataset.properties, 'Dataset Name');
-      const allPropValues = dataset.properties.map( p => {return p.propertyValue;}).join('');
+      const allPropValues = dataset.properties.map((p) => p.propertyValue).join('');
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval
@@ -456,7 +455,6 @@ export const getSearchFilterFunctions = () => {
         : 'yes no';
       return includes(loweredTerm, toLower(alias)) ||
           includes(loweredTerm, toLower(identifier)) ||
-          includes(loweredTerm, toLower(datasetName)) ||
           includes(loweredTerm, toLower(allPropValues)) ||
           includes(loweredTerm, toLower(dataset.codeList)) ||
           includes(loweredTerm, toLower(status));
