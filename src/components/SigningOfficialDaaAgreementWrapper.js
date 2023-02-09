@@ -3,7 +3,6 @@ import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
 import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
-
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import { useEffect, useState } from 'react';
 import { spinnerService } from '../libs/spinner-service';
@@ -14,17 +13,11 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
     onAccept,
     children,
+    isDataSubmitter,
   } = props;
-
-  const {
-    props: {
-      dataSubmitter,
-    },
-  } = children;
 
   const [hasAccepted, setHasAccepted] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const replacementText = dataSubmitter === true ? 'Data Submitter' : 'Library Card';
 
   useEffect(() => {
     const init = async() => {
@@ -68,17 +61,17 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
     }, [
 
       h2({}, [
-        'Agree to ' + replacementText + ' Terms'
+        'Agree to ' + (isDataSubmitter === true ? 'Data Submitter' : 'Library Card') + ' Terms'
       ]),
 
       p({
         style: {marginBottom: '20px'}
       }, [
-        'To begin issuing ' + replacementText + 's to researchers from your institution, please review the terms of the data access agreement(s) below and click \'I agree\' when finished.'
+        'To begin issuing ' + (isDataSubmitter === true ? 'Data Submitter privilege' : 'Library Card') + 's to researchers from your institution, please review the terms of the data access agreement(s) below and click \'I agree\' when finished.'
       ]),
 
 
-      div({style: { marginBottom: '25px', },}, [dataSubmitter === true ?
+      div({style: { marginBottom: '25px', },}, [isDataSubmitter === true ?
         a({target: '_blank', href: DataSubmitterAgreementLink, className: 'button button-white', }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' DUOS Data Submitter Agreement'
@@ -88,7 +81,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
           ' Broad Library Card Agreement'
         ])
       ]),
-      div({}, [dataSubmitter === true ? isNull :
+      div({}, [isDataSubmitter === true ? isNull :
         a({ target: '_blank', href: NIHLibraryCardAgreementLink, className: 'button button-white' }, [
           span({className: 'glyphicon glyphicon-download'}),
           ' NIH Library Card Agreement'
@@ -105,8 +98,8 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Wraps component and ensures that SO agrees to the
 // Broad and NIH agreements before proceeding to the given
 // component.
-export const ensureSoHasDaaAcknowledgement = (component) => {
-  return (props) => h(SigningOfficialDaaAgreementWrapper, {}, [
+export const ensureSoHasDaaAcknowledgement = (component, isDataSubmitter=false) => {
+  return (props) => h(SigningOfficialDaaAgreementWrapper, {isDataSubmitter}, [
     h(component, props),
   ]);
 };
