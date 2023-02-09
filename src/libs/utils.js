@@ -446,24 +446,19 @@ export const getSearchFilterFunctions = () => {
       const loweredTerm = toLower(term);
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
-      const dataSubmitter = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Submitter');
       const datasetName = DatasetService.findDatasetPropertyValue(dataset.properties, 'Dataset Name');
-      const dataDepositor = DatasetService.findDatasetPropertyValue(dataset.properties, 'Data Depositor');
-      const dataCustodians = DatasetService.findDatasetPropertyValueList(dataset.properties, 'Data Custodian Email');
+      const allPropValues = dataset.properties.map( p => {return p.propertyValue;}).join('');
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval
           ? 'accepted'
           : 'rejected'
         : 'yes no';
-      const dataUse = join(', ')(dataset.codeList);
       return includes(loweredTerm, toLower(alias)) ||
           includes(loweredTerm, toLower(identifier)) ||
-          includes(loweredTerm, toLower(dataSubmitter)) ||
           includes(loweredTerm, toLower(datasetName)) ||
-          includes(loweredTerm, toLower(dataDepositor)) ||
-          includes(loweredTerm, toLower(join(' ')(dataCustodians))) ||
-          includes(loweredTerm, toLower(dataUse)) ||
+          includes(loweredTerm, toLower(allPropValues)) ||
+          includes(loweredTerm, toLower(dataset.codeList)) ||
           includes(loweredTerm, toLower(status));
     }, targetList),
   };
