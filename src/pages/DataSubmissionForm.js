@@ -1,5 +1,5 @@
 import React from 'react';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
@@ -13,23 +13,25 @@ import NIHAdministrativeInformation from '../components/data_submission/NIHAdmin
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 import { isEmpty, set } from 'lodash';
+import { Storage } from '../libs/storage';
 
 
 export const DataSubmissionForm = () => {
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
-      const institutionNames = institutions.map((institution) => institution.name);
-      setInstitutions(institutionNames);
+      setInstitutions(institutions);
     };
 
     const init = async () => {
       try {
         getAllInstitutions();
+        setUser(await Storage.getCurrentUser());
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -41,11 +43,31 @@ export const DataSubmissionForm = () => {
     init();
   }, []);
 
-  const formData = {};
+  const formData = { publicVisibility: true };
+
+  const addAdditionalFields = (formData) => {
+    formData['dataSubmitterUserId'] = user.userId;
+
+    for (const key of Object.keys(formData)) {
+      if (isNil(formData[key])) {
+        formData[key] = undefined;
+      }
+    }
+
+    formData.consentGroups.forEach((cg) => {
+      for (const key of Object.keys(cg)) {
+        if (isNil(cg[key])) {
+          cg[key] = undefined;
+        }
+      }
+    });
+
+  };
 
   // separate json object and files to send to consent
   const separateRegistrationAndFiles = (formData) => {
     const registration = cloneDeep(formData);
+    addAdditionalFields(registration);
     const files = {};
 
     if (!isEmpty(registration.alternativeDataSharingPlanFile)) {
@@ -70,7 +92,7 @@ export const DataSubmissionForm = () => {
     const multiPartFormData = new FormData();
     const [registration, files] = separateRegistrationAndFiles(formData);
 
-    multiPartFormData.append('dataset', registration);
+    multiPartFormData.append('dataset', JSON.stringify(registration));
     for (const field of Object.keys(files)) {
       multiPartFormData.append(field, files[field]);
     }

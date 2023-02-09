@@ -111,6 +111,7 @@ export const FormFieldTypes = {
   },
   NUMBER: {
     defaultValue: '',
+    inputType: 'number',
     component: formInputGeneric,
     requiredProps: [],
     optionalProps: [

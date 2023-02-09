@@ -342,7 +342,6 @@ describe('FormField - Tests', () => {
         title: 'Public Visibility',
         validators: [FormValidators.REQUIRED],
         type: FormFieldTypes.SLIDER,
-        defaultValue: true,
         description: `Please select if you would like your dataset
           to be publicly visible for the requesters to see and select
           for an access request`,

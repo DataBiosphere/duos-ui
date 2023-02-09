@@ -8,7 +8,7 @@ import { FormFieldTypes, FormField } from '../forms/forms';
 import './ds_common.css';
 
 const OPEN_ACCESS = 'Open Access';
-const CLOSED_ACCESS = 'Closed Access';
+const CLOSED_ACCESS = 'Controlled Access';
 
 const openClosedRadioOptions =     [
   {
@@ -19,7 +19,7 @@ const openClosedRadioOptions =     [
   {
     id: 'closed_access',
     name: CLOSED_ACCESS,
-    text: 'Closed Access',
+    text: 'Controlled Access',
   }
 ];
 
@@ -41,14 +41,7 @@ export const DataAccessGovernance = (props) => {
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
 
-    const groups = filteredConsentGroupsState.map(state => {
-      return {
-        ...state.consentGroup,
-        ...{
-          nihInsitutionalCertificationFileName: state?.nihInsitutionalCertificationFile?.name,
-        },
-      };
-    });
+    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
     const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
 
     onChange({key: 'consentGroups', value: groups, isValid: valid});
@@ -176,7 +169,7 @@ export const DataAccessGovernance = (props) => {
             return h(ConsentGroupForm, {
               key: idx,
               idx: idx,
-              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
+              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
               deleteConsentGroup: () => deleteConsentGroup(idx),
               updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
               startEditConsentGroup: () => startEditConsentGroup(idx),

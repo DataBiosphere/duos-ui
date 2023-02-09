@@ -74,14 +74,20 @@ export const formInputGeneric = (config) => {
   return div([
     input({
       id,
-      type: type || 'text',
+      type: type?.inputType || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue,
       readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
-      onChange: (event) => onFormInputChange(config, event.target.value),
+      onChange: (event) => {
+        if (type?.inputType === 'number') {
+          onFormInputChange(config, parseInt(event.target.value));
+        } else {
+          onFormInputChange(config, event.target.value);
+        }
+      },
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,
