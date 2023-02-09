@@ -183,6 +183,7 @@ const NavigationTabsComponent = (props) => {
             }
           }, tabs.map((tab, tabIndex) => {
             return h(Tab, {
+              key: `${tab.link}_${tabIndex}`,
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
               to: {
@@ -311,6 +312,7 @@ const NavigationTabsComponent = (props) => {
         onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
         return h(Tab, {
+          key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
           to: {
@@ -565,7 +567,8 @@ class DuosHeader extends Component {
               [
                 h(NavigationTabsComponent, {
                   goToLink: this.goToLink,
-                  makeNotifications: this.makeNotifications,
+                  // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+                  makeNotifications: () => {},
                   duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
                   currentUser, isLogged, signOut: this.signOut,
                   contactUsButton, supportrequestModal,

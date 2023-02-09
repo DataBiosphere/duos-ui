@@ -297,7 +297,7 @@ export const DataSet = {
   },
 
   getDatasets: async () => {
-    const url = `${await getApiUrl()}/api/dataset`;
+    const url = `${await getApiUrl()}/api/dataset/v2`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
