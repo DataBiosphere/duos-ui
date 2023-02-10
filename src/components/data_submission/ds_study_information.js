@@ -17,7 +17,7 @@ export default function DataSubmissionStudyInformation(props) {
     const updateUserAndFields = async () => {
       const me = await User.getMe();
       setUser(me);
-      onChange({key: 'dataSubmitterId', value: me.dacUserId, isValid: true});
+      onChange({key: 'dataSubmitterUserId', value: me.dacUserId, isValid: true});
     };
 
     const init = async () => {

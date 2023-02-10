@@ -12,15 +12,12 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-import { isEmpty, set } from 'lodash';
-import { Storage } from '../libs/storage';
 
 
 export const DataSubmissionForm = () => {
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
-  const [user, setUser] = useState({});
 
   useEffect(() => {
     const getAllInstitutions = async() => {
@@ -31,7 +28,6 @@ export const DataSubmissionForm = () => {
     const init = async () => {
       try {
         getAllInstitutions();
-        setUser(await Storage.getCurrentUser());
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -43,11 +39,10 @@ export const DataSubmissionForm = () => {
     init();
   }, []);
 
+  const formFiles = {};
   const formData = { publicVisibility: true };
 
-  const addAdditionalFields = (formData) => {
-    formData['dataSubmitterUserId'] = user.userId;
-
+  const formatForRegistration = (formData) => {
     for (const key of Object.keys(formData)) {
       if (isNil(formData[key])) {
         formData[key] = undefined;
@@ -64,37 +59,19 @@ export const DataSubmissionForm = () => {
 
   };
 
-  // separate json object and files to send to consent
-  const separateRegistrationAndFiles = (formData) => {
-    const registration = cloneDeep(formData);
-    addAdditionalFields(registration);
-    const files = {};
-
-    if (!isEmpty(registration.alternativeDataSharingPlanFile)) {
-      files.alternativeDataSharingPlan = registration.alternativeDataSharingPlanFile;
-      delete registration.alternativeDataSharingPlanFile;
-    }
-
-    const consentGroups = registration['consentGroups'];
-
-    for (let i = 0; i < consentGroups?.length; i++) {
-      if (!isEmpty(consentGroups[i].nihInstitutionalCertificationFile)) {
-        files['consentGroups['+i+'].nihInstitutionalCertification'] = registration.nihInstitutionalCertificationFile;
-        delete consentGroups[i].nihInstitutionalCertificationFile;
-      }
-    }
-
-    return [registration, files];
-  };
-
   // compute multipart/form-data object, includes registration information and all files
   const getMultiPartFormData = () => {
+    const registration = cloneDeep(formData);
+    formatForRegistration(registration);
+
     const multiPartFormData = new FormData();
-    const [registration, files] = separateRegistrationAndFiles(formData);
 
     multiPartFormData.append('dataset', JSON.stringify(registration));
-    for (const field of Object.keys(files)) {
-      multiPartFormData.append(field, files[field]);
+
+    for (const field of Object.keys(formFiles)) {
+      if (!isNil(formFiles[field])) {
+        multiPartFormData.append(field, formFiles[field]);
+      }
     }
 
     return multiPartFormData;
@@ -112,7 +89,14 @@ export const DataSubmissionForm = () => {
     /* eslint-disable no-console */
     console.log('StudyInfo OnChange:', key, value, isValid);
 
-    set(formData, key, value);
+    formData[key] = value;
+  };
+
+  const onFileChange = ({ key, value, isValid }) => {
+    /* eslint-disable no-console */
+    console.log('File OnChange:', key, value, isValid);
+
+    formFiles[key] = value;
   };
 
 
@@ -137,8 +121,8 @@ export const DataSubmissionForm = () => {
       <DataSubmissionStudyInformation onChange={onChange} />
       <NihAnvilUse onChange={onChange} initialFormData={formData} />
       <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} />
-      <NIHDataManagement initialFormData={formData} onChange={onChange} />
-      <DataAccessGovernance onChange={onChange} />
+      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} />
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} />
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>
