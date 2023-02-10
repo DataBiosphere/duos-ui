@@ -47,37 +47,37 @@ describe('Consent Group', function () {
     cy.get('#0_saveConsentGroup').click().then(() => {
       expect(propCopy.saveConsentGroup).to.be.calledWith(
         {
-            "value": {
-                "consentGroupName": "Hello!",
-                "generalResearchUse": false,
-                "hmb": true,
-                "poa": false,
-                "nmds": false,
-                "gso": false,
-                "pub": false,
-                "col": true,
-                "irb": false,
-                "gs": null,
-                "npu": false,
-                "mor": undefined,
-                "diseaseSpecificUse": undefined,
-                "otherPrimary": undefined,
-                "otherSecondary": null,
-                "dataLocation": [
-                    "Not Determined"
-                ],
-                "url": "https://www.asdf.gov",
-                "fileTypes": [
-                    {
-                        "fileType": "Genome",
-                        "functionalEquivalence": "asdf",
-                        "numberOfParticipants": 123
-                    }
-                ]
-            },
-            "valid": true
+          'value': {
+            'consentGroupName': 'Hello!',
+            'generalResearchUse': false,
+            'hmb': true,
+            'poa': false,
+            'nmds': false,
+            'gso': false,
+            'pub': false,
+            'col': true,
+            'irb': false,
+            'gs': null,
+            'npu': false,
+            'mor': undefined,
+            'diseaseSpecificUse': undefined,
+            'otherPrimary': undefined,
+            'otherSecondary': null,
+            'dataLocation': [
+              'Not Determined'
+            ],
+            'url': 'https://www.asdf.gov',
+            'fileTypes': [
+              {
+                'fileType': 'Genome',
+                'functionalEquivalence': 'asdf',
+                'numberOfParticipants': 123
+              }
+            ]
+          },
+          'valid': true
         }
-    );
+      );
 
       // switches to summary view
       cy.get('#0_consentGroupSummary').should('exist');
