@@ -254,7 +254,7 @@ export const SupportRequestModal = hh(
                 id: 'SupportRequestModal',
                 imgSrc: addHelpIcon,
                 color: 'common',
-                title: 'Request Help',
+                title: 'Contact Us',
               }),
             ]),
             div({

@@ -1,0 +1,11 @@
+.underlined > p {
+  margin-top: 0 !important;
+}
+
+.underlined > p > a {
+  text-decoration: underline !important;
+}
+
+.underlined > p > a:hover {
+  text-decoration: underline !important;
+}

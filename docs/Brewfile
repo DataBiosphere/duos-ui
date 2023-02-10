@@ -1,0 +1,10 @@
+brew "git"
+brew "git-secrets"
+brew "jq"
+brew "vault", restart_service: true
+brew "volta"
+cask "docker"
+cask "google-cloud-sdk"
+cask "intellij-idea"        # comment this line and uncomment the next line
+# cask "intellij-idea-ce"   # if you want to install the community edition
+cask "postgres-unofficial"
