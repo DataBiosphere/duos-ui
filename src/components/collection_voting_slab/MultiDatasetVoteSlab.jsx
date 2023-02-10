@@ -46,7 +46,9 @@ const styles = {
     display: 'flex',
     fontSize: '1.6rem',
     height: '32px',
-    padding: '1.5rem',
+    padding: '1.8rem',
+    color: '#333F52',
+    marginTop: '30px',
     columnGap: '2rem'
   },
   dataUses: {},

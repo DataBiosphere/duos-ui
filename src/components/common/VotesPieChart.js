@@ -33,8 +33,8 @@ export default function VotesPieChart(props) {
     title = props.title || 'My DAC\'s Votes (summary)',
     pieHole = 0.3,
     height = 'inherit',
-    width = '100%',
-    style = { padding: '20px 0', width: '50%' },
+    width = '50%',
+    style = { padding: '20px 0', width: '100%', marginLeft: '-10%'},
     styleOverride,
   } = props;
 
@@ -47,7 +47,8 @@ export default function VotesPieChart(props) {
     pieSliceText: 'none',
     slices: pieSliceColors,
     titleTextStyle: {
-      fontSize: 15
+      fontSize: 15,
+      color: '#333F52'
     },
   };
 

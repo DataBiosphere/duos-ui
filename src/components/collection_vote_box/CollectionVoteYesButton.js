@@ -20,7 +20,7 @@ export default function CollectionVoteYesButton(props) {
 
   const Label = () => {
     return span({style: styles.label}, [
-      h(CheckCircleOutlined, {style: styles.icon}),
+      h(CheckCircleOutlined, {style: styles.icon, }),
       'Yes'
     ]);
   };
