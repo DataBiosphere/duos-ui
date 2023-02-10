@@ -67,6 +67,10 @@ const styles = {
   }
 };
 
+const isOnlySigningOfficial = (user) => {
+  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
+};
+
 export const headerTabsConfig = [
   {
     label: 'Admin Console',
@@ -84,11 +88,12 @@ export const headerTabsConfig = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/data_submitters',
+    link: '/signing_official_console/researchers',
     children: [
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
+      { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Researchers', link: '/signing_official_console/researchers' }
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
+      { label: 'My Datasets', link: '/dataset_catalog'}
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -99,7 +104,8 @@ export const headerTabsConfig = [
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
       { label: 'Datasets', link: '/dataset_catalog' },
-      { label: 'DAC Members', link: '/manage_dac' }
+      { label: 'DAC Members', link: '/manage_dac' },
+      { label: "My DAC's Datasets", link: '/dac_datasets' }
     ],
     isRendered: (user) => user.isChairPerson
   },
@@ -130,7 +136,7 @@ export const headerTabsConfig = [
       { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'DAR Requests', link: '/researcher_console' }
     ],
-    isRendered: (user) => user.isResearcher
+    isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }
 ];
 
@@ -155,9 +161,9 @@ const NavigationTabsComponent = (props) => {
   return (div({
     className: `navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`
   }, [
+    makeNotifications(),
     ul({ className: 'navbar-main' }, [
       div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
-        makeNotifications(),
         h(Link, {
           isRendered: orientation === 'horizontal',
           id: 'link_logo',
@@ -177,6 +183,7 @@ const NavigationTabsComponent = (props) => {
             }
           }, tabs.map((tab, tabIndex) => {
             return h(Tab, {
+              key: `${tab.link}_${tabIndex}`,
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
               to: {
@@ -242,7 +249,7 @@ const NavigationTabsComponent = (props) => {
           style: styles.navButton
         }, [
           div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-            'Request Help'
+            'Contact Us'
           ])
         ]),
         supportrequestModal,
@@ -305,6 +312,7 @@ const NavigationTabsComponent = (props) => {
         onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
         return h(Tab, {
+          key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
           to: {
@@ -424,7 +432,7 @@ class DuosHeader extends Component {
 
     const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
-    const contactUsText = isLogged ? 'Request Help': span({ style: navbarDuosText }, ['Request Help']);
+    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
       id: 'btn_applyAcces',
       style: {
@@ -559,7 +567,8 @@ class DuosHeader extends Component {
               [
                 h(NavigationTabsComponent, {
                   goToLink: this.goToLink,
-                  makeNotifications: this.makeNotifications,
+                  // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+                  makeNotifications: () => {},
                   duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
                   currentUser, isLogged, signOut: this.signOut,
                   contactUsButton, supportrequestModal,

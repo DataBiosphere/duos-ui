@@ -1,10 +1,18 @@
-import { a, div, span } from 'react-hyperscript-helpers';
+import React from 'react';
+import { a, h, div, span } from 'react-hyperscript-helpers';
+import { useState } from 'react';
+import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 
 export const CollaboratorSummary = (props) => {
   const {
     collaborator,
     index
   } = props;
+
+  const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
+  const closeDelete = () => {
+    setShowDeleteCollaboratorModal(false);
+  };
 
   return div({}, [
     div({}, [
@@ -77,7 +85,7 @@ export const CollaboratorSummary = (props) => {
         a({
           id: index+'_deleteMember',
           style: { marginLeft: 10 },
-          onClick: () => props.toggleDeleteBool(true),
+          onClick: () => { setShowDeleteCollaboratorModal(true), props.toggleDeleteBool(false); },
         }, [
           span({
             className: 'glyphicon glyphicon-trash collaborator-delete-icon',
@@ -89,44 +97,15 @@ export const CollaboratorSummary = (props) => {
             }
           }),
         ]),
-      ]),
-      // Delete Confirmation Buttons
-      // Cancel Delete
-      div({
-        className: 'collaborator-summary-confirm-delete-buttons',
-        isRendered: props.deleteMode,
-      }, [
-        a({
-          id: index+'_editCollaborator',
-          style: { marginLeft: 10, marginRight: 10 },
-          onClick: () => props.toggleDeleteBool(false),
-        }, [
-          span({
-            className: 'glyphicon glyphicon-remove caret-margin collaborator-cancel-delete-icon', 'aria-hidden': 'true',
-            'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
-          }),
-          span({
-            style: {
-              marginLeft: '1rem',
-            }
-          }),
-        ]),
-        // Confirm Delete
-        a({
-          id: index+'_confimDeleteMember',
-          style: { marginLeft: 10 },
-          onClick: () => props.deleteCollaborator(),
-        }, [
-          span({
-            className: 'glyphicon glyphicon-trash collaborator-confirm-delete-icon',
-            'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
-          }),
-          span({
-            style: {
-              marginLeft: '1rem',
-            }
-          }),
-        ]),
+        // Delete Modal
+        h(DeleteCollaboratorModal, {
+          showDelete: showDeleteCollaboratorModal,
+          closeDelete: closeDelete,
+          header: 'Delete Entry',
+          title:<div>Are you sure you want to delete <strong>{collaborator.name}</strong>?</div>,
+          message: <div><i>This action is permanent and cannot be undone.</i></div>,
+          onConfirm: () => props.deleteCollaborator(),
+        })
       ]),
     ]),
   ]);
