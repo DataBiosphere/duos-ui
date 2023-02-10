@@ -8,7 +8,7 @@ import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import {PageHeading} from '../components/PageHeading';
 import {PaginatorBar} from '../components/PaginatorBar';
 import {SearchBox} from '../components/SearchBox';
-import {DAC, DAR, DataSet, Files} from '../libs/ajax';
+import {DAC, DAR, DataSet} from '../libs/ajax';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
