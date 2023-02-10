@@ -358,12 +358,12 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
-      cy.get(selector).should('be.checked');
+      cy.get(selector).should('not.be.checked');
       cy.get(selector)
         .click()
         .then(() => {
-          cy.get(selector).should('not.be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
+          cy.get(selector).should('be.checked'); // visual
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
         });
     });
 
@@ -371,13 +371,13 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
-      cy.get(selector).should('be.checked');
+      cy.get(selector).should('not.be.checked');
       cy.get(selector)
         .click()
         .click()
         .then(() => {
-          cy.get(selector).should('be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
+          cy.get(selector).should('not.be.checked'); // visual
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
         });
     });
   });
