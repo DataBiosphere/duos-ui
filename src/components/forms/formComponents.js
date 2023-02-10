@@ -9,7 +9,7 @@ import { RadioButton } from '../RadioButton';
 import PublishIcon from '@material-ui/icons/Publish';
 
 import './formComponents.css';
-import { isArray } from 'lodash';
+import { isArray, isNaN } from 'lodash';
 
 const styles = {
   inputStyle: {
@@ -77,13 +77,22 @@ export const formInputGeneric = (config) => {
       type: type?.inputType || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
-      value: formValue,
+      value: formValue.toString(),
       readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => {
+        const value = event.target.value;
         if (type?.inputType === 'number') {
-          onFormInputChange(config, parseInt(event.target.value));
+          // if the input box is empty, default to 0
+          if (value === '') {
+            onFormInputChange(config, 0);
+          } else {
+            // if there is a value, try to parse it; if parsing fails, then the value should stay the same.
+            const parsed = +value;
+            onFormInputChange(config, isNaN(parsed) ? formValue : parsed);
+          }
+
         } else {
           onFormInputChange(config, event.target.value);
         }
