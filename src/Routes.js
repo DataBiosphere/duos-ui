@@ -47,8 +47,8 @@ import {Storage} from './libs/storage';
  * @type {{NON_STAGING: string[], NON_PROD: string[]}}
  */
 export const envGroups = {
-  NON_PROD: ['local', 'dev', 'staging'],
-  NON_STAGING: ['local', 'dev']
+  NON_PROD: ['local', 'dev', 'alpha', 'staging'],
+  NON_STAGING: ['local', 'dev', 'alpha']
 };
 
 /**
@@ -77,11 +77,9 @@ const Routes = (props) => (
     <Route exact path="/liveness" render={() => HealthCheck()} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
-        props.env
-          ? checkEnv(envGroups.NON_STAGING)
-            ? <BackgroundSignIn {...routeProps} />
-            : <NotFound />
-          : <div />
+        checkEnv(envGroups.NON_STAGING)
+          ? <BackgroundSignIn {...routeProps} />
+          : <NotFound />
     } />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
