@@ -16,6 +16,7 @@ const styles = {
     marginTop: '-20px'
   },
   question: {
+    marginTop: '-10px',
     fontSize: '1.8rem',
   },
   content: {
@@ -35,7 +36,7 @@ const styles = {
     borderRadius: '4px',
     fontWeight: '500',
     color: '#181818A6',
-    width: '40rem',
+    width: '45rem',
   }
 };
 

@@ -64,7 +64,7 @@
     "google-auth-library": "8.7.0",
     "html-webpack-plugin": "4.5.2",
     "react-error-overlay": "6.0.9",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "source-map-explorer": "2.5.3"
   },
   "browserslist": [

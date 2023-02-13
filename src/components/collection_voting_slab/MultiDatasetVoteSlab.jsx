@@ -43,15 +43,18 @@ const styles = {
     display: 'flex'
   },
   slatTitleText: {
-    display: 'flex',
-    fontSize: '1.6rem',
+    display: 'fixed',
+    fontSize: 17,
+    fontWeight: 800,
     height: '32px',
-    padding: '1.8rem',
+    paddingLeft: '-10%',
     color: '#333F52',
-    marginTop: '30px',
+    marginTop: '-5px',
     columnGap: '2rem'
   },
-  dataUses: {},
+  dataUses: {
+    marginTop: '-20%'
+  },
   voteInfo: {},
   chairVoteInfo: {},
 };
