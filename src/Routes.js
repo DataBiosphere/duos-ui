@@ -1,4 +1,4 @@
-import {contains, mergeAll} from 'lodash/fp';
+import {includes, mergeAll} from 'lodash/fp';
 import React from 'react';
 import {Route, Switch} from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
@@ -40,32 +40,33 @@ import DataSubmissionForm from './pages/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 import BroadDatasetCatalog from './pages/dac_dataset_catalog/BroadDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
+import {Storage} from './libs/storage';
 
 /**
  * Predefined groups of environments for which certain features are valid for.
  * @type {{NON_STAGING: string[], NON_PROD: string[]}}
  */
-const envGroups = {
+export const envGroups = {
   NON_PROD: ['local', 'dev', 'staging'],
   NON_STAGING: ['local', 'dev']
 };
 
 /**
- * Returns true if the current `props.env` variable exists as an element
- * in the specified environment group, false otherwise. Helpful to determine
- * if a route should be displayed or not based on current env.
+ * Returns true if the current application `Storage.ENV` variable exists as an element
+ * in the specified environment group or false otherwise. Used to determine if a route
+ * should be displayed or not based on current env.
  *
  * @example
- * // returns true when props.env === 'dev'
+ * // returns true when Storage.ENV === 'dev' | 'local'
  * processEnv(envGroups.NON_STAGING, props)
- * // returns false when props.env === 'staging'
+ * // returns false when Storage.ENV === 'staging' | 'prod'
  * processEnv(envGroups.NON_STAGING, props)
  * @param envGroup
- * @param props
  * @returns {boolean}
  */
-const processEnv = (envGroup, props) => {
-  return props.env ? contains(envGroups[envGroup])(props.env) : false;
+export const processEnv = (envGroup) => {
+  const env = Storage.getEnv();
+  return env ? includes(env)(envGroup) : false;
 };
 
 const Routes = (props) => (
@@ -116,7 +117,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    {(processEnv(envGroups.NON_STAGING, props)) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
