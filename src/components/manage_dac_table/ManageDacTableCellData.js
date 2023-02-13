@@ -3,7 +3,7 @@ import {styles} from './ManageDacTable';
 import {a, label, h, div} from 'react-hyperscript-helpers';
 import TableIconButton from '../../components/TableIconButton';
 import {Styles} from '../../libs/theme';
-import {Delete, Edit} from '@material-ui/icons';
+import {Delete, Edit} from '@mui/icons-material';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {
   return {

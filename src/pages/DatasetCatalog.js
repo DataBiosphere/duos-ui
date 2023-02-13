@@ -15,7 +15,7 @@ import datasetIcon from '../images/icon_dataset_.png';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
-import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 
 const tableBody = {
   ...Theme.textTableBody,

@@ -1,7 +1,7 @@
 import { Styles } from '../libs/theme';
 import { h, span } from 'react-hyperscript-helpers';
 import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { isNil } from 'lodash';
 import {useEffect} from 'react';
 import ReactTooltip from 'react-tooltip';
