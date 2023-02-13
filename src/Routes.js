@@ -58,9 +58,9 @@ export const envGroups = {
  *
  * @example
  * // returns true when Storage.ENV === 'dev' | 'local'
- * checkEnv(envGroups.NON_STAGING, props)
+ * checkEnv(envGroups.NON_STAGING)
  * // returns false when Storage.ENV === 'staging' | 'prod'
- * checkEnv(envGroups.NON_STAGING, props)
+ * checkEnv(envGroups.NON_STAGING)
  * @param envGroup
  * @returns {boolean}
  */
