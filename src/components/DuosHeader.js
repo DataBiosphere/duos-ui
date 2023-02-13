@@ -17,7 +17,7 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import {envGroups, processEnv} from '../Routes';
+import {envGroups, checkEnv} from '../Routes';
 import {isFunction, isNil} from 'lodash/fp';
 
 const styles = {
@@ -94,7 +94,7 @@ export const headerTabsConfig = [
     children: [
       { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => processEnv(envGroups.NON_STAGING) },
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
       { label: 'My Datasets', link: '/dataset_catalog' }
     ],
     isRendered: (user) => user.isSigningOfficial
