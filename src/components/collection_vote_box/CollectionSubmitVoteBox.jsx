@@ -64,7 +64,7 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   return (
     <div data-cy={'vote-subsection-heading'}>
       {heading}
-      {votableChairView && <span style={{ marginLeft: 0, fontWeight: 'normal', }}>(Vote and Rationale cannot be updated after submitting)</span>}
+      {votableChairView && <span style={{ marginLeft: 0, fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
     </div>
   );
 };

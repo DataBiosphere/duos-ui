@@ -24,6 +24,7 @@ const styles = {
     rowGap: '35px'
   },
   title: {
+    color: '#333F52',
     fontFamily: 'Montserrat',
     fontSize: '2.4rem',
     fontWeight: 'bold',
