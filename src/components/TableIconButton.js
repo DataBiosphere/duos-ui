@@ -51,6 +51,7 @@ export default function TableIconButton(props) {
   return (
     span(attributes, [
       h(Icon, {
+        style: appliedStyle,
         isRendered: isRendered && !isNil(Icon),
         className: classes.root
       })
