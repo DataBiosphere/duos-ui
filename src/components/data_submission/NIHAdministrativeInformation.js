@@ -32,10 +32,12 @@ export const NIHAdministrativeInformation = (props) => {
       isRendered: !isEmpty(institutions),
       validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
-      selectOptions: institutions,
+      selectOptions: institutions.map((inst) => { return { displayText: inst.name, id: inst.id };}),
       isCreatable: false,
       selectConfig: {},
-      onChange,
+      onChange: ({key, value, isValid}) => {
+        onChange({key, value: value?.id, isValid});
+      },
       defaultValue: initialFormData?.piInstitution,
     }),
     h(FormField, {

@@ -8,7 +8,7 @@ import { FormFieldTypes, FormField } from '../forms/forms';
 import './ds_common.css';
 
 const OPEN_ACCESS = 'Open Access';
-const CLOSED_ACCESS = 'Closed Access';
+const CLOSED_ACCESS = 'Controlled Access';
 
 const openClosedRadioOptions =     [
   {
@@ -19,13 +19,13 @@ const openClosedRadioOptions =     [
   {
     id: 'closed_access',
     name: CLOSED_ACCESS,
-    text: 'Closed Access',
+    text: 'Controlled Access',
   }
 ];
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange
+    onChange, onFileChange
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
@@ -41,25 +41,26 @@ export const DataAccessGovernance = (props) => {
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
 
-    const groups = filteredConsentGroupsState.map(state => {
-      return {
-        ...state.consentGroup,
-        ...{
-          nihInsitutionalCertificationFileName: state?.nihInsitutionalCertificationFile?.name,
-        },
-      };
-    });
+    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
     const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
 
     onChange({key: 'consentGroups', value: groups, isValid: valid});
-  }, [consentGroupsState, onChange]);
+
+    filteredConsentGroupsState.forEach((cgState, idx) => {
+      onFileChange({
+        key: `consentGroups[${idx}].nihInstitutionalCertificationFile`,
+        value: cgState?.nihInstitutionalCertificationFile,
+        isValid: true
+      });
+    });
+  }, [consentGroupsState, onChange, onFileChange]);
 
   const addNewConsentGroup = useCallback(() => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
-        nihInsitutionalCertificationFile: null,
+        nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
       });
@@ -93,7 +94,7 @@ export const DataAccessGovernance = (props) => {
   const updateNihInstitutionalCertificationFile = useCallback((idx, file) => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState[idx].nihInsitutionalCertificationFile = file;
+      newConsentGroupsState[idx].nihInstitutionalCertificationFile = file;
       return newConsentGroupsState;
     });
   }, []);
@@ -176,7 +177,7 @@ export const DataAccessGovernance = (props) => {
             return h(ConsentGroupForm, {
               key: idx,
               idx: idx,
-              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
+              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
               deleteConsentGroup: () => deleteConsentGroup(idx),
               updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
               startEditConsentGroup: () => startEditConsentGroup(idx),

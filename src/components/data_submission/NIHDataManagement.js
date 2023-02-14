@@ -18,6 +18,7 @@ export const NIHDataManagement = (props) => {
   const {
     initialFormData,
     onChange,
+    onFileChange,
   } = props;
 
   const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(initialFormData?.alternativeDataSharingPlan === true || false);
@@ -152,7 +153,7 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.FILE,
         title: 'Upload your alternative sharing plan.',
         id: 'alternativeDataSharingPlanFile',
-        onChange,
+        onChange: onFileChange,
       }),
 
       h(FormField, {

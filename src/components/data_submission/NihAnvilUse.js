@@ -2,8 +2,8 @@ import {div, h, h2} from 'react-hyperscript-helpers';
 import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
-const I_DID = 'I Did';
-const I_WILL = 'I Will';
+const I_DID = 'I did';
+const I_WILL = 'I will';
 const NO = 'No';
 
 const nihAnvilUseLabels = {
@@ -48,7 +48,7 @@ export default function NihAnvilUse(props) {
       onChange: (config) => {
 
         const value = nihAnvilUseLabels[config.value];
-        onChange({key: config.key, value: value, isValid: config.isValid});
+        onChange({key: config.key, value: [value], isValid: config.isValid});
 
         // if going from did -> i will / no, then clear all values
         if (nihAnvilUse === I_DID && value !== I_DID) {
