@@ -17,7 +17,7 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import {checkEnv, envGroups} from '../utils/RouteUtils';
+import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
 import {isFunction, isNil} from 'lodash/fp';
 
 const styles = {

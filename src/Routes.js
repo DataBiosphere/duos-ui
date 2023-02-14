@@ -40,7 +40,7 @@ import DataSubmissionForm from './pages/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 import BroadDatasetCatalog from './pages/dac_dataset_catalog/BroadDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
-import {checkEnv, envGroups} from './utils/RouteUtils';
+import {checkEnv, envGroups} from './utils/EnvironmentUtils';
 
 const Routes = (props) => (
   <Switch>
