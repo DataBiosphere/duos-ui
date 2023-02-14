@@ -91,9 +91,6 @@ export const EditConsentGroup = (props) => {
         width: '70%'
       }
     }, [
-
-      h3(['Consent Group Information']),
-
       // name
       h(FormField, {
         id: idx+'_consentGroupName',
