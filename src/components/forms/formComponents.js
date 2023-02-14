@@ -9,7 +9,7 @@ import { RadioButton } from '../RadioButton';
 import PublishIcon from '@material-ui/icons/Publish';
 
 import './formComponents.css';
-import { isArray, isNaN } from 'lodash';
+import { isArray } from 'lodash';
 
 const styles = {
   inputStyle: {
@@ -41,10 +41,14 @@ const getKey = (config) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { onChange, formValue, setFormValue } = config;
+  const { type, onChange, formValue, setFormValue } = config;
 
   const key = getKey(config);
   const isValidInput = validateFormInput(config, value);
+
+  if (!isNil(type?.parseFormInput)) {
+    value = type.parseFormInput(value);
+  }
 
   if (value !== formValue) {
     onChange({key: key, value: value, isValid: isValidInput });
@@ -82,20 +86,7 @@ export const formInputGeneric = (config) => {
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => {
-        const value = event.target.value;
-        if (type?.inputType === 'number') {
-          // if the input box is empty, default to 0
-          if (value === '') {
-            onFormInputChange(config, 0);
-          } else {
-            // if there is a value, try to parse it; if parsing fails, then the value should stay the same.
-            const parsed = +value;
-            onFormInputChange(config, isNaN(parsed) ? formValue : parsed);
-          }
-
-        } else {
-          onFormInputChange(config, event.target.value);
-        }
+        onFormInputChange(config, event.target.value);
       },
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),

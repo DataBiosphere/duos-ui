@@ -113,6 +113,15 @@ export const FormFieldTypes = {
     defaultValue: '',
     inputType: 'number',
     component: formInputGeneric,
+    parseFormInput: (formInput, prevValue) => {
+      if (formInput === '') {
+        return 0;
+      } else {
+        // if there is a value, try to parse it; if parsing fails, then the value should stay the same.
+        const parsed = +formInput;
+        return isNaN(parsed) ? prevValue : parsed;
+      }
+    },
     requiredProps: [],
     optionalProps: [
       'placeholder',
