@@ -346,8 +346,7 @@ class DuosHeader extends Component {
       showSupportRequestModal: false,
       hover: false,
       notificationData: [],
-      openDrawer: false,
-      env: props.env
+      openDrawer: false
     };
   }
 
