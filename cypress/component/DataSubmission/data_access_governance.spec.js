@@ -24,13 +24,13 @@ beforeEach(() => {
 });
 
 describe('Data Access Governance', function () {
-  it('Only renders consent group info if closed access', function () {
+  it('Only renders consent group info if controlled access', function () {
     mount(<DataSubmissionForm />);
 
     cy.get('#btn_addConsentGroup').should('not.exist');
     cy.get('#dataAccessCommitteeId').should('not.exist');
 
-    cy.get('#dataSharingPlan_closed_access').check();
+    cy.get('#dataSharingPlan_controlled_access').check();
 
 
     cy.get('#btn_addConsentGroup').should('exist');
@@ -49,7 +49,7 @@ describe('Data Access Governance', function () {
   it('Adds multiple consent groups', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#dataSharingPlan_closed_access').check();
+    cy.get('#dataSharingPlan_controlled_access').check();
 
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#1_consentGroupForm').should('not.exist');
@@ -75,7 +75,7 @@ describe('Data Access Governance', function () {
   it('Delete consent group works', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#dataSharingPlan_closed_access').check();
+    cy.get('#dataSharingPlan_controlled_access').check();
 
     cy.get('#btn_addConsentGroup').click();
     cy.get('#btn_addConsentGroup').click();
