@@ -1,25 +1,25 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep } from 'lodash/fp';
-import { div, h, h2, a, span } from 'react-hyperscript-helpers';
+import { div, h, h2, h3, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
 import { FormFieldTypes, FormField } from '../forms/forms';
 
 import './ds_common.css';
 
 const OPEN_ACCESS = 'Open Access';
-const CLOSED_ACCESS = 'Closed Access';
+const CONTROLLED_ACCESS = 'Controlled Access';
 
-const openClosedRadioOptions =     [
+const openControlledRadioOptions =     [
   {
     id: 'open_access',
     name: OPEN_ACCESS,
     text: 'Open Access'
   },
   {
-    id: 'closed_access',
-    name: CLOSED_ACCESS,
-    text: 'Closed Access',
+    id: 'controlled_access',
+    name: CONTROLLED_ACCESS,
+    text: 'Controlled Access',
   }
 ];
 
@@ -30,7 +30,7 @@ export const DataAccessGovernance = (props) => {
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
-  const [isClosedAccess, setIsClosedAccess] = useState(false);
+  const [isControlledAccess, setIsControlledAccess] = useState(false);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -117,7 +117,7 @@ export const DataAccessGovernance = (props) => {
           type: FormFieldTypes.RADIOGROUP,
           id: 'dataSharingPlan',
           title: 'Does the data need to be managed under Controlled or Open Access?',
-          options: openClosedRadioOptions,
+          options: openControlledRadioOptions,
           onChange: ({ value, isValid }) => {
             onChange({
               key: 'alternativeDataSharingPlanControlledOpenAccess',
@@ -125,13 +125,13 @@ export const DataAccessGovernance = (props) => {
               isValid: isValid,
             });
 
-            setIsClosedAccess(value === CLOSED_ACCESS);
+            setIsControlledAccess(value === CONTROLLED_ACCESS);
           },
         }
       ),
 
       div({
-        isRendered: isClosedAccess,
+        isRendered: isControlledAccess,
       },
       [
         h(FormField, {
@@ -147,6 +147,7 @@ export const DataAccessGovernance = (props) => {
           }
         }),
 
+        h3(['Consent Group Information']),
 
         // add consent group
         div({
