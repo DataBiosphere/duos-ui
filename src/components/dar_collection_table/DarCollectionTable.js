@@ -28,7 +28,6 @@ export const styles = {
     whiteSpace: 'pre-wrap',
     backgroundColor: 'white',
     border: '1px solid #DEDEDE',
-    borderRadius: '4px',
     margin: '0.5% 0'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
