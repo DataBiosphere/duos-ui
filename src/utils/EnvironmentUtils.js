@@ -3,9 +3,9 @@ import {includes} from 'lodash/fp';
 
 
 /**
- * Predefined groups of environments for which certain features are valid for.
+ * Predefined groups of environments for which certain features might be valid for.
  * The environment hierarchy is:
- *  * Prod
+ *  * prod
  *    * staging
  *      * alpha
  *      * dev
