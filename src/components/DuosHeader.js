@@ -73,6 +73,10 @@ const isOnlySigningOfficial = (user) => {
   return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
 };
 
+/**
+ * Tab objects in this array support an `isRendered` function per top level Tab as well as
+ * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
+ */
 export const headerTabsConfig = [
   {
     label: 'Admin Console',
