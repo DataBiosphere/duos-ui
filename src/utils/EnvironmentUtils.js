@@ -36,6 +36,6 @@ export const checkEnv = (envGroup) => {
 };
 
 export default {
-  envGroups,
-  checkEnv
+  checkEnv,
+  envGroups
 };
