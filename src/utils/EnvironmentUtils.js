@@ -23,7 +23,7 @@ export const envGroups = {
  * should be displayed or not based on current env.
  *
  * @example
- * // returns true when Storage.ENV === 'dev' | 'local'
+ * // returns true when Storage.ENV === 'alpha' || 'dev' |" 'local'
  * checkEnv(envGroups.NON_STAGING)
  * // returns false when Storage.ENV === 'staging' | 'prod'
  * checkEnv(envGroups.NON_STAGING)
