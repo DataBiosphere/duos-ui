@@ -34,7 +34,7 @@ export default function VotesPieChart(props) {
     pieHole = 0.3,
     height = 'inherit',
     width = '100%',
-    style = { padding: '20px 0', width: '60%' },
+    style = { padding: '20px 0', width: '70%', marginLeft: '-12%', backgroundColor: 'rgba(255, 255, 255, 0)' },
     styleOverride,
   } = props;
 
