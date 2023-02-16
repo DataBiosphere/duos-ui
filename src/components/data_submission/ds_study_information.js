@@ -97,8 +97,6 @@ export default function DataSubmissionStudyInformation(props) {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email ',
-      helpText: ` Insert the email for any individual with the 
-        authority to add/remove users access to this study’s datasets.`,
       defaultValue: user?.email,
       disabled: true,
       onChange
@@ -106,6 +104,8 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
+      helpText: ` Insert the email for any individual with the 
+        authority to add/remove users access to this study’s datasets.`,
       type: FormFieldTypes.MULTITEXT,
       defaultValue: [],
       validators: [
