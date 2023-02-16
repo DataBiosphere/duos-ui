@@ -1,4 +1,4 @@
-import {any, forEach, get, getOr, isEqual, map} from 'lodash/fp';
+import {any, forEach, get, getOr, includes, isEqual, map, values} from 'lodash/fp';
 
 export const processCollection = (collection) => {
   let buckets = [];
@@ -11,7 +11,9 @@ export const processCollection = (collection) => {
     // use is already in a bucket, then it gets merged in.
     let bucket = {
       datasets: [d],
-      dataUse: d.dataUse
+      datasetIds: [d.dataSetId],
+      dataUse: d.dataUse,
+      elections: []
     };
     if (getOr(false)('otherRestrictions')(d.dataUse)) {
       buckets.push(bucket);
@@ -25,9 +27,26 @@ export const processCollection = (collection) => {
         forEach(b => {
           if (isEqual(b.dataUse)(d.dataUse)) {
             b.datasets.push(d);
+            b.datasetIds.push(d.dataSetId);
           }
         })(buckets);
       }
     }
   })(datasets);
+
+  const darMap = get('dars')(collection);
+  forEach(dar => {
+    const electionMap = get('elections')(dar);
+    forEach(election => {
+      // find the bucket this election belongs to
+      const datasetId = get('dataSetId')(election);
+      forEach(b => {
+        if (includes(datasetId)(b.datasetIds)) {
+          b.elections.push(election);
+        }
+      })(buckets);
+    })(values(electionMap));
+  })(values(darMap));
+
+  console.log(buckets);
 };
