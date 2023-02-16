@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction } from 'lodash/fp';
+import { cloneDeep, isFunction, isNil } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
   customSelectPropValidation,
-  requiredValidator,
-  urlValidator,
-  emailValidator,
-  dateValidator,
 } from './formUtils';
 import {
   formInputGeneric,
@@ -21,9 +17,11 @@ import {
   formInputTextarea,
   formInputRadioButton,
   formInputFile,
+  getKey
 } from './formComponents';
 
 import './forms.css';
+import { dateValidator, emailValidator, isValid, requiredValidator, urlValidator } from './formValidation';
 
 export const commonRequiredProps = [
   'id',
@@ -43,6 +41,8 @@ export const commonOptionalProps = [
   'type',
   'key',
   'isRendered',
+  'validation',
+  'onValidationChange'
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
@@ -189,6 +189,8 @@ export const FormFieldTypes = {
   }
 };
 
+
+
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     FORM VALIDATORS                                     ====== //
 // ----------------------------------------------------------------------------------------------------- //
@@ -198,6 +200,9 @@ export const FormValidators = {
   EMAIL: emailValidator,
   DATE: dateValidator,
 };
+
+
+
 
 // ----------------------------------------------------------------------------------------------------- //
 // ======                                     MAIN COMPONENTS                                     ====== //
@@ -210,13 +215,13 @@ export const FormFieldTitle = (props) => {
     formId,
     ariaLevel,
     required,
-    error,
+    validation,
   } = props;
 
   return div({}, [
     title && !hideTitle && label({
       id: `lbl_${formId}`,
-      className: `control-label ${error ? 'errored' : ''}`,
+      className: `control-label ${isValid(validation) ? '' : 'errored'}`,
       htmlFor: `${formId}`,
       'aria-level': ariaLevel
     }, [
@@ -229,12 +234,15 @@ export const FormFieldTitle = (props) => {
 
 export const FormField = (config) => {
   const {
-    id, type = FormFieldTypes.TEXT, ariaLevel,
+    id, name, type = FormFieldTypes.TEXT, ariaLevel,
     title, hideTitle, description,
-    defaultValue, style, validators
+    defaultValue, style, validators,
+    validation, onValidationChange
   } = config;
 
-  const [error, setError] = useState();
+  // if the user specifies the 'errors' prop, we should use that as the source of truth.
+  // otherwise, we should use internal state to keep track of errors.
+  const [internalValidationState, setInternalValidationState] = useState();
 
   const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue;
   const [formValue, setFormValue] = useState(typeDefaultValue || '');
@@ -254,6 +262,21 @@ export const FormField = (config) => {
     validateFormProps(config);
   }, [config]);
 
+  const getValidation = useCallback(() => {
+    if (!isNil(validation)) {
+      return validation;
+    }
+    return internalValidationState;
+  }, [internalValidationState, validation])
+
+  const updateValidation = useCallback((newValidation) => {
+    if (!isNil(onValidationChange)) {
+      onValidationChange({ key: getKey({ name, id }), validation: newValidation });
+      return;
+    }
+    setInternalValidationState(newValidation);
+  }, [name, id, setInternalValidationState, onValidationChange]);
+
   return div({
     key: `formControl_${id}`,
     style,
@@ -262,11 +285,11 @@ export const FormField = (config) => {
     h(FormFieldTitle, {
       title, hideTitle, description,
       required, formId: id, ariaLevel,
-      error
+      validation: getValidation()
     }),
     h(type.component, {
       ...config,
-      error, setError,
+      validation: getValidation(), setValidation: updateValidation,
       formValue, setFormValue,
       required
     })

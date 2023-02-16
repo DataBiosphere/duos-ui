@@ -1,7 +1,10 @@
 import React from 'react';
+import Ajv2020 from "ajv/dist/2020"
+import { addFormats, validate } from '../utils/JsonSchemaUtils';
+
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import { Institution, DataSet } from '../libs/ajax';
+import { Institution, DataSet, Schema } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 
 import lockIcon from '../images/lock-icon.png';
@@ -12,22 +15,31 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+import { set } from 'lodash';
 
 
 export const DataSubmissionForm = () => {
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
+  const [schema, setSchema] = useState();
+  const [validateSchema, setValidateSchema] = useState();
 
   useEffect(() => {
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
       setInstitutions(institutions);
     };
+    const getSchema = async () => {
+      const schema = await Schema.datasetRegistrationV1();
+      setSchema(schema);
+      console.log(schema);
+    }
 
     const init = async () => {
       try {
         getAllInstitutions();
+        getSchema();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -39,8 +51,20 @@ export const DataSubmissionForm = () => {
     init();
   }, []);
 
+  useEffect(() => {
+    if (!isNil(schema)) {
+      const validator = addFormats(new Ajv2020({strict: false, allErrors: true})).compile(schema);
+      console.log(validator)
+      setValidateSchema((_) => validator);
+    } else {
+      setValidateSchema();
+    }
+  }, [schema]);
+
   const formFiles = {};
   const formData = { publicVisibility: true };
+
+  const [formValidation, setFormValidation] = useState({});
 
   const formatForRegistration = (formData) => {
     for (const key of Object.keys(formData)) {
@@ -63,6 +87,13 @@ export const DataSubmissionForm = () => {
   const getMultiPartFormData = () => {
     const registration = cloneDeep(formData);
     formatForRegistration(registration);
+
+    console.log(validateSchema);
+    const [valid, validation] = validate(validateSchema, registration);
+    
+    setFormValidation(validation);
+    console.log();
+    console.log(validateSchema.errors);
 
     const multiPartFormData = new FormData();
 
@@ -99,6 +130,16 @@ export const DataSubmissionForm = () => {
     formFiles[key] = value;
   };
 
+  const onValidationChange = ({ key, validation }) => {
+    console.log('Validation OnChange:', key, validation);
+
+    setFormValidation((val) => {
+      const newValidation = cloneDeep(val);
+      set(newValidation, key, validation);
+      return newValidation;
+    });
+  }
+
 
   return !failedInit && <div style={Styles.PAGE} >
     <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
@@ -118,7 +159,7 @@ export const DataSubmissionForm = () => {
     <form style={{ margin: 'auto', maxWidth: 800}}>
 
 
-      <DataSubmissionStudyInformation onChange={onChange} />
+      <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} />
       <NihAnvilUse onChange={onChange} initialFormData={formData} />
       <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} />
       <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} />

@@ -9,7 +9,7 @@ import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import './ds_common.css';
 
 export default function DataSubmissionStudyInformation(props) {
-  const { onChange } = props;
+  const { onChange, validation, onValidationChange } = props;
   const [user, setUser] = useState();
 
   //init hook, need to make ajax calls here
@@ -39,7 +39,9 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyName',
       title: 'Study Name',
       validators: [FormValidators.REQUIRED],
-      onChange
+      validation: validation.studyName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'studyType',
