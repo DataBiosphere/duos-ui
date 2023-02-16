@@ -1,0 +1,2962 @@
+{
+  "darCollectionId": 535,
+  "darCode": "DAR-602",
+  "createDate": 1674489092852,
+  "createUser": {
+    "userId": 3396,
+    "email": "createUser@duos.org",
+    "displayName": "User 1: Chairperson",
+    "createDate": 1526056488000,
+    "properties": [
+      {
+        "propertyId": 6709,
+        "userId": 3396,
+        "propertyKey": "academicEmail",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6700,
+        "userId": 3396,
+        "propertyKey": "address1",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6697,
+        "userId": 3396,
+        "propertyKey": "address2",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6712,
+        "userId": 3396,
+        "propertyKey": "checkNotifications",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6698,
+        "userId": 3396,
+        "propertyKey": "city",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6703,
+        "userId": 3396,
+        "propertyKey": "completed",
+        "propertyValue": "false"
+      },
+      {
+        "propertyId": 6696,
+        "userId": 3396,
+        "propertyKey": "country",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6713,
+        "userId": 3396,
+        "propertyKey": "department",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6707,
+        "userId": 3396,
+        "propertyKey": "division",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 10200,
+        "userId": 3396,
+        "propertyKey": "eraAuthorized",
+        "propertyValue": "true"
+      },
+      {
+        "propertyId": 10201,
+        "userId": 3396,
+        "propertyKey": "eraExpiration",
+        "propertyValue": "1677780633658"
+      },
+      {
+        "propertyId": 6701,
+        "userId": 3396,
+        "propertyKey": "havePI",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6714,
+        "userId": 3396,
+        "propertyKey": "isThePI",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6704,
+        "userId": 3396,
+        "propertyKey": "linkedIn",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6702,
+        "userId": 3396,
+        "propertyKey": "orcid",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6699,
+        "userId": 3396,
+        "propertyKey": "piEmail",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6706,
+        "userId": 3396,
+        "propertyKey": "piName",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6705,
+        "userId": 3396,
+        "propertyKey": "pubmedID",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6710,
+        "userId": 3396,
+        "propertyKey": "researcherGate",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6715,
+        "userId": 3396,
+        "propertyKey": "scientificURL",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6711,
+        "userId": 3396,
+        "propertyKey": "state",
+        "propertyValue": ""
+      },
+      {
+        "propertyId": 6708,
+        "userId": 3396,
+        "propertyKey": "zipcode",
+        "propertyValue": ""
+      }
+    ],
+    "emailPreference": false,
+    "institutionId": 150,
+    "eraCommonsId": "sdffsa",
+    "institution": {
+      "id": 150,
+      "name": "The Broad Institute of MIT and Harvard",
+      "createDate": 1617716382481,
+      "updateDate": 1620133344596
+    },
+    "libraryCards": [
+      {
+        "id": 53,
+        "userId": 3396,
+        "institutionId": 150,
+        "eraCommonsId": "sdffsa",
+        "userName": "User 1: Chairperson",
+        "userEmail": "createUser@duos.org",
+        "createDate": 1652974588684,
+        "createUserId": 3351,
+        "updateUserId": 5025
+      },
+      {
+        "id": 74,
+        "userId": 3396,
+        "institutionId": 150,
+        "eraCommonsId": "sdffsa",
+        "userName": "User 1: Chairperson",
+        "userEmail": "createUser@duos.org",
+        "createDate": 1664461174741,
+        "createUserId": 3396,
+        "updateUserId": 5025
+      }
+    ]
+  },
+  "createUserId": 3396,
+  "dars": {
+    "0a1cc490-2ad2-4194-b2c0-9244184843e4": {
+      "id": 1349,
+      "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+      "collectionId": 535,
+      "data": {
+        "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+        "projectTitle": "Lou Test",
+        "checkCollaborator": true,
+        "checkNihDataOnly": true,
+        "rus": "asdfasdf",
+        "nonTechRus": "asdfasdf",
+        "diseases": false,
+        "methods": true,
+        "population": true,
+        "other": false,
+        "ontologies": [],
+        "forProfit": true,
+        "oneGender": true,
+        "gender": "F",
+        "pediatric": true,
+        "illegalBehavior": true,
+        "addiction": true,
+        "sexualDiseases": true,
+        "stigmatizedDiseases": true,
+        "vulnerablePopulation": true,
+        "populationMigration": false,
+        "psychiatricTraits": true,
+        "notHealth": true,
+        "hmb": true,
+        "poa": false,
+        "datasets": [
+          {
+            "key": "2",
+            "value": "2",
+            "label": "Herman Taylor (U. Miss Med Center) - Jackson Heart Study"
+          },
+          {
+            "key": "384",
+            "value": "384",
+            "label": "TOPMed FHS_HMB_IRB_MDS_phs000007.v29.p10.c1"
+          },
+          {
+            "key": "390",
+            "value": "390",
+            "label": "TOPMed HVH_DS_CVD_IRB_MDS_phs001013.v3.p2.c2"
+          },
+          {
+            "key": "459",
+            "value": "459",
+            "label": "mynewdataset"
+          },
+          {
+            "key": "1396",
+            "value": "1396",
+            "label": "datasetNamenottaken2"
+          },
+          {
+            "key": "1397",
+            "value": "1397",
+            "label": "datasetNamenottaken3"
+          },
+          {
+            "key": "1398",
+            "value": "1398",
+            "label": "datasetNamenottaken4"
+          },
+          {
+            "key": "1399",
+            "value": "1399",
+            "label": "datasetNamenottaken"
+          },
+          {
+            "key": "1403",
+            "value": "1403",
+            "label": "A physiological fMRI study of acupuncture and perceptions of pain in chronic low back pain patients"
+          },
+          {
+            "key": "1404",
+            "value": "1404",
+            "label": "Quazi Test Dataset"
+          }
+        ],
+        "darCode": "DAR-602",
+        "createDate": 1674489092852,
+        "sortDate": 1674489092852,
+        "datasetIds": [
+          2,
+          384,
+          390,
+          459,
+          1396,
+          1397,
+          1398,
+          1399,
+          1403,
+          1404
+        ],
+        "anvilUse": true,
+        "itDirector": "asdfasdf",
+        "signingOfficial": "asdfasf",
+        "labCollaborators": [],
+        "internalCollaborators": [],
+        "externalCollaborators": [],
+        "dsAcknowledgement": true,
+        "gsoAcknowledgement": false,
+        "pubAcknowledgement": false
+      },
+      "draft": false,
+      "userId": 3396,
+      "createDate": 1674489046161,
+      "sortDate": 1674489092852,
+      "submissionDate": 1674489092852,
+      "updateDate": 1674489092852,
+      "elections": {
+        "2578": {
+          "electionId": 2578,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 2,
+          "votes": {
+            "39048": {
+              "voteId": 39048,
+              "vote": false,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672705616,
+              "electionId": 2578,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39049": {
+              "voteId": 39049,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "rationale": "",
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39050": {
+              "voteId": 39050,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "rationale": "",
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39051": {
+              "voteId": 39051,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39052": {
+              "voteId": 39052,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39053": {
+              "voteId": 39053,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39054": {
+              "voteId": 39054,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39055": {
+              "voteId": 39055,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39056": {
+              "voteId": 39056,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39057": {
+              "voteId": 39057,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39058": {
+              "voteId": 39058,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39059": {
+              "voteId": 39059,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2578,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2579": {
+          "electionId": 2579,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 2,
+          "votes": {
+            "39060": {
+              "voteId": 39060,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39061": {
+              "voteId": 39061,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39062": {
+              "voteId": 39062,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39063": {
+              "voteId": 39063,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39064": {
+              "voteId": 39064,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39065": {
+              "voteId": 39065,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39066": {
+              "voteId": 39066,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2579,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39067": {
+              "voteId": 39067,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2579,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2580": {
+          "electionId": 2580,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 384,
+          "votes": {
+            "39068": {
+              "voteId": 39068,
+              "vote": false,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674833203878,
+              "electionId": 2580,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39069": {
+              "voteId": 39069,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39070": {
+              "voteId": 39070,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39071": {
+              "voteId": 39071,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39072": {
+              "voteId": 39072,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39073": {
+              "voteId": 39073,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39074": {
+              "voteId": 39074,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39075": {
+              "voteId": 39075,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39076": {
+              "voteId": 39076,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39077": {
+              "voteId": 39077,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39078": {
+              "voteId": 39078,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39079": {
+              "voteId": 39079,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2580,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2581": {
+          "electionId": 2581,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 384,
+          "votes": {
+            "39080": {
+              "voteId": 39080,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39081": {
+              "voteId": 39081,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39082": {
+              "voteId": 39082,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39083": {
+              "voteId": 39083,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39084": {
+              "voteId": 39084,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39085": {
+              "voteId": 39085,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39086": {
+              "voteId": 39086,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2581,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39087": {
+              "voteId": 39087,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2581,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2582": {
+          "electionId": 2582,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 390,
+          "votes": {
+            "39088": {
+              "voteId": 39088,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39089": {
+              "voteId": 39089,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39090": {
+              "voteId": 39090,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39091": {
+              "voteId": 39091,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39092": {
+              "voteId": 39092,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39093": {
+              "voteId": 39093,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39094": {
+              "voteId": 39094,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39095": {
+              "voteId": 39095,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39096": {
+              "voteId": 39096,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39097": {
+              "voteId": 39097,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39098": {
+              "voteId": 39098,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39099": {
+              "voteId": 39099,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2582,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2583": {
+          "electionId": 2583,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 390,
+          "votes": {
+            "39100": {
+              "voteId": 39100,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39101": {
+              "voteId": 39101,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39102": {
+              "voteId": 39102,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39103": {
+              "voteId": 39103,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39104": {
+              "voteId": 39104,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39105": {
+              "voteId": 39105,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39106": {
+              "voteId": 39106,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2583,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39107": {
+              "voteId": 39107,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2583,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2584": {
+          "electionId": 2584,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 459,
+          "votes": {
+            "39108": {
+              "voteId": 39108,
+              "vote": true,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672727883,
+              "electionId": 2584,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39109": {
+              "voteId": 39109,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39110": {
+              "voteId": 39110,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39111": {
+              "voteId": 39111,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39112": {
+              "voteId": 39112,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39113": {
+              "voteId": 39113,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39114": {
+              "voteId": 39114,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39115": {
+              "voteId": 39115,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39116": {
+              "voteId": 39116,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39117": {
+              "voteId": 39117,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39118": {
+              "voteId": 39118,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39119": {
+              "voteId": 39119,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2584,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2585": {
+          "electionId": 2585,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 459,
+          "votes": {
+            "39120": {
+              "voteId": 39120,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39121": {
+              "voteId": 39121,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39122": {
+              "voteId": 39122,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39123": {
+              "voteId": 39123,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39124": {
+              "voteId": 39124,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39125": {
+              "voteId": 39125,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39126": {
+              "voteId": 39126,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2585,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39127": {
+              "voteId": 39127,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2585,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2586": {
+          "electionId": 2586,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1396,
+          "votes": {
+            "39128": {
+              "voteId": 39128,
+              "vote": true,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672727883,
+              "electionId": 2586,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39129": {
+              "voteId": 39129,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39130": {
+              "voteId": 39130,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39131": {
+              "voteId": 39131,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39132": {
+              "voteId": 39132,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39133": {
+              "voteId": 39133,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39134": {
+              "voteId": 39134,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39135": {
+              "voteId": 39135,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39136": {
+              "voteId": 39136,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39137": {
+              "voteId": 39137,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39138": {
+              "voteId": 39138,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39139": {
+              "voteId": 39139,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2586,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2587": {
+          "electionId": 2587,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1396,
+          "votes": {
+            "39140": {
+              "voteId": 39140,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39141": {
+              "voteId": 39141,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39142": {
+              "voteId": 39142,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39143": {
+              "voteId": 39143,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39144": {
+              "voteId": 39144,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39145": {
+              "voteId": 39145,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39146": {
+              "voteId": 39146,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2587,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39147": {
+              "voteId": 39147,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2587,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2588": {
+          "electionId": 2588,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1397,
+          "votes": {
+            "39148": {
+              "voteId": 39148,
+              "vote": true,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672727883,
+              "electionId": 2588,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39149": {
+              "voteId": 39149,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39150": {
+              "voteId": 39150,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39151": {
+              "voteId": 39151,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39152": {
+              "voteId": 39152,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39153": {
+              "voteId": 39153,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39154": {
+              "voteId": 39154,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39155": {
+              "voteId": 39155,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39156": {
+              "voteId": 39156,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39157": {
+              "voteId": 39157,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39158": {
+              "voteId": 39158,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39159": {
+              "voteId": 39159,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2588,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2589": {
+          "electionId": 2589,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1397,
+          "votes": {
+            "39160": {
+              "voteId": 39160,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39161": {
+              "voteId": 39161,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39162": {
+              "voteId": 39162,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39163": {
+              "voteId": 39163,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39164": {
+              "voteId": 39164,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39165": {
+              "voteId": 39165,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39166": {
+              "voteId": 39166,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2589,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39167": {
+              "voteId": 39167,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2589,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2590": {
+          "electionId": 2590,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1398,
+          "votes": {
+            "39168": {
+              "voteId": 39168,
+              "vote": true,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672727883,
+              "electionId": 2590,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39169": {
+              "voteId": 39169,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39170": {
+              "voteId": 39170,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39171": {
+              "voteId": 39171,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39172": {
+              "voteId": 39172,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39173": {
+              "voteId": 39173,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39174": {
+              "voteId": 39174,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39175": {
+              "voteId": 39175,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39176": {
+              "voteId": 39176,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39177": {
+              "voteId": 39177,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39178": {
+              "voteId": 39178,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39179": {
+              "voteId": 39179,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2590,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2591": {
+          "electionId": 2591,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1398,
+          "votes": {
+            "39180": {
+              "voteId": 39180,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39181": {
+              "voteId": 39181,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39182": {
+              "voteId": 39182,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39183": {
+              "voteId": 39183,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39184": {
+              "voteId": 39184,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39185": {
+              "voteId": 39185,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39186": {
+              "voteId": 39186,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2591,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39187": {
+              "voteId": 39187,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2591,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2592": {
+          "electionId": 2592,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1399,
+          "votes": {
+            "39188": {
+              "voteId": 39188,
+              "vote": true,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "updateDate": 1674672727883,
+              "electionId": 2592,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39189": {
+              "voteId": 39189,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39190": {
+              "voteId": 39190,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39191": {
+              "voteId": 39191,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39192": {
+              "voteId": 39192,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39193": {
+              "voteId": 39193,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39194": {
+              "voteId": 39194,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39195": {
+              "voteId": 39195,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39196": {
+              "voteId": 39196,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39197": {
+              "voteId": 39197,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39198": {
+              "voteId": 39198,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39199": {
+              "voteId": 39199,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2592,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2593": {
+          "electionId": 2593,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1399,
+          "votes": {
+            "39200": {
+              "voteId": 39200,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39201": {
+              "voteId": 39201,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39202": {
+              "voteId": 39202,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39203": {
+              "voteId": 39203,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39204": {
+              "voteId": 39204,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39205": {
+              "voteId": 39205,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39206": {
+              "voteId": 39206,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2593,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39207": {
+              "voteId": 39207,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2593,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2594": {
+          "electionId": 2594,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1403,
+          "votes": {
+            "39208": {
+              "voteId": 39208,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39209": {
+              "voteId": 39209,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39210": {
+              "voteId": 39210,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39211": {
+              "voteId": 39211,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39212": {
+              "voteId": 39212,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39213": {
+              "voteId": 39213,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39214": {
+              "voteId": 39214,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39215": {
+              "voteId": 39215,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39216": {
+              "voteId": 39216,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39217": {
+              "voteId": 39217,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39218": {
+              "voteId": 39218,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39219": {
+              "voteId": 39219,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2594,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2595": {
+          "electionId": 2595,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1403,
+          "votes": {
+            "39220": {
+              "voteId": 39220,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39221": {
+              "voteId": 39221,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39222": {
+              "voteId": 39222,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39223": {
+              "voteId": 39223,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39224": {
+              "voteId": 39224,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39225": {
+              "voteId": 39225,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39226": {
+              "voteId": 39226,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2595,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39227": {
+              "voteId": 39227,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2595,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2596": {
+          "electionId": 2596,
+          "electionType": "DataAccess",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1404,
+          "votes": {
+            "39228": {
+              "voteId": 39228,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39229": {
+              "voteId": 39229,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39230": {
+              "voteId": 39230,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "FINAL",
+              "displayName": "User 1: Chairperson"
+            },
+            "39231": {
+              "voteId": 39231,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39232": {
+              "voteId": 39232,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39233": {
+              "voteId": 39233,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "FINAL",
+              "displayName": "User 2: Member"
+            },
+            "39234": {
+              "voteId": 39234,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39235": {
+              "voteId": 39235,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39236": {
+              "voteId": 39236,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "FINAL",
+              "displayName": "User 4: Chair"
+            },
+            "39237": {
+              "voteId": 39237,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39238": {
+              "voteId": 39238,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            },
+            "39239": {
+              "voteId": 39239,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2596,
+              "type": "FINAL",
+              "displayName": "User 3: Member"
+            }
+          }
+        },
+        "2597": {
+          "electionId": 2597,
+          "electionType": "RP",
+          "status": "Open",
+          "createDate": 1674654916934,
+          "referenceId": "0a1cc490-2ad2-4194-b2c0-9244184843e4",
+          "dataSetId": 1404,
+          "votes": {
+            "39240": {
+              "voteId": 39240,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "DAC",
+              "displayName": "User 1: Chairperson"
+            },
+            "39241": {
+              "voteId": 39241,
+              "dacUserId": 3396,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "Chairperson",
+              "displayName": "User 1: Chairperson"
+            },
+            "39242": {
+              "voteId": 39242,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "DAC",
+              "displayName": "User 2: Member"
+            },
+            "39243": {
+              "voteId": 39243,
+              "dacUserId": 5075,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "Chairperson",
+              "displayName": "User 2: Member"
+            },
+            "39244": {
+              "voteId": 39244,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "DAC",
+              "displayName": "User 4: Chair"
+            },
+            "39245": {
+              "voteId": 39245,
+              "dacUserId": 4977,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "Chairperson",
+              "displayName": "User 4: Chair"
+            },
+            "39246": {
+              "voteId": 39246,
+              "vote": true,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "updateDate": 1676481400372,
+              "electionId": 2597,
+              "rationale": "",
+              "type": "DAC",
+              "displayName": "User 3: Member"
+            },
+            "39247": {
+              "voteId": 39247,
+              "dacUserId": 3351,
+              "createDate": 1674654916934,
+              "electionId": 2597,
+              "type": "Chairperson",
+              "displayName": "User 3: Member"
+            }
+          }
+        }
+      },
+      "datasetIds": [
+        2,
+        384,
+        390,
+        459,
+        1396,
+        1397,
+        1398,
+        1399,
+        1403,
+        1404
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "dataSetId": 2,
+      "objectId": "SC-10985",
+      "name": "Herman Taylor (U. Miss Med Center) - Jackson Heart Study",
+      "datasetName": "Herman Taylor (U. Miss Med Center) - Jackson Heart Study",
+      "createDate": "Mar 21, 2019",
+      "active": true,
+      "needsApproval": true,
+      "alias": 3,
+      "datasetIdentifier": "DUOS-000003",
+      "dataUse": {
+        "diseaseRestrictions": [
+          "http://purl.obolibrary.org/obo/DOID_602",
+          "http://purl.obolibrary.org/obo/DOID_9351"
+        ],
+        "populationOriginsAncestry": true,
+        "commercialUse": false,
+        "controlSetOption": "Yes",
+        "gender": "Female",
+        "pediatric": true
+      },
+      "dacId": 3,
+      "consentId": "eac1d4f9-78c9-4c88-9b10-9d692e171b5b",
+      "translatedUseRestriction": "Samples are restricted for use under the following conditions:\nData use is limited for studying: cancerophobia, diabetes mellitus [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use prohibited. [NCU]\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]\nData use is limited to research on females. [RS-FM]\nData use is limited to pediatric research. [RS-PD]",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 2,
+          "propertyName": "Data Depositor",
+          "propertyValue": "John Doe",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Dataset Name",
+          "propertyValue": "Herman Taylor (U. Miss Med Center) - Jackson Heart Study",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "muc-1, heart disease",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "dbGAP",
+          "propertyValue": "http://....",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Description",
+          "propertyValue": "NHGRI Medical Resequencing",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "# of participants",
+          "propertyValue": 31,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Species",
+          "propertyValue": "human",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Data Type",
+          "propertyValue": "DNA, whole genome",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Sample Collection ID",
+          "propertyValue": "SC-10985",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 2,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "Mark Smith",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1396,
+      "name": "datasetNamenottaken2",
+      "datasetName": "datasetNamenottaken2",
+      "createDate": "Apr 26, 2021",
+      "createUserId": 5018,
+      "updateDate": 1619469336429,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 600,
+      "datasetIdentifier": "DUOS-000600",
+      "dataUse": {
+        "diseaseRestrictions": [
+          "http://purl.obolibrary.org/obo/DOID_602",
+          "http://purl.obolibrary.org/obo/DOID_9351"
+        ],
+        "populationOriginsAncestry": true,
+        "commercialUse": false,
+        "controlSetOption": "Yes",
+        "gender": "Female",
+        "pediatric": true
+      },
+      "dacId": 3,
+      "consentId": "9f526a04-0fa9-46db-9ef9-f07376f2bd3e",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1396,
+          "propertyName": "Species",
+          "propertyValue": "g",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "u",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Data Type",
+          "propertyValue": "h",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "Rae",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Description",
+          "propertyValue": "j",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "dbGAP",
+          "propertyValue": "h",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Rae Johanek",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "Dataset Name",
+          "propertyValue": "datasetNamenottaken2",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1396,
+          "propertyName": "# of participants",
+          "propertyValue": 1,
+          "propertyType": "Number"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1397,
+      "name": "datasetNamenottaken3",
+      "datasetName": "datasetNamenottaken3",
+      "createDate": "Apr 26, 2021",
+      "createUserId": 5018,
+      "updateDate": 1619470040050,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 601,
+      "datasetIdentifier": "DUOS-000601",
+      "dataUse": {
+        "otherRestrictions": true,
+        "secondaryOther": "other"
+      },
+      "dacId": 3,
+      "consentId": "82037a04-4b09-4739-b29d-3ab77a09251f",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1397,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "dbGAP",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Species",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Description",
+          "propertyValue": "e",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Dataset Name",
+          "propertyValue": "datasetNamenottaken3",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Data Type",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": ";",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Rae Johanek",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1397,
+          "propertyName": "# of participants",
+          "propertyValue": 1,
+          "propertyType": "Number"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 390,
+      "name": "TOPMed HVH_DS_CVD_IRB_MDS_phs001013.v3.p2.c2",
+      "datasetName": "TOPMed HVH_DS_CVD_IRB_MDS_phs001013.v3.p2.c2",
+      "createDate": "May 15, 2019",
+      "updateDate": 1605620309593,
+      "updateUserId": 5008,
+      "active": true,
+      "needsApproval": false,
+      "alias": 33,
+      "datasetIdentifier": "DUOS-000033",
+      "dataUse": {
+        "diseaseRestrictions": [
+          "http://purl.obolibrary.org/obo/DOID_1287"
+        ],
+        "populationOriginsAncestry": true,
+        "controlSetOption": "Yes",
+        "genomicPhenotypicData": "Yes",
+        "other": "IRB Approval Required"
+      },
+      "dacId": 3,
+      "consentId": "5d788920-daf5-455e-9211-a0a769918e36",
+      "translatedUseRestriction": "Samples are restricted for use under the following conditions:\nData use is limited for studying: cardiovascular system disease [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]\nOther restrictions: IRB Approval Required.",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 390,
+          "propertyName": "Description",
+          "propertyValue": "Heart and Vascular Health Study",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Data Type",
+          "propertyValue": "Whole Genome",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Dataset Name",
+          "propertyValue": "TOPMed HVH_DS_CVD_IRB_MDS_phs001013.v3.p2.c2",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "# of participants",
+          "propertyValue": 11,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "NHLBI",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Species",
+          "propertyValue": "human",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "Cardiovascular System Disease",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "Data Depositor",
+          "propertyValue": "NHLBI",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 390,
+          "propertyName": "dbGAP",
+          "propertyValue": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001013.v3.p2",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1398,
+      "name": "datasetNamenottaken4",
+      "datasetName": "datasetNamenottaken4",
+      "createDate": "Apr 26, 2021",
+      "createUserId": 5018,
+      "updateDate": 1619470175543,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 602,
+      "datasetIdentifier": "DUOS-000602",
+      "dataUse": {
+        "otherRestrictions": true,
+        "other": "other"
+      },
+      "dacId": 3,
+      "consentId": "d440c95b-1525-47d3-868a-09020d1ce95c",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1398,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Species",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Data Type",
+          "propertyValue": "s",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Description",
+          "propertyValue": "d",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "d",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Dataset Name",
+          "propertyValue": "datasetNamenottaken4",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "# of participants",
+          "propertyValue": 1,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "dbGAP",
+          "propertyValue": "d",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1398,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Rae Johanek",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1399,
+      "name": "datasetNamenottaken",
+      "datasetName": "datasetNamenottaken",
+      "createDate": "Apr 26, 2021",
+      "createUserId": 5018,
+      "updateDate": 1619470531298,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 603,
+      "datasetIdentifier": "DUOS-000603",
+      "dataUse": {
+        "otherRestrictions": true,
+        "other": "other",
+        "secondaryOther": "other 2"
+      },
+      "dacId": 3,
+      "consentId": "26eadb0a-d360-4c4a-8945-661847f36bd5",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1399,
+          "propertyName": "Data Type",
+          "propertyValue": "h",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Dataset Name",
+          "propertyValue": "datasetNamenottaken",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "j",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "dbGAP",
+          "propertyValue": "h",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Species",
+          "propertyValue": "j",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "# of participants",
+          "propertyValue": 0,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "j",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Description",
+          "propertyValue": "j",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1399,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Rae Johanek",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 459,
+      "name": "mynewdataset",
+      "datasetName": "mynewdataset",
+      "createDate": "Apr 22, 2021",
+      "createUserId": 5018,
+      "updateDate": 1619124384029,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 93,
+      "datasetIdentifier": "DUOS-000093",
+      "dataUse": {
+        "otherRestrictions": true,
+        "other": "these are my other uses",
+        "secondaryOther": "these are my other secondary use terms"
+      },
+      "dacId": 3,
+      "consentId": "23df23bd-f6ff-45d9-9ad6-8fe2314082a1",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 459,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Rae Johanek",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Data Type",
+          "propertyValue": "genome",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "pheno",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "# of participants",
+          "propertyValue": 111,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "dbGAP",
+          "propertyValue": "fsf",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "Rae",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Dataset Name",
+          "propertyValue": "mynewdataset",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Species",
+          "propertyValue": "human",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 459,
+          "propertyName": "Description",
+          "propertyValue": "will have other data use terms",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1403,
+      "name": "A physiological fMRI study of acupuncture and perceptions of pain in chronic low back pain patients",
+      "datasetName": "A physiological fMRI study of acupuncture and perceptions of pain in chronic low back pain patients",
+      "createDate": "Jul 29, 2021",
+      "createUserId": 3396,
+      "updateDate": 1627587312300,
+      "updateUserId": 3396,
+      "active": true,
+      "needsApproval": false,
+      "alias": 607,
+      "datasetIdentifier": "DUOS-000607",
+      "dataUse": {
+        "generalUse": true
+      },
+      "dacId": 3,
+      "consentId": "f408fd44-3930-43f6-9fc9-bf78bc2248d9",
+      "translatedUseRestriction": "Samples are restricted for use under the following conditions:\nData is available for general research use. [GRU]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nRestrictions for use as a control set for diseases other than those defined were not specified.",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1403,
+          "propertyName": "Species",
+          "propertyValue": "Human",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "dbGAP",
+          "propertyValue": "https://www.massgeneral.org/doctors/18071/randy-gollub",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Data Type",
+          "propertyValue": "Imaging / MRI",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "Chronic back pain",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "# of participants",
+          "propertyValue": 100,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Dataset Name",
+          "propertyValue": "A physiological fMRI study of acupuncture and perceptions of pain in chronic low back pain patients",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Description",
+          "propertyValue": "The dataset contains the MRI data for 100 participants from a physiological fMRI study of acupuncture and perceptions of pain in chronic low back pain patients",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Jonathan Lawson (Admin & DAC Member)",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1403,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "Randy Gollub",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 1404,
+      "name": "Quazi Test Dataset",
+      "datasetName": "Quazi Test Dataset",
+      "createDate": "Mar 29, 2022",
+      "createUserId": 5052,
+      "updateDate": 1648590021870,
+      "updateUserId": 5052,
+      "active": true,
+      "needsApproval": true,
+      "alias": 608,
+      "datasetIdentifier": "DUOS-000608",
+      "dataUse": {
+        "generalUse": true
+      },
+      "dacId": 3,
+      "consentId": "afc44469-6ea1-40fc-95d3-bd96dc1429d4",
+      "translatedUseRestriction": "Samples are restricted for use under the following conditions:\nData is available for general research use. [GRU]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nRestrictions for use as a control set for diseases other than those defined were not specified.",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 1404,
+          "propertyName": "Description",
+          "propertyValue": "Quazi Test Dataset",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "Quazi Hoque",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Dataset Name",
+          "propertyValue": "Quazi Test Dataset",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "dbGAP",
+          "propertyValue": "https://docs.google.com/spreadsheets/d/1-ZBHYmngVYICIYO1WAfdtlBO_Vxf1kI9uVmvpHwI1sA/edit#gid=0",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "# of participants",
+          "propertyValue": 1,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Data Type",
+          "propertyValue": "Test",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Data Depositor",
+          "propertyValue": "Quazi Hoque",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "No",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 1404,
+          "propertyName": "Species",
+          "propertyValue": "Survey",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    },
+    {
+      "dataSetId": 384,
+      "name": "TOPMed FHS_HMB_IRB_MDS_phs000007.v29.p10.c1",
+      "datasetName": "TOPMed FHS_HMB_IRB_MDS_phs000007.v29.p10.c1",
+      "createDate": "May 15, 2019",
+      "updateDate": 1614697592380,
+      "updateUserId": 5018,
+      "active": true,
+      "needsApproval": false,
+      "alias": 27,
+      "datasetIdentifier": "DUOS-000027",
+      "dataUse": {
+        "hmbResearch": true,
+        "populationOriginsAncestry": true,
+        "genomicPhenotypicData": "Yes",
+        "other": "IRB Approval Required"
+      },
+      "dacId": 3,
+      "consentId": "7378e952-a2e9-4ba0-a515-ba8091299897",
+      "translatedUseRestriction": "Samples are restricted for use under the following conditions:\nData is limited for health/medical/biomedical research. [HMB]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for any type of health/medical/biomedical study is not prohibited.\nOther restrictions: IRB Approval Required.",
+      "deletable": false,
+      "properties": [
+        {
+          "dataSetId": 384,
+          "propertyName": "Description",
+          "propertyValue": "Framingham Heart Study",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "# of participants",
+          "propertyValue": 1,
+          "propertyType": "Number"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Data Depositor",
+          "propertyValue": "NHLBI",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Dataset Name",
+          "propertyValue": "TOPMed FHS_HMB_IRB_MDS_phs000007.v29.p10.c1",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Phenotype/Indication",
+          "propertyValue": "Cardiovascular System Disease",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Data Type",
+          "propertyValue": "Whole Genome",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Principal Investigator(PI)",
+          "propertyValue": "NHLBI",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "dbGAP",
+          "propertyValue": "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000007.v29.p10",
+          "propertyType": "String"
+        },
+        {
+          "dataSetId": 384,
+          "propertyName": "Species",
+          "propertyValue": "human",
+          "propertyType": "String"
+        }
+      ],
+      "dacApproval": true
+    }
+  ]
+}
