@@ -5,6 +5,7 @@ const CurrentUser = 'CurrentUser'; // System user
 const GoogleUser = 'Gapi'; // Google user info, including token
 const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
+const ENV = 'env';
 
 export const Storage = {
   clearStorage: () => {
@@ -65,5 +66,13 @@ export const Storage = {
 
   removeData: key => {
     sessionStorage.removeItem(key);
+  },
+
+  setEnv: (value) => {
+    sessionStorage.setItem(ENV, value);
+  },
+
+  getEnv: () => {
+    return sessionStorage.getItem(ENV);
   }
 };

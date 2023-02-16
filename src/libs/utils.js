@@ -4,9 +4,8 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import {map as lodashMap, forEach as lodashForEach, isArray} from 'lodash';
 import { DAR } from './ajax';
 import {Theme } from './theme';
-import { each, join, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
+import { each, flatten, flow, forEach as lodashFPForEach, get, getOr, uniq, find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, every, capitalize } from 'lodash/fp';
 import { headerTabsConfig } from '../components/DuosHeader';
-import {DatasetService} from '../utils/DatasetService';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
