@@ -41,10 +41,14 @@ const getKey = (config) => {
 };
 
 const onFormInputChange = (config, value) => {
-  const { onChange, formValue, setFormValue } = config;
+  const { type, onChange, formValue, setFormValue } = config;
 
   const key = getKey(config);
   const isValidInput = validateFormInput(config, value);
+
+  if (!isNil(type?.parseFormInput)) {
+    value = type.parseFormInput(value);
+  }
 
   if (value !== formValue) {
     onChange({key: key, value: value, isValid: isValidInput });
@@ -74,14 +78,16 @@ export const formInputGeneric = (config) => {
   return div([
     input({
       id,
-      type: type || 'text',
+      type: type?.inputType || 'text',
       className: `form-control ${error ? 'errored' : ''}`,
       placeholder: placeholder || title,
-      value: formValue,
+      value: formValue.toString(),
       readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
-      onChange: (event) => onFormInputChange(config, event.target.value),
+      onChange: (event) => {
+        onFormInputChange(config, event.target.value);
+      },
       onFocus: () => setError(),
       onBlur: (event) => validateFormInput(config, event.target.value),
       'aria-describedby': ariaDescribedby,

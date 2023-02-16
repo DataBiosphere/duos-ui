@@ -284,7 +284,7 @@ export const EditConsentGroup = (props) => {
         name: 'gs',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Specify Geographic Restriction',
-        defaultValue: gsText,
+        defaultValue: gsText || '',
         onChange: ({key, value, isValid}) => {
           setGSText(value);
           onChange({key: key, value: value, isValid: isValid});
@@ -348,7 +348,7 @@ export const EditConsentGroup = (props) => {
         name: 'otherSecondary',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Please specify',
-        defaultValue: otherSecondaryText,
+        defaultValue: otherSecondaryText || '',
         onChange: ({key, value, isValid}) => {
           setOtherSecondaryText(value);
           onChange({key: key, value: value, isValid: isValid});
