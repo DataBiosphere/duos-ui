@@ -87,7 +87,8 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterName',
-      title: 'Data Submitter Name',
+      title: 'Data Submitter Name ',
+      helpText: ' The individual completing this form will be saved with the study.',
       defaultValue: user?.displayName,
       disabled: true,
       onChange
@@ -95,7 +96,9 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterEmail',
-      title: 'Data Submitter Email',
+      title: 'Data Submitter Email ',
+      helpText: ` Insert the email for any individual with the 
+        authority to add/remove users access to this study’s datasets.`,
       defaultValue: user?.email,
       disabled: true,
       onChange
@@ -106,7 +109,7 @@ export default function DataSubmissionStudyInformation(props) {
       type: FormFieldTypes.MULTITEXT,
       defaultValue: [],
       validators: [
-        { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+        { isValid: isEmailAddress, msg: `Enter a valid email address (example@site.com)` }
       ],
       onChange
     }),
