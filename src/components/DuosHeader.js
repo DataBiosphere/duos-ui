@@ -332,7 +332,7 @@ const NavigationTabsComponent = (props) => {
             },
           },
           component: Link
-        }) : <div/>;
+        }) : null;
       }))
     ])
   ]));
