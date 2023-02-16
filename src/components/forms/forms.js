@@ -225,7 +225,7 @@ export const FormFieldTitle = (props) => {
       title,
       required && '*'
     ]),
-    helpText && span({ style: { fontStyle: 'italic' } }, helpText),
+    helpText && span({ style: { fontStyle: 'italic', padding: 7 } }, helpText),
     description && div({ style: { marginBottom: 15 } }, description),
   ]);
 };
