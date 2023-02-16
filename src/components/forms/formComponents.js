@@ -33,7 +33,7 @@ const updateValidation = (config, value) => {
   setValidation(validation);
 
   return isValid(validation);
-}
+};
 
 const onFormInputChange = (config, value) => {
   const { type, onChange, formValue, setFormValue, validators, setValidation } = config;
@@ -43,7 +43,7 @@ const onFormInputChange = (config, value) => {
   const validation = validateFormValue(value, validators);
   setValidation(validation);
 
-  
+
   if (!isNil(type?.parseFormInput)) {
     value = type.parseFormInput(value);
   }
@@ -127,14 +127,14 @@ export const formInputMultiText = (config) => {
   const {
     id, title, disabled,
     placeholder, ariaDescribedby,
-    inputStyle, onChange,
-    formValue, setFormValue, validation, setValidation
+    inputStyle, formValue, validation,
+    setValidation
   } = config;
 
   const pushValue = (element) => {
     const value = element.value.trim();
 
-    if (!value || !updateValidation(config, value)) {
+    if (!value) {
       return;
     }
     if (formValue.indexOf(value) !== -1) {
@@ -144,16 +144,14 @@ export const formInputMultiText = (config) => {
 
     const formValueClone = cloneDeep(formValue);
     formValueClone.push(value);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
+    onFormInputChange(config, formValueClone);
     element.value = '';
   };
 
   const removePill = (index) => {
     const formValueClone = cloneDeep(formValue);
     formValueClone.splice(index, 1);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
+    onFormInputChange(formValueClone);
   };
 
   return div({}, [

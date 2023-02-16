@@ -1,6 +1,5 @@
 import React from 'react';
-import Ajv2020 from "ajv/dist/2020"
-import { addFormats, validate } from '../utils/JsonSchemaUtils';
+import { compileSchema, validateForm } from '../utils/JsonSchemaUtils';
 
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
@@ -33,8 +32,7 @@ export const DataSubmissionForm = () => {
     const getSchema = async () => {
       const schema = await Schema.datasetRegistrationV1();
       setSchema(schema);
-      console.log(schema);
-    }
+    };
 
     const init = async () => {
       try {
@@ -53,9 +51,7 @@ export const DataSubmissionForm = () => {
 
   useEffect(() => {
     if (!isNil(schema)) {
-      const validator = addFormats(new Ajv2020({strict: false, allErrors: true})).compile(schema);
-      console.log(validator)
-      setValidateSchema((_) => validator);
+      setValidateSchema(compileSchema(schema));
     } else {
       setValidateSchema();
     }
@@ -84,16 +80,7 @@ export const DataSubmissionForm = () => {
   };
 
   // compute multipart/form-data object, includes registration information and all files
-  const getMultiPartFormData = () => {
-    const registration = cloneDeep(formData);
-    formatForRegistration(registration);
-
-    console.log(validateSchema);
-    const [valid, validation] = validate(validateSchema, registration);
-    
-    setFormValidation(validation);
-    console.log();
-    console.log(validateSchema.errors);
+  const createMultiPartFormData = (registration) => {
 
     const multiPartFormData = new FormData();
 
@@ -109,7 +96,20 @@ export const DataSubmissionForm = () => {
   };
 
   const submit = async () => {
-    const multiPartFormData = getMultiPartFormData();
+    const registration = cloneDeep(formData);
+    formatForRegistration(registration);
+
+    // check against json schema to see if there are uncaught validation issues
+    const [valid, validation] = validateForm(validateSchema, registration);
+    setFormValidation(validation);
+
+    if (!valid) {
+      Notifications.showError({ text: 'There are errors in your form. Please fix and try again.' });
+      return;
+    }
+
+    // no validation issues, matches json schema: continue to submission
+    const multiPartFormData = createMultiPartFormData(registration);
 
     DataSet.registerDataset(multiPartFormData).catch((e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });
@@ -131,6 +131,7 @@ export const DataSubmissionForm = () => {
   };
 
   const onValidationChange = ({ key, validation }) => {
+    /* eslint-disable no-console */
     console.log('Validation OnChange:', key, validation);
 
     setFormValidation((val) => {
@@ -138,7 +139,7 @@ export const DataSubmissionForm = () => {
       set(newValidation, key, validation);
       return newValidation;
     });
-  }
+  };
 
 
   return !failedInit && <div style={Styles.PAGE} >
@@ -160,10 +161,10 @@ export const DataSubmissionForm = () => {
 
 
       <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} />
-      <NihAnvilUse onChange={onChange} initialFormData={formData} />
-      <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} />
-      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} />
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} />
+      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} />
+      <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
+      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

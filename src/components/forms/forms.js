@@ -267,7 +267,7 @@ export const FormField = (config) => {
       return validation;
     }
     return internalValidationState;
-  }, [internalValidationState, validation])
+  }, [internalValidationState, validation]);
 
   const updateValidation = useCallback((newValidation) => {
     if (!isNil(onValidationChange)) {
