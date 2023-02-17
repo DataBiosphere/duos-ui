@@ -1,8 +1,8 @@
-import { mergeAll } from 'lodash/fp';
+import {mergeAll} from 'lodash/fp';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
-import { USER_ROLES } from './libs/utils';
+import {USER_ROLES} from './libs/utils';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
@@ -21,8 +21,8 @@ import SigningOfficialDarRequests from './pages/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/SigningOfficialDataSubmitters';
 import Translator from './pages/Translator';
 import NIHPilotInfo from './pages/NIHPilotInfo';
-import { Status } from './pages/Status';
-import { SummaryVotes } from './pages/SummaryVotes';
+import {Status} from './pages/Status';
+import {SummaryVotes} from './pages/SummaryVotes';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
@@ -35,11 +35,12 @@ import ChairConsole from './pages/ChairConsole';
 import MemberConsole from './pages/MemberConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
-import { HealthCheck } from './pages/HealthCheck';
+import {HealthCheck} from './pages/HealthCheck';
 import DataSubmissionForm from './pages/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 import BroadDatasetCatalog from './pages/dac_dataset_catalog/BroadDatasetCatalog';
-import { AnVILDMSPolicyInfo, NIHDMSPolicyInfo } from './pages/DMSPolicyInfo';
+import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
+import {checkEnv, envGroups} from './utils/EnvironmentUtils';
 
 const Routes = (props) => (
   <Switch>
@@ -49,11 +50,9 @@ const Routes = (props) => (
     <Route exact path="/liveness" render={() => HealthCheck()} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
-        props.env
-          ? (props.env !== 'prod' && props.env !== 'staging')
-            ? <BackgroundSignIn {...routeProps} />
-            : <NotFound />
-          : <div />
+        checkEnv(envGroups.NON_STAGING)
+          ? <BackgroundSignIn {...routeProps} />
+          : <NotFound />
     } />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
@@ -78,30 +77,28 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
-    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props}
-      rolesAllowed={[USER_ROLES.researcher]} />}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
-    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props}
-      rolesAllowed={[USER_ROLES.researcher]} />}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/broad_dataset_catalog" component={BroadDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/broad_dataset_catalog" component={BroadDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
-    {(props.env === 'local' || props.env === 'dev') && <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />}
-    {(props.env === 'local' || props.env === 'dev' || props.env === 'staging') &&<AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.all]} />}
+    {checkEnv(envGroups.NON_PROD) && <AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <Route path="*" component={NotFound} />
   </Switch>
 );

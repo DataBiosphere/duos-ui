@@ -1,4 +1,4 @@
-import {Component, useEffect, useState} from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
@@ -17,6 +17,8 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
+import {isFunction, isNil} from 'lodash/fp';
 
 const styles = {
   drawerPaper: {
@@ -71,6 +73,10 @@ const isOnlySigningOfficial = (user) => {
   return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
 };
 
+/**
+ * Tab objects in this array support an `isRendered` function per top level Tab as well as
+ * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
+ */
 export const headerTabsConfig = [
   {
     label: 'Admin Console',
@@ -92,8 +98,8 @@ export const headerTabsConfig = [
     children: [
       { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
-      { label: 'My Datasets', link: '/dataset_catalog'}
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
+      { label: 'My Datasets', link: '/dataset_catalog' }
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -311,7 +317,11 @@ const NavigationTabsComponent = (props) => {
         },
         onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
-        return h(Tab, {
+        // Default to displaying the sub tab if no render function exists for it
+        const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ?
+          true :
+          tab.isRendered();
+        return isRendered ? h(Tab, {
           key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
@@ -322,7 +332,7 @@ const NavigationTabsComponent = (props) => {
             },
           },
           component: Link
-        });
+        }) : null;
       }))
     ])
   ]));

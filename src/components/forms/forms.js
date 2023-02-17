@@ -30,6 +30,7 @@ export const commonOptionalProps = [
   'name',
   'disabled',
   'description',
+  'helpText',
   'title',
   'ariaLevel',
   'ariaDescribedby',
@@ -212,6 +213,7 @@ export const FormFieldTitle = (props) => {
     title,
     hideTitle,
     description,
+    helpText,
     formId,
     ariaLevel,
     required,
@@ -228,6 +230,7 @@ export const FormFieldTitle = (props) => {
       title,
       required && '*'
     ]),
+    helpText && span({ style: { fontStyle: 'italic', padding: 7 } }, helpText),
     description && div({ style: { marginBottom: 15 } }, description),
   ]);
 };
@@ -235,7 +238,7 @@ export const FormFieldTitle = (props) => {
 export const FormField = (config) => {
   const {
     id, name, type = FormFieldTypes.TEXT, ariaLevel,
-    title, hideTitle, description,
+    title, hideTitle, description, helpText
     defaultValue, style, validators,
     validation, onValidationChange
   } = config;
@@ -280,7 +283,7 @@ export const FormField = (config) => {
     className: `formField-container formField-${id}`
   }, [
     h(FormFieldTitle, {
-      title, hideTitle, description,
+      title, hideTitle, description, helpText,
       required, formId: id, ariaLevel,
       validation: getValidation()
     }),
