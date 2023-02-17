@@ -1,6 +1,6 @@
 import {h, span} from 'react-hyperscript-helpers';
 import CollectionVoteButton from './CollectionVoteButton';
-import {CheckCircleOutlined} from '@material-ui/icons';
+import {CheckCircleOutlined} from '@mui/icons-material';
 import {votingColors} from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 export default function CollectionVoteYesButton(props) {

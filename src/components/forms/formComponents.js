@@ -6,7 +6,7 @@ import AsyncSelect from 'react-select/async';
 import AsyncCreatable from 'react-select/async-creatable';
 import { FormField, FormValidators } from './forms';
 import { RadioButton } from '../RadioButton';
-import PublishIcon from '@material-ui/icons/Publish';
+import PublishIcon from '@mui/icons-material/Publish';
 
 import './formComponents.css';
 import { isArray } from 'lodash';

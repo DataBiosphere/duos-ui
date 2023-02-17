@@ -1,5 +1,5 @@
 import isNil from 'lodash/fp/isNil';
-import ClearIcon from '@material-ui/icons/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
 import { div, input, label, a, h } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
 import { isFileEmpty } from '../libs/utils';

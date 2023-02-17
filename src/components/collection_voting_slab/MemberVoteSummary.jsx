@@ -3,7 +3,7 @@ import {
   collapseVotesByUser,
 } from '../../utils/DarCollectionUtils';
 import VoteSummaryTable from '../vote_summary_table/VoteSummaryTable';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 import './member_vote_summary.css';
 
