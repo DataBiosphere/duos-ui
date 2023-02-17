@@ -151,7 +151,7 @@ export const formInputMultiText = (config) => {
   const removePill = (index) => {
     const formValueClone = cloneDeep(formValue);
     formValueClone.splice(index, 1);
-    onFormInputChange(formValueClone);
+    onFormInputChange(config, formValueClone);
   };
 
   return div({}, [

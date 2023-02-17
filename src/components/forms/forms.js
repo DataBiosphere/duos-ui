@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction, isNil } from 'lodash/fp';
+import { cloneDeep, isFunction, isNil, isArray } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
@@ -251,12 +251,9 @@ export const FormField = (config) => {
 
   useEffect(() => {
     if (defaultValue !== undefined) {
-      const normalizedValue = isFunction(type.updateDefaultValue)
-        ? type.updateDefaultValue(config)
-        : defaultValue;
-      setFormValue(normalizedValue);
+      setFormValue(defaultValue);
     }
-  }, [defaultValue, config, type]);
+  }, [defaultValue, type]);
 
   useEffect(() => {
     validateFormProps(config);
@@ -304,9 +301,10 @@ export const FormField = (config) => {
 */
 export const FormTable = (config) => {
   const {
-    id, name, formFields, defaultValue,
+    id, name, formFields,
     enableAddingRow, addRowLabel,
-    disabled, onChange, minLength
+    disabled, onChange, minLength,
+    validation, defaultValue
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
@@ -332,6 +330,7 @@ export const FormTable = (config) => {
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
             defaultValue: formValue[i][formCol.name || formCol.id],
+            validation: !isNil(validation) && isArray(validation) ? validation.at(i)?.[formCol.id] : undefined,
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][formCol.name || formCol.id] = value;

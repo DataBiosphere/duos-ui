@@ -24,6 +24,8 @@ export const DataSubmissionForm = () => {
   const [schema, setSchema] = useState();
   const [validateSchema, setValidateSchema] = useState();
 
+  const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
+
   useEffect(() => {
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
@@ -51,7 +53,7 @@ export const DataSubmissionForm = () => {
 
   useEffect(() => {
     if (!isNil(schema)) {
-      setValidateSchema(compileSchema(schema));
+      setValidateSchema(() => compileSchema(schema));
     } else {
       setValidateSchema();
     }
@@ -96,6 +98,11 @@ export const DataSubmissionForm = () => {
   };
 
   const submit = async () => {
+    if (!allConsentGroupsSaved) {
+      Notifications.showError({ text: 'Please save all consent groups and try again.' });
+      return;
+    }
+
     const registration = cloneDeep(formData);
     formatForRegistration(registration);
 
@@ -164,7 +171,7 @@ export const DataSubmissionForm = () => {
       <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} />
       <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
       <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} />
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

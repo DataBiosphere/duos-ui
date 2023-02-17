@@ -6,19 +6,19 @@ import {
 } from '../components/forms/formValidation';
 import {
   get, set, isNil
-} from 'lodash'
+} from 'lodash';
 
 
 const formats = {
   date: dateValidator.isValid,
   uri: urlValidator.isValid,
   email: emailValidator.isValid
-}
+};
 
 /**
  * Validates given object according to the schema in a format that
  * our internal form components can understand.
- * 
+ *
  * @param {*} compiledSchema Compiled schema
  * @param {*} obj Form data
  * @returns Form component compatible validation object
@@ -56,14 +56,14 @@ export const validateForm = (compiledSchema, obj) => {
   });
 
   return [false, validationObject];
-}
+};
 
 /**
  * Compiles schema (defaults to 2020 draft version of JSON Schema)
  */
 export const compileSchema = (schema) => {
   return addFormats(new Ajv2020({strict: false, allErrors: true})).compile(schema);
-}
+};
 
 
 const addFormats = (ajv) => {
@@ -71,7 +71,7 @@ const addFormats = (ajv) => {
     ajv = ajv.addFormat(formatId, formats[formatId]);
   }
   return ajv;
-}
+};
 
 
 const updateValidation = (existingValidation, validationError) => {
@@ -79,7 +79,7 @@ const updateValidation = (existingValidation, validationError) => {
     return {
       valid: false,
       failed: [validationError]
-    }
+    };
   }
 
   // if the field is required and empty, we shouldn't also error on, e.g., that it isn't a date format
@@ -87,14 +87,14 @@ const updateValidation = (existingValidation, validationError) => {
     return {
       valid: false,
       failed: ['required']
-    }
+    };
   }
 
   return {
     valid: false,
     failed: existingValidation.failed + [validationError],
-  }
-}
+  };
+};
 
 const splitJsonPointer = (jsonPointer) => {
   if (jsonPointer[0] === '/') {
@@ -102,4 +102,4 @@ const splitJsonPointer = (jsonPointer) => {
   }
 
   return jsonPointer.split('/');
-}
+};

@@ -71,7 +71,6 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
-      defaultValue: [],
       type: FormFieldTypes.MULTITEXT,
       validation: validation.dataTypes,
       onChange,
@@ -122,9 +121,8 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
       type: FormFieldTypes.MULTITEXT,
-      defaultValue: [],
       validators: [
-        FormValidators.DATE
+        FormValidators.EMAIL
       ],
       validation: validation.dataCustodianEmail,
       onChange,
