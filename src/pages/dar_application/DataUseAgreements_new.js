@@ -2,7 +2,7 @@
 import { a, div, h2, h3, span, li, ol, p} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
-import NihLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
 import './dar_application_new.css';
@@ -57,7 +57,7 @@ export default function DataUseAgreements(props) {
           ])
         ]),
         div({}, [
-          a({ target: '_blank', href: NihLibraryCardAgreementLink, className: 'button button-white' }, [
+          a({ target: '_blank', href: NhgriLibraryCardAgreementLink, className: 'button button-white' }, [
             span({className: 'glyphicon glyphicon-download'}),
             ' NHGRI Library Card Agreement'
           ])
