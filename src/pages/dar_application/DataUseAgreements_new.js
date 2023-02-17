@@ -59,7 +59,7 @@ export default function DataUseAgreements(props) {
         div({}, [
           a({ target: '_blank', href: NihLibraryCardAgreementLink, className: 'button button-white' }, [
             span({className: 'glyphicon glyphicon-download'}),
-            ' NIH Library Card Agreement'
+            ' NHGRI Library Card Agreement'
           ])
         ])
       ]),
