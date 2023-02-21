@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { div, h, img } from 'react-hyperscript-helpers';
+import { div, h, img, a } from 'react-hyperscript-helpers';
 import {cloneDeep, findIndex} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
@@ -9,6 +9,8 @@ import {Notifications, searchOnFilteredList, getSearchFilterFunctions } from '..
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
 import { USER_ROLES } from '../libs/utils';
+import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
+import NhgriLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
@@ -146,6 +148,14 @@ export default function ResearcherConsole() {
                 }),
               },
               [`Select and manage Data Access Requests and Drafts below`]
+            ),
+            div(
+              {
+                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+                  fontSize: '18px',
+                }),
+              },
+              ['By submitting a DAR in DUOS you agree to the ', a({target: '_blank', href: BroadLibraryCardAgreementLink}, ['Broad']), ' and ', a({target: '_blank', href: NhgriLibraryCardAgreementLink}, ['NHGRI']), ' Library Card Agreements.']
             ),
           ]),
         ]
