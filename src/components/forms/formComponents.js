@@ -12,6 +12,7 @@ import './formComponents.css';
 import { isArray } from 'lodash';
 
 import { isValid, validateFormValue, validationMessage } from './formValidation';
+import { useState } from 'react';
 
 const styles = {
   inputStyle: {
@@ -126,10 +127,15 @@ export const formInputTextarea = (config) => {
 export const formInputMultiText = (config) => {
   const {
     id, title, disabled,
-    placeholder, ariaDescribedby,
+    placeholder, ariaDescribedby, validators,
     inputStyle, formValue, validation,
     setValidation
   } = config;
+
+  // validation of the user's input as they are typing it, 
+  // separate from validation of the actual saved values
+  // (which is the top level validation).
+  const [inputValidation, setInputValidation] = useState({});
 
   const pushValue = (element) => {
     const value = element.value.trim();
@@ -137,6 +143,13 @@ export const formInputMultiText = (config) => {
     if (!value) {
       return;
     }
+
+    const inputValidation = validateFormValue(value, validators);
+    setInputValidation(inputValidation);
+    if (!isValid(inputValidation)) {
+      return;
+    }
+
     if (formValue.indexOf(value) !== -1) {
       element.value = '';
       return;
@@ -161,7 +174,7 @@ export const formInputMultiText = (config) => {
       input({
         id,
         type: 'text',
-        className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
+        className: `form-control ${!isValid(validation) || !isValid(inputValidation) ? 'errored' : ''}`,
         placeholder: placeholder || title,
         style: { ...styles.inputStyle, ...inputStyle },
         disabled,
@@ -187,6 +200,7 @@ export const formInputMultiText = (config) => {
         })
       ])
     ]),
+    errorMessages(inputValidation),
     errorMessages(validation),
     div({ className: 'flex-row', style: { justifyContent: 'flex-start' } },
       formValue.map((val, i) => {

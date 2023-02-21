@@ -30,7 +30,7 @@ describe('FormField - Tests', () => {
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         validators: [
-          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+          FormValidators.EMAIL
         ]
       };
 
@@ -47,13 +47,12 @@ describe('FormField - Tests', () => {
     });
 
     it('should show error message with validator error message', () => {
-      const errMessage = 'Enter a valid email address (example@site.com)';
       props = {
         ...baseProps,
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         validators: [
-          { isValid: isEmailAddress, msg: errMessage }
+          FormValidators.EMAIL
         ]
       };
       mount(<FormField {...props}/>);
@@ -61,7 +60,7 @@ describe('FormField - Tests', () => {
         .type('a')
         .then(() => {
           cy.get('#dataCustodianEmail').should('have.value', 'a');
-          cy.get('.formField-dataCustodianEmail .error-message').contains(errMessage);
+          cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
         });
     });
   });
@@ -217,7 +216,7 @@ describe('FormField - Tests', () => {
         title: 'Data Custodian Email',
         type: FormFieldTypes.MULTITEXT,
         validators: [
-          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+          FormValidators.EMAIL
         ],
         defaultValue: []
       };

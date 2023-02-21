@@ -268,6 +268,6 @@ describe('Researcher Info', () => {
     // Invalid Email entered
     cy.get('#0_collaboratorEmail').type('JohnDoe@gmail{enter}');
     cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Please enter a valid email address (e.g., person@example.com)');
+    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Please enter a valid email (e.g., johndoe@gmail.com)');
   });
 });
