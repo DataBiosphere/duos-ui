@@ -7,7 +7,9 @@ import NihAnvilUse from '../../../src/components/data_submission/NihAnvilUse';
 let propCopy;
 
 const props = {
-  onChange: () => {}
+  onChange: () => {},
+  validation: {},
+  onValidationChange: () => {},
 };
 
 beforeEach(() => {

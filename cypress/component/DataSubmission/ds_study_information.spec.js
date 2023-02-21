@@ -14,7 +14,9 @@ const user = {
 };
 
 const props = {
-  onChange: () => {}
+  onChange: () => {},
+  validation: {},
+  onValidationChange: () => {},
 };
 
 beforeEach(() => {

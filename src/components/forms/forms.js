@@ -238,7 +238,7 @@ export const FormFieldTitle = (props) => {
 export const FormField = (config) => {
   const {
     id, name, type = FormFieldTypes.TEXT, ariaLevel,
-    title, hideTitle, description, helpText
+    title, hideTitle, description, helpText,
     defaultValue, style, validators,
     validation, onValidationChange
   } = config;
