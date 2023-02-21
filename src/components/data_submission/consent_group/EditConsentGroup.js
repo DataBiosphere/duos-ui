@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { div, h, h3 } from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators } from '../../forms/forms';
 import { DAR } from '../../../libs/ajax';

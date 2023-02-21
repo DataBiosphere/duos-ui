@@ -1,5 +1,5 @@
-import { Grid } from '@material-ui/core';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import { Grid } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import React from 'react';
 import homeHeaderBackground from '../images/home_header_background.png';
 import anvilBackground from '../images/anvil_background.jpg';

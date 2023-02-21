@@ -1,10 +1,10 @@
-import React, {Component, useEffect, useState} from 'react';
+import {Component, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import {IconButton} from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
+import Drawer from '@mui/material/Drawer';
+import Hidden from '@mui/material/Hidden';
+import {IconButton} from '@mui/material';
+import { withStyles } from '@mui/styles';
+import MenuIcon from '@mui/icons-material/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';

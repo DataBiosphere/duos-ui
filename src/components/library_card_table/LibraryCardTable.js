@@ -12,7 +12,7 @@ import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import { LibraryCard } from '../../libs/ajax';
 import ConfirmationModal from '../modals/ConfirmationModal';
-import {Delete, Update} from '@material-ui/icons';
+import {Delete, Update} from '@mui/icons-material';
 import TableIconButton from '../TableIconButton';
 import SimpleButton from '../SimpleButton';
 

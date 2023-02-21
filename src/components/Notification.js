@@ -1,10 +1,10 @@
 import {isEmpty} from 'lodash/fp';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import WarningIcon from '@material-ui/icons/Warning';
-import InfoIcon from '@material-ui/icons/Info';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ReportIcon from '@material-ui/icons/Report';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ReportIcon from '@mui/icons-material/Report';
 import style from './Notification.module.css';
 
 export const Notification = (props) => {
