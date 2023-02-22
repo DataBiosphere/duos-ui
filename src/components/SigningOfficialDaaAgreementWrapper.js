@@ -84,7 +84,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
       div({}, [isDataSubmitterTab === true ? isNull :
         a({ target: '_blank', href: NIHLibraryCardAgreementLink, className: 'button button-white' }, [
           span({className: 'glyphicon glyphicon-download'}),
-          ' NIH Library Card Agreement'
+          ' NHGRI Library Card Agreement'
         ])
       ]),
 

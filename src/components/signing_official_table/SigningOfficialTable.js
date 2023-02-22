@@ -18,6 +18,8 @@ import ConfirmationModal from '../modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDownload';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
+import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
 
 //Styles specific to this table
@@ -398,8 +400,16 @@ export default function SigningOfficialTable(props) {
               target: '_blank',
               id: 'so-console-info-link',
               style: { verticalAlign: 'super' }},
-            ['i'])
-          ])
+            ['i']),
+          ]),
+          div({
+            style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+              fontSize: '16px',
+            }),
+          },[
+            'Issuing Library Card privileges is done in accordance with the ', a({target: '_blank', href: BroadLibraryCardAgreementLink}, ['Broad']), ' and ', a({target: '_blank', href: NhgriLibraryCardAgreementLink}, ['NHGRI']), ' Library Card Agreements.',
+
+          ]),
         ]),
       ]),
       h(SearchBar, {style: {marginLeft: '25%', marginRight: '-10%'}}, { handleSearchChange, searchRef }),
