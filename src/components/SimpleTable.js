@@ -2,7 +2,7 @@ import { isNil } from 'lodash/fp';
 import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
-import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import { SpinnerComponent } from '../components/SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
 

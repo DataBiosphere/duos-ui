@@ -1,7 +1,7 @@
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles, Theme } from '../../libs/theme';
-import { Block, Delete } from '@material-ui/icons';
+import { Block, Delete } from '@mui/icons-material';
 import SimpleButton from '../SimpleButton';
 import { useHistory } from 'react-router-dom';
 import { Notifications } from '../../libs/utils';
