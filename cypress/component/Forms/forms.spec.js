@@ -2,7 +2,6 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
-import { isEmailAddress } from '../../../src/libs/utils';
 
 let props;
 const baseProps = {
@@ -102,7 +101,7 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.REQUIRED.msg);
       cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
-    })
+    });
   });
 
   describe('Form Control - Text Input Tests', () => {
