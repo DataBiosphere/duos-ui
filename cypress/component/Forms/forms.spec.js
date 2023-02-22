@@ -73,7 +73,7 @@ describe('FormField - Tests', () => {
       };
       cy.spy(props, 'onValidationChange');
       mount(<FormField {...props}/>);
-      
+
       cy.get('#dataCustodianEmail')
         .type('a')
         .then(() => {
@@ -86,8 +86,7 @@ describe('FormField - Tests', () => {
         .type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
         .then(() => {
           expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email', 'required'] }});
-        })
-        ;
+        });
     })
 
     it('can take external validation control', () => {
