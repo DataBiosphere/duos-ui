@@ -122,7 +122,7 @@ export const NIHAdministrativeInformation = (props) => {
     }),
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
-      title: 'If no, explain why controlled access is needed for GSR.',
+      title: 'If yes, explain why controlled access is needed for GSR.',
       isRendered: showGSRRequiredExplanation,
       defaultValue: gsrRequiredExplanation,
       validators: [FormValidators.REQUIRED],
