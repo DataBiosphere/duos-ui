@@ -85,7 +85,7 @@ export const generatePreProcessedBucketData = async ({dars, datasets}) => {
 };
 
 //Helper function for processDataUseBuckets, essentilly organizes votes in a dar's elections by type
-const processVotesForBucket = (darElections = []) => {
+export const processVotesForBucket = (darElections = []) => {
   const rp =  {
     chairpersonVotes: [],
     memberVotes : [],
@@ -489,6 +489,7 @@ export const updateFinalVote = ({key, votePayload, voteIds, dataUseBuckets, setD
 export default {
   generatePreProcessedBucketData,
   processDataUseBuckets,
+  processVotesForBucket,
   extractDacDataAccessVotesFromBucket,
   extractDacRPVotesFromBucket,
   extractDacFinalVotesFromBucket,

@@ -1,9 +1,14 @@
 import {any, forEach, get, getOr, includes, isEqual, map, values} from 'lodash/fp';
 
-export const processCollection = (collection) => {
+import {processVotesForBucket} from './DarCollectionUtils';
+
+export const binCollectionToBuckets = (collection) => {
   let buckets = [];
   // Step 1: Map all datasets to distinct buckets based on data use
   // Step 2: Pull all elections for those datasets into the buckets
+  // Step 3: Pull all votes up to a top level bucket field for easier iteration
+
+  // Step 1
   const datasets = get('datasets')(collection);
   map(d => {
     // Put each dataset into a bucket. If the dataset's data use is
@@ -13,7 +18,8 @@ export const processCollection = (collection) => {
       datasets: [d],
       datasetIds: [d.dataSetId],
       dataUse: d.dataUse,
-      elections: []
+      elections: [],
+      votes: []
     };
     if (getOr(false)('otherRestrictions')(d.dataUse)) {
       buckets.push(bucket);
@@ -34,6 +40,7 @@ export const processCollection = (collection) => {
     }
   })(datasets);
 
+  // Step 2
   const darMap = get('dars')(collection);
   forEach(dar => {
     const electionMap = get('elections')(dar);
@@ -48,5 +55,10 @@ export const processCollection = (collection) => {
     })(values(electionMap));
   })(values(darMap));
 
-  console.log(buckets);
+  // Step 3
+  forEach(bucket => {
+    bucket.votes.push(processVotesForBucket(bucket.elections));
+  })(buckets);
+
+  return buckets;
 };
