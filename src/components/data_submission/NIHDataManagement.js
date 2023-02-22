@@ -182,38 +182,6 @@ export const NIHDataManagement = (props) => {
         title: 'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
         onChange,
       }),
-
-      div({
-        style: {
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        },
-      }, [
-
-        h(FormField, {
-          id: 'alternativeDataSharingPlanTargetDeliveryDate',
-          style: {
-            width: '45%',
-          },
-          defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
-          title: 'Target Delivery Date',
-          placeholder: 'Please enter date (YYYY-MM-DD)',
-          validators: [FormValidators.DATE],
-          onChange,
-        }),
-        h(FormField, {
-          id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
-          style: {
-            width: '45%',
-          },
-          defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
-          title: 'Target Public Release Date',
-          placeholder: 'Please enter date (YYYY-MM-DD)',
-          validators: [FormValidators.DATE],
-          onChange,
-        }),
-      ]),
     ]),
 
   ]);
