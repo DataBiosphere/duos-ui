@@ -7,16 +7,16 @@ import {
   customSelectPropValidation,
 } from './formUtils';
 import {
-  formInputGeneric,
-  formInputMultiText,
-  formInputSelect,
-  formInputCheckbox,
-  formInputSlider,
-  formInputRadioGroup,
-  formInputYesNoRadioGroup,
-  formInputTextarea,
-  formInputRadioButton,
-  formInputFile,
+  FormInputGeneric,
+  FormInputMultiText,
+  FormInputSelect,
+  FormInputCheckbox,
+  FormInputSlider,
+  FormInputRadioGroup,
+  FormInputYesNoRadioGroup,
+  FormInputTextarea,
+  FormInputRadioButton,
+  FormInputFile,
   getKey
 } from './formComponents';
 
@@ -52,7 +52,7 @@ export const commonOptionalProps = [
 export const FormFieldTypes = {
   MULTITEXT: {
     defaultValue: [],
-    component: formInputMultiText,
+    component: FormInputMultiText,
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -61,7 +61,7 @@ export const FormFieldTypes = {
   },
   SLIDER: {
     defaultValue: false,
-    component: formInputSlider,
+    component: FormInputSlider,
     requiredProps: [],
     optionalProps: [
       'toggleText',
@@ -69,7 +69,7 @@ export const FormFieldTypes = {
   },
   RADIOGROUP: {
     defaultValue: null,
-    component: formInputRadioGroup,
+    component: FormInputRadioGroup,
     requiredProps: [
       'options',
       // 'options' example:
@@ -85,7 +85,7 @@ export const FormFieldTypes = {
   },
   YESNORADIOGROUP: {
     defaultValue: null,
-    component: formInputYesNoRadioGroup,
+    component: FormInputYesNoRadioGroup,
     optionalProps: [
       'orientation', // 'vertical' or 'horizontal'
     ],
@@ -98,11 +98,11 @@ export const FormFieldTypes = {
     optionalProps: [
       'toggleText',
     ],
-    component: formInputRadioButton,
+    component: FormInputRadioButton,
   },
   TEXT: {
     defaultValue: '',
-    component: formInputGeneric,
+    component: FormInputGeneric,
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -113,7 +113,7 @@ export const FormFieldTypes = {
   NUMBER: {
     defaultValue: '',
     inputType: 'number',
-    component: formInputGeneric,
+    component: FormInputGeneric,
     parseFormInput: (formInput, prevValue) => {
       if (formInput === '') {
         return 0;
@@ -132,7 +132,7 @@ export const FormFieldTypes = {
   },
   FILE: {
     defaultValue: null,
-    component: formInputFile,
+    component: FormInputFile,
     requiredProps: [],
     optionalProps: [
       'uploadText',
@@ -140,7 +140,7 @@ export const FormFieldTypes = {
   },
   CHECKBOX: {
     defaultValue: false,
-    component: formInputCheckbox,
+    component: FormInputCheckbox,
     requiredProps: [],
     optionalProps: [
       'toggleText'
@@ -148,7 +148,7 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    component: formInputSelect,
+    component: FormInputSelect,
     requiredNormalSelectProps: [
       'selectOptions'
       // 'selectOptions' example:
@@ -179,7 +179,7 @@ export const FormFieldTypes = {
   },
   TEXTAREA: {
     defaultValue: '',
-    component: formInputTextarea,
+    component: FormInputTextarea,
     requiredProps: [],
     optionalProps: [
       'placeholder',

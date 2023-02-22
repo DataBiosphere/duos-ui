@@ -65,7 +65,7 @@ const errorMessages = (validation) => {
 //---------------------------------------------
 // Form Controls
 //---------------------------------------------
-export const formInputGeneric = (config) => {
+export const FormInputGeneric = (config) => {
   const {
     id, title, disabled,
     placeholder, type,
@@ -95,7 +95,7 @@ export const formInputGeneric = (config) => {
   ]);
 };
 
-export const formInputTextarea = (config) => {
+export const FormInputTextarea = (config) => {
   const {
     id, title, type, disabled,
     placeholder,
@@ -124,7 +124,7 @@ export const formInputTextarea = (config) => {
   ]);
 };
 
-export const formInputMultiText = (config) => {
+export const FormInputMultiText = (config) => {
   const {
     id, title, disabled,
     placeholder, ariaDescribedby, validators,
@@ -132,7 +132,7 @@ export const formInputMultiText = (config) => {
     setValidation
   } = config;
 
-  // validation of the user's input as they are typing it, 
+  // validation of the user's input as they are typing it,
   // separate from validation of the actual saved values
   // (which is the top level validation).
   const [inputValidation, setInputValidation] = useState({});
@@ -251,7 +251,7 @@ const normalizeSelectFormValue = (value) => {
 };
 
 // Using react-select/creatable - Passing config directly through!
-export const formInputSelect = (config) => {
+export const FormInputSelect = (config) => {
   const {
     id, title, disabled, required, validation, setValidation,
     selectOptions, placeholder, ariaDescribedby,
@@ -336,7 +336,7 @@ export const formInputSelect = (config) => {
   }) ;
 };
 
-export const formInputRadioGroup = (config) => {
+export const FormInputRadioGroup = (config) => {
   const {
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
@@ -379,7 +379,7 @@ export const formInputRadioGroup = (config) => {
   );
 };
 
-export const formInputYesNoRadioGroup = (config) => {
+export const FormInputYesNoRadioGroup = (config) => {
   const {
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
@@ -434,7 +434,7 @@ export const formInputYesNoRadioGroup = (config) => {
     ]);
 };
 
-export const formInputRadioButton = (config) => {
+export const FormInputRadioButton = (config) => {
   const {
     id, disabled, value, toggleText,
     formValue,
@@ -460,7 +460,7 @@ export const formInputRadioButton = (config) => {
   ]);
 };
 
-export const formInputCheckbox = (config) => {
+export const FormInputCheckbox = (config) => {
   const {
     id, disabled, validation, toggleText,
     formValue, ariaDescribedby
@@ -483,7 +483,7 @@ export const formInputCheckbox = (config) => {
   ]);
 };
 
-export const formInputSlider = (config) => {
+export const FormInputSlider = (config) => {
   const {
     id, disabled, toggleText, formValue
   } = config;
@@ -509,7 +509,7 @@ export const formInputSlider = (config) => {
   ]);
 };
 
-export const formInputFile = (config) => {
+export const FormInputFile = (config) => {
   const {
     id,
     formValue,

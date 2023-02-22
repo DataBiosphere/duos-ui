@@ -41,9 +41,13 @@ export const validateForm = (compiledSchema, obj) => {
     } else if (error.keyword === 'format'){
       // format errors are, e.g., date/email/uri errors
       path = error.instancePath;
-      errorType = error.params.format;
+      errorType = error.params.format; // e.g., 'date'
+    } else if (error.keyword === 'type') {
+      path = error.instancePath;
+      errorType = error.params.type; // e.g., 'integer'
     } else {
-      return;
+      path = error.instancePath;
+      errorType = 'unknown';
     }
 
     const splitPath = splitJsonPointer(path);

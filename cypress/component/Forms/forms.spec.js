@@ -10,7 +10,6 @@ const baseProps = {
 };
 
 describe('FormField - Tests', () => {
-
   describe('Validation', () => {
     it('should render required indicator', () => {
       props = {
@@ -63,6 +62,48 @@ describe('FormField - Tests', () => {
           cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
         });
     });
+
+    it('updates external validation', () => {
+      props = {
+        ...baseProps,
+        id: 'dataCustodianEmail',
+        title: 'Data Custodian Email',
+        validators: [FormValidators.EMAIL, FormValidators.REQUIRED],
+        onValidationChange: () => {},
+      };
+      cy.spy(props, 'onValidationChange');
+      mount(<FormField {...props}/>);
+      
+      cy.get('#dataCustodianEmail')
+        .type('a')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email'] }});
+        })
+        .type('@gmail.com')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: true }});
+        })
+        .type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email', 'required'] }});
+        })
+        ;
+    })
+
+    it('can take external validation control', () => {
+      props = {
+        ...baseProps,
+        id: 'dataCustodianEmail',
+        title: 'Data Custodian Email',
+        validation: {
+          valid: false,
+          failed: ['required', 'email'],
+        }
+      };
+      mount(<FormField {...props}/>);
+      cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.REQUIRED.msg);
+      cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
+    })
   });
 
   describe('Form Control - Text Input Tests', () => {
