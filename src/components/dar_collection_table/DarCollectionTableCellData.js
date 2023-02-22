@@ -148,14 +148,14 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
   let actionComponent;
 
   actionComponent = h(Actions, {
     collection, consoleType,
     showConfirmationModal, goToVote,
     reviewCollection, resumeCollection,
-    actions
+    actions, status
   });
 
   return {
