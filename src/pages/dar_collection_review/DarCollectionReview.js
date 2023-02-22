@@ -13,6 +13,7 @@ import {
   updateFinalVote,
   filterBucketsForUser,
 } from '../../utils/DarCollectionUtils';
+import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
@@ -97,6 +98,7 @@ export default function DarCollectionReview(props) {
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
+  const [collectionBuckets, setCollectionBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
 
   const init = useCallback(async () => {
@@ -116,6 +118,8 @@ export default function DarCollectionReview(props) {
         ? processedBuckets
         : filterBucketsForUser(user, processedBuckets);
       setDataUseBuckets(filteredBuckets);
+      const binnedCollectionBuckets = await binCollectionToBuckets(collection);
+      setCollectionBuckets(binnedCollectionBuckets);
       setCollection(collection);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
@@ -124,6 +128,7 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false);
       setReferenceIdForDocuments(referenceIdForDocuments);
     } catch (error) {
+      // console.log(error);
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });

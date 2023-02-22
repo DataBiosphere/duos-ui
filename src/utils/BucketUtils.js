@@ -1,26 +1,59 @@
-import {any, forEach, get, getOr, includes, isEqual, map, values} from 'lodash/fp';
+import {any, compact, findIndex, flow, forEach, get, getOr, includes, isEqual, isNil, omitBy, map, toLower, uniq, values} from 'lodash/fp';
 
 import {processVotesForBucket} from './DarCollectionUtils';
+import {Match} from '../libs/ajax';
+import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
-export const binCollectionToBuckets = (collection) => {
+
+export const binCollectionToBuckets = async (collection) => {
+
+  // Find all match results for this collection. This will be placed into each
+  // bucket based on the dataset that the match applies to in step 1.a
+  const referenceIds = flow(
+    map(d => d.referenceId),
+    uniq
+  )(collection.dars);
+  const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
+
+
   let buckets = [];
   // Step 1: Map all datasets to distinct buckets based on data use
+  // Step 1.a: Pull out match data based on dataset that the match data applies to.
   // Step 2: Pull all elections for those datasets into the buckets
   // Step 3: Pull all votes up to a top level bucket field for easier iteration
 
   // Step 1
   const datasets = get('datasets')(collection);
+
+  // Find all translated data uses for all datasets.
+  // translatedDataUses creates a parallel, ordered array in the
+  // same order as rawDataUses, so we can associate them by index.
+  // Unfortunately, it also creates empty elements per translation (one for any missing potential
+  // translation), so we need to filter those out.
+  const rawDataUses = map(d => d.dataUse)(datasets);
+  const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses);
+  const flatTranslatedDataUses = map(d => compact(d))(translatedDataUses);
+
   map(d => {
     // Put each dataset into a bucket. If the dataset's data use is
     // unique or "Other", then it gets its own bucket. If the data
     // use is already in a bucket, then it gets merged in.
     let bucket = {
+      key: '',
       datasets: [d],
       datasetIds: [d.dataSetId],
       dataUse: d.dataUse,
+      dataUses: [],
       elections: [],
-      votes: []
+      votes: [],
+      matchResults: []
     };
+
+    // Find the translation for this dataset's dataUse
+    const index = findIndex(d.dataUse)(rawDataUses);
+    if (index >= 0) {
+      bucket.dataUses = flatTranslatedDataUses[index];
+    }
     if (getOr(false)('otherRestrictions')(d.dataUse)) {
       buckets.push(bucket);
     } else {
@@ -38,6 +71,12 @@ export const binCollectionToBuckets = (collection) => {
         })(buckets);
       }
     }
+    // Step 1.a
+    forEach(m => {
+      if (toLower(d.datasetIdentifier) === toLower(m.consent)) {
+        bucket.matchResults.push(m);
+      }
+    })(matchData);
   })(datasets);
 
   // Step 2
