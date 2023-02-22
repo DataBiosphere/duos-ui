@@ -87,7 +87,7 @@ describe('FormField - Tests', () => {
         .then(() => {
           expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email', 'required'] }});
         });
-    })
+    });
 
     it('can take external validation control', () => {
       props = {
