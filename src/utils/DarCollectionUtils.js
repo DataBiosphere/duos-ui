@@ -249,7 +249,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
 };
 
 //Gets this user's rp votes from this bucket; chairperson votes if isChair is true, member votes if false
-//Note that filtering by DAC does not occur when viewing through th eadmin raview page
+//Note that filtering by DAC does not occur when viewing through th admin review page
 export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, adminPage = false) => {
   const votes = !isNil(bucket) ? bucket.votes : [];
 
