@@ -21,7 +21,7 @@ export const urlValidator = {
 export const emailValidator = {
   id: 'email',
   isValid: isEmailAddress,
-  msg: 'Please enter a valid email (e.g., johndoe@gmail.com)'
+  msg: 'Please enter a valid email address (e.g., person@example.com)'
 };
 
 export const dateValidator = {
