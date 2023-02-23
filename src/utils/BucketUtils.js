@@ -23,7 +23,7 @@ export const binCollectionToBuckets = async (collection) => {
   // Step 1: Map all datasets to distinct buckets based on data use
   //      a: Pull out match data based on dataset that the match data applies to.
   //      b: Pull out the data use translations for the bucket's dataUse
-  //      c: Set the bucket key/label from the dataUse
+  //      c: Set the bucket key/label from the dataUse + dataset ids
   // Step 2: Pull all elections for those datasets into the buckets
   // Step 3: Pull all votes up to a top level bucket field for easier iteration
   // Step 4: Prepend an RP Vote bucket for the DAC to vote on the research purpose
@@ -44,6 +44,7 @@ export const binCollectionToBuckets = async (collection) => {
     // use is already in a bucket, then it gets merged in.
     let bucket = {
       key: '',
+      label: '',
       datasets: [d],
       datasetIds: [d.dataSetId],
       dataUse: d.dataUse,
@@ -122,15 +123,16 @@ export const binCollectionToBuckets = async (collection) => {
       bucket.dataUses = flatTranslatedDataUses[index];
     }
 
-    // Step 1.c: Generate the key used for the label
+    // Step 1.c: Generate bucket key and label
     if (!isEmpty(bucket.dataUses)) {
-      bucket.key = flow(
+      bucket.label = flow(
         map((du) => du.alternateLabel || du.code),
         join(', ')
       )(bucket.dataUses);
     } else {
-      bucket.key = 'Undefined Data Use';
+      bucket.label = 'Undefined Data Use';
     }
+    bucket.key = bucket.label + '_' + join('_')(bucket.datasetIds);
 
   })(datasets);
 
