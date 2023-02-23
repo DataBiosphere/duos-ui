@@ -154,7 +154,6 @@ export const binCollectionToBuckets = async (collection) => {
   // Step 3: Populate votes
   forEach(bucket => {
     bucket.votes.push(processVotesForBucket(bucket.elections));
-    console.log(bucket.votes);
   })(buckets);
 
   // Step 4: Populate RUS Vote bucket with RP votes
