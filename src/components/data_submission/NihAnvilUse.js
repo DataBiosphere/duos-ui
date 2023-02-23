@@ -24,6 +24,8 @@ export default function NihAnvilUse(props) {
   const {
     onChange,
     initialFormData,
+    validation,
+    onValidationChange,
   } = props;
   const [nihAnvilUse, setNihAnvilUse] = useState(initialFormData?.nihAnvilUse || null);
 
@@ -62,6 +64,8 @@ export default function NihAnvilUse(props) {
 
         setNihAnvilUse(value);
       },
+      validation: validation.nihAnvilUse,
+      onValidationChange,
     }),
 
     h(FormField, {
@@ -77,6 +81,9 @@ export default function NihAnvilUse(props) {
       onChange: ({key, value}) => {
         onChange({key, value: value === 'yes'});
       },
+      validation: validation.submittingToAnvil,
+      onValidationChange,
+
     }),
 
     div({ isRendered: nihAnvilUse === I_DID }, [
@@ -85,28 +92,38 @@ export default function NihAnvilUse(props) {
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
         validators: [FormValidators.REQUIRED],
-        onChange
+        onChange,
+        validation: validation.dbGaPPhsID,
+        onValidationChange,
+
       }),
       h(FormField, {
         id: 'dbGaPStudyRegistrationName',
         title: 'dbGaP Study Registration Name',
         placeholder: 'Email',
         validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
-        onChange
+        onChange,
+        validation: validation.dbGaPStudyRegistrationName,
+        onValidationChange,
+
       }),
       h(FormField, {
         id: 'embargoReleaseDate',
         title: 'Embargo Release Date',
         placeholder: 'YYYY-MM-DD',
         validators: [FormValidators.REQUIRED, FormValidators.DATE],
-        onChange
+        onChange,
+        validation: validation.embargoReleaseDate,
+        onValidationChange,
       }),
       h(FormField, {
         id: 'sequencingCenter',
         title: 'Sequencing Center',
         placeholder: 'Email',
         validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
-        onChange
+        onChange,
+        validation: validation.sequencingCenter,
+        onValidationChange,
       }),
     ])
   ]);

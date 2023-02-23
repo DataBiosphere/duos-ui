@@ -19,6 +19,8 @@ export const NIHDataManagement = (props) => {
     initialFormData,
     onChange,
     onFileChange,
+    validation,
+    onValidationChange,
   } = props;
 
   const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(initialFormData?.alternativeDataSharingPlan === true || false);
@@ -66,6 +68,8 @@ export const NIHDataManagement = (props) => {
         setShowAlternativeDataSharingPlan(value);
         onChange({key, value});
       },
+      validation: validation.alternativeDataSharingPlan,
+      onValidationChange,
     }),
     div({
       isRendered: showAlternativeDataSharingPlan,
@@ -79,6 +83,8 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.CHECKBOX,
         onChange: onAlternativeDataSharingPlanReasonsChange,
         toggleText: 'Legal Restrictions',
+        validation: validation.legalRestrictions,
+        onValidationChange,
       }),
       h(FormField, {
         id: 'isInformedConsentProcessesInadequate',
@@ -90,6 +96,8 @@ export const NIHDataManagement = (props) => {
         },
         toggleText:
           'Informed consent processes are inadequate to support data for sharing for the following reasons:',
+        validation: validation.isInformedConsentProcessesInadequate,
+        onValidationChange,
       }),
       div({
         isRendered: showInadequateConsentProcessesQuestions,
@@ -147,7 +155,9 @@ export const NIHDataManagement = (props) => {
         defaultValue: initialFormData?.alternativeDataSharingPlanExplanation,
         onChange,
         title: 'Explanation for request',
-        validators: [FormValidators.REQUIRED]
+        validators: [FormValidators.REQUIRED],
+        validation: validation.alternativeDataSharingPlanExplanation,
+        onValidationChange,
       }),
       h(FormField, {
         type: FormFieldTypes.FILE,
@@ -174,6 +184,8 @@ export const NIHDataManagement = (props) => {
           }
         ],
         onChange,
+        validation: validation.alternativeDataSharingPlanDataSubmitted,
+        onValidationChange,
       }),
       h(FormField, {
         type: FormFieldTypes.YESNORADIOGROUP,
@@ -181,6 +193,8 @@ export const NIHDataManagement = (props) => {
         defaultValue: initialFormData?.alternativeDataSharingPlanDataReleased,
         title: 'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
         onChange,
+        validation: validation.alternativeDataSharingPlanDataReleased,
+        onValidationChange,
       }),
 
       div({
@@ -201,6 +215,8 @@ export const NIHDataManagement = (props) => {
           placeholder: 'Please enter date (YYYY-MM-DD)',
           validators: [FormValidators.DATE],
           onChange,
+          validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
+          onValidationChange,
         }),
         h(FormField, {
           id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
@@ -211,6 +227,8 @@ export const NIHDataManagement = (props) => {
           title: 'Target Public Release Date',
           placeholder: 'Please enter date (YYYY-MM-DD)',
           validators: [FormValidators.DATE],
+          validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
+          onValidationChange,
           onChange,
         }),
       ]),

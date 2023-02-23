@@ -11,7 +11,8 @@ const props = {
   deleteConsentGroup: () => {},
   nihInstitutionalCertificationFile: null,
   updateNihInstitutionalCertificationFile: () => {},
-
+  validation: {},
+  onValidationChange: () => {}
 };
 
 let propCopy = {};
