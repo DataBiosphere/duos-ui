@@ -1,12 +1,12 @@
-import {any, compact, findIndex, flow, forEach, get, getOr, includes, isEqual, map, toLower, uniq, values} from 'lodash/fp';
+import {any, compact, findIndex, flow, forEach, get, getOr, includes, isEmpty, isEqual, join, map, toLower, uniq, values} from 'lodash/fp';
 
 import {processVotesForBucket} from './DarCollectionUtils';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 
 /**
- * TODO: Prepend a rus bucket, add key
- * @param collection The Data Access Request Collection
+ * TODO: Prepend a rus bucket, fix algorithm result
+ * @param collection The full Data Access Request Collection
  * @returns {Promise<*[Bucket]>}
  */
 export const binCollectionToBuckets = async (collection) => {
@@ -24,6 +24,7 @@ export const binCollectionToBuckets = async (collection) => {
   // Step 1: Map all datasets to distinct buckets based on data use
   //      a: Pull out match data based on dataset that the match data applies to.
   //      b: Pull out the data use translations for the bucket's dataUse
+  //      c: Set the bucket key/label from the dataUse
   // Step 2: Pull all elections for those datasets into the buckets
   // Step 3: Pull all votes up to a top level bucket field for easier iteration
 
@@ -84,6 +85,17 @@ export const binCollectionToBuckets = async (collection) => {
     const index = findIndex(d.dataUse)(rawDataUses);
     if (index >= 0) {
       bucket.dataUses = flatTranslatedDataUses[index];
+    }
+
+    // Step 1.c
+    // Generate the key used for the label
+    if (!isEmpty(bucket.dataUses)) {
+      bucket.key = flow(
+        map((du) => du.alternateLabel || du.code),
+        join(', ')
+      )(bucket.dataUses);
+    } else {
+      bucket.key = 'Undefined Data Use';
     }
 
   })(datasets);
