@@ -1,4 +1,4 @@
-import {any, compact, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, join, map, pick, toLower, uniq, values} from 'lodash/fp';
+import {any, compact, findIndex, filter, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, join, map, toLower, uniq, values} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -154,15 +154,42 @@ export const binCollectionToBuckets = async (collection) => {
   // Step 3: Populate votes
   forEach(bucket => {
     bucket.votes.push(processVotesForBucket(bucket.elections));
+    console.log(bucket.votes);
   })(buckets);
 
   // Step 4: Populate RUS Vote bucket with RP votes
-  const rpVotes = flow(
-    flatMap(b => b.votes),
-    map(pick('rp'))
+  let rpVotes = [];
+  const rpElectionVoteArrays = flow(
+    flatMap(b => b.elections),
+    filter(e => toLower(e.electionType) === 'rp'),
+    map(e => e.votes),
+    // election.votes is a hash of vote id => vote object
+    map(hash => values(hash))
   )(buckets);
+  forEach(vArray => {
+    let rpVoteGroup =  {
+      chairpersonVotes: [],
+      memberVotes : [],
+      finalVotes: []
+    };
+    forEach(v => {
+      const lowerCaseType = toLower(v.type);
+      switch (lowerCaseType) {
+        case 'chairperson':
+          rpVoteGroup.chairpersonVotes.push(v);
+          rpVoteGroup.finalVotes.push(v);
+          break;
+        case 'dac':
+          rpVoteGroup.memberVotes.push(v);
+          break;
+        default:
+          break;
+      }
+    })(vArray);
+    rpVotes.push({rp: rpVoteGroup});
+  })(rpElectionVoteArrays);
   buckets.unshift({
-    isRp: true,
+    isRP: true,
     key: 'RUS Vote',
     votes: rpVotes
   });
