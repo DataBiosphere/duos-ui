@@ -1,11 +1,10 @@
 import {any, compact, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, join, map, pick, toLower, uniq, values} from 'lodash/fp';
-
-import {processVotesForBucket} from './DarCollectionUtils';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
+import {processVotesForBucket} from './DarCollectionUtils';
+import {processMatchData} from './VoteUtils';
 
 /**
- * TODO: fix algorithm result
  * @param collection The full Data Access Request Collection
  * @returns {Promise<*[Bucket]>}
  */
@@ -78,6 +77,44 @@ export const binCollectionToBuckets = async (collection) => {
         bucket.matchResults.push(m);
       }
     })(matchData);
+    // Four potential cases:
+    // 1. No matches
+    // 2. Exactly one match, easy case
+    // 3. N matches - all the same, also an easy case
+    // 4. N matches - not all the same - confusing case
+    forEach(b => {
+      if (isEmpty(b.matchResults)) {
+        b.algorithmResult = {result: 'N/A', createDate: undefined, failureReasons: undefined, id: b.key};
+      } else if (!isEmpty(b.matchResults) && b.matchResults.length === 1) {
+        const match = b.matchResults[0];
+        const { createDate, failureReasons, id } = match;
+        b.algorithmResult = {
+          result: processMatchData(match),
+          createDate,
+          failureReasons,
+          id
+        };
+      } else {
+        const matchVals = flow(
+          map(m => m.match),
+          uniq
+        )(b.matchResults);
+        // All the same match value? Choose the first one
+        if (matchVals.length === 1) {
+          const match = b.matchResults[0];
+          const { createDate, failureReasons, id } = match;
+          b.algorithmResult = {
+            result: processMatchData(match),
+            createDate,
+            failureReasons,
+            id
+          };
+        } else {
+          // Different match values? Provide a custom message
+          b.algorithmResult = {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: b.key};
+        }
+      }
+    })(buckets);
 
     // Step 1.b: Populate translated dataUses
     const index = findIndex(d.dataUse)(rawDataUses);
