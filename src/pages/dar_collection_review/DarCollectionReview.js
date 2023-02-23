@@ -6,13 +6,7 @@ import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
 import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
-import {
-  generatePreProcessedBucketData,
-  getMatchDataForBuckets,
-  processDataUseBuckets,
-  updateFinalVote,
-  filterBucketsForUser,
-} from '../../utils/DarCollectionUtils';
+import {updateFinalVote, filterBucketsForUser} from '../../utils/DarCollectionUtils';
 import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
@@ -98,28 +92,21 @@ export default function DarCollectionReview(props) {
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
-  const [collectionBuckets, setCollectionBuckets] = useState([]);
+  // const [collectionBuckets, setCollectionBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
 
   const init = useCallback(async () => {
     const user = Storage.getCurrentUser();
     try {
       const collection = await Collections.getCollectionById(collectionId);
-      const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const referenceIdForDocuments = find((d) => !isEmpty(d.referenceId))(collection.dars).referenceId;
       const researcherProfile = await User.getById(collection.createUserId);
-      const processedBuckets = await flow([
-        generatePreProcessedBucketData,
-        processDataUseBuckets,
-      ])({ dars, datasets });
-      await getMatchDataForBuckets(processedBuckets);
+      const processedBuckets = await binCollectionToBuckets(collection);
       const filteredBuckets = adminPage
         ? processedBuckets
         : filterBucketsForUser(user, processedBuckets);
       setDataUseBuckets(filteredBuckets);
-      const binnedCollectionBuckets = await binCollectionToBuckets(collection);
-      setCollectionBuckets(binnedCollectionBuckets);
       setCollection(collection);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
@@ -128,7 +115,6 @@ export default function DarCollectionReview(props) {
       setSubcomponentLoading(false);
       setReferenceIdForDocuments(referenceIdForDocuments);
     } catch (error) {
-      // console.log(error);
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
