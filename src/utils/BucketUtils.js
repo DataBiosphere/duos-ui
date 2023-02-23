@@ -5,11 +5,22 @@ import {processVotesForBucket} from './DarCollectionUtils';
 import {processMatchData} from './VoteUtils';
 
 /**
+ * Entry method into bundling up datasets into groups based on common data use restrictions.
+ *
+ * Step 1: Map all datasets to distinct buckets based on data use
+ *      a: Pull out match data based on dataset that the match data applies to.
+ *      b: Pull out the data use translations for the bucket's dataUse
+ *      c: Set the bucket key/label from the dataUse + dataset ids
+ * Step 2: Pull all elections for those datasets into the buckets
+ * Step 3: Pull all votes up to a top level bucket field for easier iteration
+ * Step 4: Prepend an RP Vote bucket for the DAC to vote on the research purpose
+ *
  * @param collection The full Data Access Request Collection
  * @returns {Promise<*[Bucket]>}
  */
 export const binCollectionToBuckets = async (collection) => {
 
+  let buckets = [];
   // Find all match results for this collection. This will be placed into each
   // bucket based on the dataset that the match applies to in step 1.a
   const referenceIds = flow(
@@ -17,19 +28,7 @@ export const binCollectionToBuckets = async (collection) => {
     uniq
   )(collection.dars);
   const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
-
-  let buckets = [];
-
-  // Step 1: Map all datasets to distinct buckets based on data use
-  //      a: Pull out match data based on dataset that the match data applies to.
-  //      b: Pull out the data use translations for the bucket's dataUse
-  //      c: Set the bucket key/label from the dataUse + dataset ids
-  // Step 2: Pull all elections for those datasets into the buckets
-  // Step 3: Pull all votes up to a top level bucket field for easier iteration
-  // Step 4: Prepend an RP Vote bucket for the DAC to vote on the research purpose
-
   const datasets = get('datasets')(collection);
-
   // Find all translated data uses for all datasets. translatedDataUses creates a parallel, ordered array in the same
   // order as rawDataUses, so we can associate them by index. Unfortunately, it also creates empty elements per
   // translation (one for any missing potential translation), so we need to filter those out.
@@ -78,43 +77,8 @@ export const binCollectionToBuckets = async (collection) => {
         bucket.matchResults.push(m);
       }
     })(matchData);
-    // Four potential cases:
-    // 1. No matches
-    // 2. Exactly one match, easy case
-    // 3. N matches - all the same, also an easy case
-    // 4. N matches - not all the same - confusing case
     forEach(b => {
-      if (isEmpty(b.matchResults)) {
-        b.algorithmResult = {result: 'N/A', createDate: undefined, failureReasons: undefined, id: b.key};
-      } else if (!isEmpty(b.matchResults) && b.matchResults.length === 1) {
-        const match = b.matchResults[0];
-        const { createDate, failureReasons, id } = match;
-        b.algorithmResult = {
-          result: processMatchData(match),
-          createDate,
-          failureReasons,
-          id
-        };
-      } else {
-        const matchVals = flow(
-          map(m => m.match),
-          uniq
-        )(b.matchResults);
-        // All the same match value? Choose the first one
-        if (matchVals.length === 1) {
-          const match = b.matchResults[0];
-          const { createDate, failureReasons, id } = match;
-          b.algorithmResult = {
-            result: processMatchData(match),
-            createDate,
-            failureReasons,
-            id
-          };
-        } else {
-          // Different match values? Provide a custom message
-          b.algorithmResult = {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: b.key};
-        }
-      }
+      b.algorithmResult = calculateAlgorithmResultForBucket(b);
     })(buckets);
 
     // Step 1.b: Populate translated dataUses
@@ -157,7 +121,75 @@ export const binCollectionToBuckets = async (collection) => {
   })(buckets);
 
   // Step 4: Populate RUS Vote bucket with RP votes
+  const rpVotes = createRpVoteStructureFromBuckets(buckets);
+  buckets.unshift({
+    isRP: true,
+    key: 'RUS Vote',
+    votes: rpVotes
+  });
+
+  return buckets;
+};
+
+/**
+ * Generate the summary of algorithm results suitable for display in the UI
+ *
+ * Four potential cases:
+ *  1. No matches
+ *  2. Exactly one match, easy case
+ *  3. N matches - all the same, also an easy case
+ *  4. N matches - not all the same - very confusing case
+ * @param bucket
+ * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
+ */
+const calculateAlgorithmResultForBucket = (bucket) => {
+
+  // We actually DO NOT want to show system match results when the data use indicates
+  // that a match should not be made. This happens for all "Other" cases.
+  const unmatchable = (getOr(false)('otherRestrictions')(bucket.dataUse));
+  if (unmatchable || isEmpty(bucket.matchResults)) {
+    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
+  } else if (!isEmpty(bucket.matchResults) && bucket.matchResults.length === 1) {
+    const match = bucket.matchResults[0];
+    const { createDate, failureReasons, id } = match;
+    return {
+      result: processMatchData(match),
+      createDate,
+      failureReasons,
+      id
+    };
+  } else {
+    const matchVals = flow(
+      map(m => m.match),
+      uniq
+    )(bucket.matchResults);
+    // All the same match value? Choose the first one
+    if (matchVals.length === 1) {
+      const match = bucket.matchResults[0];
+      const { createDate, failureReasons, id } = match;
+      return {
+        result: processMatchData(match),
+        createDate,
+        failureReasons,
+        id
+      };
+    } else {
+      // Different match values? Provide a custom message
+      return {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: bucket.key};
+    }
+  }
+};
+
+/**
+ * Create a structure of RP votes from all votes in a list of buckets.
+ *
+ * @param buckets
+ * @returns [{rp: {chairpersonVotes: [], memberVotes : [], finalVotes: []}}]
+ */
+const createRpVoteStructureFromBuckets = (buckets) => {
+  // List of rp vote groups broken out by election into chair, member, and final votes.
   let rpVotes = [];
+
   const rpElectionVoteArrays = flow(
     flatMap(b => b.elections),
     filter(e => toLower(e.electionType) === 'rp'),
@@ -165,6 +197,7 @@ export const binCollectionToBuckets = async (collection) => {
     // election.votes is a hash of vote id => vote object
     map(hash => values(hash))
   )(buckets);
+
   forEach(vArray => {
     let rpVoteGroup =  {
       chairpersonVotes: [],
@@ -175,6 +208,7 @@ export const binCollectionToBuckets = async (collection) => {
       const lowerCaseType = toLower(v.type);
       switch (lowerCaseType) {
         case 'chairperson':
+          // 'Chairperson' votes count as final votes for 'RP' elections. This is not true for 'DataAccess' votes
           rpVoteGroup.chairpersonVotes.push(v);
           rpVoteGroup.finalVotes.push(v);
           break;
@@ -187,11 +221,6 @@ export const binCollectionToBuckets = async (collection) => {
     })(vArray);
     rpVotes.push({rp: rpVoteGroup});
   })(rpElectionVoteArrays);
-  buckets.unshift({
-    isRP: true,
-    key: 'RUS Vote',
-    votes: rpVotes
-  });
 
-  return buckets;
+  return rpVotes;
 };
