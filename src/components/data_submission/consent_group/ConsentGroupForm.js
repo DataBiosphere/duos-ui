@@ -22,6 +22,7 @@ export const ConsentGroupForm = (props) => {
     hmb: undefined,
     diseaseSpecificUse: undefined, // string
     poa: undefined,
+    openAccess: undefined,
     otherPrimary: undefined, // string
 
     // secondary:
