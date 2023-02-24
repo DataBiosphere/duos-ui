@@ -351,7 +351,7 @@ describe('BucketUtils', () => {
     expect(gruBucket.datasets.length).to.eq(2);
   });
 
-  it('there should be a bucket with an primary OTHER dataset', async () => {
+  it('there should be a bucket with a primary OTHER dataset', async () => {
     const buckets = await binCollectionToBuckets(sample_collection);
     const other = find(b => b.label === 'OTH1')(buckets);
     expect(other).to.not.be.empty;

@@ -92,7 +92,6 @@ export default function DarCollectionReview(props) {
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [researcherProfile, setResearcherProfile] = useState({});
   const [dataUseBuckets, setDataUseBuckets] = useState([]);
-  // const [collectionBuckets, setCollectionBuckets] = useState([]);
   const { adminPage = false, readOnly = false } = props;
 
   const init = useCallback(async () => {
