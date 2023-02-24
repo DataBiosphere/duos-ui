@@ -1,8 +1,9 @@
 import {styles} from './DarDatasetTable';
+import {find} from 'lodash/fp';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {
-    data: dataUseGroup,
+    data: label,
     id: dataUseGroup,
     style : {
       color: '#354052',
@@ -15,7 +16,7 @@ export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
 }
 
 export function votesCellData({elections, votes, dataUseGroup, label= 'votes'}) {
-  const dataAccess = elections?.find((election) => election.electionType === 'DataAccess');
+  const dataAccess = find((election) => election.electionType === 'DataAccess')(elections);
 
   let status = dataAccess?.status || 'N/A';
 

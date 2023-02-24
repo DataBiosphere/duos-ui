@@ -6,11 +6,8 @@ import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarDatasetTableCellData';
-import {flow, isNil, intersection, cloneDeep} from 'lodash/fp';
-import {
-  generatePreProcessedBucketData,
-  processDataUseBuckets,
-} from '../../utils/DarCollectionUtils';
+import {isNil, intersection, cloneDeep} from 'lodash/fp';
+import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import {Notifications} from '../../libs/utils';
 import { isEmpty } from 'lodash';
 
@@ -114,13 +111,15 @@ const processBucketRowData = ({
         votes,
         datasets,
         elections,
+        label
       } = bucket;
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
           dataUseGroup,
           datasets,
-          elections: elections[0],
-          votes: votes[0]?.dataAccess || [],
+          elections,
+          votes,
+          label
         });
       });
     });
@@ -182,14 +181,11 @@ export const DarDatasetTable = (props) => {
         setBuckets([]);
         return;
       }
-      const processedBuckets = await flow([
-        generatePreProcessedBucketData,
-        processDataUseBuckets,
-      ])({ dars, datasets });
-      const filteredDataUseBuckets = processedBuckets.filter(
+      const binnedBuckets = await binCollectionToBuckets(collection);
+      const filteredBinnedBuckets = binnedBuckets.filter(
         (b) => b.isRP !== true
       );
-      setBuckets(filteredDataUseBuckets);
+      setBuckets(filteredBinnedBuckets);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
