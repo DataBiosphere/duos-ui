@@ -96,7 +96,7 @@ export const binCollectionToBuckets = async (collection) => {
     } else {
       bucket.label = 'Undefined Data Use';
     }
-    bucket.key = bucket.label + '_' + join('_')(bucket.datasetIds);
+    bucket.key = 'bucket-' + join('-')(bucket.datasetIds);
 
   })(datasets);
 
