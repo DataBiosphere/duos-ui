@@ -16,7 +16,7 @@ const styles = {
     marginTop: '-20px'
   },
   question: {
-    marginTop: '-10px',
+    marginTop: '-18px',
     fontSize: '1.8rem',
   },
   content: {

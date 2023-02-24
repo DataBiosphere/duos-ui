@@ -52,9 +52,7 @@ const styles = {
     marginTop: '-5px',
     columnGap: '2rem'
   },
-  dataUses: {
-    marginTop: '-20%'
-  },
+  dataUses: {},
   voteInfo: {},
   chairVoteInfo: {},
 };
@@ -135,13 +133,13 @@ export default function MultiDatasetVoteSlab(props) {
               <td style={{width: '50%'}}><VoteInfoSubsection/></td>
             </tr>
             <tr>
-              <td style={{width: '50%'}}><ChairVoteInfo
+              <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
                 dacVotes={dacVotes}
                 isChair={isChair}
                 isLoading={isLoading}
                 adminPage={adminPage}/>
               </td>
-              <td style={{width: '50%'}}>
+              <td style={{width: '50%', verticalAlign: 'text-top'}}>
                 {!isEmpty(algorithmResult) && <CollectionAlgorithmDecision
                   algorithmResult={algorithmResult}
                 />}
