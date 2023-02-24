@@ -29,14 +29,14 @@ export const binCollectionToBuckets = async (collection) => {
   )(collection.dars);
   const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
   const datasets = get('datasets')(collection);
-  // Find all translated data uses for all datasets. translatedDataUses creates a parallel, ordered array in the same
-  // order as rawDataUses, so we can associate them by index. Unfortunately, it also creates empty elements per
-  // translation (one for any missing potential translation), so we need to filter those out.
+  // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
+  // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
+  // empty elements per translation (one for any missing potential translation), so we need to filter those out.
   const rawDataUses = map(d => d.dataUse)(datasets);
   const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses);
   const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses);
 
-  // Step 1
+  // Step 1: Create buckets for unique dataset groups
   map(d => {
     // Put each dataset into a bucket. If the dataset's data use is unique or has an "Other" restriction, then it gets
     // its own bucket. If the data use is already in a bucket, then it gets merged in.
@@ -99,7 +99,7 @@ export const binCollectionToBuckets = async (collection) => {
 
   })(datasets);
 
-  // Step 2: Populate elections
+  // Step 2: Populate elections for each bucket
   const darMap = get('dars')(collection);
   forEach(dar => {
     const electionMap = get('elections')(dar);
@@ -114,7 +114,7 @@ export const binCollectionToBuckets = async (collection) => {
     })(values(electionMap));
   })(values(darMap));
 
-  // Step 3: Populate votes
+  // Step 3: Populate votes for each bucket
   forEach(bucket => {
     bucket.votes.push(processVotesForBucket(bucket.elections));
   })(buckets);
