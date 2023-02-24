@@ -183,15 +183,15 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 
 /**
  * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
- * or they can have fields populated for 'other': 'true|false' and 'secondaryOther': 'true|false'
+ * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
  * @private
  * @param dataUse
  * @returns TRUE|FALSE
  */
 const isOther = (dataUse) => {
   const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
-  const primaryOther = getOr('false')('other')(dataUse) === 'true';
-  const secondaryOther = getOr('false')('secondaryOther')(dataUse) === 'true';
+  const primaryOther = !isEmpty(getOr('')('other')(dataUse));
+  const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
   return otherRestrictions || primaryOther || secondaryOther;
 };
 
