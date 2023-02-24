@@ -43,10 +43,13 @@ const styles = {
     display: 'flex'
   },
   slatTitleText: {
-    display: 'flex',
-    fontSize: '1.6rem',
+    display: 'fixed',
+    fontSize: 17,
+    fontWeight: 800,
     height: '32px',
-    padding: '1.5rem',
+    paddingLeft: '-10%',
+    color: '#333F52',
+    marginTop: '-5px',
     columnGap: '2rem'
   },
   dataUses: {},
@@ -130,13 +133,13 @@ export default function MultiDatasetVoteSlab(props) {
               <td style={{width: '50%'}}><VoteInfoSubsection/></td>
             </tr>
             <tr>
-              <td style={{width: '50%'}}><ChairVoteInfo
+              <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
                 dacVotes={dacVotes}
                 isChair={isChair}
                 isLoading={isLoading}
                 adminPage={adminPage}/>
               </td>
-              <td style={{width: '50%'}}>
+              <td style={{width: '50%', verticalAlign: 'text-top'}}>
                 {!isEmpty(algorithmResult) && <CollectionAlgorithmDecision
                   algorithmResult={algorithmResult}
                 />}
