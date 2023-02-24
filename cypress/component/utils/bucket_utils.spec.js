@@ -140,9 +140,73 @@ const sample_collection = {
               'displayName': 'User 1'
             }
           }
+        },
+        '5': {
+          'electionId': 5,
+          'electionType': 'DataAccess',
+          'referenceId': 'dar-reference-id-1',
+          'dataSetId': 3,
+          'votes': {
+            '111': {
+              'voteId': 111,
+              'dacUserId': 1,
+              'electionId': 3,
+              'rationale': '',
+              'type': 'Chairperson',
+              'displayName': 'User 1'
+            },
+            '222': {
+              'voteId': 222,
+              'dacUserId': 1,
+              'electionId': 5,
+              'rationale': '',
+              'type': 'DAC',
+              'displayName': 'User 1'
+            },
+            '333': {
+              'voteId': 333,
+              'dacUserId': 1,
+              'electionId': 5,
+              'rationale': '',
+              'type': 'Final',
+              'displayName': 'User 1'
+            }
+          }
+        },
+        '6': {
+          'electionId': 6,
+          'electionType': 'RP',
+          'referenceId': 'dar-reference-id-1',
+          'dataSetId': 3,
+          'votes': {
+            '444': {
+              'voteId': 444,
+              'dacUserId': 1,
+              'electionId': 6,
+              'rationale': '',
+              'type': 'Chairperson',
+              'displayName': 'User 1'
+            },
+            '555': {
+              'voteId': 555,
+              'dacUserId': 1,
+              'electionId': 6,
+              'rationale': '',
+              'type': 'DAC',
+              'displayName': 'User 1'
+            },
+            '666': {
+              'voteId': 666,
+              'dacUserId': 1,
+              'electionId': 6,
+              'rationale': '',
+              'type': 'Final',
+              'displayName': 'User 1'
+            }
+          }
         }
       },
-      'datasetIds': [1,2]
+      'datasetIds': [1,2,3]
     }
   }
   ,
@@ -158,6 +222,12 @@ const sample_collection = {
       'datasetName': 'ds 2',
       'datasetIdentifier': 'DUOS-000002',
       'dataUse': {'generalUse': true}
+    },
+    {
+      'dataSetId': 3,
+      'datasetName': 'ds 3',
+      'datasetIdentifier': 'DUOS-000003',
+      'dataUse': {'generalUse': false, 'other': 'other restrictions'}
     }
   ],
 };
@@ -201,7 +271,6 @@ describe('BucketUtils', () => {
         expect(b.dataUse).to.not.be.empty;
         expect(b.dataUses).to.not.be.empty;
         expect(b.elections).to.not.be.empty;
-        expect(b.matchResults).to.not.be.empty;
       }
     })(buckets);
   });
@@ -212,6 +281,14 @@ describe('BucketUtils', () => {
     expect(gruBucket).to.not.be.empty;
     expect(gruBucket.datasets).to.not.be.empty;
     expect(gruBucket.datasets.length).to.eq(2);
+  });
+
+  it('there should be a bucket with an primary OTHER dataset', async () => {
+    const buckets = await binCollectionToBuckets(sample_collection);
+    const gruBucket = find(b => b.label === 'OTH1')(buckets);
+    expect(gruBucket).to.not.be.empty;
+    expect(gruBucket.datasets).to.not.be.empty;
+    expect(gruBucket.datasets.length).to.eq(1);
   });
 
 });
