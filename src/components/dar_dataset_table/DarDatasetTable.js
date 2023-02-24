@@ -186,6 +186,7 @@ export const DarDatasetTable = (props) => {
         (b) => b.isRP !== true
       );
       setBuckets(filteredBinnedBuckets);
+      setTableSize(filteredBinnedBuckets.length);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
