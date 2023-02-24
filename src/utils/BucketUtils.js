@@ -52,7 +52,7 @@ export const binCollectionToBuckets = async (collection) => {
       matchResults: []
     };
 
-    if (getOr(false)('otherRestrictions')(d.dataUse)) {
+    if (isOther(d.dataUse)) {
       buckets.push(bucket);
     } else {
       // Add to bucket if the data use doesn't exist
@@ -138,6 +138,8 @@ export const binCollectionToBuckets = async (collection) => {
  *  2. Exactly one match, easy case
  *  3. N matches - all the same, also an easy case
  *  4. N matches - not all the same - very confusing case
+ *
+ * @private
  * @param bucket
  * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
  */
@@ -145,7 +147,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 
   // We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const unmatchable = (getOr(false)('otherRestrictions')(bucket.dataUse));
+  const unmatchable = isOther(bucket.dataUse);
   if (unmatchable || isEmpty(bucket.matchResults)) {
     return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
   } else if (!isEmpty(bucket.matchResults) && bucket.matchResults.length === 1) {
@@ -180,8 +182,23 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 };
 
 /**
+ * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
+ * or they can have fields populated for 'other': 'true|false' and 'secondaryOther': 'true|false'
+ * @private
+ * @param dataUse
+ * @returns TRUE|FALSE
+ */
+const isOther = (dataUse) => {
+  const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
+  const primaryOther = getOr('false')('other')(dataUse) === 'true';
+  const secondaryOther = getOr('false')('secondaryOther')(dataUse) === 'true';
+  return otherRestrictions || primaryOther || secondaryOther;
+};
+
+/**
  * Create a structure of RP votes from all votes in a list of buckets.
  *
+ * @private
  * @param buckets
  * @returns [{rp: {chairpersonVotes: [], memberVotes : [], finalVotes: []}}]
  */
