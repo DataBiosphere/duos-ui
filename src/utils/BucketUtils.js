@@ -1,4 +1,4 @@
-import {any, compact, findIndex, filter, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, join, map, toLower, uniq, values} from 'lodash/fp';
+import {any, compact, findIndex, filter, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, toLower, uniq, values} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -12,8 +12,10 @@ import {processMatchData} from './VoteUtils';
  *      b: Pull out the data use translations for the bucket's dataUse
  *      c: Set the bucket key/label from the dataUse + dataset ids
  * Step 2: Pull all elections for those datasets into the buckets
- * Step 3: Pull all votes up to a top level bucket field for easier iteration
- * Step 4: Prepend an RP Vote bucket for the DAC to vote on the research purpose
+ * Step 3: Set the bucket key/label from the dataUse + dataset ids
+ * Step 4: Coalesce the algorithm decision per bucket
+ * Step 5: Pull all votes up to a top level bucket field for easier iteration
+ * Step 6: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
  * @param collection The full Data Access Request Collection
  * @returns {Promise<*[Bucket]>}
@@ -70,32 +72,18 @@ export const binCollectionToBuckets = async (collection) => {
       }
     }
 
-    // Step 1.a: Populate match results for this bucket
+    // Step 1.a: Find match results for this dataset and add to bucket
     forEach(m => {
       if (toLower(d.datasetIdentifier) === toLower(m.consent)) {
         bucket.matchResults.push(m);
       }
     })(matchData);
-    forEach(b => {
-      b.algorithmResult = calculateAlgorithmResultForBucket(b);
-    })(buckets);
 
     // Step 1.b: Populate translated dataUses
     const index = findIndex(d.dataUse)(rawDataUses);
-    if (index >= 0) {
+    if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
       bucket.dataUses = flatTranslatedDataUses[index];
     }
-
-    // Step 1.c: Generate bucket key and label
-    if (!isEmpty(bucket.dataUses)) {
-      bucket.label = flow(
-        map((du) => du.alternateLabel || du.code),
-        join(', ')
-      )(bucket.dataUses);
-    } else {
-      bucket.label = 'Undefined Data Use';
-    }
-    bucket.key = 'bucket-' + join('-')(bucket.datasetIds);
 
   })(datasets);
 
@@ -114,12 +102,27 @@ export const binCollectionToBuckets = async (collection) => {
     })(values(electionMap));
   })(values(darMap));
 
-  // Step 3: Populate votes for each bucket
-  forEach(bucket => {
-    bucket.votes.push(processVotesForBucket(bucket.elections));
+  // Steps 3-5
+  forEach(b => {
+    // Step 3: Generate bucket key and label
+    if (!isEmpty(b.dataUses)) {
+      b.label = flow(
+        map((du) => du.alternateLabel || du.code),
+        join(', ')
+      )(b.dataUses);
+    } else {
+      b.label = 'Undefined Data Use';
+    }
+    b.key = 'bucket-' + join('-')(b.datasetIds);
+
+    // Step 4: Coalesce match results into a single result per bucket
+    b.algorithmResult = calculateAlgorithmResultForBucket(b);
+
+    // Step 5: Populate votes for each bucket
+    b.votes.push(processVotesForBucket(b.elections));
   })(buckets);
 
-  // Step 4: Populate RUS Vote bucket with RP votes
+  // Step 6: Populate RUS Vote bucket with RP votes
   const rpVotes = createRpVoteStructureFromBuckets(buckets);
   buckets.unshift({
     isRP: true,
