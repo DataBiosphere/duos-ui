@@ -44,8 +44,6 @@ export const ConsentGroupForm = (props) => {
     fileTypes: [{}],
   });
 
-
-
   const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
   const [consentGroupValidationErrors, setConsentGroupValidationErrors] = useState([]);
   const [editMode, setEditMode] = useState(true);

@@ -89,24 +89,15 @@ export const DataSubmissionForm = () => {
     });
   };
 
-  const onChange = ({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('StudyInfo OnChange:', key, value, isValid);
-
+  const onChange = ({ key, value }) => {
     formData[key] = value;
   };
 
-  const onFileChange = ({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('File OnChange:', key, value, isValid);
-
+  const onFileChange = ({ key, value }) => {
     formFiles[key] = value;
   };
 
   const onValidationChange = ({ key, validation }) => {
-    /* eslint-disable no-console */
-    console.log('Validation OnChange:', key, validation);
-
     setFormValidation((val) => {
       const newValidation = cloneDeep(val);
       set(newValidation, key, validation);
