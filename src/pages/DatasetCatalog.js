@@ -81,6 +81,7 @@ export default function DatasetCatalog(props) {
       row['Data Custodian'] = findPropertyValue(row, 'Data Depositor');
       return row;
     })(datasets);
+    console.log(datasets)
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
 
@@ -603,7 +604,7 @@ export default function DatasetCatalog(props) {
                     return h(Fragment, { key: trIndex }, [
                       tr({ className: 'tableRow' }, [
                         td({}, [
-                          div({ className: 'checkbox' }, [
+                          div({ className: 'checkbox', isRendered: !isNil(dataset.dacId)}, [
                             input({
                               type: 'checkbox',
                               id: trIndex + '_chkSelect',
