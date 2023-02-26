@@ -22,6 +22,10 @@ const tableBody = {
   padding: '8px 5px 8px 5px'
 };
 
+const canApplyForDataset = (dataset) => {
+  return dataset.active && !isNil(dataset.dacId);
+};
+
 export default function DatasetCatalog(props) {
 
   const {
@@ -81,7 +85,6 @@ export default function DatasetCatalog(props) {
       row['Data Custodian'] = findPropertyValue(row, 'Data Depositor');
       return row;
     })(datasets);
-    console.log(datasets)
     applyDatasetSort(sort, datasets);
   }, [applyDatasetSort, sort]);
 
@@ -333,10 +336,10 @@ export default function DatasetCatalog(props) {
 
   const allOnPageSelected = () => {
 
-    const filteredList = datasetsOnPage;
+    const filteredList = datasetsOnPage.filter(canApplyForDataset);
 
-    return filteredList.length > 0 &&  filteredList.every((row) => {
-      return row.checked || (!row.active);
+    return filteredList.length > 0 && filteredList.every((row) => {
+      return row.checked;
     });
   };
 
@@ -348,7 +351,7 @@ export default function DatasetCatalog(props) {
     });
 
     const modifiedDatasetList = map((row) => {
-      if (row.active) {
+      if (canApplyForDataset(row)) {
         if (datasetIdsToCheck.includes(row.dataSetId)) {
           row.checked = checked;
         }
@@ -365,7 +368,7 @@ export default function DatasetCatalog(props) {
     const checked = isNil(e.target.checked) ? false : e.target.checked;
     const selectedDatasets = map(row => {
       if (row.dataSetId === dataset.dataSetId) {
-        if (row.active) {
+        if (canApplyForDataset(row)) {
           row.checked = checked;
         }
       }
@@ -603,7 +606,7 @@ export default function DatasetCatalog(props) {
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
                       tr({ className: 'tableRow' }, [
-                        td({}, [
+                        td({ width: '60px' }, [
                           div({ className: 'checkbox', isRendered: !isNil(dataset.dacId)}, [
                             input({
                               type: 'checkbox',
@@ -621,7 +624,7 @@ export default function DatasetCatalog(props) {
                           ])
                         ]),
 
-                        td({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), style: { minWidth: '14rem' } }, [
+                        td({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson) }, [
                           div({ className: 'dataset-actions' }, [
                             a({
                               id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataset.dataSetId),
