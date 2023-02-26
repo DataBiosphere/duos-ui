@@ -284,7 +284,8 @@ export const FormField = (config) => {
     }),
     h(type.component, {
       ...config,
-      validation: getValidation(), setValidation: (newValidation) => updateValidation(newValidation),
+      validation: getValidation(),
+      setValidation: (newValidation) => updateValidation(newValidation),
       formValue, setFormValue,
       required
     })

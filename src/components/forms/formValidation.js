@@ -70,7 +70,6 @@ export const validateFormValue = (formValue, validators) => {
   };
 };
 
-
 /**
  * Gives a human readable validation message. Gives generic message if the validator cannot be found.
  *
