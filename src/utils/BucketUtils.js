@@ -38,7 +38,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
   // empty elements per translation (one for any missing potential translation), so we need to filter those out.
-  const rawDataUses = map(d => d.dataUse)(datasets);
+  const rawDataUses = compact(map(d => d.dataUse)(datasets));
   const translatedDataUses = await translateDataUseRestrictionsFromDataUseArray(rawDataUses);
   const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses);
 
@@ -58,7 +58,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       matchResults: []
     };
 
-    if (isOther(d.dataUse)) {
+    if (isUndefined(d.dataUse) || isOther(d.dataUse)) {
       buckets.push(bucket);
     } else {
       // Add to bucket if the data use doesn't exist
@@ -84,9 +84,11 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     })(matchData);
 
     // Step 1.b: Populate translated dataUses
-    const index = findIndex(d.dataUse)(rawDataUses);
-    if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
-      bucket.dataUses = flatTranslatedDataUses[index];
+    if (d.dataUse) {
+      const index = findIndex(d.dataUse)(rawDataUses);
+      if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
+        bucket.dataUses = flatTranslatedDataUses[index];
+      }
     }
 
   })(datasets);
