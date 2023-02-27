@@ -7,11 +7,11 @@ import {useEffect} from 'react';
 import ReactTooltip from 'react-tooltip';
 
 const useStyles = makeStyles()({
-  "root": {
-    "backgroundColor": 'inherit',
-    "color": 'inherit',
-    "pointerEvents": 'none',
-    "fontSize": 28,
+  'root': {
+    'backgroundColor': 'inherit',
+    'color': 'inherit',
+    'pointerEvents': 'none',
+    'fontSize': 28,
   }
 });
 
