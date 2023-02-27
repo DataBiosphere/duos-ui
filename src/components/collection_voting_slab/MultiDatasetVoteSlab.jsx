@@ -129,9 +129,8 @@ export default function MultiDatasetVoteSlab(props) {
         <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
           <tbody>
             <tr>
-              <td style={{width: '50%'}}><DataUseSummary
-                /></td>
-              <td style={{width: '50%'}}><VoteInfoSubsection/></td>
+              <td style={{width: '50%'}}><DataUseSummary/></td>
+              <td style={{width: '50%', verticalAlign: 'text-top'}}><VoteInfoSubsection/></td>
             </tr>
             <tr>
               <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
