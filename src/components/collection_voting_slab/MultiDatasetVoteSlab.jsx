@@ -84,8 +84,7 @@ export default function MultiDatasetVoteSlab(props) {
   const DataUseSummary = () => {
     const dataUses = get('dataUses')(bucket);
     return !isNil(dataUses)
-      ? <div style={styles.dataUses}>
-          <div>{DataUsePills(dataUses)}</div></div>
+      ? <div style={styles.dataUses}>{DataUsePills(dataUses)}</div>
       : <></>;
   };
 
@@ -127,10 +126,10 @@ export default function MultiDatasetVoteSlab(props) {
   function DatasetDisplayTable() {
     return (
       <>
-        <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available', border: '1px solid green'}}>
+        <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
           <tbody>
             <tr>
-              <td style={{width: '50%', border: '1px solid red'}}><DataUseSummary
+              <td style={{width: '50%'}}><DataUseSummary
                 /></td>
               <td style={{width: '50%'}}><VoteInfoSubsection/></td>
             </tr>
