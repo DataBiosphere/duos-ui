@@ -44,8 +44,8 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
   // Step 1: Create buckets for unique dataset groups
   map(d => {
-    // Put each dataset into a bucket. If the dataset's data use is unique or has an "Other" restriction, then it gets
-    // its own bucket. If the data use is already in a bucket, then it gets merged in.
+    // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
+    // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
     let bucket = {
       key: '',
       label: '',
