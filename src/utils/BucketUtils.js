@@ -18,9 +18,11 @@ import {processMatchData} from './VoteUtils';
  * Step 6: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
  * @param collection The full Data Access Request Collection
+ * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
+ *        the provided dac ids. This will extend to elections and votes as well.
  * @returns {Promise<*[Bucket]>}
  */
-export const binCollectionToBuckets = async (collection) => {
+export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
   let buckets = [];
   // Find all match results for this collection. This will be placed into each
@@ -30,7 +32,9 @@ export const binCollectionToBuckets = async (collection) => {
     uniq
   )(collection.dars);
   const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
-  const datasets = get('datasets')(collection);
+  const datasets = isEmpty(dacIds) ?
+    get('datasets')(collection) :
+    filter(d => includes(d.dacId)(dacIds))(get('datasets')(collection));
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
   // empty elements per translation (one for any missing potential translation), so we need to filter those out.

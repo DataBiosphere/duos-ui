@@ -6,7 +6,7 @@ import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
 import cellData from './DarDatasetTableCellData';
-import {isNil, intersection, cloneDeep} from 'lodash/fp';
+import {compact, isNil, map, uniq} from 'lodash/fp';
 import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import {Notifications} from '../../libs/utils';
 import { isEmpty } from 'lodash';
@@ -147,11 +147,12 @@ export const DarDatasetTable = (props) => {
   const [pageCount, setPageCount] = useState(1);
   const [sort, setSort] = useState(getInitialSort(props.columns));
   const [tableSize, setTableSize] = useState(10);
+  const [user] = useState(Storage.getCurrentUser());
 
   const [buckets, setBuckets] = useState([]);
 
   const {
-    collection, isLoading, summary
+    collection, isLoading, isAdminPage
   } = props;
 
   const [isInitializing, setIsInitializing] = useState(true);
@@ -162,38 +163,21 @@ export const DarDatasetTable = (props) => {
         setBuckets([]);
         return;
       }
-      let { dars, datasets } = cloneDeep(collection);
-      datasets = datasets ? datasets.filter(dataset => summary.datasetIds.includes(dataset.dataSetId)) : null;
-      const darKeys = Object.keys(dars);
-      darKeys.forEach(darKey => {
-        if(intersection(summary.datasetIds, dars[darKey].datasetIds).length > 0) {
-          const electionKeys = Object.keys(dars[darKey].elections);
-          electionKeys.forEach(electionKey => {
-            if (!summary.datasetIds.includes(dars[darKey].elections[electionKey].datasetId)) {
-              delete dars[darKey].elections[electionKey];
-            }
-          });
-        } else {
-          delete dars[darKey];
-        }
-      });
-      if (isNil(dars) || isNil(datasets)) {
-        setBuckets([]);
-        return;
-      }
-      const binnedBuckets = await binCollectionToBuckets(collection);
-      const filteredBinnedBuckets = binnedBuckets.filter(
+      // If this is NOT an admin view, we need to filter buckets by the user's DACs
+      const dacIds = isAdminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)));
+      const buckets = await binCollectionToBuckets(collection, dacIds);
+      const dataAccessBuckets = buckets.filter(
         (b) => b.isRP !== true
       );
-      setBuckets(filteredBinnedBuckets);
-      setTableSize(filteredBinnedBuckets.length);
+      setBuckets(dataAccessBuckets);
+      setTableSize(dataAccessBuckets.length);
     } catch (error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
       });
     }
     setIsInitializing(false);
-  }, [collection, summary]);
+  }, [collection, isAdminPage, user]);
 
   useEffect(() => {
     try {

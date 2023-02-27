@@ -1,4 +1,4 @@
-import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, sortBy, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten, get} from 'lodash/fp';
+import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, sortBy, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
 import { formatDate, Notifications } from '../libs/utils';
 import { Collections } from '../libs/ajax';
 
@@ -97,17 +97,6 @@ const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   return filter(
     voteArray => includes(user.userId, userIdsOfVotes(voteArray))
   )(voteArrays);
-};
-
-export const filterBucketsForUser = (user, buckets) => {
-  const containsUserRpVote = (bucket) => {
-    return get('isRP')(bucket) && !isEmpty(extractUserRPVotesFromBucket(bucket, user, false));
-  };
-  const containsUserDataAccessVote = (bucket) => {
-    return !isEmpty(extractUserDataAccessVotesFromBucket(bucket, user, false));
-  };
-
-  return filter(bucket => containsUserRpVote(bucket) || containsUserDataAccessVote(bucket))(buckets);
 };
 
 //Gets this user's data access votes from this bucket; final and chairperson votes if isChair is true, member votes if false
