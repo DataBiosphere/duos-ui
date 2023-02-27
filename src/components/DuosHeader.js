@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState} from 'react';
+import {Component, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@mui/material/Drawer';
 import Hidden from '@mui/material/Hidden';
