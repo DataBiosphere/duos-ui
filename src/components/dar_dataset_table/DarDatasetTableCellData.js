@@ -1,5 +1,5 @@
 import {styles} from './DarDatasetTable';
-import {filter, flatMap, flow, get, isEmpty, isUndefined, map, uniq} from 'lodash/fp';
+import {filter, flatMap, flow, get, isEmpty, isUndefined, map, uniq, values} from 'lodash/fp';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {
@@ -15,18 +15,19 @@ export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   };
 }
 
-export function votesCellData({elections, votes, dataUseGroup, label= 'votes'}) {
+export function votesCellData({elections, dataUseGroup, label= 'votes'}) {
   let displayValue = '-/-';
   if (!isEmpty(elections)) {
+    const darElections = filter(e => e.electionType === 'DataAccess')(elections);
     const datasetIds = flow(
       filter(e => e.electionType === 'DataAccess'),
       map(e => e.dataSetId),
       uniq
-    )(elections);
+    )(darElections);
     const memberVotes = flow(
-      map(v => v.dataAccess),
-      flatMap(v => v.memberVotes)
-    )(votes);
+      flatMap(e => values(e.votes)),
+      filter(v => v.type === 'DAC')
+    )(darElections);
     const voteValues = flow(
       filter(v => !isUndefined(v.vote)),
       map(v => get('vote')(v))
