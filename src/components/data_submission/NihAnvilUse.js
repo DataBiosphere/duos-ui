@@ -1,4 +1,4 @@
-import {div, h, h2, p} from 'react-hyperscript-helpers';
+import {div, h, h2} from 'react-hyperscript-helpers';
 import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
