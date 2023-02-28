@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import {binCollectionToBuckets} from '../../../src/utils/BucketUtils';
-import {forEach, find} from 'lodash/fp';
+import {forEach, find, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
 const sample_collection = {
@@ -267,6 +267,70 @@ const sample_collection = {
               'displayName': 'User 1'
             }
           }
+        },
+        '9': {
+          'electionId': 9,
+          'electionType': 'DataAccess',
+          'referenceId': 'dar-reference-id-1',
+          'dataSetId': 5,
+          'votes': {
+            '11111': {
+              'voteId': 11111,
+              'dacUserId': 1,
+              'electionId': 9,
+              'rationale': '',
+              'type': 'Chairperson',
+              'displayName': 'User 1'
+            },
+            '22222': {
+              'voteId': 22222,
+              'dacUserId': 1,
+              'electionId': 9,
+              'rationale': '',
+              'type': 'DAC',
+              'displayName': 'User 1'
+            },
+            '33333': {
+              'voteId': 33333,
+              'dacUserId': 1,
+              'electionId': 9,
+              'rationale': '',
+              'type': 'Final',
+              'displayName': 'User 1'
+            }
+          }
+        },
+        '10': {
+          'electionId': 10,
+          'electionType': 'RP',
+          'referenceId': 'dar-reference-id-1',
+          'dataSetId': 5,
+          'votes': {
+            '44444': {
+              'voteId': 44444,
+              'dacUserId': 1,
+              'electionId': 10,
+              'rationale': '',
+              'type': 'Chairperson',
+              'displayName': 'User 1'
+            },
+            '55555': {
+              'voteId': 55555,
+              'dacUserId': 1,
+              'electionId': 10,
+              'rationale': '',
+              'type': 'DAC',
+              'displayName': 'User 1'
+            },
+            '66666': {
+              'voteId': 66666,
+              'dacUserId': 1,
+              'electionId': 10,
+              'rationale': '',
+              'type': 'Final',
+              'displayName': 'User 1'
+            }
+          }
         }
       },
       'datasetIds': [1,2,3,4]
@@ -277,25 +341,35 @@ const sample_collection = {
       'dataSetId': 1,
       'datasetName': 'ds 1',
       'datasetIdentifier': 'DUOS-000001',
-      'dataUse': {'generalUse': true}
+      'dataUse': {'generalUse': true},
+      'dacId': 1
     },
     {
       'dataSetId': 2,
       'datasetName': 'ds 2',
       'datasetIdentifier': 'DUOS-000002',
-      'dataUse': {'generalUse': true}
+      'dataUse': {'generalUse': true},
+      'dacId': 2
     },
     {
       'dataSetId': 3,
       'datasetName': 'ds 3',
       'datasetIdentifier': 'DUOS-000003',
-      'dataUse': {'generalUse': false, 'other': 'other restrictions'}
+      'dataUse': {'generalUse': false, 'other': 'other restrictions'},
+      'dacId': 3
     },
     {
       'dataSetId': 4,
       'datasetName': 'ds 4',
       'datasetIdentifier': 'DUOS-000004',
-      'dataUse': {'generalUse': false, 'secondaryOther': 'secondary other restrictions'}
+      'dataUse': {'generalUse': false, 'secondaryOther': 'secondary other restrictions'},
+      'dacId': 4
+    },
+    {
+      'dataSetId': 5,
+      'datasetName': 'ds 5',
+      'datasetIdentifier': 'DUOS-000005',
+      'dacId': 5
     }
   ],
 };
@@ -336,8 +410,10 @@ describe('BucketUtils', () => {
         expect(b.label).to.not.be.empty;
         expect(b.datasets).to.not.be.empty;
         expect(b.datasetIds).to.not.be.empty;
-        expect(b.dataUse).to.not.be.empty;
-        expect(b.dataUses).to.not.be.empty;
+        if (b.dataUse) {
+          expect(b.dataUse).to.not.be.empty;
+          expect(b.dataUses).to.not.be.empty;
+        }
         expect(b.elections).to.not.be.empty;
       }
     })(buckets);
@@ -365,6 +441,16 @@ describe('BucketUtils', () => {
     expect(secondaryOther).to.not.be.empty;
     expect(secondaryOther.datasets).to.not.be.empty;
     expect(secondaryOther.datasets.length).to.eq(1);
+  });
+
+  it('there should be a bucket with a an undefined data use', async () => {
+    const buckets = await binCollectionToBuckets(sample_collection);
+    const missingDataUse = find(b => !b.isRP && isUndefined(b.dataUse))(buckets);
+    expect(missingDataUse).to.not.be.empty;
+    expect(missingDataUse.datasets).to.not.be.empty;
+    expect(missingDataUse.datasets.length).to.eq(1);
+    expect(missingDataUse.dataUse).to.be.undefined;
+    expect(missingDataUse.dataUses).to.be.empty;
   });
 
 });
