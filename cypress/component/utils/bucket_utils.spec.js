@@ -3,7 +3,7 @@ import {binCollectionToBuckets} from '../../../src/utils/BucketUtils';
 import {filter, find, forEach, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
-const sample_collection = {
+const dar_collection = {
   'darCollectionId': 1,
   'darCode': 'DAR-001',
   'dars': {
@@ -401,7 +401,7 @@ beforeEach(() => {
 
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection);
+    const buckets = await binCollectionToBuckets(dar_collection);
     expect(buckets).to.not.be.empty;
     forEach(b => {
       expect(b.key).to.not.be.empty;
@@ -420,7 +420,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with two GRU datasets', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection);
+    const buckets = await binCollectionToBuckets(dar_collection);
     const gruBucket = find(b => b.label === 'GRU')(buckets);
     expect(gruBucket).to.not.be.empty;
     expect(gruBucket.datasets).to.not.be.empty;
@@ -428,7 +428,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a primary OTHER dataset', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection);
+    const buckets = await binCollectionToBuckets(dar_collection);
     const other = find(b => b.label === 'OTH1')(buckets);
     expect(other).to.not.be.empty;
     expect(other.datasets).to.not.be.empty;
@@ -436,7 +436,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a secondary OTHER dataset', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection);
+    const buckets = await binCollectionToBuckets(dar_collection);
     const secondaryOther = find(b => b.label === 'OTH2')(buckets);
     expect(secondaryOther).to.not.be.empty;
     expect(secondaryOther.datasets).to.not.be.empty;
@@ -444,7 +444,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a an undefined data use', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection);
+    const buckets = await binCollectionToBuckets(dar_collection);
     const missingDataUse = find(b => !b.isRP && isUndefined(b.dataUse))(buckets);
     expect(missingDataUse).to.not.be.empty;
     expect(missingDataUse.datasets).to.not.be.empty;
@@ -454,7 +454,7 @@ describe('BucketUtils', () => {
   });
 
   it('buckets should be filtered to datasets containing one dac id: 1', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection, [1]);
+    const buckets = await binCollectionToBuckets(dar_collection, [1]);
     const dataAccessBuckets = filter(b => !b.isRP)(buckets);
     expect(dataAccessBuckets).to.exist;
     expect(dataAccessBuckets.length).to.eq(1);
@@ -467,7 +467,7 @@ describe('BucketUtils', () => {
   });
 
   it('buckets should be filtered to datasets containing two dac ids, 1 & 5', async () => {
-    const buckets = await binCollectionToBuckets(sample_collection, [1, 5]);
+    const buckets = await binCollectionToBuckets(dar_collection, [1, 5]);
     const dataAccessBuckets = filter(b => !b.isRP)(buckets);
     expect(dataAccessBuckets).to.exist;
     expect(dataAccessBuckets.length).to.eq(2);
