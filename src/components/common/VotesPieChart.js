@@ -30,25 +30,20 @@ export default function VotesPieChart(props) {
   const {
     votes = [],
     keyString,
-    title = props.title || 'My DAC\'s Votes (summary)',
     pieHole = 0.3,
     height = 'inherit',
     width = '100%',
-    style = { padding: '20px 0', width: '50%' },
+    style = { width: '70%' },
     styleOverride,
   } = props;
 
   const processedVotes = useMemo(() => processVotes(votes), [votes]);
   const options = {
-    title,
     pieHole,
     is3d: false,
     fontName: 'Montserrat',
     pieSliceText: 'none',
     slices: pieSliceColors,
-    titleTextStyle: {
-      fontSize: 15
-    },
   };
 
   if(isEmpty(votes)) {

@@ -152,16 +152,15 @@ export const ChairVoteInfo = ({dacVotes, isChair, adminPage = false}) => {
         {
           style: {
             backgroundColor: '#FFFFFF',
-            display: 'flex',
-            justifyContent: 'space-between',
             padding: '1% 0',
-            marginBottom: '10px',
+            marginLeft: '-3%',
+            marginTop: '10%',
           },
         },
         [
+          div({style: {fontSize: 17, color: '#333F52', fontFamily: 'Montserrat'}}, [adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)"]),
           h(VotesPieChart, {
             votes: dacVotes,
-            title: adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)",
             styleOverride: {}
           }),
         ]
