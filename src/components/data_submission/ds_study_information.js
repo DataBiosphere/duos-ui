@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash/fp';
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
+import initialFormData from './NIHDataManagement';
 
 import './ds_common.css';
 
@@ -131,6 +132,41 @@ export default function DataSubmissionStudyInformation(props) {
       onChange,
       onValidationChange
     }),
+    div({
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      },
+    }, [
+
+      h(FormField, {
+        id: 'alternativeDataSharingPlanTargetDeliveryDate',
+        style: {
+          width: '45%',
+        },
+        defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
+        title: 'Target Delivery Date',
+        placeholder: 'Please enter date (YYYY-MM-DD)',
+        validators: [FormValidators.DATE],
+        onChange,
+        validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
+        onValidationChange,
+      }),
+      h(FormField, {
+        id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
+        style: {
+          width: '45%',
+        },
+        defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
+        title: 'Target Public Release Date',
+        placeholder: 'Please enter date (YYYY-MM-DD)',
+        validators: [FormValidators.DATE],
+        onChange,
+        validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
+        onValidationChange,
+      }),
+    ]),
     h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',

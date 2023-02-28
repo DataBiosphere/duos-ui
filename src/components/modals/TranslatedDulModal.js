@@ -1,4 +1,4 @@
-import {li, ul} from 'react-hyperscript-helpers';
+import {li, ul, span} from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { useState, useEffect } from 'react';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -23,7 +23,7 @@ async function GenerateUseRestrictionStatements(dataUse) {
     return li({
       className: 'translated-restriction',
       key: `${restriction.code}-statement`,
-    }, [restriction.description]);
+    }, [span({ style: { fontWeight: 'bold' } }, [restriction.code, ': ']), restriction.description]);
   });
 }
 
@@ -55,8 +55,7 @@ export default function TranslatedDulModal(props) {
       color: 'dataset',
       type: 'informative',
       iconSize: 'none',
-      title: 'More information',
-      description: 'Translated Use Restriction',
+      title: 'Data Use Terms',
       action: { label: 'Close', handler: OKHandler }
     },
     [

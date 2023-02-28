@@ -21,7 +21,7 @@ export const urlValidator = {
 export const emailValidator = {
   id: 'email',
   isValid: isEmailAddress,
-  msg: 'Please enter a valid email (e.g., johndoe@gmail.com)'
+  msg: 'Please enter a valid email address (e.g., person@example.com)'
 };
 
 export const dateValidator = {
@@ -69,7 +69,6 @@ export const validateFormValue = (formValue, validators) => {
     failed: failedValidators,
   };
 };
-
 
 /**
  * Gives a human readable validation message. Gives generic message if the validator cannot be found.

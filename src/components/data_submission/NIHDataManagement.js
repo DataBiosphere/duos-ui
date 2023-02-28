@@ -196,44 +196,7 @@ export const NIHDataManagement = (props) => {
         validation: validation.alternativeDataSharingPlanDataReleased,
         onValidationChange,
       }),
-
-      div({
-        style: {
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        },
-      }, [
-
-        h(FormField, {
-          id: 'alternativeDataSharingPlanTargetDeliveryDate',
-          style: {
-            width: '45%',
-          },
-          defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
-          title: 'Target Delivery Date',
-          placeholder: 'Please enter date (YYYY-MM-DD)',
-          validators: [FormValidators.DATE],
-          onChange,
-          validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
-          onValidationChange,
-        }),
-        h(FormField, {
-          id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
-          style: {
-            width: '45%',
-          },
-          defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
-          title: 'Target Public Release Date',
-          placeholder: 'Please enter date (YYYY-MM-DD)',
-          validators: [FormValidators.DATE],
-          validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
-          onValidationChange,
-          onChange,
-        }),
-      ]),
     ]),
-
   ]);
 };
 

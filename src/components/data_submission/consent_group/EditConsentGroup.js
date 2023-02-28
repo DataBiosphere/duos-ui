@@ -85,9 +85,7 @@ export const EditConsentGroup = (props) => {
     setShowOtherPrimaryText(key === 'otherPrimary');
   };
 
-  return div({
-
-  }, [
+  return div({}, [
     div({
       style: {
         width: '70%'
@@ -188,7 +186,6 @@ export const EditConsentGroup = (props) => {
         }),
       ]),
 
-
       h(FormField, {
         type: FormFieldTypes.RADIOBUTTON,
         id: idx+'_primaryConsent_poa',
@@ -205,6 +202,7 @@ export const EditConsentGroup = (props) => {
           onValidationChange({key: 'poa', validation});
         },
       }),
+
       h(FormField, {
         type: FormFieldTypes.RADIOBUTTON,
         id: idx+'_primaryConsent_otherPrimary',
@@ -429,9 +427,9 @@ export const EditConsentGroup = (props) => {
         onChange,
         validation: validation.url,
         onValidationChange,
-
       }),
     ]),
+
     h(FormTable, {
       id: idx+'_fileTypes',
       name: 'fileTypes',
@@ -466,7 +464,6 @@ export const EditConsentGroup = (props) => {
       onChange,
       validation: validation.fileTypes,
       onValidationChange,
-
     }),
 
     h(FormField, {
