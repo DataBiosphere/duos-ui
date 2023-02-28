@@ -193,7 +193,6 @@ export const EditConsentGroup = (props) => {
         value: 'poa',
         toggleText: 'Populations, Origins, Ancestry Use',
         defaultValue: selectedPrimaryGroup(consentGroup),
-
         onChange: ({value}) => {
           onPrimaryChange({key: value, value: true});
         },

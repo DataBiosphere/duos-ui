@@ -67,7 +67,7 @@ export default function NihAnvilUse(props) {
         validators: [FormValidators.REQUIRED],
         onChange,
         validation: validation.dbGaPPhsID,
-        onValidationChange,p
+        onValidationChange,
       }),
       h(FormField, {
         id: 'dbGaPStudyRegistrationName',
