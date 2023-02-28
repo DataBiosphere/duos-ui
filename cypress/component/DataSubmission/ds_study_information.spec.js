@@ -28,7 +28,7 @@ describe('DataSubmissionStudyInformation - Tests', () => {
   it('should mount with all the fields', () => {
     mount(<DataSubmissionStudyInformation {...propCopy}/>);
     const formFields = cy.get('.formField-container');
-    formFields.should('have.length', 11);
+    formFields.should('have.length', 13);
 
     cy.get('.formField-studyName').should('have.length', 1);
     cy.get('.formField-studyType').should('have.length', 1);
@@ -40,6 +40,8 @@ describe('DataSubmissionStudyInformation - Tests', () => {
     cy.get('.formField-dataSubmitterName').should('have.length', 1);
     cy.get('.formField-dataSubmitterEmail').should('have.length', 1);
     cy.get('.formField-dataCustodianEmail').should('have.length', 1);
+    cy.get('#alternativeDataSharingPlanTargetDeliveryDate').should('exist');
+    cy.get('#alternativeDataSharingPlanTargetPublicReleaseDate').should('exist');
     cy.get('.formField-publicVisibility').should('have.length', 1);
   });
 

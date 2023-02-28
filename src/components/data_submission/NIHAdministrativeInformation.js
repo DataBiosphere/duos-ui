@@ -14,8 +14,8 @@ export const NIHAdministrativeInformation = (props) => {
   } = props;
 
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(initialFormData?.multiCenterStudy === true || false);
-  const [showGSRNotRequiredExplanation, setShowGSRNotRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
-  const [gsrNotRequiredExplanation, setGSRNotRequiredExplanation] = useState('');
+  const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
+  const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
 
   return div({
     className: 'data-submitter-section',
@@ -131,24 +131,24 @@ export const NIHAdministrativeInformation = (props) => {
       type: FormFieldTypes.YESNORADIOGROUP,
       validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
-        setShowGSRNotRequiredExplanation(!value);
+        setShowGSRRequiredExplanation(value);
         onChange({key, value});
         onChange({
-          key: 'controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation',
-          value: (!value ? gsrNotRequiredExplanation : undefined),
+          key: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
+          value: (value ? gsrRequiredExplanation : undefined),
         });
       },
       validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSR,
       onValidationChange,
     }),
     h(FormField, {
-      id: 'controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation',
-      title: 'If no, explain why controlled access is needed for GSR.',
-      isRendered: showGSRNotRequiredExplanation,
-      defaultValue: gsrNotRequiredExplanation,
+      id: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
+      title: 'If yes, explain why controlled access is needed for GSR.',
+      isRendered: showGSRRequiredExplanation,
+      defaultValue: gsrRequiredExplanation,
       validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
-        setGSRNotRequiredExplanation(value);
+        setGSRRequiredExplanation(value);
         onChange({key, value});
       },
       validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation,
