@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import {binCollectionToBuckets} from '../../../src/utils/BucketUtils';
-import {forEach, find, isUndefined} from 'lodash/fp';
+import {filter, find, forEach, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
 const sample_collection = {
@@ -451,6 +451,31 @@ describe('BucketUtils', () => {
     expect(missingDataUse.datasets.length).to.eq(1);
     expect(missingDataUse.dataUse).to.be.undefined;
     expect(missingDataUse.dataUses).to.be.empty;
+  });
+
+  it('buckets should be filtered to datasets containing one dac id: 1', async () => {
+    const buckets = await binCollectionToBuckets(sample_collection, [1]);
+    const dataAccessBuckets = filter(b => !b.isRP)(buckets);
+    expect(dataAccessBuckets).to.exist;
+    expect(dataAccessBuckets.length).to.eq(1);
+    expect(dataAccessBuckets[0].datasetIds.length).to.eq(1);
+    forEach(b => {
+      forEach(e => {
+        expect(b.datasetIds).to.contain(e.dataSetId);
+      })(b.elections);
+    })(buckets);
+  });
+
+  it('buckets should be filtered to datasets containing two dac ids, 1 & 5', async () => {
+    const buckets = await binCollectionToBuckets(sample_collection, [1, 5]);
+    const dataAccessBuckets = filter(b => !b.isRP)(buckets);
+    expect(dataAccessBuckets).to.exist;
+    expect(dataAccessBuckets.length).to.eq(2);
+    forEach(b => {
+      forEach(e => {
+        expect(b.datasetIds).to.contain(e.dataSetId);
+      })(b.elections);
+    })(buckets);
   });
 
 });
