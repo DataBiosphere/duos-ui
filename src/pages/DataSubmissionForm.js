@@ -96,7 +96,7 @@ export const DataSubmissionForm = () => {
     formData[key] = value;
     if (key === 'nihAnvilUse') {
       if (includes(value)(['yes_nhgri_yes_phs_id'])) {
-      setNihAdminRendered(true);
+        setNihAdminRendered(true);
       setNihDataManagementRendered(true);
       }
       if (includes(value)(['yes_nhgri_no_phs_id'])) {
