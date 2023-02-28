@@ -11,6 +11,9 @@ import PublishIcon from '@mui/icons-material/Publish';
 import './formComponents.css';
 import { isArray } from 'lodash';
 
+import { isValid, validateFormValue, validationMessage } from './formValidation';
+import { useState } from 'react';
+
 const styles = {
   inputStyle: {
     padding: '25px 15px',
@@ -18,68 +21,64 @@ const styles = {
   }
 };
 
-//---------------------------------------------
-// Form Behavior
-//---------------------------------------------
-const validateFormInput = (config, value) => {
-  const { setError, validators } = config;
-  if (validators) {
-    const validationResults = validators
-      .filter(validator => !validator.isValid(value))
-      .map(x => x.msg);
-
-    const isValid = validationResults.length === 0;
-    setError(isValid ? undefined : validationResults);
-    return isValid;
-  }
-  setError();
-  return true;
+export const getKey = ({ name, id }) => {
+  return (!isNil(name) ? name : id);
 };
 
-const getKey = (config) => {
-  return (!isNil(config.name) ? config.name : config.id);
+const updateValidation = (config, value) => {
+  const {
+    setValidation,
+    validators
+  } = config;
+  const validation = validateFormValue(value, validators);
+  setValidation(validation);
+
+  return isValid(validation);
 };
 
 const onFormInputChange = (config, value) => {
-  const { type, onChange, formValue, setFormValue } = config;
+  const { type, onChange, formValue, setFormValue, validators, setValidation } = config;
 
   const key = getKey(config);
-  const isValidInput = validateFormInput(config, value);
+
+  const validation = validateFormValue(value, validators);
+  setValidation(validation);
+
 
   if (!isNil(type?.parseFormInput)) {
     value = type.parseFormInput(value);
   }
 
   if (value !== formValue) {
-    onChange({key: key, value: value, isValid: isValidInput });
+    onChange({key: key, value: value, isValid: isValid(validation) });
     setFormValue(value);
   }
 };
 
-const errorMessage = (error) => {
-  return error && div({ className: `error-message fadein`}, [
+const errorMessages = (validation) => {
+  return !isValid(validation) && div({ className: `error-message fadein`}, [
     span({ className: 'glyphicon glyphicon-play' }),
-    ...error.map((err) => div([err])),
+    ...validation.failed.map((err) => div([validationMessage(err)])),
   ]);
 };
 
 //---------------------------------------------
 // Form Controls
 //---------------------------------------------
-export const formInputGeneric = (config) => {
+export const FormInputGeneric = (config) => {
   const {
     id, title, disabled,
     placeholder, type,
     inputStyle, ariaDescribedby,
     readOnly,
-    formValue, error, setError
+    formValue, validation, setValidation
   } = config;
 
   return div([
     input({
       id,
       type: type?.inputType || 'text',
-      className: `form-control ${error ? 'errored' : ''}`,
+      className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue.toString(),
       readOnly: readOnly,
@@ -88,57 +87,69 @@ export const formInputGeneric = (config) => {
       onChange: (event) => {
         onFormInputChange(config, event.target.value);
       },
-      onFocus: () => setError(),
-      onBlur: (event) => validateFormInput(config, event.target.value),
+      onFocus: () => setValidation({ valid: true }),
+      onBlur: (event) => updateValidation(config, event.target.value),
       'aria-describedby': ariaDescribedby,
     }),
-    errorMessage(error)
+    errorMessages(validation)
   ]);
 };
 
-export const formInputTextarea = (config) => {
+export const FormInputTextarea = (config) => {
   const {
     id, title, type, disabled,
     placeholder,
     inputStyle, ariaDescribedby,
     rows, maxLength,
-    formValue, error, setError
+    formValue, validation, setValidation
   } = config;
 
   return div([
     textarea({
       id,
       type: type || 'text',
-      className: `form-control ${error ? 'errored' : ''}`,
+      className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
       placeholder: placeholder || title,
       value: formValue,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,
       onChange: (event) => onFormInputChange(config, event.target.value),
-      onFocus: () => setError(),
-      onBlur: (event) => validateFormInput(config, event.target.value),
+      onFocus: () => setValidation({ valid: true }),
+      onBlur: (event) => updateValidation(config, event.target.value),
       'aria-describedby': ariaDescribedby,
       rows,
       maxLength
     }),
-    errorMessage(error)
+    errorMessages(validation)
   ]);
 };
 
-export const formInputMultiText = (config) => {
+export const FormInputMultiText = (config) => {
   const {
     id, title, disabled,
-    placeholder, ariaDescribedby,
-    inputStyle, onChange,
-    formValue, setFormValue, error, setError
+    placeholder, ariaDescribedby, validators,
+    inputStyle, formValue, validation,
+    setValidation
   } = config;
+
+  // validation of the user's input as they are typing it,
+  // separate from validation of the actual saved values
+  // (which is the top level validation).
+  const [inputValidation, setInputValidation] = useState({});
 
   const pushValue = (element) => {
     const value = element.value.trim();
 
-    if (!value || !validateFormInput(config, value)) {
+    if (!value) {
       return;
     }
+
+    const inputValidation = validateFormValue(value, validators);
+    setInputValidation(inputValidation);
+    if (!isValid(inputValidation)) {
+      return;
+    }
+
     if (formValue.indexOf(value) !== -1) {
       element.value = '';
       return;
@@ -146,16 +157,14 @@ export const formInputMultiText = (config) => {
 
     const formValueClone = cloneDeep(formValue);
     formValueClone.push(value);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
+    onFormInputChange(config, formValueClone);
     element.value = '';
   };
 
   const removePill = (index) => {
     const formValueClone = cloneDeep(formValue);
     formValueClone.splice(index, 1);
-    setFormValue(formValueClone);
-    onChange({key: id, value: formValueClone, isValid: true});
+    onFormInputChange(config, formValueClone);
   };
 
   return div({}, [
@@ -165,13 +174,13 @@ export const formInputMultiText = (config) => {
       input({
         id,
         type: 'text',
-        className: `form-control ${error ? 'errored' : ''}`,
+        className: `form-control ${!isValid(validation) || !isValid(inputValidation) ? 'errored' : ''}`,
         placeholder: placeholder || title,
         style: { ...styles.inputStyle, ...inputStyle },
         disabled,
         'aria-describedby': ariaDescribedby,
-        onKeyUp: (event) => event.code === 'Enter' ? pushValue(event.target) : setError(),
-        onFocus: () => setError()
+        onKeyUp: (event) => event.code === 'Enter' ? pushValue(event.target) : setValidation({ valid: true }),
+        onFocus: () => setValidation({ valid: true })
       }),
       h(button, {
         className: 'form-btn btn-xs',
@@ -191,7 +200,8 @@ export const formInputMultiText = (config) => {
         })
       ])
     ]),
-    errorMessage(error),
+    errorMessages(inputValidation),
+    errorMessages(validation),
     div({ className: 'flex-row', style: { justifyContent: 'flex-start' } },
       formValue.map((val, i) => {
         return h(button, {
@@ -241,9 +251,9 @@ const normalizeSelectFormValue = (value) => {
 };
 
 // Using react-select/creatable - Passing config directly through!
-export const formInputSelect = (config) => {
+export const FormInputSelect = (config) => {
   const {
-    id, title, disabled, required, error, setError,
+    id, title, disabled, required, validation, setValidation,
     selectOptions, placeholder, ariaDescribedby,
     formValue, isCreatable = false, isMulti = false,
     isAsync = false, setFormValue,
@@ -269,7 +279,7 @@ export const formInputSelect = (config) => {
     required,
     isDisabled: disabled,
     placeholder: placeholder || `Search for ${title}...`,
-    className: `form-select ${error ? 'errored' : ''}`,
+    className: `form-select ${!isValid(validation) ? 'errored' : ''}`,
     onChange: (selected) => {
       if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
         const newSelection = selected[selected.length - 1];
@@ -298,10 +308,10 @@ export const formInputSelect = (config) => {
         onFormInputChange(config, selected);
       }
     },
-    onMenuOpen: () => setError(),
+    onMenuOpen: () => setValidation({ valid: true }),
     onMenuClose: () => {
       if (required && !formValue) {
-        setError(FormValidators.REQUIRED.msg);
+        setValidation(FormValidators.REQUIRED.msg);
       }
     },
     getOptionLabel: (option) => option.displayText,
@@ -326,7 +336,7 @@ export const formInputSelect = (config) => {
   }) ;
 };
 
-export const formInputRadioGroup = (config) => {
+export const FormInputRadioGroup = (config) => {
   const {
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
@@ -369,7 +379,7 @@ export const formInputRadioGroup = (config) => {
   );
 };
 
-export const formInputYesNoRadioGroup = (config) => {
+export const FormInputYesNoRadioGroup = (config) => {
   const {
     id, disabled,
     orientation = 'vertical', // [vertical, horizontal],
@@ -424,7 +434,7 @@ export const formInputYesNoRadioGroup = (config) => {
     ]);
 };
 
-export const formInputRadioButton = (config) => {
+export const FormInputRadioButton = (config) => {
   const {
     id, disabled, value, toggleText,
     formValue,
@@ -450,9 +460,9 @@ export const formInputRadioButton = (config) => {
   ]);
 };
 
-export const formInputCheckbox = (config) => {
+export const FormInputCheckbox = (config) => {
   const {
-    id, disabled, error, toggleText,
+    id, disabled, validation, toggleText,
     formValue, ariaDescribedby
   } = config;
 
@@ -467,13 +477,13 @@ export const formInputCheckbox = (config) => {
       disabled
     }),
     label({
-      className: `regular-checkbox ${error ? 'errored' : ''}`,
+      className: `regular-checkbox ${!isValid(validation) ? 'errored' : ''}`,
       htmlFor: `${id}`,
     }, [toggleText])
   ]);
 };
 
-export const formInputSlider = (config) => {
+export const FormInputSlider = (config) => {
   const {
     id, disabled, toggleText, formValue
   } = config;
@@ -499,7 +509,7 @@ export const formInputSlider = (config) => {
   ]);
 };
 
-export const formInputFile = (config) => {
+export const FormInputFile = (config) => {
   const {
     id,
     formValue,

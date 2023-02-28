@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet } from '../libs/ajax';
@@ -12,6 +13,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+import { set } from 'lodash';
 
 
 export const DataSubmissionForm = () => {
@@ -41,6 +43,8 @@ export const DataSubmissionForm = () => {
 
   const formFiles = {};
   const formData = { publicVisibility: true };
+
+  const [formValidation, setFormValidation] = useState({});
 
   const formatForRegistration = (formData) => {
     for (const key of Object.keys(formData)) {
@@ -85,18 +89,20 @@ export const DataSubmissionForm = () => {
     });
   };
 
-  const onChange = ({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('StudyInfo OnChange:', key, value, isValid);
-
+  const onChange = ({ key, value }) => {
     formData[key] = value;
   };
 
-  const onFileChange = ({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('File OnChange:', key, value, isValid);
-
+  const onFileChange = ({ key, value }) => {
     formFiles[key] = value;
+  };
+
+  const onValidationChange = ({ key, validation }) => {
+    setFormValidation((val) => {
+      const newValidation = cloneDeep(val);
+      set(newValidation, key, validation);
+      return newValidation;
+    });
   };
 
 
@@ -118,11 +124,11 @@ export const DataSubmissionForm = () => {
     <form style={{ margin: 'auto', maxWidth: 800}}>
 
 
-      <DataSubmissionStudyInformation onChange={onChange} />
-      <NihAnvilUse onChange={onChange} initialFormData={formData} />
-      <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} />
-      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} />
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} />
+      <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} />
+      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} />
+      <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
+      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

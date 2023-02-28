@@ -85,17 +85,21 @@ describe('Data Access Governance', function () {
     cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('exist');
 
+
+    // when you delete consent groups, they get shifted down to
+    // their appropriate idx; so if you have 0, 1 and 2 and you
+    // delete 1, then 0 and 2 get mapped to 0 and 1
     cy.get('#1_deleteConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
-    cy.get('#1_consentGroupForm').should('not.exist');
-    cy.get('#2_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('not.exist');
 
     cy.get('#0_deleteConsentGroup').click();
-    cy.get('#0_consentGroupForm').should('not.exist');
+    cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('not.exist');
-    cy.get('#2_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('not.exist');
 
-    cy.get('#2_deleteConsentGroup').click();
+    cy.get('#0_deleteConsentGroup').click();
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');

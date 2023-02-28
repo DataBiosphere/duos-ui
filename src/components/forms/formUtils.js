@@ -1,6 +1,5 @@
 import { FormFieldTypes, commonRequiredProps, commonOptionalProps } from './forms';
 import { isNil, isFunction, isArray, isString } from 'lodash/fp';
-import { isEmailAddress } from '../../libs/utils';
 
 export const validateFormProps = (props) => {
   const type = (!isNil(props.type) ? props.type : FormFieldTypes.TEXT);
@@ -76,43 +75,4 @@ export const customRadioPropValidation = (props) => {
     }
 
   });
-};
-
-export const requiredValidator = {
-  isValid: (value) => {
-    return value !== undefined && value !== null &&
-      (isString(value) ? value.trim() !== '' : true);
-  },
-  msg: 'Please enter a value',
-};
-
-export const urlValidator = {
-  isValid: (val) => {
-    return validURLObject(val) || validURLObject('https://' + val);
-  },
-  msg: 'Please enter a valid url (e.g., duos.org)',
-};
-
-const validURLObject = (val) => {
-  try {
-    new URL(val);
-  } catch (_) {
-    return false;
-  }
-
-  return true;
-};
-
-export const emailValidator = {
-  isValid: isEmailAddress,
-  msg: 'Please enter a valid email address (e.g., person@example.com)',
-};
-
-// regex source: https://regexland.com/regex-dates/
-const dateRegex = /^\d{4}-(02-(0[1-9]|[12][0-9])|(0[469]|11)-(0[1-9]|[12][0-9]|30)|(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))$/;
-export const dateValidator = {
-  isValid: (val) => {
-    return dateRegex.test(val);
-  },
-  msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
 };
