@@ -466,7 +466,7 @@ describe('BucketUtils', () => {
     })(buckets);
   });
 
-  it('buckets should be filtered to datasets containing two dac ids, 1 & 5', async () => {
+  it('buckets should be filtered to datasets containing two dac ids: 1 & 5', async () => {
     const buckets = await binCollectionToBuckets(dar_collection, [1, 5]);
     const dataAccessBuckets = filter(b => !b.isRP)(buckets);
     expect(dataAccessBuckets).to.exist;
