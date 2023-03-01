@@ -1,4 +1,4 @@
-import React from 'react';
+import React,  { useCallback } from 'react';
 import { compileSchema, validateForm } from '../utils/JsonSchemaUtils';
 
 import { cloneDeep, isNil } from 'lodash/fp';
@@ -59,8 +59,8 @@ export const DataSubmissionForm = () => {
     }
   }, [schema]);
 
-  const formFiles = {};
-  const formData = { publicVisibility: true };
+  const [formFiles, setFormFiles] = useState({});
+  const [formData, setFormData] = useState({ publicVisibility: true });
 
   const [formValidation, setFormValidation] = useState({});
 
@@ -123,13 +123,24 @@ export const DataSubmissionForm = () => {
     });
   };
 
-  const onChange = ({ key, value }) => {
-    formData[key] = value;
-  };
+  const onChange = useCallback(({ key, value, isValid }) => {
+    /* eslint-disable no-console */
+    console.log('StudyInfo OnChange:', key, value, isValid);
 
-  const onFileChange = ({ key, value }) => {
-    formFiles[key] = value;
-  };
+    setFormData((val) => {
+      const newForm = cloneDeep(val);
+      set(newForm, key, value);
+      return newForm;
+    });
+  }, [setFormData]);
+
+  const onFileChange = useCallback(({ key, value }) => {
+    setFormFiles((val) => {
+      const newFiles = cloneDeep(val);
+      set(newFiles, key, value);
+      return newFiles;
+    });
+  }, [setFormFiles]);
 
   const onValidationChange = ({ key, validation }) => {
     setFormValidation((val) => {

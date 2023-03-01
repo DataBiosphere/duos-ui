@@ -36,7 +36,7 @@ export const DataAccessGovernance = (props) => {
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
-  }, []);
+  }, [setDacs]);
 
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
