@@ -10,6 +10,8 @@ export const ConsentGroupForm = (props) => {
     saveConsentGroup,
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
+    validation,
+    onValidationChange
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
@@ -71,7 +73,9 @@ export const ConsentGroupForm = (props) => {
           setNihInstitutionalCertificationFile: (file) => {
             setNihInstitutionalCertificationFile(file);
             updateNihInstitutionalCertificationFile(file);
-          }
+          },
+          validation,
+          onValidationChange
         },
       })
       : h(ConsentGroupSummary, {

@@ -9,11 +9,13 @@ export const NIHAdministrativeInformation = (props) => {
     initialFormData,
     onChange,
     institutions,
+    validation,
+    onValidationChange,
   } = props;
 
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(initialFormData?.multiCenterStudy === true || false);
-  const [showGSRNotRequiredExplanation, setShowGSRNotRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
-  const [gsrNotRequiredExplanation, setGSRNotRequiredExplanation] = useState('');
+  const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
+  const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
 
   return div({
     className: 'data-submitter-section',
@@ -25,6 +27,8 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       onChange,
       defaultValue: initialFormData?.piName,
+      validation: validation.piName,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'piInstitution',
@@ -32,11 +36,15 @@ export const NIHAdministrativeInformation = (props) => {
       isRendered: !isEmpty(institutions),
       validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
-      selectOptions: institutions,
+      selectOptions: institutions.map((inst) => { return { displayText: inst.name, id: inst.id };}),
       isCreatable: false,
       selectConfig: {},
-      onChange,
+      onChange: ({key, value, isValid}) => {
+        onChange({key, value: value?.id, isValid});
+      },
       defaultValue: initialFormData?.piInstitution,
+      validation: validation.piInstitution,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihGrantContractNumber',
@@ -44,6 +52,8 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       onChange,
       defaultValue: initialFormData?.nihGrantContractNumber,
+      validation: validation.nihGrantContractNumber,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihICsSupportingStudy',
@@ -55,6 +65,8 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       defaultValue: initialFormData?.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
+      validation: validation.nihICsSupportingStudy,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihProgramOfficerName',
@@ -63,6 +75,8 @@ export const NIHAdministrativeInformation = (props) => {
       onChange,
       placeholder: 'Officer Name',
       defaultValue: initialFormData?.nihProgramOfficerName,
+      validation: validation.nihProgramOfficerName,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihInstitutionCenterSubmission',
@@ -73,6 +87,8 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       defaultValue: initialFormData?.nihInstitutionCenterSubmission,
       selectOptions: nihInstitutions,
+      validation: validation.nihInstitutionCenterSubmission,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihGenomicProgramAdministratorName',
@@ -80,6 +96,8 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       defaultValue: initialFormData?.nihGenomicProgramAdministratorName,
       onChange,
+      validation: validation.nihGenomicProgramAdministratorName,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'multiCenterStudy',
@@ -90,7 +108,9 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value}) => {
         setShowMultiCenterStudy(value);
         onChange({key, value});
-      }
+      },
+      validation: validation.multiCenterStudy,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'collaboratingSites',
@@ -101,8 +121,9 @@ export const NIHAdministrativeInformation = (props) => {
       defaultValue: initialFormData?.collaboratingSites,
       validators: [FormValidators.REQUIRED],
       onChange,
+      validation: validation.collaboratingSites,
+      onValidationChange,
     }),
-    //NOTE: radio group not equipped to handle yes/no groupings
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
       title: 'Is controlled access required for genomic summary results (GSR)?',
@@ -110,24 +131,28 @@ export const NIHAdministrativeInformation = (props) => {
       type: FormFieldTypes.YESNORADIOGROUP,
       validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
-        setShowGSRNotRequiredExplanation(!value);
+        setShowGSRRequiredExplanation(value);
         onChange({key, value});
         onChange({
-          key: 'controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation',
-          value: (!value ? gsrNotRequiredExplanation : undefined),
+          key: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
+          value: (value ? gsrRequiredExplanation : undefined),
         });
-      }
+      },
+      validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      onValidationChange,
     }),
     h(FormField, {
-      id: 'controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation',
-      title: 'If no, explain why controlled access is needed for GSR.',
-      isRendered: showGSRNotRequiredExplanation,
-      defaultValue: gsrNotRequiredExplanation,
+      id: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
+      title: 'If yes, explain why controlled access is needed for GSR.',
+      isRendered: showGSRRequiredExplanation,
+      defaultValue: gsrRequiredExplanation,
       validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
-        setGSRNotRequiredExplanation(value);
+        setGSRRequiredExplanation(value);
         onChange({key, value});
       },
+      validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation,
+      onValidationChange,
     }),
   ]);
 };

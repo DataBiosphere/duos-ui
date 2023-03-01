@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
 import { DarDatasetTable } from '../dar_dataset_table/DarDatasetTable';
 import { Collections } from '../../libs/ajax';
-import { Notifications } from '@material-ui/icons';
+import { Notifications } from '@mui/icons-material';
 
 const storageDarCollectionSort = 'storageDarCollectionSort';
 
@@ -28,7 +28,6 @@ export const styles = {
     whiteSpace: 'pre-wrap',
     backgroundColor: 'white',
     border: '1px solid #DEDEDE',
-    borderRadius: '4px',
     margin: '0.5% 0'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {

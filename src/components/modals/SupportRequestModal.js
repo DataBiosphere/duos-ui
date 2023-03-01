@@ -4,8 +4,8 @@ import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { PageSubHeading } from '../PageSubHeading';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
 import * as fp from 'lodash/fp';
@@ -254,7 +254,7 @@ export const SupportRequestModal = hh(
                 id: 'SupportRequestModal',
                 imgSrc: addHelpIcon,
                 color: 'common',
-                title: 'Request Help',
+                title: 'Contact Us',
               }),
             ]),
             div({

@@ -48,6 +48,14 @@ export const Config = {
     },
   }),
 
+  multiPartOpts: (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
+      'X-App-ID': 'DUOS',
+    },
+  }),
+
   textPlain: () => ({
     headers: {
       Accept: 'text/plain',

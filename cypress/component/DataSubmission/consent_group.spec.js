@@ -11,7 +11,8 @@ const props = {
   deleteConsentGroup: () => {},
   nihInstitutionalCertificationFile: null,
   updateNihInstitutionalCertificationFile: () => {},
-
+  validation: {},
+  onValidationChange: () => {}
 };
 
 let propCopy = {};
@@ -45,37 +46,39 @@ describe('Consent Group', function () {
     cy.get('#0_fileTypes-0-0_functionalEquivalence').type('asdf');
     cy.get('#0_fileTypes-0-0_numberOfParticipants').type('123');
     cy.get('#0_saveConsentGroup').click().then(() => {
-      expect(propCopy.saveConsentGroup).to.be.calledWith({
-        'value': {
-          'consentGroupName': 'Hello!',
-          'generalResearchUse': false,
-          'hmb': true,
-          'poa': false,
-          'nmds': false,
-          'gso': false,
-          'pub': false,
-          'col': true,
-          'irb': false,
-          'gs': null,
-          'mor': undefined,
-          'npu': false,
-          'otherSecondary': null,
-          'otherPrimary': undefined,
-          'diseaseSpecificUse': undefined,
-          'fileTypes': [
-            {
-              'fileType': 'Genome',
-              'functionalEquivalence': 'asdf',
-              'numberOfParticipants': '123',
-            }
-          ],
-          'dataLocation': [
-            'Not Determined'
-          ],
-          'url': 'https://www.asdf.gov'
-        },
-        'valid': true
-      });
+      expect(propCopy.saveConsentGroup).to.be.calledWith(
+        {
+          'value': {
+            'consentGroupName': 'Hello!',
+            'generalResearchUse': false,
+            'hmb': true,
+            'poa': false,
+            'nmds': false,
+            'gso': false,
+            'pub': false,
+            'col': true,
+            'irb': false,
+            'gs': null,
+            'npu': false,
+            'mor': undefined,
+            'diseaseSpecificUse': undefined,
+            'otherPrimary': undefined,
+            'otherSecondary': null,
+            'dataLocation': [
+              'Not Determined'
+            ],
+            'url': 'https://www.asdf.gov',
+            'fileTypes': [
+              {
+                'fileType': 'Genome',
+                'functionalEquivalence': 'asdf',
+                'numberOfParticipants': 123
+              }
+            ]
+          },
+          'valid': true
+        }
+      );
 
       // switches to summary view
       cy.get('#0_consentGroupSummary').should('exist');

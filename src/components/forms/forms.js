@@ -1,29 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { h, div, label, span, button } from 'react-hyperscript-helpers';
-import { cloneDeep, isFunction } from 'lodash/fp';
+import { cloneDeep, isFunction, isNil, isArray } from 'lodash/fp';
 import {
   validateFormProps,
   customRadioPropValidation,
   customSelectPropValidation,
-  requiredValidator,
-  urlValidator,
-  emailValidator,
-  dateValidator,
 } from './formUtils';
 import {
-  formInputGeneric,
-  formInputMultiText,
-  formInputSelect,
-  formInputCheckbox,
-  formInputSlider,
-  formInputRadioGroup,
-  formInputYesNoRadioGroup,
-  formInputTextarea,
-  formInputRadioButton,
-  formInputFile,
+  FormInputGeneric,
+  FormInputMultiText,
+  FormInputSelect,
+  FormInputCheckbox,
+  FormInputSlider,
+  FormInputRadioGroup,
+  FormInputYesNoRadioGroup,
+  FormInputTextarea,
+  FormInputRadioButton,
+  FormInputFile,
+  getKey
 } from './formComponents';
 
 import './forms.css';
+import { dateValidator, emailValidator, isValid, requiredValidator, urlValidator } from './formValidation';
 
 export const commonRequiredProps = [
   'id',
@@ -32,6 +30,7 @@ export const commonOptionalProps = [
   'name',
   'disabled',
   'description',
+  'helpText',
   'title',
   'ariaLevel',
   'ariaDescribedby',
@@ -43,6 +42,8 @@ export const commonOptionalProps = [
   'type',
   'key',
   'isRendered',
+  'validation',
+  'onValidationChange'
 ];
 
 // ----------------------------------------------------------------------------------------------------- //
@@ -51,7 +52,7 @@ export const commonOptionalProps = [
 export const FormFieldTypes = {
   MULTITEXT: {
     defaultValue: [],
-    component: formInputMultiText,
+    component: FormInputMultiText,
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -60,7 +61,7 @@ export const FormFieldTypes = {
   },
   SLIDER: {
     defaultValue: false,
-    component: formInputSlider,
+    component: FormInputSlider,
     requiredProps: [],
     optionalProps: [
       'toggleText',
@@ -68,7 +69,7 @@ export const FormFieldTypes = {
   },
   RADIOGROUP: {
     defaultValue: null,
-    component: formInputRadioGroup,
+    component: FormInputRadioGroup,
     requiredProps: [
       'options',
       // 'options' example:
@@ -84,7 +85,7 @@ export const FormFieldTypes = {
   },
   YESNORADIOGROUP: {
     defaultValue: null,
-    component: formInputYesNoRadioGroup,
+    component: FormInputYesNoRadioGroup,
     optionalProps: [
       'orientation', // 'vertical' or 'horizontal'
     ],
@@ -97,11 +98,11 @@ export const FormFieldTypes = {
     optionalProps: [
       'toggleText',
     ],
-    component: formInputRadioButton,
+    component: FormInputRadioButton,
   },
   TEXT: {
     defaultValue: '',
-    component: formInputGeneric,
+    component: FormInputGeneric,
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -111,7 +112,17 @@ export const FormFieldTypes = {
   },
   NUMBER: {
     defaultValue: '',
-    component: formInputGeneric,
+    inputType: 'number',
+    component: FormInputGeneric,
+    parseFormInput: (formInput, prevValue) => {
+      if (formInput === '') {
+        return 0;
+      } else {
+        // if there is a value, try to parse it; if parsing fails, then the value should stay the same.
+        const parsed = +formInput;
+        return isNaN(parsed) ? prevValue : parsed;
+      }
+    },
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -121,7 +132,7 @@ export const FormFieldTypes = {
   },
   FILE: {
     defaultValue: null,
-    component: formInputFile,
+    component: FormInputFile,
     requiredProps: [],
     optionalProps: [
       'uploadText',
@@ -129,7 +140,7 @@ export const FormFieldTypes = {
   },
   CHECKBOX: {
     defaultValue: false,
-    component: formInputCheckbox,
+    component: FormInputCheckbox,
     requiredProps: [],
     optionalProps: [
       'toggleText'
@@ -137,7 +148,7 @@ export const FormFieldTypes = {
   },
   SELECT: {
     defaultValue: (config) => (config?.isMulti ? [] : ''),
-    component: formInputSelect,
+    component: FormInputSelect,
     requiredNormalSelectProps: [
       'selectOptions'
       // 'selectOptions' example:
@@ -168,7 +179,7 @@ export const FormFieldTypes = {
   },
   TEXTAREA: {
     defaultValue: '',
-    component: formInputTextarea,
+    component: FormInputTextarea,
     requiredProps: [],
     optionalProps: [
       'placeholder',
@@ -197,34 +208,39 @@ export const FormFieldTitle = (props) => {
     title,
     hideTitle,
     description,
+    helpText,
     formId,
     ariaLevel,
     required,
-    error,
+    validation,
   } = props;
 
   return div({}, [
     title && !hideTitle && label({
       id: `lbl_${formId}`,
-      className: `control-label ${error ? 'errored' : ''}`,
+      className: `control-label ${isValid(validation) ? '' : 'errored'}`,
       htmlFor: `${formId}`,
       'aria-level': ariaLevel
     }, [
       title,
       required && '*'
     ]),
+    helpText && span({ style: { fontStyle: 'italic', padding: 7 } }, helpText),
     description && div({ style: { marginBottom: 15 } }, description),
   ]);
 };
 
 export const FormField = (config) => {
   const {
-    id, type = FormFieldTypes.TEXT, ariaLevel,
-    title, hideTitle, description,
-    defaultValue, style, validators
+    id, name, type = FormFieldTypes.TEXT, ariaLevel,
+    title, hideTitle, description, helpText,
+    defaultValue, style, validators,
+    validation, onValidationChange
   } = config;
 
-  const [error, setError] = useState();
+  // if the user specifies the 'errors' prop, we should use that as the source of truth.
+  // otherwise, we should use internal state to keep track of errors.
+  const [internalValidationState, setInternalValidationState] = useState();
 
   const typeDefaultValue = isFunction(type.defaultValue) ? type.defaultValue(config) : type.defaultValue;
   const [formValue, setFormValue] = useState(typeDefaultValue || '');
@@ -233,16 +249,28 @@ export const FormField = (config) => {
 
   useEffect(() => {
     if (defaultValue !== undefined) {
-      const normalizedValue = isFunction(type.updateDefaultValue)
-        ? type.updateDefaultValue(config)
-        : defaultValue;
-      setFormValue(normalizedValue);
+      setFormValue(defaultValue);
     }
-  }, [defaultValue, config, type]);
+  }, [defaultValue, type]);
 
   useEffect(() => {
     validateFormProps(config);
   }, [config]);
+
+  const getValidation = useCallback(() => {
+    if (!isNil(validation)) {
+      return validation;
+    }
+    return internalValidationState;
+  }, [internalValidationState, validation]);
+
+  const updateValidation = useCallback((newValidation) => {
+    if (!isNil(onValidationChange)) {
+      onValidationChange({ key: getKey({ name, id }), validation: newValidation });
+      return;
+    }
+    setInternalValidationState(newValidation);
+  }, [name, id, setInternalValidationState, onValidationChange]);
 
   return div({
     key: `formControl_${id}`,
@@ -250,13 +278,14 @@ export const FormField = (config) => {
     className: `formField-container formField-${id}`
   }, [
     h(FormFieldTitle, {
-      title, hideTitle, description,
+      title, hideTitle, description, helpText,
       required, formId: id, ariaLevel,
-      error
+      validation: getValidation()
     }),
     h(type.component, {
       ...config,
-      error, setError,
+      validation: getValidation(),
+      setValidation: (newValidation) => updateValidation(newValidation),
       formValue, setFormValue,
       required
     })
@@ -271,9 +300,10 @@ export const FormField = (config) => {
 */
 export const FormTable = (config) => {
   const {
-    id, name, formFields, defaultValue,
+    id, name, formFields,
     enableAddingRow, addRowLabel,
-    disabled, onChange, minLength
+    disabled, onChange, minLength,
+    validation, defaultValue
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
@@ -299,6 +329,7 @@ export const FormTable = (config) => {
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
             defaultValue: formValue[i][formCol.name || formCol.id],
+            validation: !isNil(validation) && isArray(validation) ? validation.at(i)?.[formCol.id] : undefined,
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][formCol.name || formCol.id] = value;

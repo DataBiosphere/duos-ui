@@ -1,36 +1,36 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep } from 'lodash/fp';
-import { div, h, h2, a, span } from 'react-hyperscript-helpers';
+import { div, h, h2, h3, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
 import { FormFieldTypes, FormField } from '../forms/forms';
 
 import './ds_common.css';
 
 const OPEN_ACCESS = 'Open Access';
-const CLOSED_ACCESS = 'Closed Access';
+const CONTROLLED_ACCESS = 'Controlled Access';
 
-const openClosedRadioOptions =     [
+const openControlledRadioOptions =     [
   {
     id: 'open_access',
     name: OPEN_ACCESS,
     text: 'Open Access'
   },
   {
-    id: 'closed_access',
-    name: CLOSED_ACCESS,
-    text: 'Closed Access',
+    id: 'controlled_access',
+    name: CONTROLLED_ACCESS,
+    text: 'Controlled Access',
   }
 ];
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange
+    onChange, onFileChange, validation, onValidationChange
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
-  const [isClosedAccess, setIsClosedAccess] = useState(false);
+  const [isControlledAccess, setIsControlledAccess] = useState(false);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -41,25 +41,27 @@ export const DataAccessGovernance = (props) => {
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
 
-    const groups = filteredConsentGroupsState.map(state => {
-      return {
-        ...state.consentGroup,
-        ...{
-          nihInsitutionalCertificationFileName: state?.nihInsitutionalCertificationFile?.name,
-        },
-      };
-    });
+    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
     const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
 
     onChange({key: 'consentGroups', value: groups, isValid: valid});
-  }, [consentGroupsState, onChange]);
+
+    filteredConsentGroupsState.forEach((cgState, idx) => {
+      onFileChange({
+        key: `consentGroups[${idx}].nihInstitutionalCertificationFile`,
+        value: cgState?.nihInstitutionalCertificationFile,
+        isValid: true
+      });
+    });
+  }, [consentGroupsState, onChange, onFileChange]);
 
   const addNewConsentGroup = useCallback(() => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
-        nihInsitutionalCertificationFile: null,
+        key: Math.max(consentGroupsState.map((state) => state.key)) + 1,
+        nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
       });
@@ -71,7 +73,7 @@ export const DataAccessGovernance = (props) => {
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState[idx] = undefined; // if deleted directly, keys based on idx would break.
+      newConsentGroupsState.splice(idx, 1);
       return newConsentGroupsState;
     });
   }, []);
@@ -93,7 +95,7 @@ export const DataAccessGovernance = (props) => {
   const updateNihInstitutionalCertificationFile = useCallback((idx, file) => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState[idx].nihInsitutionalCertificationFile = file;
+      newConsentGroupsState[idx].nihInstitutionalCertificationFile = file;
       return newConsentGroupsState;
     });
   }, []);
@@ -117,7 +119,7 @@ export const DataAccessGovernance = (props) => {
           type: FormFieldTypes.RADIOGROUP,
           id: 'dataSharingPlan',
           title: 'Does the data need to be managed under Controlled or Open Access?',
-          options: openClosedRadioOptions,
+          options: openControlledRadioOptions,
           onChange: ({ value, isValid }) => {
             onChange({
               key: 'alternativeDataSharingPlanControlledOpenAccess',
@@ -125,13 +127,13 @@ export const DataAccessGovernance = (props) => {
               isValid: isValid,
             });
 
-            setIsClosedAccess(value === CLOSED_ACCESS);
+            setIsControlledAccess(value === CONTROLLED_ACCESS);
           },
         }
       ),
 
       div({
-        isRendered: isClosedAccess,
+        isRendered: isControlledAccess,
       },
       [
         h(FormField, {
@@ -147,6 +149,7 @@ export const DataAccessGovernance = (props) => {
           }
         }),
 
+        h3(['Consent Group Information']),
 
         // add consent group
         div({
@@ -173,14 +176,21 @@ export const DataAccessGovernance = (props) => {
               return div({}, []);
             }
 
-            return h(ConsentGroupForm, {
-              key: idx,
-              idx: idx,
-              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup),
-              deleteConsentGroup: () => deleteConsentGroup(idx),
-              updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
-              startEditConsentGroup: () => startEditConsentGroup(idx),
-            });
+            return div({key: state.key},
+              [
+                h(ConsentGroupForm, {
+                  idx: idx,
+                  saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
+                  deleteConsentGroup: () => deleteConsentGroup(idx),
+                  updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
+                  startEditConsentGroup: () => startEditConsentGroup(idx),
+                  validation: validation?.consentGroups?.at(idx) || {},
+                  onValidationChange: (change) => {
+                    onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
+                  }
+                })
+              ]
+            );
           })
       ]),
     ])

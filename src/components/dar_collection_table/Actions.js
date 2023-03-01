@@ -1,10 +1,11 @@
 import { div, h } from 'react-hyperscript-helpers';
 import TableIconButton from '../TableIconButton';
 import { Styles, Theme } from '../../libs/theme';
-import { Block, Delete } from '@material-ui/icons';
+import { Block, Delete } from '@mui/icons-material';
 import SimpleButton from '../SimpleButton';
 import { useHistory } from 'react-router-dom';
 import { Notifications } from '../../libs/utils';
+import { includes, toLower } from 'lodash/fp';
 
 const duosBlue = '#0948B7';
 const cancelGray = '#333F52';
@@ -40,7 +41,7 @@ const resumeDARApplication = (referenceId, history) => {
 };
 
 export default function Actions(props) {
-  const { showConfirmationModal, collection, goToVote, consoleType, actions = [] } = props;
+  const { showConfirmationModal, collection, goToVote, consoleType, actions = [], status } = props;
   const collectionId = collection.darCollectionId;
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0]);
 
@@ -48,7 +49,7 @@ export default function Actions(props) {
 
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
-    label: 'Open',
+    label: includes(toLower(status), ['complete', 'canceled']) ? 'Re-Open' : 'Open',
     isRendered: actions.includes('Open'),
     onClick: () => showConfirmationModal(collection, 'open'),
     baseColor: duosBlue,

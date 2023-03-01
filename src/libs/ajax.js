@@ -146,6 +146,13 @@ export const DAC = {
     return res.status;
   },
 
+  updateApprovalStatus: async (dacId, datasetId, approvalStatus) => {
+    const url = `${await getApiUrl()}/api/dac/${dacId}/dataset/${datasetId}`;
+    const approval = { 'approval': approvalStatus };
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(approval), { method: 'PUT' }]));
+    return res.json();
+  },
+
   addDacMember: async (dacId, userId) => {
     const url = `${await getApiUrl()}/api/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
@@ -289,8 +296,14 @@ export const DataSet = {
     return await res.json();
   },
 
+  registerDataset: async (registration) => {
+    const url = `${await getApiUrl()}/api/dataset/v3`;
+    const res = await axios.post(url, registration, Config.multiPartOpts());
+    return res.data;
+  },
+
   getDatasets: async () => {
-    const url = `${await getApiUrl()}/api/dataset`;
+    const url = `${await getApiUrl()}/api/dataset/v2`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

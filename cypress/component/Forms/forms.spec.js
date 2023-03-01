@@ -2,7 +2,6 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
-import { isEmailAddress } from '../../../src/libs/utils';
 
 let props;
 const baseProps = {
@@ -10,7 +9,6 @@ const baseProps = {
 };
 
 describe('FormField - Tests', () => {
-
   describe('Validation', () => {
     it('should render required indicator', () => {
       props = {
@@ -30,7 +28,7 @@ describe('FormField - Tests', () => {
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         validators: [
-          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+          FormValidators.EMAIL
         ]
       };
 
@@ -47,13 +45,12 @@ describe('FormField - Tests', () => {
     });
 
     it('should show error message with validator error message', () => {
-      const errMessage = 'Enter a valid email address (example@site.com)';
       props = {
         ...baseProps,
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         validators: [
-          { isValid: isEmailAddress, msg: errMessage }
+          FormValidators.EMAIL
         ]
       };
       mount(<FormField {...props}/>);
@@ -61,8 +58,49 @@ describe('FormField - Tests', () => {
         .type('a')
         .then(() => {
           cy.get('#dataCustodianEmail').should('have.value', 'a');
-          cy.get('.formField-dataCustodianEmail .error-message').contains(errMessage);
+          cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
         });
+    });
+
+    it('updates external validation', () => {
+      props = {
+        ...baseProps,
+        id: 'dataCustodianEmail',
+        title: 'Data Custodian Email',
+        validators: [FormValidators.EMAIL, FormValidators.REQUIRED],
+        onValidationChange: () => {},
+      };
+      cy.spy(props, 'onValidationChange');
+      mount(<FormField {...props}/>);
+
+      cy.get('#dataCustodianEmail')
+        .type('a')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email'] }});
+        })
+        .type('@gmail.com')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: true }});
+        })
+        .type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
+        .then(() => {
+          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email', 'required'] }});
+        });
+    });
+
+    it('can take external validation control', () => {
+      props = {
+        ...baseProps,
+        id: 'dataCustodianEmail',
+        title: 'Data Custodian Email',
+        validation: {
+          valid: false,
+          failed: ['required', 'email'],
+        }
+      };
+      mount(<FormField {...props}/>);
+      cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.REQUIRED.msg);
+      cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
     });
   });
 
@@ -217,7 +255,7 @@ describe('FormField - Tests', () => {
         title: 'Data Custodian Email',
         type: FormFieldTypes.MULTITEXT,
         validators: [
-          { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+          FormValidators.EMAIL
         ],
         defaultValue: []
       };
@@ -342,7 +380,6 @@ describe('FormField - Tests', () => {
         title: 'Public Visibility',
         validators: [FormValidators.REQUIRED],
         type: FormFieldTypes.SLIDER,
-        defaultValue: true,
         description: `Please select if you would like your dataset
           to be publicly visible for the requesters to see and select
           for an access request`,
@@ -359,12 +396,12 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
-      cy.get(selector).should('be.checked');
+      cy.get(selector).should('not.be.checked');
       cy.get(selector)
         .click()
         .then(() => {
-          cy.get(selector).should('not.be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
+          cy.get(selector).should('be.checked'); // visual
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
         });
     });
 
@@ -372,13 +409,13 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
-      cy.get(selector).should('be.checked');
+      cy.get(selector).should('not.be.checked');
       cy.get(selector)
         .click()
         .click()
         .then(() => {
-          cy.get(selector).should('be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
+          cy.get(selector).should('not.be.checked'); // visual
+          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
         });
     });
   });

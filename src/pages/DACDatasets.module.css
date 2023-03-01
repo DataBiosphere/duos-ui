@@ -1,0 +1,37 @@
+.btn-primary-dac-datasets {
+    font-size: 15px !important;
+    font-weight: 500;
+    border: 2px solid #0948B7 !important;
+    border-radius: 5px;
+    height: 40px;
+    margin-right: 1em !important;
+    cursor: pointer;
+    color: #0948B7 !important;
+    padding: 10px 20px;
+}
+
+.add-button {
+    margin-left: 1.2em !important;
+    margin-top: 1em !important;
+    font-size: 1.2em !important;
+    color: #0948B7;
+    vertical-align: center;
+    border: 2px solid #0948B7 !important;
+    border-radius: 5px;
+}
+
+.cell-data {
+    display: flex;
+    align-items: center;
+    margin: 10px 10px 10px 10px;
+    border-spacing: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.data-use {
+    font-size: 1.2em !important;
+    font-weight: 500 !important;
+    color: #0948B7 !important;
+    cursor: pointer;
+}

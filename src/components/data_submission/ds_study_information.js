@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { h, h2, div, span } from 'react-hyperscript-helpers';
 import { isEmpty } from 'lodash/fp';
 
-import { Notifications, isEmailAddress } from '../../libs/utils';
+import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
+import initialFormData from './NIHDataManagement';
 
 import './ds_common.css';
 
 export default function DataSubmissionStudyInformation(props) {
-  const { onChange } = props;
+  const { onChange, validation, onValidationChange } = props;
   const [user, setUser] = useState();
 
   //init hook, need to make ajax calls here
@@ -17,7 +18,7 @@ export default function DataSubmissionStudyInformation(props) {
     const updateUserAndFields = async () => {
       const me = await User.getMe();
       setUser(me);
-      onChange({key: 'dataSubmitterId', value: me.dacUserId, isValid: true});
+      onChange({key: 'dataSubmitterUserId', value: me.userId, isValid: true});
     };
 
     const init = async () => {
@@ -39,7 +40,9 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyName',
       title: 'Study Name',
       validators: [FormValidators.REQUIRED],
-      onChange
+      validation: validation.studyName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'studyType',
@@ -52,64 +55,118 @@ export default function DataSubmissionStudyInformation(props) {
         'Cohort study'
       ],
       isCreatable: true,
+      validation: validation.studyType,
       selectConfig: {},
-      onChange
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
-      onChange
+      validation: validation.studyDescription,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
-      defaultValue: [],
       type: FormFieldTypes.MULTITEXT,
-      onChange
+      validation: validation.dataTypes,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
-      onChange
+      validation: validation.phenotypeIndication,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'species',
       title: 'Species',
-      onChange
+      validation: validation.species,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'piName',
       title: 'Principal Investigator Name',
-      onChange
+      validation: validation.piName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterName',
-      title: 'Data Submitter Name',
+      title: 'Data Submitter Name ',
+      helpText: `The individual completing this form will be saved with the study.`,
       defaultValue: user?.displayName,
+      validation: validation.dataSubmitterName,
       disabled: true,
-      onChange
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
       defaultValue: user?.email,
+      validation: validation.dataSubmitterEmail,
       disabled: true,
-      onChange
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'dataCustodianEmail',
       title: 'Data Custodian Email',
+      helpText: `Insert the email for any individual with the 
+        authority to add/remove users access to this study’s datasets.`,
       type: FormFieldTypes.MULTITEXT,
-      defaultValue: [],
       validators: [
-        { isValid: isEmailAddress, msg: 'Enter a valid email address (example@site.com)' }
+        FormValidators.EMAIL
       ],
-      onChange
+      validation: validation.dataCustodianEmail,
+      onChange,
+      onValidationChange
     }),
+    div({
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      },
+    }, [
+
+      h(FormField, {
+        id: 'alternativeDataSharingPlanTargetDeliveryDate',
+        style: {
+          width: '45%',
+        },
+        defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
+        title: 'Target Delivery Date',
+        placeholder: 'Please enter date (YYYY-MM-DD)',
+        validators: [FormValidators.DATE],
+        onChange,
+        validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
+        onValidationChange,
+      }),
+      h(FormField, {
+        id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
+        style: {
+          width: '45%',
+        },
+        defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
+        title: 'Target Public Release Date',
+        placeholder: 'Please enter date (YYYY-MM-DD)',
+        validators: [FormValidators.DATE],
+        onChange,
+        validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
+        onValidationChange,
+      }),
+    ]),
     h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',
@@ -123,7 +180,9 @@ export default function DataSubmissionStudyInformation(props) {
         fontWeight: 'normal',
         fontStyle: 'italic'
       }}, ['Visible']),
-      onChange
+      onChange,
+      validation: validation.publicVisibility,
+      onValidationChange
     })
   ]);
 }

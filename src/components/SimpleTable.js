@@ -2,7 +2,7 @@ import { isNil } from 'lodash/fp';
 import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
-import { ArrowDropUp, ArrowDropDown } from '@material-ui/icons';
+import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import { SpinnerComponent } from '../components/SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
 
@@ -98,7 +98,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
 export default function SimpleTable(props) {
   //rowData -> array of arrays, outer array represents the collection of rows, inner array represents the collection of cells within a particular row
   //ex -> [[{cellData1Row1}], [{cellData1Row2}]], where inner objects contain relevant data for render (text, style, component (if provided))
-  //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimentions of the cell for the columns
+  //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimensions of the cell for the columns
 
   const {
     columnHeaders = [],

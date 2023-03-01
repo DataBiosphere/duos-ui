@@ -1,7 +1,7 @@
 import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
 import {h, div} from 'react-hyperscript-helpers';
-import { ExpandMore, ExpandLess } from '@material-ui/icons';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
@@ -148,14 +148,14 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
   };
 }
 
-export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions}) {
+export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
   let actionComponent;
 
   actionComponent = h(Actions, {
     collection, consoleType,
     showConfirmationModal, goToVote,
     reviewCollection, resumeCollection,
-    actions
+    actions, status
   });
 
   return {

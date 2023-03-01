@@ -1,10 +1,10 @@
 import {Component, useEffect, useState} from 'react';
 import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import {IconButton} from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
+import Drawer from '@mui/material/Drawer';
+import Hidden from '@mui/material/Hidden';
+import {IconButton} from '@mui/material';
+import { withStyles } from 'tss-react/mui';
+import MenuIcon from '@mui/icons-material/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
@@ -17,6 +17,8 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
+import {isFunction, isNil} from 'lodash/fp';
 
 const styles = {
   drawerPaper: {
@@ -67,6 +69,14 @@ const styles = {
   }
 };
 
+const isOnlySigningOfficial = (user) => {
+  return user.isSigningOfficial && !(user.isAdmin || user.isChairPerson || user.isMember || user.isDataSubmitter);
+};
+
+/**
+ * Tab objects in this array support an `isRendered` function per top level Tab as well as
+ * an optional `isRendered` (defaults to `true`) function for each sub-tab in `children`
+ */
 export const headerTabsConfig = [
   {
     label: 'Admin Console',
@@ -84,11 +94,12 @@ export const headerTabsConfig = [
   },
   {
     label: 'SO Console',
-    link: '/signing_official_console/data_submitters',
+    link: '/signing_official_console/researchers',
     children: [
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters' },
+      { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Researchers', link: '/signing_official_console/researchers' }
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
+      { label: 'My Datasets', link: '/dataset_catalog' }
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -99,7 +110,8 @@ export const headerTabsConfig = [
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
       { label: 'Datasets', link: '/dataset_catalog' },
-      { label: 'DAC Members', link: '/manage_dac' }
+      { label: 'DAC Members', link: '/manage_dac' },
+      { label: "My DAC's Datasets", link: '/dac_datasets' }
     ],
     isRendered: (user) => user.isChairPerson
   },
@@ -130,7 +142,7 @@ export const headerTabsConfig = [
       { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'DAR Requests', link: '/researcher_console' }
     ],
-    isRendered: (user) => user.isResearcher
+    isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }
 ];
 
@@ -155,9 +167,9 @@ const NavigationTabsComponent = (props) => {
   return (div({
     className: `navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`
   }, [
+    makeNotifications(),
     ul({ className: 'navbar-main' }, [
       div({ style: { width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' } }, [
-        makeNotifications(),
         h(Link, {
           isRendered: orientation === 'horizontal',
           id: 'link_logo',
@@ -177,6 +189,7 @@ const NavigationTabsComponent = (props) => {
             }
           }, tabs.map((tab, tabIndex) => {
             return h(Tab, {
+              key: `${tab.link}_${tabIndex}`,
               label: tab.label,
               style: selectedMenuTab === tabIndex ? styles.mainTabActive : styles.mainTab,
               to: {
@@ -242,7 +255,7 @@ const NavigationTabsComponent = (props) => {
           style: styles.navButton
         }, [
           div({ id: 'help', style: { whiteSpace: 'nowrap' } }, [
-            'Request Help'
+            'Contact Us'
           ])
         ]),
         supportrequestModal,
@@ -304,7 +317,12 @@ const NavigationTabsComponent = (props) => {
         },
         onChange: onSubtabChange
       }, tabs[selectedMenuTab].children.map((tab, tabIndex) => {
-        return h(Tab, {
+        // Default to displaying the sub tab if no render function exists for it
+        const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ?
+          true :
+          tab.isRendered();
+        return isRendered ? h(Tab, {
+          key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,
           to: {
@@ -314,7 +332,7 @@ const NavigationTabsComponent = (props) => {
             },
           },
           component: Link
-        });
+        }) : null;
       }))
     ])
   ]));
@@ -424,7 +442,7 @@ class DuosHeader extends Component {
 
     const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
-    const contactUsText = isLogged ? 'Request Help': span({ style: navbarDuosText }, ['Request Help']);
+    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
       id: 'btn_applyAcces',
       style: {
@@ -559,7 +577,8 @@ class DuosHeader extends Component {
               [
                 h(NavigationTabsComponent, {
                   goToLink: this.goToLink,
-                  makeNotifications: this.makeNotifications,
+                  // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+                  makeNotifications: () => {},
                   duosLogoImage, DuosLogo, navbarDuosIcon, navbarDuosText,
                   currentUser, isLogged, signOut: this.signOut,
                   contactUsButton, supportrequestModal,
@@ -581,4 +600,4 @@ class DuosHeader extends Component {
 
 }
 
-export default withRouter(withStyles(styles)(DuosHeader));
+export default withRouter(withStyles(DuosHeader, styles));

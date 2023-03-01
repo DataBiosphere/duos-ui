@@ -48,6 +48,7 @@ function App() {
     const setEnvironment = async () => {
       const environment = await Config.getEnv();
       setEnv(environment);
+      Storage.setEnv(environment);
     };
 
     const initApp = async () => {
