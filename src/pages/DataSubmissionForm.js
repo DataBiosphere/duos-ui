@@ -124,9 +124,6 @@ export const DataSubmissionForm = () => {
   };
 
   const onChange = useCallback(({ key, value, isValid }) => {
-    /* eslint-disable no-console */
-    console.log('StudyInfo OnChange:', key, value, isValid);
-
     setFormData((val) => {
       const newForm = cloneDeep(val);
       set(newForm, key, value);
