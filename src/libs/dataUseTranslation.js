@@ -7,6 +7,11 @@ export const ControlledAccessType = {
   modifiers: 'Modifiers'
 };
 
+/**
+ * Primary source of truth for Data Access Request (purpose) data use translations
+ * This constant holds all potential DUO codes that a dar might contain.
+ * It is intended to map codes and descriptions for easier viewing.
+ */
 export const srpTranslations = {
   hmb: {
     code: 'HMB',
@@ -140,7 +145,17 @@ export const srpTranslations = {
   }
 };
 
+/**
+ * Primary source of truth for Dataset translations
+ * This constant holds all potential DUO codes that a dataset might contain.
+ * It is intended to map codes and descriptions for easier viewing.
+ */
 export const consentTranslations = {
+  nRes: {
+    code: 'NRES',
+    description: 'No restrictions on data use',
+    type: ControlledAccessType.permissions,
+  },
   generalUse: {
     code: 'GRU',
     description: 'Use is permitted for any research purpose',
@@ -171,6 +186,16 @@ export const consentTranslations = {
   methodsResearch: {
     code: 'NMDS',
     description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations',
+    type: ControlledAccessType.modifiers,
+  },
+  controlSetOption: {
+    code: 'NCTRL',
+    description: 'Future use as a control set for diseases other than those specified is prohibited',
+    type: ControlledAccessType.modifiers,
+  },
+  aggregateResearch: {
+    code: 'NAGR',
+    description: 'Future use of aggregate-level data for general research purposes is prohibited',
     type: ControlledAccessType.modifiers,
   },
   geneticStudiesOnly: {
@@ -281,11 +306,12 @@ export const processDefinedLimitations = (
 //Helper function to handle OTHER attribute translations in dataUse
 const processOtherInDataUse = (dataUse, restrictionStatements) => {
   //Wrapping the statements in a Promise.resolve before adding it to the array allows the restrictionStatements to be compatible with future Promise.all calls
-  if ((dataUse.otherRestrictions === true || (!isNil(dataUse.generalUse) && dataUse.generalUse === false)) && !isNil(dataUse.other)) {
+  if (dataUse.otherRestrictions === true || !isNil(dataUse.other)) {
     restrictionStatements.push(
       Promise.resolve({
         code: 'OTH1',
         description: `Primary Other: ${isEmpty(dataUse.other) ? 'Not provided' : dataUse.other}`,
+        type: ControlledAccessType.modifiers,
       })
     );
   }
@@ -294,6 +320,7 @@ const processOtherInDataUse = (dataUse, restrictionStatements) => {
       Promise.resolve({
         code: 'OTH2',
         description: `Secondary Other: ${isEmpty(dataUse.secondaryOther) ? 'Not provided' : dataUse.secondaryOther}`,
+        type: ControlledAccessType.modifiers,
       })
     );
   }
