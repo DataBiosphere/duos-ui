@@ -123,7 +123,7 @@ export const DataSubmissionForm = () => {
     });
   };
 
-  const onChange = useCallback(({ key, value, isValid }) => {
+  const onChange = useCallback(({ key, value }) => {
     setFormData((val) => {
       const newForm = cloneDeep(val);
       set(newForm, key, value);
