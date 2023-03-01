@@ -10,7 +10,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '18px'
+    fontSize: '18px',
+    marginTop: '15px',
   },
   defaultLabelColor: '#333F52',
 };
