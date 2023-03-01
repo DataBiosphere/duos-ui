@@ -1,27 +1,10 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep } from 'lodash/fp';
-import { div, h, h2, h3, a, span } from 'react-hyperscript-helpers';
+import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
-import { FormFieldTypes, FormField } from '../forms/forms';
 
 import './ds_common.css';
-
-const OPEN_ACCESS = 'Open Access';
-const CONTROLLED_ACCESS = 'Controlled Access';
-
-const openControlledRadioOptions = [
-  {
-    id: 'open_access',
-    name: OPEN_ACCESS,
-    text: 'Open Access'
-  },
-  {
-    id: 'controlled_access',
-    name: CONTROLLED_ACCESS,
-    text: 'Controlled Access',
-  }
-];
 
 export const DataAccessGovernance = (props) => {
   const {
@@ -30,7 +13,6 @@ export const DataAccessGovernance = (props) => {
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
-  const [isControlledAccess, setIsControlledAccess] = useState(false);
 
   useEffect(() => {
     addNewConsentGroup();
@@ -116,73 +98,52 @@ export const DataAccessGovernance = (props) => {
     className: 'data-submitter-section',
   }, [
     h2('Data Access Governance'),
-    div({}, [
-
-      h(FormField,
-        {
-          type: FormFieldTypes.RADIOGROUP,
-          id: 'dataSharingPlan',
-          title: 'Does the data need to be managed under Controlled or Open Access?',
-          options: openControlledRadioOptions,
-          onChange: ({ value, isValid }) => {
-            onChange({
-              key: 'alternativeDataSharingPlanControlledOpenAccess',
-              value: value,
-              isValid: isValid,
-            });
-
-            setIsControlledAccess(value === CONTROLLED_ACCESS);
-          },
-        }
-      ),
-
-      div({},
-        [
-          // consent groups
-          consentGroupsState
-            ?.map((state, idx) => {
-              if (isNil(state)) {
-                return div({}, []);
-              }
-
-              return div({ key: state.key },
-                [
-                  h(ConsentGroupForm, {
-                    idx: idx,
-                    dacs: dacs,
-                    saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
-                    deleteConsentGroup: () => deleteConsentGroup(idx),
-                    updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
-                    startEditConsentGroup: () => startEditConsentGroup(idx),
-                    validation: validation?.consentGroups?.at(idx) || {},
-                    onValidationChange: (change) => {
-                      onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
-                    }
-                  })
-                ]
-              );
-            }),
-
-          // add consent group
-          div({
-            className: 'right-header-section',
-            id: 'add-new-consent-group-btn',
-            style: {
-              display: 'flex',
-              alignItems: 'flex-end',
-              margin: '2rem 0 2rem 0'
+    div({},
+      [
+        // consent groups
+        consentGroupsState
+          ?.map((state, idx) => {
+            if (isNil(state)) {
+              return div({}, []);
             }
+
+            return div({ key: state.key },
+              [
+                h(ConsentGroupForm, {
+                  idx: idx,
+                  dacs: dacs,
+                  saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
+                  deleteConsentGroup: () => deleteConsentGroup(idx),
+                  updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
+                  startEditConsentGroup: () => startEditConsentGroup(idx),
+                  validation: validation?.consentGroups?.at(idx) || {},
+                  onValidationChange: (change) => {
+                    onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
+                  }
+                })
+              ]
+            );
+          }),
+
+        // add consent group
+        div({
+          className: 'right-header-section',
+          id: 'add-new-consent-group-btn',
+          style: {
+            display: 'flex',
+            alignItems: 'flex-end',
+            margin: '2rem 0 2rem 0'
+          }
+        }, [
+          a({
+            id: 'btn_addConsentGroup',
+            className: 'btn-primary btn-add common-background',
+            onClick: () => addNewConsentGroup(),
           }, [
-            a({
-              id: 'btn_addConsentGroup',
-              className: 'btn-primary btn-add common-background',
-              onClick: () => addNewConsentGroup(),
-            }, [
-              span({}, ['Add Consent Group'])
-            ])
-          ]),
+            span({}, ['Add Consent Group'])
+          ])
         ]),
-    ])
+      ]),
   ]);
 };
 

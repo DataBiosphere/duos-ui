@@ -13,6 +13,8 @@ export const selectedPrimaryGroup = (consentGroup) => {
     return 'diseaseSpecificUse';
   } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
     return 'poa';
+  } else if (!isNil(consentGroup.openAccess) && consentGroup.openAccess) {
+    return 'openAccess';
   } else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
     return 'otherPrimary';
   }
@@ -75,6 +77,7 @@ export const EditConsentGroup = (props) => {
         hmb: false,
         diseaseSpecificUse: undefined,
         poa: false,
+        openAccess: false,
         otherPrimary: undefined,
       },
       ...{
@@ -107,7 +110,7 @@ export const EditConsentGroup = (props) => {
 
       // primary
       h(FormField, {
-        title: 'Consent Group - Primary Data Use Terms*',
+        title: 'Primary Data Use Terms*',
         description: 'Please select one of the following data use permissions for your dataset',
         type: FormFieldTypes.RADIOBUTTON,
         id: idx+'_primaryConsent_generalResearchUse',
@@ -123,7 +126,6 @@ export const EditConsentGroup = (props) => {
           onValidationChange({key: 'generalResearchUse', validation});
         },
       }),
-
 
       h(FormField, {
         type: FormFieldTypes.RADIOBUTTON,
@@ -201,6 +203,19 @@ export const EditConsentGroup = (props) => {
         onValidationChange: ({validation}) => {
           onValidationChange({key: 'poa', validation});
         },
+      }),
+
+      h(FormField, {
+        type: FormFieldTypes.RADIOBUTTON,
+        id: idx+'_primaryConsent_openAccess',
+        name: 'primaryConsent',
+        value: 'openAccess',
+        toggleText: 'No Restrictions (Open Access Data)',
+        defaultValue: selectedPrimaryGroup(consentGroup),
+        onChange: ({value}) => {
+          onPrimaryChange({key: value, value: true});
+        },
+        validation: validation.openAccess,
       }),
 
       h(FormField, {
