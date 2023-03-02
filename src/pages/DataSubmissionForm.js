@@ -96,7 +96,7 @@ export const DataSubmissionForm = () => {
 
   const onChange = ({ key, value }) => {
     formData[key] = value;
-  }
+  };
 
   const updateParentRenderState = ({ key, value }) => {
     if (key === 'nihAnvilUse') {
