@@ -205,7 +205,6 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
 };
 
 const requiredRusFields = [
-  'methods',
   'controls',
   'population',
   'forProfit',
