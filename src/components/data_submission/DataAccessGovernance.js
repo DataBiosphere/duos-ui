@@ -15,10 +15,6 @@ export const DataAccessGovernance = (props) => {
   const [dacs, setDacs] = useState([]);
 
   useEffect(() => {
-    addNewConsentGroup();
-  }, [addNewConsentGroup]);
-
-  useEffect(() => {
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
@@ -46,7 +42,7 @@ export const DataAccessGovernance = (props) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
-        key: Math.max(consentGroupsState.map((state) => state.key)) + 1,
+        key: Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
         nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
@@ -55,6 +51,10 @@ export const DataAccessGovernance = (props) => {
       return newConsentGroupsState;
     });
   }, []);
+
+  useEffect(() => {
+    addNewConsentGroup();
+  }, [addNewConsentGroup]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
