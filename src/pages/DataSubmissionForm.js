@@ -98,15 +98,7 @@ export const DataSubmissionForm = () => {
     formData[key] = value;
     if (key === 'nihAnvilUse') {
       const val = isArray(value) ? value[0] : value;
-      if (includes(val)([YES_NHGRI_YES_PHS_ID])) {
-        setNihAdminRendered(true);
-        setNihDataManagementRendered(true);
-      }
-      if (includes(val)([YES_NHGRI_NO_PHS_ID])) {
-        setNihAdminRendered(true);
-        setNihDataManagementRendered(true);
-      }
-      if (includes(val)([NO_NHGRI_YES_ANVIL])) {
+      if (includes(val)([YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL])) {
         setNihAdminRendered(true);
         setNihDataManagementRendered(true);
       }
