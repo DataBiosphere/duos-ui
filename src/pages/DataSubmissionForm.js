@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { cloneDeep, isNil, includes, isArray } from 'lodash/fp';
+import { cloneDeep, isNil, includes, isArray, isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
@@ -96,8 +96,11 @@ export const DataSubmissionForm = () => {
 
   const onChange = ({ key, value }) => {
     formData[key] = value;
+  }
+
+  const updateParentRenderState = ({ key, value }) => {
     if (key === 'nihAnvilUse') {
-      const val = isArray(value) ? value[0] : value;
+      const val = (isArray(value) && !isEmpty(value)) ? value[0] : value;
       if (includes(val)([YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL])) {
         setNihAdminRendered(true);
         setNihDataManagementRendered(true);
@@ -141,7 +144,7 @@ export const DataSubmissionForm = () => {
 
 
       <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} />
-      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} />
+      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} updateParentRenderState={updateParentRenderState}/>
       <NIHAdministrativeInformation nihAdminRendered={nihAdminRendered} initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
       <NIHDataManagement nihDataManagementRendered={nihDataManagementRendered} initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
       <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />

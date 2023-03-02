@@ -7,7 +7,7 @@ export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP 
 export const NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL';
 export const NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL';
 
-export const nihAnvilUseLabels = {
+const nihAnvilUseLabels = {
   yes_nhgri_yes_phs_id: YES_NHGRI_YES_PHS_ID,
   yes_nhgri_no_phs_id: YES_NHGRI_NO_PHS_ID,
   no_nhgri_yes_anvil: NO_NHGRI_YES_ANVIL,
@@ -27,6 +27,7 @@ export default function NihAnvilUse(props) {
     initialFormData,
     validation,
     onValidationChange,
+    updateParentRenderState,
   } = props;
   const [nihAnvilUse, setNihAnvilUse] = useState(initialFormData?.nihAnvilUse || null);
 
@@ -54,6 +55,7 @@ export default function NihAnvilUse(props) {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: [value], isValid: config.isValid});
         setNihAnvilUse(value);
+        updateParentRenderState({key: config.key, value: [value], isValid: config.isValid});
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
