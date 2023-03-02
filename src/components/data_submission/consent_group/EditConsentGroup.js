@@ -38,6 +38,7 @@ export const EditConsentGroup = (props) => {
     nihInstitutionalCertificationFile,
     setNihInstitutionalCertificationFile,
     idx,
+    dacs,
     validation,
     onValidationChange,
   } = props;
@@ -392,8 +393,21 @@ export const EditConsentGroup = (props) => {
         onValidationChange,
       }),
 
-      // location
+      // data access committee
+      h(FormField, {
+        id: 'dataAccessCommitteeId',
+        title: 'Data Access Committee*',
+        description: 'Please select which DAC should govern requests for this dataset',
+        type: FormFieldTypes.SELECT,
+        selectOptions: dacs.map((dac) => {
+          return { dacId: dac.dacId, displayText: dac.name };
+        }),
+        onChange: ({ key, value }) => {
+          onChange({ key, value: value.dacId });
+        }
+      }),
 
+      // location
       h(FormField, {
         id: idx+'_dataLocation',
         name: 'dataLocation',
