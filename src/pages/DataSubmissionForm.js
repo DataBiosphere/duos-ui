@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { cloneDeep, isNil, includes } from 'lodash/fp';
+import { cloneDeep, isNil, includes, isArray } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
@@ -13,6 +13,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL, NO_NHGRI_NO_ANVIL } from '../components/data_submission/NihAnvilUse';
 import { set } from 'lodash';
 
 
@@ -21,7 +22,8 @@ export const DataSubmissionForm = () => {
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
   const [nihAdminRendered, setNihAdminRendered] = useState(false);
-  const [nihDataManagementRendered, setNihDataManagementRendered]  = useState(false);
+  const [nihDataManagementRendered, setNihDataManagementRendered] = useState(false);
+
 
 
   useEffect(() => {
@@ -95,17 +97,22 @@ export const DataSubmissionForm = () => {
   const onChange = ({ key, value }) => {
     formData[key] = value;
     if (key === 'nihAnvilUse') {
-      if (includes(value)(['yes_nhgri_yes_phs_id'])) {
-      setNihAdminRendered(true);
-      setNihDataManagementRendered(true);
-      }
-      if (includes(value)(['yes_nhgri_no_phs_id'])) {
+      const val = isArray(value) ? value[0] : value;
+      if (includes(val)([YES_NHGRI_YES_PHS_ID])) {
         setNihAdminRendered(true);
         setNihDataManagementRendered(true);
       }
-      if (includes(value)(['no_nhgri_yes_anvil'])) {
+      if (includes(val)([YES_NHGRI_NO_PHS_ID])) {
         setNihAdminRendered(true);
         setNihDataManagementRendered(true);
+      }
+      if (includes(val)([NO_NHGRI_YES_ANVIL])) {
+        setNihAdminRendered(true);
+        setNihDataManagementRendered(true);
+      }
+      if (includes(val)([NO_NHGRI_NO_ANVIL])) {
+        setNihAdminRendered(false);
+        setNihDataManagementRendered(false);
       }
     }
   };
