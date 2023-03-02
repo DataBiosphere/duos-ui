@@ -105,7 +105,7 @@ export const DataSubmissionForm = () => {
         setNihAdminRendered(true);
         setNihDataManagementRendered(true);
       }
-      if (includes(val)([NO_NHGRI_NO_ANVIL])) {
+      else {
         setNihAdminRendered(false);
         setNihDataManagementRendered(false);
       }

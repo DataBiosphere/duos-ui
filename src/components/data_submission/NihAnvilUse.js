@@ -55,7 +55,7 @@ export default function NihAnvilUse(props) {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: [value], isValid: config.isValid});
         setNihAnvilUse(value);
-        updateParentRenderState({key: config.key, value: [value], isValid: config.isValid});
+        updateParentRenderState({key: config.key, value: [value]});
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
