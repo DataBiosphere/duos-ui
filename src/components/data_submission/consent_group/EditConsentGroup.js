@@ -391,43 +391,47 @@ export const EditConsentGroup = (props) => {
         validation: validation.otherSecondary,
         onValidationChange,
       }),
+    ]),
 
       // location
 
-      h(FormField, {
-        id: idx+'_dataLocation',
-        name: 'dataLocation',
-        type: FormFieldTypes.SELECT,
-        isMulti: true,
-        title: 'Data Location',
-        description: 'Please provide the location of your data resource for this consent group',
-        exclusiveValues: ['Not Determined'],
-        selectOptions: [
-          'AnVIL Workspace',
-          'Terra Workspace',
-          'TDR Location',
-          'Not Determined',
-        ],
-        defaultValue: consentGroup.dataLocation,
-        placeholder: 'Data Location(s)',
-        validators: [FormValidators.REQUIRED],
-        onChange,
-        validation: validation.dataLocation,
-        onValidationChange,
-      }),
-
-      h(FormField, {
-        id: idx+'_url',
-        name: 'url',
-        title: 'Data URL',
-        validators: [FormValidators.REQUIRED, FormValidators.URL],
-        placeholder: 'Free text field for entering URL of data',
-        defaultValue: consentGroup.url,
-        onChange,
-        validation: validation.url,
-        onValidationChange,
-      }),
-    ]),
+    h(FormTable, {
+      id: idx+'_dataLocationSection',
+      name: 'dataLocationSection',
+      formFields: [
+        {
+          id: idx+'_dataLocation',
+          name: 'dataLocation',
+          title: 'Data Location',
+          description: 'Please provide the location of your data resource for this consent group',
+          type: FormFieldTypes.SELECT,
+          isMulti: true,
+          exclusiveValues: ['Not Determined'],
+          selectOptions: [
+            'Existing AnVIL Workspace',
+            'Existing Terra Workspace',
+            'Existing TDR Snapshot',
+            'Not Determined',
+            'I am requesting an AnVIL workspace for storage',
+          ],
+          placeholder: 'Data Location(s)',
+          defaultValue: consentGroup.dataLocation,
+          validators: [FormValidators.REQUIRED],
+        },
+        {
+          id: idx+'_url',
+          name: 'url',
+          title: 'URL',
+          description: '',
+          placeholder: 'Enter a URL for your data location here',
+          defaultValue: consentGroup.url,
+          onChange,
+        },
+      ],
+      onChange,
+      validation: validation.dataLocation,
+      onValidationChange,
+    }),
 
     h(FormTable, {
       id: idx+'_fileTypes',
@@ -439,15 +443,14 @@ export const EditConsentGroup = (props) => {
           title: 'File Type',
           type: FormFieldTypes.SELECT,
           selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
-          validators: [FormValidators.REQUIRED]
         },
         {
           id: idx+'_functionalEquivalence',
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
-          validators: [FormValidators.REQUIRED]
-        }, {
+        }, 
+        {
           id: idx+'_numberOfParticipants',
           name: 'numberOfParticipants',
           title: '# of Participants',
