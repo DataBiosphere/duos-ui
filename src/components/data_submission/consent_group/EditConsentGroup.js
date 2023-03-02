@@ -252,7 +252,7 @@ export const EditConsentGroup = (props) => {
 
       // secondary
       div({
-        isRendered: consentGroup.openAccess === false,
+        isRendered: consentGroup.openAccess !== true,
       }, [
         h(FormField, {
           title: 'Secondary Data Use Terms',
@@ -416,7 +416,7 @@ export const EditConsentGroup = (props) => {
 
       // data access committee
       div({
-        isRendered: consentGroup.openAccess === false,
+        isRendered: consentGroup.openAccess !== true,
       }, [
         h(FormField, {
           id: 'dataAccessCommitteeId',
