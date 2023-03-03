@@ -415,22 +415,19 @@ export const EditConsentGroup = (props) => {
       ]),
 
       // data access committee
-      div({
+      h(FormField, {
         isRendered: consentGroup.openAccess !== true,
-      }, [
-        h(FormField, {
-          id: 'dataAccessCommitteeId',
-          title: 'Data Access Committee*',
-          description: 'Please select which DAC should govern requests for this dataset',
-          type: FormFieldTypes.SELECT,
-          selectOptions: dacs.map((dac) => {
-            return { dacId: dac.dacId, displayText: dac.name };
-          }),
-          onChange: ({ key, value }) => {
-            onChange({ key, value: value.dacId });
-          }
+        id: idx + 'dataAccessCommitteeId',
+        title: 'Data Access Committee*',
+        description: 'Please select which DAC should govern requests for this dataset',
+        type: FormFieldTypes.SELECT,
+        selectOptions: dacs.map((dac) => {
+          return { dacId: dac.dacId, displayText: dac.name };
         }),
-      ]),
+        onChange: ({ key, value }) => {
+          onChange({ key, value: value.dacId });
+        }
+      }),
 
       // location
       h(FormField, {
