@@ -402,8 +402,6 @@ export const EditConsentGroup = (props) => {
         {
           id: idx+'_dataLocation',
           name: 'dataLocation',
-          title: 'Data Location',
-          description: 'Please provide the location of your data resource for this consent group',
           type: FormFieldTypes.SELECT,
           isMulti: true,
           exclusiveValues: ['Not Determined'],
@@ -421,8 +419,6 @@ export const EditConsentGroup = (props) => {
         {
           id: idx+'_url',
           name: 'url',
-          title: 'URL',
-          description: '',
           placeholder: 'Enter a URL for your data location here',
           defaultValue: consentGroup.url,
           onChange,
@@ -461,7 +457,7 @@ export const EditConsentGroup = (props) => {
       ],
       defaultValue: consentGroup.fileTypes,
       enableAddingRow: true,
-      addRowLabel: 'Add New Filetype',
+      addRowLabel: 'Add New File Type',
       minLength: 1,
       onChange,
       validation: validation.fileTypes,

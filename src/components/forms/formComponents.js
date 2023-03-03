@@ -556,7 +556,7 @@ export const FormInputFile = (config) => {
         uploadText,
       ])
     ]),
-    /*div({
+    div( {
       style: {
         marginLeft: '20px',
         width: '450px',
@@ -568,7 +568,7 @@ export const FormInputFile = (config) => {
         defaultValue: formValue?.name,
         readOnly: true,
       })
-    ])*/
+    ])
   ]);
 };
 
