@@ -1,4 +1,23 @@
-import {any, compact, findIndex, filter, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, toLower, uniq, values} from 'lodash/fp';
+import {
+  any,
+  compact,
+  filter,
+  findIndex,
+  flatMap,
+  flow,
+  forEach,
+  get,
+  getOr,
+  includes,
+  isEmpty,
+  isEqual,
+  isUndefined,
+  join,
+  map,
+  toLower,
+  uniq,
+  values
+} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -32,9 +51,10 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     uniq
   )(collection.dars);
   const matchData = referenceIds.length > 0 ? await Match.findMatchBatch(referenceIds) : [];
-  const datasets = isEmpty(dacIds) ?
-    get('datasets')(collection) :
-    filter(d => includes(d.dacId)(dacIds))(get('datasets')(collection));
+
+  // If we need to restrict the datasets to a particular DAC, do that here.
+  const datasets = filterDatasetsByDACs(dacIds, get('datasets')(collection));
+
   // Find all translated data uses for all datasets. `translateDataUseRestrictionsFromDataUseArray` creates a parallel,
   // ordered array in the same order as rawDataUses, so we can associate them by index. Unfortunately, it also creates
   // empty elements per translation (one for any missing potential translation), so we need to filter those out.
@@ -43,34 +63,34 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   const flatTranslatedDataUses = map(t => compact(t))(translatedDataUses);
 
   // Step 1: Create buckets for unique dataset groups
-  map(d => {
+  forEach(dataset => {
     // Put each dataset into a bucket. If the dataset's data use is missing, unique or has an "Other" restriction, then
     // it gets its own bucket. If the data use is already in a bucket, then it gets merged in.
     let bucket = {
       key: '',
       label: '',
-      datasets: [d],
-      datasetIds: [d.dataSetId],
-      dataUse: d.dataUse,
+      datasets: [dataset],
+      datasetIds: [dataset.dataSetId],
+      dataUse: dataset.dataUse,
       dataUses: [],
       elections: [],
       votes: [],
       matchResults: []
     };
 
-    if (isUndefined(d.dataUse) || isOther(d.dataUse)) {
+    if (isUndefined(dataset.dataUse) || isOther(dataset.dataUse)) {
       buckets.push(bucket);
     } else {
       // Add to bucket if the data use doesn't exist
       const bucketDataUses = map(b => b.dataUse)(buckets);
-      if (!any(d.dataUse)(bucketDataUses)) {
+      if (!any(dataset.dataUse)(bucketDataUses)) {
         buckets.push(bucket);
       } else {
         // If it does exist, merge this dataset into that bucket
         forEach(b => {
-          if (isEqual(b.dataUse)(d.dataUse)) {
-            b.datasets.push(d);
-            b.datasetIds.push(d.dataSetId);
+          if (isEqual(b.dataUse)(dataset.dataUse)) {
+            b.datasets.push(dataset);
+            b.datasetIds.push(dataset.dataSetId);
           }
         })(buckets);
       }
@@ -78,14 +98,14 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
     // Step 1.a: Find match results for this dataset and add to bucket
     forEach(m => {
-      if (toLower(d.datasetIdentifier) === toLower(m.consent)) {
+      if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
         bucket.matchResults.push(m);
       }
     })(matchData);
 
     // Step 1.b: Populate translated dataUses
-    if (d.dataUse) {
-      const index = findIndex(d.dataUse)(rawDataUses);
+    if (dataset.dataUse) {
+      const index = findIndex(dataset.dataUse)(rawDataUses);
       if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
         bucket.dataUses = flatTranslatedDataUses[index];
       }
@@ -137,6 +157,21 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   });
 
   return buckets;
+};
+
+/**
+ * Optionally filter a list of collection datasets by the dac ids provided.
+ * @private
+ * @param dacIds List of dac ids. Can be empty
+ * @param datasets List of datasets to filter
+ * @returns {[]}
+ */
+const filterDatasetsByDACs = (dacIds, datasets) => {
+  return isEmpty(dacIds) ?
+    datasets :
+    filter(
+      dataset => includes(dataset.dacId)(dacIds)
+    )(datasets);
 };
 
 /**
