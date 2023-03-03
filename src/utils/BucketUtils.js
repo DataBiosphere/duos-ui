@@ -31,9 +31,9 @@ import {processMatchData} from './VoteUtils';
  *      b: Pull out the data use translations for the bucket's dataUse
  *      c: Set the bucket key/label from the dataUse + dataset ids
  * Step 2: Pull all elections for those datasets into the buckets
- * Step 3: Set the bucket key/label from the dataUse + dataset ids
- * Step 4: Coalesce the algorithm decision per bucket
- * Step 5: Pull all votes up to a top level bucket field for easier iteration
+ * Step 3: Pull all votes up to a top level bucket field for easier iteration
+ * Step 4: Set the bucket key/label from the dataUse + dataset ids
+ * Step 5: Coalesce the algorithm decision per bucket
  * Step 6: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
  * @param collection The full Data Access Request Collection
@@ -113,24 +113,16 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
   })(datasets);
 
-  // Step 2: Populate elections for each bucket
-  const darMap = get('dars')(collection);
-  forEach(dar => {
-    const electionMap = get('elections')(dar);
-    forEach(election => {
-      // find the bucket this election belongs to
-      const datasetId = get('dataSetId')(election);
-      forEach(b => {
-        if (includes(datasetId)(b.datasetIds)) {
-          b.elections.push(election);
-        }
-      })(buckets);
-    })(values(electionMap));
-  })(values(darMap));
-
-  // Steps 3-5
+  // The following steps are all bucket-centric, so we can process those in a single loop
+  // Steps 2-5
   forEach(b => {
-    // Step 3: Generate bucket key and label
+    // Step 2: Populate elections for datasets in this bucket
+    b.elections = findElectionsForDatasets(collection, b.datasetIds);
+
+    // Step 3: Populate votes for each bucket
+    b.votes.push(processVotesForBucket(b.elections));
+
+    // Step 4: Generate bucket key and label
     if (!isEmpty(b.dataUses)) {
       b.label = flow(
         map((du) => du.alternateLabel || du.code),
@@ -141,11 +133,9 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     }
     b.key = 'bucket-' + join('-')(b.datasetIds);
 
-    // Step 4: Coalesce match results into a single result per bucket
+    // Step 5: Coalesce match results into a single result per bucket
     b.algorithmResult = calculateAlgorithmResultForBucket(b);
 
-    // Step 5: Populate votes for each bucket
-    b.votes.push(processVotesForBucket(b.elections));
   })(buckets);
 
   // Step 6: Populate RUS Vote bucket with RP votes
@@ -157,6 +147,25 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   });
 
   return buckets;
+};
+
+/**
+ * Find all elections (in a dar collection) with a dataset id in the provided list of dataset ids
+ * @private
+ * @param collection
+ * @param datasetIds
+ * @returns {[]}
+ */
+const findElectionsForDatasets = (collection, datasetIds) => {
+  // In a collection, DARs and elections are each a map of id => object
+  // Iterate through all values of each map find elections associated to the provided dataset ids.
+  const darMap = get('dars')(collection); // Map of dar reference id -> dar
+  return flow(
+    values,
+    get('elections'), // Map of election id -> election
+    values,
+    filter(e => includes(get('dataSetId')(e))(datasetIds))
+  )(darMap);
 };
 
 /**
