@@ -52,6 +52,7 @@ export const DataAccessGovernance = (props) => {
     });
   }, []);
 
+  // pre-populate the page with a consent group
   useEffect(() => {
     addNewConsentGroup();
   }, [addNewConsentGroup]);
