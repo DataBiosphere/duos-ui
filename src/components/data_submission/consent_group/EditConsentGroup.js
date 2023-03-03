@@ -449,7 +449,7 @@ export const EditConsentGroup = (props) => {
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
-        }, 
+        },
         {
           id: idx+'_numberOfParticipants',
           name: 'numberOfParticipants',
