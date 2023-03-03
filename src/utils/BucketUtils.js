@@ -1,23 +1,4 @@
-import {
-  any,
-  compact,
-  filter,
-  findIndex,
-  flatMap,
-  flow,
-  forEach,
-  get,
-  getOr,
-  includes,
-  isEmpty,
-  isEqual,
-  isUndefined,
-  join,
-  map,
-  toLower,
-  uniq,
-  values
-} from 'lodash/fp';
+import {any, compact, filter, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, toLower, uniq, values} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -161,9 +142,9 @@ const findElectionsForDatasets = (collection, datasetIds) => {
   // Iterate through all values of each map find elections associated to the provided dataset ids.
   const darMap = get('dars')(collection); // Map of dar reference id -> dar
   return flow(
-    values,
-    get('elections'), // Map of election id -> election
-    values,
+    values, // List of DARs
+    flatMap(dar => get('elections')(dar)), // List of maps of election id -> election
+    flatMap(eMap => values(eMap)), // List of election objects
     filter(e => includes(get('dataSetId')(e))(datasetIds))
   )(darMap);
 };
