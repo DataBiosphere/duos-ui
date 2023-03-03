@@ -24,6 +24,7 @@ import DarValidationMessages from './dar_application/DarValidationMessages';
 import {
   validateDARFormData
 } from '../utils/darFormUtils';
+import { set } from 'lodash';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -99,14 +100,12 @@ const DataAccessRequestApplicationNew = (props) => {
     collaborationLetterName: '',
   });
   
-  const [validation, setValidation] = useState({});
+  const [validation, setValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
 
 
-  const [showValidationMessages, setShowValidationMessages] = useState(false);
-  const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
   const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true);
   const [externalCollaboratorsCompleted, setExternalCollaboratorsCompleted] = useState(true);
@@ -137,6 +136,14 @@ const DataAccessRequestApplicationNew = (props) => {
         };
       }
     );
+  }, []);
+
+  const formValidationChange = useCallback(({ key, value })=> {
+    setValidation((validation) => {
+      const newValidation = deepCopy(validation);
+      set(validation, key, value);
+      return newValidation;
+    })
   }, []);
 
   const batchFormFieldChange = (updates) => {
@@ -289,12 +296,12 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
 
-  const scrollToFormErrors = (validationMessages) => {
-    if (!isEmpty(validationMessages.researcherInfoErrors)) {
+  const scrollToFormErrors = (validation) => {
+    if (!isEmpty(validation.researcherInfoErrors)) {
       goToStep(1);
-    } else if (!isEmpty(validationMessages.darErrors)) {
+    } else if (!isEmpty(validation.darErrors)) {
       goToStep(2);
-    } else if (!isEmpty(validationMessages.rusErrors)) {
+    } else if (!isEmpty(validation.rusErrors)) {
       goToStep(3);
     } else {
       goToStep(1);
@@ -313,9 +320,8 @@ const DataAccessRequestApplicationNew = (props) => {
       externalCollaboratorsCompleted,
     });
 
-    setValidationMessages(validation);
+    setValidation(validation);
     const isInvalidForm = validationFailed(validation);
-    setShowValidationMessages(isInvalidForm);
 
     if (isInvalidForm) {
       scrollToFormErrors(validation);
