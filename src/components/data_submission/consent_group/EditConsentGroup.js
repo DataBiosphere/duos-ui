@@ -52,7 +52,7 @@ export const EditConsentGroup = (props) => {
   const [gsText, setGSText] = useState(consentGroup.gs);
 
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
-  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary);
+  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary || '');
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
@@ -159,6 +159,7 @@ export const EditConsentGroup = (props) => {
           },
           validation: validation.diseaseSpecificUse,
         }),
+
         div({
           isRendered: showDiseaseSpecificUseSearchbar,
           style: {
