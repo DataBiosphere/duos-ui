@@ -151,7 +151,7 @@ export const srpTranslations = {
  * It is intended to map codes and descriptions for easier viewing.
  */
 export const consentTranslations = {
-  nRes: {
+  noRestrictions: {
     code: 'NRES',
     description: 'No restrictions on data use',
     type: ControlledAccessType.permissions,
