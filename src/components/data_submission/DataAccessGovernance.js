@@ -25,7 +25,7 @@ const openControlledRadioOptions =     [
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange, onFileChange
+    onChange, onFileChange, validation, onValidationChange
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
@@ -60,6 +60,7 @@ export const DataAccessGovernance = (props) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
+        key: Math.max(consentGroupsState.map((state) => state.key)) + 1,
         nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
@@ -72,7 +73,7 @@ export const DataAccessGovernance = (props) => {
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState[idx] = undefined; // if deleted directly, keys based on idx would break.
+      newConsentGroupsState.splice(idx, 1);
       return newConsentGroupsState;
     });
   }, []);
@@ -175,14 +176,21 @@ export const DataAccessGovernance = (props) => {
               return div({}, []);
             }
 
-            return h(ConsentGroupForm, {
-              key: idx,
-              idx: idx,
-              saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
-              deleteConsentGroup: () => deleteConsentGroup(idx),
-              updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
-              startEditConsentGroup: () => startEditConsentGroup(idx),
-            });
+            return div({key: state.key},
+              [
+                h(ConsentGroupForm, {
+                  idx: idx,
+                  saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
+                  deleteConsentGroup: () => deleteConsentGroup(idx),
+                  updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
+                  startEditConsentGroup: () => startEditConsentGroup(idx),
+                  validation: validation?.consentGroups?.at(idx) || {},
+                  onValidationChange: (change) => {
+                    onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
+                  }
+                })
+              ]
+            );
           })
       ]),
     ])

@@ -2,7 +2,7 @@ import { selectedPrimaryGroup } from './EditConsentGroup';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isEmpty } from 'lodash/fp';
 import { Notification } from '../../Notification';
-import { dateValidator } from '../../forms/formUtils';
+import { dateValidator } from '../../forms/formValidation';
 import { FormValidators } from '../../forms/forms';
 
 export const computeConsentGroupValidationErrors = (consentGroup) => {

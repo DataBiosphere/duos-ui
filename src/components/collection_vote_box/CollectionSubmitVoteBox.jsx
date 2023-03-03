@@ -12,10 +12,12 @@ const styles = {
     color: '#333F52',
     display: 'flex',
     flexDirection: 'column',
-    rowGap: '2rem'
+    rowGap: '2rem',
+    marginTop: '-20px'
   },
   question: {
-    fontSize: '1.8rem',
+    marginTop: '-18px',
+    fontSize: 17,
   },
   content: {
     display: 'flex',
@@ -34,7 +36,7 @@ const styles = {
     borderRadius: '4px',
     fontWeight: '500',
     color: '#181818A6',
-    width: '40rem',
+    width: '45rem',
   }
 };
 
@@ -62,7 +64,7 @@ const VoteSubsectionHeading = ({ vote, adminPage, isFinal, isVotingDisabled }) =
   return (
     <div data-cy={'vote-subsection-heading'}>
       {heading}
-      {votableChairView && <span style={{ marginLeft: 5, fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
+      {votableChairView && <span style={{ fontWeight: 'normal' }}>(Vote and Rationale cannot be updated after submitting)</span>}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import {a, button, div, h, img, li, nav, small, span, ul} from 'react-hyperscrip
 import Drawer from '@mui/material/Drawer';
 import Hidden from '@mui/material/Hidden';
 import {IconButton} from '@mui/material';
-import { withStyles } from '@mui/styles';
+import { withStyles } from 'tss-react/mui';
 import MenuIcon from '@mui/icons-material/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
@@ -600,4 +600,4 @@ class DuosHeader extends Component {
 
 }
 
-export default withRouter(withStyles(styles)(DuosHeader));
+export default withRouter(withStyles(DuosHeader, styles));

@@ -26,7 +26,7 @@ const styles = {
   title: {
     color: '#333F52',
     fontFamily: 'Montserrat',
-    fontSize: '2.4rem',
+    fontSize: 17,
     fontWeight: 'bold',
     paddingBottom: '20px',
     paddingTop: '35px'
