@@ -91,8 +91,8 @@ export default function NihAnvilUse(props) {
       h(FormField, {
         id: 'sequencingCenter',
         title: 'Sequencing Center',
-        placeholder: 'Email',
-        validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+        placeholder: 'Name',
+        validators: [FormValidators.REQUIRED],
         onChange,
         validation: validation.sequencingCenter,
         onValidationChange,
