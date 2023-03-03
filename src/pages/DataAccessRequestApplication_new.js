@@ -98,6 +98,8 @@ const DataAccessRequestApplicationNew = (props) => {
     collaborationLetterLocation: '',
     collaborationLetterName: '',
   });
+  
+  const [validation, setValidation] = useState({});
 
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
