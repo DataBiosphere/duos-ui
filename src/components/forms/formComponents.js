@@ -514,6 +514,8 @@ export const FormInputFile = (config) => {
     id,
     formValue,
     uploadText = 'Upload a file',
+    hideTextBar = false,
+    hideInput = false,
     multiple = false,
     accept = '',
   } = config;
@@ -526,6 +528,7 @@ export const FormInputFile = (config) => {
     }
   }, [
     div({
+      isRendered: hideInput === false,
       className: 'form-file-upload',
     }, [
       input({
@@ -556,7 +559,8 @@ export const FormInputFile = (config) => {
         uploadText,
       ])
     ]),
-    div( {
+    div({
+      isRendered: hideTextBar === false,
       style: {
         marginLeft: '20px',
         width: '450px',
