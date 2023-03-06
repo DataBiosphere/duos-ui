@@ -492,7 +492,6 @@ export const EditConsentGroup = (props) => {
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
-          validators: [FormValidators.REQUIRED]
         }, {
           id: idx + '_numberOfParticipants',
           name: 'numberOfParticipants',
