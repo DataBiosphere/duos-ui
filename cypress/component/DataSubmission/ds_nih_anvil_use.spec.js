@@ -10,6 +10,7 @@ const props = {
   onChange: () => {},
   validation: {},
   onValidationChange: () => {},
+  updateParentRenderState: () => {},
 };
 
 beforeEach(() => {

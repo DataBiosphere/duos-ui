@@ -4,8 +4,20 @@ import ConsentGroupForm from '../../../src/components/data_submission/consent_gr
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'cypress/react';
 
+const dacs = [
+  {
+    dacId: 1,
+    name: 'DAC 0001',
+  },
+  {
+    dacId: 2,
+    name: 'DAC 0002',
+  },
+];
+
 const props = {
   idx: 0,
+  dacs: dacs,
   parentConsentGroup: {},
   saveConsentGroup: () => {},
   deleteConsentGroup: () => {},
@@ -53,6 +65,7 @@ describe('Consent Group', function () {
             'generalResearchUse': false,
             'hmb': true,
             'poa': false,
+            'openAccess': false,
             'nmds': false,
             'gso': false,
             'pub': false,
@@ -101,6 +114,8 @@ describe('Consent Group', function () {
   it('Shows conditional fields only when checked', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
+
+    cy.get('#0_primaryConsent_generalResearchUse').click();
 
     cy.get('#0_gsText').should('not.exist');
     cy.get('#0_gs').check();
