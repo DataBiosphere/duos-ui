@@ -438,7 +438,6 @@ export const EditConsentGroup = (props) => {
       validation: validation.dataLocation,
       onValidationChange,
     }),
-
     h(FormTable, {
       id: idx+'_fileTypes',
       name: 'fileTypes',
@@ -473,7 +472,6 @@ export const EditConsentGroup = (props) => {
       validation: validation.fileTypes,
       onValidationChange,
     }),
-    
     div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' }}, [
       h(FormField, {
         type: FormFieldTypes.FILE,
@@ -493,7 +491,6 @@ export const EditConsentGroup = (props) => {
         hideTextBar: true,
       }),
     ]),
-      
     h(FormField, {
       isRendered: !isNil(nihInstitutionalCertificationFile),
       id: `${idx}_fileName`,
