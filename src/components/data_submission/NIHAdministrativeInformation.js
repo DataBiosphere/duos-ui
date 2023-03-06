@@ -11,6 +11,7 @@ export const NIHAdministrativeInformation = (props) => {
     institutions,
     validation,
     onValidationChange,
+    nihAdminRendered,
   } = props;
 
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(initialFormData?.multiCenterStudy === true || false);
@@ -18,6 +19,7 @@ export const NIHAdministrativeInformation = (props) => {
   const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
 
   return div({
+    isRendered: nihAdminRendered === true,
     className: 'data-submitter-section',
   }, [
     h2('NIH Administrative Information'),
