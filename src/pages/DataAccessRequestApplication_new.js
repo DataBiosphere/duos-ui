@@ -19,7 +19,6 @@ import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import DarValidationMessages from './dar_application/DarValidationMessages';
 
 import {
   validateDARFormData
@@ -140,7 +139,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const formValidationChange = useCallback(({ key, value })=> {
     setValidation((validation) => {
-      const newValidation = deepCopy(validation);
+      const newValidation = cloneDeep(validation);
       set(validation, key, value);
       return newValidation;
     })
@@ -497,22 +496,18 @@ const DataAccessRequestApplicationNew = (props) => {
 
           <div className='dar-steps'>
             <div className='step-container'>
-              <DarValidationMessages
-                validationMessages={validationMessages.researcherInfoErrors}
-                showValidationMessages
-              />
-
               <ResearcherInfo
                 completed={!isNil(get('institutionId', researcher))}
                 darCode={formData.darCode}
                 formData={formData}
+                validation={validation.researcherInfoErrors}
+                formValidationChange={formValidationChange}
                 eRACommonsDestination={eRACommonsDestination}
                 formFieldChange={formFieldChange}
                 location={props.location}
                 nihValid={nihValid}
                 onNihStatusUpdate={setNihValid}
                 researcher={researcher}
-                showValidationMessages={showValidationMessages}
                 allSigningOfficials={allSigningOfficials}
                 setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
                 setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
@@ -521,14 +516,11 @@ const DataAccessRequestApplicationNew = (props) => {
             </div>
 
             <div className='step-container'>
-              <DarValidationMessages
-                validationMessages={validationMessages.darErrors}
-                showValidationMessages={showValidationMessages}
-              />
-
               <DataAccessRequest
                 formData={formData}
                 datasets={datasets}
+                validation={validation.researcherInfoErrors}
+                formValidationChange={formValidationChange}
                 dataUseTranslations={dataUseTranslations}
                 formFieldChange={formFieldChange}
                 batchFormFieldChange={batchFormFieldChange}
@@ -541,13 +533,10 @@ const DataAccessRequestApplicationNew = (props) => {
             </div>
 
             <div className='step-container'>
-              <DarValidationMessages
-                validationMessages={validationMessages.rusErrors}
-                showValidationMessages={showValidationMessages}
-              />
-
               <ResearchPurposeStatement
                 darCode={formData.darCode}
+                validation={validation.researcherInfoErrors}
+                formValidationChange={formValidationChange}
                 formFieldChange={formFieldChange}
                 formData={formData}
               />

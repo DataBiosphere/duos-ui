@@ -71,6 +71,8 @@ export default function DataAccessRequest(props) {
     uploadedCollaborationLetter,
     updateCollaborationLetter,
     setDatasets,
+    validation,
+    formValidationChange,
     ariaLevel = 2
   } = props;
 
@@ -78,6 +80,11 @@ export default function DataAccessRequest(props) {
 
   const onChange = ({key, value}) => {
     formFieldChange({key, value});
+  };
+
+
+  const onValidationChange = ({key, value}) => {
+    formValidationChange({key, value});
   };
 
   const primaryChange = ({key, value}) => {
@@ -121,6 +128,8 @@ export default function DataAccessRequest(props) {
           isMulti: true,
           title: '2.1 Select Dataset(s)',
           validators: [FormValidators.REQUIRED],
+          validation: validation.datasetIds,
+          onValidationChange,
           description: 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:',
           defaultValue: datasets?.map((ds) => formatSearchDataset(ds)),
           selectConfig: {
@@ -143,11 +152,13 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           title: '2.2 Descriptive Title of Project',
           validators: [FormValidators.REQUIRED],
+          validation: validation.projectTitle,
           description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
           id: 'projectTitle',
           placeholder: 'Project Title',
           defaultValue: formData.projectTitle,
           onChange,
+          onValidationChange,
         }),
 
         div({

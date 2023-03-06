@@ -2,7 +2,7 @@
 
 // ********************** DUL LOGIC ********************** //
 
-import { isEmpty, isNil, isEqual, isString } from 'lodash';
+import { isEmpty, isNil, isEqual, isString, isArray } from 'lodash';
 import { FormValidators } from '../components/forms/forms';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
@@ -229,9 +229,11 @@ const calcRusErrors = (formData) => {
     }
   }
 
-  if (requiredRusFields.some((field) => isNil(formData[field]))) {
-    errors[field] = requiredError;
-  }
+  requiredRusFields.forEach((field) => {
+    if (isNil(formData[field])) {
+      errors[field] = requiredError;
+    }
+  });
 
   return errors;
 };

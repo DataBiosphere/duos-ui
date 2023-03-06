@@ -4,7 +4,6 @@ import { FormFieldTypes, FormField, FormValidators } from '../../../components/f
 import { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
-import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
 import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 
@@ -53,12 +52,7 @@ export default function CollaboratorForm (props) {
       key: `collaborator-item-${uuid}`}, [
       // name and eraCommonsId
       div({ className: 'row'}, [
-        h(DarValidationMessages,
-          {
-            validationMessages: collaboratorValidationErrors,
-            showValidationMessages: true,
-            datacy: 'collaborator-form-errors',
-          }),
+
         h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {
           id: index+'_collaboratorName',
