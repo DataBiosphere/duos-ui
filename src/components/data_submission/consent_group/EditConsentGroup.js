@@ -13,6 +13,8 @@ export const selectedPrimaryGroup = (consentGroup) => {
     return 'diseaseSpecificUse';
   } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
     return 'poa';
+  } else if (!isNil(consentGroup.openAccess) && consentGroup.openAccess) {
+    return 'openAccess';
   } else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
     return 'otherPrimary';
   }
@@ -24,7 +26,7 @@ const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
     items => {
-      options = items.map(function(item) {
+      options = items.map(function (item) {
         return item.label;
       });
       callback(options);
@@ -38,6 +40,7 @@ export const EditConsentGroup = (props) => {
     nihInstitutionalCertificationFile,
     setNihInstitutionalCertificationFile,
     idx,
+    dacs,
     validation,
     onValidationChange,
   } = props;
@@ -49,7 +52,7 @@ export const EditConsentGroup = (props) => {
   const [gsText, setGSText] = useState(consentGroup.gs);
 
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
-  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary);
+  const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary || '');
 
   const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
@@ -57,7 +60,7 @@ export const EditConsentGroup = (props) => {
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
   const [morText, setMORText] = useState(consentGroup.mor);
 
-  const onChange = ({key, value}) => {
+  const onChange = ({ key, value }) => {
     setConsentGroup({
       ...consentGroup,
       ...{
@@ -66,7 +69,7 @@ export const EditConsentGroup = (props) => {
     });
   };
 
-  const onPrimaryChange = ({key, value}) => {
+  const onPrimaryChange = ({ key, value }) => {
     setConsentGroup({
       ...consentGroup,
       ...{
@@ -74,6 +77,7 @@ export const EditConsentGroup = (props) => {
         hmb: false,
         diseaseSpecificUse: undefined,
         poa: false,
+        openAccess: false,
         otherPrimary: undefined,
       },
       ...{
@@ -93,7 +97,7 @@ export const EditConsentGroup = (props) => {
     }, [
       // name
       h(FormField, {
-        id: idx+'_consentGroupName',
+        id: idx + '_consentGroupName',
         name: 'consentGroupName',
         title: 'Consent Group Name',
         validators: [FormValidators.REQUIRED],
@@ -105,297 +109,330 @@ export const EditConsentGroup = (props) => {
       }),
 
       // primary
-      h(FormField, {
-        title: 'Consent Group - Primary Data Use Terms*',
-        description: 'Please select one of the following data use permissions for your dataset',
-        type: FormFieldTypes.RADIOBUTTON,
-        id: idx+'_primaryConsent_generalResearchUse',
-        name: 'primaryConsent',
-        value: 'generalResearchUse',
-        toggleText: 'General Research Use',
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => {
-          onPrimaryChange({key: value, value: true});
-        },
-        validation: validation.generalResearchUse,
-        onValidationChange: ({validation}) => {
-          onValidationChange({key: 'generalResearchUse', validation});
-        },
-      }),
-
-
-      h(FormField, {
-        type: FormFieldTypes.RADIOBUTTON,
-        id: idx+'_primaryConsent_hmb',
-        name: 'primaryConsent',
-        value: 'hmb',
-        toggleText: 'Health/Medical/Biomedical Research Use',
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => {
-          onPrimaryChange({key: value, value: true});
-        },
-        validation: validation.hmb,
-        onValidationChange: ({validation}) => {
-          onValidationChange({key: 'hmb', validation});
-        },
-      }),
-
-      h(FormField, {
-        type: FormFieldTypes.RADIOBUTTON,
-        id: idx+'_primaryConsent_diseaseSpecificUse',
-        name: 'primaryConsent',
-        value: 'diseaseSpecificUse',
-        toggleText: 'Disease-Specific Research Use',
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => {
-          onPrimaryChange({
-            key: value,
-            value: selectedDiseases
-          });
-        },
-        validation: validation.diseaseSpecificUse,
-      }),
-      div({
-        isRendered: showDiseaseSpecificUseSearchbar,
-        style: {
-          marginBottom: '1.0rem'
-        }
-      }, [
+      div({}, [
         h(FormField, {
-          type: FormFieldTypes.SELECT,
-          isMulti: true,
-          isCreatable: true,
-          isAsync: true,
-          optionsAreString: true,
-          loadOptions: searchOntologies,
-          id: idx+'_diseaseSpecificUseText',
-          name: 'diseaseSpecificUse',
-          validators: [FormValidators.REQUIRED],
-          placeholder: 'Please enter one or more diseases',
-          defaultValue: selectedDiseases,
-          validation: validation.diseaseSpecificUse,
-          onValidationChange,
-          onChange: ({key, value, isValid}) => {
-            setSelectedDiseases(value);
-            onChange({
-              key: key,
-              value: value,
-              isValid: isValid
+          title: 'Primary Data Use Terms*',
+          description: 'Please select one of the following data use permissions for your dataset',
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_generalResearchUse',
+          name: 'primaryConsent',
+          value: 'generalResearchUse',
+          toggleText: 'General Research Use',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({ key: value, value: true });
+          },
+          validation: validation.generalResearchUse,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'generalResearchUse', validation });
+          },
+        }),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_hmb',
+          name: 'primaryConsent',
+          value: 'hmb',
+          toggleText: 'Health/Medical/Biomedical Research Use',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({ key: value, value: true });
+          },
+          validation: validation.hmb,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'hmb', validation });
+          },
+        }),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_diseaseSpecificUse',
+          name: 'primaryConsent',
+          value: 'diseaseSpecificUse',
+          toggleText: 'Disease-Specific Research Use',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({
+              key: value,
+              value: selectedDiseases
             });
+          },
+          validation: validation.diseaseSpecificUse,
+        }),
+
+        div({
+          isRendered: showDiseaseSpecificUseSearchbar,
+          style: {
+            marginBottom: '1.0rem'
+          }
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.SELECT,
+            isMulti: true,
+            isCreatable: true,
+            isAsync: true,
+            optionsAreString: true,
+            loadOptions: searchOntologies,
+            id: idx + '_diseaseSpecificUseText',
+            name: 'diseaseSpecificUse',
+            validators: [FormValidators.REQUIRED],
+            placeholder: 'Please enter one or more diseases',
+            defaultValue: selectedDiseases,
+            validation: validation.diseaseSpecificUse,
+            onValidationChange,
+            onChange: ({ key, value, isValid }) => {
+              setSelectedDiseases(value);
+              onChange({
+                key: key,
+                value: value,
+                isValid: isValid
+              });
+            },
+          }),
+        ]),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_poa',
+          name: 'primaryConsent',
+          value: 'poa',
+          toggleText: 'Populations, Origins, Ancestry Use',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({ key: value, value: true });
+          },
+          validation: validation.poa,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'poa', validation });
+          },
+        }),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_openAccess',
+          name: 'primaryConsent',
+          value: 'openAccess',
+          toggleText: 'No Restrictions (Open Access Data)',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({ key: value, value: true });
+          },
+          validation: validation.openAccess,
+        }),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_otherPrimary',
+          name: 'primaryConsent',
+          value: 'otherPrimary',
+          toggleText: 'Other',
+          defaultValue: selectedPrimaryGroup(consentGroup),
+          onChange: ({ value }) => {
+            onPrimaryChange({ key: value, value: otherPrimaryText });
+          },
+          validation: validation.otherPrimary,
+        }),
+
+        h(FormField, {
+          isRendered: showOtherPrimaryText,
+          id: idx + '_otherPrimaryText',
+          name: 'otherPrimary',
+          validators: [FormValidators.REQUIRED],
+          placeholder: 'Please specify',
+          defaultValue: otherPrimaryText,
+          onChange: ({ key, value, isValid }) => {
+            setOtherPrimaryText(value);
+            onChange({ key: key, value: value, isValid: isValid });
+          },
+          validation: validation.otherPrimary,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'otherPrimary', validation });
           },
         }),
       ]),
 
-      h(FormField, {
-        type: FormFieldTypes.RADIOBUTTON,
-        id: idx+'_primaryConsent_poa',
-        name: 'primaryConsent',
-        value: 'poa',
-        toggleText: 'Populations, Origins, Ancestry Use',
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => {
-          onPrimaryChange({key: value, value: true});
-        },
-        validation: validation.poa,
-        onValidationChange: ({validation}) => {
-          onValidationChange({key: 'poa', validation});
-        },
-      }),
-
-      h(FormField, {
-        type: FormFieldTypes.RADIOBUTTON,
-        id: idx+'_primaryConsent_otherPrimary',
-        name: 'primaryConsent',
-        value: 'otherPrimary',
-        toggleText: 'Other',
-        defaultValue: selectedPrimaryGroup(consentGroup),
-        onChange: ({value}) => {
-          onPrimaryChange({key: value, value: otherPrimaryText});
-        },
-        validation: validation.otherPrimary,
-      }),
-
-      h(FormField, {
-        isRendered: showOtherPrimaryText,
-        id: idx+'_otherPrimaryText',
-        name: 'otherPrimary',
-        validators: [FormValidators.REQUIRED],
-        placeholder: 'Please specify',
-        defaultValue: otherPrimaryText,
-        onChange: ({key, value, isValid}) => {
-          setOtherPrimaryText(value);
-          onChange({key: key, value: value, isValid: isValid});
-        },
-        validation: validation.otherPrimary,
-        onValidationChange: ({validation}) => {
-          onValidationChange({key: 'otherPrimary', validation});
-        },
-      }),
-
       // secondary
-      h(FormField, {
-        title: 'Consent Secondary Data Use Terms',
-        description: 'Select all applicable data use parameters',
-        id: idx+'_nmds',
-        name: 'nmds',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'No methods development or validation studies (NMDS)',
-        defaultValue: consentGroup.nmds,
-        onChange,
-        validation: validation.nmds,
-        onValidationChange,
-      }),
+      div({
+        isRendered: consentGroup.openAccess !== true,
+      }, [
+        h(FormField, {
+          title: 'Secondary Data Use Terms',
+          description: 'Select all applicable data use parameters',
+          id: idx + '_nmds',
+          name: 'nmds',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'No methods development or validation studies (NMDS)',
+          defaultValue: consentGroup.nmds,
+          onChange,
+          validation: validation.nmds,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_gso',
-        name: 'gso',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Genetic studies only (GSO)',
-        defaultValue: consentGroup.gso,
-        onChange,
-        validation: validation.gso,
-        onValidationChange,
-      }),
+        h(FormField, {
+          id: idx + '_gso',
+          name: 'gso',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Genetic studies only (GSO)',
+          defaultValue: consentGroup.gso,
+          onChange,
+          validation: validation.gso,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_pub',
-        name: 'pub',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Publication Required (PUB)',
-        defaultValue: consentGroup.pub,
-        onChange,
-        validation: validation.pub,
-        onValidationChange,
-      }),
+        h(FormField, {
+          id: idx + '_pub',
+          name: 'pub',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Publication Required (PUB)',
+          defaultValue: consentGroup.pub,
+          onChange,
+          validation: validation.pub,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_col',
-        name: 'col',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Collaboration Required (COL)',
-        defaultValue: consentGroup.col,
-        onChange,
-        validation: validation.col,
-        onValidationChange,
-      }),
+        h(FormField, {
+          id: idx + '_col',
+          name: 'col',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Collaboration Required (COL)',
+          defaultValue: consentGroup.col,
+          onChange,
+          validation: validation.col,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_irb',
-        name: 'irb',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Ethics Approval Required (IRB)',
-        defaultValue: consentGroup.irb,
-        onChange,
-        validation: validation.irb,
-        onValidationChange,
-      }),
+        h(FormField, {
+          id: idx + '_irb',
+          name: 'irb',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Ethics Approval Required (IRB)',
+          defaultValue: consentGroup.irb,
+          onChange,
+          validation: validation.irb,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_gs',
-        name: 'gs',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Geographic Restriction (GS-)',
-        defaultValue: showGSText,
-        onChange: ({key, value}) => {
-          setShowGSText(value);
+        h(FormField, {
+          id: idx + '_gs',
+          name: 'gs',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Geographic Restriction (GS-)',
+          defaultValue: showGSText,
+          onChange: ({ key, value }) => {
+            setShowGSText(value);
 
-          if (value) {
-            onChange({key: key, value: gsText});
-          } else {
-            onChange({key: key, value: undefined});
+            if (value) {
+              onChange({ key: key, value: gsText });
+            } else {
+              onChange({ key: key, value: undefined });
+            }
+          },
+        }),
+
+        h(FormField, {
+          isRendered: showGSText,
+          id: idx + '_gsText',
+          name: 'gs',
+          validators: [FormValidators.REQUIRED],
+          placeholder: 'Specify Geographic Restriction',
+          defaultValue: gsText || '',
+          onChange: ({ key, value, isValid }) => {
+            setGSText(value);
+            onChange({ key: key, value: value, isValid: isValid });
+          },
+          validation: validation.gs,
+          onValidationChange,
+        }),
+
+        h(FormField, {
+          id: idx + '_mor',
+          name: 'mor',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Publication Moratorium (MOR)',
+          defaultValue: showMORText,
+          onChange: ({ key, value }) => {
+            setShowMORText(value);
+            onChange({ key: key, value: (value ? morText : undefined) });
           }
-        },
-      }),
+        }),
 
-      h(FormField, {
-        isRendered: showGSText,
-        id: idx+'_gsText',
-        name: 'gs',
-        validators: [FormValidators.REQUIRED],
-        placeholder: 'Specify Geographic Restriction',
-        defaultValue: gsText || '',
-        onChange: ({key, value, isValid}) => {
-          setGSText(value);
-          onChange({key: key, value: value, isValid: isValid});
-        },
-        validation: validation.gs,
-        onValidationChange,
-      }),
+        h(FormField, {
+          isRendered: showMORText,
+          id: idx + '_morText',
+          name: 'mor',
+          validators: [FormValidators.REQUIRED, FormValidators.DATE],
+          placeholder: 'Please specify date (YYYY-MM-DD)',
+          defaultValue: morText,
+          onChange: ({ key, value, isValid }) => {
+            setMORText(value);
+            onChange({ key: key, value: value, isValid: isValid });
+          },
+          validation: validation.mor,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        id: idx+'_mor',
-        name: 'mor',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Publication Moratorium (MOR)',
-        defaultValue: showMORText,
-        onChange: ({key, value}) => {
-          setShowMORText(value);
-          onChange({key: key, value: (value ? morText : undefined)});
-        }
-      }),
+        h(FormField, {
+          id: idx + '_npu',
+          name: 'npu',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Non-profit Use Only (NPU)',
+          defaultValue: consentGroup.npu,
+          onChange,
+          validation: validation.npu,
+          onValidationChange,
+        }),
 
-      h(FormField, {
-        isRendered: showMORText,
-        id: idx+'_morText',
-        name: 'mor',
-        validators: [FormValidators.REQUIRED, FormValidators.DATE],
-        placeholder: 'Please specify date (YYYY-MM-DD)',
-        defaultValue: morText,
-        onChange: ({key, value, isValid}) => {
-          setMORText(value);
-          onChange({key: key, value: value, isValid: isValid});
-        },
-        validation: validation.mor,
-        onValidationChange,
-      }),
+        h(FormField, {
+          id: idx + '_otherSecondary',
+          name: 'otherSecondary',
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'Other',
+          defaultValue: showOtherSecondaryText,
+          onChange: ({ key, value }) => {
+            setShowOtherSecondaryText(value);
 
-      h(FormField, {
-        id: idx+'_npu',
-        name: 'npu',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Non-profit Use Only (NPU)',
-        defaultValue: consentGroup.npu,
-        onChange,
-        validation: validation.npu,
-        onValidationChange,
-      }),
-
-      h(FormField, {
-        id: idx+'_otherSecondary',
-        name: 'otherSecondary',
-        type: FormFieldTypes.CHECKBOX,
-        toggleText: 'Other',
-        defaultValue: showOtherSecondaryText,
-        onChange: ({key, value}) => {
-          setShowOtherSecondaryText(value);
-
-          if (value) {
-            onChange({key: key, value: otherSecondaryText});
-          } else {
-            onChange({key: key, value: undefined});
+            if (value) {
+              onChange({ key: key, value: otherSecondaryText });
+            } else {
+              onChange({ key: key, value: undefined });
+            }
           }
-        }
-      }),
+        }),
 
+        h(FormField, {
+          isRendered: showOtherSecondaryText,
+          id: idx + '_otherSecondaryText',
+          name: 'otherSecondary',
+          validators: [FormValidators.REQUIRED],
+          placeholder: 'Please specify',
+          defaultValue: otherSecondaryText || '',
+          onChange: ({ key, value, isValid }) => {
+            setOtherSecondaryText(value);
+            onChange({ key: key, value: value, isValid: isValid });
+          },
+          validation: validation.otherSecondary,
+          onValidationChange,
+        }),
+      ]),
+
+      // data access committee
       h(FormField, {
-        isRendered: showOtherSecondaryText,
-        id: idx+'_otherSecondaryText',
-        name: 'otherSecondary',
-        validators: [FormValidators.REQUIRED],
-        placeholder: 'Please specify',
-        defaultValue: otherSecondaryText || '',
-        onChange: ({key, value, isValid}) => {
-          setOtherSecondaryText(value);
-          onChange({key: key, value: value, isValid: isValid});
-        },
-        validation: validation.otherSecondary,
-        onValidationChange,
+        isRendered: consentGroup.openAccess !== true,
+        id: idx + 'dataAccessCommitteeId',
+        title: 'Data Access Committee*',
+        description: 'Please select which DAC should govern requests for this dataset',
+        type: FormFieldTypes.SELECT,
+        selectOptions: dacs.map((dac) => {
+          return { dacId: dac.dacId, displayText: dac.name };
+        }),
+        onChange: ({ key, value }) => {
+          onChange({ key, value: value.dacId });
+        }
       }),
 
       // location
-
       h(FormField, {
-        id: idx+'_dataLocation',
+        id: idx + '_dataLocation',
         name: 'dataLocation',
         type: FormFieldTypes.SELECT,
         isMulti: true,
@@ -417,7 +454,7 @@ export const EditConsentGroup = (props) => {
       }),
 
       h(FormField, {
-        id: idx+'_url',
+        id: idx + '_url',
         name: 'url',
         title: 'Data URL',
         validators: [FormValidators.REQUIRED, FormValidators.URL],
@@ -430,11 +467,11 @@ export const EditConsentGroup = (props) => {
     ]),
 
     h(FormTable, {
-      id: idx+'_fileTypes',
+      id: idx + '_fileTypes',
       name: 'fileTypes',
       formFields: [
         {
-          id: idx+'_fileType',
+          id: idx + '_fileType',
           name: 'fileType',
           title: 'File Type',
           type: FormFieldTypes.SELECT,
@@ -442,13 +479,13 @@ export const EditConsentGroup = (props) => {
           validators: [FormValidators.REQUIRED]
         },
         {
-          id: idx+'_functionalEquivalence',
+          id: idx + '_functionalEquivalence',
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
           validators: [FormValidators.REQUIRED]
         }, {
-          id: idx+'_numberOfParticipants',
+          id: idx + '_numberOfParticipants',
           name: 'numberOfParticipants',
           title: '# of Participants',
           placeholder: 'Number',
@@ -469,10 +506,10 @@ export const EditConsentGroup = (props) => {
       type: FormFieldTypes.FILE,
       title: 'NIH Institutional Certification',
       description: 'If an Institutional Certification for this consent group exists, please upload it here',
-      id: idx+'_nihInstituionalCertificationFile',
+      id: idx + '_nihInstituionalCertificationFile',
       name: 'nihInstituionalCertificationFile',
       defaultValue: nihInstitutionalCertificationFile,
-      onChange: ({value}) => setNihInstitutionalCertificationFile(value),
+      onChange: ({ value }) => setNihInstitutionalCertificationFile(value),
     })
   ]);
 };

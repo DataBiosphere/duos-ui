@@ -10,6 +10,7 @@ const dacs = [
     dacId: 1,
   }
 ];
+
 const user = {
   userId: 1,
   dacUserId: 2,
@@ -24,59 +25,36 @@ beforeEach(() => {
 });
 
 describe('Data Access Governance', function () {
-  it('Only renders consent group info if controlled access', function () {
-    mount(<DataSubmissionForm />);
-
-    cy.get('#btn_addConsentGroup').should('not.exist');
-    cy.get('#dataAccessCommitteeId').should('not.exist');
-
-    cy.get('#dataSharingPlan_controlled_access').check();
-
-
-    cy.get('#btn_addConsentGroup').should('exist');
-    cy.get('#dataAccessCommitteeId').should('exist');
-    cy.get('#0_consentGroupForm').should('not.exist');
-    cy.get('#btn_addConsentGroup').click();
-    cy.get('#0_consentGroupForm').should('exist');
-
-    cy.get('#dataSharingPlan_open_access').check();
-
-    cy.get('#btn_addConsentGroup').should('not.exist');
-    cy.get('#dataAccessCommitteeId').should('not.exist');
-    cy.get('#0_consentGroupForm').should('not.exist');
-
-  }),
   it('Adds multiple consent groups', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#dataSharingPlan_controlled_access').check();
-
-    cy.get('#0_consentGroupForm').should('not.exist');
-    cy.get('#1_consentGroupForm').should('not.exist');
-    cy.get('#2_consentGroupForm').should('not.exist');
-
-    cy.get('#btn_addConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
 
     cy.get('#btn_addConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('not.exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
 
     cy.get('#btn_addConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
 
+    cy.get('#btn_addConsentGroup').click();
+    cy.get('#0_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('exist');
+    cy.get('#3_consentGroupForm').should('exist');
 
   }),
   it('Delete consent group works', function () {
     mount(<DataSubmissionForm />);
 
-    cy.get('#dataSharingPlan_controlled_access').check();
-
     cy.get('#btn_addConsentGroup').click();
     cy.get('#btn_addConsentGroup').click();
     cy.get('#btn_addConsentGroup').click();
@@ -84,24 +62,33 @@ describe('Data Access Governance', function () {
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('exist');
-
+    cy.get('#3_consentGroupForm').should('exist');
 
     // when you delete consent groups, they get shifted down to
-    // their appropriate idx; so if you have 0, 1 and 2 and you
-    // delete 1, then 0 and 2 get mapped to 0 and 1
+    // their appropriate idx; so if you have 0, 1, 2, and 3 and
+    // you delete 1, then 0, 2, and 3 get mapped to 0, 1, and 2
     cy.get('#1_deleteConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('exist');
+    cy.get('#2_consentGroupForm').should('exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
+
+    cy.get('#0_deleteConsentGroup').click();
+    cy.get('#0_consentGroupForm').should('exist');
+    cy.get('#1_consentGroupForm').should('exist');
     cy.get('#2_consentGroupForm').should('not.exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
 
     cy.get('#0_deleteConsentGroup').click();
     cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
 
     cy.get('#0_deleteConsentGroup').click();
     cy.get('#0_consentGroupForm').should('not.exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');
+    cy.get('#3_consentGroupForm').should('not.exist');
   });
 });
