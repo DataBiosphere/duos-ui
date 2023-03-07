@@ -4,8 +4,6 @@ import { mount } from 'cypress/react';
 import {Storage} from '../../../src/libs/storage';
 import {User} from '../../../src/libs/ajax';
 import MultiDatasetVotingTab, {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
-import {filterBucketsForUser} from '../../../src/utils/DarCollectionUtils.js';
-import {rpVoteKey} from '../../../src/utils/DarCollectionUtils';
 import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 
 const darInfo = {
@@ -226,40 +224,3 @@ describe('MultiDatasetVoteTab - Tests', function() {
     cy.get('[id=missing_lc_alert]').should('not.exist');
   });
 });
-
-describe('filterBucketsForUser - Tests', function() {
-  it('Filters out buckets if current user has no votes in it', function () {
-    const currentUser = {userId: 100};
-    const rpBucket = {isRP: true, key: rpVoteKey};
-    const prefilteredBuckets = [rpBucket, bucket1, bucket2];
-
-    const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
-    expect(filteredBuckets).to.have.lengthOf(1);
-    expect(filteredBuckets).to.deep.include(bucket1);
-    expect(filteredBuckets).to.not.deep.include(bucket2);
-    expect(filteredBuckets).to.not.deep.include(rpBucket);
-  });
-
-  it('Does not filter out buckets with votes by the current user', function () {
-    const currentUser = {userId: 200};
-    const rpBucket = {
-      isRP: true,
-      votes: [
-        {
-          rp: {
-            memberVotes: [
-              {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
-            ],
-          }
-        }
-      ]
-    };
-    const prefilteredBuckets = [rpBucket, bucket1];
-
-    const filteredBuckets = filterBucketsForUser(currentUser, prefilteredBuckets);
-    expect(filteredBuckets).to.have.lengthOf(2);
-    expect(filteredBuckets).to.deep.include(rpBucket);
-    expect(filteredBuckets).to.deep.include(bucket1);
-  });
-});
-

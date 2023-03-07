@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {cloneDeep, flow, getOr, isNil, unset} from 'lodash/fp';
+import {cloneDeep, flow, getOr, isNil, uniq, unset} from 'lodash/fp';
 import {Config} from './config';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
@@ -479,7 +479,7 @@ export const Support = {
 export const Match = {
 
   findMatchBatch: async (purposeIdsArr = []) => {
-    const purposeIds = purposeIdsArr.join(',');
+    const purposeIds = uniq(purposeIdsArr).join(',');
     const url = `${await getApiUrl()}/api/match/purpose/batch`;
     const config = Object.assign({}, Config.authOpts(), {params: { purposeIds}});
     const res = await axios.get(url, config);

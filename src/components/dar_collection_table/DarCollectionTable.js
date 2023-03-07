@@ -6,7 +6,7 @@ import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import cellData from './DarCollectionTableCellData';
+import cellData, {consoleTypes} from './DarCollectionTableCellData';
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
@@ -202,6 +202,8 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
   } = props;
+  const isAdminPage = consoleType === consoleTypes.ADMIN;
+
   /*
     NOTE: This component will most likely be used in muliple consoles
     Right now the table is assuming a fetchAll request since it's being implemented for the ResearcherConsole
@@ -299,6 +301,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
             summary: collectionsSummaryMap[darCollectionId],
             collection: fetchDarCollection(darCollectionId),
             isLoading: isNil(darCollectionCache[darCollectionId]),
+            isAdminPage: isAdminPage
           }),
         ])
 
@@ -306,7 +309,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     }
 
     return renderedRow;
-  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded]);
+  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isAdminPage]);
 
   return h(Fragment, {}, [
     h(SimpleTable, {
