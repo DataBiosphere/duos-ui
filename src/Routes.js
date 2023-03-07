@@ -38,7 +38,7 @@ import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import {HealthCheck} from './pages/HealthCheck';
 import DataSubmissionForm from './pages/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
-import BroadDatasetCatalog from './pages/dac_dataset_catalog/BroadDatasetCatalog';
+import CustomDatasetCatalog from './pages/dac_dataset_catalog/CustomDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
 import {checkEnv, envGroups} from './utils/EnvironmentUtils';
 
@@ -91,8 +91,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dataset_catalog/:variant" component={CustomDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/broad_dataset_catalog" component={BroadDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />

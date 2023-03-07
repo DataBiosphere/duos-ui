@@ -1,4 +1,4 @@
-import {filter, find, flow, getOr, includes, isEmpty, isNil, map} from 'lodash/fp';
+import {filter, find, flow, getOr, includes, isEmpty, isNil, map, isFunction} from 'lodash/fp';
 import {Fragment, useEffect, useState, useCallback } from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -33,7 +33,8 @@ export default function DatasetCatalog(props) {
   } = props;
 
   const isCustomDacDatasetPage = !isNil(customDacDatasetPage);
-  const color = isCustomDacDatasetPage ? customDacDatasetPage.color : 'dataset';
+  const color = isCustomDacDatasetPage ? customDacDatasetPage.colorKey : 'dataset';
+  const dacFilter = customDacDatasetPage?.dacFilter;
 
   // Data states
   const [currentUser, setCurrentUser] = useState({});
@@ -47,7 +48,7 @@ export default function DatasetCatalog(props) {
   const [currentPageAllDatasets, setCurrentPageAllDatasets] = useState(1);
   const [currentPageOnlySelected, setCurrentPageOnlySelected] = useState(1);
 
-  const [filterToDacIds, setFilterToDacIds] = useState(customDacDatasetPage?.dacIds);
+  const [useCustomFilter, setUseCustomFilter] = useState(isFunction(dacFilter));
 
   const [dataUse, setDataUse] = useState();
   const [errorMessage, setErrorMessage] = useState();
@@ -131,7 +132,7 @@ export default function DatasetCatalog(props) {
         visibleDatasets
           .filter(searchTable(searchDulText))
           .filter((row) => {
-            return (!isNil(filterToDacIds) ? filterToDacIds.includes(row['dacId']) : true);
+            return (useCustomFilter ? dacFilter(row) : true);
           })
           .slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize));
       await Promise.all(results.map(async(dataset) => {
@@ -153,7 +154,7 @@ export default function DatasetCatalog(props) {
     };
     doEnrichment();
 
-  }, [searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets, filterToDacIds]);
+  }, [searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets, dacFilter, useCustomFilter]);
 
   const applyDatasetSort = useCallback((sortParams, datasets) => {
     const sortedList = datasets.sort((a, b) => {
@@ -200,7 +201,7 @@ export default function DatasetCatalog(props) {
     };
     const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
-    props.history.push({ pathname: 'dar_application/' + referenceId });
+    props.history.push({ pathname: '/dar_application/' + referenceId });
   };
 
   const openConnectDataset = (dataset) => {
@@ -497,13 +498,13 @@ export default function DatasetCatalog(props) {
                 }
               }, [
                 input({
-                  checked: filterToDacIds === customDacDatasetPage?.dacIds,
+                  checked: useCustomFilter,
                   type: 'checkbox',
                   'select-all': 'true',
                   className: 'checkbox-inline',
                   id: 'chk_filterDacId',
                   onChange: () => {
-                    setFilterToDacIds(isNil(filterToDacIds) ? customDacDatasetPage?.dacIds : undefined);
+                    setUseCustomFilter(!useCustomFilter);
                     setCurrentPageOnlySelected(1);
                     setCurrentPageAllDatasets(1);
                   },
