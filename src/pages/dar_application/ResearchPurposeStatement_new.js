@@ -10,7 +10,10 @@ const ResearchPurposeRow = (props) => {
     id,
     defaultValue,
     onChange,
+    validation,
+    onValidationChange,
   } = props;
+
 
   return div({
     className: 'rp-row flex flex-row',
@@ -38,6 +41,8 @@ const ResearchPurposeRow = (props) => {
         validators: [FormValidators.REQUIRED],
         defaultValue,
         orientation: 'horizontal',
+        validation,
+        onValidationChange,
         onChange,
       }),
 
@@ -51,8 +56,11 @@ export default function ResearchPurposeStatement(props) {
     darCode,
     formFieldChange,
     formData,
+    validation,
+    formValidationChange,
   } = props;
 
+  const onValidationChange = formValidationChange;
 
   //NOTE: inputs have both isEmpty and isNil checks
   //currently values are initialized as emptry strings as a way to maintain controlled inputs in components
@@ -79,6 +87,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Increase controls available for a comparison group (e.g. a case-control study).',
             id: 'controls',
             defaultValue: formData.controls,
+            validation: validation.controls,
+            onValidationChange,
             onChange,
           }),
 
@@ -86,6 +96,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Study variation in the general population (e.g. calling variants and/or studying their distribution).',
             id: 'population',
             defaultValue: formData.population,
+            validation: validation.population,
+            onValidationChange,
             onChange,
           }),
 
@@ -93,6 +105,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Conduct research for an exclusively or partially commercial purpose.',
             id: 'forProfit',
             defaultValue: formData.forProfit,
+            validation: validation.forProfit,
+            onValidationChange,
             onChange,
           }),
 
@@ -102,6 +116,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Limited to one gender',
             id: 'oneGender',
             defaultValue: formData.oneGender,
+            validation: validation.oneGender,
+            onValidationChange,
             onChange,
           }),
 
@@ -136,6 +152,8 @@ export default function ResearchPurposeStatement(props) {
               ],
               defaultValue: formData.gender,
               onChange,
+              validation: validation.gender,
+              onValidationChange,
             }),
           ]),
 
@@ -144,6 +162,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Limited to a pediatric population (under the age of 18)',
             id: 'pediatric',
             defaultValue: formData.pediatric,
+            validation: validation.pediatric,
+            onValidationChange,
             onChange,
           }),
 
@@ -155,6 +175,8 @@ export default function ResearchPurposeStatement(props) {
             description: '(children, prisoners, pregnant women, mentally disabled persons, or [“SIGNIFICANTLY”] economically or educationally disadvantaged persons)',
             id: 'vulnerablePopulation',
             defaultValue: formData.vulnerablePopulation,
+            validation: validation.vulnerablePopulation,
+            onValidationChange,
             onChange,
           }),
 
@@ -164,6 +186,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)',
             id: 'illegalBehavior',
             defaultValue: formData.illegalBehavior,
+            validation: validation.illegalBehavior,
+            onValidationChange,
             onChange,
           }),
 
@@ -171,6 +195,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Sexual preferences or sexually transmitted diseases',
             id: 'sexualDiseases',
             defaultValue: formData.sexualDiseases,
+            validation: validation.sexualDiseases,
+            onValidationChange,
             onChange,
           }),
 
@@ -178,6 +204,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Psychological traits, intelligence, or attention',
             id: 'psychiatricTraits',
             defaultValue: formData.psychiatricTraits,
+            validation: validation.psychiatricTraits,
+            onValidationChange,
             onChange,
           }),
 
@@ -185,6 +213,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Correlating ethnicity, race, or gender with genotypic or phenotypic variables for purposes beyond biomedical or health-related research, or in ways not easily related to health',
             id: 'notHealth',
             defaultValue: formData.notHealth,
+            validation: validation.notHealth,
+            onValidationChange,
             onChange,
           }),
 
@@ -192,6 +222,8 @@ export default function ResearchPurposeStatement(props) {
             title: 'Stigmatizing illnesses',
             id: 'stigmatizedDiseases',
             defaultValue: formData.stigmatizedDiseases,
+            validation: validation.stigmatizedDiseases,
+            onValidationChange,
             onChange,
           }),
 

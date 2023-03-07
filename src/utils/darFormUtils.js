@@ -212,6 +212,7 @@ const requiredRusFields = [
   'forProfit',
   'oneGender',
   'pediatric',
+  'vulnerablePopulation',
   'illegalBehavior',
   'sexualDiseases',
   'psychiatricTraits',

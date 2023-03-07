@@ -3,14 +3,23 @@ import CollaboratorRow from './CollaboratorRow';
 import { useState, useEffect} from 'react';
 import { button, div, h } from 'react-hyperscript-helpers';
 import './collaborator.css';
+import { isNil } from 'lodash';
 
 export default function CollaboratorList_new(props) {
-  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted} = props;
+  const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted, validation, onValidationChange} = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);
   const [editState, setEditState] = useState([]);
   const [showNewForm, setShowNewForm] = useState(false);
   const [deleteBoolArray, setDeleteBoolArray] = useState(props.deleteBoolArray || []);
+
+  const onCollaboratorValidationChange = ({index, key, validation}) => {
+    if (isNil(key)) {
+      onValidationChange({ key: [collaboratorKey, index], validation });
+    } else {
+      onValidationChange({ key: [collaboratorKey, index, key], validation });
+    }
+  };
 
   const deleteCollaborator = (index) => {
     let deleteCopy = deleteBoolArray.slice();
@@ -73,6 +82,8 @@ export default function CollaboratorList_new(props) {
           showApproval,
           editMode: editState[index],
           key: collaborator?.uuid,
+          validation: !isNil(validation) ? validation[index] || {} : {},
+          onCollaboratorValidationChange,
           deleteMode: deleteBoolArray[index]
         });
       })
@@ -99,6 +110,8 @@ export default function CollaboratorList_new(props) {
           collaboratorLabel,
           showApproval,
           editMode: true,
+          validation: !isNil(validation) ? validation[collaborators.length] || {} : {},
+          onCollaboratorValidationChange,
         }),
       ]),
       ListItems

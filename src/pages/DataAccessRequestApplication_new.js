@@ -23,7 +23,7 @@ import Tab from '@mui/material/Tab';
 import {
   validateDARFormData
 } from '../utils/darFormUtils';
-import { set } from 'lodash';
+import { isArray, set } from 'lodash';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -58,7 +58,7 @@ const DataAccessRequestApplicationNew = (props) => {
     oneGender: null,
     methods: null,
     controls: null,
-    population: '',
+    population: null,
     hmb: null,
     poa: null,
     diseases: null,
@@ -98,8 +98,8 @@ const DataAccessRequestApplicationNew = (props) => {
     collaborationLetterLocation: '',
     collaborationLetterName: '',
   });
-  
-  const [validation, setValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
+
+  const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
@@ -137,12 +137,18 @@ const DataAccessRequestApplicationNew = (props) => {
     );
   }, []);
 
-  const formValidationChange = useCallback(({ key, value })=> {
-    setValidation((validation) => {
-      const newValidation = cloneDeep(validation);
-      set(validation, key, value);
-      return newValidation;
-    })
+  const formValidationChange = useCallback((section, { key, validation })=> {
+    setFormValidation((formValidation) => {
+      const newFormValidation = cloneDeep(formValidation);
+
+      if (isArray(key)) {
+        set(newFormValidation, [section, ...key], validation);
+      } else {
+        set(newFormValidation, [section, key], validation);
+      }
+
+      return newFormValidation;
+    });
   }, []);
 
   const batchFormFieldChange = (updates) => {
@@ -295,8 +301,8 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
 
-  const scrollToFormErrors = (validation) => {
-    if (!isEmpty(validation.researcherInfoErrors)) {
+  const scrollToFormErrors = (validation, nihValid) => {
+    if (!isEmpty(validation.researcherInfoErrors) || nihValid !== true) {
       goToStep(1);
     } else if (!isEmpty(validation.darErrors)) {
       goToStep(2);
@@ -319,11 +325,12 @@ const DataAccessRequestApplicationNew = (props) => {
       externalCollaboratorsCompleted,
     });
 
-    setValidation(validation);
-    const isInvalidForm = validationFailed(validation);
+    setFormValidation(validation);
+
+    const isInvalidForm = validationFailed(validation) || nihValid !== true;
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation);
+      scrollToFormErrors(validation, nihValid);
     } else {
       setShowDialogSubmit(true);
     }
@@ -500,8 +507,8 @@ const DataAccessRequestApplicationNew = (props) => {
                 completed={!isNil(get('institutionId', researcher))}
                 darCode={formData.darCode}
                 formData={formData}
-                validation={validation.researcherInfoErrors}
-                formValidationChange={formValidationChange}
+                validation={formValidation.researcherInfoErrors}
+                formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
                 eRACommonsDestination={eRACommonsDestination}
                 formFieldChange={formFieldChange}
                 location={props.location}
@@ -519,8 +526,8 @@ const DataAccessRequestApplicationNew = (props) => {
               <DataAccessRequest
                 formData={formData}
                 datasets={datasets}
-                validation={validation.researcherInfoErrors}
-                formValidationChange={formValidationChange}
+                validation={formValidation.darErrors}
+                formValidationChange={(val) => formValidationChange('darErrors', val)}
                 dataUseTranslations={dataUseTranslations}
                 formFieldChange={formFieldChange}
                 batchFormFieldChange={batchFormFieldChange}
@@ -535,8 +542,8 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <ResearchPurposeStatement
                 darCode={formData.darCode}
-                validation={validation.researcherInfoErrors}
-                formValidationChange={formValidationChange}
+                validation={formValidation.rusErrors}
+                formValidationChange={(val) => formValidationChange('rusErrors', val)}
                 formFieldChange={formFieldChange}
                 formData={formData}
               />
