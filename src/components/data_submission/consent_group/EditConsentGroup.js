@@ -433,14 +433,11 @@ export const EditConsentGroup = (props) => {
 
     // location
 
-    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between', width:'53%', marginBottom: '-5%' }}, [
+    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between', marginBottom: '-5%' }}, [
       h(FormFieldTitle, {
         required: true,
         title: 'Data Location',
         description: 'Please provide the location of your data resource for this consent group',
-      }),
-      h(FormFieldTitle, {
-        title: 'URL',
       }),
     ]),
 
