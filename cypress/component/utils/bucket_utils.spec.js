@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import {binCollectionToBuckets} from '../../../src/utils/BucketUtils';
-import {filter, find, forEach, isUndefined} from 'lodash/fp';
+import {filter, find, forEach, isEmpty, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
 const dar_collection = {
@@ -333,7 +333,7 @@ const dar_collection = {
           }
         }
       },
-      'datasetIds': [1,2,3,4]
+      'datasetIds': [1, 2, 3, 4]
     }
   },
   'datasets': [
@@ -395,12 +395,9 @@ const match_results = [
   }
 ];
 
-beforeEach(() => {
-  cy.stub(Match, 'findMatchBatch').returns(match_results);
-});
-
 describe('BucketUtils', () => {
   it('instantiates a collection into buckets', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection);
     expect(buckets).to.not.be.empty;
     forEach(b => {
@@ -420,6 +417,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with two GRU datasets', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection);
     const gruBucket = find(b => b.label === 'GRU')(buckets);
     expect(gruBucket).to.not.be.empty;
@@ -428,6 +426,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a primary OTHER dataset', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection);
     const other = find(b => b.label === 'OTH1')(buckets);
     expect(other).to.not.be.empty;
@@ -436,6 +435,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a secondary OTHER dataset', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection);
     const secondaryOther = find(b => b.label === 'OTH2')(buckets);
     expect(secondaryOther).to.not.be.empty;
@@ -444,6 +444,7 @@ describe('BucketUtils', () => {
   });
 
   it('there should be a bucket with a an undefined data use', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection);
     const missingDataUse = find(b => !b.isRP && isUndefined(b.dataUse))(buckets);
     expect(missingDataUse).to.not.be.empty;
@@ -454,6 +455,7 @@ describe('BucketUtils', () => {
   });
 
   it('buckets should be filtered to datasets containing one dac id: 1', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection, [1]);
     const dataAccessBuckets = filter(b => !b.isRP)(buckets);
     expect(dataAccessBuckets).to.exist;
@@ -467,6 +469,7 @@ describe('BucketUtils', () => {
   });
 
   it('buckets should be filtered to datasets containing two dac ids: 1 & 5', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
     const buckets = await binCollectionToBuckets(dar_collection, [1, 5]);
     const dataAccessBuckets = filter(b => !b.isRP)(buckets);
     expect(dataAccessBuckets).to.exist;
@@ -478,4 +481,40 @@ describe('BucketUtils', () => {
     })(buckets);
   });
 
+  it('match failures should be condensed for a bucket with two failing matches', async () => {
+    const failing_matches = [
+      {
+        'id': 1,
+        'consent': 'DUOS-000001',
+        'purpose': 'dar-reference-id-1',
+        'match': false,
+        'failed': false,
+        'createDate': 'Jan 23, 2023',
+        'algorithmVersion': 'v2',
+        'failureReasons': ['1', '2', '3']
+      },
+      {
+        'id': 2,
+        'consent': 'DUOS-000002',
+        'purpose': 'dar-reference-id-1',
+        'match': false,
+        'failed': false,
+        'createDate': 'Jan 23, 2023',
+        'algorithmVersion': 'v2',
+        'failureReasons': ['1', '2', '3', '4', '5']
+      }
+    ];
+    cy.stub(Match, 'findMatchBatch').returns(failing_matches);
+    const buckets = await binCollectionToBuckets(dar_collection);
+    expect(buckets).to.not.be.empty;
+    let failureReasonCheck = false;
+    forEach(b => {
+      if (!isEmpty(b.matchResults)) {
+        expect(b.algorithmResult.failureReasons).to.not.be.empty;
+        expect(b.algorithmResult.failureReasons.length).to.eq(5, 'Failure reasons should be length 5');
+        failureReasonCheck = true;
+      }
+    })(buckets);
+    expect(failureReasonCheck).to.eq(true, 'Failure reason checks should have occurred');
+  });
 });

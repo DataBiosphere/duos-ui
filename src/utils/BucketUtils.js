@@ -8,14 +8,14 @@ import {processMatchData} from './VoteUtils';
  * Entry method into bundling up datasets into groups based on common data use restrictions.
  *
  * Step 1: Map all datasets to distinct buckets based on data use
- *      a: Pull out match data based on dataset that the match data applies to.
- *      b: Pull out the data use translations for the bucket's dataUse
- *      c: Set the bucket key/label from the dataUse + dataset ids
- * Step 2: Pull all elections for those datasets into the buckets
- * Step 3: Pull all votes up to a top level bucket field for easier iteration
- * Step 4: Set the bucket key/label from the dataUse + dataset ids
- * Step 5: Coalesce the algorithm decision per bucket
- * Step 6: Prepend an RP Vote bucket for the DAC to vote on the research purpose
+ *      a: Pull out the data use translations for the bucket's dataUse
+ *      b: Set the bucket key/label from the dataUse + dataset ids
+ * Step 2: Pull out match data based on dataset that the match data applies to.
+ * Step 3: Pull all elections for those datasets into the buckets
+ * Step 4: Pull all votes up to a top level bucket field for easier iteration
+ * Step 5: Set the bucket key/label from the dataUse + dataset ids
+ * Step 6: Coalesce the algorithm decision per bucket
+ * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
  * @param collection The full Data Access Request Collection
  * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
@@ -77,13 +77,6 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       }
     }
 
-    // Step 1.a: Find match results for this dataset and add to bucket
-    forEach(m => {
-      if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
-        bucket.matchResults.push(m);
-      }
-    })(matchData);
-
     // Step 1.b: Populate translated dataUses
     if (dataset.dataUse) {
       const index = findIndex(dataset.dataUse)(rawDataUses);
@@ -95,15 +88,24 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
   })(datasets);
 
   // The following steps are all bucket-centric, so we can process those in a single loop
-  // Steps 2-5
+  // Steps 2-6
   forEach(b => {
-    // Step 2: Populate elections for datasets in this bucket
+    // Step 2: Find match results for each dataset in bucket
+    forEach(m => {
+      forEach(dataset => {
+        if (toLower(dataset.datasetIdentifier) === toLower(m.consent)) {
+          b.matchResults.push(m);
+        }
+      })(b.datasets);
+    })(matchData);
+
+    // Step 3: Populate elections for datasets in this bucket
     b.elections = findElectionsForDatasets(collection, b.datasetIds);
 
-    // Step 3: Populate votes for each bucket
+    // Step 4: Populate votes for each bucket
     b.votes.push(processVotesForBucket(b.elections));
 
-    // Step 4: Generate bucket key and label
+    // Step 5: Generate bucket key and label
     if (!isEmpty(b.dataUses)) {
       b.label = flow(
         map((du) => du.alternateLabel || du.code),
@@ -114,12 +116,12 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     }
     b.key = 'bucket-' + join('-')(b.datasetIds);
 
-    // Step 5: Coalesce match results into a single result per bucket
+    // Step 6: Coalesce match results into a single result per bucket
     b.algorithmResult = calculateAlgorithmResultForBucket(b);
 
   })(buckets);
 
-  // Step 6: Populate RUS Vote bucket with RP votes
+  // Step 7: Populate RUS Vote bucket with RP votes
   const rpVotes = createRpVoteStructureFromBuckets(buckets);
   buckets.unshift({
     isRP: true,
@@ -169,9 +171,8 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
  *
  * Four potential cases:
  *  1. No matches
- *  2. Exactly one match, easy case
- *  3. N matches - all the same, also an easy case
- *  4. N matches - not all the same - very confusing case
+ *  2. Exactly one match or N matches that are all the same - easy case
+ *  3. N matches - not all the same - very confusing case
  *
  * @private
  * @param bucket
@@ -182,11 +183,24 @@ const calculateAlgorithmResultForBucket = (bucket) => {
   // We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
   const unmatchable = isOther(bucket.dataUse);
-  if (unmatchable || isEmpty(bucket.matchResults)) {
+  // Check on all possible true/false values in the matches.
+  // If all matches are the same, we can merge them into a single match object for display.
+  // If they are not all the same, we have to punt this decision solely to the DAC.
+  const matchVals = unmatchable ? [] : flow(
+    map(m => m.match),
+    uniq
+  )(bucket.matchResults);
+
+  if (isEmpty(matchVals)) {
     return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
-  } else if (!isEmpty(bucket.matchResults) && bucket.matchResults.length === 1) {
-    const match = bucket.matchResults[0];
-    const { createDate, failureReasons, id } = match;
+  } else if (matchVals.length === 1) {
+    // pull all unique failure reasons from all match failures into the display
+    const failureReasons = flow(
+      flatMap(match => match.failureReasons),
+      uniq
+    )(bucket.matchResults);
+    const { createDate, id } = bucket.matchResults[0];
+    const match = {createDate, failureReasons, id};
     return {
       result: processMatchData(match),
       createDate,
@@ -194,24 +208,8 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       id
     };
   } else {
-    const matchVals = flow(
-      map(m => m.match),
-      uniq
-    )(bucket.matchResults);
-    // All the same match value? Choose the first one
-    if (matchVals.length === 1) {
-      const match = bucket.matchResults[0];
-      const { createDate, failureReasons, id } = match;
-      return {
-        result: processMatchData(match),
-        createDate,
-        failureReasons,
-        id
-      };
-    } else {
-      // Different match values? Provide a custom message
-      return {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: bucket.key};
-    }
+    // Different match values? Provide a custom message
+    return {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: bucket.key};
   }
 };
 
