@@ -37,7 +37,7 @@ export default function CollaboratorList_new(props) {
 
   useEffect(() => {
     setCompleted(!showNewForm && editState.every((v) => v === false));
-  });
+  }, [setCompleted, showNewForm, editState]);
 
   const saveCollaborator = (index, newCollaborator) => {
     let newCollaborators = collaborators.slice();

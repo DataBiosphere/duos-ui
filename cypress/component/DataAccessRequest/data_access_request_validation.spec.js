@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { User, DataSet, DAR } from '../../../src/libs/ajax';
 import { Storage } from '../../../src/libs/storage.js';
 import { Navigation } from '../../../src/libs/utils.js';
+import { NotificationService } from '../../../src/libs/notificationService';
 
 const props = {
   match: {
@@ -61,22 +62,22 @@ const userSigningOfficials = [
   }
 ];
 
-beforeEach(() => {
-  cy.stub(User, 'getMe').returns(user);
-  cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
-  cy.stub(DataSet, 'searchDatasets').returns(Promise.resolve(datasets));
-  cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
-  cy.stub(Storage, 'getCurrentUser').returns(user);
-  cy.stub(Navigation, 'console').returns({});
-  cy.stub(DAR, 'postDar').returns({});
-  cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
-  cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
-  cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
-});
 
 describe('Data Access Request - Validation', () => {
 
   beforeEach(() => {
+    cy.stub(User, 'getMe').returns(user);
+    cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
+    cy.stub(DataSet, 'searchDatasets').returns(Promise.resolve(datasets));
+    cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
+    cy.stub(Storage, 'getCurrentUser').returns(user);
+    cy.stub(Navigation, 'console').returns({});
+    cy.stub(DAR, 'postDar').returns({});
+    cy.stub(DAR, 'updateDarDraft').returns({ referenceId: 'asdf' });
+    cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
+    cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
+    cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}));
+
     mount(
       <MemoryRouter initialEntries={['/']}>
         <DataAccessRequestApplicationNew {...props} />
@@ -193,7 +194,6 @@ describe('Data Access Request - Validation', () => {
     cy.get('#0_collaboratorEmail').should('have.class', 'errored');
     cy.get('#0_collaboratorApproval').should('have.class', 'errored');
 
-
     // fill out fields
     cy.get('#0_collaboratorName').type('asdf');
     cy.get('#0_collaboratorEraCommonsId').type('asdgasdg');
@@ -207,7 +207,6 @@ describe('Data Access Request - Validation', () => {
     cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
     cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
     cy.get('#0_collaboratorEmail').should('have.class', 'errored');
-
 
     // shouldn't submit since invalid email format
     cy.get('#collaborator-labCollaborators-add-save').click();
