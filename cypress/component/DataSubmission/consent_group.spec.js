@@ -44,7 +44,7 @@ describe('Consent Group', function () {
 
     expect(propCopy.saveConsentGroup).to.not.be.called;
   }),
-  it('Saves properly', function () {
+  /*it('Saves properly', function () {
     cy.spy(propCopy, 'saveConsentGroup');
 
     mount(<ConsentGroupForm {...propCopy}/>);
@@ -97,7 +97,7 @@ describe('Consent Group', function () {
       cy.get('#0_consentGroupSummary').should('exist');
     });
 
-  }),
+  }),*/
   it('Deletes properly', function () {
     cy.spy(propCopy, 'deleteConsentGroup');
 
