@@ -11,6 +11,7 @@ export default function CollaboratorForm (props) {
   const {
     index,
     collaborator,
+    collaboratorKey,
     validation,
     onCollaboratorValidationChange
   } = props;
@@ -107,7 +108,7 @@ export default function CollaboratorForm (props) {
           title: `${props.collaboratorLabel} Email`,
           defaultValue: email,
           placeholder: 'Email',
-          validators: [FormValidators.REQUIRED],
+          validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
           validation: validation.email,
           onValidationChange,
           onChange: ({value}) => {
@@ -165,11 +166,12 @@ export default function CollaboratorForm (props) {
         ]),
         // Add/Save Button
         div({
+          id: `collaborator-${collaboratorKey}-add-save`,
           className: 'collaborator-form-add-save-button f-left btn',
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
-            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproval: props.showApproval});
+            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: props.showApproval});
             const valid = Object.keys(errors).length === 0;
             onCollaboratorValidationChange({ index, validation: errors });
             if (valid) {

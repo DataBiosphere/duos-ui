@@ -93,7 +93,7 @@ export default function CollaboratorList_new(props) {
     div({className: 'collaborator-list-component'}, [
       div({className: 'row no-margin'}, [
         button({
-          id: 'add-collaborator-btn access-background',
+          id: `add-${collaboratorKey}-btn`,
           type: 'button', // default button element type inside a form is "submit".
           className: 'button button-white',
           style: { marginTop: 25, marginBottom: 5 },
@@ -104,6 +104,7 @@ export default function CollaboratorList_new(props) {
         }, [`Add ${collaboratorLabel}`]),
         h(CollaboratorForm, {
           index: collaborators.length,
+          collaboratorKey,
           saveCollaborator: (newCollaborator) => saveCollaborator(collaborators.length, newCollaborator),
           updateEditState: (bool) => setShowNewForm(bool),
           isRendered: showNewForm,

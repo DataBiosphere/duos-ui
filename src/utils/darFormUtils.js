@@ -61,7 +61,7 @@ const isStringEmpty = (str) => {
   return isNil(str) || (isString(str) && str.trim() === '');
 };
 
-export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) => {
+export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=true}) => {
   const errors = {};
 
   if (isStringEmpty(collaborator.name)) {
@@ -79,12 +79,12 @@ export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) =>
   if (isStringEmpty(collaborator.email)) {
     errors.email = requiredError;
   } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
-    errors.email = validationError('date');
+    errors.email = validationError('email');
   }
 
-  if (needsApproval) {
+  if (needsApproverStatus) {
     if (isEmpty(collaborator.approverStatus)) {
-      errors.approvalStatus = requiredError;
+      errors.approverStatus = requiredError;
     }
   }
 

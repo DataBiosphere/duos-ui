@@ -137,7 +137,7 @@ const DataAccessRequestApplicationNew = (props) => {
     );
   }, []);
 
-  const formValidationChange = useCallback((section, { key, validation })=> {
+  const formValidationChange = useCallback((section, { key, validation }) => {
     setFormValidation((formValidation) => {
       const newFormValidation = cloneDeep(formValidation);
 
@@ -177,18 +177,6 @@ const DataAccessRequestApplicationNew = (props) => {
     setUploadedIrbDocument(document);
   };
 
-  useEffect(() => {
-    init();
-    NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
-      setNotificationData(notificationData);
-    });
-
-    // ran on unmount;
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [init, onScroll]);
-
   const [datasets, setDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
 
@@ -203,6 +191,47 @@ const DataAccessRequestApplicationNew = (props) => {
       setDataUseTranslations(translations);
     });
   }, [datasets]);
+
+  const resetForcedScrollDebounce = useCallback(() => {
+    if (forcedScroll) {
+      clearTimeout(forcedScroll);
+    }
+    setForcedScroll(setTimeout(() => { // eslint-disable-line -- codacy says settimeout is dangerous
+      setForcedScroll(null);
+    }, 200));
+  }, [forcedScroll]);
+
+  const goToStep = (step = 1) => {
+    resetForcedScrollDebounce();
+    setStep(step);
+    window.scroll({
+      top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
+      behavior: 'smooth'
+    });
+  };
+
+  const onScroll = useCallback(() => {
+    if (forcedScroll) {
+      resetForcedScrollDebounce();
+    } else {
+      const scrollPos = window.scrollY;
+      const scrollBuffer = window.innerHeight * .25;
+      const sectionIndex = ApplicationTabs
+        .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
+        .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
+
+      let newStep;
+      if (sectionIndex === 0) {
+        newStep = 1;
+      } else if (sectionIndex === -1) {
+        newStep = ApplicationTabs.length;
+      } else {
+        newStep = sectionIndex;
+      }
+
+      setStep(newStep);
+    }
+  }, [forcedScroll, resetForcedScrollDebounce]);
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
@@ -240,46 +269,17 @@ const DataAccessRequestApplicationNew = (props) => {
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }, [onScroll, props.match.params]);
 
-  const goToStep = (step = 1) => {
-    resetForcedScrollDebounce();
-    setStep(step);
-    window.scroll({
-      top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
-      behavior: 'smooth'
+  useEffect(() => {
+    init();
+    NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
+      setNotificationData(notificationData);
     });
-  };
 
-  const onScroll = useCallback(() => {
-    if (forcedScroll) {
-      resetForcedScrollDebounce();
-    } else {
-      const scrollPos = window.scrollY;
-      const scrollBuffer = window.innerHeight * .25;
-      const sectionIndex = ApplicationTabs
-        .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
-        .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
-
-      let newStep;
-      if (sectionIndex === 0) {
-        newStep = 1;
-      } else if (sectionIndex === -1) {
-        newStep = ApplicationTabs.length;
-      } else {
-        newStep = sectionIndex;
-      }
-
-      setStep(newStep);
-    }
-  }, [forcedScroll, resetForcedScrollDebounce]);
-
-  const resetForcedScrollDebounce = useCallback(() => {
-    if (forcedScroll) {
-      clearTimeout(forcedScroll);
-    }
-    setForcedScroll(setTimeout(() => { // eslint-disable-line -- codacy says settimeout is dangerous
-      setForcedScroll(null);
-    }, 200));
-  }, [forcedScroll]);
+    // ran on unmount;
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [init, onScroll]);
 
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
@@ -493,7 +493,7 @@ const DataAccessRequestApplicationNew = (props) => {
             </div>
           </ConfirmationDialog>
           <ConfirmationDialog
-            title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+            title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color='' id='submitConfirmationModal'
             showModal={showDialogSubmit} action={{ label: 'Yes', handler: onSubmitConfirmation }}
           >
             <div className='dialog-description'>
