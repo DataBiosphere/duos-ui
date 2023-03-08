@@ -433,46 +433,43 @@ export const EditConsentGroup = (props) => {
 
     // location
 
-    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between', marginBottom: '-5%' }}, [
+    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between' }}, [
       h(FormFieldTitle, {
         required: true,
         title: 'Data Location',
         description: 'Please provide the location of your data resource for this consent group',
       }),
     ]),
-
-    h(FormTable, {
-      id: idx+'_dataLocationSection',
-      name: 'dataLocationSection',
-      formFields: [
-        {
-          id: idx+'_dataLocation',
-          name: 'dataLocation',
-          type: FormFieldTypes.SELECT,
-          isMulti: true,
-          exclusiveValues: ['Not Determined'],
-          selectOptions: [
-            'Existing AnVIL Workspace',
-            'Existing Terra Workspace',
-            'Existing TDR Snapshot',
-            'Not Determined',
-            'I am requesting an AnVIL workspace for storage',
-          ],
-          placeholder: 'Data Location(s)',
-          defaultValue: consentGroup.dataLocation,
-        },
-        {
-          id: idx+'_url',
-          name: 'url',
-          placeholder: 'Enter a URL for your data location here',
-          defaultValue: consentGroup.url,
-          onChange,
-        },
-      ],
-      onChange,
-      validation: validation.dataLocation,
-      onValidationChange,
-    }),
+    div({className: 'flex flex-row'}, [
+      h(FormField, {
+        style: { width: '50%' },
+        id: idx+'_dataLocation',
+        name: 'dataLocation',
+        type: FormFieldTypes.SELECT,
+        isMulti: true,
+        exclusiveValues: ['Not Determined'],
+        selectOptions: [
+          'Existing AnVIL Workspace',
+          'Existing Terra Workspace',
+          'Existing TDR Snapshot',
+          'Not Determined',
+          'I am requesting an AnVIL workspace for storage',
+        ],
+        placeholder: 'Data Location(s)',
+        defaultValue: consentGroup.dataLocation,
+        onChange,
+        validation: validation.dataLocation,
+        onValidationChange,
+      }),
+      h(FormField, {
+        style: { width: '50%', paddingLeft: '1.5%' },
+        id: idx+'_url',
+        name: 'url',
+        placeholder: 'Enter a URL for your data location here',
+        defaultValue: consentGroup.url,
+        onChange,
+      }),
+    ]),
     h(FormTable, {
       id: idx+'_fileTypes',
       name: 'fileTypes',

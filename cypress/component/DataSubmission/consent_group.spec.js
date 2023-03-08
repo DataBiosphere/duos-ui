@@ -40,7 +40,7 @@ describe('Consent Group', function () {
     mount(<ConsentGroupForm {...propCopy}/>);
 
     cy.get('#0_consentGroupName').type('Hello!');
-    cy.get('#0_dataLocationSection-0-0_url').type('https://www.asdf.gov');
+    cy.get('#0_url').type('https://www.asdf.gov');
 
     expect(propCopy.saveConsentGroup).to.not.be.called;
   }),
@@ -50,10 +50,10 @@ describe('Consent Group', function () {
     mount(<ConsentGroupForm {...propCopy}/>);
 
     cy.get('#0_consentGroupName').type('Hello!');
-    cy.get('#0_dataLocationSection-0-0_url').type('https://www.asdf.gov');
+    cy.get('#0_url').type('https://www.asdf.gov');
     cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
-    cy.get('#0_dataLocationSection-0-0_dataLocation').type('Not Determined{enter}');
+    cy.get('#_dataLocation').type('Not Determined{enter}');
     cy.get('#0_fileTypes-0-0_fileType').type('Geno{enter}');
     cy.get('#0_fileTypes-0-0_functionalEquivalence').type('asdf');
     cy.get('#0_fileTypes-0-0_numberOfParticipants').type('123');
@@ -104,7 +104,7 @@ describe('Consent Group', function () {
     mount(<ConsentGroupForm {...propCopy}/>);
 
     cy.get('#0_consentGroupName').type('Hello!');
-    cy.get('#0_dataLocationSection-0-0_url').type('https://www.asdf.gov');
+    cy.get('#0_url').type('https://www.asdf.gov');
     cy.get('#0_primaryConsent_hmb').check();
     cy.get('#0_col').check();
     cy.get('#0_deleteConsentGroup').click().then(() => {
