@@ -199,10 +199,10 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       flatMap(match => match.failureReasons),
       uniq
     )(bucket.matchResults);
-    const { createDate, id } = bucket.matchResults[0];
-    const match = {createDate, failureReasons, id};
+    const {createDate, failed, id, match} = bucket.matchResults[0];
+    const matchResult = {createDate, failureReasons, failed, id, match};
     return {
-      result: processMatchData(match),
+      result: processMatchData(matchResult),
       createDate,
       failureReasons,
       id
