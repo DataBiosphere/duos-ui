@@ -44,7 +44,9 @@ describe('Consent Group', function () {
 
     expect(propCopy.saveConsentGroup).to.not.be.called;
   }),
-  /*it('Saves properly', function () {
+  /* TO DO: Re-enable test once DS Form schema is updated.
+
+  it('Saves properly', function () {
     cy.spy(propCopy, 'saveConsentGroup');
 
     mount(<ConsentGroupForm {...propCopy}/>);
