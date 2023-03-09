@@ -136,6 +136,8 @@ export const FormFieldTypes = {
     requiredProps: [],
     optionalProps: [
       'uploadText',
+      'hideTextBar',
+      'hideInput',
     ],
   },
   CHECKBOX: {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
-import { FormFieldTypes, FormField, FormTable, FormValidators } from '../../forms/forms';
+import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
 import { DAR } from '../../../libs/ajax';
 
 export const selectedPrimaryGroup = (consentGroup) => {
@@ -429,45 +429,49 @@ export const EditConsentGroup = (props) => {
           onChange({ key, value: value.dacId });
         }
       }),
+    ]),
 
-      // location
+    // location
+
+    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between' }}, [
+      h(FormFieldTitle, {
+        required: true,
+        title: 'Data Location',
+        description: 'Please provide the location of your data resource for this consent group',
+      }),
+    ]),
+    div({className: 'flex flex-row'}, [
       h(FormField, {
-        id: idx + '_dataLocation',
+        style: { width: '50%' },
+        id: idx+'_dataLocation',
         name: 'dataLocation',
         type: FormFieldTypes.SELECT,
         isMulti: true,
-        title: 'Data Location',
-        description: 'Please provide the location of your data resource for this consent group',
         exclusiveValues: ['Not Determined'],
         selectOptions: [
-          'AnVIL Workspace',
-          'Terra Workspace',
-          'TDR Location',
+          'Existing AnVIL Workspace',
+          'Existing Terra Workspace',
+          'Existing TDR Snapshot',
           'Not Determined',
+          'I am requesting an AnVIL workspace for storage',
         ],
-        defaultValue: consentGroup.dataLocation,
         placeholder: 'Data Location(s)',
-        validators: [FormValidators.REQUIRED],
+        defaultValue: consentGroup.dataLocation,
         onChange,
         validation: validation.dataLocation,
         onValidationChange,
       }),
-
       h(FormField, {
-        id: idx + '_url',
+        style: { width: '50%', paddingLeft: '1.5%' },
+        id: idx+'_url',
         name: 'url',
-        title: 'Data URL',
-        validators: [FormValidators.REQUIRED, FormValidators.URL],
-        placeholder: 'Free text field for entering URL of data',
+        placeholder: 'Enter a URL for your data location here',
         defaultValue: consentGroup.url,
         onChange,
-        validation: validation.url,
-        onValidationChange,
       }),
     ]),
-
     h(FormTable, {
-      id: idx + '_fileTypes',
+      id: idx+'_fileTypes',
       name: 'fileTypes',
       formFields: [
         {
@@ -476,14 +480,12 @@ export const EditConsentGroup = (props) => {
           title: 'File Type',
           type: FormFieldTypes.SELECT,
           selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
-          validators: [FormValidators.REQUIRED]
         },
         {
           id: idx + '_functionalEquivalence',
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
-          validators: [FormValidators.REQUIRED]
         }, {
           id: idx + '_numberOfParticipants',
           name: 'numberOfParticipants',
@@ -495,21 +497,37 @@ export const EditConsentGroup = (props) => {
       ],
       defaultValue: consentGroup.fileTypes,
       enableAddingRow: true,
-      addRowLabel: 'Add New Filetype',
+      addRowLabel: 'Add New File Type',
       minLength: 1,
       onChange,
       validation: validation.fileTypes,
       onValidationChange,
     }),
-
+    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' }}, [
+      h(FormField, {
+        type: FormFieldTypes.FILE,
+        title: 'NIH Institutional Certification',
+        description: 'If an Institutional Certification for this consent group exists, please upload it here',
+        id: idx+'_nihInstituionalCertificationFile',
+        name: 'nihInstituionalCertificationFile',
+        hideTextBar: true,
+        hideInput: true,
+      }),
+      h(FormField, {
+        style: {margin: '11px'},
+        type: FormFieldTypes.FILE,
+        id: idx+'_fileInputSection',
+        defaultValue: nihInstitutionalCertificationFile,
+        onChange: ({value}) => setNihInstitutionalCertificationFile(value),
+        hideTextBar: true,
+      }),
+    ]),
     h(FormField, {
-      type: FormFieldTypes.FILE,
-      title: 'NIH Institutional Certification',
-      description: 'If an Institutional Certification for this consent group exists, please upload it here',
-      id: idx + '_nihInstituionalCertificationFile',
-      name: 'nihInstituionalCertificationFile',
-      defaultValue: nihInstitutionalCertificationFile,
-      onChange: ({ value }) => setNihInstitutionalCertificationFile(value),
+      isRendered: !isNil(nihInstitutionalCertificationFile),
+      id: `${idx}_fileName`,
+      placeholder: 'Filename.txt',
+      defaultValue: nihInstitutionalCertificationFile?.name,
+      readOnly: true,
     })
   ]);
 };
