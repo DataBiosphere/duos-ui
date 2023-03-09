@@ -8,7 +8,7 @@ import './ds_common.css';
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange, onFileChange, validation, onValidationChange
+    onChange, onFileChange, validation, onValidationChange, setAllConsentGroupsSaved
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
@@ -18,7 +18,7 @@ export const DataAccessGovernance = (props) => {
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
-  }, []);
+  }, [setDacs]);
 
   useEffect(() => {
     const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
@@ -94,6 +94,10 @@ export const DataAccessGovernance = (props) => {
       return newConsentGroupsState;
     });
   }, []);
+
+  useEffect(() => {
+    setAllConsentGroupsSaved(consentGroupsState.every((state) => state.editMode === false));
+  }, [consentGroupsState, setAllConsentGroupsSaved]);
 
   return div({
     className: 'data-submitter-section',

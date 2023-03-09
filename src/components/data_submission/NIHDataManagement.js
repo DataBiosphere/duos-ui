@@ -199,7 +199,6 @@ export const NIHDataManagement = (props) => {
         onValidationChange,
       }),
     ]),
-
   ]);
 };
 
