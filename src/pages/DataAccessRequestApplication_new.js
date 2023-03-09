@@ -274,12 +274,13 @@ const DataAccessRequestApplicationNew = (props) => {
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
       setNotificationData(notificationData);
     });
+  }, [init]);
 
-    // ran on unmount;
+  useEffect(() => {
     return () => {
       window.removeEventListener('scroll', onScroll);
     };
-  }, [init, onScroll]);
+  }, [onScroll]);
 
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
