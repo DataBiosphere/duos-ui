@@ -1,8 +1,9 @@
 import {styles} from './DarDatasetTable';
+import {filter, flatMap, flow, get, isEmpty, isUndefined, map, uniq, values} from 'lodash/fp';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {
-    data: dataUseGroup,
+    data: label,
     id: dataUseGroup,
     style : {
       color: '#354052',
@@ -14,27 +15,30 @@ export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   };
 }
 
-export function votesCellData({elections, votes, dataUseGroup, label= 'votes'}) {
-  const dataAccess = elections?.find((election) => election.electionType === 'DataAccess');
-
-  let status = dataAccess?.status || 'N/A';
-
-  if (status === 'Closed') {
-    // if there is some true vote, approved.
-    // if there is some false vote, denied.
-    // if there is no such vote, then still in progress.
-    status = (
-      votes?.finalVotes?.some((v) => v.vote === true)
-        ? 'Approved'
-        : (
-          votes?.finalVotes?.some((v) => v.vote === false)
-            ? 'Denied'
-            : 'N/A'
-        ));
+export function votesCellData({elections, dataUseGroup, label= 'votes'}) {
+  let displayValue = '-/-';
+  if (!isEmpty(elections)) {
+    const darElections = filter(e => e.electionType === 'DataAccess')(elections);
+    const datasetIds = flow(
+      filter(e => e.electionType === 'DataAccess'),
+      map(e => e.dataSetId),
+      uniq
+    )(darElections);
+    const memberVotes = flow(
+      flatMap(e => values(e.votes)),
+      filter(v => v.type === 'DAC')
+    )(darElections);
+    const voteValues = flow(
+      filter(v => !isUndefined(v.vote)),
+      map(v => get('vote')(v))
+    )(memberVotes);
+    const numerator = voteValues.length / datasetIds.length;
+    const denominator = memberVotes.length / datasetIds.length;
+    displayValue = numerator + '/' + denominator;
   }
 
   return {
-    data: status,
+    data: displayValue,
     id: dataUseGroup,
     style : {
       color: '#354052',

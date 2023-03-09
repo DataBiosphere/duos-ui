@@ -2,10 +2,10 @@ import {div, h, h2} from 'react-hyperscript-helpers';
 import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
-const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
-const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID';
-const NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL';
-const NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL';
+export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
+export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID';
+export const NO_NHGRI_YES_ANVIL = 'I am not NHGRI funded but I am seeking to submit data to AnVIL';
+export const NO_NHGRI_NO_ANVIL = 'I am not NHGRI funded and do not plan to store data in AnVIL';
 
 const nihAnvilUseLabels = {
   yes_nhgri_yes_phs_id: YES_NHGRI_YES_PHS_ID,
@@ -27,6 +27,7 @@ export default function NihAnvilUse(props) {
     initialFormData,
     validation,
     onValidationChange,
+    updateParentRenderState,
   } = props;
   const [nihAnvilUse, setNihAnvilUse] = useState(initialFormData?.nihAnvilUse || null);
 
@@ -54,6 +55,7 @@ export default function NihAnvilUse(props) {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: [value], isValid: config.isValid});
         setNihAnvilUse(value);
+        updateParentRenderState({key: config.key, value: [value]});
       },
       validation: validation.nihAnvilUse,
       onValidationChange,

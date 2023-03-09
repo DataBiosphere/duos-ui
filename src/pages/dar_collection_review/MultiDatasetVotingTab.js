@@ -62,7 +62,7 @@ export default function MultiDatasetVotingTab(props) {
     const isApprovalDisabled = dataAccessApprovalDisabled();
     return map(bucket => {
       return h(MultiDatasetVoteSlab, {
-        title: bucket.key,
+        title: bucket.label,
         bucket,
         dacDatasetIds,
         isChair,

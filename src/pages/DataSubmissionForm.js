@@ -1,7 +1,7 @@
 import React,  { useCallback } from 'react';
 import { compileSchema, validateForm } from '../utils/JsonSchemaUtils';
 
-import { cloneDeep, isNil } from 'lodash/fp';
+import { cloneDeep, isNil, includes, isArray, isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet, Schema } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
@@ -14,6 +14,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL } from '../components/data_submission/NihAnvilUse';
 import { set } from 'lodash';
 
 
@@ -21,10 +22,16 @@ export const DataSubmissionForm = () => {
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
+
   const [schema, setSchema] = useState();
   const [validateSchema, setValidateSchema] = useState();
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
+
+  const [nihAdminRendered, setNihAdminRendered] = useState(false);
+  const [nihDataManagementRendered, setNihDataManagementRendered] = useState(false);
+
+
 
   useEffect(() => {
     const getAllInstitutions = async() => {
@@ -139,6 +146,21 @@ export const DataSubmissionForm = () => {
     });
   }, [setFormFiles]);
 
+  const updateParentRenderState = ({ key, value }) => {
+    if (key === 'nihAnvilUse') {
+      const val = (isArray(value) && !isEmpty(value)) ? value[0] : value;
+      if (includes(val)([YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL])) {
+        setNihAdminRendered(true);
+        setNihDataManagementRendered(true);
+      }
+      else {
+        setNihAdminRendered(false);
+        setNihDataManagementRendered(false);
+      }
+    }
+  };
+
+
   const onValidationChange = ({ key, validation }) => {
     setFormValidation((val) => {
       const newValidation = cloneDeep(val);
@@ -167,9 +189,9 @@ export const DataSubmissionForm = () => {
 
 
       <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} />
-      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} />
-      <NIHAdministrativeInformation initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
-      <NIHDataManagement initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
+      <NihAnvilUse onChange={onChange} initialFormData={formData} validation={formValidation} onValidationChange={onValidationChange} updateParentRenderState={updateParentRenderState}/>
+      <NIHAdministrativeInformation nihAdminRendered={nihAdminRendered} initialFormData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} />
+      <NIHDataManagement nihDataManagementRendered={nihDataManagementRendered} initialFormData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} />
       <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} />
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>

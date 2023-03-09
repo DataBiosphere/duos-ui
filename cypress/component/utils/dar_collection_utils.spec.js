@@ -1,7 +1,5 @@
 /* eslint-disable no-undef */
 import {
-  checkIfOpenableElectionPresent,
-  checkIfCancelableElectionPresent,
   updateCollectionFn,
   cancelCollectionFn,
   openCollectionFn,
@@ -10,136 +8,12 @@ import {
   extractUserDataAccessVotesFromBucket,
   extractUserRPVotesFromBucket,
   collapseVotesByUser,
-  getMatchDataForBuckets,
   updateFinalVote,
   rpVoteKey
 } from '../../../src/utils/DarCollectionUtils';
-import {Collections, Match} from '../../../src/libs/ajax';
+import {Collections} from '../../../src/libs/ajax';
 import {formatDate, Notifications, USER_ROLES} from '../../../src/libs/utils';
-import {cloneDeep, forEach, includes, concat} from 'lodash/fp';
-
-const openableAndClosableDars = {
-  1: {
-    elections: {
-      1: {
-        status: 'Open',
-        electionType: 'DataAccess'
-      },
-      2: {
-        status: 'Open',
-        electionType: 'RP'
-      },
-    },
-  },
-  2: {
-    elections: {
-      3: {
-        status: 'Canceled',
-        electionType: 'DataAccess'
-      },
-      4: {
-        status: 'Canceled',
-        electionType: 'RP'
-      }
-    },
-  },
-};
-
-const closeableDars = {
-  1: {
-    elections: {
-      1: {
-        status: 'Open',
-        electionType: 'DataAccess'
-      },
-      2: {
-        status: 'Open',
-        electionType: 'RP'
-      }
-    }
-  },
-  2: {
-    elections: {
-      3: {
-        status: 'Open',
-        electionType: 'DataAccess'
-      },
-      4: {
-        status: 'Open',
-        electionType: 'RP'
-      }
-    }
-  }
-};
-
-const openableDars = {
-  1: {
-    elections: {
-      1: {
-        status: 'Canceled',
-        electionType: 'DataAccess'
-      },
-      2: {
-        status: 'Canceled',
-        electionType: 'RP'
-      }
-    }
-  },
-  2: {
-    elections: {
-      3: {
-        status: 'Closed',
-        electionType: 'DataAccess'
-      },
-      4: {
-        status: 'Closed',
-        electionType: 'RP'
-      }
-    }
-  }
-};
-
-const mockBuckets = [
-  {
-    key: rpVoteKey,
-    isRP: true
-  },
-  {
-    key: 'OTH1',
-    elections: [
-      [
-        { electionType: 'RP', referenceId: 'test3' },
-        { electionType: 'DataAccess', referenceId: 'test4' },
-      ],
-      [
-        { electionType: 'RP', referenceId: 'test5' },
-        { electionType: 'DataAccess', referenceId: 'test6' },
-      ],
-    ],
-  }
-];
-
-describe('checkIfOpenableElectionPresent()', () => {
-  it('returns true if there is at least one election that is not open', () => {
-    const isOpenable = checkIfOpenableElectionPresent(openableAndClosableDars);
-    expect(isOpenable).to.be.true;
-  });
-  it('returns false if there is no valid election to be opened', () => {
-    const isOpenable = checkIfOpenableElectionPresent(closeableDars);
-    expect(isOpenable).to.be.false;
-  });
-});
-
-describe('checkIfCancelableElectionPresent()', () => {
-  it('returns true if there is at least one cancelable election present', () => {
-    const isCancelable = checkIfCancelableElectionPresent(openableAndClosableDars);
-    expect(isCancelable).to.be.true;
-  });
-  it('returns false if there is no valid elections for cancelation', () => {
-    const isCancelable = checkIfCancelableElectionPresent(openableDars);
-    expect(isCancelable).to.be.false;
-  });
-});
+import {forEach, includes, concat} from 'lodash/fp';
 
 describe('updateCollectionFn', () => {
   it('generates an update callback function for consoles to use', () => {
@@ -660,51 +534,6 @@ describe('collapseVotesByUser', () => {
       displayName: 'John',
       rationale: 'rationale\n',
       lastUpdated: `${formatDate('20000')}\n`
-    });
-  });
-});
-
-describe('getMatchDataForBuckets', () => {
-  it("fetches matches for buckets based on the bucket's data access election", async() => {
-
-    const mockDate = new Date();
-    const mockId = 10;
-    const mockMatchReturn = [
-      {
-        purpose: 'test4',
-        match: true,
-        failed: false,
-        createDate: mockDate,
-        id: mockId
-      }
-    ];
-
-    cy.stub(Match, 'findMatchBatch').returns(mockMatchReturn);
-    const buckets = cloneDeep(mockBuckets);
-    await getMatchDataForBuckets(buckets);
-    buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
-        const {algorithmResult} = bucket;
-        expect(algorithmResult).to.not.be.empty;
-        expect(algorithmResult.result).to.equal('Yes');
-        expect(algorithmResult.createDate).to.equal(mockDate);
-        expect(algorithmResult.id).to.equal(mockId);
-      }
-    });
-  });
-
-  it('sets "N/A defaults if no match data is found', async() => {
-    cy.stub(Match, 'findMatchBatch').returns([]);
-    const buckets = cloneDeep(mockBuckets);
-    await getMatchDataForBuckets(buckets);
-    buckets.forEach(bucket => {
-      if(bucket.key.toLowerCase() !== rpVoteKey.toLowerCase()) {
-        const {algorithmResult} = bucket;
-        expect(algorithmResult).to.not.be.empty;
-        expect(algorithmResult.result).to.equal('N/A');
-        expect(algorithmResult.createDate).to.equal(undefined);
-        expect(algorithmResult.id).to.equal(bucket.key);
-      }
     });
   });
 });

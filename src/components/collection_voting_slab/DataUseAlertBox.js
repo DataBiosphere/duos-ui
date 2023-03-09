@@ -28,8 +28,8 @@ const styles = {
 const dataUseDescriptions = (translatedDataUse) => {
   return flatMap(key => {
     const dataUses = translatedDataUse[key];
-    return map(dataUse => {
-      return div({key: dataUse.code}, [dataUse.description]);
+    return map.convert({cap: false})((dataUse, index) => {
+      return div({key: dataUse.code + '-' + index}, [dataUse.description]);
     })(manuallyReviewedDataUses(dataUses));
   })(keys(translatedDataUse));
 };
