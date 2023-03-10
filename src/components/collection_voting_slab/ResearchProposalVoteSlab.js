@@ -153,7 +153,6 @@ export const ChairVoteInfo = ({dacVotes, isChair, adminPage = false}) => {
           style: {
             backgroundColor: '#FFFFFF',
             padding: '1% 0',
-            marginLeft: '-3%',
             marginTop: '10%',
           },
         },
