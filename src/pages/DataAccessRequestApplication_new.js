@@ -24,12 +24,13 @@ import DarValidationMessages from './dar_application/DarValidationMessages';
 import {
   validateDARFormData
 } from '../utils/darFormUtils';
+import DucAddendum from './dar_application/DucAddendum';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
   { name: 'Research Purpose Statement' },
-  { name: 'Data Use Agreement', showStep: false }
+  { name: 'Data Use Agreement' }
 ];
 
 const fetchAllDatasets = async (dsIds) => {
@@ -104,7 +105,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
 
   const [showValidationMessages, setShowValidationMessages] = useState(false);
-  const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
+  const [validationMessages, setValidationMessages] = useState({ researcherInfoErrors: [], darErrors: [], rusErrors: [] });
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
   const [internalCollaboratorsCompleted, setInternalCollaboratorsCompleted] = useState(true);
   const [externalCollaboratorsCompleted, setExternalCollaboratorsCompleted] = useState(true);
@@ -123,8 +124,13 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const [forcedScroll, setForcedScroll] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAttested, setIsAttested] = useState(false);
+
+  const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
+
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  const formFieldChange = useCallback(({key, value}) => {
+  const formFieldChange = useCallback(({ key, value }) => {
     setFormData(
       (formData) => {
         return {
@@ -198,8 +204,9 @@ const DataAccessRequestApplicationNew = (props) => {
 
     setResearcher(researcher);
     setAllSigningOfficials(signingOfficials);
+    setIsLoading(false);
 
-    if(!isNil(collectionId)) {
+    if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
@@ -219,7 +226,7 @@ const DataAccessRequestApplicationNew = (props) => {
     }
 
     formData.researcher = isNil(researcher) ? '' : researcher.displayName;
-    formData.institution = isNil(researcher)  || isNil(researcher.institution)? '' : researcher.institution.name;
+    formData.institution = isNil(researcher) || isNil(researcher.institution) ? '' : researcher.institution.name;
     formData.userId = researcher.userId;
 
     batchFormFieldChange(formData);
@@ -241,7 +248,7 @@ const DataAccessRequestApplicationNew = (props) => {
     } else {
       const scrollPos = window.scrollY;
       const scrollBuffer = window.innerHeight * .25;
-      const sectionIndex = ApplicationTabs
+      const sectionIndex = applicationTabs
         .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
         .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
@@ -249,7 +256,7 @@ const DataAccessRequestApplicationNew = (props) => {
       if (sectionIndex === 0) {
         newStep = 1;
       } else if (sectionIndex === -1) {
-        newStep = ApplicationTabs.length;
+        newStep = applicationTabs.length;
       } else {
         newStep = sectionIndex;
       }
@@ -278,7 +285,7 @@ const DataAccessRequestApplicationNew = (props) => {
 
   const updateDraftResponse = (formattedFormData, referenceId) => {
     let darPartialResponse;
-    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+    if (!isNil(referenceId) && !isEmpty(referenceId)) {
       darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
     } else {
       darPartialResponse = DAR.postDarDraft(formattedFormData);
@@ -299,6 +306,20 @@ const DataAccessRequestApplicationNew = (props) => {
     }
   };
 
+  const addDucAddendumTab = () => {
+    const tabs = [
+      ...ApplicationTabs,
+      { name: 'Post Confirmation Summary', showStep: false }
+    ];
+    setApplicationTabs(tabs);
+  };
+
+  const goToDucAddendum = useCallback(async () => {
+    if (isAttested) {
+      goToStep(5);
+    }
+  }, [goToStep, isAttested]);
+
   const attemptSubmit = () => {
     const validation = validateDARFormData({
       formData,
@@ -318,6 +339,16 @@ const DataAccessRequestApplicationNew = (props) => {
     if (isInvalidForm) {
       scrollToFormErrors(validation);
     } else {
+      setIsAttested(true);
+      addDucAddendumTab();
+      goToDucAddendum();
+    }
+
+    return !isInvalidForm;
+  };
+
+  const doSubmit = () => {
+    if (attemptSubmit()) {
       setShowDialogSubmit(true);
     }
   };
@@ -338,7 +369,7 @@ const DataAccessRequestApplicationNew = (props) => {
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
 
-      if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
+      if (!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       let updatedFormData = assign(formattedFormData, darPartialResponse);
@@ -388,18 +419,18 @@ const DataAccessRequestApplicationNew = (props) => {
 
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
-      if(isNil(dataRequestId)) {
+      if (isNil(dataRequestId)) {
         props.history.replace('/dar_application/' + referenceId);
       }
       //execute saveDARDocuments method only if documents are required for the DAR
       //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
-      if(!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
+      if (!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       batchFormFieldChange(darPartialResponse);
       setShowDialogSave(false);
       setDisableOkButton(false);
-    } catch(error) {
+    } catch (error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
       NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
@@ -414,10 +445,10 @@ const DataAccessRequestApplicationNew = (props) => {
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
-    <div className='container' style={{paddingBottom: '2%'}}>
+    <div className='container' style={{ paddingBottom: '2%' }}>
       <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
         <div className='row no-margin'>
-          <Notification notificationData={notificationData}/>
+          <Notification notificationData={notificationData} />
           <div
             className={(formData.darCode !== null ?
               'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
@@ -454,7 +485,7 @@ const DataAccessRequestApplicationNew = (props) => {
             }}
           >
             {
-              ApplicationTabs.map((tabConfig, index) => {
+              applicationTabs.map((tabConfig, index) => {
                 const { name, showStep = true } = tabConfig;
                 return <Tab
                   key={`step-${index}-${name}`}
@@ -548,10 +579,16 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <DataUseAgreements
                 darCode={formData.darCode}
-                attestAndSend={attemptSubmit}
+                attest={attemptSubmit}
                 save={() => setShowDialogSave(true)}
               />
             </div>
+
+            {isAttested &&
+              <div className='step-container'>
+                <DucAddendum doSubmit={doSubmit} save={() => setShowDialogSave(true)} isLoading={isLoading} formData={formData} datasets={datasets} dataUseTranslations={dataUseTranslations} />
+              </div>
+            }
           </div>
         </div>
       </form>
