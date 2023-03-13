@@ -36,7 +36,6 @@ export const commonStyles = {
     width: '100%',
     border: '1px solid black',
     borderWidth: '1px 1px 0 1px',
-    color: '#7B7B7B',
   }
 };
 
@@ -55,19 +54,6 @@ const columnStyles = {
     datasetName: '30%',
     whichDac: '20%',
     acknowledgment: '30%'
-  },
-};
-
-const headerConfig = {
-  dataUseCodes: {
-    label: 'Data Use Codes',
-    cellStyle: { width: headerStyles.cellWidth.dataUseCodes },
-    sortable: false
-  },
-  dataUseSummary: {
-    label: 'Data Use Summary',
-    cellStyle: { width: headerStyles.cellWidth.dataUseSummary },
-    sortable: false
   },
 };
 
@@ -121,25 +107,23 @@ export default function DucAddendum(props) {
   }, [getBuckets]);
 
   const buildDucAddendumTable = useCallback(async () => {
-    const tableChunks = buckets.map((bucket, i) => {
+    const tableChunks = buckets.map(bucket => {
 
       const dataUseCodes = bucket.label;
       const dataUseSummary = bucket.dataUses.map(dataUse => dataUse.description).join('. ');
 
-      const headerData = [
-        [
-          {
-            data: dataUseCodes,
-            id: i,
-            style: headerStyles
-          },
-          {
-            data: dataUseSummary,
-            id: i + 1,
-            style: headerStyles
-          }
-        ]
-      ];
+      const headerConfig = {
+        dataUseCodes: {
+          label: dataUseCodes,
+          cellStyle: { width: headerStyles.cellWidth.dataUseCodes, color: '#337ab7', fontSize: '1.6rem', padding: '1rem' },
+          sortable: false
+        },
+        dataUseSummary: {
+          label: dataUseSummary,
+          cellStyle: { width: headerStyles.cellWidth.dataUseSummary, color: '#000000' },
+          sortable: false
+        },
+      };
 
       const datasetData = bucket.datasets.map(dataset => {
         return [
@@ -171,7 +155,7 @@ export default function DucAddendum(props) {
           h(SimpleTable, {
             isLoading: isLoading,
             columnHeaders: columnHeaderData(headerConfig),
-            rowData: headerData,
+            rowData: [],
             styles: headerStyles
           }),
         ]),
@@ -186,6 +170,13 @@ export default function DucAddendum(props) {
       ];
     });
 
+    tableChunks.push(div({
+      style: {
+        borderTop: '1px solid black',
+        borderWidth: '1px 0 0 0',
+      },
+    }, []));
+
     const fullTable = flatten(tableChunks);
     setDucAddendumTable(fullTable);
   }, [buckets, isLoading]);
@@ -199,7 +190,7 @@ export default function DucAddendum(props) {
       className: 'dar-step-card'
     }, [
       h2({}, ['Post Confirmation Summary']),
-      h3({}, ['Review your DAR before submitting']),
+      h3({ style: { marginBottom: '2rem' } }, ['Review your DAR before submitting']),
 
       div({ className: 'table-container' }, ducAddendumTable),
 
