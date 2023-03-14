@@ -13,8 +13,6 @@ export const Config = {
 
   getNihUrl: async () => (await getConfig()).nihUrl,
 
-  getPowerBiUrl: async () => (await getConfig()).powerBiUrl,
-
   getGoogleClientId: async () => (await getConfig()).clientId,
 
   getGAId: async () => (await getConfig()).gaId,
