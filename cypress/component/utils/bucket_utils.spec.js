@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import {binCollectionToBuckets} from '../../../src/utils/BucketUtils';
+import {binCollectionToBuckets, isEqualDataUse} from '../../../src/utils/BucketUtils';
 import {filter, find, forEach, isEmpty, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
@@ -516,5 +516,49 @@ describe('BucketUtils', () => {
       }
     })(buckets);
     expect(failureReasonCheck).to.eq(true, 'Failure reason checks should have occurred');
+  });
+
+  it('marks three unequal data uses as unequal', async () => {
+    const dataUses = [
+      {'generalUse': true, 'collaborationInvestigators': true},
+      {'generalUse': false, 'hmbResearch': true, 'publicationMoratorium': 'date'},
+      {'generalUse': false, 'hmbResearch': false, 'stigmatizeDiseases': true}
+    ];
+    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
+    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
+    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(false);
+  });
+
+  it('marks three mixed, unequal data uses as unequal', async () => {
+    const dataUses = [
+      {'generalUse': true},
+      {'generalUse': false, 'hmbResearch': true, 'other': 'other restrictions'},
+      {'generalUse': false, 'hmbResearch': true, 'secondaryOther': 'secondary other restrictions'}
+    ];
+    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
+    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
+    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(false);
+  });
+
+  it('marks three equal data uses as equal', async () => {
+    const dataUses = [
+      {'generalUse': true},
+      {'generalUse': true},
+      {'generalUse': true}
+    ];
+    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(true);
+    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(true);
+    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(true);
+  });
+
+  it('marks three mixed, equal data uses as equal', async () => {
+    const dataUses = [
+      {'generalUse': true, 'recontactMay': true},
+      {'generalUse': true, 'recontactMust': true},
+      {'generalUse': true, 'manualReview': true}
+    ];
+    expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(true);
+    expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(true);
+    expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(true);
   });
 });
