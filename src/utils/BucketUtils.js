@@ -1,4 +1,4 @@
-import {any, compact, filter, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, toLower, uniq, values} from 'lodash/fp';
+import {any, compact, filter, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, pick, toLower, uniq, values} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -69,7 +69,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       } else {
         // If it does exist, merge this dataset into that bucket
         forEach(b => {
-          if (isEqual(b.dataUse)(dataset.dataUse)) {
+          if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
             b.datasets.push(dataset);
             b.datasetIds.push(dataset.dataSetId);
           }
@@ -271,4 +271,27 @@ const createRpVoteStructureFromBuckets = (buckets) => {
   })(rpElectionVoteArrays);
 
   return rpVotes;
+};
+
+/**
+ * Constrain the equality check to a limited number of fields. These
+ * fields are the ones that are used in the V2 algorithm and are what
+ * determine whether it falls into a Data Use bucket. We limit the fields
+ * because there are quite a few that have no impact on algorithm
+ * decision-making. Fields like recontactMay and recontactMust are not
+ * relevant to DAC decisions.
+ *
+ * @param a Data Use
+ * @param b Data Use
+ * @returns {boolean}
+ */
+export const isEqualDataUse = (a, b) => {
+  const fields = ['generalUse', 'hmbResearch', 'diseaseRestrictions',
+    'populationOriginsAncestry', 'commercialUse', 'methodsResearch',
+    'aggregateResearch', 'controlSetOption', 'gender', 'pediatric',
+    'ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults',
+    'otherRestrictions', 'other', 'secondaryOther'];
+  const aCopy = pick(fields)(a);
+  const bCopy = pick(fields)(b);
+  return isEqual(aCopy)(bCopy);
 };
