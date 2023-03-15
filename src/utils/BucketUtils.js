@@ -170,7 +170,7 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 /**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Four potential cases:
+ * Three potential cases:
  *  1. No matches
  *  2. Exactly one match or N matches that are all the same - easy case
  *  3. N matches - not all the same - very confusing case
