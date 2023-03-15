@@ -5,7 +5,7 @@ import { User } from '../../libs/ajax';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get, toLower, uniq, compact} from 'lodash/fp';
+import {find, isEmpty, flatMap, flow, filter, map, get, toLower, uniq, compact} from 'lodash/fp';
 import {updateFinalVote} from '../../utils/DarCollectionUtils';
 import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import { Navigation } from '../../libs/utils';
@@ -43,17 +43,6 @@ const tabStyleOverride = {
     border: '0px'
   },
 };
-const memberRoleId = 1;
-const chairpersonRoleId = 2;
-
-const userHasRole = (user, roleId) => {
-  const roleIds = flow(
-    get('roles'),
-    map(role => role.roleId)
-  )(user);
-  const matches = filter(id => id === roleId)(roleIds);
-  return !isEmpty(matches);
-};
 
 const tabsForUser = (user, buckets, adminPage = false) => {
   if (adminPage) {
@@ -62,19 +51,27 @@ const tabsForUser = (user, buckets, adminPage = false) => {
       chairVote: 'Chair Vote'
     };
   }
-  const dataAccessBucketsForUser = filter(
+  const dataAccessBuckets = filter(
     (bucket) => get('isRP')(bucket) !== true
   )(buckets);
-  const userHasVotesForCollection = !isEmpty(dataAccessBucketsForUser);
-
+  const myMemberVotes = flow(
+    flatMap(b => b.votes),
+    flatMap(v => v.dataAccess),
+    flatMap(da => da.memberVotes),
+    filter(v => v.dacUserId === user.userId)
+  )(dataAccessBuckets);
+  const myChairVotes = flow(
+    flatMap(b => b.votes),
+    flatMap(v => v.dataAccess),
+    flatMap(da => da.chairpersonVotes),
+    filter(v => v.dacUserId === user.userId)
+  )(dataAccessBuckets);
   const updatedTabs = { applicationInformation: 'Application Information' };
-  if (userHasVotesForCollection) {
-    if (userHasRole(user, chairpersonRoleId)) {
-      updatedTabs.memberVote = 'Member Vote';
-      updatedTabs.chairVote = 'Chair Vote';
-    } else if (userHasRole(user, memberRoleId)) {
-      updatedTabs.memberVote = 'Member Vote';
-    }
+  if (!isEmpty(myMemberVotes)) {
+    updatedTabs.memberVote = 'Member Vote';
+  }
+  if (!isEmpty(myChairVotes)) {
+    updatedTabs.chairVote = 'Chair Vote';
   }
   return updatedTabs;
 };
