@@ -520,9 +520,9 @@ describe('BucketUtils', () => {
 
   it('marks three unequal data uses as unequal', async () => {
     const dataUses = [
-      {'generalUse': true, 'collaborationInvestigators': true},
-      {'generalUse': false, 'hmbResearch': true, 'publicationMoratorium': 'date'},
-      {'generalUse': false, 'hmbResearch': false, 'stigmatizeDiseases': true}
+      {'generalUse': true},
+      {'generalUse': false, 'hmbResearch': true, 'other': 'other restrictions'},
+      {'generalUse': false, 'hmbResearch': true, 'secondaryOther': 'secondary other restrictions'}
     ];
     expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
     expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
@@ -531,9 +531,9 @@ describe('BucketUtils', () => {
 
   it('marks three mixed, unequal data uses as unequal', async () => {
     const dataUses = [
-      {'generalUse': true},
-      {'generalUse': false, 'hmbResearch': true, 'other': 'other restrictions'},
-      {'generalUse': false, 'hmbResearch': true, 'secondaryOther': 'secondary other restrictions'}
+      {'generalUse': true, 'collaborationInvestigators': true},
+      {'generalUse': false, 'hmbResearch': true, 'publicationMoratorium': 'date'},
+      {'generalUse': false, 'hmbResearch': false, 'stigmatizeDiseases': true}
     ];
     expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(false);
     expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(false);
