@@ -17,6 +17,7 @@ import {processMatchData} from './VoteUtils';
  * Step 6: Coalesce the algorithm decision per bucket
  * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
+ * @public
  * @param collection The full Data Access Request Collection
  * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
  *        the provided dac ids. This will extend to elections and votes as well.
@@ -281,6 +282,7 @@ const createRpVoteStructureFromBuckets = (buckets) => {
  * decision-making. Fields like recontactMay and recontactMust are not
  * relevant to DAC decisions.
  *
+ * @public
  * @param a Data Use
  * @param b Data Use
  * @returns {boolean}
