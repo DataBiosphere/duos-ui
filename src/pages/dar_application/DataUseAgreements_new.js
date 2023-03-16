@@ -11,7 +11,7 @@ export default function DataUseAgreements(props) {
 
   const {
     save,
-    attestAndSend,
+    attest,
     darCode,
   } = props;
 
@@ -65,18 +65,18 @@ export default function DataUseAgreements(props) {
       ]),
 
 
-      div({ className: 'flex flex-row', style: { justifyContent: 'flex-end' }, }, [
+      div({ className: 'flex flex-row', style: { justifyContent: 'flex-start', paddingTop: '4rem' }, }, [
         a({
-          id: 'btn_save', isRendered: isNil(darCode), onClick: () => save(),
-          className: 'button button-white',
+          id: 'btn_submit', isRendered: isNil(darCode), onClick: () => attest(),
+          className: 'button button-blue',
           style: {
             marginRight: '2rem',
           }
-        }, ['Save']),
+        }, ['Attest']),
         a({
-          id: 'btn_submit', isRendered: isNil(darCode), onClick: () => attestAndSend(),
-          className: 'button button-blue '
-        }, ['Attest and Send']),
+          id: 'btn_save', isRendered: isNil(darCode), onClick: () => save(),
+          className: 'button button-white',
+        }, ['Save']),
       ])
     ])
   );
