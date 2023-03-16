@@ -115,7 +115,7 @@ export default function DucAddendum(props) {
       const headerConfig = {
         dataUseCodes: {
           label: dataUseCodes,
-          cellStyle: { width: headerStyles.cellWidth.dataUseCodes, color: '#337ab7', fontSize: '1.6rem', padding: '1rem' },
+          cellStyle: { width: headerStyles.cellWidth.dataUseCodes, color: '#337ab7', fontSize: '1.6rem', margin: '1rem' },
           sortable: false
         },
         dataUseSummary: {
