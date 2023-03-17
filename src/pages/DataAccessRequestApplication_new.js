@@ -121,8 +121,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState(null);
   const [uploadedCollaborationLetter, setUploadedCollaborationLetter] = useState(null);
 
-  const [forcedScroll, setForcedScroll] = useState(null);
-
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({key, value}) => {
     setFormData(
@@ -192,17 +190,7 @@ const DataAccessRequestApplicationNew = (props) => {
     });
   }, [datasets]);
 
-  const resetForcedScrollDebounce = useCallback(() => {
-    if (forcedScroll) {
-      clearTimeout(forcedScroll);
-    }
-    setForcedScroll(setTimeout(() => { // eslint-disable-line -- codacy says settimeout is dangerous
-      setForcedScroll(null);
-    }, 200));
-  }, [forcedScroll]);
-
   const goToStep = (step = 1) => {
-    resetForcedScrollDebounce();
     setStep(step);
     window.scroll({
       top: document.getElementsByClassName('step-container')[step - 1]?.offsetTop,
@@ -211,27 +199,24 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
   const onScroll = useCallback(() => {
-    if (forcedScroll) {
-      resetForcedScrollDebounce();
+
+    const scrollPos = window.scrollY;
+    const scrollBuffer = window.innerHeight * .25;
+    const sectionIndex = ApplicationTabs
+      .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
+      .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
+
+    let newStep;
+    if (sectionIndex === 0) {
+      newStep = 1;
+    } else if (sectionIndex === -1) {
+      newStep = ApplicationTabs.length;
     } else {
-      const scrollPos = window.scrollY;
-      const scrollBuffer = window.innerHeight * .25;
-      const sectionIndex = ApplicationTabs
-        .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
-        .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
-
-      let newStep;
-      if (sectionIndex === 0) {
-        newStep = 1;
-      } else if (sectionIndex === -1) {
-        newStep = ApplicationTabs.length;
-      } else {
-        newStep = sectionIndex;
-      }
-
-      setStep(newStep);
+      newStep = sectionIndex;
     }
-  }, [forcedScroll, resetForcedScrollDebounce]);
+
+    setStep(newStep);
+  }, []);
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
