@@ -24,6 +24,7 @@ export default function ResearcherInfo(props) {
     formFieldChange,
     location,
     onNihStatusUpdate,
+    nihValid,
     formData,
     researcher,
     setLabCollaboratorsCompleted,
@@ -78,7 +79,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h3('1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')),
-          span({ className: 'default-color' }, [
+          span({ className: `${nihValid ? 'default-color' : 'errored'}`, isRendered: formData.checkCollaborator !== true }, [
             'Please authenticate with ',
             a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
           ]),
@@ -88,7 +89,7 @@ export default function ResearcherInfo(props) {
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: showValidationMessages,
+              validationError: !nihValid && formData.checkCollaborator !== true,
               header: true
             })
           ]),

@@ -249,6 +249,7 @@ export const validateDARFormData = ({
   dataUseTranslations,
   irbDocument,
   collaborationLetter,
+  researcher,
   labCollaboratorsCompleted,
   internalCollaboratorsCompleted,
   externalCollaboratorsCompleted
@@ -257,5 +258,6 @@ export const validateDARFormData = ({
     researcherInfoErrors: calcResearcherInfoErrors(formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted),
     darErrors: calcDarErrors(formData, datasets, dataUseTranslations, irbDocument, collaborationLetter),
     rusErrors: calcRusErrors(formData),
+    nihValid: isNil(researcher.eraCommonsId) || formData.checkCollaborator === true,
   };
 };

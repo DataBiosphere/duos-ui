@@ -102,7 +102,6 @@ const DataAccessRequestApplicationNew = (props) => {
   const [nihValid, setNihValid] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
 
-
   const [showValidationMessages, setShowValidationMessages] = useState(false);
   const [validationMessages, setValidationMessages] = useState({researcherInfoErrors: [], darErrors: [], rusErrors: []});
   const [labCollaboratorsCompleted, setLabCollaboratorsCompleted] = useState(true);
@@ -306,14 +305,16 @@ const DataAccessRequestApplicationNew = (props) => {
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
-      internalCollaboratorsCompleted,
+      researcher,
       labCollaboratorsCompleted,
+      internalCollaboratorsCompleted,
       externalCollaboratorsCompleted,
     });
 
     setValidationMessages(validation);
     const isInvalidForm = validationFailed(validation);
     setShowValidationMessages(isInvalidForm);
+    setNihValid(validation.nihValid);
 
     if (isInvalidForm) {
       scrollToFormErrors(validation);
