@@ -112,7 +112,8 @@ describe('Data Access Request - Validation', () => {
     cy.get('#notHealth_no').click();
     cy.get('#stigmatizedDiseases_no').click();
 
-    cy.get('#btn_attemptSubmit').click();
+    cy.get('#btn_attest').click();
+    cy.get('#btn_openSubmitModal').click();
     cy.get('#btn_submit').click().then(() => {
       expect(DAR.postDar).to.have.been.calledOnce;
     });
@@ -147,7 +148,7 @@ describe('Data Access Request - Validation', () => {
   });
 
   it('Required fields get errors on submit', () => {
-    cy.get('#btn_attemptSubmit').click();
+    cy.get('#btn_attest').click();
 
     cy.get('#piName').should('have.class', 'errored');
     cy.get('#signingOfficial').should('have.class', 'errored');

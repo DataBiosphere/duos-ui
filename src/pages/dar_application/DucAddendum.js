@@ -196,7 +196,7 @@ export default function DucAddendum(props) {
 
       div({ className: 'flex flex-row', style: { justifyContent: 'flex-start', paddingTop: '4rem' }, }, [
         a({
-          id: 'btn_submit', onClick: () => doSubmit(),
+          id: 'btn_openSubmitModal', onClick: () => doSubmit(),
           className: 'button button-blue',
           style: {
             marginRight: '2rem',
