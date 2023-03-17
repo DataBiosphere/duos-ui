@@ -5,14 +5,9 @@ import { User } from '../../libs/ajax';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
-import {find, isEmpty, flow, filter, map, get, toLower} from 'lodash/fp';
-import {
-  generatePreProcessedBucketData,
-  getMatchDataForBuckets,
-  processDataUseBuckets,
-  updateFinalVote,
-  filterBucketsForUser,
-} from '../../utils/DarCollectionUtils';
+import {find, isEmpty, flow, filter, map, get, toLower, uniq, compact} from 'lodash/fp';
+import {updateFinalVote} from '../../utils/DarCollectionUtils';
+import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
@@ -103,23 +98,17 @@ export default function DarCollectionReview(props) {
     const user = Storage.getCurrentUser();
     try {
       const collection = await Collections.getCollectionById(collectionId);
-      const { dars, datasets } = collection;
       const darInfo = find((d) => !isEmpty(d.data))(collection.dars).data;
       const referenceIdForDocuments = find((d) => !isEmpty(d.referenceId))(collection.dars).referenceId;
       const researcherProfile = await User.getById(collection.createUserId);
-      const processedBuckets = await flow([
-        generatePreProcessedBucketData,
-        processDataUseBuckets,
-      ])({ dars, datasets });
-      await getMatchDataForBuckets(processedBuckets);
-      const filteredBuckets = adminPage
-        ? processedBuckets
-        : filterBucketsForUser(user, processedBuckets);
-      setDataUseBuckets(filteredBuckets);
+      // If this is NOT an admin view, we need to filter buckets by the user's DACs
+      const dacIds = adminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)));
+      const processedBuckets = await binCollectionToBuckets(collection, dacIds);
+      setDataUseBuckets(processedBuckets);
       setCollection(collection);
       setDarInfo(darInfo);
       setResearcherProfile(researcherProfile);
-      setTabs(tabsForUser(user, filteredBuckets, adminPage));
+      setTabs(tabsForUser(user, processedBuckets, adminPage));
       setIsLoading(false);
       setSubcomponentLoading(false);
       setReferenceIdForDocuments(referenceIdForDocuments);

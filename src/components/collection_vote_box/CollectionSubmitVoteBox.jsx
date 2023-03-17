@@ -16,8 +16,9 @@ const styles = {
     marginTop: '-20px'
   },
   question: {
-    marginTop: '-18px',
+    marginTop: '18px',
     fontSize: 17,
+    color: '#333F52',
   },
   content: {
     display: 'flex',

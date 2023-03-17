@@ -1,0 +1,31 @@
+/**
+Add colors for each page variant that you include.  The color key is an option of each variant
+
+// Text color for title
+.[colorKey]-color {
+  color: <> !important;
+}
+
+// Button color
+.[colorKey]-background {
+  background: <> !important;
+}
+**/
+
+/* Sample color scheme */
+.sample-color {
+  color: #ff0000 !important;
+}
+
+.sample-background {
+  background: #ff0000 !important;
+}
+
+/* Broad color scheme */
+.broad-color {
+  color: #0948B7 !important;
+}
+
+.broad-background {
+  background: #0948B7 !important;
+}

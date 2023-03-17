@@ -40,10 +40,11 @@ const styles = {
     }
   },
   slabTitle: {
-    display: 'flex'
+    display: 'flex',
+    paddingBottom: '15px',
   },
   slatTitleText: {
-    display: 'fixed',
+    display: 'flex',
     fontSize: 17,
     fontWeight: 800,
     height: '32px',
@@ -51,6 +52,11 @@ const styles = {
     color: '#333F52',
     marginTop: '-5px',
     columnGap: '2rem'
+  },
+  question: {
+    fontSize: 17,
+    color: '#333F52',
+    marginLeft: '30px',
   },
   dataUses: {},
   voteInfo: {},
@@ -107,7 +113,6 @@ export default function MultiDatasetVoteSlab(props) {
         </div>
         <div>
           <CollectionSubmitVoteBox
-            question={'Should data access be granted to this applicant?'}
             votes={currentUserVotes}
             isFinal={isChair}
             isDisabled={adminPage || readOnly || isEmpty(currentUserVotes) || !allOpenElections}
@@ -129,8 +134,15 @@ export default function MultiDatasetVoteSlab(props) {
         <table className={'layout-table'} role='presentation' style={{width:'-webkit-fill-available'}}>
           <tbody>
             <tr>
-              <td style={{width: '50%'}}><DataUseSummary/></td>
-              <td style={{width: '50%', verticalAlign: 'text-top'}}><VoteInfoSubsection/></td>
+              <td style={{width: '50%', verticalAlign: 'text-top',}}>
+                <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
+                  <span style={styles.slatTitleText}>{title}</span>
+                </div>
+                <DataUseSummary/></td>
+              <td style={{width: '50%', verticalAlign: 'text-top'}}>
+                <div style={styles.question}>
+                  <p>Should data access be granted to this applicant?</p>
+                </div><VoteInfoSubsection/></td>
             </tr>
             <tr>
               <td style={{width: '50%', verticalAlign: 'text-top'}}><ChairVoteInfo
@@ -174,9 +186,6 @@ export default function MultiDatasetVoteSlab(props) {
 
   return(
     <div style={styles.baseStyle} data-cy={'dataset-vote-slab'}>
-      <div style={styles.slabTitle} key={convertLabelToKey(get('key')(bucket))}>
-        <span style={styles.slatTitleText}>{title}</span>
-      </div>
       {!isLoading ? <div style={{display:'inline'}}>
         <DatasetDisplayTable/>
         <DatasetsRequested/>

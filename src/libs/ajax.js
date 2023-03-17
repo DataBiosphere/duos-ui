@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {cloneDeep, flow, getOr, isNil, unset} from 'lodash/fp';
+import {cloneDeep, flow, getOr, isNil, uniq, unset} from 'lodash/fp';
 import {Config} from './config';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
@@ -479,7 +479,7 @@ export const Support = {
 export const Match = {
 
   findMatchBatch: async (purposeIdsArr = []) => {
-    const purposeIds = purposeIdsArr.join(',');
+    const purposeIds = uniq(purposeIdsArr).join(',');
     const url = `${await getApiUrl()}/api/match/purpose/batch`;
     const config = Object.assign({}, Config.authOpts(), {params: { purposeIds}});
     const res = await axios.get(url, config);
@@ -762,6 +762,14 @@ export const Institution = {
   deleteInstitution: async (id) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+  }
+};
+
+export const Schema = {
+  datasetRegistrationV1: async () => {
+    const url = `${await getApiUrl()}/schemas/dataset-registration/v1`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   }
 };
 

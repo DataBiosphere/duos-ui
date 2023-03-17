@@ -21,6 +21,7 @@ export const NIHDataManagement = (props) => {
     onFileChange,
     validation,
     onValidationChange,
+    nihDataManagementRendered,
   } = props;
 
   const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(initialFormData?.alternativeDataSharingPlan === true || false);
@@ -56,6 +57,7 @@ export const NIHDataManagement = (props) => {
   };
 
   return div({
+    isRendered: nihDataManagementRendered === true,
     className: 'data-submitter-section',
   }, [
     h2('NIH Data Management & Sharing Policy Details'),
@@ -197,7 +199,6 @@ export const NIHDataManagement = (props) => {
         onValidationChange,
       }),
     ]),
-
   ]);
 };
 
