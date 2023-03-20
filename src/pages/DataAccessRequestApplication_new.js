@@ -99,7 +99,8 @@ const DataAccessRequestApplicationNew = (props) => {
     collaborationLetterName: '',
   });
 
-  const [nihValid, setNihValid] = useState(false);
+  const [nihValid, setNihValid] = useState(true);
+  const [showNihValidationError, setShowNihValidationError] = useState(false);
   const [disableOkBtn, setDisableOkButton] = useState(false);
 
   const [showValidationMessages, setShowValidationMessages] = useState(false);
@@ -311,10 +312,12 @@ const DataAccessRequestApplicationNew = (props) => {
       externalCollaboratorsCompleted,
     });
 
-    setValidationMessages(validation);
-    const isInvalidForm = validationFailed(validation);
+    const isInvalidForm = validationFailed(validation) || !nihValid;
+    setShowNihValidationError(!nihValid);
     setShowValidationMessages(isInvalidForm);
-    setNihValid(validation.nihValid);
+    setNihValid(nihValid);
+    setValidationMessages(validationMessages);
+
 
     if (isInvalidForm) {
       scrollToFormErrors(validation);
@@ -504,6 +507,7 @@ const DataAccessRequestApplicationNew = (props) => {
                 location={props.location}
                 nihValid={nihValid}
                 onNihStatusUpdate={setNihValid}
+                showNihValidationError={showNihValidationError}
                 researcher={researcher}
                 showValidationMessages={showValidationMessages}
                 allSigningOfficials={allSigningOfficials}
