@@ -23,13 +23,13 @@ export default function ResearcherInfo(props) {
     eRACommonsDestination,
     formFieldChange,
     location,
-    nihValid,
     onNihStatusUpdate,
     formData,
     researcher,
     setLabCollaboratorsCompleted,
     setInternalCollaboratorsCompleted,
     setExternalCollaboratorsCompleted,
+    showNihValidationError,
     showValidationMessages,
     validation,
     formValidationChange,
@@ -83,7 +83,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h3('1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')),
-          span({ className: 'default-color' }, [
+          span({ className: `${showNihValidationError ? 'errored' : 'default-color'}`, isRendered: formData.checkCollaborator !== true }, [
             'Please authenticate with ',
             a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
           ]),
@@ -93,7 +93,7 @@ export default function ResearcherInfo(props) {
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: nihValid !== true,
+              validationError: showNihValidationError,
               header: true
             })
           ]),
@@ -113,7 +113,8 @@ export default function ResearcherInfo(props) {
               isRendered: (completed === true && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
               Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
             ]),
-          ]),          div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
+          ]),
+          div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
             h4({ style: { marginRight: 30 } }, '1.2.2'),
             h(FormField, {
               id: 'checkNihDataOnly',
