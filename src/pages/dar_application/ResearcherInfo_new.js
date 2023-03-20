@@ -31,6 +31,8 @@ export default function ResearcherInfo(props) {
     setExternalCollaboratorsCompleted,
     showNihValidationError,
     showValidationMessages,
+    validation,
+    formValidationChange,
     ariaLevel = 2
   } = props;
 
@@ -40,6 +42,8 @@ export default function ResearcherInfo(props) {
     const emailString = !isNil(email) ? ` (${email})` : '';
     return nameString + emailString;
   };
+
+  const onValidationChange = formValidationChange;
 
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
@@ -117,8 +121,10 @@ export default function ResearcherInfo(props) {
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
+              validation: validation.checkNihDataOnly,
+              onValidationChange,
               onChange: ({key, value}) => formFieldChange({key, value}),
-              defaultValue: formData.checkNihDataOnly
+              defaultValue: formData.checkNihDataOnly,
             })
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
@@ -128,6 +134,8 @@ export default function ResearcherInfo(props) {
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
+              validation: validation.checkCollaborator,
+              onValidationChange,
               onChange: ({key, value}) => formFieldChange({key, value}),
               defaultValue: formData.checkCollaborator
             })
@@ -142,6 +150,8 @@ export default function ResearcherInfo(props) {
             title: '1.3 Principal Investigator',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
+            validation: validation.piName,
+            onValidationChange,
             onChange: ({key, value}) => formFieldChange({key, value}),
             defaultValue: formData.piName
           })
@@ -162,6 +172,8 @@ export default function ResearcherInfo(props) {
             collaboratorKey: 'labCollaborators',
             collaboratorLabel: 'Internal Lab Member',
             setCompleted: setLabCollaboratorsCompleted,
+            validation: validation.labCollaborators,
+            onValidationChange,
             showApproval: true,
             disabled: !isEmpty(darCode)
           }),
@@ -187,6 +199,8 @@ export default function ResearcherInfo(props) {
             collaboratorKey: 'internalCollaborators',
             collaboratorLabel: 'Internal Collaborator',
             setCompleted: setInternalCollaboratorsCompleted,
+            validation: validation.internalCollaborators,
+            onValidationChange,
             showApproval: false,
             disabled: !isEmpty(darCode)
           }),
@@ -201,6 +215,8 @@ export default function ResearcherInfo(props) {
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
             defaultValue: formData.signingOfficial,
+            validation: validation.signingOfficial,
+            onValidationChange,
             onChange: ({key, value}) => {
               formFieldChange({key, value});
             },
@@ -218,6 +234,8 @@ export default function ResearcherInfo(props) {
             title: '1.7 Information Technology (IT) Director',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
+            validation: validation.itDirector,
+            onValidationChange,
             onChange: ({key, value,}) => formFieldChange({key, value}),
             defaultValue: formData.itDirector
           })
@@ -245,6 +263,8 @@ export default function ResearcherInfo(props) {
               validators: [FormValidators.REQUIRED],
               ariaLevel: ariaLevel + 1,
               orientation: 'horizontal',
+              validation: validation.anvilUse,
+              onValidationChange,
               onChange: ({key, value}) => {
                 const normalizedValue = value === 'yes';
                 formFieldChange({key, value: normalizedValue});
@@ -273,6 +293,8 @@ export default function ResearcherInfo(props) {
                         toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
                         defaultValue: formData.localUse,
                         ariaLevel: ariaLevel + 2,
+                        validation: validation.localUse,
+                        onValidationChange,
                         onChange: ({ key, value }) => formFieldChange({key, value})
                       })
                     ])
@@ -286,6 +308,8 @@ export default function ResearcherInfo(props) {
                       toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
                       defaultValue: formData.cloudUse,
                       ariaLevel: ariaLevel + 2,
+                      validation: validation.cloudUse,
+                      onValidationChange,
                       onChange: ({ key, value }) => formFieldChange({key, value})
                     })
                   ])
@@ -300,6 +324,8 @@ export default function ResearcherInfo(props) {
                       validators: [FormValidators.REQUIRED],
                       disabled: !isEmpty(darCode),
                       ariaLevel: ariaLevel + 3,
+                      validation: validation.cloudProvider,
+                      onValidationChange,
                     })
                   ]),
                   div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group'}, [
@@ -310,7 +336,9 @@ export default function ResearcherInfo(props) {
                       validators: [FormValidators.REQUIRED],
                       disabled: !isNil(darCode),
                       ariaLevel: ariaLevel + 3,
-                      onChange: ({ key, value }) => formFieldChange({key, value})
+                      onChange: ({ key, value }) => formFieldChange({key, value}),
+                      validation: validation.cloudProviderType,
+                      onValidationChange,
                     })
                   ])
                 ]),
@@ -328,7 +356,9 @@ export default function ResearcherInfo(props) {
                       rows: 6,
                       maxLength: 2000,
                       ariaLevel: ariaLevel + 3,
-                      onChange: ({ key, value}) => formFieldChange({key, value})
+                      onChange: ({ key, value}) => formFieldChange({key, value}),
+                      validation: validation.cloudProviderDescription,
+                      onValidationChange,
                     })
                   ])
                 ])
@@ -357,7 +387,9 @@ export default function ResearcherInfo(props) {
             collaboratorLabel: 'External Collaborator',
             setCompleted: setExternalCollaboratorsCompleted,
             showApproval: false,
-            disabled: !isEmpty(darCode)
+            disabled: !isEmpty(darCode),
+            validation: validation.externalCollaborators,
+            onValidationChange,
           }),
         ])
       ]),
