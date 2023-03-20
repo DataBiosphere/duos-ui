@@ -14,7 +14,6 @@ const dar = {
   'createDate': 1669229413840,
   'createUser': {
     'userId': 7,
-    'dacUserId': 7,
     'email': 'Bob.Jones@prodigy.com',
     'displayName': 'Bob Jones',
     'createDate': 1668229413840,
@@ -643,7 +642,6 @@ const user = {
 
 const researcher = {
   'userId': 7,
-  'dacUserId': 7,
   'email': 'Bob.Jones@prodigy.com',
   'displayName': 'Bob Jones',
   'createDate': 1668229413840,
