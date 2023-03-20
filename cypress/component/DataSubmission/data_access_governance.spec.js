@@ -21,7 +21,7 @@ const user = {
 beforeEach(() => {
   cy.stub(DAC, 'list').returns(Promise.resolve(dacs));
   cy.stub(User, 'getMe').returns(user);
-  cy.stub(Institution, 'list').returns([{name: 'Test Instituion'}]);
+  cy.stub(Institution, 'list').returns([{name: 'Test Institution'}]);
   cy.stub(Schema, 'datasetRegistrationV1').returns({});
 });
 
