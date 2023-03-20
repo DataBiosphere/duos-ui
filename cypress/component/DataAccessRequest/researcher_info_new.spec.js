@@ -71,7 +71,6 @@ const WrappedResearcherInfo = (props) => {
 
 const user = {
   userId: 1,
-  dacUserId: 2,
   displayName: 'Cindy Crawford',
   email: 'cc@c.com'
 };

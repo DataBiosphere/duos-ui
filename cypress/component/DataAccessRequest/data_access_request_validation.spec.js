@@ -16,7 +16,6 @@ const props = {
 
 const user = {
   userId: 5,
-  dacUserId: 3,
   displayName: 'Jane Doe',
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
@@ -50,13 +49,11 @@ const datasets = [
 const userSigningOfficials = [
   {
     userId: 6,
-    dacUserId: 4,
     displayName: 'SO 1',
     email: 'so1@gmail.com'
   },
   {
     userId: 7,
-    dacUserId: 5,
     displayName: 'SO 2',
     email: 'so2@gmail.com'
   }

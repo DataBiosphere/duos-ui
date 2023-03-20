@@ -13,7 +13,6 @@ const dacs = [
 
 const user = {
   userId: 1,
-  dacUserId: 2,
   displayName: 'Cindy Crawford',
   email: 'cc@c.com'
 };
@@ -21,7 +20,7 @@ const user = {
 beforeEach(() => {
   cy.stub(DAC, 'list').returns(Promise.resolve(dacs));
   cy.stub(User, 'getMe').returns(user);
-  cy.stub(Institution, 'list').returns([{name: 'Test Instituion'}]);
+  cy.stub(Institution, 'list').returns([{name: 'Test Institution'}]);
   cy.stub(Schema, 'datasetRegistrationV1').returns({});
 });
 

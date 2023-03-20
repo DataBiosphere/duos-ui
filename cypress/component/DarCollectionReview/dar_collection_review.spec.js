@@ -14,7 +14,6 @@ const dar = {
   'createDate': 1669229413840,
   'createUser': {
     'userId': 7,
-    'dacUserId': 7,
     'email': 'Bob.Jones@prodigy.com',
     'displayName': 'Bob Jones',
     'createDate': 1668229413840,
@@ -308,7 +307,7 @@ const dar = {
             '8675': {
               'voteId': 8675,
               'vote': true,
-              'dacUserId': 4444,
+              'userId': 4444,
               'createDate': 1669062648000,
               'updateDate': 1669120753000,
               'electionId': 8888,
@@ -318,7 +317,7 @@ const dar = {
             },
             '8676': {
               'voteId': 8676,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'DAC',
@@ -326,7 +325,7 @@ const dar = {
             },
             '8677': {
               'voteId': 8677,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'Chairperson',
@@ -334,7 +333,7 @@ const dar = {
             },
             '8678': {
               'voteId': 8678,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'FINAL',
@@ -342,7 +341,7 @@ const dar = {
             },
             '8679': {
               'voteId': 8679,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'AGREEMENT',
@@ -350,7 +349,7 @@ const dar = {
             },
             '8680': {
               'voteId': 8680,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'DAC',
@@ -358,7 +357,7 @@ const dar = {
             },
             '8681': {
               'voteId': 8681,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'Chairperson',
@@ -366,7 +365,7 @@ const dar = {
             },
             '8682': {
               'voteId': 8682,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'FINAL',
@@ -374,7 +373,7 @@ const dar = {
             },
             '8683': {
               'voteId': 8683,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'AGREEMENT',
@@ -382,7 +381,7 @@ const dar = {
             },
             '8684': {
               'voteId': 8684,
-              'dacUserId': 4585,
+              'userId': 4585,
               'createDate': 1669062648000,
               'electionId': 8888,
               'type': 'DAC',
@@ -400,7 +399,7 @@ const dar = {
           'votes': {
             '8688': {
               'voteId': 8688,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'DAC',
@@ -408,7 +407,7 @@ const dar = {
             },
             '8689': {
               'voteId': 8689,
-              'dacUserId': 9988,
+              'userId': 9988,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'Chairperson',
@@ -416,7 +415,7 @@ const dar = {
             },
             '8690': {
               'voteId': 8690,
-              'dacUserId': 4585,
+              'userId': 4585,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'DAC',
@@ -424,7 +423,7 @@ const dar = {
             },
             '8685': {
               'voteId': 8685,
-              'dacUserId': 4444,
+              'userId': 4444,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'DAC',
@@ -432,7 +431,7 @@ const dar = {
             },
             '8686': {
               'voteId': 8686,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'DAC',
@@ -440,7 +439,7 @@ const dar = {
             },
             '8687': {
               'voteId': 8687,
-              'dacUserId': 11111,
+              'userId': 11111,
               'createDate': 1669062648000,
               'electionId': 1776,
               'type': 'Chairperson',
@@ -643,7 +642,6 @@ const user = {
 
 const researcher = {
   'userId': 7,
-  'dacUserId': 7,
   'email': 'Bob.Jones@prodigy.com',
   'displayName': 'Bob Jones',
   'createDate': 1668229413840,
