@@ -2,7 +2,7 @@
 
 // ********************** DUL LOGIC ********************** //
 
-import { isEmpty, isNil, isEqual, isString } from 'lodash';
+import { isEmpty, isNil, isEqual, isString, isArray } from 'lodash';
 import { FormValidators } from '../components/forms/forms';
 
 const datasetsContainDataUseFlag = (datasets, flag) => {
@@ -44,51 +44,47 @@ export const newIrbDocumentExpirationDate = () => {
 
 // ********************** DAR FORM VALIDATION ********************** //
 
-const requiredFieldMsg = (fieldName) => {
-  return `Please specify ${fieldName}.`;
+const validationError = (failed) => {
+  if (isArray(failed)) {
+    return { valid: false, failed: failed };
+  }
+
+  return { valid: false, failed: [failed] };
 };
 
-const emptyArrayMsg = (fieldNameSingular) => {
-  return `Please specify at least one ${fieldNameSingular}.`;
-};
-
-const requiredUploadMsg = (fileName) => {
-  return `Please upload ${fileName}`;
-};
-
-const mustAcceptMsg = (fieldName) => {
-  return `Please accept ${fieldName}`;
+const requiredError = {
+  valid: false,
+  failed: ['required']
 };
 
 const isStringEmpty = (str) => {
   return isNil(str) || (isString(str) && str.trim() === '');
 };
 
-export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) => {
-  const errors = [];
+export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=true}) => {
+  const errors = {};
 
   if (isStringEmpty(collaborator.name)) {
-    errors.push('Must specify the name of the collaborator.');
+    errors.name = requiredError;
   }
 
   if (isStringEmpty(collaborator.eraCommonsId)) {
-    errors.push('Must specify the eRA Commons ID of the collaborator.');
+    errors.eraCommonsId = requiredError;
   }
 
   if (isStringEmpty(collaborator.title)) {
-    errors.push('Must specify the title of the collaborator.');
+    errors.title = requiredError;
   }
 
   if (isStringEmpty(collaborator.email)) {
-    errors.push('Must specify the email of the collaborator.');
-  } else {
-    var testEmail = FormValidators.EMAIL.isValid(collaborator.email);
-    if(testEmail === false) errors.push(FormValidators.EMAIL.msg);
+    errors.email = requiredError;
+  } else if (!FormValidators.EMAIL.isValid(collaborator.email)) {
+    errors.email = validationError('email');
   }
 
-  if (needsApproval) {
+  if (needsApproverStatus) {
     if (isEmpty(collaborator.approverStatus)) {
-      errors.push('Must specify the Designated Download/Approval status.');
+      errors.approverStatus = requiredError;
     }
   }
 
@@ -98,53 +94,59 @@ export const computeCollaboratorErrors = ({collaborator, needsApproval=true}) =>
 
 // errors for the Researcher Info section
 const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted) => {
-  const errors = [];
+  const errors = {};
 
   if (isStringEmpty(formData.researcher)) {
-    errors.push(requiredFieldMsg('Researcher'));
+    errors.researcher = requiredError;
   }
 
   if (formData.checkCollaborator !== true && formData.nihValid === false) {
-    errors.push('Please provide your NIH eRA Commons ID.');
+    errors.nihEraId = requiredError;
   }
 
   if (isStringEmpty(formData.piName)) {
-    errors.push(requiredFieldMsg('the Principal Investigator'));
+    errors.piName = requiredError;
   }
 
   if (isStringEmpty(formData.signingOfficial)) {
-    errors.push(requiredFieldMsg('your Institutional Signing Official'));
+    errors.signingOfficial = requiredError;
   }
 
   if (isStringEmpty(formData.itDirector)) {
-    errors.push(requiredFieldMsg('your Information Technology (IT) Director'));
+    errors.itDirector = requiredError;
   }
 
   if (!labCollaboratorsCompleted) {
-    errors.push('Please fill out and save Step 1.4: Lab Collaborators.');
+    errors.labCollaboratorsCompleted = requiredError;
   }
 
   if (!internalCollaboratorsCompleted) {
-    errors.push('Please fill out and save Step 1.5: Internal Collaborators.');
+    errors.internalCollaborators = requiredError;
   }
 
   if (!externalCollaboratorsCompleted) {
-    errors.push('Please fill out and save Step 1.9: External Collaborators.');
+    errors.externalCollaborators = requiredError;
   }
 
 
 
 
   if(isNil(formData.anvilUse)) {
-    errors.push(requiredFieldMsg('Cloud Use Statement'));
+    errors.anvilUse = requiredError;
   } else {
     if(!formData.anvilUse && !formData.localUse && !formData.cloudUse) {
-      errors.push('You must request data storage and analysis on cloud computing, local computing, or both.');
-    }
-    if(formData.cloudUse && (isStringEmpty(formData.cloudProvider) || isStringEmpty(formData.cloudProviderType) || isStringEmpty(formData.cloudProviderDescription))){
-      errors.push('Please fill out more information about your cloud provider.');
+      errors.dataStorageAndAnalysis = requiredError; // one of them must be selected, this makes the whole section red until selected.
     }
 
+    if(formData.cloudUse && (isStringEmpty(formData.cloudProvider))){
+      errors.cloudProvider = requiredError;
+    }
+    if(formData.cloudUse && (isStringEmpty(formData.cloudProviderType))){
+      errors.cloudProviderType = requiredError;
+    }
+    if(formData.cloudUse && (isStringEmpty(formData.cloudProviderDescription))){
+      errors.cloudProviderDescription = requiredError;
+    }
   }
 
   return errors;
@@ -154,50 +156,50 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
 
 // errors for the Data Access Request section
 const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, collaborationLetter) => {
-  const errors = [];
+  const errors = {};
 
   if (isEmpty(formData.datasetIds) || isEmpty(datasets)) {
-    errors.push(emptyArrayMsg('dataset'));
+    errors.datasetIds = requiredError;
   }
 
   if (isStringEmpty(formData.projectTitle)) {
-    errors.push(requiredFieldMsg('Project Title'));
+    errors.projectTitle = requiredError;
   }
 
   if (isStringEmpty(formData.rus)) {
-    errors.push(requiredFieldMsg('Research Use Statement'));
+    errors.rus = requiredError;
   }
 
   if (isNil(formData.diseases)) {
-    errors.push(requiredFieldMsg('if your research investigates a specific disease'));
+    errors.diseases = requiredError;
   }
 
   if (formData.diseases === true && isEmpty(formData.ontologies)) {
-    errors.push(requiredFieldMsg('the diseases studied'));
+    errors.ontologies = requiredError;
   }
 
   if (isStringEmpty(formData.nonTechRus)) {
-    errors.push(requiredFieldMsg('Non-Technical Summary'));
+    errors.nonTechRus = requiredError;
   }
 
   if ((needsCollaborationLetter(datasets) && (isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation'])))) {
-    errors.push(requiredUploadMsg('Collaboration Letter'));
+    errors.collaborationLetterLocation = requiredError;
   }
 
   if ((needsIrbApprovalDocument(datasets) && (isNil(irbDocument) && isEmpty(formData['irbDocumentLocation'])))) {
-    errors.push(requiredUploadMsg('IRB Approval Document'));
+    errors.irbDocumentLocation = requiredError;
   }
 
   if ((needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement)) {
-    errors.push(mustAcceptMsg('GSO Acknowledgement'));
+    errors.gsoAcknowledgement = requiredError;
   }
 
   if ((needsPubAcknowledgement(datasets) && !formData.pubAcknowledgement)) {
-    errors.push(mustAcceptMsg('PUB Acknowledgement'));
+    errors.pubAcknowledgement = requiredError;
   }
 
   if ((needsDsAcknowledgement(dataUseTranslations) && !formData.dsAcknowledgement)) {
-    errors.push(mustAcceptMsg('DS Acknowledgement'));
+    errors.dsAcknowledgement = requiredError;
   }
 
 
@@ -210,6 +212,7 @@ const requiredRusFields = [
   'forProfit',
   'oneGender',
   'pediatric',
+  'vulnerablePopulation',
   'illegalBehavior',
   'sexualDiseases',
   'psychiatricTraits',
@@ -219,17 +222,19 @@ const requiredRusFields = [
 
 // errors for the RUS section
 const calcRusErrors = (formData) => {
-  const errors = [];
+  const errors = {};
 
   if (formData.oneGender === true) {
     if (['M', 'F'].includes(formData.gender) === false) {
-      errors.push(requiredFieldMsg('Gender'));
+      errors.gender = requiredError;
     }
   }
 
-  if (requiredRusFields.some((field) => isNil(formData[field]))) {
-    errors.push('Please answer all research purpose questions.');
-  }
+  requiredRusFields.forEach((field) => {
+    if (isNil(formData[field])) {
+      errors[field] = requiredError;
+    }
+  });
 
   return errors;
 };
@@ -238,9 +243,9 @@ const calcRusErrors = (formData) => {
  * Takes in DAR Application FormData
  * Returns object:
  * {
- *  researcherInfoErrors: []string,
- *  darErrors: []string,
- *  rusErrors: []string,
+ *  researcherInfoErrors: { field: validation{} },
+ *  darErrors: { field: validation{} },
+ *  rusErrors: { field: validation{} },
  * }
  */
 export const validateDARFormData = ({
