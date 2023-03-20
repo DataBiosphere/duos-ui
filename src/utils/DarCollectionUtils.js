@@ -88,10 +88,10 @@ export const extractDacRPVotesFromBucket = (bucket, user, adminPage) => {
 
 
 // Applies filter to arrays of votes grouped by election and
-// only keeps arrays where at least one vote has the dacUserId of the provided user
+// only keeps arrays where at least one vote has the userId of the provided user
 const filterVoteArraysForUsersDac = (voteArrays = [], user) => {
   const userIdsOfVotes = (votes) => {
-    return map(vote => vote.dacUserId)(votes);
+    return map(vote => vote.userId)(votes);
   };
 
   return filter(
@@ -111,7 +111,7 @@ export const extractUserDataAccessVotesFromBucket = (bucket, user, isChair = fal
       filteredData.memberVotes)
   )(votes);
   return !adminPage ?
-    filter((vote) => vote.dacUserId === user.userId)(output) :
+    filter((vote) => vote.userId === user.userId)(output) :
     filter((vote) => !isNil(vote.vote))(output);
 };
 
@@ -129,14 +129,14 @@ export const extractUserRPVotesFromBucket = (bucket, user, isChair = false, admi
   )(votes);
 
   output = !adminPage ?
-    filter(vote => vote.dacUserId === user.userId)(output) :
+    filter(vote => vote.userId === user.userId)(output) :
     filter(vote => !isNil(vote.vote))(output);
   return output;
 };
 
 //collapses votes by the same user with same vote (true/false) into a singular vote with appended rationales / dates if different
 export const collapseVotesByUser = (votes) => {
-  const votesGroupedByUser = groupBy(vote => vote.dacUserId)(cloneDeep(votes));
+  const votesGroupedByUser = groupBy(vote => vote.userId)(cloneDeep(votes));
   return flatMap(userIdKey => {
     const votesByUser = votesGroupedByUser[userIdKey];
     const collapsedVotes = collapseVotes({votes: votesByUser});
@@ -152,7 +152,7 @@ const collapseVotes = ({votes}) => {
     const lastUpdate = vote.updateDate || vote.createDate;
     if (isNil(matchingVote)) {
       collapsedVotes[`${vote.vote}`] = {
-        dacUserId: vote.dacUserId,
+        userId: vote.userId,
         vote: vote.vote,
         voteId: vote.voteId,
         displayName: vote.displayName,
@@ -176,7 +176,7 @@ const convertToVoteObjects = ({collapsedVotes}) => {
     const collapsedDate = appendAll(map(date => formatDate(date))(collapsedVote.lastUpdates));
 
     return {
-      dacUserId: collapsedVote.dacUserId,
+      userId: collapsedVote.userId,
       vote: collapsedVote.vote,
       voteId: collapsedVote.voteId,
       displayName: collapsedVote.displayName,

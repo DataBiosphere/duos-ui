@@ -58,13 +58,13 @@ const tabsForUser = (user, buckets, adminPage = false) => {
     flatMap(b => b.votes),
     flatMap(v => v.dataAccess),
     flatMap(da => da.memberVotes),
-    filter(v => v.dacUserId === user.userId)
+    filter(v => v.userId === user.userId)
   )(dataAccessBuckets);
   const myChairVotes = flow(
     flatMap(b => b.votes),
     flatMap(v => v.dataAccess),
     flatMap(da => da.chairpersonVotes),
-    filter(v => v.dacUserId === user.userId)
+    filter(v => v.userId === user.userId)
   )(dataAccessBuckets);
   const updatedTabs = { applicationInformation: 'Application Information' };
   if (!isEmpty(myMemberVotes)) {
