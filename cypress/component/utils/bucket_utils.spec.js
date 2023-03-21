@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import {binCollectionToBuckets, isEqualDataUse} from '../../../src/utils/BucketUtils';
+import {binCollectionToBuckets, isEqualDataUse, shouldAbstain} from '../../../src/utils/BucketUtils';
 import {filter, find, forEach, isEmpty, isUndefined} from 'lodash/fp';
 import {Match} from '../../../src/libs/ajax';
 
@@ -555,10 +555,41 @@ describe('BucketUtils', () => {
     const dataUses = [
       {'generalUse': true, 'recontactMay': true},
       {'generalUse': true, 'recontactMust': true},
-      {'generalUse': true, 'manualReview': true}
+      {'generalUse': true, 'recontactingDataSubjects': true}
     ];
     expect(isEqualDataUse(dataUses[0], dataUses[1])).to.eq(true);
     expect(isEqualDataUse(dataUses[0], dataUses[2])).to.eq(true);
     expect(isEqualDataUse(dataUses[1], dataUses[2])).to.eq(true);
+  });
+
+  it('correctly determines matchable data use objects', async () => {
+    const dataUses = [
+      {'generalUse': true, 'recontactMay': true},
+      {'generalUse': true, 'recontactMust': true},
+      {'generalUse': true, 'collaboratorRequired': true}
+    ];
+    forEach(d => {
+      expect(shouldAbstain(d)).to.eq(false);
+    })(dataUses);
+  });
+
+  it('correctly determines unmatchable data use objects', async () => {
+    const dataUses = [
+      {'generalUse': true, 'otherRestrictions': true},
+      {'generalUse': true, 'other': 'true'},
+      {'generalUse': true, 'secondaryOther': 'true'},
+      {'generalUse': true, 'illegalBehavior': true},
+      {'generalUse': true, 'illegalBehavior': true},
+      {'generalUse': true, 'addiction': true},
+      {'generalUse': true, 'sexualDiseases': true},
+      {'generalUse': true, 'stigmatizeDiseases': true},
+      {'generalUse': true, 'vulnerablePopulations': true},
+      {'generalUse': true, 'psychologicalTraits': true},
+      {'generalUse': true, 'nonBiomedical': true},
+      {'generalUse': true, 'manualReview': true}
+    ];
+    forEach(d => {
+      expect(shouldAbstain(d)).to.eq(true);
+    })(dataUses);
   });
 });
