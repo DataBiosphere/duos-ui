@@ -28,8 +28,6 @@ const customStyles = {
   }
 };
 
-Modal.setAppElement('#root');
-
 export const ConfirmationDialog = (props) => {
 
   const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props;

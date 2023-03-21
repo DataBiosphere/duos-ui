@@ -23,28 +23,28 @@ const bucket1 = {
     {
       rp: {
         finalVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         chairpersonVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         memberVotes: [
-          {dacUserId: 100, displayName: 'Joe', electionId: 100, voteId: 1, createDate: 1},
-          {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
-          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
+          {userId: 100, displayName: 'Joe', electionId: 100, voteId: 1, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
+          {userId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
         ]
       },
       dataAccess: {
         finalVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: false},
+          {userId: 200, displayName: 'Sarah', vote: false},
         ],
         chairpersonVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: false},
+          {userId: 200, displayName: 'Sarah', vote: false},
         ],
         memberVotes: [
-          {dacUserId: 100, displayName: 'Joe', rationale: 'test', electionId: 101, voteId: 1, createDate: 1},
-          {dacUserId: 200, displayName: 'Sarah', vote: false, rationale: 'rationale', electionId: 101, voteId: 2, createDate: 1},
-          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
+          {userId: 100, displayName: 'Joe', rationale: 'test', electionId: 101, voteId: 1, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: false, rationale: 'rationale', electionId: 101, voteId: 2, createDate: 1},
+          {userId: 300, displayName: 'Matt', vote: true, electionId: 101, voteId: 3, createDate: 1}
         ]
       }
     },
@@ -66,26 +66,26 @@ const bucket2 = {
     {
       rp: {
         finalVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         chairpersonVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, createDate: 1},
+          {userId: 200, displayName: 'Sarah', vote: true, createDate: 1},
         ],
         memberVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
-          {dacUserId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
+          {userId: 200, displayName: 'Sarah', vote: true, electionId: 100, voteId: 2, createDate: 1},
+          {userId: 300, displayName: 'Matt', vote: true, electionId: 100, voteId: 3, createDate: 1}
         ]
       },
       dataAccess: {
         finalVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true},
+          {userId: 200, displayName: 'Sarah', vote: true},
         ],
         chairpersonVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true},
+          {userId: 200, displayName: 'Sarah', vote: true},
         ],
         memberVotes: [
-          {dacUserId: 200, displayName: 'Sarah', vote: true, rationale: 'rationale2', electionId: 102, voteId: 4, createDate: 1},
-          {dacUserId: 300, displayName: 'Matt', electionId: 102, voteId: 5, createDate: 1}
+          {userId: 200, displayName: 'Sarah', vote: true, rationale: 'rationale2', electionId: 102, voteId: 4, createDate: 1},
+          {userId: 300, displayName: 'Matt', electionId: 102, voteId: 5, createDate: 1}
         ]
       }
     },

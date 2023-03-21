@@ -21,6 +21,8 @@ const props = {
   researcher: {},
   showValidationMessages: false,
   nextPage: () => {},
+  validation: {},
+  formValidationChange: () => {},
   formData: {
     cloudProviderType: '',
     cloudProvider: '',
@@ -69,7 +71,6 @@ const WrappedResearcherInfo = (props) => {
 
 const user = {
   userId: 1,
-  dacUserId: 2,
   displayName: 'Cindy Crawford',
   email: 'cc@c.com'
 };
@@ -221,53 +222,5 @@ describe('Researcher Info', () => {
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('not.exist');
-  });
-
-  it('validates collaborator form values properly', () => {
-    mount(<WrappedResearcherInfo {...props}/>);
-    cy.get(`[dataCy='internal-lab-staff']`)
-      .find('.collaborator-list-component')
-      .find('.row')
-      .find('.button').click();
-    // no values entered, should have 5 errors
-    cy.get('.collaborator-form-add-save-button').click();
-    // should not save without all fields
-    cy.get('#0_summary').should('not.exist');
-    cy.get('[dataCy=internal-lab-staff]')
-      .find('.collaborator-list-component')
-      .find('.row')
-      .find('.form-group').should('exist');
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.length', 5);
-    // Download/Approval status not entered
-    cy.get('#0_collaboratorName').type('John Doe{enter}');
-    cy.get('#0_collaboratorEraCommonsId').type('12345{enter}');
-    cy.get('#0_collaboratorTitle').type('Analyst{enter}');
-    cy.get('#0_collaboratorEmail').type('JohnDoe@gmail.com{enter}');
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Must specify the Designated Download/Approval status.');
-    // name not entered
-    cy.get('#0_collaboratorName').clear();
-    cy.get('#0_collaboratorApproval_yes').check();
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Must specify the name of the collaborator.');
-    // EraCommonsId not entered
-    cy.get('#0_collaboratorName').type('John Doe{enter}');
-    cy.get('#0_collaboratorEraCommonsId').clear();
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Must specify the eRA Commons ID of the collaborator.');
-    // Title not entered
-    cy.get('#0_collaboratorEraCommonsId').type('12345{enter}');
-    cy.get('#0_collaboratorTitle').clear();
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Must specify the title of the collaborator.');
-    // Email not entered
-    cy.get('#0_collaboratorTitle').type('Analyst{enter}');
-    cy.get('#0_collaboratorEmail').clear();
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Must specify the email of the collaborator.');
-    // Invalid Email entered
-    cy.get('#0_collaboratorEmail').type('JohnDoe@gmail{enter}');
-    cy.get('.collaborator-form-add-save-button').click();
-    cy.get('[dataCy=collaborator-form-errors]').children().should('have.text', 'Please enter a valid email address (e.g., person@example.com)');
   });
 });

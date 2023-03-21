@@ -4,7 +4,6 @@ import { FormFieldTypes, FormField, FormValidators } from '../../../components/f
 import { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { v4 as uuidV4} from 'uuid';
-import { DarValidationMessages } from '../DarValidationMessages';
 import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
 import DeleteCollaboratorModal from './DeleteCollaboratorModal';
 
@@ -12,6 +11,9 @@ export default function CollaboratorForm (props) {
   const {
     index,
     collaborator,
+    collaboratorKey,
+    validation,
+    onCollaboratorValidationChange
   } = props;
 
   const [name, setName] = useState('');
@@ -20,8 +22,11 @@ export default function CollaboratorForm (props) {
   const [title, setTitle] = useState('');
   const [approverStatus, setApproverStatus] = useState('');
   const [uuid, setUuid] = useState('');
-  const [collaboratorValidationErrors, setCollaboratorValidationErrors] = useState([]);
   const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
+
+  const onValidationChange = ({ key, validation }) => {
+    onCollaboratorValidationChange({ index, key, validation });
+  };
 
   useEffect(() => {
     if (!isEmpty(collaborator)) {
@@ -53,31 +58,30 @@ export default function CollaboratorForm (props) {
       key: `collaborator-item-${uuid}`}, [
       // name and eraCommonsId
       div({ className: 'row'}, [
-        h(DarValidationMessages,
-          {
-            validationMessages: collaboratorValidationErrors,
-            showValidationMessages: true,
-            datacy: 'collaborator-form-errors',
-          }),
+
         h2([`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`]),
         h(FormField, {
           id: index+'_collaboratorName',
-          name: `collaborator-${uuid}-name`,
+          name: `name`,
           title: `${props.collaboratorLabel} Name`,
           defaultValue: name,
           placeholder: 'Firstname Lastname',
           validators: [FormValidators.REQUIRED],
+          validation: validation.name,
+          onValidationChange,
           onChange: ({value}) => {
             setName(value);
           },
         }),
         h(FormField, {
           id: index+'_collaboratorEraCommonsId',
-          name: `collaborator-${uuid}-eraCommonsId`,
+          name: `eraCommonsId`,
           title: `${props.collaboratorLabel} eRA Commons ID`,
           defaultValue: eraCommonsId,
           placeholder: 'eRA Commons ID',
           validators: [FormValidators.REQUIRED],
+          validation: validation.eraCommonsId,
+          onValidationChange,
           onChange: ({value}) => {
             setEraCommonsId(value);
           },
@@ -87,22 +91,26 @@ export default function CollaboratorForm (props) {
       div({ className: 'row'}, [
         h(FormField, {
           id: index+'_collaboratorTitle',
-          name: `collaborator-${uuid}-title`,
+          name: `title`,
           title: `${props.collaboratorLabel} Title`,
           defaultValue: title,
           placeholder: 'Title',
           validators: [FormValidators.REQUIRED],
+          validation: validation.title,
+          onValidationChange,
           onChange: ({value}) => {
             setTitle(value);
           },
         }),
         h(FormField, {
           id: index+'_collaboratorEmail',
-          name: `collaborator-${uuid}-email`,
+          name: `email`,
           title: `${props.collaboratorLabel} Email`,
           defaultValue: email,
           placeholder: 'Email',
-          validators: [FormValidators.REQUIRED],
+          validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+          validation: validation.email,
+          onValidationChange,
           onChange: ({value}) => {
             setEmail(value);
           },
@@ -113,7 +121,7 @@ export default function CollaboratorForm (props) {
         h(FormField, {
           id: index+'_collaboratorApproval',
           type: FormFieldTypes.RADIOGROUP,
-          name: `collaborator-${uuid}-approval`,
+          name: `approverStatus`,
           description: `Are you requesting permission for this member of the Internal Lab Staff to be given
                     Designated Download/Approval" status? This indication should be limited to individuals who
                     the PI designates to download data and/or share the requested data with other Internal Lab Staff
@@ -127,6 +135,8 @@ export default function CollaboratorForm (props) {
           defaultValue: (approverStatus === true || approverStatus ===  'yes') ? 'yes'
             : (approverStatus === false || approverStatus === 'no') ? 'no'
               : undefined,
+          validation: validation.approverStatus,
+          onValidationChange,
           onChange: ({value}) => {
             setApproverStatus(value);
           }
@@ -156,14 +166,17 @@ export default function CollaboratorForm (props) {
         ]),
         // Add/Save Button
         div({
+          id: `collaborator-${collaboratorKey}-add-save`,
           className: 'collaborator-form-add-save-button f-left btn',
           role: 'button',
           onClick: () => {
             let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
-            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproval: props.showApproval});
-            const valid = errors.length === 0;
-            setCollaboratorValidationErrors(errors);
-            valid && saveUpdate();
+            const errors = computeCollaboratorErrors({collaborator: newCollaborator, needsApproverStatus: props.showApproval});
+            const valid = Object.keys(errors).length === 0;
+            onCollaboratorValidationChange({ index, validation: errors });
+            if (valid) {
+              saveUpdate();
+            }
           },
         },
         [`${isNil(collaborator) ? 'Add' : 'Save'}`]),

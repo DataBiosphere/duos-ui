@@ -20,7 +20,7 @@ const dar_collection = {
           'votes': {
             '1': {
               'voteId': 1,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 1,
               'rationale': '',
               'type': 'Chairperson',
@@ -28,7 +28,7 @@ const dar_collection = {
             },
             '2': {
               'voteId': 2,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 1,
               'rationale': '',
               'type': 'DAC',
@@ -36,7 +36,7 @@ const dar_collection = {
             },
             '3': {
               'voteId': 3,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 1,
               'rationale': '',
               'type': 'Final',
@@ -52,7 +52,7 @@ const dar_collection = {
           'votes': {
             '4': {
               'voteId': 4,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 2,
               'rationale': '',
               'type': 'Chairperson',
@@ -60,7 +60,7 @@ const dar_collection = {
             },
             '5': {
               'voteId': 5,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 2,
               'rationale': '',
               'type': 'DAC',
@@ -68,7 +68,7 @@ const dar_collection = {
             },
             '6': {
               'voteId': 6,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 2,
               'rationale': '',
               'type': 'Final',
@@ -84,7 +84,7 @@ const dar_collection = {
           'votes': {
             '11': {
               'voteId': 11,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 3,
               'rationale': '',
               'type': 'Chairperson',
@@ -92,7 +92,7 @@ const dar_collection = {
             },
             '22': {
               'voteId': 22,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 3,
               'rationale': '',
               'type': 'DAC',
@@ -100,7 +100,7 @@ const dar_collection = {
             },
             '33': {
               'voteId': 33,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 3,
               'rationale': '',
               'type': 'Final',
@@ -116,7 +116,7 @@ const dar_collection = {
           'votes': {
             '44': {
               'voteId': 44,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 4,
               'rationale': '',
               'type': 'Chairperson',
@@ -124,7 +124,7 @@ const dar_collection = {
             },
             '55': {
               'voteId': 55,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 4,
               'rationale': '',
               'type': 'DAC',
@@ -132,7 +132,7 @@ const dar_collection = {
             },
             '66': {
               'voteId': 66,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 4,
               'rationale': '',
               'type': 'Final',
@@ -148,7 +148,7 @@ const dar_collection = {
           'votes': {
             '111': {
               'voteId': 111,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 3,
               'rationale': '',
               'type': 'Chairperson',
@@ -156,7 +156,7 @@ const dar_collection = {
             },
             '222': {
               'voteId': 222,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 5,
               'rationale': '',
               'type': 'DAC',
@@ -164,7 +164,7 @@ const dar_collection = {
             },
             '333': {
               'voteId': 333,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 5,
               'rationale': '',
               'type': 'Final',
@@ -180,7 +180,7 @@ const dar_collection = {
           'votes': {
             '444': {
               'voteId': 444,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 6,
               'rationale': '',
               'type': 'Chairperson',
@@ -188,7 +188,7 @@ const dar_collection = {
             },
             '555': {
               'voteId': 555,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 6,
               'rationale': '',
               'type': 'DAC',
@@ -196,7 +196,7 @@ const dar_collection = {
             },
             '666': {
               'voteId': 666,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 6,
               'rationale': '',
               'type': 'Final',
@@ -212,7 +212,7 @@ const dar_collection = {
           'votes': {
             '1111': {
               'voteId': 1111,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 7,
               'rationale': '',
               'type': 'Chairperson',
@@ -220,7 +220,7 @@ const dar_collection = {
             },
             '2222': {
               'voteId': 2222,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 7,
               'rationale': '',
               'type': 'DAC',
@@ -228,7 +228,7 @@ const dar_collection = {
             },
             '3333': {
               'voteId': 3333,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 7,
               'rationale': '',
               'type': 'Final',
@@ -244,7 +244,7 @@ const dar_collection = {
           'votes': {
             '4444': {
               'voteId': 4444,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 8,
               'rationale': '',
               'type': 'Chairperson',
@@ -252,7 +252,7 @@ const dar_collection = {
             },
             '5555': {
               'voteId': 5555,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 8,
               'rationale': '',
               'type': 'DAC',
@@ -260,7 +260,7 @@ const dar_collection = {
             },
             '6666': {
               'voteId': 6666,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 8,
               'rationale': '',
               'type': 'Final',
@@ -276,7 +276,7 @@ const dar_collection = {
           'votes': {
             '11111': {
               'voteId': 11111,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 9,
               'rationale': '',
               'type': 'Chairperson',
@@ -284,7 +284,7 @@ const dar_collection = {
             },
             '22222': {
               'voteId': 22222,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 9,
               'rationale': '',
               'type': 'DAC',
@@ -292,7 +292,7 @@ const dar_collection = {
             },
             '33333': {
               'voteId': 33333,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 9,
               'rationale': '',
               'type': 'Final',
@@ -308,7 +308,7 @@ const dar_collection = {
           'votes': {
             '44444': {
               'voteId': 44444,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 10,
               'rationale': '',
               'type': 'Chairperson',
@@ -316,7 +316,7 @@ const dar_collection = {
             },
             '55555': {
               'voteId': 55555,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 10,
               'rationale': '',
               'type': 'DAC',
@@ -324,7 +324,7 @@ const dar_collection = {
             },
             '66666': {
               'voteId': 66666,
-              'dacUserId': 1,
+              'userId': 1,
               'electionId': 10,
               'rationale': '',
               'type': 'Final',

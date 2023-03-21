@@ -97,12 +97,12 @@ describe('openCollectionFn', () => {
 });
 
 describe('extractDacDataAccessVotesFromBucket', () => {
-  it('returns empty list if data access votes in this bucket do not have the dacUserId of the given user', () => {
+  it('returns empty list if data access votes in this bucket do not have the userId of the given user', () => {
     const bucket = {
       votes: [
         {
           dataAccess: {
-            memberVotes: [{dacUserId: 2}, {dacUserId: 3}]
+            memberVotes: [{userId: 2}, {userId: 3}]
           }
         }
       ]
@@ -118,19 +118,19 @@ describe('extractDacDataAccessVotesFromBucket', () => {
       votes: [
         {
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}, {dacUserId: 3}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}, {userId: 3}],
           }
         },
         {
           dataAccess: {
             memberVotes: [
-              {vote: true, dacUserId: 4},
-              {vote: false, rationale: 'rationale', dacUserId: 1}],
+              {vote: true, userId: 4},
+              {vote: false, rationale: 'rationale', userId: 1}],
           }
         },
         {
           dataAccess: {
-            memberVotes: [{vote: true, dacUserId: 5}, {dacUserId: 6}],
+            memberVotes: [{vote: true, userId: 5}, {userId: 6}],
           }
         }
       ]
@@ -139,13 +139,13 @@ describe('extractDacDataAccessVotesFromBucket', () => {
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(5);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.deep.include({dacUserId: 3});
-    expect(votes).to.deep.include({vote: true, dacUserId: 4});
-    expect(votes).to.deep.include({vote: false, rationale: 'rationale', dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 5});
-    expect(votes).to.not.deep.include({dacUserId: 6});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: false, userId: 2});
+    expect(votes).to.deep.include({userId: 3});
+    expect(votes).to.deep.include({vote: true, userId: 4});
+    expect(votes).to.deep.include({vote: false, rationale: 'rationale', userId: 1});
+    expect(votes).to.not.deep.include({vote: true, userId: 5});
+    expect(votes).to.not.deep.include({userId: 6});
   });
 
   it('only returns data access votes', () => {
@@ -153,10 +153,10 @@ describe('extractDacDataAccessVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{vote: true, userId: 1}, {userId: 2}],
           },
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 3}],
           }
         },
       ]
@@ -165,10 +165,10 @@ describe('extractDacDataAccessVotesFromBucket', () => {
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: false, dacUserId: 3});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 2});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: false, userId: 3});
+    expect(votes).to.not.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 2});
   });
 
   it('only returns member votes', () => {
@@ -176,8 +176,8 @@ describe('extractDacDataAccessVotesFromBucket', () => {
       votes: [
         {
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 3}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 2}],
           }
         },
       ]
@@ -186,20 +186,20 @@ describe('extractDacDataAccessVotesFromBucket', () => {
 
     const votes = extractDacDataAccessVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: false, dacUserId: 3});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 2});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: false, userId: 3});
+    expect(votes).to.not.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 2});
   });
 });
 
 describe('extractDacRPVotesFromBucket', () => {
-  it('returns empty list if rp votes in this bucket do not have the dacUserId of the given user', () => {
+  it('returns empty list if rp votes in this bucket do not have the userId of the given user', () => {
     const bucket = {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 2}, {dacUserId: 3}]
+            memberVotes: [{userId: 2}, {userId: 3}]
           }
         }
       ]
@@ -215,19 +215,19 @@ describe('extractDacRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}, {dacUserId: 3}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}, {userId: 3}],
           }
         },
         {
           rp: {
             memberVotes: [
-              {vote: true, dacUserId: 4},
-              {vote: false, rationale: 'rationale', dacUserId: 1}],
+              {vote: true, userId: 4},
+              {vote: false, rationale: 'rationale', userId: 1}],
           }
         },
         {
           rp: {
-            memberVotes: [{vote: true, dacUserId: 5}, {dacUserId: 6}],
+            memberVotes: [{vote: true, userId: 5}, {userId: 6}],
           }
         }
       ]
@@ -236,13 +236,13 @@ describe('extractDacRPVotesFromBucket', () => {
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(5);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.deep.include({dacUserId: 3});
-    expect(votes).to.deep.include({vote: true, dacUserId: 4});
-    expect(votes).to.deep.include({vote: false, rationale: 'rationale', dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 5});
-    expect(votes).to.not.deep.include({dacUserId: 6});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: false, userId: 2});
+    expect(votes).to.deep.include({userId: 3});
+    expect(votes).to.deep.include({vote: true, userId: 4});
+    expect(votes).to.deep.include({vote: false, rationale: 'rationale', userId: 1});
+    expect(votes).to.not.deep.include({vote: true, userId: 5});
+    expect(votes).to.not.deep.include({userId: 6});
   });
 
   it('only returns rp votes', () => {
@@ -250,10 +250,10 @@ describe('extractDacRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{vote: true, userId: 1}, {userId: 2}],
           },
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 3}],
           }
         },
       ]
@@ -262,10 +262,10 @@ describe('extractDacRPVotesFromBucket', () => {
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.not.deep.include({dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: false, dacUserId: 3});
-    expect(votes).to.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.deep.include({dacUserId: 2});
+    expect(votes).to.not.deep.include({userId: 1});
+    expect(votes).to.not.deep.include({vote: false, userId: 3});
+    expect(votes).to.deep.include({vote: true, userId: 1});
+    expect(votes).to.deep.include({userId: 2});
   });
 
   it('only returns member votes', () => {
@@ -273,8 +273,8 @@ describe('extractDacRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 3}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{userId: 1}, {vote: false, userId: 3}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 2}],
           }
         },
       ]
@@ -283,10 +283,10 @@ describe('extractDacRPVotesFromBucket', () => {
 
     const votes = extractDacRPVotesFromBucket(bucket, user);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: false, dacUserId: 3});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 2});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: false, userId: 3});
+    expect(votes).to.not.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 2});
   });
 });
 
@@ -296,15 +296,15 @@ describe('extractUserDataAccessVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{vote: false, dacUserId: 1}],
+            memberVotes: [{vote: false, userId: 1}],
           },
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{userId: 1}, {userId: 2}],
           },
         },
         {
           dataAccess: {
-            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            memberVotes: [{vote: true, userId: 1}, {userId: 3}],
           },
         },
       ]
@@ -313,10 +313,10 @@ describe('extractUserDataAccessVotesFromBucket', () => {
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 
   it('only returns member votes if isChair is false', () => {
@@ -324,9 +324,9 @@ describe('extractUserDataAccessVotesFromBucket', () => {
       votes: [
         {
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
-            finalVotes: [{vote: true, dacUserId: 1}]
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 3}],
+            finalVotes: [{vote: true, userId: 1}]
           },
         },
       ]
@@ -335,10 +335,10 @@ describe('extractUserDataAccessVotesFromBucket', () => {
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(1);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.not.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({vote: false, userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 
   it('only returns chairperson votes if isChair is true', () => {
@@ -346,9 +346,9 @@ describe('extractUserDataAccessVotesFromBucket', () => {
       votes: [
         {
           dataAccess: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
-            finalVotes: [{vote: true, dacUserId: 1}]
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 3}],
+            finalVotes: [{vote: true, userId: 1}]
           },
         },
       ]
@@ -357,10 +357,10 @@ describe('extractUserDataAccessVotesFromBucket', () => {
 
     const votes = extractUserDataAccessVotesFromBucket(bucket, user, true);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 1});
+    expect(votes).to.not.deep.include({vote: false, userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 });
 
@@ -370,15 +370,15 @@ describe('extractUserRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 1}, {dacUserId: 2}],
+            memberVotes: [{userId: 1}, {userId: 2}],
           },
           dataAccess: {
-            memberVotes: [{vote: false, dacUserId: 1}],
+            memberVotes: [{vote: false, userId: 1}],
           },
         },
         {
           rp: {
-            memberVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}],
+            memberVotes: [{vote: true, userId: 1}, {userId: 3}],
           },
         },
       ]
@@ -387,10 +387,10 @@ describe('extractUserRPVotesFromBucket', () => {
 
     const votes = extractUserRPVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(2);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 
   it('only returns member votes if isChair is false', () => {
@@ -398,8 +398,8 @@ describe('extractUserRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}]
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 3}]
           },
         },
       ]
@@ -408,10 +408,10 @@ describe('extractUserRPVotesFromBucket', () => {
 
     const votes = extractUserRPVotesFromBucket(bucket, user, false);
     expect(votes).to.have.lengthOf(1);
-    expect(votes).to.deep.include({dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: true, dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.deep.include({userId: 1});
+    expect(votes).to.not.deep.include({vote: true, userId: 1});
+    expect(votes).to.not.deep.include({vote: false, userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 
   it('only returns chairperson votes if isChair is true', () => {
@@ -419,8 +419,8 @@ describe('extractUserRPVotesFromBucket', () => {
       votes: [
         {
           rp: {
-            memberVotes: [{dacUserId: 1}, {vote: false, dacUserId: 2}],
-            chairpersonVotes: [{vote: true, dacUserId: 1}, {dacUserId: 3}]
+            memberVotes: [{userId: 1}, {vote: false, userId: 2}],
+            chairpersonVotes: [{vote: true, userId: 1}, {userId: 3}]
           },
         },
       ]
@@ -429,51 +429,51 @@ describe('extractUserRPVotesFromBucket', () => {
 
     const votes = extractUserRPVotesFromBucket(bucket, user, true);
     expect(votes).to.have.lengthOf(1);
-    expect(votes).to.not.deep.include({dacUserId: 1});
-    expect(votes).to.not.deep.include({vote: false, dacUserId: 2});
-    expect(votes).to.not.deep.include({dacUserId: 3});
+    expect(votes).to.not.deep.include({userId: 1});
+    expect(votes).to.not.deep.include({vote: false, userId: 2});
+    expect(votes).to.not.deep.include({userId: 3});
   });
 });
 
 describe('collapseVotesByUser', () => {
   it('does not collapse votes by different users', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, voteId: 1},
-      {dacUserId: 2, displayName: 'John', vote: true, voteId: 2},
-      {dacUserId: 3, displayName: 'Lauren', vote: true, voteId: 3},
+      {userId: 1, displayName: 'John', vote: true, voteId: 1},
+      {userId: 2, displayName: 'John', vote: true, voteId: 2},
+      {userId: 3, displayName: 'Lauren', vote: true, voteId: 3},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 2, voteId: 2, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 3, voteId: 3, displayName: 'Lauren', vote: true, rationale: null, lastUpdated: null});
   });
 
   it('does not collapse votes by the same user with different vote values', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, voteId: 1},
-      {dacUserId: 1, displayName: 'John', vote: false, voteId: 2},
-      {dacUserId: 1, displayName: 'John', voteId: 3},
+      {userId: 1, displayName: 'John', vote: true, voteId: 1},
+      {userId: 1, displayName: 'John', vote: false, voteId: 2},
+      {userId: 1, displayName: 'John', voteId: 3},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(3);
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null});
-    expect(collapsedVotes).to.deep.include({dacUserId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 1, voteId: 1, displayName: 'John', vote: true, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 1, voteId: 2, displayName: 'John', vote: false, rationale: null, lastUpdated: null});
+    expect(collapsedVotes).to.deep.include({userId: 1, voteId: 3, displayName: 'John', vote: undefined, rationale: null, lastUpdated: null});
   });
 
   it('collapses votes by the same user without appending identical dates / rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 2},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
-      dacUserId: 1,
+      userId: 1,
       voteId: 1,
       displayName: 'John',
       vote: true,
@@ -484,15 +484,15 @@ describe('collapseVotesByUser', () => {
 
   it('collapses votes by the same user and appends different dates', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000', voteId: 2},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '30000', voteId: 2},
     ];
     const collapsedVotes = collapseVotesByUser(votes);
     const formattedDate = `${formatDate('20000')}\n${formatDate('30000')}\n`;
 
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
-      dacUserId: 1,
+      userId: 1,
       voteId: 1,
       displayName: 'John',
       vote: true,
@@ -503,14 +503,14 @@ describe('collapseVotesByUser', () => {
 
   it('collapses votes by the same user and appends different rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale1', createDate: '20000', voteId: 1},
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000', voteId: 2},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale1', createDate: '20000', voteId: 1},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale2', createDate: '20000', voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
-      dacUserId: 1,
+      userId: 1,
       voteId: 1,
       displayName: 'John',
       vote: true,
@@ -521,14 +521,14 @@ describe('collapseVotesByUser', () => {
 
   it('does not append null dates / rationales', () => {
     const votes = [
-      {dacUserId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
-      {dacUserId: 1, displayName: 'John', vote: true, voteId: 2},
+      {userId: 1, displayName: 'John', vote: true, rationale: 'rationale', createDate: '20000', voteId: 1},
+      {userId: 1, displayName: 'John', vote: true, voteId: 2},
     ];
 
     const collapsedVotes = collapseVotesByUser(votes);
     expect(collapsedVotes).to.have.lengthOf(1);
     expect(collapsedVotes).to.deep.include({
-      dacUserId: 1,
+      userId: 1,
       voteId: 1,
       vote: true,
       displayName: 'John',

@@ -71,6 +71,8 @@ export default function DataAccessRequest(props) {
     uploadedCollaborationLetter,
     updateCollaborationLetter,
     setDatasets,
+    validation,
+    formValidationChange,
     ariaLevel = 2
   } = props;
 
@@ -78,6 +80,11 @@ export default function DataAccessRequest(props) {
 
   const onChange = ({key, value}) => {
     formFieldChange({key, value});
+  };
+
+
+  const onValidationChange = ({key, validation}) => {
+    formValidationChange({key, validation});
   };
 
   const primaryChange = ({key, value}) => {
@@ -121,6 +128,8 @@ export default function DataAccessRequest(props) {
           isMulti: true,
           title: '2.1 Select Dataset(s)',
           validators: [FormValidators.REQUIRED],
+          validation: validation.datasetIds,
+          onValidationChange,
           description: 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:',
           defaultValue: datasets?.map((ds) => formatSearchDataset(ds)),
           selectConfig: {
@@ -143,11 +152,13 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           title: '2.2 Descriptive Title of Project',
           validators: [FormValidators.REQUIRED],
+          validation: validation.projectTitle,
           description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
           id: 'projectTitle',
           placeholder: 'Project Title',
           defaultValue: formData.projectTitle,
           onChange,
+          onValidationChange,
         }),
 
         div({
@@ -178,6 +189,8 @@ export default function DataAccessRequest(props) {
           maxLength: 2200,
           ariaLevel: ariaLevel + 3,
           defaultValue: formData.rus,
+          validation: validation.rus,
+          onValidationChange,
           onChange,
         }),
 
@@ -187,6 +200,8 @@ export default function DataAccessRequest(props) {
           type: FormFieldTypes.YESNORADIOGROUP,
           orientation: 'horizontal',
           defaultValue: formData.diseases,
+          validation: validation.diseases,
+          onValidationChange,
           onChange: primaryChange,
         }),
 
@@ -208,6 +223,8 @@ export default function DataAccessRequest(props) {
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
             defaultValue: formData.ontologies.map(formatOntologyForSelect),
+            validation: validation.ontologies,
+            onValidationChange,
             onChange: ({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)}),
           }),
         ]),
@@ -221,6 +238,8 @@ export default function DataAccessRequest(props) {
             id: 'hmb',
             orientation: 'horizontal',
             defaultValue: formData.hmb,
+            validation: validation.hmb,
+            onValidationChange,
             onChange: primaryChange,
           }),
         ]),
@@ -234,6 +253,8 @@ export default function DataAccessRequest(props) {
             id: 'poa',
             orientation: 'horizontal',
             defaultValue: formData.poa,
+            validation: validation.poa,
+            onValidationChange,
             onChange: primaryChange,
           }),
         ]),
@@ -247,6 +268,8 @@ export default function DataAccessRequest(props) {
             id: 'methods',
             orientation: 'horizontal',
             defaultValue: formData.methods,
+            validation: validation.methods,
+            onValidationChange,
             onChange: primaryChange,
           }),
         ]),
@@ -259,6 +282,8 @@ export default function DataAccessRequest(props) {
             id: 'otherText',
             placeholder: 'Please specify...',
             defaultValue: formData.otherText,
+            validation: validation.otherText,
+            onValidationChange,
             onChange,
           }),
         ]),
@@ -274,6 +299,8 @@ export default function DataAccessRequest(props) {
           maxLength: 1100,
           ariaLevel: ariaLevel + 3,
           defaultValue: formData.nonTechRus,
+          validation: validation.nonTechRus,
+          onValidationChange,
           onChange,
         }),
 
@@ -290,6 +317,8 @@ export default function DataAccessRequest(props) {
           toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.',
           defaultValue: formData.gsoAcknowledgement,
           onChange,
+          validation: validation.gsoAcknowledgement,
+          onValidationChange,
         }),
 
         h(FormField, {
@@ -298,6 +327,8 @@ export default function DataAccessRequest(props) {
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.',
           defaultValue: formData.pubAcknowledgement,
+          validation: validation.pubAcknowledgement,
+          onValidationChange,
           onChange,
         }),
 
@@ -307,6 +338,8 @@ export default function DataAccessRequest(props) {
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
           defaultValue: formData.dsAcknowledgement,
+          validation: validation.dsAcknowledgement,
+          onValidationChange,
           onChange,
         }),
 
@@ -329,6 +362,8 @@ export default function DataAccessRequest(props) {
               defaultValue: uploadedIrbDocument || {
                 name: formData.irbDocumentName,
               },
+              validation: validation.irbDocument,
+              onValidationChange,
               onChange: ({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration),
             }),
           ]),
@@ -353,6 +388,8 @@ export default function DataAccessRequest(props) {
             name: formData.collaborationLetterName,
           },
           id: 'collaborationLetter',
+          validation: validation.collaborationLetter,
+          onValidationChange,
           description: 'One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here.',
           onChange: ({value}) => updateCollaborationLetter(value),
         }),

@@ -8,7 +8,6 @@ import DataSubmissionStudyInformation from '../../../src/components/data_submiss
 let propCopy;
 const user = {
   userId: 1,
-  dacUserId: 2,
   displayName: 'Cindy Crawford',
   email: 'cc@c.com'
 };
