@@ -133,17 +133,17 @@ export default function DucAddendum(props) {
             style: columnStyles
           },
           {
-            data: dataset.datasetName,
+            data: dataset.datasetName.replaceAll("_", "_\u200b"),
             id: dataset.dataSetId,
             style: columnStyles
           },
           {
-            data: 'Unknown',
+            data: '',
             id: dataset.dataSetId,
             style: columnStyles
           },
           {
-            data: 'Unknown',
+            data: '',
             id: dataset.dataSetId,
             style: columnStyles
           }
