@@ -284,14 +284,8 @@ const DataAccessRequestApplicationNew = (props) => {
     return assign(irbUpdate.data, collaborationUpdate.data);
   };
 
-  const updateDraftResponse = (formattedFormData, referenceId) => {
-    let darPartialResponse;
-    if (!isNil(referenceId) && !isEmpty(referenceId)) {
-      darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
-    } else {
-      darPartialResponse = DAR.postDarDraft(formattedFormData);
-    }
-    return darPartialResponse;
+  const updateDraftResponse = async (formattedFormData, referenceId) => {
+    return await DAR.updateDarDraft(formattedFormData, referenceId);
   };
 
 
@@ -368,7 +362,7 @@ const DataAccessRequestApplicationNew = (props) => {
     formattedFormData.userId = userId;
 
     try {
-      let referenceId = formattedFormData.referenceId;
+      let referenceId = formData.referenceId;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
 
