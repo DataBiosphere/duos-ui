@@ -1,4 +1,24 @@
-import {any, compact, filter, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, toLower, uniq, values} from 'lodash/fp';
+import {
+  any,
+  compact,
+  filter,
+  findIndex,
+  flatMap,
+  flow,
+  forEach,
+  get,
+  getOr,
+  includes,
+  isEmpty,
+  isEqual,
+  isUndefined,
+  join,
+  map,
+  pick,
+  toLower,
+  uniq,
+  values
+} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -9,7 +29,7 @@ import {processMatchData} from './VoteUtils';
  *
  * Step 1: Map all datasets to distinct buckets based on data use
  *      a: Pull out the data use translations for the bucket's dataUse
- *      b: Set the bucket key/label from the dataUse + dataset ids
+ *      b: Populate translated dataUses
  * Step 2: Pull out match data based on dataset that the match data applies to.
  * Step 3: Pull all elections for those datasets into the buckets
  * Step 4: Pull all votes up to a top level bucket field for easier iteration
@@ -17,6 +37,7 @@ import {processMatchData} from './VoteUtils';
  * Step 6: Coalesce the algorithm decision per bucket
  * Step 7: Prepend an RP Vote bucket for the DAC to vote on the research purpose
  *
+ * @public
  * @param collection The full Data Access Request Collection
  * @param dacIds An optional array of dac ids. If provided, bucket contents will be filtered to datasets matching
  *        the provided dac ids. This will extend to elections and votes as well.
@@ -69,7 +90,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       } else {
         // If it does exist, merge this dataset into that bucket
         forEach(b => {
-          if (isEqual(b.dataUse)(dataset.dataUse)) {
+          if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
             b.datasets.push(dataset);
             b.datasetIds.push(dataset.dataSetId);
           }
@@ -169,7 +190,7 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 /**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Four potential cases:
+ * Three potential cases:
  *  1. No matches
  *  2. Exactly one match or N matches that are all the same - easy case
  *  3. N matches - not all the same - very confusing case
@@ -182,7 +203,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 
   // We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const unmatchable = isOther(bucket.dataUse);
+  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
@@ -209,7 +230,12 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     };
   } else {
     // Different match values? Provide a custom message
-    return {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: bucket.key};
+    return {
+      result: 'Unable to determine a system match',
+      createDate: undefined,
+      failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+      id: bucket.key
+    };
   }
 };
 
@@ -218,13 +244,39 @@ const calculateAlgorithmResultForBucket = (bucket) => {
  * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
  * @private
  * @param dataUse
- * @returns TRUE|FALSE
+ * @returns boolean
  */
 const isOther = (dataUse) => {
   const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
   const primaryOther = !isEmpty(getOr('')('other')(dataUse));
   const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
   return otherRestrictions || primaryOther || secondaryOther;
+};
+
+/**
+ * Calculate abstention for a data use. There are a number of cases where there should
+ * not be an algorithm decision if a field is true, including any "Other" state.
+ * @param dataUse
+ * @returns boolean
+ */
+export const shouldAbstain = (dataUse) => {
+  const abstainFields = [
+    'addiction',
+    'collaboratorRequired',
+    'ethicsApprovalRequired',
+    'gender',
+    'geneticStudiesOnly',
+    'geographicalRestrictions',
+    'illegalBehavior',
+    'manualReview',
+    'nonBiomedical',
+    'pediatric',
+    'psychologicalTraits',
+    'publicationResults',
+    'sexualDiseases',
+    'stigmatizeDiseases',
+    'vulnerablePopulations'];
+  return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields);
 };
 
 /**
@@ -247,9 +299,9 @@ const createRpVoteStructureFromBuckets = (buckets) => {
   )(buckets);
 
   forEach(vArray => {
-    let rpVoteGroup =  {
+    let rpVoteGroup = {
       chairpersonVotes: [],
-      memberVotes : [],
+      memberVotes: [],
       finalVotes: []
     };
     forEach(v => {
@@ -271,4 +323,49 @@ const createRpVoteStructureFromBuckets = (buckets) => {
   })(rpElectionVoteArrays);
 
   return rpVotes;
+};
+
+/**
+ * Constrain the equality check to a limited number of fields. These
+ * fields are the ones that are used in algorithm decisions and are what
+ * determine whether it falls into a Data Use bucket. We limit the fields
+ * because there are quite a few that have no impact on decision-making.
+ * Fields like recontactMay and recontactMust, and others, are not relevant
+ * to DAC decisions.
+ *
+ * @public
+ * @param a Data Use
+ * @param b Data Use
+ * @returns {boolean}
+ */
+export const isEqualDataUse = (a, b) => {
+  const fields = ['addiction',
+    'aggregateResearch',
+    'collaboratorRequired',
+    'controlSetOption',
+    'ethicsApprovalRequired',
+    'gender',
+    'geneticStudiesOnly',
+    'geographicalRestrictions',
+    'illegalBehavior',
+    'manualReview',
+    'methodsResearch',
+    'nonBiomedical',
+    'other',
+    'otherRestrictions',
+    'pediatric',
+    'psychologicalTraits',
+    'publicationResults',
+    'secondaryOther',
+    'sexualDiseases',
+    'stigmatizeDiseases',
+    'vulnerablePopulations',
+    'commercialUse',
+    'diseaseRestrictions',
+    'generalUse',
+    'hmbResearch',
+    'populationOriginsAncestry'];
+  const aCopy = pick(fields)(a);
+  const bCopy = pick(fields)(b);
+  return isEqual(aCopy)(bCopy);
 };
