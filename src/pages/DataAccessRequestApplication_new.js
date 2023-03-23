@@ -525,6 +525,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <ResearcherInfo
                 completed={!isNil(get('institutionId', researcher))}
+                readOnlyMode={isAttested}
                 darCode={formData.darCode}
                 formData={formData}
                 validation={formValidation.researcherInfoErrors}
@@ -546,6 +547,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <DataAccessRequest
                 formData={formData}
+                readOnlyMode={isAttested}
                 datasets={datasets}
                 validation={formValidation.darErrors}
                 formValidationChange={(val) => formValidationChange('darErrors', val)}
@@ -563,6 +565,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <ResearchPurposeStatement
                 darCode={formData.darCode}
+                readOnlyMode={isAttested}
                 validation={formValidation.rusErrors}
                 formValidationChange={(val) => formValidationChange('rusErrors', val)}
                 formFieldChange={formFieldChange}
@@ -573,6 +576,8 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <DataUseAgreements
                 darCode={formData.darCode}
+                cancelAttest={() => setIsAttested(false)}
+                isAttested={isAttested}
                 attest={attemptSubmit}
                 save={() => setShowDialogSave(true)}
               />

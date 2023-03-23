@@ -72,6 +72,7 @@ export default function DataAccessRequest(props) {
     updateCollaborationLetter,
     setDatasets,
     validation,
+    readOnlyMode,
     formValidationChange,
     ariaLevel = 2
   } = props;
@@ -124,6 +125,7 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           type: FormFieldTypes.SELECT,
           id: 'datasetIds',
+          disabled: readOnlyMode,
           isAsync: true,
           isMulti: true,
           title: '2.1 Select Dataset(s)',
@@ -151,6 +153,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           title: '2.2 Descriptive Title of Project',
+          disabled: readOnlyMode,
           validators: [FormValidators.REQUIRED],
           validation: validation.projectTitle,
           description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
@@ -171,6 +174,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'rus',
+          disabled: readOnlyMode,
           type: FormFieldTypes.TEXTAREA,
           title: '2.3 Research Use Statement (RUS)',
           validators: [FormValidators.REQUIRED],
@@ -197,6 +201,7 @@ export default function DataAccessRequest(props) {
         h(FormField, {
           title: h4({}, 'Is the primary purpose of this research to investigate a specific disease(s)?'),
           id: 'diseases',
+          disabled: readOnlyMode,
           type: FormFieldTypes.YESNORADIOGROUP,
           orientation: 'horizontal',
           defaultValue: formData.diseases,
@@ -214,6 +219,7 @@ export default function DataAccessRequest(props) {
         }, [
           h(FormField, {
             type: FormFieldTypes.SELECT,
+            disabled: readOnlyMode,
             isMulti: true,
             isCreatable: false,
             isAsync: true,
@@ -234,6 +240,7 @@ export default function DataAccessRequest(props) {
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
             title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
             id: 'hmb',
             orientation: 'horizontal',
@@ -249,6 +256,7 @@ export default function DataAccessRequest(props) {
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
             title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
             id: 'poa',
             orientation: 'horizontal',
@@ -264,6 +272,7 @@ export default function DataAccessRequest(props) {
         }, [
           h(FormField, {
             type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
             title: h4({}, 'Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?'),
             id: 'methods',
             orientation: 'horizontal',
@@ -279,6 +288,7 @@ export default function DataAccessRequest(props) {
         }, [
           h(FormField, {
             title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
+            disabled: readOnlyMode,
             id: 'otherText',
             placeholder: 'Please specify...',
             defaultValue: formData.otherText,
@@ -290,6 +300,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'nonTechRus',
+          disabled: readOnlyMode,
           type: FormFieldTypes.TEXTAREA,
           title: '2.4 Non-Technical Summary',
           validators: [FormValidators.REQUIRED],
@@ -312,6 +323,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'gsoAcknowledgement',
+          disabled: readOnlyMode,
           type: FormFieldTypes.CHECKBOX,
           isRendered: needsGsoAcknowledgement(datasets),
           toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.',
@@ -323,6 +335,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'pubAcknowledgement',
+          disabled: readOnlyMode,
           isRendered: needsPubAcknowledgement(datasets),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.',
@@ -334,6 +347,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           id: 'dsAcknowledgement',
+          disabled: readOnlyMode,
           isRendered: needsDsAcknowledgement(dataUseTranslations),
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
@@ -358,6 +372,7 @@ export default function DataAccessRequest(props) {
           div({}, [
             h(FormField, {
               type: FormFieldTypes.FILE,
+              disabled: readOnlyMode,
               id: 'irbDocument',
               defaultValue: uploadedIrbDocument || {
                 name: formData.irbDocumentName,
@@ -383,6 +398,7 @@ export default function DataAccessRequest(props) {
 
         h(FormField, {
           type: FormFieldTypes.FILE,
+          disabled: readOnlyMode,
           isRendered: needsCollaborationLetter(datasets),
           defaultValue: uploadedCollaborationLetter ||{
             name: formData.collaborationLetterName,
