@@ -566,7 +566,7 @@ describe('BucketUtils', () => {
     const dataUses = [
       {'generalUse': true, 'recontactMay': true},
       {'generalUse': true, 'recontactMust': true},
-      {'generalUse': true, 'collaboratorRequired': true}
+      {'generalUse': true, 'genomicSummaryResults': true}
     ];
     forEach(d => {
       expect(shouldAbstain(d)).to.eq(false);
@@ -575,18 +575,24 @@ describe('BucketUtils', () => {
 
   it('correctly determines unmatchable data use objects', async () => {
     const dataUses = [
-      {'generalUse': true, 'otherRestrictions': true},
-      {'generalUse': true, 'other': 'true'},
-      {'generalUse': true, 'secondaryOther': 'true'},
-      {'generalUse': true, 'illegalBehavior': true},
-      {'generalUse': true, 'illegalBehavior': true},
       {'generalUse': true, 'addiction': true},
+      {'generalUse': true, 'collaboratorRequired': true},
+      {'generalUse': true, 'ethicsApprovalRequired': true},
+      {'generalUse': true, 'gender': 'F'},
+      {'generalUse': true, 'gender': 'M'},
+      {'generalUse': true, 'geographicalRestrictions': 'true'},
+      {'generalUse': true, 'illegalBehavior': true},
+      {'generalUse': true, 'manualReview': true},
+      {'generalUse': true, 'nonBiomedical': true},
+      {'generalUse': true, 'other': 'true'},
+      {'generalUse': true, 'otherRestrictions': true},
+      {'generalUse': true, 'pediatric': true},
+      {'generalUse': true, 'psychologicalTraits': true},
+      {'generalUse': true, 'publicationResults': true},
+      {'generalUse': true, 'secondaryOther': 'true'},
       {'generalUse': true, 'sexualDiseases': true},
       {'generalUse': true, 'stigmatizeDiseases': true},
-      {'generalUse': true, 'vulnerablePopulations': true},
-      {'generalUse': true, 'psychologicalTraits': true},
-      {'generalUse': true, 'nonBiomedical': true},
-      {'generalUse': true, 'manualReview': true}
+      {'generalUse': true, 'vulnerablePopulations': true}
     ];
     forEach(d => {
       expect(shouldAbstain(d)).to.eq(true);

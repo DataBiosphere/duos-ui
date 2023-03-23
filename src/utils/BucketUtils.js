@@ -1,4 +1,24 @@
-import {any, compact, filter, findIndex, flatMap, flow, forEach, get, getOr, includes, isEmpty, isEqual, isUndefined, join, map, pick, toLower, uniq, values} from 'lodash/fp';
+import {
+  any,
+  compact,
+  filter,
+  findIndex,
+  flatMap,
+  flow,
+  forEach,
+  get,
+  getOr,
+  includes,
+  isEmpty,
+  isEqual,
+  isUndefined,
+  join,
+  map,
+  pick,
+  toLower,
+  uniq,
+  values
+} from 'lodash/fp';
 import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
@@ -210,7 +230,12 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     };
   } else {
     // Different match values? Provide a custom message
-    return {result: 'Unable to determine a system match', createDate: undefined, failureReasons: ['Algorithm matched both true and false for this combination of datasets'], id: bucket.key};
+    return {
+      result: 'Unable to determine a system match',
+      createDate: undefined,
+      failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+      id: bucket.key
+    };
   }
 };
 
@@ -235,8 +260,22 @@ const isOther = (dataUse) => {
  * @returns boolean
  */
 export const shouldAbstain = (dataUse) => {
-  const abstainFields = ['illegalBehavior', 'addiction', 'sexualDiseases', 'stigmatizeDiseases',
-    'vulnerablePopulations', 'psychologicalTraits', 'nonBiomedical', 'manualReview'];
+  const abstainFields = [
+    'addiction',
+    'collaboratorRequired',
+    'ethicsApprovalRequired',
+    'gender',
+    'geneticStudiesOnly',
+    'geographicalRestrictions',
+    'illegalBehavior',
+    'manualReview',
+    'nonBiomedical',
+    'pediatric',
+    'psychologicalTraits',
+    'publicationResults',
+    'sexualDiseases',
+    'stigmatizeDiseases',
+    'vulnerablePopulations'];
   return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields);
 };
 
@@ -260,9 +299,9 @@ const createRpVoteStructureFromBuckets = (buckets) => {
   )(buckets);
 
   forEach(vArray => {
-    let rpVoteGroup =  {
+    let rpVoteGroup = {
       chairpersonVotes: [],
-      memberVotes : [],
+      memberVotes: [],
       finalVotes: []
     };
     forEach(v => {
@@ -300,11 +339,32 @@ const createRpVoteStructureFromBuckets = (buckets) => {
  * @returns {boolean}
  */
 export const isEqualDataUse = (a, b) => {
-  const fields = ['generalUse', 'hmbResearch', 'diseaseRestrictions', 'populationOriginsAncestry', 'commercialUse',
-    'methodsResearch', 'aggregateResearch', 'controlSetOption', 'gender', 'pediatric', 'ethicsApprovalRequired',
-    'collaboratorRequired', 'publicationResults', 'otherRestrictions', 'other', 'secondaryOther', 'illegalBehavior',
-    'addiction', 'sexualDiseases', 'stigmatizeDiseases', 'vulnerablePopulations', 'psychologicalTraits',
-    'nonBiomedical', 'manualReview', 'geneticStudiesOnly'];
+  const fields = ['addiction',
+    'aggregateResearch',
+    'collaboratorRequired',
+    'controlSetOption',
+    'ethicsApprovalRequired',
+    'gender',
+    'geneticStudiesOnly',
+    'geographicalRestrictions',
+    'illegalBehavior',
+    'manualReview',
+    'methodsResearch',
+    'nonBiomedical',
+    'other',
+    'otherRestrictions',
+    'pediatric',
+    'psychologicalTraits',
+    'publicationResults',
+    'secondaryOther',
+    'sexualDiseases',
+    'stigmatizeDiseases',
+    'vulnerablePopulations',
+    'commercialUse',
+    'diseaseRestrictions',
+    'generalUse',
+    'hmbResearch',
+    'populationOriginsAncestry'];
   const aCopy = pick(fields)(a);
   const bCopy = pick(fields)(b);
   return isEqual(aCopy)(bCopy);
