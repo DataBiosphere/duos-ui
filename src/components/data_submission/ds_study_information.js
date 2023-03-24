@@ -94,6 +94,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'piName',
       title: 'Principal Investigator Name',
+      validators: [FormValidators.REQUIRED],
       validation: validation.piName,
       onChange,
       onValidationChange
