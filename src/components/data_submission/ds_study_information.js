@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { h, h2, div, span } from 'react-hyperscript-helpers';
+import { h, h2, div } from 'react-hyperscript-helpers';
 import { isEmpty } from 'lodash/fp';
 
 import { Notifications } from '../../libs/utils';
@@ -171,18 +171,17 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'publicVisibility',
       title: 'Public Visibility',
       validators: [FormValidators.REQUIRED],
-      type: FormFieldTypes.SLIDER,
+      type: FormFieldTypes.RADIOGROUP,
       defaultValue: true,
-      description: `Please select if you would like your dataset
-        to be publicly visible for the requesters to see and select
-        for an access request`,
-      toggleText: span({ style: {
-        fontWeight: 'normal',
-        fontStyle: 'italic'
-      }}, ['Visible']),
+      description: 'Please select one of the following data use permissions for your dataset',
+      name: 'publicVisibility',
+      options: [
+        { name: 'yes', text: 'Yes, I want my dataset info to be visible and available for requests' },
+        { name: 'no', text: 'No, I do not want my dataset info to be visible and available for requests' }
+      ],
       onChange,
       validation: validation.publicVisibility,
       onValidationChange
-    })
+    }),
   ]);
 }
