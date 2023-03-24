@@ -102,7 +102,7 @@ export default function DataSubmissionStudyInformation(props) {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterName',
       title: 'Data Submitter Name ',
-      helpText: `The individual completing this form will be saved with the study.`,
+      description: `The individual completing this form will be saved with the study.`,
       defaultValue: user?.displayName,
       validation: validation.dataSubmitterName,
       disabled: true,
