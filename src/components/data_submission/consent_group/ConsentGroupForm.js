@@ -11,7 +11,8 @@ export const ConsentGroupForm = (props) => {
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
     validation,
-    onValidationChange
+    onValidationChange,
+    disableDelete,
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
@@ -96,6 +97,7 @@ export const ConsentGroupForm = (props) => {
       a({
         id: idx+'_deleteConsentGroup',
         onClick: () => deleteConsentGroup(),
+        disabled: disableDelete,
       }, [
         span({
           className: 'cm-icon-button glyphicon glyphicon-trash',
