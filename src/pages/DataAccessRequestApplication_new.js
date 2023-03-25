@@ -295,8 +295,8 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
 
-  const scrollToFormErrors = (validation, nihValid) => {
-    if (!isEmpty(validation.researcherInfoErrors) || nihValid !== true) {
+  const scrollToFormErrors = (validation, eraCommonsIdValid) => {
+    if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid) {
       goToStep(1);
     } else if (!isEmpty(validation.darErrors)) {
       goToStep(2);
@@ -336,11 +336,13 @@ const DataAccessRequestApplicationNew = (props) => {
 
     setFormValidation(validation);
 
-    const isInvalidForm = validationFailed(validation) || nihValid !== true;
-    setShowNihValidationError(nihValid !== true);
+    const eraCommonsIdValid = nihValid === true || formData.checkCollaborator === true;
+
+    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid;
+    setShowNihValidationError(!eraCommonsIdValid);
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, nihValid);
+      scrollToFormErrors(validation, eraCommonsIdValid);
     } else {
       setIsAttested(true);
       addDucAddendumTab();

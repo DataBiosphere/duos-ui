@@ -95,6 +95,7 @@ export default function ResearcherInfo(props) {
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
               validationError: showNihValidationError,
+              readOnly: readOnlyMode,
               header: true
             })
           ]),
