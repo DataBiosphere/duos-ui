@@ -201,7 +201,7 @@ export const ConsentGroupSummary = (props) => {
           }
         }, 'Data Location'),
         p({}, [
-          (!isNil(consentGroup.dataLocation)? consentGroup.dataLocation.join(', ') : ''),
+          consentGroup.dataLocation,
         ]),
         input({
           disabled: true,

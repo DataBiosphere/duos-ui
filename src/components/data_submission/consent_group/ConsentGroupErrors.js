@@ -12,7 +12,7 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
     errors.push('Please select a primary consent group.');
   }
 
-  if (isNil(consentGroup.url) || consentGroup.url === '') {
+  if ((isNil(consentGroup.url) || consentGroup.url === '') && consentGroup.dataLocation !== 'Not Determined') {
     errors.push('Please specify the URL of the data.');
   } else {
     try {
@@ -26,7 +26,7 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
     errors.push('Please specify the name of the consent group');
   }
 
-  if (isNil(consentGroup.dataLocation) || consentGroup.dataLocation.length === 0) {
+  if (isNil(consentGroup.dataLocation) || consentGroup.dataLocation === '') {
     errors.push('Please specify data location (or specify \'Not Determined\')');
   }
 
@@ -36,6 +36,10 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
 
   if (!isNil(consentGroup.otherPrimary) && consentGroup.otherPrimary == '') {
     errors.push('Please specify the \'Other\' primary consent.');
+  }
+
+  if (isNil(consentGroup.dataAccessCommitteeId) && consentGroup.openAccess !== true) {
+    errors.push('Please specify the DAC ID');
   }
 
   if (!isNil(consentGroup.otherSecondary) && consentGroup.otherSecondary == '') {
@@ -48,6 +52,12 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
 
   if (isNil(consentGroup.fileTypes) || isEmpty(consentGroup.fileTypes)) {
     errors.push('Please specify the file type.');
+  } else {
+    consentGroup.fileTypes.forEach((ft) => {
+      if (isNil(ft.numberOfParticipants)) {
+        errors.push('Please specify the number of participants.')
+      }
+    })
   }
 
   return errors;

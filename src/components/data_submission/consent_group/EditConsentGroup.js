@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
 import { DAR } from '../../../libs/ajax';
+import { cloneDeep } from 'lodash';
 
 export const selectedPrimaryGroup = (consentGroup) => {
   if (!isNil(consentGroup.generalResearchUse) && consentGroup.generalResearchUse) {
@@ -60,6 +61,13 @@ export const EditConsentGroup = (props) => {
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
   const [morText, setMORText] = useState(consentGroup.mor);
 
+
+  useEffect(() => {
+    console.log(consentGroup.dataLocation);
+  }, [consentGroup.dataLocation]);
+  useEffect(() => {
+    console.log(consentGroup);
+  }, [consentGroup])
   const onChange = ({ key, value }) => {
     setConsentGroup({
       ...consentGroup,
@@ -68,6 +76,18 @@ export const EditConsentGroup = (props) => {
       },
     });
   };
+
+  const onBatchChange = (...updates) => {
+    setConsentGroup((cg) => {
+      const consentGroup = cloneDeep(cg);
+
+      updates.forEach(({key, value}) => {
+        consentGroup[key] = value;
+      });
+
+      return consentGroup;
+    })
+  }
 
   const onPrimaryChange = ({ key, value }) => {
     setConsentGroup({
@@ -446,8 +466,6 @@ export const EditConsentGroup = (props) => {
         id: idx+'_dataLocation',
         name: 'dataLocation',
         type: FormFieldTypes.SELECT,
-        isMulti: true,
-        exclusiveValues: ['Not Determined'],
         selectOptions: [
           'Existing AnVIL Workspace',
           'Existing Terra Workspace',
@@ -457,7 +475,16 @@ export const EditConsentGroup = (props) => {
         ],
         placeholder: 'Data Location(s)',
         defaultValue: consentGroup.dataLocation,
-        onChange,
+        onChange: ({key, value, isValid}) => {
+
+          if (value === 'Not Determined') {
+            // if not determined, clear url field as well.
+            // must do in one batch call, otherwise react gets confused.
+            onBatchChange({ key, value }, {key: 'url', value: ''})
+          } else {
+            onChange({key, value, isValid});
+          }
+        },
         validation: validation.dataLocation,
         onValidationChange,
       }),
@@ -465,9 +492,13 @@ export const EditConsentGroup = (props) => {
         style: { width: '50%', paddingLeft: '1.5%' },
         id: idx+'_url',
         name: 'url',
+        validators: [FormValidators.URL],
+        disabled: consentGroup.dataLocation === 'Not Determined',
         placeholder: 'Enter a URL for your data location here',
         defaultValue: consentGroup.url,
         onChange,
+        validation: validation.url,
+        onValidationChange,
       }),
     ]),
     h(FormTable, {
