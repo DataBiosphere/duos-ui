@@ -55,9 +55,9 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
   } else {
     consentGroup.fileTypes.forEach((ft) => {
       if (isNil(ft.numberOfParticipants)) {
-        errors.push('Please specify the number of participants.')
+        errors.push('Please specify the number of participants.');
       }
-    })
+    });
   }
 
   return errors;

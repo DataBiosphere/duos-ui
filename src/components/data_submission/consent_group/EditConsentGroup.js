@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
@@ -61,13 +61,6 @@ export const EditConsentGroup = (props) => {
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
   const [morText, setMORText] = useState(consentGroup.mor);
 
-
-  useEffect(() => {
-    console.log(consentGroup.dataLocation);
-  }, [consentGroup.dataLocation]);
-  useEffect(() => {
-    console.log(consentGroup);
-  }, [consentGroup])
   const onChange = ({ key, value }) => {
     setConsentGroup({
       ...consentGroup,
@@ -86,8 +79,8 @@ export const EditConsentGroup = (props) => {
       });
 
       return consentGroup;
-    })
-  }
+    });
+  };
 
   const onPrimaryChange = ({ key, value }) => {
     setConsentGroup({
@@ -480,7 +473,7 @@ export const EditConsentGroup = (props) => {
           if (value === 'Not Determined') {
             // if not determined, clear url field as well.
             // must do in one batch call, otherwise react gets confused.
-            onBatchChange({ key, value }, {key: 'url', value: ''})
+            onBatchChange({ key, value }, {key: 'url', value: ''});
           } else {
             onChange({key, value, isValid});
           }
