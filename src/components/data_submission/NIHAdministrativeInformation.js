@@ -24,15 +24,6 @@ export const NIHAdministrativeInformation = (props) => {
   }, [
     h2('NIH Administrative Information'),
     h(FormField, {
-      id: 'piName',
-      title: 'Principal Investigator Name',
-      validators: [FormValidators.REQUIRED],
-      onChange,
-      defaultValue: initialFormData?.piName,
-      validation: validation.piName,
-      onValidationChange,
-    }),
-    h(FormField, {
       id: 'piInstitution',
       title: 'Principal Investigator Institution',
       isRendered: !isEmpty(institutions),
