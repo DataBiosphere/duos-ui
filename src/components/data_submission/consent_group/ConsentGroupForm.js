@@ -39,7 +39,7 @@ export const ConsentGroupForm = (props) => {
     // dataLocation is one of:
     // "AnVIL Workspace", "Terra Workspace",
     // "TDR Location", "Not Determined"
-    dataLocation: [],
+    dataLocation: null,
 
     url: '',
     fileTypes: [{}],
