@@ -1,5 +1,5 @@
 
-import { a, div, h2, h3, span, li, ol, p} from 'react-hyperscript-helpers';
+import { a, div, h2, h3, span, li, ol, p } from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
@@ -13,6 +13,8 @@ export default function DataUseAgreements(props) {
     save,
     attest,
     darCode,
+    isAttested,
+    cancelAttest,
   } = props;
 
   return (
@@ -65,19 +67,29 @@ export default function DataUseAgreements(props) {
       ]),
 
 
-      div({ className: 'flex flex-row', style: { justifyContent: 'flex-start', paddingTop: '4rem' }, }, [
+      div({ className: 'flex flex-row', style: { justifyContent: 'around', paddingTop: '4rem' } }, [
+        div({ className: 'flex flex-row', style: { justifyContent: 'flex-start' }, }, [
+          a({
+            id: 'btn_attest', isRendered: isNil(darCode), onClick: () => attest(),
+            className: 'button button-blue',
+            disabled: isAttested,
+            style: {
+              marginRight: '2rem',
+            }
+          }, ['Attest']),
+          a({
+            id: 'btn_saveDar', isRendered: isNil(darCode), onClick: () => save(),
+            className: 'button button-white',
+            disabled: isAttested,
+          }, ['Save']),
+
+        ]),
         a({
-          id: 'btn_attest', isRendered: isNil(darCode), onClick: () => attest(),
-          className: 'button button-blue',
-          style: {
-            marginRight: '2rem',
-          }
-        }, ['Attest']),
-        a({
-          id: 'btn_saveDar', isRendered: isNil(darCode), onClick: () => save(),
-          className: 'button button-white',
-        }, ['Save']),
+          id: 'btn_cancelAttest', isRendered: isNil(darCode) && isAttested, onClick: () => cancelAttest(),
+          style: { 'float': 'right' }, className: 'button button-white',
+        }, ['Cancel']),
       ])
+
     ])
   );
 }

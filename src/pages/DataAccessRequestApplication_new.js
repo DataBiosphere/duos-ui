@@ -289,8 +289,8 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
 
-  const scrollToFormErrors = (validation, nihValid) => {
-    if (!isEmpty(validation.researcherInfoErrors) || nihValid !== true) {
+  const scrollToFormErrors = (validation, eraCommonsIdValid) => {
+    if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid) {
       goToStep(1);
     } else if (!isEmpty(validation.darErrors)) {
       goToStep(2);
@@ -330,11 +330,13 @@ const DataAccessRequestApplicationNew = (props) => {
 
     setFormValidation(validation);
 
-    const isInvalidForm = validationFailed(validation) || nihValid !== true;
-    setShowNihValidationError(nihValid !== true);
+    const eraCommonsIdValid = nihValid === true || formData.checkCollaborator === true;
+
+    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid;
+    setShowNihValidationError(!eraCommonsIdValid);
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, nihValid);
+      scrollToFormErrors(validation, eraCommonsIdValid);
     } else {
       setIsAttested(true);
       addDucAddendumTab();
@@ -519,6 +521,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <ResearcherInfo
                 completed={!isNil(get('institutionId', researcher))}
+                readOnlyMode={isAttested}
                 darCode={formData.darCode}
                 formData={formData}
                 validation={formValidation.researcherInfoErrors}
@@ -540,6 +543,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <DataAccessRequest
                 formData={formData}
+                readOnlyMode={isAttested}
                 datasets={datasets}
                 validation={formValidation.darErrors}
                 formValidationChange={(val) => formValidationChange('darErrors', val)}
@@ -557,6 +561,7 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <ResearchPurposeStatement
                 darCode={formData.darCode}
+                readOnlyMode={isAttested}
                 validation={formValidation.rusErrors}
                 formValidationChange={(val) => formValidationChange('rusErrors', val)}
                 formFieldChange={formFieldChange}
@@ -567,6 +572,8 @@ const DataAccessRequestApplicationNew = (props) => {
             <div className='step-container'>
               <DataUseAgreements
                 darCode={formData.darCode}
+                cancelAttest={() => setIsAttested(false)}
+                isAttested={isAttested}
                 attest={attemptSubmit}
                 save={() => setShowDialogSave(true)}
               />

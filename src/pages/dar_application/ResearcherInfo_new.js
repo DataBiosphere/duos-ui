@@ -18,6 +18,7 @@ const missingLibraryCard = span(['You must submit ', profileLink, ' and obtain a
 export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
+    readOnlyMode,
     completed,
     darCode,
     eRACommonsDestination,
@@ -94,6 +95,7 @@ export default function ResearcherInfo(props) {
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
               validationError: showNihValidationError,
+              readOnly: readOnlyMode,
               header: true
             })
           ]),
@@ -118,6 +120,7 @@ export default function ResearcherInfo(props) {
             h4({ style: { marginRight: 30 } }, '1.2.2'),
             h(FormField, {
               id: 'checkNihDataOnly',
+              disabled: readOnlyMode,
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
@@ -131,6 +134,7 @@ export default function ResearcherInfo(props) {
             h4({ style: { marginRight: 30 } }, '1.2.3'),
             h(FormField, {
               id: 'checkCollaborator',
+              disabled: readOnlyMode,
               toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am an NIH intramural researcher (NIH email required)']),
               type: FormFieldTypes.CHECKBOX,
               ariaLevel: ariaLevel + 2,
@@ -145,6 +149,7 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h(FormField, {
             id: `piName`,
+            disabled: readOnlyMode,
             description: 'I certify that the principal investigator listed below is aware of this study',
             placeholder: 'Firstname Lastname',
             title: '1.3 Principal Investigator',
@@ -175,7 +180,7 @@ export default function ResearcherInfo(props) {
             validation: validation.labCollaborators,
             onValidationChange,
             showApproval: true,
-            disabled: !isEmpty(darCode)
+            disabled: !isEmpty(darCode) || readOnlyMode,
           }),
         ]),
 
@@ -202,7 +207,7 @@ export default function ResearcherInfo(props) {
             validation: validation.internalCollaborators,
             onValidationChange,
             showApproval: false,
-            disabled: !isEmpty(darCode)
+            disabled: !isEmpty(darCode) || readOnlyMode
           }),
         ]),
 
@@ -217,6 +222,7 @@ export default function ResearcherInfo(props) {
             defaultValue: formData.signingOfficial,
             validation: validation.signingOfficial,
             onValidationChange,
+            disabled: readOnlyMode,
             onChange: ({key, value}) => {
               formFieldChange({key, value});
             },
@@ -229,6 +235,7 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h(FormField, {
             id: 'itDirector',
+            disabled: readOnlyMode,
             description: 'I certify that the individual listed below is my IT Director',
             placeholder: 'Enter Firstname Lastname',
             title: '1.7 Information Technology (IT) Director',
@@ -245,6 +252,7 @@ export default function ResearcherInfo(props) {
           div([
             h(FormField, {
               id: 'anvilUse',
+              disabled: readOnlyMode,
               type: FormFieldTypes.RADIOGROUP,
               title: '1.8 Cloud Use Statement',
               description: [span([
@@ -287,7 +295,7 @@ export default function ResearcherInfo(props) {
                     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                       h(FormField, {
                         id: 'localUse',
-                        disabled: !isNil(darCode),
+                        disabled: !isNil(darCode) || readOnlyMode,
                         validators: [FormValidators.REQUIRED],
                         type: FormFieldTypes.CHECKBOX,
                         toggleText: 'I am requesting permission to use local computing to carry out the research described in my Research Use Statement',
@@ -302,7 +310,7 @@ export default function ResearcherInfo(props) {
                   div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
                     h(FormField, {
                       id: 'cloudUse',
-                      disabled: !isNil(darCode),
+                      disabled: !isNil(darCode) || readOnlyMode,
                       validators: [FormValidators.REQUIRED],
                       type: FormFieldTypes.CHECKBOX,
                       toggleText: 'I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement',
@@ -322,7 +330,7 @@ export default function ResearcherInfo(props) {
                       onChange: ({ key, value }) => formFieldChange({key, value}),
                       defaultValue: formData.cloudProvider,
                       validators: [FormValidators.REQUIRED],
-                      disabled: !isEmpty(darCode),
+                      disabled: !isEmpty(darCode) || readOnlyMode,
                       ariaLevel: ariaLevel + 3,
                       validation: validation.cloudProvider,
                       onValidationChange,
@@ -334,7 +342,7 @@ export default function ResearcherInfo(props) {
                       title: 'Type of Cloud Provider',
                       defaultValue: formData.cloudProviderType,
                       validators: [FormValidators.REQUIRED],
-                      disabled: !isNil(darCode),
+                      disabled: !isNil(darCode) || readOnlyMode,
                       ariaLevel: ariaLevel + 3,
                       onChange: ({ key, value }) => formFieldChange({key, value}),
                       validation: validation.cloudProviderType,
@@ -348,7 +356,7 @@ export default function ResearcherInfo(props) {
                       id: 'cloudProviderDescription',
                       type: FormFieldTypes.TEXTAREA,
                       defaultValue: formData.cloudProviderDescription,
-                      disabled: !isNil(darCode),
+                      disabled: !isNil(darCode) || readOnlyMode,
                       validators: [FormValidators.REQUIRED],
                       placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
                     + ' and how you plan to use it (them) to carry out the work described in your Research Use Statement (e.g. datasets to be included, process for data transfer)'
@@ -387,7 +395,7 @@ export default function ResearcherInfo(props) {
             collaboratorLabel: 'External Collaborator',
             setCompleted: setExternalCollaboratorsCompleted,
             showApproval: false,
-            disabled: !isEmpty(darCode),
+            disabled: !isEmpty(darCode) || readOnlyMode,
             validation: validation.externalCollaborators,
             onValidationChange,
           }),

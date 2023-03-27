@@ -138,6 +138,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             onMouseEnter: this.onMouseEnter,
             onMouseLeave: this.onMouseLeave,
             onClick: this.redirectToNihLogin,
+            disabled: this.props.readOnly,
             target: '_blank'
           }, [
             div({ style: logoStyle }),
@@ -167,6 +168,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
                 margin: '2px 0 0 10px'
               },
               type: 'button',
+              disabled: this.props.readOnly,
               onClick: this.deleteNihAccount,
               className: 'close'
             }, [
