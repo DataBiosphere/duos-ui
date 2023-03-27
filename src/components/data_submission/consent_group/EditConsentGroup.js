@@ -40,17 +40,17 @@ export const EditConsentGroup = (props) => {
     setConsentGroup,
     nihInstitutionalCertificationFile,
     setNihInstitutionalCertificationFile,
-    idx,
-    dacs,
     validation,
     onValidationChange,
+    idx,
+    dacs,
   } = props;
 
   const [showOtherSecondaryText, setShowOtherSecondaryText] = useState(!isNil(consentGroup.otherSecondary));
   const [otherSecondaryText, setOtherSecondaryText] = useState(consentGroup.otherSecondary);
 
   const [showGSText, setShowGSText] = useState(!isNil(consentGroup.gs));
-  const [gsText, setGSText] = useState(consentGroup.gs);
+  const [gsText, setGSText] = useState(consentGroup.gs || '');
 
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary || '');
@@ -59,7 +59,7 @@ export const EditConsentGroup = (props) => {
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
-  const [morText, setMORText] = useState(consentGroup.mor);
+  const [morText, setMORText] = useState(consentGroup.mor || '');
 
   const onChange = ({ key, value }) => {
     setConsentGroup({
@@ -135,9 +135,9 @@ export const EditConsentGroup = (props) => {
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
           },
-          validation: validation.generalResearchUse,
+          validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
-            onValidationChange({ key: 'generalResearchUse', validation });
+            onValidationChange({ key: 'primaryConsent', validation });
           },
         }),
 
@@ -151,9 +151,9 @@ export const EditConsentGroup = (props) => {
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
           },
-          validation: validation.hmb,
+          validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
-            onValidationChange({ key: 'hmb', validation });
+            onValidationChange({ key: 'primaryConsent', validation });
           },
         }),
 
@@ -164,13 +164,16 @@ export const EditConsentGroup = (props) => {
           value: 'diseaseSpecificUse',
           toggleText: 'Disease-Specific Research Use',
           defaultValue: selectedPrimaryGroup(consentGroup),
+          validation: validation.primaryConsent,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'primaryConsent', validation });
+          },
           onChange: ({ value }) => {
             onPrimaryChange({
               key: value,
               value: selectedDiseases
             });
           },
-          validation: validation.diseaseSpecificUse,
         }),
 
         div({
@@ -192,7 +195,9 @@ export const EditConsentGroup = (props) => {
             placeholder: 'Please enter one or more diseases',
             defaultValue: selectedDiseases,
             validation: validation.diseaseSpecificUse,
-            onValidationChange,
+            onValidationChange: ({ validation }) => {
+              onValidationChange({ key: 'diseaseSpecificUse', validation });
+            },
             onChange: ({ key, value, isValid }) => {
               setSelectedDiseases(value);
               onChange({
@@ -214,9 +219,9 @@ export const EditConsentGroup = (props) => {
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
           },
-          validation: validation.poa,
+          validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
-            onValidationChange({ key: 'poa', validation });
+            onValidationChange({ key: 'primaryConsent', validation });
           },
         }),
 
@@ -230,7 +235,10 @@ export const EditConsentGroup = (props) => {
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
           },
-          validation: validation.openAccess,
+          validation: validation.primaryConsent,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'primaryConsent', validation });
+          },
         }),
 
         h(FormField, {
@@ -243,7 +251,10 @@ export const EditConsentGroup = (props) => {
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: otherPrimaryText });
           },
-          validation: validation.otherPrimary,
+          validation: validation.primaryConsent,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'primaryConsent', validation });
+          },
         }),
 
         h(FormField, {
@@ -432,6 +443,7 @@ export const EditConsentGroup = (props) => {
       h(FormField, {
         isRendered: consentGroup.openAccess !== true,
         id: idx + 'dataAccessCommitteeId',
+        name: 'dataAccessCommitteeId',
         title: 'Data Access Committee*',
         description: 'Please select which DAC should govern requests for this dataset',
         type: FormFieldTypes.SELECT,
@@ -439,8 +451,11 @@ export const EditConsentGroup = (props) => {
           return { dacId: dac.dacId, displayText: dac.name };
         }),
         onChange: ({ key, value }) => {
-          onChange({ key, value: value.dacId });
-        }
+          onChange({ key, value: value?.dacId });
+        },
+        validators: [FormValidators.REQUIRED],
+        validation: validation.dataAccessCommitteeId,
+        onValidationChange,
       }),
     ]),
 

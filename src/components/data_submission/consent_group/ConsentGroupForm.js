@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { div, h, span, a, button } from 'react-hyperscript-helpers';
 import ConsentGroupSummary from './ConsentGroupSummary';
 import { EditConsentGroup } from './EditConsentGroup';
-import { computeConsentGroupValidationErrors, ConsentGroupErrors } from './ConsentGroupErrors';
+import { computeConsentGroupValidationErrors } from './ConsentGroupErrors';
+import { isEmpty, cloneDeep, set } from 'lodash';
 
 export const ConsentGroupForm = (props) => {
   const {
@@ -10,8 +11,6 @@ export const ConsentGroupForm = (props) => {
     saveConsentGroup,
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
-    validation,
-    onValidationChange,
     disableDelete,
   } = props;
 
@@ -47,7 +46,16 @@ export const ConsentGroupForm = (props) => {
   });
 
   const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
-  const [consentGroupValidationErrors, setConsentGroupValidationErrors] = useState([]);
+  const [validation, setValidation] = useState({});
+
+  const onValidationChange = ({key, validation}) => {
+    setValidation((val) => {
+      const newValidation = cloneDeep(val);
+      set(newValidation, key, validation);
+      return newValidation;
+    });
+  };
+
   const [editMode, setEditMode] = useState(true);
 
   return div({
@@ -59,11 +67,6 @@ export const ConsentGroupForm = (props) => {
     },
     id: idx+'_consentGroupForm'
   }, [
-
-    h(ConsentGroupErrors,
-      {
-        errors: consentGroupValidationErrors,
-      }),
 
     (editMode
       ? h(EditConsentGroup, {
@@ -126,9 +129,9 @@ export const ConsentGroupForm = (props) => {
           isRendered: editMode,
           onClick: () => {
             const errors = computeConsentGroupValidationErrors(consentGroup);
-            const valid = errors.length === 0;
+            const valid = isEmpty(errors);
 
-            setConsentGroupValidationErrors(errors);
+            setValidation(errors);
 
             if (valid) {
               saveConsentGroup({ value: consentGroup, valid: true });
