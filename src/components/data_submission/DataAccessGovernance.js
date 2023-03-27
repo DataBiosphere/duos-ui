@@ -117,6 +117,7 @@ export const DataAccessGovernance = (props) => {
                 h(ConsentGroupForm, {
                   idx: idx,
                   dacs: dacs,
+                  disableDelete: consentGroupsState.length === 1,
                   saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
                   deleteConsentGroup: () => deleteConsentGroup(idx),
                   updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
