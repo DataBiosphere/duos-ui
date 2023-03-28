@@ -64,7 +64,7 @@ export const validateForm = (compiledSchema, obj) => {
 };
 
 /**
- * Compiles schema (defaults to 2020 draft version of JSON Schema)
+ * Compiles schema (defaults to 2019-09 draft version of JSON Schema)
  */
 export const compileSchema = (schema) => {
   return addFormats(new Ajv({strict: false, allErrors: true})).compile(schema);
