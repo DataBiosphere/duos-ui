@@ -34,7 +34,6 @@ describe('NihAnvilUse - Tests', () => {
     propCopy.formData.nihAnvilUse = YES_NHGRI_YES_PHS_ID;
     mount(<NihAnvilUse {...propCopy}/>);
     cy.get('#nihAnvilUse_yes_nhgri_yes_phs_id').click();
-    
     cy.get('#dbGaPPhsID').should('exist');
     cy.get('#dbGaPStudyRegistrationName').should('exist');
     cy.get('#embargoReleaseDate').should('exist');
