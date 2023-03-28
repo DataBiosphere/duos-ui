@@ -3,7 +3,7 @@ import { compileSchema, validateForm } from '../../../src/utils/JsonSchemaUtils'
 
 const jsonSchema = {
   '$id': 'https://example.com/person.schema.json',
-  '$schema': 'https://json-schema.org/draft/2020-12/schema',
+  '$schema': 'https://json-schema.org/draft/2019-09/schema',
   'title': 'Person',
   'type': 'object',
   'required': [
