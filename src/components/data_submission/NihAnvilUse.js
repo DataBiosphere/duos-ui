@@ -19,6 +19,7 @@ export default function NihAnvilUse(props) {
     formData,
     validation,
     onValidationChange,
+    updateParentRenderState,
   } = props;
 
   return h(div, {
@@ -39,6 +40,7 @@ export default function NihAnvilUse(props) {
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
+        updateParentRenderState({key: config.key, value: [value]});
       },
       validation: validation.nihAnvilUse,
       onValidationChange,

@@ -11,6 +11,7 @@ const props = {
   validation: {},
   onValidationChange: () => {},
   formData: {},
+  updateParentRenderState: () => {},
 };
 
 beforeEach(() => {
