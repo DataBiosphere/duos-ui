@@ -2,7 +2,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import { NihAnvilUse, YES_NHGRI_YES_PHS_ID } from '../../../src/components/data_submission/NihAnvilUse';
+import  NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from '../../../src/components/data_submission/NihAnvilUse';
 
 let propCopy;
 
@@ -10,13 +10,7 @@ const props = {
   onChange: () => {},
   validation: {},
   onValidationChange: () => {},
-  formData: {
-    nihAnvilUse: '',
-    dbGaPStudyRegistrationName: '',
-    embargoReleaseDate: '',
-    sequencingCenter: '',
-  },
-  updateParentRenderState: () => {},
+  formData: {},
 };
 
 beforeEach(() => {
@@ -25,7 +19,6 @@ beforeEach(() => {
 
 describe('NihAnvilUse - Tests', () => {
   it('should mount with only the nihAnvilUse form field displayed', () => {
-    propCopy.formData = {};
     mount(<NihAnvilUse {...propCopy}/>);
     const formFields = cy.get('.formField-container');
     formFields.should('exist');
@@ -38,6 +31,7 @@ describe('NihAnvilUse - Tests', () => {
   });
 
   it('should show dbGaP form fields if NHGRI funded and has dbGaP ID', () => {
+    propCopy.formData.nihAnvilUse = YES_NHGRI_YES_PHS_ID;
     mount(<NihAnvilUse {...propCopy}/>);
     cy.get('#nihAnvilUse_yes_nhgri_yes_phs_id').click();
     console.log(props.formData.nihAnvilUse);
