@@ -1,4 +1,4 @@
-import Ajv2020 from 'ajv/dist/2020';
+import {default as Ajv} from 'ajv/dist/2019';
 import {
   urlValidator,
   dateValidator,
@@ -7,7 +7,6 @@ import {
 import {
   get, set, isNil
 } from 'lodash';
-
 
 const formats = {
   date: dateValidator.isValid,
@@ -63,10 +62,10 @@ export const validateForm = (compiledSchema, obj) => {
 };
 
 /**
- * Compiles schema (defaults to 2020 draft version of JSON Schema)
+ * Compiles schema (defaults to 2019-09 draft version of JSON Schema)
  */
 export const compileSchema = (schema) => {
-  return addFormats(new Ajv2020({strict: false, allErrors: true})).compile(schema);
+  return addFormats(new Ajv({strict: false, allErrors: true})).compile(schema);
 };
 
 
