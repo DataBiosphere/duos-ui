@@ -1,5 +1,4 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
-import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
@@ -14,13 +13,6 @@ const nihAnvilUseLabels = {
   no_nhgri_no_anvil: NO_NHGRI_NO_ANVIL,
 };
 
-const allNihAnvilUseFields = [
-  'dbGaPPhsID',
-  'dbGaPStudyRegistrationName',
-  'embargoReleaseDate',
-  'sequencingCenter',
-];
-
 export default function NihAnvilUse(props) {
   const {
     onChange,
@@ -28,10 +20,6 @@ export default function NihAnvilUse(props) {
     validation,
     onValidationChange,
   } = props;
-
-  const clearFormValues = () => {
-    allNihAnvilUseFields.forEach((field) => onChange({key: field, value: undefined, isValid: true}));
-  };
 
   return h(div, {
     className: 'data-submitter-section',
