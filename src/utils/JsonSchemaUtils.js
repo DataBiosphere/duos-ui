@@ -1,4 +1,4 @@
-import Ajv2019 from 'ajv/dist/2019';
+import {default as Ajv} from 'ajv/dist/2019';
 import {
   urlValidator,
   dateValidator,
@@ -7,8 +7,6 @@ import {
 import {
   get, set, isNil
 } from 'lodash';
-
-const Ajv = Ajv2019;
 
 const formats = {
   date: dateValidator.isValid,
