@@ -2,7 +2,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import NihAnvilUse from '../../../src/components/data_submission/NihAnvilUse';
+import { NihAnvilUse, YES_NHGRI_YES_PHS_ID } from '../../../src/components/data_submission/NihAnvilUse';
 
 let propCopy;
 
@@ -10,6 +10,12 @@ const props = {
   onChange: () => {},
   validation: {},
   onValidationChange: () => {},
+  formData: {
+    nihAnvilUse: '',
+    dbGaPStudyRegistrationName: '',
+    embargoReleaseDate: '',
+    sequencingCenter: '',
+  },
   updateParentRenderState: () => {},
 };
 
@@ -34,7 +40,9 @@ describe('NihAnvilUse - Tests', () => {
   it('should show dbGaP form fields if NHGRI funded and has dbGaP ID', () => {
     mount(<NihAnvilUse {...propCopy}/>);
     cy.get('#nihAnvilUse_yes_nhgri_yes_phs_id').click();
-
+    console.log(props.formData.nihAnvilUse);
+    console.log(YES_NHGRI_YES_PHS_ID);
+    console.log(props.formData.dbGaPPhsID);
     cy.get('#dbGaPPhsID').should('exist');
     cy.get('#dbGaPStudyRegistrationName').should('exist');
     cy.get('#embargoReleaseDate').should('exist');
