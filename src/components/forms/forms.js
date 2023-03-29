@@ -302,16 +302,15 @@ export const FormField = (config) => {
 */
 export const FormTable = (config) => {
   const {
-    id, name, formFields,
+    id, formFields,
     enableAddingRow, addRowLabel,
     disabled, onChange, minLength,
-    validation, defaultValue
+    validation, onValidationChange, defaultValue
   } = config;
 
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
 
-
-  const key = name || id;
+  const key = getKey(config);
 
   return div({ id, className: `formField-table formField-${id}` }, [
     // generate columns
@@ -330,13 +329,19 @@ export const FormTable = (config) => {
             ...formCol,
             id: `${id}-${i}-${formCol.id}`,
             hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-            defaultValue: formValue[i][formCol.name || formCol.id],
-            validation: !isNil(validation) && isArray(validation) ? validation.at(i)?.[formCol.id] : undefined,
+            defaultValue: formValue[i][getKey(formCol)],
+            validation: !isNil(validation) && isArray(validation) ? validation.at(i)?.[getKey(formCol)] : undefined,
             onChange: ({ value }) => {
               const formValueClone = cloneDeep(formValue);
-              formValueClone[i][formCol.name || formCol.id] = value;
+              formValueClone[i][getKey(formCol)] = value;
               setFormValue(formValueClone);
               onChange({key: key, value: formValueClone, isValid: true });
+            },
+            onValidationChange: ({ validation }) => {
+              if (isNil(onValidationChange)) {
+                return;
+              }
+              onValidationChange({ key: [getKey(config), i, getKey(formCol)], validation: validation });
             }
           });
         }),
@@ -348,9 +353,17 @@ export const FormTable = (config) => {
           disabled: disabled || formValue.length <= minLength,
           onClick: () => {
             const formValueClone = cloneDeep(formValue);
+
             formValueClone.splice(i, 1);
             setFormValue(formValueClone);
             onChange({ key: key, value: formValueClone, isValid: true });
+
+            if (!isNil(validation) && !isNil(onValidationChange)) {
+              const validationClone = cloneDeep(validation);
+              validationClone.splice(i, 1);
+              onValidationChange({ key: getKey(config), validation: validationClone });
+
+            }
           }
         }, [
           span({ className: 'glyphicon glyphicon-remove' })
