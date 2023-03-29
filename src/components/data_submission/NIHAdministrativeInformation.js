@@ -3,23 +3,23 @@ import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { nihInstitutions } from './nih_institutions';
 import { isEmpty } from 'lodash/fp';
 import { useState } from 'react';
+import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './NihAnvilUse';
 
 export const NIHAdministrativeInformation = (props) => {
   const {
-    initialFormData,
+    formData,
     onChange,
     institutions,
     validation,
     onValidationChange,
-    nihAdminRendered,
   } = props;
 
-  const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(initialFormData?.multiCenterStudy === true || false);
-  const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
+  const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(formData?.multiCenterStudy === true || false);
+  const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(formData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
   const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
 
   return div({
-    isRendered: nihAdminRendered === true,
+    isRendered: ((formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) || (formData.nihAnvilUse === YES_NHGRI_NO_PHS_ID) || (formData.nihAnvilUse === NO_NHGRI_YES_ANVIL)),
     className: 'data-submitter-section',
   }, [
     h2('NIH Administrative Information'),
@@ -35,7 +35,7 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: initialFormData?.piInstitution,
+      defaultValue: formData?.piInstitution,
       validation: validation.piInstitution,
       onValidationChange,
     }),
@@ -44,7 +44,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'NIH Grant or Contract Number',
       validators: [FormValidators.REQUIRED],
       onChange,
-      defaultValue: initialFormData?.nihGrantContractNumber,
+      defaultValue: formData?.nihGrantContractNumber,
       validation: validation.nihGrantContractNumber,
       onValidationChange,
     }),
@@ -56,7 +56,7 @@ export const NIHAdministrativeInformation = (props) => {
       type: FormFieldTypes.SELECT,
       isMulti: true,
       validators: [FormValidators.REQUIRED],
-      defaultValue: initialFormData?.nihICsSupportingStudy,
+      defaultValue: formData?.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
       validation: validation.nihICsSupportingStudy,
       onValidationChange,
@@ -67,7 +67,7 @@ export const NIHAdministrativeInformation = (props) => {
       validators: [FormValidators.REQUIRED],
       onChange,
       placeholder: 'Officer Name',
-      defaultValue: initialFormData?.nihProgramOfficerName,
+      defaultValue: formData?.nihProgramOfficerName,
       validation: validation.nihProgramOfficerName,
       onValidationChange,
     }),
@@ -78,7 +78,7 @@ export const NIHAdministrativeInformation = (props) => {
       onChange,
       type: FormFieldTypes.SELECT,
       validators: [FormValidators.REQUIRED],
-      defaultValue: initialFormData?.nihInstitutionCenterSubmission,
+      defaultValue: formData?.nihInstitutionCenterSubmission,
       selectOptions: nihInstitutions,
       validation: validation.nihInstitutionCenterSubmission,
       onValidationChange,
@@ -87,7 +87,7 @@ export const NIHAdministrativeInformation = (props) => {
       id: 'nihGenomicProgramAdministratorName',
       title: 'NIH Genomic Program Administrator Name',
       validators: [FormValidators.REQUIRED],
-      defaultValue: initialFormData?.nihGenomicProgramAdministratorName,
+      defaultValue: formData?.nihGenomicProgramAdministratorName,
       onChange,
       validation: validation.nihGenomicProgramAdministratorName,
       onValidationChange,
@@ -97,7 +97,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'Is this a multi-center study?',
       type: FormFieldTypes.YESNORADIOGROUP,
       validators: [FormValidators.REQUIRED],
-      defaultValue: initialFormData?.multiCenterStudy,
+      defaultValue: formData?.multiCenterStudy,
       onChange: ({key, value}) => {
         setShowMultiCenterStudy(value);
         onChange({key, value});
@@ -111,7 +111,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'What are the collaborating sites?',
       type: FormFieldTypes.MULTITEXT,
       placeholder: 'List site(s) here...',
-      defaultValue: initialFormData?.collaboratingSites,
+      defaultValue: formData?.collaboratingSites,
       validators: [FormValidators.REQUIRED],
       onChange,
       validation: validation.collaboratingSites,
@@ -120,7 +120,7 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
       title: 'Is controlled access required for genomic summary results (GSR)?',
-      defaultValue: initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      defaultValue: formData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
       type: FormFieldTypes.YESNORADIOGROUP,
       validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {

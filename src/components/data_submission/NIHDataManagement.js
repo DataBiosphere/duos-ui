@@ -1,6 +1,7 @@
 import {div, h, h2, h3} from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { useState } from 'react';
+import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './NihAnvilUse';
 
 
 const alternativeDataSharingPlanReasonValues = {
@@ -16,26 +17,25 @@ const alternativeDataSharingPlanReasonValues = {
 
 export const NIHDataManagement = (props) => {
   const {
-    initialFormData,
+    formData,
     onChange,
     onFileChange,
     validation,
     onValidationChange,
-    nihDataManagementRendered,
   } = props;
 
-  const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(initialFormData?.alternativeDataSharingPlan === true || false);
+  const [showAlternativeDataSharingPlan, setShowAlternativeDataSharingPlan] = useState(formData?.alternativeDataSharingPlan === true || false);
 
   const [showInadequateConsentProcessesQuestions, setShowInadequateConsentProcessesQuestions] =
     useState(
-      initialFormData
+      formData
         ?.alternativeDataSharingPlanReasons
         ?.includes(
           alternativeDataSharingPlanReasonValues
             .isInformedConsentProcessesInadequate)
         || false);
 
-  const [alternativeDataSharingPlanReasons, setAlternativeDataSharingPlanReasons] = useState(initialFormData?.alternativeDataSharingPlanReasons || []);
+  const [alternativeDataSharingPlanReasons, setAlternativeDataSharingPlanReasons] = useState(formData?.alternativeDataSharingPlanReasons || []);
 
   const onAlternativeDataSharingPlanReasonsChange = ({key, value}) => {
     const reason = alternativeDataSharingPlanReasonValues[key];
@@ -57,14 +57,14 @@ export const NIHDataManagement = (props) => {
   };
 
   return div({
-    isRendered: nihDataManagementRendered === true,
+    isRendered: ((formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) || (formData.nihAnvilUse === YES_NHGRI_NO_PHS_ID) || (formData.nihAnvilUse === NO_NHGRI_YES_ANVIL)),
     className: 'data-submitter-section',
   }, [
     h2('NIH Data Management & Sharing Policy Details'),
     h(FormField, {
       type: FormFieldTypes.YESNORADIOGROUP,
       id: 'alternativeDataSharingPlan',
-      defaultValue: initialFormData?.alternativeDataSharingPlan,
+      defaultValue: formData?.alternativeDataSharingPlan,
       title: 'Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public repository or database?',
       onChange: ({key, value}) => {
         setShowAlternativeDataSharingPlan(value);
@@ -81,7 +81,7 @@ export const NIHDataManagement = (props) => {
       ),
       h(FormField, {
         id: 'legalRestrictions',
-        defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.legalRestrictions),
+        defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.legalRestrictions),
         type: FormFieldTypes.CHECKBOX,
         onChange: onAlternativeDataSharingPlanReasonsChange,
         toggleText: 'Legal Restrictions',
@@ -90,7 +90,7 @@ export const NIHDataManagement = (props) => {
       }),
       h(FormField, {
         id: 'isInformedConsentProcessesInadequate',
-        defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.isInformedConsentProcessesInadequate),
+        defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.isInformedConsentProcessesInadequate),
         type: FormFieldTypes.CHECKBOX,
         onChange: ({key, value}) => {
           setShowInadequateConsentProcessesQuestions(value);
@@ -109,7 +109,7 @@ export const NIHDataManagement = (props) => {
       }, [
         h(FormField, {
           id: 'consentFormsUnavailable',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentFormsUnavailable),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentFormsUnavailable),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText:
@@ -117,35 +117,35 @@ export const NIHDataManagement = (props) => {
         }),
         h(FormField, {
           id: 'consentProcessDidNotAddressFutureUseOrBroadSharing',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessDidNotAddressFutureUseOrBroadSharing),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessDidNotAddressFutureUseOrBroadSharing),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText: 'The consent process did not specifically address future use or broad data sharing for samples collected after January 25, 2015',
         }),
         h(FormField, {
           id: 'consentProcessInadequatelyAddressesRisk',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessInadequatelyAddressesRisk),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessInadequatelyAddressesRisk),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText: 'The consent processes inadequately addresses risks related to future use or broad data sharing for samples collected after January 25, 2015',
         }),
         h(FormField, {
           id: 'consentProcessPrecludesFutureUseOrBroadSharing',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessPrecludesFutureUseOrBroadSharing),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.consentProcessPrecludesFutureUseOrBroadSharing),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText: 'The consent specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)',
         }),
         h(FormField, {
           id: 'otherInformedConsentLimitationsOrConcerns',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.otherInformedConsentLimitationsOrConcerns),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.otherInformedConsentLimitationsOrConcerns),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText: 'Other informed consent limitations or concerns',
         }),
         h(FormField, {
           id: 'otherReasonForRequest',
-          defaultValue: initialFormData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.otherReasonForRequest),
+          defaultValue: formData?.alternativeDataSharingPlanReasons?.includes(alternativeDataSharingPlanReasonValues.otherReasonForRequest),
           type: FormFieldTypes.CHECKBOX,
           onChange: onAlternativeDataSharingPlanReasonsChange,
           toggleText: 'Other'
@@ -154,7 +154,7 @@ export const NIHDataManagement = (props) => {
       h(FormField, {
         isRendered: true, // todo: otherReasonForRequest,
         id: 'alternativeDataSharingPlanExplanation',
-        defaultValue: initialFormData?.alternativeDataSharingPlanExplanation,
+        defaultValue: formData?.alternativeDataSharingPlanExplanation,
         onChange,
         title: 'Explanation for request',
         validators: [FormValidators.REQUIRED],
@@ -172,7 +172,7 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.RADIOGROUP,
         title: 'Data will be submitted:',
         id: 'alternativeDataSharingPlanDataSubmitted',
-        defaultValue: initialFormData?.alternativeDataSharingPlanDataSubmitted,
+        defaultValue: formData?.alternativeDataSharingPlanDataSubmitted,
         options: [
           {
             text: 'Within 3 months of the last data generated or last clinical visit',
@@ -192,7 +192,7 @@ export const NIHDataManagement = (props) => {
       h(FormField, {
         type: FormFieldTypes.YESNORADIOGROUP,
         id: 'alternativeDataSharingPlanDataReleased',
-        defaultValue: initialFormData?.alternativeDataSharingPlanDataReleased,
+        defaultValue: formData?.alternativeDataSharingPlanDataReleased,
         title: 'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
         onChange,
         validation: validation.alternativeDataSharingPlanDataReleased,
