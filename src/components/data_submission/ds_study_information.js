@@ -64,6 +64,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
+      validators: [FormValidators.REQUIRED],
       validation: validation.studyDescription,
       onChange,
       onValidationChange
@@ -72,6 +73,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
+      validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.MULTITEXT,
       validation: validation.dataTypes,
       onChange,
@@ -173,12 +175,11 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Public Visibility',
       validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.RADIOGROUP,
-      defaultValue: true,
       description: 'Please select one of the following data use permissions for your dataset',
       name: 'publicVisibility',
       options: [
-        { name: 'yes', text: 'Yes, I want my dataset info to be visible and available for requests' },
-        { name: 'no', text: 'No, I do not want my dataset info to be visible and available for requests' }
+        { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
+        { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' }
       ],
       onChange,
       validation: validation.publicVisibility,

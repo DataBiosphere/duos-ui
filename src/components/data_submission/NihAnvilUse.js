@@ -53,7 +53,7 @@ export default function NihAnvilUse(props) {
       onChange: (config) => {
         clearFormValues();
         const value = nihAnvilUseLabels[config.value];
-        onChange({key: config.key, value: [value], isValid: config.isValid});
+        onChange({key: config.key, value: value, isValid: config.isValid});
         setNihAnvilUse(value);
         updateParentRenderState({key: config.key, value: [value]});
       },
@@ -75,7 +75,6 @@ export default function NihAnvilUse(props) {
         id: 'dbGaPStudyRegistrationName',
         title: 'dbGaP Study Registration Name',
         placeholder: 'Name',
-        validators: [FormValidators.REQUIRED],
         onChange,
         validation: validation.dbGaPStudyRegistrationName,
         onValidationChange,
@@ -85,7 +84,7 @@ export default function NihAnvilUse(props) {
         id: 'embargoReleaseDate',
         title: 'Embargo Release Date',
         placeholder: 'YYYY-MM-DD',
-        validators: [FormValidators.REQUIRED, FormValidators.DATE],
+        validators: [FormValidators.DATE],
         onChange,
         validation: validation.embargoReleaseDate,
         onValidationChange,
@@ -94,7 +93,6 @@ export default function NihAnvilUse(props) {
         id: 'sequencingCenter',
         title: 'Sequencing Center',
         placeholder: 'Name',
-        validators: [FormValidators.REQUIRED],
         onChange,
         validation: validation.sequencingCenter,
         onValidationChange,

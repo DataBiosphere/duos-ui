@@ -518,6 +518,7 @@ export const FormInputFile = (config) => {
     hideInput = false,
     multiple = false,
     accept = '',
+    validation,
   } = config;
 
   return div({
@@ -525,7 +526,7 @@ export const FormInputFile = (config) => {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
-    }
+    },
   }, [
     div({
       isRendered: hideInput === false,
@@ -553,7 +554,7 @@ export const FormInputFile = (config) => {
       ]),
       label({
         htmlFor: `${id}`,
-        className: 'form-file-label',
+        className: `form-file-label ${!isValid(validation) ? 'errored' : ''}`,
       }, [
         h(PublishIcon, {}),
         uploadText,
@@ -569,6 +570,7 @@ export const FormInputFile = (config) => {
       h(FormField, {
         id: `${id}_fileName`,
         placeholder: 'Filename.txt',
+        validation,
         defaultValue: formValue?.name,
         readOnly: true,
       })

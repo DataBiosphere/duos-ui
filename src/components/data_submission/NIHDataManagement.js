@@ -77,7 +77,7 @@ export const NIHDataManagement = (props) => {
       isRendered: showAlternativeDataSharingPlan,
     }, [
       h3(
-        'Please mark the reasons for which you are requesting an Alernative Data Sharing plan (check all that apply)'
+        'Please mark the reasons for which you are requesting an Alernative Data Sharing plan (check all that apply)*',
       ),
       h(FormField, {
         id: 'legalRestrictions',
@@ -85,8 +85,10 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.CHECKBOX,
         onChange: onAlternativeDataSharingPlanReasonsChange,
         toggleText: 'Legal Restrictions',
-        validation: validation.legalRestrictions,
-        onValidationChange,
+        validation: validation.alternativeDataSharingPlanReasons,
+        onValidationChange: ({validation}) => {
+          onValidationChange({key: 'alternativeDataSharingPlanReasons', validation});
+        },
       }),
       h(FormField, {
         id: 'isInformedConsentProcessesInadequate',
@@ -98,8 +100,10 @@ export const NIHDataManagement = (props) => {
         },
         toggleText:
           'Informed consent processes are inadequate to support data for sharing for the following reasons:',
-        validation: validation.isInformedConsentProcessesInadequate,
-        onValidationChange,
+        validation: validation.alternativeDataSharingPlanReasons,
+        onValidationChange: ({validation}) => {
+          onValidationChange({key: 'alternativeDataSharingPlanReasons', validation});
+        },
       }),
       div({
         isRendered: showInadequateConsentProcessesQuestions,
@@ -165,6 +169,9 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.FILE,
         title: 'Upload your alternative sharing plan.',
         id: 'alternativeDataSharingPlanFile',
+        validators: [FormValidators.REQUIRED],
+        validation: validation.alternativeDataSharingPlanFile,
+        onValidationChange,
         onChange: onFileChange,
       }),
 
