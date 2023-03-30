@@ -1,86 +1,79 @@
 import { selectedPrimaryGroup } from './EditConsentGroup';
-import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isEmpty } from 'lodash/fp';
-import { Notification } from '../../Notification';
+import { set } from 'lodash';
 import { dateValidator } from '../../forms/formValidation';
 import { FormValidators } from '../../forms/forms';
 
+const requiredError = {
+  valid: false,
+  failed: ['required']
+};
+
+const invalidFormatError = (format) => {
+  return {
+    valid: false,
+    failed: [format]
+  };
+};
+
 export const computeConsentGroupValidationErrors = (consentGroup) => {
-  const errors = [];
+  const validation = {};
 
   if (isNil(selectedPrimaryGroup(consentGroup))) {
-    errors.push('Please select a primary consent group.');
+    validation.primaryConsent = requiredError;
+  }
+
+  if (selectedPrimaryGroup(consentGroup) === 'diseaseSpecificUse' && isEmpty(consentGroup.diseaseSpecificUse)) {
+    validation.diseaseSpecificUse = requiredError;
   }
 
   if ((isNil(consentGroup.url) || consentGroup.url === '') && consentGroup.dataLocation !== 'Not Determined') {
-    errors.push('Please specify the URL of the data.');
+    validation.url = requiredError;
   } else {
     try {
       FormValidators.URL.isValid(consentGroup.url);
     } catch(err) {
-      errors.push('The data location URL must be a valid URL.');
+      validation.url = invalidFormatError('uri');
     }
   }
 
   if (isNil(consentGroup.consentGroupName) || consentGroup.consentGroupName === '') {
-    errors.push('Please specify the name of the consent group');
+    validation.consentGroupName = requiredError;
   }
 
   if (isNil(consentGroup.dataLocation) || consentGroup.dataLocation === '') {
-    errors.push('Please specify data location (or specify \'Not Determined\')');
+    validation.dataLocation = requiredError;
   }
 
   if (!isNil(consentGroup.gs) && consentGroup.gs == '') {
-    errors.push('Please specify the geographic restrictions.');
+    validation.gs = requiredError;
   }
 
   if (!isNil(consentGroup.otherPrimary) && consentGroup.otherPrimary == '') {
-    errors.push('Please specify the \'Other\' primary consent.');
+    validation.otherPrimary = requiredError;
   }
 
   if (isNil(consentGroup.dataAccessCommitteeId) && consentGroup.openAccess !== true) {
-    errors.push('Please specify the DAC ID');
+    validation.dataAccessCommitteeId = requiredError;
   }
 
   if (!isNil(consentGroup.otherSecondary) && consentGroup.otherSecondary == '') {
-    errors.push('Please specify the \'Other\' secondary consent.');
+    validation.otherSecondary = requiredError;
   }
 
   if (!isNil(consentGroup.mor) && !dateValidator.isValid(consentGroup.mor)) {
-    errors.push('Please enter a valid date for the Publication Moratorium (MOR) field.');
+    validation.mor = requiredError;
   }
 
   if (isNil(consentGroup.fileTypes) || isEmpty(consentGroup.fileTypes)) {
-    errors.push('Please specify the file type.');
+    validation.fileTypes = requiredError;
   } else {
-    consentGroup.fileTypes.forEach((ft) => {
+    consentGroup.fileTypes.forEach((ft, idx) => {
       if (isNil(ft.numberOfParticipants)) {
-        errors.push('Please specify the number of participants.');
+        set(validation, ['fileTypes', idx, 'numberOfParticipants'], requiredError);
       }
     });
   }
 
-  return errors;
-};
-
-export const ConsentGroupErrors = (props) => {
-
-  const {
-    errors
-  } = props;
-
-  return div({},
-    errors.map((err, idx) => {
-      return div({style: {marginBottom: '2rem'}}, [
-        h(Notification,
-          {
-            key: idx,
-            notificationData: {
-              level: 'danger',
-              message: err,
-            }
-          }),
-      ]);
-    }),
-  );
+  return validation;
 };

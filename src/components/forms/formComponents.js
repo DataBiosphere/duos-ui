@@ -437,11 +437,11 @@ export const FormInputYesNoRadioGroup = (config) => {
 export const FormInputRadioButton = (config) => {
   const {
     id, disabled, value, toggleText,
-    formValue,
+    formValue, validation
   } = config;
 
   return div({
-    className: 'radio-button-container',
+    className: `radio-button-container ${!isValid(validation) ? 'errored' : ''}`,
   }, [
     h(RadioButton, {
       id: id,
