@@ -4,7 +4,7 @@ import Creatable from 'react-select/creatable';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import AsyncCreatable from 'react-select/async-creatable';
-import { FormField, FormValidators } from './forms';
+import { FormField } from './forms';
 import { RadioButton } from '../RadioButton';
 import PublishIcon from '@mui/icons-material/Publish';
 
@@ -311,7 +311,7 @@ export const FormInputSelect = (config) => {
     onMenuOpen: () => setValidation({ valid: true }),
     onMenuClose: () => {
       if (required && !formValue) {
-        setValidation(FormValidators.REQUIRED.msg);
+        setValidation({ valid: false, failed: ['required'] });
       }
     },
     getOptionLabel: (option) => option.displayText,

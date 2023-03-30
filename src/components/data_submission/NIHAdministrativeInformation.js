@@ -1,7 +1,7 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { nihInstitutions } from './nih_institutions';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isNil } from 'lodash/fp';
 import { useState } from 'react';
 
 export const NIHAdministrativeInformation = (props) => {
@@ -17,6 +17,15 @@ export const NIHAdministrativeInformation = (props) => {
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(initialFormData?.multiCenterStudy === true || false);
   const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(initialFormData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
   const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
+
+  const findInstitutionSelectOption = (id) => {
+    const institution = institutions.find((inst) => inst.id === id);
+
+    return {
+      displayText: institution.name || 'Unknown',
+      id: id,
+    };
+  };
 
   return div({
     isRendered: nihAdminRendered === true,
@@ -35,6 +44,7 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
+      defaultValue: !isNil(initialFormData.piInstitution) ? findInstitutionSelectOption(initialFormData.piInstitution) : null,
       validation: validation.piInstitution,
       onValidationChange,
     }),
