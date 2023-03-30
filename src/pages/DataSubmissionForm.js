@@ -120,12 +120,11 @@ export const DataSubmissionForm = () => {
         validation.alternativeDataSharingPlanFile = {
           valid: false,
           failed: ['required']
-        }
+        };
         valid = false;
       }
     }
 
-    console.log(validation);
     setFormValidation(validation);
 
     if (!valid) {
