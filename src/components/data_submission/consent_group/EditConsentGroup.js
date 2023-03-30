@@ -488,7 +488,7 @@ export const EditConsentGroup = (props) => {
           if (value === 'Not Determined') {
             // if not determined, clear url field as well.
             // must do in one batch call, otherwise react gets confused.
-            onBatchChange({ key, value }, {key: 'url', value: ''});
+            onBatchChange({ key, value }, {key: 'url', value: undefined});
           } else {
             onChange({key, value, isValid});
           }

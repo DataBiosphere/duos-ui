@@ -62,7 +62,7 @@ export const DataSubmissionForm = () => {
   }, [schema]);
 
   const [formFiles, setFormFiles] = useState({});
-  const [formData, setFormData] = useState({ publicVisibility: true });
+  const [formData, setFormData] = useState({});
 
   const [formValidation, setFormValidation] = useState({});
 
@@ -109,7 +109,17 @@ export const DataSubmissionForm = () => {
     formatForRegistration(registration);
 
     // check against json schema to see if there are uncaught validation issues
-    const [valid, validation] = validateForm(validateSchema, registration);
+    let [valid, validation] = validateForm(validateSchema, registration);
+    if (formData.alternativeDataSharingPlan === true) {
+      if (isNil(formFiles.alternativeDataSharingPlanFile)) {
+        validation.alternativeDataSharingPlanFile = {
+          valid: false,
+          failed: ['required']
+        };
+        valid = false;
+      }
+    }
+
     setFormValidation(validation);
 
     if (!valid) {

@@ -1,7 +1,7 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { nihInstitutions } from './nih_institutions';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isNil } from 'lodash/fp';
 import { useState } from 'react';
 import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './NihAnvilUse';
 
@@ -17,6 +17,15 @@ export const NIHAdministrativeInformation = (props) => {
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(formData?.multiCenterStudy === true || false);
   const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(formData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
   const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
+
+  const findInstitutionSelectOption = (id) => {
+    const institution = institutions.find((inst) => inst.id === id);
+
+    return {
+      displayText: institution.name || 'Unknown',
+      id: id,
+    };
+  };
 
   return div({
     isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
@@ -35,7 +44,7 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: formData?.piInstitution,
+      defaultValue: !isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null,
       validation: validation.piInstitution,
       onValidationChange,
     }),
@@ -55,7 +64,6 @@ export const NIHAdministrativeInformation = (props) => {
       onChange,
       type: FormFieldTypes.SELECT,
       isMulti: true,
-      validators: [FormValidators.REQUIRED],
       defaultValue: formData?.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
       validation: validation.nihICsSupportingStudy,
@@ -64,7 +72,6 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'nihProgramOfficerName',
       title: 'NIH Program Officer Name',
-      validators: [FormValidators.REQUIRED],
       onChange,
       placeholder: 'Officer Name',
       defaultValue: formData?.nihProgramOfficerName,
@@ -77,7 +84,6 @@ export const NIHAdministrativeInformation = (props) => {
       placeholder: 'Institute/Center Name',
       onChange,
       type: FormFieldTypes.SELECT,
-      validators: [FormValidators.REQUIRED],
       defaultValue: formData?.nihInstitutionCenterSubmission,
       selectOptions: nihInstitutions,
       validation: validation.nihInstitutionCenterSubmission,
@@ -86,7 +92,6 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'nihGenomicProgramAdministratorName',
       title: 'NIH Genomic Program Administrator Name',
-      validators: [FormValidators.REQUIRED],
       defaultValue: formData?.nihGenomicProgramAdministratorName,
       onChange,
       validation: validation.nihGenomicProgramAdministratorName,
@@ -96,7 +101,6 @@ export const NIHAdministrativeInformation = (props) => {
       id: 'multiCenterStudy',
       title: 'Is this a multi-center study?',
       type: FormFieldTypes.YESNORADIOGROUP,
-      validators: [FormValidators.REQUIRED],
       defaultValue: formData?.multiCenterStudy,
       onChange: ({key, value}) => {
         setShowMultiCenterStudy(value);
@@ -112,7 +116,6 @@ export const NIHAdministrativeInformation = (props) => {
       type: FormFieldTypes.MULTITEXT,
       placeholder: 'List site(s) here...',
       defaultValue: formData?.collaboratingSites,
-      validators: [FormValidators.REQUIRED],
       onChange,
       validation: validation.collaboratingSites,
       onValidationChange,
@@ -122,7 +125,6 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'Is controlled access required for genomic summary results (GSR)?',
       defaultValue: formData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
       type: FormFieldTypes.YESNORADIOGROUP,
-      validators: [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
         setShowGSRRequiredExplanation(value);
         onChange({key, value});
