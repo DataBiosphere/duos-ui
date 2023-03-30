@@ -357,7 +357,7 @@ const DataAccessRequestApplicationNew = (props) => {
     let formattedFormData = cloneDeep(formData);
 
     for (var key in formattedFormData) {
-      if (isString(formattedFormData[key]) && formattedFormData[key].trim()) {
+      if (isString(formattedFormData[key]) && formattedFormData[key].trim() && formattedFormData[key].length === 0) {
         formattedFormData[key] = undefined;
       }
     }
