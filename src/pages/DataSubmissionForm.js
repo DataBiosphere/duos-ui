@@ -1,7 +1,7 @@
 import React,  { useCallback } from 'react';
 import { compileSchema, validateForm } from '../utils/JsonSchemaUtils';
 
-import { cloneDeep, isNil, includes, isArray, isEmpty } from 'lodash/fp';
+import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import { Institution, DataSet, Schema } from '../libs/ajax';
 import { Notifications } from '../libs/utils';

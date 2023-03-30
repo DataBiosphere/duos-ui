@@ -19,7 +19,7 @@ export const NIHAdministrativeInformation = (props) => {
   const [gsrRequiredExplanation, setGSRRequiredExplanation] = useState('');
 
   return div({
-    isRendered: ((formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) || (formData.nihAnvilUse === YES_NHGRI_NO_PHS_ID) || (formData.nihAnvilUse === NO_NHGRI_YES_ANVIL)),
+    isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
     className: 'data-submitter-section',
   }, [
     h2('NIH Administrative Information'),
