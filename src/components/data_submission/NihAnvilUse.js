@@ -1,5 +1,4 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
-import {useState} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
@@ -14,26 +13,13 @@ const nihAnvilUseLabels = {
   no_nhgri_no_anvil: NO_NHGRI_NO_ANVIL,
 };
 
-const allNihAnvilUseFields = [
-  'dbGaPPhsID',
-  'dbGaPStudyRegistrationName',
-  'embargoReleaseDate',
-  'sequencingCenter',
-];
-
 export default function NihAnvilUse(props) {
   const {
     onChange,
-    initialFormData,
+    formData,
     validation,
     onValidationChange,
-    updateParentRenderState,
   } = props;
-  const [nihAnvilUse, setNihAnvilUse] = useState(initialFormData?.nihAnvilUse || null);
-
-  const clearFormValues = () => {
-    allNihAnvilUseFields.forEach((field) => onChange({key: field, value: undefined, isValid: true}));
-  };
 
   return h(div, {
     className: 'data-submitter-section',
@@ -51,22 +37,20 @@ export default function NihAnvilUse(props) {
       ],
       validators: [FormValidators.REQUIRED],
       onChange: (config) => {
-        clearFormValues();
         const value = nihAnvilUseLabels[config.value];
-        onChange({key: config.key, value: [value], isValid: config.isValid});
-        setNihAnvilUse(value);
-        updateParentRenderState({key: config.key, value: [value]});
+        onChange({key: config.key, value: value, isValid: config.isValid});
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
     }),
 
-    div({ isRendered: nihAnvilUse === YES_NHGRI_YES_PHS_ID }, [
+    div({ isRendered: formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID }, [
       h(FormField, {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
         validators: [FormValidators.REQUIRED],
+        defaultValue: formData.dbGaPPhsID,
         onChange,
         validation: validation.dbGaPPhsID,
         onValidationChange,
@@ -76,6 +60,7 @@ export default function NihAnvilUse(props) {
         title: 'dbGaP Study Registration Name',
         placeholder: 'Name',
         validators: [FormValidators.REQUIRED],
+        defaultValue: formData.dbGaPStudyRegistrationName,
         onChange,
         validation: validation.dbGaPStudyRegistrationName,
         onValidationChange,
@@ -86,6 +71,7 @@ export default function NihAnvilUse(props) {
         title: 'Embargo Release Date',
         placeholder: 'YYYY-MM-DD',
         validators: [FormValidators.REQUIRED, FormValidators.DATE],
+        defaultValue: formData.embargoReleaseDate,
         onChange,
         validation: validation.embargoReleaseDate,
         onValidationChange,
@@ -95,6 +81,7 @@ export default function NihAnvilUse(props) {
         title: 'Sequencing Center',
         placeholder: 'Name',
         validators: [FormValidators.REQUIRED],
+        defaultValue: formData.sequencingCenter,
         onChange,
         validation: validation.sequencingCenter,
         onValidationChange,
