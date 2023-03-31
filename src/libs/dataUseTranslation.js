@@ -173,7 +173,7 @@ export const consentTranslations = {
     const restrictionList = restrictions.join(', ');
     return {
       code: 'DS',
-      alternateLabel: `DS ${restrictions.join('-')}`,
+      alternateLabel: `DS (${restrictions.join(', ')})`,
       description: `Use is permitted for the specified disease(s): ${restrictionList}`,
       type: ControlledAccessType.permissions,
     };
