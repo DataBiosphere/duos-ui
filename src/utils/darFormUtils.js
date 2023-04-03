@@ -183,11 +183,11 @@ const calcDarErrors = (formData, datasets, dataUseTranslations, irbDocument, col
   }
 
   if ((needsCollaborationLetter(datasets) && (isNil(collaborationLetter) && isEmpty(formData['collaborationLetterLocation'])))) {
-    errors.collaborationLetterLocation = requiredError;
+    errors.collaborationLetter = requiredError;
   }
 
   if ((needsIrbApprovalDocument(datasets) && (isNil(irbDocument) && isEmpty(formData['irbDocumentLocation'])))) {
-    errors.irbDocumentLocation = requiredError;
+    errors.irbDocument = requiredError;
   }
 
   if ((needsGsoAcknowledgement(datasets) && !formData.gsoAcknowledgement)) {
