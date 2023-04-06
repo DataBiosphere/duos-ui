@@ -14,7 +14,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-import validateSchema from '../utils/schemas/DatasetRegistrationSchemaValidation';
+import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
 
 
