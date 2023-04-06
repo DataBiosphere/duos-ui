@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 APIURL=https://consent.dsde-dev.broadinstitute.org/
 if test -f "./public/config.json"; then
   APIURL=$(jq '.apiUrl' ./public/config.json -r)
