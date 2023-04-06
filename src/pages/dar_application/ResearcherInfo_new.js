@@ -96,7 +96,8 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showNihValidationError,
               readOnly: readOnlyMode,
-              header: true
+              header: true,
+              required: formData.checkCollaborator !== true,
             })
           ]),
           fieldset({ }, [

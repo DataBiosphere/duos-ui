@@ -129,7 +129,14 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         className: this.props.className,
         style: { minHeight: 65, ...this.props.style }
       }, [
-        label({ className: 'control-label', isRendered: this.props.header }, ['NIH eRA Commons ID*']),
+        label(
+          { className: 'control-label', isRendered: this.props.header },
+          [
+            span({}, [
+              'NIH eRA Commons ID',
+              isNil(this.props.required) || this.props.required === true ? '*' : ''
+            ])
+          ]),
         div({
           isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
         }, [
