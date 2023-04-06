@@ -189,8 +189,8 @@ export default function DucAddendum(props) {
     div({
       className: 'dar-step-card'
     }, [
-      h2({}, ['Post Confirmation Summary']),
-      h3({ style: { marginBottom: '2rem' } }, ['Review your DAR before submitting']),
+      h2({}, ['Addendum']),
+      h3({ style: { marginBottom: '2rem' } }, ['Please review the datasets you requested grouped by their data use terms below, and click "Submit" below to send your data access request to the DAC(s).']),
 
       div({ className: 'table-container' }, ducAddendumTable),
 
