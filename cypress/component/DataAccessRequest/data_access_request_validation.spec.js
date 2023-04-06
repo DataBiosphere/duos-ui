@@ -30,7 +30,7 @@ const user = {
       propertyId: 10351,
       userId: 5,
       propertyKey: 'eraExpiration',
-      propertyValue: '1680741397751'
+      propertyValue: '999980741397751'
     },
   ],
 };
