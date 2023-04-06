@@ -304,7 +304,7 @@ const DataAccessRequestApplicationNew = (props) => {
   const addDucAddendumTab = () => {
     const tabs = [
       ...ApplicationTabs,
-      { name: 'Post Confirmation Summary', showStep: false }
+      { name: 'Addendum', showStep: false }
     ];
     setApplicationTabs(tabs);
   };
