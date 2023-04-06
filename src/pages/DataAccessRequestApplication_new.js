@@ -285,7 +285,13 @@ const DataAccessRequestApplicationNew = (props) => {
   };
 
   const updateDraftResponse = async (formattedFormData, referenceId) => {
-    return await DAR.updateDarDraft(formattedFormData, referenceId);
+    let darPartialResponse;
+    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+      darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId);
+    } else {
+      darPartialResponse = await DAR.postDarDraft(formattedFormData);
+    }
+    return darPartialResponse;
   };
 
 
