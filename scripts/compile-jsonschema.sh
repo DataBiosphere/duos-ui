@@ -33,12 +33,13 @@ check_ajv_installed
 
 APIURL=https://consent.dsde-dev.broadinstitute.org/
 if test -f "./public/config.json"; then
-  APIURL=$(jq '.apiUrl' ./public/config.json -r)
+  CONFIGAPIURL=$(jq '.apiUrl' ./public/config.json -r)
+  if [ "$CONFIGAPIURL" != "" ]; then
+    APIURL=$CONFIGAPIURL
+  fi
 fi
 
-
-response_code=$(curl --write-out '%{http_code}' -S -X 'GET'  "$APIURL/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json)
-
+curl -s -S -X 'GET'  "$APIURL/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json
 
 ajv compile -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
 
