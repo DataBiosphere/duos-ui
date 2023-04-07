@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
 # Compiles the json schemas needed for the frontend; output is at
-# ./src/assets/schemas.
+# ./src/assets/schemas. The schemas downloaded are based on the
+# backend configured in ./public/config.json.
+#
 # You MUST have jq and ajv installed to be able to use this script.
 #
 # USAGE: ./compile-jsonschema.sh 
