@@ -1,10 +1,10 @@
 import moment from 'moment';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { div, h, img } from 'react-hyperscript-helpers';
+import { div, h, img, a, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
 import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil, omit } from 'lodash/fp';
-import { Styles, Theme } from '../../libs/theme';
+import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SearchBar from '../SearchBar';
 import SimpleTable from '../SimpleTable';
@@ -14,7 +14,6 @@ import { LibraryCard } from '../../libs/ajax';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import {Delete, Update} from '@mui/icons-material';
 import TableIconButton from '../TableIconButton';
-import SimpleButton from '../SimpleButton';
 
 //Styles specific to the LibraryCard table
 const styles = {
@@ -393,7 +392,42 @@ export default function LibraryCardTable(props) {
           ]),
         ]
       ),
-      h(SearchBar, { handleSearchChange, searchRef }),
+      h(SearchBar, {
+        handleSearchChange,
+        searchRef,
+        style: {
+          width: '100%',
+          margin: '0 3% 0 0',
+        },
+        button: div({
+          style: {
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            justifyContent: 'center',
+            width: '300px'
+          }
+        }, [
+          a({
+            id: 'btn_addLibraryCard',
+            className: 'btn-primary btn-add common-background',
+            style: {
+              marginTop: '30%',
+              display: 'flex',
+            },
+            onClick: () =>
+              showModalOnClick(
+                {},
+                'add',
+                setModalType,
+                setShowModal,
+                setCurrentCard
+              ),
+          }, [
+            span({}, ['Add Library Card']),
+          ]),
+        ]),
+      }),
     ]),
     h(SimpleTable, {
       isLoading,
@@ -403,20 +437,6 @@ export default function LibraryCardTable(props) {
       tableSize,
       paginationBar,
     }),
-    div({ style: { marginLeft: '90%' } }, [
-      h(SimpleButton, {
-        onClick: () =>
-          showModalOnClick(
-            {},
-            'add',
-            setModalType,
-            setShowModal,
-            setCurrentCard
-          ),
-        baseColor: Theme.palette.secondary,
-        label: 'Add Library Card',
-      }),
-    ]),
     h(LibraryCardFormModal, {
       showModal,
       updateOnClick: updateListFn,
