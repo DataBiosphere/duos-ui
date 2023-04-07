@@ -25,7 +25,7 @@ check_ajv_installed() {
 }
 
 prepend_text() {
-  echo "$1 $(cat $2)" > $2
+  echo "$1 $(cat "$2")" > "$2"
 }
 
 check_jq_installed
