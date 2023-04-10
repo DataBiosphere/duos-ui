@@ -76,7 +76,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     {/* Order is important for processing links with embedded dataRequestIds */}
     {/*
-        For non-staging/prod (i.e. dev, local, alpha, point existing dar urls (and new url) to new component
+        For non-staging/prod (i.e. dev, local, alpha), point existing dar urls (and new url) to new component
         and point `_old` version of the url to the old component.
         For all environments, point `_old` -> old component and `_new` -> new component.
         TODO: Remove all `_new` and `_old` urls and old component when feature is completely released.
