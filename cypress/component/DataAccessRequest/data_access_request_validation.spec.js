@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import DataAccessRequestApplication from '../../../src/pages/DataAccessRequestApplication.js';
+import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.js';
 import { MemoryRouter } from 'react-router-dom';
 import { User, DataSet, DAR } from '../../../src/libs/ajax';
 import { Storage } from '../../../src/libs/storage.js';
