@@ -20,7 +20,7 @@ import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, m
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
 
-class DataAccessRequestApplication extends Component {
+class DataAccessRequestApplication_old extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -1087,4 +1087,4 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
-export default DataAccessRequestApplication;
+export default DataAccessRequestApplication_old;
