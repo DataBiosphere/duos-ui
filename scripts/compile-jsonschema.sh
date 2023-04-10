@@ -28,9 +28,11 @@ prepend_text() {
   echo "$1 $(cat "$2")" > "$2"
 }
 
+# Ensure dependencies are present
 check_jq_installed
 check_ajv_installed
 
+# Extract the URL for the backend from the config
 APIURL=https://consent.dsde-dev.broadinstitute.org/
 if test -f "./public/config.json"; then
   CONFIGAPIURL=$(jq '.apiUrl' ./public/config.json -r)
@@ -39,8 +41,11 @@ if test -f "./public/config.json"; then
   fi
 fi
 
+# Download the data submission schema
 curl -s -S -X 'GET'  "$APIURL/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json
 
+# Generate the data submission schema validation code
 ajv compile -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
 
+# Prevent linting errors (minified file)
 prepend_text "/* eslint-disable */" ./src/assets/schemas/DataRegistrationV1Validation.js

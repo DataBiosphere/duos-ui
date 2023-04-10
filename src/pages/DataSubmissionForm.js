@@ -14,9 +14,10 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+// schema validation is auto-generated from pre-compiled code - if the backend
+// schama changes, then run `npm run genschemas` to regenerate this code
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
-
 
 export const DataSubmissionForm = () => {
 

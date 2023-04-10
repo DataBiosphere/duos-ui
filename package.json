@@ -44,7 +44,7 @@
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
     "start": "react-scripts start",
-    "prestart": "./scripts/compile-jsonschema.sh",
+    "genschemas": "./scripts/compile-jsonschema.sh",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "cypress:open": "CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) CYPRESS_CHAIR=$(cat cypress/fixtures/duos-automation-chair.json) CYPRESS_MEMBER=$(cat cypress/fixtures/duos-automation-member.json) CYPRESS_RESEARCHER=$(cat cypress/fixtures/duos-automation-researcher.json) CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) cypress open",
