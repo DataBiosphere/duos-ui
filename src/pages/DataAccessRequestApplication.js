@@ -45,7 +45,7 @@ const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
 
-const DataAccessRequestApplicationNew = (props) => {
+const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
     datasetIds: [],
     darCode: null,
@@ -597,4 +597,4 @@ const DataAccessRequestApplicationNew = (props) => {
   );
 };
 
-export default DataAccessRequestApplicationNew;
+export default DataAccessRequestApplication;

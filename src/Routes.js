@@ -6,7 +6,7 @@ import {USER_ROLES} from './libs/utils';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication_old from './pages/DataAccessRequestApplication_old';
-import DataAccessRequestApplicationNew from './pages/DataAccessRequestApplication_new';
+import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DACDatasets from './pages/DACDatasets';
 import DatasetRegistration from './pages/DatasetRegistration';
@@ -77,10 +77,10 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication_old} props={props}
                         rolesAllowed={[USER_ROLES.researcher]} />
-    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplicationNew} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication_old} props={props}
                         rolesAllowed={[USER_ROLES.researcher]} />
-    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplicationNew} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
+    {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />}
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication_old} props={props}
                         rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
