@@ -1,26 +1,26 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span } from 'react-hyperscript-helpers';
-import ResearcherInfo from './dar_application/ResearcherInfo';
-import DataAccessRequest from './dar_application/DataAccessRequest';
-import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
-import DataUseAgreements from './dar_application/DataUseAgreements';
+import ResearcherInfo from './ResearcherInfo';
+import DataAccessRequest from './DataAccessRequest';
+import ResearchPurposeStatement from './ResearchPurposeStatement';
+import DataUseAgreements from './DataUseAgreements';
 import {
   isFileEmpty,
   Navigation,
   Notifications as NotyUtil
-} from '../libs/utils';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { Notification } from '../components/Notification';
-import { PageHeading } from '../components/PageHeading';
-import { Collections, DAR, DataSet, User } from '../libs/ajax';
-import { NotificationService } from '../libs/notificationService';
-import { Storage } from '../libs/storage';
+} from '../../libs/utils';
+import { TypeOfResearch } from './TypeOfResearch';
+import { ConfirmationDialog } from '../../components/ConfirmationDialog';
+import { Notification } from '../../components/Notification';
+import { PageHeading } from '../../components/PageHeading';
+import { Collections, DAR, DataSet, User } from '../../libs/ajax';
+import { NotificationService } from '../../libs/notificationService';
+import { Storage } from '../../libs/storage';
 import { any, assign, cloneDeep, find, get, getOr, head, isEmpty, isNil, keys, map, merge, pickBy } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
-import headingIcon from '../images/icon_add_access.png';
+import headingIcon from '../../images/icon_add_access.png';
 
-class DataAccessRequestApplication extends Component {
+class DataAccessRequestApplication_old extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -1087,4 +1087,4 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
-export default DataAccessRequestApplication;
+export default DataAccessRequestApplication_old;

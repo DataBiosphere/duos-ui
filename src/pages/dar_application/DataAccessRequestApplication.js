@@ -1,30 +1,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import ResearcherInfo from './dar_application/ResearcherInfo_new';
-import DataUseAgreements from './dar_application/DataUseAgreements_new';
-import DataAccessRequest from './dar_application/DataAccessRequest_new';
-import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement_new';
-import { translateDataUseRestrictionsFromDataUseArray } from '../libs/dataUseTranslation';
+import ResearcherInfo from './ResearcherInfo_new';
+import DataUseAgreements from './DataUseAgreements_new';
+import DataAccessRequest from './DataAccessRequest_new';
+import ResearchPurposeStatement from './ResearchPurposeStatement_new';
+import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 import {
   Navigation,
   Notifications as NotyUtil
-} from '../libs/utils';
-import { ConfirmationDialog } from '../components/ConfirmationDialog_new';
-import { Notification } from '../components/Notification';
-import { PageHeading } from '../components/PageHeading';
-import { Collections, DAR, User, DataSet } from '../libs/ajax';
-import { NotificationService } from '../libs/notificationService';
-import { Storage } from '../libs/storage';
+} from '../../libs/utils';
+import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
+import { Notification } from '../../components/Notification';
+import { PageHeading } from '../../components/PageHeading';
+import { Collections, DAR, User, DataSet } from '../../libs/ajax';
+import { NotificationService } from '../../libs/notificationService';
+import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
-import headingIcon from '../images/icon_add_access.png';
+import headingIcon from '../../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
 import {
   validateDARFormData
-} from '../utils/darFormUtils';
+} from '../../utils/darFormUtils';
 import { isArray, set } from 'lodash';
-import DucAddendum from './dar_application/DucAddendum';
+import DucAddendum from './DucAddendum';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -45,7 +45,7 @@ const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
 
-const DataAccessRequestApplicationNew = (props) => {
+const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
     datasetIds: [],
     darCode: null,
@@ -597,4 +597,4 @@ const DataAccessRequestApplicationNew = (props) => {
   );
 };
 
-export default DataAccessRequestApplicationNew;
+export default DataAccessRequestApplication;

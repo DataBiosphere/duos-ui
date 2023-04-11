@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import DataAccessRequestApplicationNew from '../../../src/pages/DataAccessRequestApplication_new.js';
+import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.js';
 import { MemoryRouter } from 'react-router-dom';
 import { User, DataSet, DAR } from '../../../src/libs/ajax';
 import { Storage } from '../../../src/libs/storage.js';
@@ -77,7 +77,7 @@ describe('Data Access Request - Validation', () => {
 
     mount(
       <MemoryRouter initialEntries={['/']}>
-        <DataAccessRequestApplicationNew {...props} />
+        <DataAccessRequestApplication {...props} />
       </MemoryRouter>
     );
   });
