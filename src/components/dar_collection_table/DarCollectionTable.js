@@ -202,7 +202,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     collections, columns, isLoading, cancelCollection, reviseCollection,
     openCollection, goToVote, consoleType, relevantDatasets, deleteDraft,
   } = props;
-  const isAdminPage = consoleType === consoleTypes.ADMIN;
+  const isUnfilteredView = consoleType === consoleTypes.ADMIN || consoleType === consoleTypes.RESEARCHER;
 
   /*
     NOTE: This component will most likely be used in muliple consoles
@@ -301,7 +301,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
             summary: collectionsSummaryMap[darCollectionId],
             collection: fetchDarCollection(darCollectionId),
             isLoading: isNil(darCollectionCache[darCollectionId]),
-            isAdminPage: isAdminPage
+            isUnfilteredView
           }),
         ])
 
@@ -309,7 +309,7 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     }
 
     return renderedRow;
-  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isAdminPage]);
+  }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isUnfilteredView]);
 
   return h(Fragment, {}, [
     h(SimpleTable, {
