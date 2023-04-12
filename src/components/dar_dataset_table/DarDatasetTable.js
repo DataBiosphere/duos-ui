@@ -152,7 +152,7 @@ export const DarDatasetTable = (props) => {
   const [buckets, setBuckets] = useState([]);
 
   const {
-    collection, isLoading, isAdminPage
+    collection, isLoading, isUnfilteredView
   } = props;
 
   const [isInitializing, setIsInitializing] = useState(true);
@@ -164,7 +164,7 @@ export const DarDatasetTable = (props) => {
         return;
       }
       // If this is NOT an admin view, we need to filter buckets by the user's DACs
-      const dacIds = isAdminPage ? [] : uniq(compact(map(r => r.dacId)(user.roles)));
+      const dacIds = isUnfilteredView ? [] : uniq(compact(map(r => r.dacId)(user.roles)));
       const buckets = await binCollectionToBuckets(collection, dacIds);
       const dataAccessBuckets = buckets.filter(
         (b) => b.isRP !== true
@@ -177,7 +177,7 @@ export const DarDatasetTable = (props) => {
       });
     }
     setIsInitializing(false);
-  }, [collection, isAdminPage, user]);
+  }, [collection, isUnfilteredView, user]);
 
   useEffect(() => {
     try {

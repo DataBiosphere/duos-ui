@@ -83,18 +83,17 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
     if (isUndefined(dataset.dataUse) || isOther(dataset.dataUse)) {
       buckets.push(bucket);
     } else {
-      // Add to bucket if the data use doesn't exist
-      const bucketDataUses = map(b => b.dataUse)(buckets);
-      if (!any(dataset.dataUse)(bucketDataUses)) {
+      /* TODO: investigate whether this can be done more efficiently */
+      let added = false;
+      forEach(b => {
+        if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
+          b.datasets.push(dataset);
+          b.datasetIds.push(dataset.dataSetId);
+          added = true;
+        }
+      })(buckets);
+      if (!added) {
         buckets.push(bucket);
-      } else {
-        // If it does exist, merge this dataset into that bucket
-        forEach(b => {
-          if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
-            b.datasets.push(dataset);
-            b.datasetIds.push(dataset.dataSetId);
-          }
-        })(buckets);
       }
     }
 
