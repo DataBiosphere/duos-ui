@@ -41,11 +41,16 @@ if test -f "./public/config.json"; then
   fi
 fi
 
-# Download the data submission schema
-curl -s -S -X 'GET'  "$APIURL/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json
+download_and_compile_schema() {
+  # Download the data submission schema
+  curl -s -S -X 'GET'  "$1/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json
 
-# Generate the data submission schema validation code
-ajv compile -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
+  # Generate the data submission schema validation code
+  ajv compile -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
 
-# Prevent linting errors (minified file)
-prepend_text "/* eslint-disable */" ./src/assets/schemas/DataRegistrationV1Validation.js
+  # Prevent linting errors (minified file)
+  prepend_text "/* eslint-disable */" ./src/assets/schemas/DataRegistrationV1Validation.js
+
+}
+
+download_and_compile_schema "$APIURL"
