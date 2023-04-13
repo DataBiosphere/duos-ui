@@ -1,9 +1,9 @@
 import React,  { useCallback } from 'react';
-import { compileSchema, validateForm } from '../utils/JsonSchemaUtils';
+import { validateForm } from '../utils/JsonSchemaUtils';
 
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import { Institution, DataSet, Schema } from '../libs/ajax';
+import { Institution, DataSet } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 
 import lockIcon from '../images/lock-icon.png';
@@ -14,16 +14,15 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+// schema validation is auto-generated from pre-compiled code - if the backend
+// schama changes, then run `npm run genschemas` to regenerate this code
+import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
-
 
 export const DataSubmissionForm = () => {
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
-
-  const [schema, setSchema] = useState();
-  const [validateSchema, setValidateSchema] = useState();
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
 
@@ -33,15 +32,10 @@ export const DataSubmissionForm = () => {
       const institutions = await Institution.list();
       setInstitutions(institutions);
     };
-    const getSchema = async () => {
-      const schema = await Schema.datasetRegistrationV1();
-      setSchema(schema);
-    };
 
     const init = async () => {
       try {
         getAllInstitutions();
-        getSchema();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -52,14 +46,6 @@ export const DataSubmissionForm = () => {
 
     init();
   }, []);
-
-  useEffect(() => {
-    if (!isNil(schema)) {
-      setValidateSchema(() => compileSchema(schema));
-    } else {
-      setValidateSchema();
-    }
-  }, [schema]);
 
   const [formFiles, setFormFiles] = useState({});
   const [formData, setFormData] = useState({});

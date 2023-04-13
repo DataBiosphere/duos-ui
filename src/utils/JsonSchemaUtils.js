@@ -22,15 +22,15 @@ const formats = {
  * @param {*} obj Form data
  * @returns Form component compatible validation object
  */
-export const validateForm = (compiledSchema, obj) => {
-  const valid = compiledSchema(obj);
+export const validateForm = (validate, obj) => {
+  const valid = validate(obj);
 
   if (valid) {
     return [true, {}];
   }
 
   const validationObject = {};
-  compiledSchema.errors.forEach((error) => {
+  validate.errors.forEach((error) => {
 
     let path;
     let errorType;
@@ -61,22 +61,6 @@ export const validateForm = (compiledSchema, obj) => {
   return [false, validationObject];
 };
 
-/**
- * Compiles schema (defaults to 2019-09 draft version of JSON Schema)
- */
-export const compileSchema = (schema) => {
-  return addFormats(new Ajv({strict: false, allErrors: true})).compile(schema);
-};
-
-
-const addFormats = (ajv) => {
-  for (const formatId of Object.keys(formats)) {
-    ajv = ajv.addFormat(formatId, formats[formatId]);
-  }
-  return ajv;
-};
-
-
 const updateValidation = (existingValidation, validationError) => {
   if (isNil(existingValidation)) {
     return {
@@ -105,4 +89,19 @@ const splitJsonPointer = (jsonPointer) => {
   }
 
   return jsonPointer.split('/');
+};
+
+/**
+ * Compiles schema (defaults to 2019-09 draft version of JSON Schema)
+ */
+export const compileSchema = (schema) => {
+  return addFormats(new Ajv({strict: false, allErrors: true})).compile(schema);
+};
+
+
+const addFormats = (ajv) => {
+  for (const formatId of Object.keys(formats)) {
+    ajv = ajv.addFormat(formatId, formats[formatId]);
+  }
+  return ajv;
 };
