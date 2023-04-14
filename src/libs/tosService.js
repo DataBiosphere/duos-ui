@@ -11,9 +11,10 @@ export const TosService = {
     return {
       marginTop: '-50px',
       paddingTop: '25px',
-      minHeight: '700px',
+      minHeight: '900px',
       backgroundImage: `linear-gradient(to right, transparent, white 50%), url(${homeHeaderBackground})`,
-      backgroundRepeat: 'no-repeat'
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover'
     };
   },
 
@@ -22,6 +23,7 @@ export const TosService = {
       margin: '50px',
       maxWidth: '800px',
       padding: '1.5rem',
+      height: '100%',
       backgroundColor: 'white',
       boxShadow: 'rgb(0 0 0 / 12%) 0 3px 2px 1px',
       borderRadius: '5px',
