@@ -529,7 +529,7 @@ class DuosHeader extends Component {
       //Hard to make that navbar flexible with material-ui's syntax
       //For now I will use material-ui's hidden element to selectively render the two different navbars
       //I'll look into rewriting the large navbar on a later PR
-      h(Hidden, { lgUp: true }, [
+      h(Hidden, { mdUp: true }, [
         this.makeNotifications(),
         div(
           {
