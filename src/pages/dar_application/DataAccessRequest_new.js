@@ -1,6 +1,7 @@
 import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
 import { DataSet, DAR } from '../../libs/ajax';
 import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
+import { isNil } from 'lodash/fp';
 import {
   needsDsAcknowledgement,
   needsPubAcknowledgement,
@@ -41,9 +42,12 @@ const searchDatasets = (query, callback, currentDatasets) => {
   const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
 
   DataSet.searchDatasets(query).then(items => {
-    let options = items.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
-      return formatSearchDataset(item);
-    });
+    let options = items
+      .filter((ds) => !currentDatasetIds.includes(ds.dataSetId))
+      .filter((ds) => !isNil(ds.dacId) && ds.dataUse.openAccess !== true)
+      .map(function (item) {
+        return formatSearchDataset(item);
+      });
     callback(options);
   });
 };
