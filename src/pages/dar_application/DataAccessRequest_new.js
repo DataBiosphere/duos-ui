@@ -44,7 +44,17 @@ const searchDatasets = (query, callback, currentDatasets) => {
   DataSet.searchDatasets(query).then(items => {
     let options = items
       .filter((ds) => !currentDatasetIds.includes(ds.dataSetId))
-      .filter((ds) => !isNil(ds.dacId) && ds.dataUse.openAccess !== true)
+      .filter((ds) => {
+        // if no dac id, fail early
+        if (isNil(ds.dacId)) {
+          return false;
+        }
+
+        const openAccessProp = ds.properties.find((prop) => prop.schemaName === 'openAccess');
+
+        // open access should be nil or falsy to be valid for DAR search
+        return isNil(openAccessProp) || openAccessProp.propertyValue !== true;
+      })
       .map(function (item) {
         return formatSearchDataset(item);
       });
