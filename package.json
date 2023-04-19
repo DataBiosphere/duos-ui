@@ -85,6 +85,9 @@
   ],
   "overrides": {
     "react": "$react",
-    "react-dom": "$react-dom"
+    "react-dom": "$react-dom",
+    "ajv-cli": {
+      "fast-json-patch": "^3.1.1"
+    }
   }
 }
