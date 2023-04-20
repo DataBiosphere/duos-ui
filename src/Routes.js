@@ -5,7 +5,6 @@ import AuthenticatedRoute from './components/AuthenticatedRoute';
 import {USER_ROLES} from './libs/utils';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageUsers from './pages/AdminManageUsers';
-import DataAccessRequestApplication_old from './pages/dar_application/DataAccessRequestApplication_old';
 import DataAccessRequestApplication from './pages/dar_application/DataAccessRequestApplication';
 import DatasetCatalog from './pages/DatasetCatalog';
 import DACDatasets from './pages/DACDatasets';
@@ -77,22 +76,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application_review/:collectionId" component={DataAccessRequestApplication} props={props}
       rolesAllowed={[USER_ROLES.researcher]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
-    {/*
-        For non-prod (i.e. dev, local, alpha, staging) point existing dar urls (and new url) to new component
-        and point `_old` version of the url to the old component.
-        For all environments, point `_old` -> old component and `_new` -> new component.
-        TODO: Remove all `_new` and `_old` urls and old component when feature is completely released.
-      */}
-    <AuthenticatedRoute path="/dar_application/:dataRequestId"
-      component={checkEnv(envGroups.NON_PROD) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
-      props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application"
-      component={checkEnv(envGroups.NON_PROD) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
-      props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_old/:dataRequestId" component={DataAccessRequestApplication_old} props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/dar_application_old" component={DataAccessRequestApplication_old} props={props} rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
