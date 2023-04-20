@@ -1,6 +1,6 @@
 import { a, div, fieldset, h2, h3, h4, h, span } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
-import './dar_application_new.css';
+import './dar_application.css';
 import { FormField, FormFieldTypes, FormValidators } from '../../components/forms/forms';
 
 const ResearchPurposeRow = (props) => {

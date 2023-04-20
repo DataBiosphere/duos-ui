@@ -5,7 +5,7 @@ import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
-import './dar_application_new.css';
+import './dar_application.css';
 
 export default function DataUseAgreements(props) {
 

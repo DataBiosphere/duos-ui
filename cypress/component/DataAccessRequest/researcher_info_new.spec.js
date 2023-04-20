@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo_new.js';
+import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo.js';
 import {User} from '../../../src/libs/ajax';
 import {BrowserRouter} from 'react-router-dom';
 

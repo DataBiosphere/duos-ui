@@ -5,7 +5,7 @@ import { button, div, h } from 'react-hyperscript-helpers';
 import './collaborator.css';
 import { isNil } from 'lodash';
 
-export default function CollaboratorList_new(props) {
+export default function CollaboratorList(props) {
   const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval, setCompleted, validation, onValidationChange} = props;
 
   const [collaborators, setCollaborators] = useState(props.collaborators || []);

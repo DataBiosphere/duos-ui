@@ -3,10 +3,10 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h2, h3, h4, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import CollaboratorList_new from './collaborator/CollaboratorList_new';
+import CollaboratorList from './collaborator/CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
-import './dar_application_new.css';
+import './dar_application.css';
 
 const linkStyle = {color: '#2FA4E7'};
 const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile']);
@@ -172,7 +172,7 @@ export default function ResearcherInfo(props) {
             level here. If your DAR is approved, you will be responsible for the appropriate use of the 
             data by each individual listed in this section.`
           ),
-          h(CollaboratorList_new, {
+          h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.labCollaborators,
             collaboratorKey: 'labCollaborators',
@@ -199,7 +199,7 @@ export default function ResearcherInfo(props) {
             Internal Collaborators will not be required to submit an independent DAR to collaborate 
             on this project.`
           ),
-          h(CollaboratorList_new, {
+          h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.internalCollaborators,
             collaboratorKey: 'internalCollaborators',
@@ -389,7 +389,7 @@ export default function ResearcherInfo(props) {
             as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
             the External Collaborators listed.`
           ),
-          h(CollaboratorList_new, {
+          h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.externalCollaborators,
             collaboratorKey: 'externalCollaborators',
