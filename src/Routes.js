@@ -78,16 +78,16 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     {/* Order is important for processing links with embedded dataRequestIds */}
     {/*
-        For non-staging/prod (i.e. dev, local, alpha), point existing dar urls (and new url) to new component
+        For non-prod (i.e. dev, local, alpha, staging) point existing dar urls (and new url) to new component
         and point `_old` version of the url to the old component.
         For all environments, point `_old` -> old component and `_new` -> new component.
         TODO: Remove all `_new` and `_old` urls and old component when feature is completely released.
       */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId"
-      component={checkEnv(envGroups.NON_STAGING) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
+      component={checkEnv(envGroups.NON_PROD) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
       props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application"
-      component={checkEnv(envGroups.NON_STAGING) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
+      component={checkEnv(envGroups.NON_PROD) ? DataAccessRequestApplication : DataAccessRequestApplication_old}
       props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application_new/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application_new" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
