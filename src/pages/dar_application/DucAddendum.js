@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from 'react';
 import { a, div, h2, h3, h } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import SimpleTable from '../../components/SimpleTable';
-import './dar_application_new.css';
+import './dar_application.css';
 import { binCollectionToBuckets } from '../../utils/BucketUtils';
 import { useCallback } from 'react';
 import { isEmpty, flatten } from 'lodash/fp';

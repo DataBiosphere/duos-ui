@@ -1,621 +1,415 @@
-import { useState, useEffect} from 'react';
-import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
-import isNil from 'lodash/fp/isNil';
-import isEmpty from 'lodash/fp/isEmpty';
-import forEach from 'lodash/fp/forEach';
-import includes from 'lodash/fp/includes';
-import cloneDeep from 'lodash/fp/cloneDeep';
-import isEqual from 'lodash/fp/isEqual';
-import every from 'lodash/fp/every';
-import any from 'lodash/fp/some';
-import { DAR } from '../../libs/ajax';
-import AsyncSelect from 'react-select/async';
-import UploadLabelButton from '../../components/UploadLabelButton';
-import { isFileEmpty } from '../../libs/utils';
+import { a, div, h, h4, span, p } from 'react-hyperscript-helpers';
+import { DataSet, DAR } from '../../libs/ajax';
+import { FormField, FormFieldTitle, FormFieldTypes, FormValidators } from '../../components/forms/forms';
+import {
+  needsDsAcknowledgement,
+  needsPubAcknowledgement,
+  needsIrbApprovalDocument,
+  needsCollaborationLetter,
+  needsGsoAcknowledgement,
+  newIrbDocumentExpirationDate,
+} from '../../utils/darFormUtils';
 
-const uploadFileDiv = (showValidationMessages, uploadedFile, currentDocumentLocation) => {
+const formatOntologyForSelect = (ontology) => {
   return {
-    padding: '1rem',
-    backgroundColor: showValidationMessages && (isFileEmpty(uploadedFile) && isEmpty(currentDocumentLocation)) ? errorBackgroundColor : 'inherit'
+    value: ontology.id,
+    displayText: ontology.label,
+    item: ontology,
   };
 };
 
-const dulQuestionDiv = (showValidationMessages, questionBool) => {
+const formatOntologyForFormData = (ontology) => {
   return {
-    backgroundColor: showValidationMessages && !questionBool ?
-      errorBackgroundColor : 'inherit',
-    padding: '1rem',
-    margin: '0.5rem 0'
+    id: ontology.id || ontology.item.id,
+    key: ontology.id || ontology.item.id,
+    value: ontology.id || ontology.item.id,
+    label: ontology.label || ontology.item.label,
+    item: ontology.item || ontology
   };
 };
 
-const uploadFileDescription = {
-  paddingBottom: '1.5rem'
-};
-
-const errorBackgroundColor = 'rgba(243, 73, 73, 0.19)';
-
-//NOTE: need to change props to account for file locations for previous uploaded file
-export default function DataAccessRequest(props) {
-  const {
-    darCode,
-    initializeDatasets, //method used to assign dataUse to pre-assgined datasets in the application
-    onDatasetsChange,
-    showValidationMessages,
-    formFieldChange,
-    isTypeOfResearchInvalid,
-    TypeOfResearch,
-    nextPage,
-    prevPage,
-    partialSave,
-    irbDocumentLocation,
-    irbDocumentName,
-    collaborationLetterLocation,
-    collaborationLetterName,
-    uploadedIrbDocument,
-    uploadedCollaborationLetter,
-    changeDARDocument,
-    referenceId
-  } = props;
-
-  const [projectTitle, setProjectTitle] = useState(props.projectTitle);
-  const [methods, setMethods] = useState(props.methods);
-  const [controls, setControls] = useState(props.controls);
-  const [population, setPopulation] = useState(props.population);
-  const [rus, setRus] = useState(props.rus);
-  const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
-  const [datasets, setDatasets] = useState(props.datasets || []);
-  const [activeDULQuestions, setActiveDULQuestions] = useState({});
-  //parent needs to initialize defaults if value not present
-  const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
-  const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
-  const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
-
-  const searchDatasets = (query, callback) => {
-    DAR.getAutoCompleteDS(query).then(items => {
-      let options = items.map(function (item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.concatenation
-        };
-      });
+const autocompleteOntologies = (query, callback) => {
+  let options = [];
+  DAR.getAutoCompleteOT(query).then(
+    items => {
+      options = items.map(formatOntologyForSelect);
       callback(options);
     });
+};
+
+const searchDatasets = (query, callback, currentDatasets) => {
+  const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
+
+  DataSet.searchDatasets(query).then(items => {
+    let options = items.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
+      return formatSearchDataset(item);
+    });
+    callback(options);
+  });
+};
+
+const formatSearchDataset = (ds) => {
+  return {
+    key: ds.dataSetId.toString(),
+    value: ds.dataSetId,
+    dataset: ds,
+    displayText: ds.datasetIdentifier,
+    label: span({}, [
+      span({style: {fontWeight: 'bold'}}, [ds.datasetIdentifier]), ' | ', ds.name]),
+  };
+};
+
+export default function DataAccessRequest(props) {
+  const {
+    formFieldChange,
+    batchFormFieldChange,
+    formData,
+    datasets,
+    dataUseTranslations,
+    uploadedIrbDocument,
+    updateUploadedIrbDocument,
+    uploadedCollaborationLetter,
+    updateCollaborationLetter,
+    setDatasets,
+    validation,
+    readOnlyMode,
+    formValidationChange,
+    ariaLevel = 2
+  } = props;
+
+  const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
+
+  const onChange = ({key, value}) => {
+    formFieldChange({key, value});
   };
 
-  //function needed to update state for checkboxes
-  const checkedStateChange = (dataset, setter) => {
-    const { value } = dataset;
-    setter(value);
-    formFieldChange(dataset);
+
+  const onValidationChange = ({key, validation}) => {
+    formValidationChange({key, validation});
   };
 
-  const calculateDSTally = (diseaseRestrictions, ontologyTally) => {
-    forEach((diseaseLink) => {
-      if(!ontologyTally[diseaseLink]) {
-        ontologyTally[diseaseLink] = 0;
-      }
-      ontologyTally[diseaseLink]++;
-    })(diseaseRestrictions);
-  };
-
-  //initialization hook, loads data from props
-  useEffect(() => {
-    setProjectTitle(props.projectTitle);
-    setRus(props.rus);
-    setNonTechRus(props.nonTechRus);
-    setDatasets(props.datasets); //initialization of datasets from props
-  }, [props.rus, props.nonTechRus, props.projectTitle, props.datasets]);
-
-  //seperate hook for datasets once state is assigned value from props
-  //used for updates as users add/remove items from AsyncSelect
-  useEffect(() => {
-    const uncappedForEach = forEach.convert({cap:false});
-
-    const calculateRestrictionEquivalency = (datasetCollection) => {
-      const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
-      let updatedDULQuestions = {};
-      let ontologyTally = {};
-      if (!isNil(datasetCollection)) {
-        const collectionLength = datasetCollection.length;
-        datasetCollection.forEach(dataset => {
-          const dataUse = dataset.dataUse;
-          if (!isNil(dataUse) && !isEmpty(dataUse)) {
-            uncappedForEach((value, key) => {
-              if(includes(key, targetDULKeys)) {
-                if (key === 'diseaseRestrictions' && collectionLength > 1) {
-                  //process DS attributes seperately due to unique attributes
-                  calculateDSTally(value, ontologyTally);
-                } else {
-                  //otherwise check value. If true, update with value, otherwise defer to current status on updatedDULQuestions
-                  updatedDULQuestions[key] = value || updatedDULQuestions[key];
-                }
-              }
-            })(dataUse);
-          }
-        });
-
-        if(Object.keys(ontologyTally).length > 0) {
-          updatedDULQuestions['diseaseRestrictions'] = !every((count) => {
-            return count === collectionLength && count > 0;
-          })(ontologyTally);
-        } else {
-          //ds rendering logic is compromised with submitted dars due to datasets being split into groups of one
-          //therefore dsAcknowledgement is maintained in order to ensure conditional rendering on that value
-          //Example: if dsAcknowledgement is true, question should be rendered
-          //if false, question should not be rendered since
-          //  1) if ds question is active, statement needs to be marked true for submission (false would not be a valid answer)
-          //  2) if ds question is inactive, false value will indicate that the question should not be rendered. (True would not be a valid answer)
-          updatedDULQuestions['diseaseRestrictions'] = false;
-        }
-      }
-
-      if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
-        setActiveDULQuestions(updatedDULQuestions);
-        //integrity checks/actions only occur on drafts
-        if(isEmpty(darCode)) {
-          //maintain dsAcknowledgement integrity when question is no longer active
-          if(!updatedDULQuestions['diseaseRestrictions']) {
-            setDSAcknowledgement(false);
-            formFieldChange({name: 'dsAcknowledgement', value: false});
-          }
-          //clear document files if associated question is inactive
-          //active clearing allows submitted DAR to control document rendering confidently when referencing these variables
-          if(!updatedDULQuestions['ethicsApprovalRequired']) {
-            formFieldChange({name: 'irbDocumentName', value: ''});
-            formFieldChange({name: 'irbDocumentLocation', value: ''});
-          }
-          if(!updatedDULQuestions['collaboratorRequired']) {
-            formFieldChange({name: 'collaborationLetterName', value: ''});
-            formFieldChange({name: 'collaborationLetterLocation', value: ''});
-          }
-        }
-        //State update is asynchronous, send updatedDULQuestions for parent component
-        formFieldChange({name: 'activeDULQuestions', value: updatedDULQuestions});
-      }
+  const primaryChange = ({key, value}) => {
+    let newFormData = {
+      diseases: null,
+      hmb: null,
+      poa: null,
+      methods: null,
+      other: null,
     };
 
-    const updateDatasetsAndDULQuestions = async(rawDatasetCollection) => {
-      const clonedDatasets = cloneDeep(rawDatasetCollection);
-      if (!every((dataset) => !isNil(dataset.dataUse) || !isEmpty(dataset.dataUse), rawDatasetCollection)) {
-        const updatedDatasets = await initializeDatasets(clonedDatasets);
-        setDatasets(updatedDatasets);
-        calculateRestrictionEquivalency(updatedDatasets);
+    // ensure that non visible fields are unselected
+    for (var key0 in newFormData) {
+      if (key === key0) {
+        newFormData[key0] = value;
+        break;
       } else {
-        calculateRestrictionEquivalency(clonedDatasets);
+        newFormData[key0] = false;
       }
-    };
-
-    updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
-
-  const renderDULQuestions = (darCode) => {
-    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && any(value => value === true)(activeDULQuestions);
-
-    if(!isEmpty(darCode)) {
-      //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
-      renderBool = renderBool || (dsAcknowledgement === true);
     }
-    return renderBool;
+
+    // if, after updating, 'diseases', 'hmb', 'poa', and 'methods' are false, then 'other' is true.
+    if (newFormData['diseases'] === false && newFormData['hmb'] === false && newFormData['poa'] === false && newFormData['methods'] === false) {
+      newFormData['other'] = true;
+    }
+
+    batchFormFieldChange(newFormData);
   };
 
   return (
-    div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-      fieldset({ disabled: !isNil(darCode) }, [
-        h3({ className: 'rp-form-title access-color' }, ['2. Data Access Request']),
-        div({ className: 'form-group' }, [
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-            label({ className: 'control-label rp-title-question' }, [
-              '2.1 Select Dataset(s)*',
-              span({},
-                ['Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:'])
-            ])
-          ]),
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-            h(AsyncSelect, {
-              id: 'sel_datasets',
-              key: isEmpty(datasets) ? null : datasets.value,
-              isDisabled: !isNil(darCode),
-              isMulti: true,
-              loadOptions: (query, callback) => searchDatasets(query, callback),
-              onChange: (option) => onDatasetsChange(option),
-              value: datasets,
-              noOptionsMessage: () => 'Start typing a Dataset Name, Sample Collection ID, or PI',
-              loadingMessage: () => 'Start typing a Dataset Name, Sample Collection ID, or PI',
-              classNamePrefix: 'select',
-              placeholder: 'Dataset Name, Sample Collection ID, or PI',
-              className: (isEmpty(datasets) && showValidationMessages) ?
-                'required-select-error select-autocomplete' :
-                'select-autocomplete'
+    div({ datacy: 'data-access-request' }, [
+      div({ className: 'dar-step-card' }, [
+        // dataset searchbar:
+        // async select with custom inner render
+        // to look like the mock
 
-            }),
-            span({
-              className: 'cancel-color required-field-error-span',
-              isRendered: isEmpty(datasets) && showValidationMessages,
-            },
-            ['Required field']),
+        h(FormField, {
+          type: FormFieldTypes.SELECT,
+          id: 'datasetIds',
+          disabled: readOnlyMode,
+          isAsync: true,
+          isMulti: true,
+          title: '2.1 Select Dataset(s)',
+          validators: [FormValidators.REQUIRED],
+          validation: validation.datasetIds,
+          onValidationChange,
+          description: 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:',
+          defaultValue: datasets?.map((ds) => formatSearchDataset(ds)),
+          selectConfig: {
+            // return custom html for displaying
+            // dataset options
+            formatOptionLabel: (opt) => opt.label,
+            // return string value of dataset
+            // for accessibility / html keys
+            getOptionLabel: (opt) => opt.displayText,
+          },
+          loadOptions: (query, callback) => searchDatasets(query, callback, datasets),
+          placeholder: 'Dataset Name, Sample Collection ID, or PI',
+          onChange: ({key, value}) => {
+            const datasets = value.map((val) => val.dataset);
+            onChange({key, value: datasets?.map((ds) => ds.dataSetId)});
+            setDatasets(datasets);
+          },
+        }),
+
+        h(FormField, {
+          title: '2.2 Descriptive Title of Project',
+          disabled: readOnlyMode,
+          validators: [FormValidators.REQUIRED],
+          validation: validation.projectTitle,
+          description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
+          id: 'projectTitle',
+          placeholder: 'Project Title',
+          defaultValue: formData.projectTitle,
+          onChange,
+          onValidationChange,
+        }),
+
+        div({
+          className: 'dar-form-notice-card',
+        }, [
+          span({}, [
+            'In sections 2.3, 2.4, and 2.5, you are attesting that your proposed research will remain with the scope of the items selected below, and will be liable for any deviations. Further, it is to your benefit to be as specific as possible in your selections, as it will maximize the data available to you.'
           ])
         ]),
 
-        div({className: 'form-group'}, [
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              label({className: 'control-label rp-title-question'}, [
-                '2.2 Descriptive Title of Project* ',
-                span({},
-                  ['Please note that coordinated requests by collaborating institutions should each use the same title.']),
-              ]),
-            ]),
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-            [
-              input({
-                type: 'text',
-                name: 'projectTitle',
-                id: 'inputTitle',
-                maxLength: '256',
-                defaultValue: projectTitle,
-                onBlur: (e) => formFieldChange({name: 'projectTitle', value: e.target.value}),
-                className: (isEmpty(projectTitle) && showValidationMessages) ?
-                  'form-control required-field-error' :
-                  'form-control',
-                required: true,
-                disabled: darCode !== null,
-              }),
-              span({
-                className: 'cancel-color required-field-error-span',
-                isRendered: isEmpty(projectTitle) && showValidationMessages,
-              },
-              ['Required field']),
-            ]),
-        ]),
-
-        div({className: 'form-group'}, [
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              label({className: 'control-label rp-title-question'}, [
-                '2.3 Type of Research* ',
-                span({},
-                  ['Please select one of the following options.']),
-              ]),
-            ]),
-          div({
-            style: {'marginLeft': '15px'},
-            className: 'row'
-          }, [
-            span({
-              className: 'cancel-color required-field-error-span',
-              isRendered: isTypeOfResearchInvalid && showValidationMessages,
-            }, [
-              'One of the following fields is required.', br(),
-              'Disease related studies require a disease selection.', br(),
-              'Other studies require additional details.'])
-          ]),
-
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [TypeOfResearch]), //pass in this component as a prop
-
-          div({className: 'form-group'}, [
-            div(
-              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-              [
-                label({className: 'control-label rp-title-question'},
-                  [
-                    '2.4 Research Designations ',
-                    span({}, ['Select all applicable options.']),
-                  ]),
-              ]),
-          ]),
-
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              div({className: 'checkbox'}, [
-                input({
-                  checked: methods,
-                  onChange: (e) => checkedStateChange({name: 'methods', value: e.target.checked}, setMethods),
-                  id: 'checkMethods',
-                  type: 'checkbox',
-                  disabled: (darCode !== null),
-                  className: 'checkbox-inline rp-checkbox',
-                  name: 'methods',
-                }),
-                label({
-                  className: 'regular-checkbox rp-choice-questions',
-                  htmlFor: 'checkMethods',
-                }, [
-                  span({},
-                    ['2.4.1 Methods development and validation studies: ']),
-                  'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data (e.g., developing more powerful methods to detect epistatic, gene-environment, or other types of complex interactions in genome-wide association studies). Data will be used for developing and/or validating new methods.',
-                ]),
-              ]),
-            ]),
-
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              div({className: 'checkbox'}, [
-                input({
-                  checked: controls,
-                  onChange: (e) => checkedStateChange({name: 'controls', value: e.target.checked}, setControls),
-                  id: 'checkControls',
-                  type: 'checkbox',
-                  disabled: (!isNil(darCode)),
-                  className: 'checkbox-inline rp-checkbox',
-                  name: 'controls',
-                }),
-                label({
-                  className: 'regular-checkbox rp-choice-questions',
-                  htmlFor: 'checkControls',
-                }, [
-                  span({}, ['2.4.2 Controls: ']),
-                  'The reason for this request is to increase the number of controls available for a comparison group (e.g., a case-control study).',
-                ]),
-              ]),
-            ]),
-
-          div(
-            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [
-              div({className: 'checkbox'}, [
-                input({
-                  checked: population,
-                  onChange: (e) => checkedStateChange({name:'population', value: e.target.checked}, setPopulation),
-                  id: 'checkPopulation',
-                  type: 'checkbox',
-                  disabled: !isNil(darCode),
-                  className: 'checkbox-inline rp-checkbox',
-                  name: 'population',
-                }),
-                label({
-                  className: 'regular-checkbox rp-choice-questions',
-                  htmlFor: 'checkPopulation',
-                }, [
-                  span({},
-                    ['2.4.3 Population structure or normal variation studies: ']),
-                  'The primary purpose of the research is to understand variation in the general population (e.g., genetic substructure of a population).',
-                ]),
-              ]),
-            ]),
-        ]),
-      ]),
-
-      div({className: 'form-group'}, [
-        div(
-          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-          [
-            label({className: 'control-label rp-title-question'}, [
-              '2.5 Research Use Statement (RUS)* ',
-              span({}, [
-                'A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
-                br(),
-                'Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
+        h(FormField, {
+          id: 'rus',
+          disabled: readOnlyMode,
+          type: FormFieldTypes.TEXTAREA,
+          title: '2.3 Research Use Statement (RUS)',
+          validators: [FormValidators.REQUIRED],
+          description: p({}, [
+            'A RUS is a brief description of the applicant\'s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
+            span({},
+              ['Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
                 a({
-                  target: '_blank',
-                  href: 'https://www.ncbi.nlm.nih.gov/books/NBK482114/',
-                }, ['here']), '.',
-                br(),
-                span({style: {fontWeight: 'bold'}}, [
-                  'If requesting NHGRI’s GTex dataset, please make sure you submit the exact RUS you previously submitted via dbGaP.'
-                ])
-              ]),
-            ]),
-          ]),
-        div(
-          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-          [
-            textarea({
-              defaultValue: rus,
-              onBlur: (e) => formFieldChange({name: 'rus', value: e.target.value}),
-              name: 'rus',
-              id: 'inputRUS',
-              className: (isEmpty(rus) && showValidationMessages) ?
-                ' required-field-error form-control' :
-                'form-control',
-              rows: '6',
-              required: true,
-              placeholder: 'Please limit your RUS to 2200 characters.',
-              disabled: !isNil(darCode),
-            }),
-            span({
-              className: 'cancel-color required-field-error-span',
-              isRendered: isEmpty(rus) && showValidationMessages,
-            },
-            ['Required field']),
-          ]),
-      ]),
 
-      div({className: 'form-group'}, [
-        div(
-          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-          [
-            label({className: 'control-label rp-title-question'}, [
-              '2.6 Non-Technical Summary* ',
-              span({}, [
-                'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).',
+                }, 'here'),
+                '.'
               ]),
-            ]),
           ]),
-        div(
-          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-          [
-            textarea({
-              defaultValue: nonTechRus,
-              onBlur: (e) => formFieldChange({name: 'nonTechRus', value: e.target.value}),
-              name: 'nonTechRus',
-              id: 'inputNonTechRus',
-              className: (isEmpty(nonTechRus) && showValidationMessages) ?
-                'required-field-error form-control' :
-                'form-control',
-              rows: '3',
-              required: true,
-              placeholder: 'Please limit your non-technical summary to 1100 characters.',
-              disabled: !isNil(darCode),
-            }),
-            span(
-              {
-                className: 'cancel-color required-field-error-span',
-                isRendered: isEmpty(nonTechRus) && showValidationMessages,
+          placeholder: 'Please limit your RUS to 2200 characters.',
+          rows: 6,
+          maxLength: 2200,
+          ariaLevel: ariaLevel + 3,
+          defaultValue: formData.rus,
+          validation: validation.rus,
+          onValidationChange,
+          onChange,
+        }),
+
+        h(FormField, {
+          title: h4({}, 'Is the primary purpose of this research to investigate a specific disease(s)?'),
+          id: 'diseases',
+          disabled: readOnlyMode,
+          type: FormFieldTypes.YESNORADIOGROUP,
+          orientation: 'horizontal',
+          defaultValue: formData.diseases,
+          validation: validation.diseases,
+          onValidationChange,
+          onChange: primaryChange,
+        }),
+
+        div({
+          isRendered: formData.diseases === true,
+          style: {
+            marginTop: '2.0rem',
+            marginBottom: '1.0rem'
+          }
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.SELECT,
+            disabled: readOnlyMode,
+            isMulti: true,
+            isCreatable: false,
+            isAsync: true,
+            optionsAreString: false,
+            loadOptions: autocompleteOntologies,
+            id: 'ontologies',
+            validators: [FormValidators.REQUIRED],
+            placeholder: 'Please enter one or more diseases',
+            defaultValue: formData.ontologies.map(formatOntologyForSelect),
+            validation: validation.ontologies,
+            onValidationChange,
+            onChange: ({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)}),
+          }),
+        ]),
+
+        div({
+          isRendered: formData.diseases === false,
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
+            title: h4({}, 'Is the primary purpose health/medical/biomedical research in nature?'),
+            id: 'hmb',
+            orientation: 'horizontal',
+            defaultValue: formData.hmb,
+            validation: validation.hmb,
+            onValidationChange,
+            onChange: primaryChange,
+          }),
+        ]),
+
+        div({
+          isRendered: formData.hmb === false,
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
+            title: h4({}, 'Is the primary purpose of this research regarding population origins or ancestry?'),
+            id: 'poa',
+            orientation: 'horizontal',
+            defaultValue: formData.poa,
+            validation: validation.poa,
+            onValidationChange,
+            onChange: primaryChange,
+          }),
+        ]),
+
+        div({
+          isRendered: formData.poa === false,
+        }, [
+          h(FormField, {
+            type: FormFieldTypes.YESNORADIOGROUP,
+            disabled: readOnlyMode,
+            title: h4({}, 'Is the primary purpose of this research to develop or validate new methods for analyzing/interpreting data?'),
+            id: 'methods',
+            orientation: 'horizontal',
+            defaultValue: formData.methods,
+            validation: validation.methods,
+            onValidationChange,
+            onChange: primaryChange,
+          }),
+        ]),
+
+        div({
+          isRendered: formData.methods === false,
+        }, [
+          h(FormField, {
+            title: h4({}, 'If none of the above, please describe the primary purpose of your research:'),
+            disabled: readOnlyMode,
+            id: 'otherText',
+            placeholder: 'Please specify...',
+            defaultValue: formData.otherText,
+            validation: validation.otherText,
+            onValidationChange,
+            onChange,
+          }),
+        ]),
+
+        h(FormField, {
+          id: 'nonTechRus',
+          disabled: readOnlyMode,
+          type: FormFieldTypes.TEXTAREA,
+          title: '2.4 Non-Technical Summary',
+          validators: [FormValidators.REQUIRED],
+          description: 'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).',
+          placeholder: 'Please limit your your non-technical summary to 1100 characters',
+          rows: 6,
+          maxLength: 1100,
+          ariaLevel: ariaLevel + 3,
+          defaultValue: formData.nonTechRus,
+          validation: validation.nonTechRus,
+          onValidationChange,
+          onChange,
+        }),
+
+        h(FormFieldTitle, {
+          title: '2.5 Data Use Acknowledgements',
+          description: 'Please confirm listed acknowledgements and/or document requirements below:',
+          isRendered: needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets),
+        }),
+
+        h(FormField, {
+          id: 'gsoAcknowledgement',
+          disabled: readOnlyMode,
+          type: FormFieldTypes.CHECKBOX,
+          isRendered: needsGsoAcknowledgement(datasets),
+          toggleText: 'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.',
+          defaultValue: formData.gsoAcknowledgement,
+          onChange,
+          validation: validation.gsoAcknowledgement,
+          onValidationChange,
+        }),
+
+        h(FormField, {
+          id: 'pubAcknowledgement',
+          disabled: readOnlyMode,
+          isRendered: needsPubAcknowledgement(datasets),
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.',
+          defaultValue: formData.pubAcknowledgement,
+          validation: validation.pubAcknowledgement,
+          onValidationChange,
+          onChange,
+        }),
+
+        h(FormField, {
+          id: 'dsAcknowledgement',
+          disabled: readOnlyMode,
+          isRendered: needsDsAcknowledgement(dataUseTranslations),
+          type: FormFieldTypes.CHECKBOX,
+          toggleText: 'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum',
+          defaultValue: formData.dsAcknowledgement,
+          validation: validation.dsAcknowledgement,
+          onValidationChange,
+          onChange,
+        }),
+
+
+        h(FormFieldTitle, {
+          description: 'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.',
+          isRendered: needsIrbApprovalDocument(datasets),
+        }),
+        div({
+          isRendered: needsIrbApprovalDocument(datasets),
+          style: {
+            display: 'flex',
+            justifyContent: 'space-between',
+          }
+        }, [
+          div({}, [
+            h(FormField, {
+              type: FormFieldTypes.FILE,
+              disabled: readOnlyMode,
+              id: 'irbDocument',
+              defaultValue: uploadedIrbDocument || {
+                name: formData.irbDocumentName,
               },
-              ['Required field']),
+              validation: validation.irbDocument,
+              onValidationChange,
+              onChange: ({value}) => updateUploadedIrbDocument(value, irbProtocolExpiration),
+            }),
           ]),
+
+          div({
+            style: {
+              width: '250px',
+            }
+          }, [
+            h(FormField, {
+              readOnly: true,
+              id: 'irbProtocolExpiration',
+              defaultValue: `IRB Expires on ${irbProtocolExpiration}`,
+            }),
+          ]),
+        ]),
+
+        h(FormField, {
+          type: FormFieldTypes.FILE,
+          disabled: readOnlyMode,
+          isRendered: needsCollaborationLetter(datasets),
+          defaultValue: uploadedCollaborationLetter ||{
+            name: formData.collaborationLetterName,
+          },
+          id: 'collaborationLetter',
+          validation: validation.collaborationLetter,
+          onValidationChange,
+          description: 'One or more of the datasets you selected requires collaboration (COL) with the primary study investigators(s) for use. Please upload documentation of your collaboration here.',
+          onChange: ({value}) => updateCollaborationLetter(value),
+        }),
       ]),
-      div({
-        className: 'form-group',
-        //if draft -> check if any one question is active
-        //if submit -> same condition plus check if dsAcknowledgement is true
-        isRendered: renderDULQuestions(darCode)
-      }, [
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-          label({className: 'control-label rp-title-question'}, [
-            '2.7 Data Use Acknowledgements*',
-            span({}, [
-              //NOTE: This is something that I came up with as a placeholder. I would appreciate any suggestions for a more legal/formal sub-header
-              'Please confirm listed acknowledgements and/or document requirements below'
-            ])
-          ])
-        ]),
-
-        div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
-          style: dulQuestionDiv(showValidationMessages, gsoAcknowledgement),
-          isRendered: activeDULQuestions['geneticStudiesOnly'] === true,
-        }, [
-          input({
-            type: 'checkbox',
-            id: 'chk_gso_confirm',
-            name: 'gsoAckowledgement',
-            className: 'checkbox-inline rp-checkbox',
-            checked: gsoAcknowledgement,
-            disabled: !isNil(darCode),
-            onChange: (e) => checkedStateChange({name: 'gsoAcknowledgement', value: e.target.checked}, setGSOAcknowledgement)
-          }),
-          label({
-            className: 'regular-checkbox rp-choice-questions',
-            htmlFor: 'chk_gso_confirm'
-          }, ['I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition. '])
-        ]),
-
-        div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
-          style: dulQuestionDiv(showValidationMessages, pubAcknowledgement),
-          isRendered: activeDULQuestions['publicationResults'] === true
-        }, [
-          input({
-            type: 'checkbox',
-            id: 'chk_pub_confirm',
-            name: 'pubAckowledgement',
-            className: 'checkbox-inline rp-checkbox',
-            checked: pubAcknowledgement,
-            disabled: !isNil(darCode),
-            onChange: (e) => checkedStateChange({name: 'pubAcknowledgement', value: e.target.checked}, setPUBAcknowledgement)
-          }),
-          label({
-            className: 'regular-checkbox rp-choice-questions',
-            htmlFor: 'chk_pub_confirm'
-          }, ['I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'])
-        ]),
-
-        div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
-          style: dulQuestionDiv(showValidationMessages, dsAcknowledgement),
-          isRendered: (isEmpty(darCode) && activeDULQuestions['diseaseRestrictions'] === true) || (!isEmpty(darCode) && props.dsAcknowledgement)
-        }, [
-          input({
-            type: 'checkbox',
-            id: 'chk_ds_confirm',
-            name: 'dsAckowledgement',
-            className: 'checkbox-inline rp-checkbox',
-            checked: dsAcknowledgement,
-            disabled: !isNil(darCode),
-            onChange: (e) => checkedStateChange({name: 'dsAcknowledgement', value: e.target.checked}, setDSAcknowledgement)
-          }),
-          label({
-            className: 'regular-checkbox rp-choice-questions',
-            htmlFor: 'chk_ds_confirm'
-          }, ['I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with the DUL are considered a violation of the Data Use Certification agreement and any additional terms described in the Addendum.'])
-        ]),
-
-        div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          //isRendered conditions => 1st condition: submitted DARs, 2nd condition: DAR drafts
-          isRendered: (!isEmpty(darCode) && !isEmpty(irbDocumentLocation)) || activeDULQuestions['ethicsApprovalRequired'] === true,
-          style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, irbDocumentLocation)
-        }, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-              span({className: 'rp-choice-questions', style: uploadFileDescription}, [
-                //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
-                //second statement can either be a condition for the first or last statements (or maybe both?)
-                `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. 
-                When IRB approval is required and Expedited or Full Review is required and must be completed annually.
-                Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-              h(UploadLabelButton, {
-                id: 'btn_irb_uploadFile',
-                darCode,
-                formAttribute: 'irbDocument',
-                newDULFile: uploadedIrbDocument,
-                currentFileName: irbDocumentName,
-                currentFileLocation: irbDocumentLocation,
-                changeDARDocument,
-                referenceId
-              })
-            ])
-          ]),
-        ]),
-
-        div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          //isRendered conditions => 1st condition: submitted DARs, 2nd condition: DAR drafts
-          isRendered: (!isEmpty(darCode) && !isEmpty(collaborationLetterLocation)) || activeDULQuestions['collaboratorRequired'] === true,
-          style: uploadFileDiv(showValidationMessages, uploadedCollaborationLetter, collaborationLetterLocation)
-        }, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-              span({className: 'rp-choice-questions',style: uploadFileDescription
-              }, [
-                'One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.'
-              ])
-            ]),
-            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
-              h(UploadLabelButton, {
-                id: 'btn_col_uploadFile',
-                darCode,
-                formAttribute: 'collaborationLetter',
-                newDULFile: uploadedCollaborationLetter,
-                currentFileName: collaborationLetterName,
-                currentFileLocation: collaborationLetterLocation,
-                changeDARDocument,
-                referenceId
-              })
-            ])
-          ])
-        ])
-      ]),
-
-      div({ className: 'row no-margin' }, [
-        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginTop: '2.5rem'} }, [
-          a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [
-            span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-          ]),
-
-          a({ id: 'btn_next', onClick: nextPage, className: 'btn-primary f-right access-background' }, [
-            'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-          ]),
-
-          a({
-            id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
-            className: 'btn-secondary f-right access-color'
-          }, ['Save'])
-        ])
-      ])
     ])
   );
 }

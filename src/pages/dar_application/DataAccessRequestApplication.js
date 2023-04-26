@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import ResearcherInfo from './ResearcherInfo_new';
-import DataUseAgreements from './DataUseAgreements_new';
-import DataAccessRequest from './DataAccessRequest_new';
-import ResearchPurposeStatement from './ResearchPurposeStatement_new';
+import ResearcherInfo from './ResearcherInfo';
+import DataUseAgreements from './DataUseAgreements';
+import DataAccessRequest from './DataAccessRequest';
+import ResearchPurposeStatement from './ResearchPurposeStatement';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 import {
   Navigation,
