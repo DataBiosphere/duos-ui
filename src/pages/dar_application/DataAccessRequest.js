@@ -156,7 +156,7 @@ export default function DataAccessRequest(props) {
           disabled: readOnlyMode,
           validators: [FormValidators.REQUIRED],
           validation: validation.projectTitle,
-          description: 'Please note that coordinated requests by collaborating institutions should each use the same title.',
+          description: 'Please note that coordinated requests by External Collaborators should each use the same title.',
           id: 'projectTitle',
           placeholder: 'Project Title',
           defaultValue: formData.projectTitle,
