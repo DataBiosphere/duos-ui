@@ -1,12 +1,12 @@
 import {useState, useEffect} from 'react';
-import {Notifications} from '../libs/utils';
+import {Notifications} from '../../libs/utils';
 import {div, h, img} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
-import lockIcon from '../images/lock-icon.png';
-import {Collections} from '../libs/ajax';
-import { USER_ROLES } from '../libs/utils';
-import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
-import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import {Styles} from '../../libs/theme';
+import lockIcon from '../../images/lock-icon.png';
+import {Collections} from '../../libs/ajax';
+import { USER_ROLES } from '../../libs/utils';
+import { DarCollectionTableColumnOptions, DarCollectionTable } from '../../components/dar_collection_table/DarCollectionTable';
+import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
 
 export default function SigningOfficialDarRequests() {
   const [collectionList, setCollectionList] = useState([]);

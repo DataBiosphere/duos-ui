@@ -1,10 +1,10 @@
 import {useState, useEffect} from 'react';
-import {Notifications} from '../libs/utils';
+import {Notifications} from '../../libs/utils';
 import {div, h} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
-import SigningOfficialTable from '../components/signing_official_table/SigningOfficialTable';
-import {User} from '../libs/ajax';
-import { USER_ROLES } from '../libs/utils';
+import {Styles} from '../../libs/theme';
+import SigningOfficialTable from './SigningOfficialTable';
+import {User} from '../../libs/ajax';
+import { USER_ROLES } from '../../libs/utils';
 
 
 export default function SigningOfficialResearchers() {

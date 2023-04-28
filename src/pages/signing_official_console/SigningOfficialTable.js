@@ -3,24 +3,24 @@ import { Styles, Theme } from '../../libs/theme';
 import { a, h, div, img } from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
-import SimpleTable from '../SimpleTable';
-import SimpleButton from '../SimpleButton';
-import PaginationBar from '../PaginationBar';
-import SearchBar from '../SearchBar';
+import SimpleTable from '../../components/SimpleTable';
+import SimpleButton from '../../components/SimpleButton';
+import PaginationBar from '../../components/PaginationBar';
+import SearchBar from '../../components/SearchBar';
 import {
   Notifications,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
 } from '../../libs/utils';
-import LibraryCardFormModal from '../modals/LibraryCardFormModal';
-import ConfirmationModal from '../modals/ConfirmationModal';
+import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax';
 import LcaMarkdown from '../../assets/LCA.md';
-import {LibraryCardAgreementTermsDownload} from '../LibraryCardAgreementTermsDownload';
+import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2021.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
-import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
+import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 
 //Styles specific to this table
 const styles = {

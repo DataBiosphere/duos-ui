@@ -3,10 +3,10 @@ import { Styles, Theme } from '../../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
-import SimpleTable from '../SimpleTable';
-import SimpleButton from '../SimpleButton';
-import PaginationBar from '../PaginationBar';
-import SearchBar from '../SearchBar';
+import SimpleTable from '../../components/SimpleTable';
+import SimpleButton from '../../components/SimpleButton';
+import PaginationBar from '../../components/PaginationBar';
+import SearchBar from '../../components/SearchBar';
 import {
   Notifications,
   tableSearchHandler,
@@ -14,11 +14,13 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList
 } from '../../libs/utils';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import DataCustodianFormModal from '../modals/DataCustodianFormModal';
-import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
+import {User} from '../../libs/ajax';
+import {setDataSubmitterProp} from '../../libs/utils';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
+import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 import DpaMarkdown from '../../assets/DPA.md';
-import {confirmModalType} from '../signing_official_table/SigningOfficialTable';
+import {confirmModalType} from './SigningOfficialTable';
 
 
 //Styles specific to this table
@@ -90,12 +92,12 @@ const IssueDataCustodianButton = (props) => {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const CustodianCell = ({
+const SubmitterCell = ({
   researcher,
   showConfirmationModal
 }) => {
   const id = researcher.userId || researcher.email;
-  const button = researcher.isCustodian
+  const button = researcher.isDataSubmitter
     ? RemoveDataCustodianButton({
       researcher,
       showConfirmationModal,
@@ -257,7 +259,7 @@ export default function DataCustodianTable(props) {
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
-        CustodianCell({
+        SubmitterCell({
           researcher,
           showConfirmationModal,
           institutionId: signingOfficial.institutionId,
@@ -283,6 +285,8 @@ export default function DataCustodianTable(props) {
     let messageName;
     const {userId, displayName} = selectedResearcher;
     try {
+      let updatedUser = await User.addRoleToUser(userId, 8);
+      setDataSubmitterProp(updatedUser);
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
         (researcher) => userId === researcher.userId
@@ -291,11 +295,11 @@ export default function DataCustodianTable(props) {
         const targetResearcher = find(
           (researcher) => userId === researcher.userId
         )(props.unregisteredResearchers) || selectedResearcher;
-        targetResearcher.isCustodian = true;
+        targetResearcher.isDataSubmitter = true;
         listCopy.unshift(targetResearcher);
         messageName = targetResearcher.email;
       } else {
-        listCopy[targetIndex].isCustodian = true;
+        listCopy[targetIndex].isDataSubmitter = true;
         messageName = displayName;
       }
 
@@ -327,8 +331,10 @@ export default function DataCustodianTable(props) {
       ) {
         listCopy.splice(targetIndex, 1);
       } else {
-        listCopy[targetIndex].isCustodian = false;
+        listCopy[targetIndex].isDataSubmitter = false;
       }
+      let updatedUser = await User.deleteRoleFromUser(userId, 8);
+      setDataSubmitterProp(updatedUser);
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({

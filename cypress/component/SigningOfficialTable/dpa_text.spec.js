@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { mount } from 'cypress/react';
-import DataCustodianTable from '../../../src/components/data_custodian_table/DataCustodianTable';
+import DataCustodianTable from '../../../src/pages/signing_official_console/DataCustodianTable';
 
 const dpaHeaderText = 'BROAD DATA USE OVERSIGHT SYSTEM (DUOS) - DATA PROVIDER AGREEMENT';
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import SigningOfficialTable
-  from '../../../src/components/signing_official_table/SigningOfficialTable';
+  from '../../../src/pages/signing_official_console/SigningOfficialTable';
 
 const lcaHeaderText = 'Broad Data Use Oversight System (DUOS) – LIBRARY CARD AGREEMENT';
 

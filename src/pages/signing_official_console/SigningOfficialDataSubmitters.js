@@ -1,10 +1,12 @@
 import {useState, useEffect} from 'react';
-import {Notifications} from '../libs/utils';
+import {Notifications} from '../../libs/utils';
 import {div, h} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
-import {User} from '../libs/ajax';
-import { USER_ROLES } from '../libs/utils';
-import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
+import {Styles} from '../../libs/theme';
+import {User} from '../../libs/ajax';
+import {setDataSubmitterProp} from '../../libs/utils';
+import { USER_ROLES } from '../../libs/utils';
+import DataCustodianTable from './DataCustodianTable';
+import {map} from 'lodash/fp';
 
 
 export default function SigningOfficialConsole() {
@@ -25,8 +27,8 @@ export default function SigningOfficialConsole() {
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers()
         ]);
-        const researcherList = soPromises[0];
-        const unregisteredResearchers = soPromises[1];
+        const researcherList = map(u => setDataSubmitterProp(u))(soPromises[0]);
+        const unregisteredResearchers = map(u => setDataSubmitterProp(u))(soPromises[1]);
         setUnregisteredResearchers(unregisteredResearchers);
         setResearchers(researcherList);
         setSigningOfficial(soUser);
