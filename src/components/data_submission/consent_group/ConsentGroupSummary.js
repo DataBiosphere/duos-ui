@@ -166,7 +166,7 @@ export const ConsentGroupSummary = (props) => {
             fontWeight: 'bold',
             fontSize: '16px',
           }
-        }, ['Name']),
+        }, ['Consent Group Name']),
         input({
           disabled: true,
           type: 'text',
@@ -178,14 +178,14 @@ export const ConsentGroupSummary = (props) => {
             fontWeight: 'bold',
             fontSize: '16px',
           }
-        }, ['Primary Group']),
+        }, ['Primary Data Use']),
         summarizePrimaryGroup(),
         p({
           style: {
             fontWeight: 'bold',
             fontSize: '16px',
           }
-        }, 'Secondary Group(s)'),
+        }, 'Secondary Data Use(s)'),
         summarizeSecondaryGroup(),
       ]),
 
