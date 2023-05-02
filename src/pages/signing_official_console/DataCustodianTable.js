@@ -12,10 +12,10 @@ import {
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
-  searchOnFilteredList
+  searchOnFilteredList,
+  hasDataSubmitterRole
 } from '../../libs/utils';
 import {User} from '../../libs/ajax';
-import {setDataSubmitterProp} from '../../libs/utils';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
@@ -97,7 +97,7 @@ const SubmitterCell = ({
   showConfirmationModal
 }) => {
   const id = researcher.userId || researcher.email;
-  const button = researcher.isDataSubmitter
+  const button = hasDataSubmitterRole(researcher)
     ? RemoveDataCustodianButton({
       researcher,
       showConfirmationModal,
@@ -285,8 +285,7 @@ export default function DataCustodianTable(props) {
     let messageName;
     const {userId, displayName} = selectedResearcher;
     try {
-      let updatedUser = await User.addRoleToUser(userId, 8);
-      setDataSubmitterProp(updatedUser);
+      let updatedResearcher = await User.addRoleToUser(userId, 8);
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
         (researcher) => userId === researcher.userId
@@ -295,11 +294,10 @@ export default function DataCustodianTable(props) {
         const targetResearcher = find(
           (researcher) => userId === researcher.userId
         )(props.unregisteredResearchers) || selectedResearcher;
-        targetResearcher.isDataSubmitter = true;
         listCopy.unshift(targetResearcher);
         messageName = targetResearcher.email;
       } else {
-        listCopy[targetIndex].isDataSubmitter = true;
+        listCopy[targetIndex] = updatedResearcher;
         messageName = displayName;
       }
 
@@ -318,6 +316,7 @@ export default function DataCustodianTable(props) {
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
     const { displayName, email, userId } = selectedResearcher;
+    let updatedResearcher = await User.deleteRoleFromUser(userId, 8);
     const searchableKey = !isNil(userId) ? 'userId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
@@ -331,10 +330,8 @@ export default function DataCustodianTable(props) {
       ) {
         listCopy.splice(targetIndex, 1);
       } else {
-        listCopy[targetIndex].isDataSubmitter = false;
+        listCopy[targetIndex] = updatedResearcher;
       }
-      let updatedUser = await User.deleteRoleFromUser(userId, 8);
-      setDataSubmitterProp(updatedUser);
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({

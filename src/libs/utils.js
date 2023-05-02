@@ -593,11 +593,8 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
   return false;
 };
 
-export const setDataSubmitterProp = (user) => {
+export const hasDataSubmitterRole = (user) => {
   const roles = get('roles')(user);
   const dsRole = find({'roleId':8})(roles);
-  if (!isNil(dsRole)) {
-    user.isDataSubmitter = true;
-  }
-  return user;
+  return !isNil(dsRole);
 };

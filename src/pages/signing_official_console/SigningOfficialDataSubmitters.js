@@ -3,10 +3,8 @@ import {Notifications} from '../../libs/utils';
 import {div, h} from 'react-hyperscript-helpers';
 import {Styles} from '../../libs/theme';
 import {User} from '../../libs/ajax';
-import {setDataSubmitterProp} from '../../libs/utils';
 import { USER_ROLES } from '../../libs/utils';
 import DataCustodianTable from './DataCustodianTable';
-import {map} from 'lodash/fp';
 
 
 export default function SigningOfficialConsole() {
@@ -27,10 +25,8 @@ export default function SigningOfficialConsole() {
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers()
         ]);
-        const researcherList = map(u => setDataSubmitterProp(u))(soPromises[0]);
-        const unregisteredResearchers = map(u => setDataSubmitterProp(u))(soPromises[1]);
-        setUnregisteredResearchers(unregisteredResearchers);
-        setResearchers(researcherList);
+        setResearchers(soPromises[0]);
+        setUnregisteredResearchers(soPromises[1]);
         setSigningOfficial(soUser);
         setIsLoading(false);
       } catch(error) {
