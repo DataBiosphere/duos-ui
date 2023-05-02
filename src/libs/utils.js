@@ -592,3 +592,9 @@ export const getBooleanFromEventHtmlDataValue = (e) => {
   }
   return false;
 };
+
+export const hasDataSubmitterRole = (user) => {
+  const roles = get('roles')(user);
+  const dsRole = find({'roleId':8})(roles);
+  return !isNil(dsRole);
+};

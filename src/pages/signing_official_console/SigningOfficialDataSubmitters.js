@@ -1,10 +1,10 @@
 import {useState, useEffect} from 'react';
-import {Notifications} from '../libs/utils';
+import {Notifications} from '../../libs/utils';
 import {div, h} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
-import {User} from '../libs/ajax';
-import { USER_ROLES } from '../libs/utils';
-import DataCustodianTable from '../components/data_custodian_table/DataCustodianTable';
+import {Styles} from '../../libs/theme';
+import {User} from '../../libs/ajax';
+import { USER_ROLES } from '../../libs/utils';
+import DataCustodianTable from './DataCustodianTable';
 
 
 export default function SigningOfficialConsole() {
@@ -25,10 +25,8 @@ export default function SigningOfficialConsole() {
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers()
         ]);
-        const researcherList = soPromises[0];
-        const unregisteredResearchers = soPromises[1];
-        setUnregisteredResearchers(unregisteredResearchers);
-        setResearchers(researcherList);
+        setResearchers(soPromises[0]);
+        setUnregisteredResearchers(soPromises[1]);
         setSigningOfficial(soUser);
         setIsLoading(false);
       } catch(error) {

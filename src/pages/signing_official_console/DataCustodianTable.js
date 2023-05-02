@@ -3,22 +3,24 @@ import { Styles, Theme } from '../../libs/theme';
 import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
-import SimpleTable from '../SimpleTable';
-import SimpleButton from '../SimpleButton';
-import PaginationBar from '../PaginationBar';
-import SearchBar from '../SearchBar';
+import SimpleTable from '../../components/SimpleTable';
+import SimpleButton from '../../components/SimpleButton';
+import PaginationBar from '../../components/PaginationBar';
+import SearchBar from '../../components/SearchBar';
 import {
   Notifications,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
-  searchOnFilteredList
+  searchOnFilteredList,
+  hasDataSubmitterRole
 } from '../../libs/utils';
-import ConfirmationModal from '../modals/ConfirmationModal';
-import DataCustodianFormModal from '../modals/DataCustodianFormModal';
-import ScrollableMarkdownContainer from '../ScrollableMarkdownContainer';
+import {User} from '../../libs/ajax';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
+import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 import DpaMarkdown from '../../assets/DPA.md';
-import {confirmModalType} from '../signing_official_table/SigningOfficialTable';
+import {confirmModalType} from './SigningOfficialTable';
 
 
 //Styles specific to this table
@@ -90,12 +92,12 @@ const IssueDataCustodianButton = (props) => {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const CustodianCell = ({
+const SubmitterCell = ({
   researcher,
   showConfirmationModal
 }) => {
   const id = researcher.userId || researcher.email;
-  const button = researcher.isCustodian
+  const button = hasDataSubmitterRole(researcher)
     ? RemoveDataCustodianButton({
       researcher,
       showConfirmationModal,
@@ -257,7 +259,7 @@ export default function DataCustodianTable(props) {
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
-        CustodianCell({
+        SubmitterCell({
           researcher,
           showConfirmationModal,
           institutionId: signingOfficial.institutionId,
@@ -283,6 +285,7 @@ export default function DataCustodianTable(props) {
     let messageName;
     const {userId, displayName} = selectedResearcher;
     try {
+      let updatedResearcher = await User.addRoleToUser(userId, 8);
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
         (researcher) => userId === researcher.userId
@@ -291,11 +294,10 @@ export default function DataCustodianTable(props) {
         const targetResearcher = find(
           (researcher) => userId === researcher.userId
         )(props.unregisteredResearchers) || selectedResearcher;
-        targetResearcher.isCustodian = true;
         listCopy.unshift(targetResearcher);
         messageName = targetResearcher.email;
       } else {
-        listCopy[targetIndex].isCustodian = true;
+        listCopy[targetIndex] = updatedResearcher;
         messageName = displayName;
       }
 
@@ -314,6 +316,7 @@ export default function DataCustodianTable(props) {
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
     const { displayName, email, userId } = selectedResearcher;
+    let updatedResearcher = await User.deleteRoleFromUser(userId, 8);
     const searchableKey = !isNil(userId) ? 'userId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
@@ -327,7 +330,7 @@ export default function DataCustodianTable(props) {
       ) {
         listCopy.splice(targetIndex, 1);
       } else {
-        listCopy[targetIndex].isCustodian = false;
+        listCopy[targetIndex] = updatedResearcher;
       }
       setResearchers(listCopy);
       setShowConfirmation(false);
