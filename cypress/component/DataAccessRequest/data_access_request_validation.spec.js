@@ -105,22 +105,22 @@ describe('Data Access Request - Validation', () => {
         </MemoryRouter>
       );
     });
-  
+
     it('Submits given valid DAR', () => {
       cy.get('#piName').type('Some PI');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
       cy.get('#anvilUse_yes').click();
-  
+
       cy.get('#datasetIds').type('asdf{enter}');
-  
+
       cy.get('#projectTitle').type('Title');
       cy.get('#rus').type('asdf');
       cy.get('#nonTechRus').type('asdf asdf');
-  
+
       cy.get('#diseases_no').click();
       cy.get('#hmb_yes').click();
-  
+
       cy.get('#controls_no').click();
       cy.get('#population_no').click();
       cy.get('#oneGender_no').click();
@@ -132,29 +132,29 @@ describe('Data Access Request - Validation', () => {
       cy.get('#psychiatricTraits_no').click();
       cy.get('#notHealth_no').click();
       cy.get('#stigmatizedDiseases_no').click();
-  
+
       cy.get('#btn_attest').click();
       cy.get('#btn_openSubmitModal').click();
       cy.get('#btn_submit').click().then(() => {
         expect(DAR.postDar).to.have.been.calledOnce;
       });
-  
+
     });
-  
+
     it('Required fields should not be errored when you open page', () => {
       cy.get('#piName').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
       cy.get('#itDirector').should('not.have.class', 'errored');
       cy.get('#anvilUse').should('not.have.class', 'errored');
-  
+
       cy.get('#datasetIds').should('not.have.class', 'errored');
-  
+
       cy.get('#projectTitle').should('not.have.class', 'errored');
       cy.get('#rus').should('not.have.class', 'errored');
       cy.get('#nonTechRus').should('not.have.class', 'errored');
-  
+
       cy.get('#diseases').should('not.have.class', 'errored');
-  
+
       cy.get('#controls').should('not.have.class', 'errored');
       cy.get('#population').should('not.have.class', 'errored');
       cy.get('#oneGender').should('not.have.class', 'errored');
@@ -167,23 +167,23 @@ describe('Data Access Request - Validation', () => {
       cy.get('#notHealth').should('not.have.class', 'errored');
       cy.get('#stigmatizedDiseases').should('not.have.class', 'errored');
     });
-  
+
     it('Required fields get errors on submit', () => {
       cy.get('#btn_attest').click();
-  
+
       cy.get('#piName').should('have.class', 'errored');
       cy.get('#signingOfficial').should('have.class', 'errored');
       cy.get('#itDirector').should('have.class', 'errored');
       cy.get('#anvilUse').should('have.class', 'errored');
-  
+
       cy.get('#datasetIds').should('have.class', 'errored');
-  
+
       cy.get('#projectTitle').should('have.class', 'errored');
       cy.get('#rus').should('have.class', 'errored');
       cy.get('#nonTechRus').should('have.class', 'errored');
-  
+
       cy.get('#diseases').should('have.class', 'errored');
-  
+
       cy.get('#controls').should('have.class', 'errored');
       cy.get('#population').should('have.class', 'errored');
       cy.get('#oneGender').should('have.class', 'errored');
@@ -196,52 +196,52 @@ describe('Data Access Request - Validation', () => {
       cy.get('#notHealth').should('have.class', 'errored');
       cy.get('#stigmatizedDiseases').should('have.class', 'errored');
     });
-  
+
     it('Internal / external / lab collaborators error properly', () => {
       cy.get('#add-labCollaborators-btn').click();
-  
+
       // should not be errored when open
       cy.get('#0_collaboratorName').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored');
       cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('not.have.class', 'errored');
       cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
-  
+
       cy.get('#collaborator-labCollaborators-add-save').click();
-  
+
       // if clicked and nothing filled out, required field should error
       cy.get('#0_collaboratorName').should('have.class', 'errored');
       cy.get('#0_collaboratorEraCommonsId').should('have.class', 'errored');
       cy.get('#0_collaboratorTitle').should('have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('have.class', 'errored');
       cy.get('#0_collaboratorApproval').should('have.class', 'errored');
-  
+
       // fill out fields
       cy.get('#0_collaboratorName').type('asdf');
       cy.get('#0_collaboratorEraCommonsId').type('asdgasdg');
       cy.get('#0_collaboratorTitle').type('asdgasdgasdgas');
       cy.get('#0_collaboratorEmail').type('asdgasdgasdgasdga'); // not a valid email
       cy.get('#0_collaboratorApproval_no').click();
-  
+
       // should remove errors, except for email
       cy.get('#0_collaboratorName').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEraCommonsId').should('not.have.class', 'errored');
       cy.get('#0_collaboratorTitle').should('not.have.class', 'errored');
       cy.get('#0_collaboratorApproval').should('not.have.class', 'errored');
       cy.get('#0_collaboratorEmail').should('have.class', 'errored');
-  
+
       // shouldn't submit since invalid email format
       cy.get('#collaborator-labCollaborators-add-save').click();
-  
+
       // fix email
       cy.get('#0_collaboratorEmail').type('@gmail.com');
       cy.get('#0_collaboratorEmail').should('not.have.class', 'errored');
-  
+
       // should save fine
       cy.get('#0_summary').should('not.exist');
       cy.get('#collaborator-labCollaborators-add-save').click();
       cy.get('#0_summary').should('exist');
-  
+
     });
   });
 
@@ -258,7 +258,7 @@ describe('Data Access Request - Validation', () => {
       cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
       cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}));
-  
+
       mount(
         <MemoryRouter initialEntries={['/']}>
           <DataAccessRequestApplication {...props} />
@@ -271,16 +271,16 @@ describe('Data Access Request - Validation', () => {
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
       cy.get('#anvilUse_yes').click();
-  
+
       cy.get('#datasetIds').type('asdf{enter}');
-  
+
       cy.get('#projectTitle').type('Title');
       cy.get('#rus').type('asdf');
       cy.get('#nonTechRus').type('asdf asdf');
-  
+
       cy.get('#diseases_no').click();
       cy.get('#hmb_yes').click();
-  
+
       cy.get('#controls_no').click();
       cy.get('#population_no').click();
       cy.get('#oneGender_no').click();
@@ -292,13 +292,13 @@ describe('Data Access Request - Validation', () => {
       cy.get('#psychiatricTraits_no').click();
       cy.get('#notHealth_no').click();
       cy.get('#stigmatizedDiseases_no').click();
-  
+
       cy.get('#btn_attest').click();
 
 
       cy.get('#btn_openSubmitModal').should('not.exist');
 
-  
+
     });
   });
 });
