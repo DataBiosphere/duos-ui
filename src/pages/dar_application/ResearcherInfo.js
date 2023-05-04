@@ -49,7 +49,7 @@ export default function ResearcherInfo(props) {
   const [libraryCardReqSatisfied, setLibraryCardReqSatisfied] = useState(false);
 
   useEffect(() => {
-    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)) || formData.checkNihDataOnly);
+    setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
   }, [formData.checkNihDataOnly, researcher]);
 
   return (
@@ -119,20 +119,6 @@ export default function ResearcherInfo(props) {
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
             h4({ style: { marginRight: 30 } }, '1.2.2'),
-            h(FormField, {
-              id: 'checkNihDataOnly',
-              disabled: readOnlyMode,
-              toggleText: span({ style: { fontSize: 14, fontWeight: 'bold' }}, ['I am exclusively applying for NIH data (ex. GTex)']),
-              type: FormFieldTypes.CHECKBOX,
-              ariaLevel: ariaLevel + 2,
-              validation: validation.checkNihDataOnly,
-              onValidationChange,
-              onChange: ({key, value}) => formFieldChange({key, value}),
-              defaultValue: formData.checkNihDataOnly,
-            })
-          ]),
-          div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
-            h4({ style: { marginRight: 30 } }, '1.2.3'),
             h(FormField, {
               id: 'checkCollaborator',
               disabled: readOnlyMode,
