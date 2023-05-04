@@ -50,7 +50,7 @@ export default function ResearcherInfo(props) {
 
   useEffect(() => {
     setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
-  }, [formData.checkNihDataOnly, researcher]);
+  }, [researcher]);
 
   return (
     div({ datacy: 'researcher-info'}, [

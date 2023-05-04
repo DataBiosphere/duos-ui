@@ -227,7 +227,6 @@ const dar = {
         'institution': 'Ace Industries',
         'projectTitle': 'Collection of sleep apnea samples',
         'checkCollaborator': false,
-        'checkNihDataOnly': false,
         'researcher': 'Bob Jones',
         'rus': 'One good RUS\n',
         'nonTechRus': 'One non-technical RUS\n',
