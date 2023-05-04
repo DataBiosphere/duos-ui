@@ -99,7 +99,6 @@ describe('Data Access Request - Validation', () => {
       cy.stub(DAR, 'uploadDARDocument').returns({ referenceId: 'asdf' });
       cy.stub(DAR, 'postDarDraft').returns({ referenceId: 'asdf' });
       cy.stub(NotificationService, 'getBannerObjectById').returns(Promise.resolve({}));
-  
       mount(
         <MemoryRouter initialEntries={['/']}>
           <DataAccessRequestApplication {...props} />
@@ -107,7 +106,7 @@ describe('Data Access Request - Validation', () => {
       );
     });
   
-    it('Submits given valid DAR', () => {  
+    it('Submits given valid DAR', () => {
       cy.get('#piName').type('Some PI');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
@@ -142,7 +141,7 @@ describe('Data Access Request - Validation', () => {
   
     });
   
-    it('Required fields should not be errored when you open page', () => {  
+    it('Required fields should not be errored when you open page', () => {
       cy.get('#piName').should('not.have.class', 'errored');
       cy.get('#signingOfficial').should('not.have.class', 'errored');
       cy.get('#itDirector').should('not.have.class', 'errored');
@@ -169,7 +168,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#stigmatizedDiseases').should('not.have.class', 'errored');
     });
   
-    it('Required fields get errors on submit', () => {  
+    it('Required fields get errors on submit', () => {
       cy.get('#btn_attest').click();
   
       cy.get('#piName').should('have.class', 'errored');
@@ -267,7 +266,7 @@ describe('Data Access Request - Validation', () => {
       );
     });
 
-    it('Cannot submit without library card', () => {  
+    it('Cannot submit without library card', () => {
       cy.get('#piName').type('Some PI');
       cy.get('#signingOfficial').type('SO 2{enter}');
       cy.get('#itDirector').type('Some IT Director');
@@ -300,7 +299,7 @@ describe('Data Access Request - Validation', () => {
       cy.get('#btn_openSubmitModal').should('not.exist');
 
   
-    });  
+    });
   });
 });
 
