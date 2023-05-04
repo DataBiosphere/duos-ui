@@ -295,8 +295,8 @@ const DataAccessRequestApplication = (props) => {
   };
 
 
-  const scrollToFormErrors = (validation, eraCommonsIdValid) => {
-    if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid) {
+  const scrollToFormErrors = (validation, eraCommonsIdValid, hasLibraryCard) => {
+    if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid || !hasLibraryCard) {
       goToStep(1);
     } else if (!isEmpty(validation.darErrors)) {
       goToStep(2);
@@ -338,11 +338,13 @@ const DataAccessRequestApplication = (props) => {
 
     const eraCommonsIdValid = nihValid === true || formData.checkCollaborator === true;
 
-    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid;
+    const hasLibraryCard = !isEmpty(researcher.libraryCards);
+
+    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid || !hasLibraryCard;
     setShowNihValidationError(!eraCommonsIdValid);
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, eraCommonsIdValid);
+      scrollToFormErrors(validation, eraCommonsIdValid, hasLibraryCard);
     } else {
       setIsAttested(true);
       addDucAddendumTab();
