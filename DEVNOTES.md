@@ -77,6 +77,10 @@ that the `e2e.baseUrl` looks like this:
 ```shell
     baseUrl: 'https://local.broadinstitute.org:3000/',
 ```
+Additionally, modify `cypress/support/commands.js` to point to this version of that url:
+```javascript
+  const url = `https://local.broadinstitute.org:3000`;
+```
 This is not necessary for component tests.
 
 ### Headless
