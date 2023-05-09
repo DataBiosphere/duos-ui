@@ -3,7 +3,7 @@
 describe('Home', function() {
 
   it('Home page loads correctly', function() {
-    cy.visit('');
+    cy.visit(Cypress.env('baseUrl'));
     cy.contains('DUOS');
     cy.contains('Sign-in/Register');
     cy.contains('What is DUOS and how does it work?');

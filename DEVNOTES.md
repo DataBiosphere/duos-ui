@@ -51,7 +51,7 @@ npm start
 Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes.
 Remember to set the `env` value appropriately in `config.json`. We use `local` for running via npm, but under docker, we use a real env like `dev`
 
-```dockerfile
+```yaml
     volumes:
       - ./public/config.json:/usr/share/nginx/html/config.json
 ``` 
@@ -71,17 +71,16 @@ We use Cypress for all component and integration testing. Each suite
 of tests is run separately for all PRs via github actions. Local
 testing can be run headless or viewed interactively.
 
-Cypress integration tests run locally require a different `baseUrl` than those
-run in Github Actions. Modify your local `cypress.config.js` file so
-that the `e2e.baseUrl` looks like this:
-```shell
-    baseUrl: 'https://local.broadinstitute.org:3000/',
+Cypress integration (e2e) tests run locally require a different `baseUrl` than those
+run in GitHub Actions. Create a `cypress.env.json` file in the root of your
+local repo that looks like this:
+```json
+{
+  "baseUrl": "https://local.broadinstitute.org:3000/"
+}
 ```
-Additionally, modify `cypress/support/commands.js` to point to this version of that url:
-```javascript
-  const url = `https://local.broadinstitute.org:3000`;
-```
-This is not necessary for component tests.
+Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`
+files instead of the default values.
 
 ### Headless
 To run cypress integration tests, first start up the app in one terminal
