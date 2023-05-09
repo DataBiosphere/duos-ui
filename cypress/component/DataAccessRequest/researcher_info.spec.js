@@ -30,7 +30,6 @@ const props = {
     internalCollaborators: [],
     externalCollaborators: [],
     labCollaborators: [],
-    checkNihDataOnly: true,
   }
 };
 
@@ -86,7 +85,7 @@ describe('Researcher Info', () => {
   });
 
   it('renders the missing library cards alert correctly', () => {
-    const mergedProps = {...props, ...{formData: {...props.formData, ...{checkNihDataOnly: false}}}};
+    const mergedProps = {...props, ...{formData: {...props.formData }}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
@@ -101,24 +100,8 @@ describe('Researcher Info', () => {
     cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
   });
 
-  it('renders the profile submitted alert for researcher without library cards if only NIH data requested', () => {
-    const mergedProps = {...props, ...{completed: true, checkNihDataOnly: true}};
-    mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
-    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
-  });
-
   it('renders the profile unsubmitted alert', () => {
     const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
-    mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
-  });
-
-  it('renders the profile unsubmitted alert for researcher without library cards if only NIH data requested', () => {
-    const mergedProps = {...props, ...{completed: false, checkNihDataOnly: true}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');

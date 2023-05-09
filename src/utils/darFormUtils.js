@@ -96,6 +96,7 @@ export const computeCollaboratorErrors = ({collaborator, needsApproverStatus=tru
 const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted) => {
   const errors = {};
 
+
   if (isStringEmpty(formData.researcher)) {
     errors.researcher = requiredError;
   }
