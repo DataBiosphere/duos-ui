@@ -76,9 +76,7 @@ run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
 ```json
 {
-  "e2e": {
-    "baseUrl": "https://local.broadinstitute.org:3000/"
-  }
+  "baseUrl": "https://local.broadinstitute.org:3000/"
 }
 ```
 Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`

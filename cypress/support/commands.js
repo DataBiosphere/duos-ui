@@ -31,7 +31,7 @@ Cypress.Commands.add('auth', async (roleName) => {
   const keys = Cypress.env(roleName);
   const client = auth.fromJSON(keys);
   client.scopes = ['email', 'profile'];
-  const url = Cypress.env('e2e').baseUrl;
+  const url = Cypress.env('baseUrl');
   await client.request({ url });
   return client.credentials;
 });
