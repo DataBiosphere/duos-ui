@@ -1,5 +1,5 @@
 import React,  { useCallback } from 'react';
-import { validateForm } from '../utils/JsonSchemaUtils';
+// import { validateForm } from '../utils/JsonSchemaUtils';
 
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
@@ -16,7 +16,7 @@ import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 // schema validation is auto-generated from pre-compiled code - if the backend
 // schama changes, then run `npm run genschemas` to regenerate this code
-import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
+// import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
 
 export const DataSubmissionForm = () => {
@@ -95,16 +95,17 @@ export const DataSubmissionForm = () => {
     formatForRegistration(registration);
 
     // check against json schema to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(validateSchema, registration);
-    if (formData.alternativeDataSharingPlan === true) {
-      if (isNil(formFiles.alternativeDataSharingPlanFile)) {
-        validation.alternativeDataSharingPlanFile = {
-          valid: false,
-          failed: ['required']
-        };
-        valid = false;
-      }
-    }
+    let [valid, validation] = [true, true];
+    // validateForm(validateSchema, registration);
+    // if (formData.alternativeDataSharingPlan === true) {
+    //   if (isNil(formFiles.alternativeDataSharingPlanFile)) {
+    //     validation.alternativeDataSharingPlanFile = {
+    //       valid: false,
+    //       failed: ['required']
+    //     };
+    //     valid = false;
+    //   }
+    // }
 
     setFormValidation(validation);
 
