@@ -475,11 +475,10 @@ export const EditConsentGroup = (props) => {
         name: 'dataLocation',
         type: FormFieldTypes.SELECT,
         selectOptions: [
-          'Existing AnVIL Workspace',
-          'Existing Terra Workspace',
-          'Existing TDR Snapshot',
-          'Not Determined',
-          'I am requesting an AnVIL workspace for storage',
+          'AnVIL Workspace',
+          'Terra Workspace',
+          'TDR Location',
+          'Not Determined'
         ],
         placeholder: 'Data Location(s)',
         defaultValue: consentGroup.dataLocation,
