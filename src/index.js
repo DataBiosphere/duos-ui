@@ -1,9 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// import $ from 'jquery';
-// import Popper from 'popper.js';
+// jquery is needed for bootstrap
 import 'jquery/src/jquery';
-
 import 'bootstrap/dist/js/bootstrap.min';
 
 import React from 'react';
