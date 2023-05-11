@@ -19,7 +19,10 @@ import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
 
-export const DataSubmissionForm = () => {
+export const DataSubmissionForm = (props) => {
+  const {
+    history
+  } = props;
 
   const [institutions, setInstitutions] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
@@ -116,7 +119,10 @@ export const DataSubmissionForm = () => {
     // no validation issues, matches json schema: continue to submission
     const multiPartFormData = createMultiPartFormData(registration);
 
-    DataSet.registerDataset(multiPartFormData).catch((e) => {
+    DataSet.registerDataset(multiPartFormData).then(() => {
+      history.push('/dataset_catalog');
+      Notifications.showSuccess({ text: 'Submitted succesfully!' });
+    }, (e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });
     });
   };
