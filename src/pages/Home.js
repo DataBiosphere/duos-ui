@@ -120,14 +120,14 @@ class Home extends Component {
               img({ style: duosLogo , alt: 'DUOS logo', src: duosLogoImg }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ className: 'hidden-xs', style: homeBannerDescription }, [
-                'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
+                'Expediting data sharing for researchers, by facilitating and \nenhancing institutional compliance workflows'])
             ])
           ]),
           div({ className: 'row' }, [
             div({ style: { margin: '5rem auto 0', backgroundColor: 'white' } }, [
-              h1({ style: header }, ['What is DUOS and how does it work?']),
+              h1({ style: header }, ['What is DUOS?']),
               h3({ style: subHeader },
-                ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
+                ['DUOS is a multi-sided software platform bringing together researchers and institutions \n to govern compliant and efficient secondary use of research data']),
               div({}, [
                 img({
                   className: 'col-sm-10 hidden-xs',
@@ -136,35 +136,13 @@ class Home extends Component {
                   src: duosDiagram
                 })
               ]),
-              div({className: 'row', style: { background: 'white', margin: '0' } }, [
-                div({className: 'col-md-5', style: {display: 'flex', justifyContent: 'center'}}, [
-                  button({className: 'btn-primary', style: buttonStyle}, [
-                    a({
-                      href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4404601291163-Registering-a-Dataset-in-DUOS',
-                      style: { color: '#fff' },
-                      target: '_blank'
-                    }, ['Register a dataset in DUOS'])
-                  ])
-                ]),
-                div({className: 'col-md-2', style: {display: 'flex', justifyContent: 'center'}}, []),
-                div({className: 'col-md-5', style: {display: 'flex', justifyContent: 'center'}}, [
-                  isLogged ?
-                    button({className: 'btn-primary', style: buttonStyle}, [
-                      a({
-                        href: '/dataset_catalog',
-                        style: { color: '#fff' }
-                      }, ['Submit a Data Access Request'])
-                    ]) :
-                    h(SignIn, { props: this.props, onSignIn, history, customStyle: buttonStyle})
-                ])
-              ]),
             ])
           ]),
           div({className: 'row', style: {background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0'}}, [
             div({className: 'col-lg-4 col-md-4'}, [
               p({style: header}, ['Are you a DAC member?']),
               p({style: description}, [
-                'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
+                'DUOS is helping DACs efficiently onboard new datasets and manage data access requests']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   id: 'zendesk-dac-link',
@@ -176,7 +154,7 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-md-4 '}, [
               p({ style: header }, ['Are you a Signing Official?']),
               p({ style: description }, [
-                'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers.']),
+                'Our innovative Library Card Agreement reduces the administrative burden on Signing Officials']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
@@ -189,7 +167,7 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-md-4' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
-                'Click here to learn more about how DUOS helps researchers and for details on making a data access request.']),
+                'DUOS helps researchers request data from institutions around the world with a single form']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide',
