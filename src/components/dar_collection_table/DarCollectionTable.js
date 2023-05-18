@@ -50,6 +50,7 @@ export const styles = {
     datasetCount: '7.5%',
     status: '10%',
     actions: '14.5%',
+    dac: '5%'
   },
   color: {
     darCode: '#000000',
@@ -60,6 +61,7 @@ export const styles = {
     datasetCount: '#354052',
     status: '#000000',
     actions: '#000000',
+    dac: '#000000'
   },
   fontSize: {
     darCode: '1.6rem',
@@ -70,6 +72,7 @@ export const styles = {
     datasetCount: '2.0rem',
     status: '1.6rem',
     actions: '1.6rem',
+    dac: '1.4rem'
   },
 };
 
@@ -81,7 +84,8 @@ export const DarCollectionTableColumnOptions = {
   INSTITUTION: 'institution',
   DATASET_COUNT: 'datasetCount',
   STATUS: 'status',
-  ACTIONS: 'actions'
+  ACTIONS: 'actions',
+  DAC: 'dac'
 };
 
 const columnHeaderConfig = {
@@ -131,6 +135,11 @@ const columnHeaderConfig = {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
     cellDataFn: cellData.consoleActionsCellData
+  },
+  dac: {
+    label: 'DAC',
+    cellStyle: { width: styles.cellWidth.dac },
+    cellDataFn: cellData.DacCellData
   }
 };
 
@@ -151,7 +160,7 @@ const processCollectionRowData = ({
     return collections.map((collection) => {
       const {
         darCollectionId, darCode, datasetIds,
-        submissionDate, status, actions,
+        submissionDate, status, actions, dac,
         researcherName, name, institutionName
       } = collection;
       collectionsSummaryMap[collection.darCollectionId] = collection;
@@ -161,7 +170,7 @@ const processCollectionRowData = ({
           submissionDate, researcherName, institutionName,
           showConfirmationModal, consoleType,
           goToVote, reviewCollection, relevantDatasets,
-          resumeCollection, actions,
+          resumeCollection, actions, dac,
           collectionIsExpanded: collectionIsExpanded(darCollectionId),
           updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
         });

@@ -85,7 +85,8 @@ export default function AdminManageDarCollections() {
         DarCollectionTableColumnOptions.INSTITUTION,
         DarCollectionTableColumnOptions.DATASET_COUNT,
         DarCollectionTableColumnOptions.STATUS,
-        DarCollectionTableColumnOptions.ACTIONS
+        DarCollectionTableColumnOptions.ACTIONS,
+        DarCollectionTableColumnOptions. DAC,
       ],
       isLoading,
       cancelCollection,

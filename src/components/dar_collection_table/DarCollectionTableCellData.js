@@ -6,6 +6,7 @@ import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
+import { DAC } from '../../libs/ajax';
 
 export const consoleTypes = {
   ADMIN: 'admin',
@@ -170,6 +171,18 @@ export function consoleActionsCellData({collection, reviewCollection, goToVote, 
   };
 }
 
+export function DacCellData({DAC, collection, label = 'dac'}) {
+  return{
+    data: DAC,
+    id: collection.darCollectionId,
+    style: {
+      color: '#354052',
+      fontSize: styles.fontSize.dac,
+    },
+    label
+  }
+}
+
 export default {
   projectTitleCellData,
   darCodeCellData,
@@ -179,4 +192,5 @@ export default {
   datasetCountCellData,
   statusCellData,
   consoleActionsCellData,
+  DacCellData,
 };
