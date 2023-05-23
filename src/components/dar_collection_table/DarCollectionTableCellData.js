@@ -92,7 +92,7 @@ export function DacCellData({dac, collection, label = 'dac'}) {
       fontSize: styles.fontSize.dac,
     },
     label
-  }
+  };
 }
 
 export function submissionDateCellData({submissionDate, darCollectionId, label = 'submission-date'}) {
