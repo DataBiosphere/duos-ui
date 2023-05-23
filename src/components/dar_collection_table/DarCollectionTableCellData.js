@@ -180,7 +180,7 @@ export function consoleActionsCellData({collection, reviewCollection, goToVote, 
     label: 'table-actions',
     data: actionComponent
   };
-};
+}
 
 export default {
   projectTitleCellData,
