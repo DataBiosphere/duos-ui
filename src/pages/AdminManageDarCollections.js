@@ -79,6 +79,7 @@ export default function AdminManageDarCollections() {
       collections: filteredList,
       columns: [
         DarCollectionTableColumnOptions.DAR_CODE,
+        DarCollectionTableColumnOptions. DAC,
         DarCollectionTableColumnOptions.NAME,
         DarCollectionTableColumnOptions.SUBMISSION_DATE,
         DarCollectionTableColumnOptions.RESEARCHER,
@@ -86,7 +87,6 @@ export default function AdminManageDarCollections() {
         DarCollectionTableColumnOptions.DATASET_COUNT,
         DarCollectionTableColumnOptions.STATUS,
         DarCollectionTableColumnOptions.ACTIONS,
-        DarCollectionTableColumnOptions. DAC,
       ],
       isLoading,
       cancelCollection,

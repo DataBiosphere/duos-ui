@@ -43,49 +43,49 @@ export const styles = {
   }),
   cellWidth: {
     darCode: '12.5%',
-    projectTitle: '18%',
-    submissionDate: '12.5%',
+    dac: '9%',
+    projectTitle: '14%',
+    submissionDate: '10.5%',
     researcher: '10%',
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
-    actions: '14.5%',
-    dac: '5%'
+    actions: '9.5%'
   },
   color: {
     darCode: '#000000',
+    dac: '#000000',
     projectTitle: '#000000',
     submissionDate: '#000000',
     researcher: '#000000',
     institution: '#354052',
     datasetCount: '#354052',
     status: '#000000',
-    actions: '#000000',
-    dac: '#000000'
+    actions: '#000000'
   },
   fontSize: {
     darCode: '1.6rem',
+    dac: '1.4rem',
     projectTitle: '1.4rem',
     submissionDate: '1.4rem',
     researcher: '1.4rem',
     institution: '1.4rem',
     datasetCount: '2.0rem',
     status: '1.6rem',
-    actions: '1.6rem',
-    dac: '1.4rem'
+    actions: '1.6rem'
   },
 };
 
 export const DarCollectionTableColumnOptions = {
   DAR_CODE: 'darCode',
+  DAC: 'dac',
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
   RESEARCHER: 'researcher',
   INSTITUTION: 'institution',
   DATASET_COUNT: 'datasetCount',
   STATUS: 'status',
-  ACTIONS: 'actions',
-  DAC: 'dac'
+  ACTIONS: 'actions'
 };
 
 const columnHeaderConfig = {
@@ -94,6 +94,11 @@ const columnHeaderConfig = {
     cellStyle: { width: styles.cellWidth.darCode },
     cellDataFn: cellData.darCodeCellData,
     sortable: true
+  },
+  dac: {
+    label: 'DAC',
+    cellStyle: { width: styles.cellWidth.dac },
+    cellDataFn: cellData.DacCellData
   },
   name: {
     label: 'Title',
@@ -136,11 +141,6 @@ const columnHeaderConfig = {
     cellStyle: { width: styles.cellWidth.actions },
     cellDataFn: cellData.consoleActionsCellData
   },
-  dac: {
-    label: 'DAC',
-    cellStyle: { width: styles.cellWidth.dac },
-    cellDataFn: cellData.DacCellData
-  }
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);

@@ -6,7 +6,6 @@ import {styles} from './DarCollectionTable';
 import Actions from './Actions';
 import DarCollectionAdminReviewLink from './DarCollectionAdminReviewLink';
 import {Link} from 'react-router-dom';
-import { DAC } from '../../libs/ajax';
 
 export const consoleTypes = {
   ADMIN: 'admin',
@@ -83,6 +82,18 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 
   return h(Link, { to: path }, [darCode]);
 };
+
+export function DacCellData({dac, collection, label = 'dac'}) {
+  return{
+    data: dac,
+    id: collection.darCollectionId,
+    style: {
+      color: '#354052',
+      fontSize: styles.fontSize.dac,
+    },
+    label
+  }
+}
 
 export function submissionDateCellData({submissionDate, darCollectionId, label = 'submission-date'}) {
   const dateString = isNil(submissionDate) ? '- -' :
@@ -169,22 +180,11 @@ export function consoleActionsCellData({collection, reviewCollection, goToVote, 
     label: 'table-actions',
     data: actionComponent
   };
-}
-
-export function DacCellData({DAC, collection, label = 'dac'}) {
-  return{
-    data: DAC,
-    id: collection.darCollectionId,
-    style: {
-      color: '#354052',
-      fontSize: styles.fontSize.dac,
-    },
-    label
-  }
-}
+};
 
 export default {
   projectTitleCellData,
+  DacCellData,
   darCodeCellData,
   submissionDateCellData,
   researcherCellData,
@@ -192,5 +192,4 @@ export default {
   datasetCountCellData,
   statusCellData,
   consoleActionsCellData,
-  DacCellData,
 };
