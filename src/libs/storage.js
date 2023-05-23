@@ -1,10 +1,12 @@
 import get from 'lodash/fp/get';
+import { v4 as uuid } from 'uuid';
 
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
 const GoogleUser = 'Gapi'; // Google user info, including token
 const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
+const anonymousId = 'anonymousId';
 const ENV = 'env';
 
 export const Storage = {
@@ -28,6 +30,14 @@ export const Storage = {
     const id = Storage.getCurrentUser()?.userId || '';
     const userSettings = JSON.parse(sessionStorage.getItem(UserSettings)) || {};
     return get([id, key], userSettings);
+  },
+
+  getAnonymousId: () => {
+    return sessionStorage.getItem(anonymousId) ? sessionStorage.getItem(anonymousId) : null;
+  },
+
+  setAnonymousId: (id = uuid()) => {
+    return sessionStorage.setItem(anonymousId, id);
   },
 
   setCurrentUserSettings: (key, value) => {
@@ -74,5 +84,5 @@ export const Storage = {
 
   getEnv: () => {
     return sessionStorage.getItem(ENV);
-  }
+  },
 };

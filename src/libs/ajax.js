@@ -38,6 +38,10 @@ export const getApiUrl = async(baseUrl = '') => {
   return env === 'local' ? baseUrl : await Config.getApiUrl();
 };
 
+export const getBardApiUrl = async() => {
+  return await Config.getBardApiUrl();
+};
+
 export const getOntologyUrl = async(baseUrl = '') => {
   const env = await Config.getEnv();
   return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
