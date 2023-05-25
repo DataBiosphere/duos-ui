@@ -83,13 +83,13 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
   return h(Link, { to: path }, [darCode]);
 };
 
-export function DacCellData({dac, collection, label = 'dac'}) {
+export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
   return{
-    data: dac,
-    id: collection.darCollectionId,
+    data: dacNames,
+    id: darCollectionId,
     style: {
       color: '#354052',
-      fontSize: styles.fontSize.dac,
+      fontSize: styles.fontSize.dacNames,
     },
     label
   };

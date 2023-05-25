@@ -42,8 +42,8 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '12.5%',
-    dac: '9%',
+    darCode: '11%',
+    dacNames: '9%',
     projectTitle: '14%',
     submissionDate: '10.5%',
     researcher: '10%',
@@ -54,7 +54,7 @@ export const styles = {
   },
   color: {
     darCode: '#000000',
-    dac: '#000000',
+    dacNames: '#000000',
     projectTitle: '#000000',
     submissionDate: '#000000',
     researcher: '#000000',
@@ -65,7 +65,7 @@ export const styles = {
   },
   fontSize: {
     darCode: '1.6rem',
-    dac: '1.4rem',
+    dacNames: '1.4rem',
     projectTitle: '1.4rem',
     submissionDate: '1.4rem',
     researcher: '1.4rem',
@@ -78,7 +78,7 @@ export const styles = {
 
 export const DarCollectionTableColumnOptions = {
   DAR_CODE: 'darCode',
-  DAC: 'dac',
+  DAC: 'dacNames',
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
   RESEARCHER: 'researcher',
@@ -95,9 +95,9 @@ const columnHeaderConfig = {
     cellDataFn: cellData.darCodeCellData,
     sortable: true
   },
-  dac: {
+  dacNames: {
     label: 'DAC',
-    cellStyle: { width: styles.cellWidth.dac },
+    cellStyle: { width: styles.cellWidth.dacNames },
     cellDataFn: cellData.DacCellData
   },
   name: {
@@ -160,7 +160,7 @@ const processCollectionRowData = ({
     return collections.map((collection) => {
       const {
         darCollectionId, darCode, datasetIds,
-        submissionDate, status, actions, dac,
+        submissionDate, status, actions, dacNames,
         researcherName, name, institutionName
       } = collection;
       collectionsSummaryMap[collection.darCollectionId] = collection;
@@ -170,7 +170,7 @@ const processCollectionRowData = ({
           submissionDate, researcherName, institutionName,
           showConfirmationModal, consoleType,
           goToVote, reviewCollection, relevantDatasets,
-          resumeCollection, actions, dac,
+          resumeCollection, actions, dacNames,
           collectionIsExpanded: collectionIsExpanded(darCollectionId),
           updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
         });
