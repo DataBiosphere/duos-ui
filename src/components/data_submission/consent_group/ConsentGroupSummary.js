@@ -209,6 +209,7 @@ export const ConsentGroupSummary = (props) => {
           className: 'form-control',
           value: consentGroup.url,
         }),
+        div({style: { marginTop: '2px' }}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${consentGroup.numberOfParticipants}`])]),
         p({
           style: {
             fontWeight: 'bold',
@@ -223,7 +224,6 @@ export const ConsentGroupSummary = (props) => {
         }, [
           div({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
           div({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
-          div({}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${ft.numberOfParticipants}`])]),
         ]))),
       ]),
     ]),

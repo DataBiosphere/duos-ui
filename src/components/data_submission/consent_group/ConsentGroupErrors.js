@@ -1,6 +1,5 @@
 import { selectedPrimaryGroup } from './EditConsentGroup';
 import { isNil, isEmpty } from 'lodash/fp';
-import { set } from 'lodash';
 import { dateValidator } from '../../forms/formValidation';
 import { FormValidators } from '../../forms/forms';
 
@@ -65,14 +64,8 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
     validation.mor = requiredError;
   }
 
-  if (isNil(consentGroup.fileTypes) || isEmpty(consentGroup.fileTypes)) {
-    validation.fileTypes = requiredError;
-  } else {
-    consentGroup.fileTypes.forEach((ft, idx) => {
-      if (isNil(ft.numberOfParticipants)) {
-        set(validation, ['fileTypes', idx, 'numberOfParticipants'], requiredError);
-      }
-    });
+  if (isNil(consentGroup.numberOfParticipants)) {
+    validation.numberOfParticipants = requiredError;
   }
 
   return validation;
