@@ -455,7 +455,6 @@ export const EditConsentGroup = (props) => {
         },
         validators: [FormValidators.REQUIRED],
         validation: validation.dataAccessCommitteeId,
-        defaultValue: consentGroup.dataAccessCommitteeId,
         onValidationChange,
       }),
     ]),
