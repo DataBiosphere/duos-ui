@@ -3,13 +3,13 @@
 describe('Home', function() {
 
   it('Home page loads correctly', function() {
-    cy.visit('');
+    cy.visit(Cypress.env('baseUrl'));
     cy.contains('DUOS');
     cy.contains('Sign-in/Register');
     cy.contains('What is DUOS and how does it work?');
-    cy.contains('Are you a DAC member?');
-    cy.contains('Are you a Signing Official?');
-    cy.contains('Are you a researcher?');
+    cy.contains('DUOS for DACs');
+    cy.contains('Institutional Oversight');
+    cy.contains('Looking for data');
     cy.contains('Overview of DUOS');
     cy.contains('Machine Readable Consent Guidance.');
     cy.get('#zendesk-dac-link').should(
