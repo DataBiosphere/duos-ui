@@ -1,4 +1,4 @@
-import {includes, isEmpty, isNil, toLower} from 'lodash/fp';
+import {includes, isEmpty, isNil, toLower, uniq} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
 import {h, div} from 'react-hyperscript-helpers';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
@@ -84,8 +84,10 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 };
 
 export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
-  return{
-    data: dacNames,
+  const dacString = uniq(dacNames).join('\n');
+
+  return {
+    data: dacString || '- -',
     id: darCollectionId,
     style: {
       color: '#354052',
