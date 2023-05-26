@@ -16,7 +16,6 @@ import { NotificationService } from '../../libs/notificationService';
 import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';
 import './DataAccessRequestApplication.css';
-import headingIcon from '../../images/icon_add_access.png';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 
@@ -453,16 +452,15 @@ const DataAccessRequestApplication = (props) => {
 
   return (
     <div className='container' style={{ paddingBottom: '2%' }}>
-      <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
+      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
         <div className='row no-margin'>
           <Notification notificationData={notificationData} />
           <div
             className={(formData.darCode !== null ?
-              'col-lg-10 col-md-9 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
+              'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
             <PageHeading
-              id='requestApplication' imgSrc={headingIcon} iconSize='medium' color='access'
               title='Data Access Request Application'
-              description='The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
+              description='Please complete the fields below to request access to data.'
             />
           </div>
           {formData.darCode !== null &&
