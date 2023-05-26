@@ -84,9 +84,10 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
 };
 
 export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
-  //const dacString = uniq(dacNames).join('\n');
+  const dacString = uniq(dacNames).join('\n');
+  
   return {
-    data: dacNames || '- -',
+    data: dacNames,
     id: darCollectionId,
     style: {
       color: '#354052',
