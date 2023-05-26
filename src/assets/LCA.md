@@ -28,7 +28,7 @@ The Requestor agrees that if a Library Card Holder changes institutions or leave
 7. ***Confidentiality***. The Requestor agrees that it and all Authorized Users will preserve at all times the confidentiality of the Data and, without limitation, will not use or attempt to use the Data to contact or identify any Research Participant. The Requestor confirms that all Authorized Users receiving access to the Data will have completed all required training (whether on-line or classroom-based) on appropriate handling and protection of human subjects data.
 
 
-8. ***Data Security***. The Requestor represents and warrants that it has enacted appropriate administrative, technical and physical safeguards to prevent unauthorized use of or access to the Data and will comply with any specific terms included in the data use limitations for specific Data provided by Broad and/or the Data Provider relating to safeguarding of such Data. 
+8. ***Data Security***. The Requestor represents that it has enacted appropriate administrative, technical and physical safeguards to prevent unauthorized use of or access to the Data and will comply with any specific terms included in the data use limitations for specific Data provided by Broad and/or the Data Provider relating to safeguarding of such Data. 
 
 
 9. ***DUOS***. Broad hereby represents and warrants to the Requestor that:\

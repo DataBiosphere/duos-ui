@@ -9,7 +9,7 @@ import {Notifications, searchOnFilteredList, getSearchFilterFunctions } from '..
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
 import { USER_ROLES } from '../libs/utils';
-import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2021.pdf';
+import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_UIversion.pdf';
 import NhgriLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
