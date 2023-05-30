@@ -39,7 +39,7 @@
     "tss-react": "4.8.3",
     "usa-states": "0.0.6",
     "uuid": "9.0.0",
-    "voca": "1.4.0"
+    "voca": "1.4.1"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
