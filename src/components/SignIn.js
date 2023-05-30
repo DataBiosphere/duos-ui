@@ -3,6 +3,7 @@ import {isEmpty, isNil} from 'lodash/fp';
 import {a, div, h, img, span} from 'react-hyperscript-helpers';
 import {Alert} from './Alert';
 import {ToS, User} from '../libs/ajax';
+import { Metrics } from '../libs/metrics';
 import {Config} from '../libs/config';
 import {Storage} from '../libs/storage';
 import {Navigation, setUserRoleStatuses} from '../libs/utils';
@@ -10,6 +11,7 @@ import loadingIndicator from '../images/loading-indicator.svg';
 import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
 import {GoogleIS} from '../libs/googleIS';
+import eventList from '../libs/events';
 
 export default function SignIn(props) {
   const [clientId, setClientId] = useState('');
@@ -62,47 +64,70 @@ export default function SignIn(props) {
   const onSuccess = async (response) => {
     Storage.setGoogleData(response);
 
-    // if 'redirectTo' exists, redirect there. otherwise,
-    // redirect to the page the user attempted to go to before
-    // signing in.
-    const queryParams = new URLSearchParams(window.location.search);
-    const currentPage = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : window.location.pathname;
-    const shouldRedirect = currentPage !== '/' && currentPage !== '/home';
+    const redirectTo = getRedirectTo();
+    const shouldRedirect = shouldRedirectTo(redirectTo);
+    Storage.setAnonymousId();
 
     try {
-      await checkToSAndRedirect(shouldRedirect ? currentPage : null);
+      await attemptSignInCheckToSAndRedirect(redirectTo, shouldRedirect);
     } catch (error) {
-      try {
-        // New users without an existing account will error out in the above call
-        // Register them and redirect them to the ToS Acceptance page.
-        const registeredUser = await User.registerUser();
-        setUserRoleStatuses(registeredUser, Storage);
-        await onSignIn();
-        history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${currentPage}` : ''}`);
-      } catch (error) {
-        // Handle common error cases
-        try {
-          const status = error.status;
-          switch (status) {
-            case 400:
-              setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
-              break;
-            case 409:
-              // If the user exists, regardless of conflict state, log them in.
-              try {
-                await checkToSAndRedirect(shouldRedirect ? currentPage : null);
-              } catch (error) {
-                Storage.clearStorage();
-              }
-              break;
-            default:
-              setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
-              break;
-          }
-        } catch (error) {
-          setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
-        }
-      }
+      await handleRegistration(redirectTo, shouldRedirect);
+    }
+  };
+
+  const getRedirectTo = () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    return queryParams.get('redirectTo') || window.location.pathname;
+  };
+
+  const shouldRedirectTo = (page) => page !== '/' && page !== '/home';
+
+  const attemptSignInCheckToSAndRedirect = async (redirectTo, shouldRedirect) => {
+    await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
+    Metrics.identify(Storage.getAnonymousId());
+    Metrics.syncProfile();
+    Metrics.captureEvent(eventList.userSignIn);
+  };
+
+  const handleRegistration = async (redirectTo, shouldRedirect) => {
+    try {
+      await registerAndRedirectNewUser(redirectTo, shouldRedirect);
+    } catch (error) {
+      await handleErrors(error, redirectTo, shouldRedirect);
+    }
+  };
+
+  const registerAndRedirectNewUser = async (redirectTo, shouldRedirect) => {
+    const registeredUser = await User.registerUser();
+    setUserRoleStatuses(registeredUser, Storage);
+    await onSignIn();
+    Metrics.identify(Storage.getAnonymousId());
+    Metrics.syncProfile();
+    Metrics.captureEvent(eventList.userRegister);
+    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
+  };
+
+  const handleErrors = async (error, redirectTo, shouldRedirect) => {
+    const status = error.status;
+
+    switch (status) {
+      case 400:
+        setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
+        break;
+      case 409:
+        handleConflictError(redirectTo, shouldRedirect);
+        break;
+      default:
+        setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
+        break;
+    }
+  };
+
+  const handleConflictError = async (redirectTo, shouldRedirect) => {
+    try {
+      await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
+    } catch (error) {
+      Storage.clearStorage();
     }
   };
 
