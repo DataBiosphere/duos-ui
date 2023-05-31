@@ -55,7 +55,7 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
-    "@babel/core": "7.21.3",
+    "@babel/core": "7.22.1",
     "@babel/eslint-parser": "7.21.3",
     "@babel/eslint-plugin": "7.19.1",
     "@babel/plugin-proposal-class-properties": "7.18.6",
