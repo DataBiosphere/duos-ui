@@ -42,39 +42,43 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '12.5%',
-    projectTitle: '18%',
-    submissionDate: '12.5%',
+    darCode: '11%',
+    dacNames: '9%',
+    projectTitle: '14%',
+    submissionDate: '10.5%',
     researcher: '10%',
     institution: '12.5%',
     datasetCount: '7.5%',
     status: '10%',
-    actions: '14.5%',
+    actions: '9.5%'
   },
   color: {
     darCode: '#000000',
+    dacNames: '#000000',
     projectTitle: '#000000',
     submissionDate: '#000000',
     researcher: '#000000',
     institution: '#354052',
     datasetCount: '#354052',
     status: '#000000',
-    actions: '#000000',
+    actions: '#000000'
   },
   fontSize: {
     darCode: '1.6rem',
+    dacNames: '1.4rem',
     projectTitle: '1.4rem',
     submissionDate: '1.4rem',
     researcher: '1.4rem',
     institution: '1.4rem',
     datasetCount: '2.0rem',
     status: '1.6rem',
-    actions: '1.6rem',
+    actions: '1.6rem'
   },
 };
 
 export const DarCollectionTableColumnOptions = {
   DAR_CODE: 'darCode',
+  DAC: 'dacNames',
   NAME: 'name',
   SUBMISSION_DATE: 'submissionDate',
   RESEARCHER: 'researcher',
@@ -90,6 +94,11 @@ const columnHeaderConfig = {
     cellStyle: { width: styles.cellWidth.darCode },
     cellDataFn: cellData.darCodeCellData,
     sortable: true
+  },
+  dacNames: {
+    label: 'DAC',
+    cellStyle: { width: styles.cellWidth.dacNames },
+    cellDataFn: cellData.DacCellData
   },
   name: {
     label: 'Title',
@@ -131,7 +140,7 @@ const columnHeaderConfig = {
     label: 'Action',
     cellStyle: { width: styles.cellWidth.actions },
     cellDataFn: cellData.consoleActionsCellData
-  }
+  },
 };
 
 const defaultColumns = Object.keys(columnHeaderConfig);
@@ -151,7 +160,7 @@ const processCollectionRowData = ({
     return collections.map((collection) => {
       const {
         darCollectionId, darCode, datasetIds,
-        submissionDate, status, actions,
+        submissionDate, status, actions, dacNames,
         researcherName, name, institutionName
       } = collection;
       collectionsSummaryMap[collection.darCollectionId] = collection;
@@ -161,7 +170,7 @@ const processCollectionRowData = ({
           submissionDate, researcherName, institutionName,
           showConfirmationModal, consoleType,
           goToVote, reviewCollection, relevantDatasets,
-          resumeCollection, actions,
+          resumeCollection, actions, dacNames,
           collectionIsExpanded: collectionIsExpanded(darCollectionId),
           updateCollectionIsExpanded: (val) => updateCollectionIsExpandedById(darCollectionId, val),
         });
