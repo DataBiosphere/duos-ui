@@ -2,7 +2,7 @@ import {User} from './ajax';
 import {Storage} from '../libs/storage';
 
 export const Acknowledgments = {
-  broadLcaAcknowledgement: 'Library_Card_Agreement_2021.pdf',
+  broadLcaAcknowledgement: 'Library_Card_Agreement_2023_UIversion.pdf',
   nihLcaAcknowledgement: 'NIH_Library_Card_Agreement_11.17.22_version.pdf',
 };
 
