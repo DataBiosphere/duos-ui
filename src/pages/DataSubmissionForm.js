@@ -161,12 +161,12 @@ export const DataSubmissionForm = (props) => {
         <div style={Styles.HEADER_CONTAINER}>
           <div style={Styles.TITLE}>
             Study Registration Form
-          <div style={Styles.MEDIUM_DESCRIPTION}>
+            <div style={Styles.MEDIUM_DESCRIPTION}>
             Submit new datasets to DUOS
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800}}>
