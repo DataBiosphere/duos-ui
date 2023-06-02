@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import { a, h, div, img } from 'react-hyperscript-helpers';
-import userIcon from '../../images/icon_manage_users.png';
+import { a, h, div } from 'react-hyperscript-helpers';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import SimpleButton from '../../components/SimpleButton';
@@ -12,6 +11,7 @@ import {
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
+
 } from '../../libs/utils';
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
@@ -374,12 +374,6 @@ export default function SigningOfficialTable(props) {
   return h(Fragment, {}, [
     div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' } }, [
       div({ style: Styles.LEFT_HEADER_SECTION }, [
-        div({ style: { ...Styles.ICON_CONTAINER, textAlign: 'center' } }, [
-          img({
-            id: 'user-icon',
-            src: userIcon,
-          }),
-        ]),
         div({ style: { ...Styles.HEADER_CONTAINER , marginRight: '-7%' }}, [
           div({ style: { ...Styles.SUB_HEADER,
             marginTop: '0',

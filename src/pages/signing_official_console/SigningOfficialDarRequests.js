@@ -41,8 +41,8 @@ export default function SigningOfficialDarRequests() {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, [`My Institution's Data Access Requests`]),
-            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
+            div({style: {...Styles.TITLE, marginTop: '0'}}, [`My Institution's Data Access Requests`]),
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, [
               'Your Institution\'s Data Access Requests: Records from all current and closed data access requests.',
             ]),
           ])
