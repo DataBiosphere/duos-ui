@@ -1,4 +1,4 @@
-import LibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_UIversion.pdf';
+import LibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import DownloadIcon from 'react-material-icon-svg/dist/Download';
 import {a, div} from 'react-hyperscript-helpers';
 import React from 'react';
