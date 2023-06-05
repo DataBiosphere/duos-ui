@@ -14,7 +14,8 @@ import {includes} from 'lodash/fp';
  */
 export const envGroups = {
   NON_PROD: ['local', 'dev', 'alpha', 'staging'],
-  NON_STAGING: ['local', 'dev', 'alpha']
+  NON_STAGING: ['local', 'dev', 'alpha'],
+  DEV: ['local', 'dev'],
 };
 
 /**
@@ -35,7 +36,18 @@ export const checkEnv = (envGroup) => {
   return env ? includes(env)(envGroup) : false;
 };
 
+/**
+ * Returns true if the current environment is development or local.
+ *
+ * @example
+ * // returns true when Storage.ENV === 'local' || 'dev'
+ * isDevEnv()
+ * @returns {boolean}
+ */
+export const isDevEnv = () => checkEnv(envGroups.DEV);
+
 export default {
   checkEnv,
+  isDevEnv,
   envGroups
 };
