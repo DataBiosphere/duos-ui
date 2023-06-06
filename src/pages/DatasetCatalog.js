@@ -16,6 +16,7 @@ import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
+import {isDevEnv} from '../utils/EnvironmentUtils';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -516,7 +517,7 @@ export default function DatasetCatalog(props) {
             button({
               id: 'btn_addDataset',
               isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
-              onClick: () => props.history.push({ pathname: 'dataset_registration' }),
+              onClick: () => props.history.push({ pathname: isDevEnv() ? 'data_submission_form' : 'dataset_registration' }),
               className: `f-right btn-primary ${color}-background search-wrapper`,
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
             }, ['Add Dataset',
