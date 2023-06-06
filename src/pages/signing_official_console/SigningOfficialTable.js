@@ -18,7 +18,7 @@ import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_UIversion.pdf';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 

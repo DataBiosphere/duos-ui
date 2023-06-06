@@ -1,6 +1,6 @@
 import { h, h2, a, p, div, span, button } from 'react-hyperscript-helpers';
 import { Notifications } from '../libs/utils';
-import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_UIversion.pdf';
+import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';

@@ -1,7 +1,7 @@
 
 import { a, div, h2, h3, span, li, ol, p } from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_UIversion.pdf';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
