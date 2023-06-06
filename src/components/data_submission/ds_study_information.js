@@ -61,6 +61,8 @@ export default function DataSubmissionStudyInformation(props) {
       onValidationChange
     }),
     h(FormField, {
+      type: FormFieldTypes.TEXTAREA,
+      rows: 6,
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',

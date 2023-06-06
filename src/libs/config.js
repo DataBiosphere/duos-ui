@@ -7,6 +7,8 @@ export const Config = {
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
+  getBardApiUrl: async () => (await getConfig()).bardApiUrl, // Mixpanel
+
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
   getProfileUrl: async () => (await getConfig()).profileUrl,

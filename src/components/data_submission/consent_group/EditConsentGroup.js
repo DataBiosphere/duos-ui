@@ -524,13 +524,6 @@ export const EditConsentGroup = (props) => {
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
-        }, {
-          id: idx + '_numberOfParticipants',
-          name: 'numberOfParticipants',
-          title: '# of Participants',
-          placeholder: 'Number',
-          type: FormFieldTypes.NUMBER,
-          validators: [FormValidators.REQUIRED]
         }
       ],
       defaultValue: consentGroup.fileTypes,
@@ -541,6 +534,21 @@ export const EditConsentGroup = (props) => {
       validation: validation.fileTypes,
       onValidationChange,
     }),
+    div({
+      style: { width: '50%' }
+    }, [
+      h(FormField, {
+        id: idx + '_numberOfParticipants',
+        name: 'numberOfParticipants',
+        title: '# of Participants',
+        placeholder: 'Number',
+        type: FormFieldTypes.NUMBER,
+        validators: [FormValidators.REQUIRED],
+        defaultValue: consentGroup.numberOfParticipants,
+        onChange,
+      }),
+    ]),
+
     div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' }}, [
       h(FormField, {
         type: FormFieldTypes.FILE,

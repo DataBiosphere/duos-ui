@@ -4,7 +4,7 @@ import {cloneDeep, findIndex} from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import { Collections, DAR } from '../libs/ajax';
 import { DarCollectionTableColumnOptions, DarCollectionTable } from '../components/dar_collection_table/DarCollectionTable';
-import accessIcon from '../images/icon_access.png';
+import accessIcon from '../images/lock-icon.png';
 import {Notifications, searchOnFilteredList, getSearchFilterFunctions } from '../libs/utils';
 import SearchBar from '../components/SearchBar';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';

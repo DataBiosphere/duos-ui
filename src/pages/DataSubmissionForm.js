@@ -159,9 +159,11 @@ export const DataSubmissionForm = (props) => {
           <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} />
         </div>
         <div style={Styles.HEADER_CONTAINER}>
-          <h1>Register a Dataset</h1>
-          <div style={{fontSize: '1.6rem'}}>
-            Submit a new dataset to DUOS
+          <div style={Styles.TITLE}>
+            Study Registration Form
+            <div style={Styles.MEDIUM_DESCRIPTION}>
+            Submit new datasets to DUOS
+            </div>
           </div>
         </div>
       </div>

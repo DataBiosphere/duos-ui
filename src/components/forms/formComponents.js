@@ -80,7 +80,7 @@ export const FormInputGeneric = (config) => {
       type: type?.inputType || 'text',
       className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
       placeholder: placeholder || title,
-      value: formValue.toString(),
+      value: formValue?.toString(),
       readOnly: readOnly,
       style: { ...styles.inputStyle, ...inputStyle },
       disabled: disabled,

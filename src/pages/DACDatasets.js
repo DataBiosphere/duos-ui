@@ -8,6 +8,7 @@ import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellD
 import style from './DACDatasets.module.css';
 import {Button} from '@mui/material';
 import {DatasetService} from '../utils/DatasetService';
+import {isDevEnv} from '../utils/EnvironmentUtils';
 
 export default function DACDatasets(props) {
 
@@ -80,7 +81,7 @@ export default function DACDatasets(props) {
     <div>
       <Button
         className={style['add-button']}
-        onClick={() => history.push({pathname: 'dataset_registration'})}
+        onClick={() => history.push({pathname: isDevEnv() ? 'data_submission_form' : 'dataset_registration'})}
         variant="outlined">
         <div style={{verticalAlign: 'center', color: '#0948B7'}}>
           <span
