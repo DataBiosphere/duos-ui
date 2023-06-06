@@ -268,8 +268,10 @@ export const processRestrictionStatements = async (key, dataUse) => {
         //condition for datasets with dataUses that do not have ontology labels saved on the dataUse object
         try {
           const ontologyUrls = uniq(value);
-          const ontologyLabels = await getOntologyName(ontologyUrls);
-          resp = consentTranslations.diseaseRestrictions(ontologyLabels);
+          if (!isEmpty(ontologyUrls)) {
+            const ontologyLabels = await getOntologyName(ontologyUrls);
+            resp = consentTranslations.diseaseRestrictions(ontologyLabels);
+          }
         } catch (error) {
           Notifications.showError({ text: 'Ontology API Request Error' });
         }
