@@ -64,7 +64,7 @@ describe('JsonSchema - validate form', () => {
       aNumber: 20,
       someArray: [
         {
-          someUri: 'asdf.com',
+          someUri: 'https://asdf.com',
           someEmail: 'asdf@asdf.com'
         }
       ]
@@ -137,7 +137,7 @@ describe('JsonSchema - validate form', () => {
           someEmail: 'asdjfasdfhalsdkfj'
         },
         {
-          someUri: 'asdf.com',
+          someUri: 'https://asdf.com',
           someEmail: 'asdf@gmail.com'
         }
       ]
@@ -158,6 +158,12 @@ describe('JsonSchema - validate form', () => {
             'failed': [
               'email'
             ]
+          },
+          'someUri': {
+            'valid': false,
+            'failed': [
+              'uri'
+            ]
           }
         }
       ]
@@ -172,7 +178,7 @@ describe('JsonSchema - validate form', () => {
       aNumber: '10',
       someArray: [
         {
-          someUri: 'asdf.com',
+          someUri: 'https://asdf.com',
           someEmail: 'asdf@asdf.com'
         }
       ]
