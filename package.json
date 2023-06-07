@@ -15,7 +15,7 @@
     "dompurify": "3.0.3",
     "framer-motion": "^10.12.7",
     "http-proxy-middleware": "^2.0.6",
-    "jquery": "3.6.3",
+    "jquery": "3.7.0",
     "js-file-download": "0.4.12",
     "lodash": "4.17.21",
     "mixin-deep": "2.0.1",
