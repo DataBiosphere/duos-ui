@@ -444,7 +444,7 @@ export const EditConsentGroup = (props) => {
         isRendered: consentGroup.openAccess !== true,
         id: idx + 'dataAccessCommitteeId',
         name: 'dataAccessCommitteeId',
-        title: 'Data Access Committee*',
+        title: 'Data Access Committee',
         description: 'Please select which DAC should govern requests for this dataset',
         type: FormFieldTypes.SELECT,
         selectOptions: dacs.map((dac) => {
@@ -455,6 +455,9 @@ export const EditConsentGroup = (props) => {
         },
         validators: [FormValidators.REQUIRED],
         validation: validation.dataAccessCommitteeId,
+        defaultValue: dacs.map((dac) => {
+          return { dacId: dac.dacId, displayText: dac.name };
+        }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
         onValidationChange,
       }),
     ]),
@@ -545,6 +548,7 @@ export const EditConsentGroup = (props) => {
         type: FormFieldTypes.NUMBER,
         validators: [FormValidators.REQUIRED],
         defaultValue: consentGroup.numberOfParticipants,
+        validation: validation.numberOfParticipants,
         onChange,
       }),
     ]),
