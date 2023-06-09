@@ -13,9 +13,9 @@ export const requiredValidator = {
 export const urlValidator = {
   id: 'uri',
   isValid: (val) => {
-    return validURLObject(val) || validURLObject('https://' + val);
+    return validURLObject(val);
   },
-  msg: 'Please enter a valid url (e.g., duos.org)',
+  msg: 'Please enter a valid url (e.g., https://duos.org)',
 };
 
 export const emailValidator = {

@@ -18,17 +18,27 @@
     {
       "$comment": "require GSR explanation if the user selected yes",
       "if": {
-        "required": ["controlledAccessRequiredForGenomicSummaryResultsGSR"],
-        "properties": {"controlledAccessRequiredForGenomicSummaryResultsGSR": { "const": true }}
+        "required": [
+          "controlledAccessRequiredForGenomicSummaryResultsGSR"
+        ],
+        "properties": {
+          "controlledAccessRequiredForGenomicSummaryResultsGSR": {
+            "const": true
+          }
+        }
       },
       "then": {
-        "required": ["controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation"]
+        "required": [
+          "controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation"
+        ]
       }
     },
     {
       "$comment": "include dbGaP related fields if they have one",
       "if": {
-        "required": ["nihAnvilUse"],
+        "required": [
+          "nihAnvilUse"
+        ],
         "properties": {
           "nihAnvilUse": {
             "type": "string",
@@ -39,13 +49,15 @@
         }
       },
       "then": {
-        "$ref":  "#/$defs/dbGaPInfo"
+        "$ref": "#/$defs/dbGaPInfo"
       }
     },
     {
       "$comment": "include NIH related fields if using AnVil",
       "if": {
-        "required": ["nihAnvilUse"],
+        "required": [
+          "nihAnvilUse"
+        ],
         "properties": {
           "nihAnvilUse": {
             "type": "string",
@@ -58,17 +70,26 @@
         }
       },
       "then": {
-        "$ref":  "#/$defs/nihAdministrativeInformation"
+        "$ref": "#/$defs/nihAdministrativeInformation"
       }
     },
     {
       "$comment": "require alternative data sharing plan fields if the DS needs one",
       "if": {
-        "required": ["alternativeDataSharingPlan"],
-        "properties": {"alternativeDataSharingPlan": { "const": true }}
+        "required": [
+          "alternativeDataSharingPlan"
+        ],
+        "properties": {
+          "alternativeDataSharingPlan": {
+            "const": true
+          }
+        }
       },
       "then": {
-        "required": ["alternativeDataSharingPlanExplanation", "alternativeDataSharingPlanReasons"],
+        "required": [
+          "alternativeDataSharingPlanExplanation",
+          "alternativeDataSharingPlanReasons"
+        ],
         "properties": {
           "alternativeDataSharingPlanReasons": {
             "minItems": 1
@@ -86,7 +107,18 @@
     },
     "studyType": {
       "type": "string",
-      "enum": ["Observational", "Interventional", "Descriptive", "Analytical", "Prospective", "Retrospective", "Case report", "Case series", "Cross-sectional", "Cohort study"],
+      "enum": [
+        "Observational",
+        "Interventional",
+        "Descriptive",
+        "Analytical",
+        "Prospective",
+        "Retrospective",
+        "Case report",
+        "Case series",
+        "Cross-sectional",
+        "Cohort study"
+      ],
       "label": "Study Type",
       "description": "The study type"
     },
@@ -168,31 +200,36 @@
       "minItems": 1,
       "label": "Consent Groups",
       "description": "Consent Groups",
-      "items": { "$ref":  "#/$defs/consentGroup"}
+      "items": {
+        "$ref": "#/$defs/consentGroup"
+      }
     }
   },
   "$defs": {
     "fileTypeObject": {
-      "required": ["numberOfParticipants"],
       "type": "object",
       "properties": {
         "fileType": {
           "type": "string",
           "description": "File Type",
-          "enum": ["Arrays", "Genome", "Exome", "Survey", "Phenotype"]
+          "enum": [
+            "Arrays",
+            "Genome",
+            "Exome",
+            "Survey",
+            "Phenotype"
+          ]
         },
         "functionalEquivalence": {
           "type": "string",
           "description": "Functional Equivalence"
-        },
-        "numberOfParticipants": {
-          "type": "integer",
-          "description": "# of Participants"
         }
       }
     },
     "dbGaPInfo": {
-      "required": ["dbGaPPhsID"],
+      "required": [
+        "dbGaPPhsID"
+      ],
       "properties": {
         "dbGaPPhsID": {
           "type": "string",
@@ -219,7 +256,10 @@
       }
     },
     "nihAdministrativeInformation": {
-      "required": ["piInstitution", "nihGrantContractNumber"],
+      "required": [
+        "piInstitution",
+        "nihGrantContractNumber"
+      ],
       "properties": {
         "piInstitution": {
           "type": "integer",
@@ -238,7 +278,35 @@
           "description": "NIH ICs Supporting the Study",
           "items": {
             "type": "string",
-            "enum": ["NCI", "NEI", "NHLBI", "NHGRI", "NIA", "NIAAA", "NIAID", "NIAMS", "NIBIB", "NICHD", "NIDCD", "NIDCR", "NIDDK", "NIDA", "NIEHS", "NIGMS", "NIMH", "NIMHD", "NINDS", "NINR", "NLM", "CC", "CIT", "CSR", "FIC", "NCATS", "NCCIH"]
+            "enum": [
+              "NCI",
+              "NEI",
+              "NHLBI",
+              "NHGRI",
+              "NIA",
+              "NIAAA",
+              "NIAID",
+              "NIAMS",
+              "NIBIB",
+              "NICHD",
+              "NIDCD",
+              "NIDCR",
+              "NIDDK",
+              "NIDA",
+              "NIEHS",
+              "NIGMS",
+              "NIMH",
+              "NIMHD",
+              "NINDS",
+              "NINR",
+              "NLM",
+              "CC",
+              "CIT",
+              "CSR",
+              "FIC",
+              "NCATS",
+              "NCCIH"
+            ]
           }
         },
         "nihProgramOfficerName": {
@@ -250,7 +318,35 @@
           "type": "string",
           "label": "NIH Institution/Center for Submission",
           "description": "NIH Institution/Center for Submission",
-          "enum": ["NCI", "NEI", "NHLBI", "NHGRI", "NIA", "NIAAA", "NIAID", "NIAMS", "NIBIB", "NICHD", "NIDCD", "NIDCR", "NIDDK", "NIDA", "NIEHS", "NIGMS", "NIMH", "NIMHD", "NINDS", "NINR", "NLM", "CC", "CIT", "CSR", "FIC", "NCATS", "NCCIH"]
+          "enum": [
+            "NCI",
+            "NEI",
+            "NHLBI",
+            "NHGRI",
+            "NIA",
+            "NIAAA",
+            "NIAID",
+            "NIAMS",
+            "NIBIB",
+            "NICHD",
+            "NIDCD",
+            "NIDCR",
+            "NIDDK",
+            "NIDA",
+            "NIEHS",
+            "NIGMS",
+            "NIMH",
+            "NIMHD",
+            "NINDS",
+            "NINR",
+            "NLM",
+            "CC",
+            "CIT",
+            "CSR",
+            "FIC",
+            "NCATS",
+            "NCCIH"
+          ]
         },
         "nihGenomicProgramAdministratorName": {
           "type": "string",
@@ -338,7 +434,10 @@
           "type": "string",
           "label": "Does the data need to be managed under Controlled or Open Access?",
           "description": "Does the data need to be managed under Controlled or Open Access?",
-          "enum": ["Controlled Access", "Open Access"]
+          "enum": [
+            "Controlled Access",
+            "Open Access"
+          ]
         }
       }
     },
@@ -346,25 +445,38 @@
       "type": "object",
       "required": [
         "consentGroupName",
-        "fileTypes"
+        "fileTypes",
+        "numberOfParticipants"
       ],
       "allOf": [
         {
           "if": {
-            "properties": {"dataLocation":  { "const": "Not Determined" }}
+            "properties": {
+              "dataLocation": {
+                "const": "Not Determined"
+              }
+            }
           },
           "then": {},
           "else": {
-            "required": ["url"]
+            "required": [
+              "url"
+            ]
           }
         },
         {
           "$comment": "if openAccess is false OR not present, then require dac id & add secondary consent fields",
           "if": {
-            "properties": {"openAccess":  {"const":  false}}
+            "properties": {
+              "openAccess": {
+                "const": false
+              }
+            }
           },
           "then": {
-            "required": ["dataAccessCommitteeId"],
+            "required": [
+              "dataAccessCommitteeId"
+            ],
             "properties": {
               "nmds": {
                 "type": "boolean",
@@ -429,28 +541,64 @@
           "$comment": "ensure one (and only one) primary consent is selected",
           "oneOf": [
             {
-              "properties": {"openAccess": { "const": true }},
-              "required": ["openAccess"]
+              "properties": {
+                "openAccess": {
+                  "const": true
+                }
+              },
+              "required": [
+                "openAccess"
+              ]
             },
             {
-              "properties": {"generalResearchUse": { "const": true }},
-              "required": ["generalResearchUse"]
+              "properties": {
+                "generalResearchUse": {
+                  "const": true
+                }
+              },
+              "required": [
+                "generalResearchUse"
+              ]
             },
             {
-              "properties": {"hmb": { "const": true }},
-              "required": ["hmb"]
+              "properties": {
+                "hmb": {
+                  "const": true
+                }
+              },
+              "required": [
+                "hmb"
+              ]
             },
             {
-              "properties": {"poa": { "const": true }},
-              "required": ["poa"]
+              "properties": {
+                "poa": {
+                  "const": true
+                }
+              },
+              "required": [
+                "poa"
+              ]
             },
             {
-              "properties": {"diseaseSpecificUse": { "minItems": 1 }},
-              "required": ["diseaseSpecificUse"]
+              "properties": {
+                "diseaseSpecificUse": {
+                  "minItems": 1
+                }
+              },
+              "required": [
+                "diseaseSpecificUse"
+              ]
             },
             {
-              "properties": {"otherPrimary": { "minLength": 1 }},
-              "required": ["otherPrimary"]
+              "properties": {
+                "otherPrimary": {
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "otherPrimary"
+              ]
             }
           ]
         }
@@ -497,7 +645,12 @@
         },
         "dataLocation": {
           "type": "string",
-          "enum": ["AnVIL Workspace", "Terra Workspace", "TDR Location", "Not Determined"],
+          "enum": [
+            "AnVIL Workspace",
+            "Terra Workspace",
+            "TDR Location",
+            "Not Determined"
+          ],
           "label": "Please provide the location of your data resource for this consent group",
           "description": "Data Location"
         },
@@ -508,10 +661,16 @@
           "description": "Free text field for entering URL of data",
           "minLength": 1
         },
+        "numberOfParticipants": {
+          "type": "integer",
+          "description": "# of Participants"
+        },
         "fileTypes": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref":  "#/$defs/fileTypeObject"},
+          "items": {
+            "$ref": "#/$defs/fileTypeObject"
+          },
           "description": "List of File Types"
         }
       }
