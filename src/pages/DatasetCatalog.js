@@ -1,4 +1,4 @@
-import {filter, find, flow, getOr, includes, isEmpty, isNil, map, isFunction} from 'lodash/fp';
+import {filter, find, flow, getOr, includes, isEmpty, isNil, isNull, map, isFunction} from 'lodash/fp';
 import {Fragment, useEffect, useState, useCallback } from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -432,6 +432,10 @@ export default function DatasetCatalog(props) {
   };
 
   const isEditDatasetEnabled = (dataset) => {
+    // Study editing is not currently supported through existing edit page.
+    if (!isNull(getOr(null)('study.studyId')(dataset))) {
+      return false;
+    }
     if (currentUser.isAdmin) {
       return true;
     }
