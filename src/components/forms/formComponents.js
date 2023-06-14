@@ -50,7 +50,9 @@ const onFormInputChange = (config, value) => {
   }
 
   if (value !== formValue) {
-    onChange({key: key, value: value, isValid: isValid(validation) });
+    if(!isNil(onChange)) {
+      onChange({key: key, value: value, isValid: isValid(validation) });
+    }
     setFormValue(value);
   }
 };
@@ -67,7 +69,7 @@ const errorMessages = (validation) => {
 //---------------------------------------------
 export const FormInputGeneric = (config) => {
   const {
-    id, title, disabled,
+    id, name, title, disabled,
     placeholder, type,
     inputStyle, ariaDescribedby,
     readOnly,
@@ -77,6 +79,7 @@ export const FormInputGeneric = (config) => {
   return div([
     input({
       id,
+      name: name || id,
       type: type?.inputType || 'text',
       className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
       placeholder: placeholder || title,
@@ -97,7 +100,7 @@ export const FormInputGeneric = (config) => {
 
 export const FormInputTextarea = (config) => {
   const {
-    id, title, type, disabled,
+    id, name, title, type, disabled,
     placeholder,
     inputStyle, ariaDescribedby,
     rows, maxLength,
@@ -107,6 +110,7 @@ export const FormInputTextarea = (config) => {
   return div([
     textarea({
       id,
+      name: name || id,
       type: type || 'text',
       className: `form-control ${!isValid(validation) ? 'errored' : ''}`,
       placeholder: placeholder || title,
@@ -126,7 +130,7 @@ export const FormInputTextarea = (config) => {
 
 export const FormInputMultiText = (config) => {
   const {
-    id, title, disabled,
+    id, name, title, disabled,
     placeholder, ariaDescribedby, validators,
     inputStyle, formValue, validation,
     setValidation
@@ -173,6 +177,7 @@ export const FormInputMultiText = (config) => {
     }, [
       input({
         id,
+        name: name || id,
         type: 'text',
         className: `form-control ${!isValid(validation) || !isValid(inputValidation) ? 'errored' : ''}`,
         placeholder: placeholder || title,
@@ -436,7 +441,7 @@ export const FormInputYesNoRadioGroup = (config) => {
 
 export const FormInputRadioButton = (config) => {
   const {
-    id, disabled, value, toggleText,
+    id, name, disabled, value, toggleText,
     formValue, validation
   } = config;
 
@@ -444,8 +449,8 @@ export const FormInputRadioButton = (config) => {
     className: `radio-button-container ${!isValid(validation) ? 'errored' : ''}`,
   }, [
     h(RadioButton, {
-      id: id,
-      name: id,
+      id,
+      name: name || id,
       defaultChecked: !isNil(formValue) && formValue === value,
       onClick: () => {
         onFormInputChange(config, value);
@@ -462,14 +467,15 @@ export const FormInputRadioButton = (config) => {
 
 export const FormInputCheckbox = (config) => {
   const {
-    id, disabled, validation, toggleText,
+    id, name, disabled, validation, toggleText,
     formValue, ariaDescribedby
   } = config;
 
   return div({ className: 'checkbox' }, [
     input({
       type: 'checkbox',
-      id: `${id}`,
+      id,
+      name: name || id,
       checked: formValue,
       className: 'checkbox-inline',
       'aria-describedby': ariaDescribedby,
@@ -485,14 +491,15 @@ export const FormInputCheckbox = (config) => {
 
 export const FormInputSlider = (config) => {
   const {
-    id, disabled, toggleText, formValue
+    id, name, disabled, toggleText, formValue
   } = config;
 
   return div({ className: 'flex-row', style: { justifyContent: 'unset' } }, [
     label({ className: 'switch', htmlFor: `${id}` }, [
       input({
         type: 'checkbox',
-        id: `${id}`,
+        id,
+        name: name || id,
         checked: formValue,
         className: 'checkbox-inline',
         onChange: (event) => onFormInputChange(config, event.target.checked),
@@ -512,11 +519,13 @@ export const FormInputSlider = (config) => {
 export const FormInputFile = (config) => {
   const {
     id,
+    name,
     formValue,
     uploadText = 'Upload a file',
     hideTextBar = false,
     hideInput = false,
     multiple = false,
+    placeholder = 'Filename.txt',
     accept = '',
     validation,
   } = config;
@@ -534,6 +543,7 @@ export const FormInputFile = (config) => {
     }, [
       input({
         id,
+        name: name || id,
         type: 'file',
         multiple,
         accept,
@@ -569,7 +579,7 @@ export const FormInputFile = (config) => {
     }, [
       h(FormField, {
         id: `${id}_fileName`,
-        placeholder: 'Filename.txt',
+        placeholder,
         validation,
         defaultValue: formValue?.name,
         readOnly: true,

@@ -135,6 +135,7 @@ export const FormFieldTypes = {
     component: FormInputFile,
     requiredProps: [],
     optionalProps: [
+      'placeholder',
       'uploadText',
       'hideTextBar',
       'hideInput',
