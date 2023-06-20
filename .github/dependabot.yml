@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: weekly
+    open-pull-requests-limit: 10
     target-branch: "develop"
     reviewers:
       - "@DataBiosphere/DUOS"
@@ -11,11 +12,12 @@ updates:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "[DUOS-1740]"
+      prefix: "[DUOS-1740-dependabot]"
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: weekly
+    open-pull-requests-limit: 10
     target-branch: "develop"
     reviewers:
       - "@DataBiosphere/DUOS"
@@ -23,4 +25,4 @@ updates:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "[DUOS-1740]"
+      prefix: "[DUOS-1740-dependabot]"
