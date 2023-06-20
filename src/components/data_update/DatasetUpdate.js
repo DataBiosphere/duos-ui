@@ -283,36 +283,28 @@ export const DatasetUpdate = (props) => {
         id: 'methodsResearch',
         toggleText: 'No methods development or validation studies (NMDS)',
         defaultValue: formData.dataUse.methodsResearch === true,
-        onChange: ({ value }) => {
-          formData.dataUse.methodsResearch = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'geneticStudiesOnly',
         toggleText: 'Genetic studies only (GSO)',
         defaultValue: formData.dataUse.geneticStudiesOnly === true,
-        onChange: ({ value }) => {
-          formData.dataUse.geneticStudiesOnly = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'publicationResults',
         toggleText: 'Publication Required (PUB)',
         defaultValue: formData.dataUse.publicationResults === true,
-        onChange: ({ value }) => {
-          formData.dataUse.publicationResults = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'collaboratorRequired',
         toggleText: 'Collaboration Required (COL)',
         defaultValue: formData.dataUse.collaboratorRequired === true,
-        onChange: ({ value }) => {
-          formData.dataUse.collaboratorRequired = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
@@ -320,58 +312,45 @@ export const DatasetUpdate = (props) => {
         name: 'ethicsApprovalRequired',
         toggleText: 'Ethics Approval Required (IRB)',
         defaultValue: formData.dataUse.ethicsApprovalRequired === true,
-        onChange: ({ value }) => {
-          formData.dataUse.ethicsApprovalRequired = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'geographicalRestrictions',
         toggleText: 'Geographic Restriction (GS-)',
         defaultValue: formData.dataUse.geographicalRestrictions === 'Yes',
-        onChange: ({ value }) => {
-          formData.dataUse.geographicalRestrictions = value ? 'Yes' : 'No';
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'publicationMoratorium',
         toggleText: 'Publication Moratorium (MOR)',
         defaultValue: formData.dataUse.publicationMoratorium === 'true',
-        onChange: ({ value }) => {
-          formData.dataUse.publicationMoratorium = value ? 'true' : 'false';
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'nonCommercialUse',
         toggleText: 'Non-profit Use Only (NPU)',
         defaultValue: formData.dataUse.commercialUse === false,
-        onChange: ({ value }) => {
-          formData.dataUse.commercialUse = !value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
         id: 'otherSecondary',
         toggleText: 'Other',
         defaultValue: formData.dataUse.hasSecondaryOther,
-        onChange: ({ value }) => {
-          formData.dataUse.hasSecondaryOther = value;
-        }
+        disabled: true,
       }),
       h(FormField, {
         id: 'otherSecondaryText',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Please specify',
         defaultValue: formData.dataUse.secondaryOther,
-        onChange: ({ value }) => {
-          formData.dataUse.secondaryOther = value;
-        }
+        disabled: true,
       }),
     ]),
-    h2('3. Data Use Limitations'),
-    h2('4. NIH Certification'),
+    h2('3. NIH Certification'),
     div({ style: { display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' } }, [
       h(FormField, {
         type: FormFieldTypes.FILE,
