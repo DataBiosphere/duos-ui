@@ -211,8 +211,9 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     uniq
   )(bucket.matchResults);
 
+  const abstain = processV3Abstain(bucket.matchResults);
   if (isEmpty(matchVals)) {
-    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
+    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
   } else if (matchVals.length === 1) {
     // pull all unique failure reasons from all match failures into the display
     const failureReasons = flow(
@@ -225,7 +226,8 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       result: processMatchData(matchResult),
       createDate,
       failureReasons,
-      id
+      id,
+      abstain: abstain
     };
   } else {
     // Different match values? Provide a custom message
@@ -233,9 +235,21 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       result: 'Unable to determine a system match',
       createDate: undefined,
       failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
-      id: bucket.key
+      id: bucket.key,
+      abstain: abstain
     };
   }
+};
+
+/**
+* Process the match results for V3 Abstain. If we have a V3 result and we have
+* an ABSTAIN case, we can return
+* @param matchResults
+*/
+const processV3Abstain = (matchResults) => {
+  const abstainList = map(m => m.abstain)(matchResults);
+  const abstainValList = filter(a => a === true)(abstainList);
+  return abstainValList.length > 0;
 };
 
 /**

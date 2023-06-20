@@ -20,9 +20,12 @@ export default function CollectionAlgorithmDecision(props) {
     return (<span><strong>{text}</strong></span>);
   }
 
-  function getResult(result) {
-    if (result && result.trim().length > 0){
-      switch (result.toLowerCase().trim()) {
+  function getResult(algorithmResult) {
+    if (algorithmResult.abstain) {
+      return <OtherResult text={'Abstain'}/>;
+    }
+    if (algorithmResult.result && algorithmResult.result.trim().length > 0){
+      switch (algorithmResult.result.toLowerCase().trim()) {
         case 'yes':
           return <YesResult/>;
         case 'no':
@@ -31,7 +34,6 @@ export default function CollectionAlgorithmDecision(props) {
       }
     }
     return <OtherResult text={'N/A'}/>;
-
   }
   const containerProps = {
     id: `collection-algorithm-id-${id}`,
@@ -55,13 +57,13 @@ export default function CollectionAlgorithmDecision(props) {
           span({id: `collection-${id}-decision-value`, style: {fontWeight: 400}}, [getResult(result)])
         ]),
         div({style: {fontSize: '1.5rem'}}, [
-          span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),
-          span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
-        ]),
-        div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Reason:']),
           span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
             [!isEmpty(failureReasons) ? failureReasons.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
+        ]),
+        div({style: {fontSize: '1.5rem'}}, [
+          span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),
+          span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
         ])
       ])
     ])
