@@ -374,9 +374,10 @@ export const DataSet = {
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
   },
 
-  updateDatasetV3: async (datasetId, dataSetObject, alternativeDataSharingData, nihCertificationData) => {
+  updateDatasetV3: async (datasetId, datasetAndFiles) => {
     const url = `${await getApiUrl()}/api/dataset/v3/${datasetId}`;
-    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
+    const res = await axios.put(url, datasetAndFiles, Config.multiPartOpts());
+    return res.data;
   },
 
   validateDatasetName: async (name) => {

@@ -75,7 +75,8 @@ export const DatasetUpdate = (props) => {
 
     const formElement = event.target.form;
     const submitData = new FormData(formElement);
-    const nihFileData = submitData.get('nihInstitutionalCertification');
+    const nihFileData = submitData.get('nihInstitutionalCertificationFile');
+    const consentGroups = [ { nihInstitutionalCertificationFile: nihFileData } ];
 
     const newDataset = {
       name: dataset.name,
@@ -93,7 +94,11 @@ export const DatasetUpdate = (props) => {
       ]
     };
 
-    DataSet.updateDatasetV3(dataset.dataSetId, newDataset, null, nihFileData).catch(() => {
+    const multiPartFormData = new FormData();
+    multiPartFormData.append('dataset', JSON.stringify(newDataset));
+    multiPartFormData.append('consentGroups', consentGroups);
+
+    DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).catch(() => {
       Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });
     });
   };
@@ -370,7 +375,7 @@ export const DatasetUpdate = (props) => {
         type: FormFieldTypes.FILE,
         title: 'NIH Institutional Certification',
         description: 'If an Institutional Certification for this dataset exists, please upload it here',
-        id: 'nihInstitutionalCertification',
+        id: 'nihInstitutionalCertificationFile',
         placeholder: 'default.txt',
       }),
     ]),
