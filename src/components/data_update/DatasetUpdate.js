@@ -81,7 +81,7 @@ export const DatasetUpdate = (props) => {
     const newDataset = {
       name: dataset.name,
       dacId: formData.dac.dacId,
-      datasetProperties: [
+      properties: [
         asProperty('Dataset Name', formData.properties.datasetName),
         asProperty('Data Type', formData.properties.dataType),
         asProperty('Species', formData.properties.species),
