@@ -11,16 +11,26 @@ export const DatasetUpdate = (props) => {
 
   const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} });
 
-  const searchOntologies = (query, callback) => {
+  const searchOntologies = async (query, callback) => {
     let options = [];
-    DAR.getAutoCompleteOT(query).then(
+    await DAR.getAutoCompleteOT(query).then(
       items => {
-        options = items.map(function (item) {
+        options = items.map((item) => {
           return item.label;
         });
         callback(options);
       });
   };
+
+  const dacOptions = (dacs) => {
+    let options = [];
+    if (!isNil(dacs)) {
+      options = dacs.map((dac) => {
+        return { displayText: dac.name, dacId: dac.dacId };
+      })
+    }
+    return options;
+  }
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -69,7 +79,7 @@ export const DatasetUpdate = (props) => {
 
     const newDataset = {
       name: dataset.name,
-      dacId: dataset.dacId,
+      dacId: formData.dac.dacId,
       datasetProperties: [
         asProperty('Dataset Name', formData.properties.datasetName),
         asProperty('Data Type', formData.properties.dataType),
@@ -90,6 +100,7 @@ export const DatasetUpdate = (props) => {
 
   const prefillFormData = useCallback(async (dataset) => {
     const dac = await DAC.get(dataset?.dacId);
+    const dacs = await DAC.list();
     setFormData({
       datasetName: dataset.datasetName,
       properties: {
@@ -104,7 +115,7 @@ export const DatasetUpdate = (props) => {
         principalInvestigator: extract('Principal Investigator(PI)'),
       },
       dataUse: await normalizeDataUse(dataset?.dataUse),
-      dac
+      dac: { ...dac, dacs }
     });
   }, [extract, normalizeDataUse]);
 
@@ -205,10 +216,13 @@ export const DatasetUpdate = (props) => {
       title: 'Data Access Committee',
       validators: [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
-      selectOptions: [], //TODO: list available DACs
+      selectOptions: dacOptions(formData.dac.dacs),
       defaultValue: [
-        { displayText: formData.dac.name, data: formData.dac.dacId },
+        { displayText: formData.dac.name, dacId: formData.dac.dacId },
       ],
+      onChange: ({ dacId }) => {
+        formData.dac.dacId = dacId;
+      },
     }),
     h2('2. Data Use Terms'),
     // readonly primary
