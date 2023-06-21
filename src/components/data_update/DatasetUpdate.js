@@ -27,10 +27,10 @@ export const DatasetUpdate = (props) => {
     if (!isNil(dacs)) {
       options = dacs.map((dac) => {
         return { displayText: dac.name, dacId: dac.dacId };
-      })
+      });
     }
     return options;
-  }
+  };
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -76,7 +76,7 @@ export const DatasetUpdate = (props) => {
     const formElement = event.target.form;
     const submitData = new FormData(formElement);
     const nihFileData = submitData.get('nihInstitutionalCertificationFile');
-    const consentGroups = [ { nihInstitutionalCertificationFile: nihFileData } ];
+    const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }];
 
     const newDataset = {
       name: dataset.name,
