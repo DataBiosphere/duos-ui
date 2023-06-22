@@ -189,61 +189,102 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 /**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Three potential cases:
+ * Four potential cases:
  *  1. No matches
  *  2. Exactly one match or N matches that are all the same - easy case
- *  3. N matches - not all the same - very confusing case
+ *  3. Abstain is true and match is false - decision is abstained
+ *  4. N matches - not all the same - very confusing case
  *
  * @private
  * @param bucket
  * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
  */
 const calculateAlgorithmResultForBucket = (bucket) => {
-
   // We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
+  // Only V1 and V1 results can be unmatchable
+  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3' ? true : false;
+  const unmatchable = (isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse));
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
-  const matchVals = unmatchable ? [] : flow(
+  const matchVals = algorithmVersionV3 ? (flow(
     map(m => m.match),
     uniq
-  )(bucket.matchResults);
+  )(bucket.matchResults)) : (unmatchable ? [] :
+    flow(
+      map(m => m.match),
+      uniq
+    )(bucket.matchResults));
 
   const abstain = processV3Abstain(bucket.matchResults);
-  if (isEmpty(matchVals)) {
-    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
-  } else if (matchVals.length === 1) {
-    // pull all unique failure reasons from all match failures into the display
-    const failureReasons = flow(
-      flatMap(match => match.failureReasons),
-      uniq
-    )(bucket.matchResults);
-    const {createDate, failed, id, match} = bucket.matchResults[0];
-    const matchResult = {createDate, failureReasons, failed, id, match};
-    return {
-      result: processMatchData(matchResult),
-      createDate,
-      failureReasons,
-      id,
-      abstain: abstain
-    };
+
+  const failureReasons = flow(
+    flatMap(match => match.failureReasons),
+    uniq
+  )(bucket.matchResults);
+  const {createDate, failed, id, match} = bucket.matchResults[0];
+  const matchResult = {createDate, failureReasons, failed, id, match, abstain};
+  if (abstain) {
+    if (isEmpty(matchVals)) {
+      return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
+    }
+    else if ((matchVals.length === 1)) {
+      if (matchVals === true) {
+        return {
+          result: processMatchData(matchResult),
+          createDate,
+          failureReasons,
+          id,
+          abstain: abstain,
+        };
+      } else {
+        return {
+          result:'Abstain',
+          createDate,
+          failureReasons,
+          id,
+          abstain: abstain,
+        };
+      }
+    }
+    else {
+      // Different match values? Provide a custom message
+      return {
+        result: 'Unable to determine a system match',
+        createDate: undefined,
+        failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+        id: bucket.key,
+        abstain: abstain,
+      };
+    }
   } else {
-    // Different match values? Provide a custom message
-    return {
-      result: 'Unable to determine a system match',
-      createDate: undefined,
-      failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
-      id: bucket.key,
-      abstain: abstain
-    };
+    if (isEmpty(matchVals)) {
+      return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
+    } else if (matchVals.length === 1) {
+      return {
+        result: processMatchData(matchResult),
+        createDate,
+        failureReasons,
+        id,
+        abstain: abstain,
+      };
+    } else {
+      // Different match values? Provide a custom message
+      return {
+        result: 'Unable to determine a system match',
+        createDate: undefined,
+        failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+        id: bucket.key,
+        abstain: abstain,
+      };
+    }
   }
 };
 
 /**
 * Process the match results for V3 Abstain. If we have a V3 result and we have
-* an ABSTAIN case, we can return
+* an ABSTAIN case, we can return true if the number of abstentions > 1
 * @param matchResults
 */
 const processV3Abstain = (matchResults) => {
