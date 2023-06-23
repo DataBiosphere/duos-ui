@@ -23,6 +23,7 @@ import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
 import {processMatchData} from './VoteUtils';
+//import { result } from 'lodash';
 
 /**
  * Entry method into bundling up datasets into groups based on common data use restrictions.
@@ -200,14 +201,14 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
  * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
  */
 const calculateAlgorithmResultForBucket = (bucket) => {
-  // We actually DO NOT want to show system match results when the data use indicates
+  // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  // Only V1 and V1 results can be unmatchable
   const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3' ? true : false;
   const unmatchable = (isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse));
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
+  // Check algorithm version: V3 does not need to be checked for 'unmatchable'
   const matchVals = algorithmVersionV3 ? (flow(
     map(m => m.match),
     uniq
@@ -218,67 +219,42 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     )(bucket.matchResults));
 
   const abstain = processV3Abstain(bucket.matchResults);
-
   const failureReasons = flow(
     flatMap(match => match.failureReasons),
     uniq
   )(bucket.matchResults);
   const {createDate, failed, id, match} = bucket.matchResults[0];
-  const matchResult = {createDate, failureReasons, failed, id, match, abstain};
-  if (abstain) {
-    if (isEmpty(matchVals)) {
-      return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
-    }
-    else if ((matchVals.length === 1)) {
-      if (matchVals === true) {
-        return {
-          result: processMatchData(matchResult),
-          createDate,
-          failureReasons,
-          id,
-          abstain: abstain,
-        };
-      } else {
-        return {
-          result:'Abstain',
-          createDate,
-          failureReasons,
-          id,
-          abstain: abstain,
-        };
-      }
-    }
-    else {
-      // Different match values? Provide a custom message
+  const matchResult = {createDate, failureReasons, failed, id, match};
+
+  // check results based on matchVals
+  if (isEmpty(matchVals)) {
+    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
+  }
+  else if ((matchVals.length === 1)) {
+    if (abstain) {
       return {
-        result: 'Unable to determine a system match',
-        createDate: undefined,
-        failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
-        id: bucket.key,
-        abstain: abstain,
+        result: 'Abstain',
+        createDate,
+        failureReasons,
+        id,
       };
     }
-  } else {
-    if (isEmpty(matchVals)) {
-      return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key, abstain: abstain};
-    } else if (matchVals.length === 1) {
+    else {
       return {
         result: processMatchData(matchResult),
         createDate,
         failureReasons,
         id,
-        abstain: abstain,
-      };
-    } else {
-      // Different match values? Provide a custom message
-      return {
-        result: 'Unable to determine a system match',
-        createDate: undefined,
-        failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
-        id: bucket.key,
-        abstain: abstain,
       };
     }
+  }
+  else {
+    return {
+      result: 'Abstain',
+      createDate,
+      failureReasons,
+      id,
+    };
   }
 };
 

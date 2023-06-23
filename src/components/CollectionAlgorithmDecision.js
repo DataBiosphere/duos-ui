@@ -15,17 +15,21 @@ export default function CollectionAlgorithmDecision(props) {
     return (<span style={{color: 'rgb(218,0,3)'}}><strong>NO</strong></span>);
   }
 
+  function AbstainResult() {
+    return (<span style={{color: 'black'}}><strong>ABSTAIN</strong></span>);
+  }
+
   function OtherResult(props) {
     const { text } = props;
     return (<span><strong>{text}</strong></span>);
   }
 
-  function getResult(algorithmResult) {
-    if (algorithmResult.abstain) {
-      return <OtherResult text={'Abstain'}/>;
+  function getResult(result) {
+    if (result.toLowerCase().trim() === 'abstain') {
+      return <AbstainResult/>;
     }
-    if (algorithmResult.result && algorithmResult.result.trim().length > 0){
-      switch (algorithmResult.result.toLowerCase().trim()) {
+    if (result && result.trim().length > 0){
+      switch (result.toLowerCase().trim()) {
         case 'yes':
           return <YesResult/>;
         case 'no':
