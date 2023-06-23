@@ -7,7 +7,7 @@ import { DAC, DAR, DataSet } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 
 export const DatasetUpdate = (props) => {
-  const { dataset } = props;
+  const { dataset, history } = props;
 
   const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} });
 
@@ -79,7 +79,7 @@ export const DatasetUpdate = (props) => {
     const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }];
 
     const newDataset = {
-      name: dataset.name,
+      name: formData.properties.datasetName,
       dacId: formData.dac.dacId,
       properties: [
         asProperty('Dataset Name', formData.properties.datasetName),
@@ -98,7 +98,10 @@ export const DatasetUpdate = (props) => {
     multiPartFormData.append('dataset', JSON.stringify(newDataset));
     multiPartFormData.append('consentGroups', consentGroups);
 
-    DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).catch(() => {
+    DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).then(() => {
+      history.push('/dataset_catalog');
+      Notifications.showSuccess({ text: 'Update submitted successfully!' });
+    }, () => {
       Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });
     });
   };
