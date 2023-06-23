@@ -248,11 +248,12 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     }
   }
   else {
+    // Different match values? Provide a custom message
     return {
-      result: 'Abstain',
-      createDate,
-      failureReasons,
-      id,
+      result: 'Unable to determine a system match',
+      createDate: undefined,
+      failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+      id: bucket.key
     };
   }
 };

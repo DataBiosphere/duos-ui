@@ -16,7 +16,7 @@ export default function CollectionAlgorithmDecision(props) {
   }
 
   function AbstainResult() {
-    return (<span style={{color: '#1f3b50'}}><strong>ABSTAIN</strong></span>);
+    return (<span style={{color: '#0948B7'}}><strong>ABSTAIN</strong></span>);
   }
 
   function OtherResult(props) {
