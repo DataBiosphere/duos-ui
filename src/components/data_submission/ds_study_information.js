@@ -76,7 +76,22 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Data Types',
       placeholder: 'Type',
       validators: [FormValidators.REQUIRED],
-      type: FormFieldTypes.MULTITEXT,
+      type: FormFieldTypes.SELECT,
+      isCreatable: true,
+      isMulti: true,
+      optionsAreString: true,
+      // The top properties were extracted from the prod database and deduplicated using the query:
+      // SELECT property_value, COUNT(*) FROM dataset_property WHERE property_key = 2 GROUP BY property_value ORDER BY COUNT(*) DESC;
+      selectOptions: [
+        'CITE-seq',
+        'Hybrid Capture',
+        'RNA-Seq',
+        'scRNA-Seq',
+        'Spatial Transcriptomics',
+        'snRNA-Seq',
+        'Whole Genome (WGS)',
+        'Whole Exome (WES)',
+      ],
       validation: validation.dataTypes,
       onChange,
       onValidationChange
@@ -129,10 +144,21 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Data Custodian Email',
       description: `Insert the email for any individual with the 
       authority to add/remove users access to this study’s datasets.`,
-      type: FormFieldTypes.MULTITEXT,
+      type: FormFieldTypes.SELECT,
       validators: [
         FormValidators.EMAIL
       ],
+      selectOptions: [],
+      isCreatable: true,
+      isMulti: true,
+      optionsAreString: true,
+      selectConfig: {
+        components: {
+          DropdownIndicator: null,
+          Menu: () => null,
+        },
+      },
+      placeholder: 'Add one or more emails',
       validation: validation.dataCustodianEmail,
       onChange,
       onValidationChange
