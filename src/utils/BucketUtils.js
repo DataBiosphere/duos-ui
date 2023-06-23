@@ -23,7 +23,6 @@ import {Match} from '../libs/ajax';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
 import {processMatchData} from './VoteUtils';
-//import { result } from 'lodash';
 
 /**
  * Entry method into bundling up datasets into groups based on common data use restrictions.
@@ -204,7 +203,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
   const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3' ? true : false;
-  const unmatchable = (isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse));
+  const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
@@ -219,18 +218,18 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     )(bucket.matchResults));
 
   const abstain = processV3Abstain(bucket.matchResults);
-  const failureReasons = flow(
-    flatMap(match => match.failureReasons),
-    uniq
-  )(bucket.matchResults);
-  const {createDate, failed, id, match} = bucket.matchResults[0];
-  const matchResult = {createDate, failureReasons, failed, id, match};
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
     return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
   }
   else if ((matchVals.length === 1)) {
+    const failureReasons = flow(
+      flatMap(match => match.failureReasons),
+      uniq
+    )(bucket.matchResults);
+    const {createDate, failed, id, match} = bucket.matchResults[0];
+    const matchResult = {createDate, failureReasons, failed, id, match};
     if (abstain) {
       return {
         result: 'Abstain',
