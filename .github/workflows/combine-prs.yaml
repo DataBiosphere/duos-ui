@@ -18,4 +18,4 @@ jobs:
         uses: github/combine-prs@v3.1.1
         with:
           branch_prefix: 'dependabot'
-          pr_title: '[DUOS-1740] Combined PRs'
+          pr_title: '[DUOS-1740] Dependabot Combined PRs'
