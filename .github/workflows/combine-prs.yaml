@@ -19,3 +19,4 @@ jobs:
         with:
           branch_prefix: 'dependabot'
           pr_title: '[DUOS-1740] Dependabot Combined PRs'
+          labels: dependency
