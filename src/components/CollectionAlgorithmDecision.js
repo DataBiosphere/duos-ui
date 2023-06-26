@@ -25,7 +25,7 @@ export default function CollectionAlgorithmDecision(props) {
   }
 
   function getResult(result) {
-    if (result.toLowerCase().trim() === 'abstain') {
+    if (result && result.toLowerCase().trim() === 'abstain') {
       return <AbstainResult/>;
     }
     if (result && result.trim().length > 0){
