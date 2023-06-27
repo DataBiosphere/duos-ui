@@ -202,20 +202,16 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 const calculateAlgorithmResultForBucket = (bucket) => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
-  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3' ? true : false;
+  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3';
   const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
   // Check algorithm version: V3 does not need to be checked for 'unmatchable'
-  const matchVals = algorithmVersionV3 ? (flow(
+  const matchVals = (algorithmVersionV3 || !unmatchable) ? flow(
     map(m => m.match),
     uniq
-  )(bucket.matchResults)) : (unmatchable ? [] :
-    flow(
-      map(m => m.match),
-      uniq
-    )(bucket.matchResults));
+  )(bucket.matchResults) : [];
 
   const abstain = processV3Abstain(bucket.matchResults);
 
@@ -260,7 +256,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 
 /**
 * Process the match results for V3 Abstain. If we have a V3 result and we have
-* an ABSTAIN case, we can return true if the number of abstentions > 1
+* an ABSTAIN case, we can return true if the number of abstentions > 0
 * @param matchResults
 */
 const processV3Abstain = (matchResults) => {
