@@ -40,6 +40,7 @@ import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgre
 import CustomDatasetCatalog from './pages/dac_dataset_catalog/CustomDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
 import {checkEnv, envGroups} from './utils/EnvironmentUtils';
+import { StudyUpdateForm } from './pages/StudyUpdateForm';
 
 const Routes = (props) => (
   <Switch>
@@ -84,6 +85,7 @@ const Routes = (props) => (
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path="/study_update/:studyId" component={StudyUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dataset_catalog/:variant" component={CustomDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}

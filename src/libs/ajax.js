@@ -381,7 +381,18 @@ export const DataSet = {
     catch (err) {
       return -1;
     }
-  }
+  },
+
+  getStudyById: async studyId => {
+    const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  updateStudy: async (studyId, studyObject) => {
+    const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
+    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(studyObject), {method: 'PUT'}]));
+  },
 };
 
 export const DatasetAssociation = {
