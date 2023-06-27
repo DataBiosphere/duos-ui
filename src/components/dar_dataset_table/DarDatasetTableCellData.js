@@ -19,11 +19,6 @@ export function votesCellData({elections, dataUseGroup, label= 'votes'}) {
   let displayValue = '-/-';
   if (!isEmpty(elections)) {
     const darElections = filter(e => e.electionType === 'DataAccess')(elections);
-    const datasetIds = flow(
-      filter(e => e.electionType === 'DataAccess'),
-      map(e => e.dataSetId),
-      uniq
-    )(darElections);
     const memberVotes = flow(
       flatMap(e => values(e.votes)),
       filter(v => v.type === 'DAC')
@@ -32,8 +27,8 @@ export function votesCellData({elections, dataUseGroup, label= 'votes'}) {
       filter(v => !isUndefined(v.vote)),
       map(v => get('vote')(v))
     )(memberVotes);
-    const numerator = voteValues.length / datasetIds.length;
-    const denominator = memberVotes.length / datasetIds.length;
+    const numerator = voteValues.length;
+    const denominator = memberVotes.length;
     displayValue = numerator + '/' + denominator;
   }
 
