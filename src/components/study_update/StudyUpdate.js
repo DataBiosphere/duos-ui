@@ -9,7 +9,7 @@ import initialFormData from '../data_submission/NIHDataManagement';
 
 export default function StudyUpdate(props) {
   const { study, history, user } = props;
-  const [formData, setFormData] = useState();
+  const [formData, setFormData] = useState({});
 
   const extract = useCallback((propertyName) => {
     const property = find({ propertyName })(study.properties);
@@ -33,9 +33,11 @@ export default function StudyUpdate(props) {
     const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }];
 
     const newStudy = {
-      name: formData.properties.studyName,
+      name: formData.properties.name,
+      studyType: formData.properties.name,
+      studyDescription: formData.properties.studyDescription,
       properties: [
-        asProperty('Study Name', formData.properties.studyName),
+        asProperty('Study Name', formData.properties.name),
         asProperty('Study Type', formData.properties.studyType),
         asProperty('Study Description', formData.properties.studyDescription),
         asProperty('Data Types', formData.properties.dataTypes),
@@ -62,26 +64,28 @@ export default function StudyUpdate(props) {
 
   const prefillFormData = useCallback(async (study) => {
     setFormData({
-      studyName: study.studyName,
-      properties: {
-        studyName: extract('Study Name'),
-        studyType: extract('Study Type'),
-        studyDescription: extract('Study Description'),
-        dataTypes: extract('Data Types'),
-        phenotypeIndication: extract('Phenotype/Indication'),
-        species: extract('Species'),
-        piName: extract('Principal Investigator Name'),
-        dataSubmitterName: extract('Data Submitter Name '),
-        dataSubmitterEmail: extract('Data Submitter Email'),
-        dataCustodianEmail: extract('Data Custodian Email')
-      },
-      //dataset: await normalizeDataUse(dataset?.dataUse),
-      //dac: { ...dac, dacs }
+      name: study.name,
+      studyType: study.studyType,
+      studyDescription: study.studyDescription,
+    //   properties: {
+    //     name: extract('Study Name'),
+    //     studyType: extract('Study Type'),
+    //     studyDescription: extract('Study Description'),
+    //     dataTypes: extract('Data Types'),
+    //     phenotypeIndication: extract('Phenotype/Indication'),
+    //     species: extract('Species'),
+    //     piName: extract('Principal Investigator Name'),
+    //     dataSubmitterName: extract('Data Submitter Name '),
+    //     dataSubmitterEmail: extract('Data Submitter Email'),
+    //     dataCustodianEmail: extract('Data Custodian Email')
+    //   },
+    //   //dataset: await normalizeDataUse(dataset?.dataUse),
+    //   //dac: { ...dac, dacs }
     });
   }, [extract]);
 
   useEffect(() => {
-    if (isNil(formData.studyName)) {
+    if (isNil(formData.name)) {
       prefillFormData(study);
     }
   }, [prefillFormData, study, formData]);
@@ -94,8 +98,9 @@ export default function StudyUpdate(props) {
       id: 'studyName',
       title: 'Study Name',
       validators: [FormValidators.REQUIRED],
+      defaultValue: formData?.name,
       onChange: ({ value }) => {
-        formData.properties.studyName = value;
+        formData.properties.name = value;
       },
     }),
     h(FormField, {
@@ -110,6 +115,7 @@ export default function StudyUpdate(props) {
       ],
       isCreatable: true,
       selectConfig: {},
+      defaultValue: formData?.studyType,
       onChange: ({ value }) => {
         formData.properties.studyType = value;
       },
@@ -121,6 +127,7 @@ export default function StudyUpdate(props) {
       title: 'Study Description',
       placeholder: 'Description',
       validators: [FormValidators.REQUIRED],
+      defaultValue: formData?.studyDescription,
       onChange: ({ value }) => {
         formData.properties.studyDescription = value;
       },
@@ -146,6 +153,7 @@ export default function StudyUpdate(props) {
         'Whole Genome (WGS)',
         'Whole Exome (WES)',
       ],
+      defaultValue: formData?.dataTypes,
       onChange: ({ value }) => {
         formData.properties.dataTypes = value;
       },
@@ -153,6 +161,7 @@ export default function StudyUpdate(props) {
     h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
+      defaultValue: formData?.phenotypeIndication,
       onChange: ({ value }) => {
         formData.properties.phenotypeIndication = value;
       },
@@ -160,6 +169,7 @@ export default function StudyUpdate(props) {
     h(FormField, {
       id: 'species',
       title: 'Species',
+      defaultValue: formData?.species,
       onChange: ({ value }) => {
         formData.properties.species = value;
       },
@@ -168,6 +178,7 @@ export default function StudyUpdate(props) {
       id: 'piName',
       title: 'Principal Investigator Name',
       validators: [FormValidators.REQUIRED],
+      defaultValue: formData?.piName,
       onChange: ({ value }) => {
         formData.properties.piName = value;
       },
@@ -199,9 +210,7 @@ export default function StudyUpdate(props) {
       description: `Insert the email for any individual with the 
       authority to add/remove users access to this study’s datasets.`,
       type: FormFieldTypes.SELECT,
-      validators: [
-        FormValidators.EMAIL
-      ],
+      validators: [ FormValidators.REQUIRED ],
       selectOptions: [],
       isCreatable: true,
       isMulti: true,
@@ -213,6 +222,7 @@ export default function StudyUpdate(props) {
         },
       },
       placeholder: 'Add one or more emails',
+      defaultValue: formData?.dataCustodianEmail,
       onChange: ({ value }) => {
         formData.properties.dataCustodianEmail = value;
       },
@@ -230,7 +240,7 @@ export default function StudyUpdate(props) {
         style: {
           width: '45%',
         },
-        defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
+        defaultValue: formData?.alternativeDataSharingPlanTargetDeliveryDate,
         title: 'Target Delivery Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
         validators: [FormValidators.DATE],
@@ -243,7 +253,7 @@ export default function StudyUpdate(props) {
         style: {
           width: '45%',
         },
-        defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
+        defaultValue: formData?.alternativeDataSharingPlanTargetPublicReleaseDate,
         title: 'Target Public Release Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
         validators: [FormValidators.DATE],
@@ -263,6 +273,7 @@ export default function StudyUpdate(props) {
         { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
         { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' }
       ],
+      defaultValue: formData?.publicVisibility,
       onChange: ({ value }) => {
         formData.properties.publicVisibility = value;
       },

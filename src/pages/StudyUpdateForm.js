@@ -6,7 +6,7 @@ import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
 
 import StudyUpdate from '../components/study_update/StudyUpdate';
-import { DataSet } from '../libs/ajax';
+import { DataSet, User } from '../libs/ajax';
 
 export const StudyUpdateForm = (props) => {
   const { history } = props;
@@ -14,10 +14,13 @@ export const StudyUpdateForm = (props) => {
 
   const [failedInit, setFailedInit] = useState(true);
   const [study, setStudy] = useState({});
+  const [user, setUser] = useState({});
 
   useEffect(() => {
     const init = async () => {
       try {
+        const me = await User.getMe();
+        setUser(me);
         setStudy(await DataSet.getStudyById(studyId));
         setFailedInit(false);
       } catch (error) {
@@ -46,7 +49,7 @@ export const StudyUpdateForm = (props) => {
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800 }}>
-      <StudyUpdate study={study} history={history} />
+      <StudyUpdate study={study} history={history} user={user}/>
     </form>
   </div>;
 };
