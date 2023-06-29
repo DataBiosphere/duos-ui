@@ -228,9 +228,7 @@ export const DatasetUpdate = (props) => {
       defaultValue: [
         { displayText: formData.dac.name, dacId: formData.dac.dacId },
       ],
-      onChange: ({ dacId }) => {
-        formData.dac.dacId = dacId;
-      },
+      disabled: true,
     }),
     h2('2. Data Use Terms'),
     // readonly primary
