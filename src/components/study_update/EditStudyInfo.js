@@ -1,89 +1,36 @@
 import { useCallback, useState, useEffect } from 'react';
-import { button, h, h2, div } from 'react-hyperscript-helpers';
+import { h, h2, div } from 'react-hyperscript-helpers';
 import { find, isNil, isEmpty } from 'lodash/fp';
 
-import { Notifications } from '../../libs/utils';
-import { DataSet } from '../../libs/ajax';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
-import initialFormData from '../data_submission/NIHDataManagement';
 
-export default function StudyUpdate(props) {
-  const { study, history, user } = props;
+export default function StudyInformationUpdate(props) {
+  const { study, user } = props;
   const [formData, setFormData] = useState({});
 
-  const extract = useCallback((propertyName) => {
-    const property = find({ propertyName })(study.properties);
-    return property?.propertyValue;
+  const extract = useCallback((key) => {
+    const property = find({ key })(study.properties);
+    return property?.value;
   }, [study]);
-
-  const asProperty = (propertyName, propertyValue) => {
-    return {
-      propertyName,
-      propertyValue
-    };
-  };
-
-  const submitForm = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const formElement = event.target.form;
-    const submitData = new FormData(formElement);
-    const nihFileData = submitData.get('nihInstitutionalCertificationFile');
-    const consentGroups = [{ nihInstitutionalCertificationFile: nihFileData }];
-
-    const newStudy = {
-      name: formData.properties.name,
-      studyType: formData.properties.name,
-      studyDescription: formData.properties.studyDescription,
-      properties: [
-        asProperty('Study Name', formData.properties.name),
-        asProperty('Study Type', formData.properties.studyType),
-        asProperty('Study Description', formData.properties.studyDescription),
-        asProperty('Data Types', formData.properties.dataTypes),
-        asProperty('Phenotype/Indication', formData.properties.phenotypeIndication),
-        asProperty('Species', formData.properties.species),
-        asProperty('Principal Investigator Name', formData.properties.principalInvestigator),
-        asProperty('Data Submitter Name ', formData.properties.dataSubmitterName),
-        asProperty('Data Submitter Email ', formData.properties.dataSubmitterEmail),
-        asProperty('Data Custodian Email ', formData.properties.dataCustodianEmail)
-      ]
-    };
-
-    const multiPartFormData = new FormData();
-    multiPartFormData.append('study', JSON.stringify(newStudy));
-    multiPartFormData.append('consentGroups', consentGroups);
-
-    DataSet.updateStudy(study.studyId, multiPartFormData).then(() => {
-      history.push('/dataset_catalog');
-      Notifications.showSuccess({ text: 'Update submitted successfully!' });
-    }, () => {
-      Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });
-    });
-  };
 
   const prefillFormData = useCallback(async (study) => {
     setFormData({
       name: study.name,
-      studyType: study.studyType,
-      studyDescription: study.studyDescription,
-    //   properties: {
-    //     name: extract('Study Name'),
-    //     studyType: extract('Study Type'),
-    //     studyDescription: extract('Study Description'),
-    //     dataTypes: extract('Data Types'),
-    //     phenotypeIndication: extract('Phenotype/Indication'),
-    //     species: extract('Species'),
-    //     piName: extract('Principal Investigator Name'),
-    //     dataSubmitterName: extract('Data Submitter Name '),
-    //     dataSubmitterEmail: extract('Data Submitter Email'),
-    //     dataCustodianEmail: extract('Data Custodian Email')
-    //   },
-    //   //dataset: await normalizeDataUse(dataset?.dataUse),
-    //   //dac: { ...dac, dacs }
+      description: study.description,
+      dataTypes: study.dataTypes,
+      piName: study.piName,
+      publicVisibility: study.publicVisibility,
+      properties: {
+        studyType: extract('studyType'),
+        phenotypeIndication: extract('phenotypeIndication'),
+        species: extract('species'),
+        dataSubmitterName: extract('dataSubmitterName'),
+        dataSubmitterEmail: extract('dataSubmitterEmail'),
+        dataCustodianEmail: extract('dataCustodianEmail'),
+      },
     });
   }, [extract]);
-
+  
   useEffect(() => {
     if (isNil(formData.name)) {
       prefillFormData(study);
@@ -91,7 +38,7 @@ export default function StudyUpdate(props) {
   }, [prefillFormData, study, formData]);
 
   return h(div, {
-    className: 'data-submitter-section',
+    className: 'study-update-section',
   }, [
     h2('Study Information'),
     h(FormField, {
@@ -99,6 +46,7 @@ export default function StudyUpdate(props) {
       title: 'Study Name',
       validators: [FormValidators.REQUIRED],
       defaultValue: formData?.name,
+      disabled: true,
       onChange: ({ value }) => {
         formData.properties.name = value;
       },
@@ -127,9 +75,9 @@ export default function StudyUpdate(props) {
       title: 'Study Description',
       placeholder: 'Description',
       validators: [FormValidators.REQUIRED],
-      defaultValue: formData?.studyDescription,
+      defaultValue: formData?.description,
       onChange: ({ value }) => {
-        formData.properties.studyDescription = value;
+        formData.properties.description = value;
       },
     }),
     h(FormField, {
@@ -210,9 +158,8 @@ export default function StudyUpdate(props) {
       description: `Insert the email for any individual with the 
       authority to add/remove users access to this study’s datasets.`,
       type: FormFieldTypes.SELECT,
-      validators: [ FormValidators.REQUIRED ],
+      validators: [FormValidators.REQUIRED],
       selectOptions: [],
-      isCreatable: true,
       isMulti: true,
       optionsAreString: true,
       selectConfig: {
@@ -278,12 +225,5 @@ export default function StudyUpdate(props) {
         formData.properties.publicVisibility = value;
       },
     }),
-    div({ className: 'flex flex-row', style: { justifyContent: 'flex-end', marginTop: '2rem', marginBottom: '2rem' } }, [
-      button({
-        className: 'button button-white',
-        type: 'submit',
-        onClick: submitForm,
-      }, 'Submit'),
-    ]),
   ]);
 }
