@@ -189,45 +189,61 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
 /**
  * Generate the summary of algorithm results suitable for display in the UI
  *
- * Three potential cases:
+ * Four potential cases:
  *  1. No matches
  *  2. Exactly one match or N matches that are all the same - easy case
- *  3. N matches - not all the same - very confusing case
+ *  3. Abstain is true and match is false - decision is abstained
+ *  4. N matches - not all the same - very confusing case
  *
  * @private
  * @param bucket
  * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
  */
 const calculateAlgorithmResultForBucket = (bucket) => {
-
-  // We actually DO NOT want to show system match results when the data use indicates
+  // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
   // that a match should not be made. This happens for all "Other" cases.
+  const algorithmVersionV3 = bucket.matchResults.algorithmVersion === 'v3';
   const unmatchable = isOther(bucket.dataUse) || shouldAbstain(bucket.dataUse);
   // Check on all possible true/false values in the matches.
   // If all matches are the same, we can merge them into a single match object for display.
   // If they are not all the same, we have to punt this decision solely to the DAC.
-  const matchVals = unmatchable ? [] : flow(
+  // Check algorithm version: V3 does not need to be checked for 'unmatchable'
+  const matchVals = (algorithmVersionV3 || !unmatchable) ? flow(
     map(m => m.match),
     uniq
-  )(bucket.matchResults);
+  )(bucket.matchResults) : [];
 
+  const abstain = processV3Abstain(bucket.matchResults);
+
+  // check results based on matchVals
   if (isEmpty(matchVals)) {
     return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
-  } else if (matchVals.length === 1) {
-    // pull all unique failure reasons from all match failures into the display
+  }
+  else if ((matchVals.length === 1)) {
     const failureReasons = flow(
       flatMap(match => match.failureReasons),
       uniq
     )(bucket.matchResults);
     const {createDate, failed, id, match} = bucket.matchResults[0];
     const matchResult = {createDate, failureReasons, failed, id, match};
-    return {
-      result: processMatchData(matchResult),
-      createDate,
-      failureReasons,
-      id
-    };
-  } else {
+    if (abstain) {
+      return {
+        result: 'Abstain',
+        createDate,
+        failureReasons,
+        id,
+      };
+    }
+    else {
+      return {
+        result: processMatchData(matchResult),
+        createDate,
+        failureReasons,
+        id,
+      };
+    }
+  }
+  else {
     // Different match values? Provide a custom message
     return {
       result: 'Unable to determine a system match',
@@ -236,6 +252,17 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       id: bucket.key
     };
   }
+};
+
+/**
+* Process the match results for V3 Abstain. If we have a V3 result and we have
+* an ABSTAIN case, we can return true if the number of abstentions > 0
+* @param matchResults
+*/
+const processV3Abstain = (matchResults) => {
+  const abstainList = map(m => m.abstain)(matchResults);
+  const abstainValList = filter(a => a === true)(abstainList);
+  return abstainValList.length > 0;
 };
 
 /**

@@ -15,12 +15,19 @@ export default function CollectionAlgorithmDecision(props) {
     return (<span style={{color: 'rgb(218,0,3)'}}><strong>NO</strong></span>);
   }
 
+  function AbstainResult() {
+    return (<span style={{color: '#0948B7'}}><strong>ABSTAIN</strong></span>);
+  }
+
   function OtherResult(props) {
     const { text } = props;
     return (<span><strong>{text}</strong></span>);
   }
 
   function getResult(result) {
+    if (result && result.toLowerCase().trim() === 'abstain') {
+      return <AbstainResult/>;
+    }
     if (result && result.trim().length > 0){
       switch (result.toLowerCase().trim()) {
         case 'yes':
@@ -31,7 +38,6 @@ export default function CollectionAlgorithmDecision(props) {
       }
     }
     return <OtherResult text={'N/A'}/>;
-
   }
   const containerProps = {
     id: `collection-algorithm-id-${id}`,
@@ -55,13 +61,13 @@ export default function CollectionAlgorithmDecision(props) {
           span({id: `collection-${id}-decision-value`, style: {fontWeight: 400}}, [getResult(result)])
         ]),
         div({style: {fontSize: '1.5rem'}}, [
-          span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),
-          span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
-        ]),
-        div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Reason:']),
           span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
             [!isEmpty(failureReasons) ? failureReasons.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
+        ]),
+        div({style: {fontSize: '1.5rem'}}, [
+          span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),
+          span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
         ])
       ])
     ])

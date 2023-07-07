@@ -254,6 +254,12 @@ export const DAR = {
     return await res.json();
   },
 
+  searchOntologyIdList: async ids => {
+    const url = `${await getOntologyUrl()}/search?id=${ids}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
   getDARDocument: async (referenceId, fileType) => {
     const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
     authOpts.headers = Object.assign(authOpts.headers, {
@@ -366,6 +372,12 @@ export const DataSet = {
   updateDataset: async (datasetId, dataSetObject) => {
     const url = `${await getApiUrl()}/api/dataset/${datasetId}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
+  },
+
+  updateDatasetV3: async (datasetId, datasetAndFiles) => {
+    const url = `${await getApiUrl()}/api/dataset/v3/${datasetId}`;
+    const res = await axios.put(url, datasetAndFiles, Config.multiPartOpts());
+    return res.data;
   },
 
   validateDatasetName: async (name) => {
