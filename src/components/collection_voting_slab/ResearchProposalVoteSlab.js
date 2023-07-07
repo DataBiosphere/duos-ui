@@ -197,7 +197,7 @@ export default function ResearchProposalVoteSlab(props) {
             span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
             h(ResearchPurposeSummary, {darInfo}),
             h(DataUseAlertBox, {translatedDataUse}),
-            h(CollectionSubmitVoteBox, {
+            !isEmpty(bucket) && h(CollectionSubmitVoteBox, {
               question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
               votes: currentUserVotes,
               isFinal: false,
