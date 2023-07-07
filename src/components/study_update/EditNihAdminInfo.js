@@ -8,7 +8,6 @@ import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from '
 
 export const NihAdministrationInfoUpdate = (props) => {
   const { study, institutions, onChange, formData } = props;
-  const [setFormData] = useState({});
 
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(formData?.multiCenterStudy === true || false);
   const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(formData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
@@ -22,35 +21,6 @@ export const NihAdministrationInfoUpdate = (props) => {
       id: id,
     };
   };
-
-//   const extract = useCallback((key) => {
-//     const property = find({ key })(study.properties);
-//     return property?.value;
-//   }, [study]);
-
-//   const prefillFormData = useCallback(async (study) => {
-//     setFormData({
-//       name: study.name,
-//       properties: {
-//         piInstitution: extract('piInstitution'),
-//         nihGrantContractNumber: extract('nihGrantContractNumber'),
-//         nihICsSupportingStudy: extract('nihICsSupportingStudy'),
-//         nihProgramOfficerName: extract('nihProgramOfficerName'),
-//         nihInstitutionCenterSubmission: extract('nihInstitutionCenterSubmission'),
-//         nihGenomicProgramAdministratorName: extract('nihGenomicProgramAdministratorName'),
-//         multiCenterStudy: extract('multiCenterStudy'),
-//         collaboratingSites: extract('collaboratingSites'),
-//         controlledAccessRequiredForGenomicSummaryResultsGSR: extract('controlledAccessRequiredForGenomicSummaryResultsGSR'),
-//         controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation: extract('controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation')
-//       },
-//     });
-//   }, [extract]);
-
-//   useEffect(() => {
-//     if (isNil(formData.name)) {
-//       prefillFormData(study);
-//     }
-//   }, [prefillFormData, study, formData]);
 
   return div({
     isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),

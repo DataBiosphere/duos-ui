@@ -6,7 +6,7 @@ import { DAC } from '../../libs/ajax';
 
 import '../data_submission/ds_common.css';
 
-export const StudyConsentGroupsUpdate = (props) => {
+export const DataAccessGovernanceUpdate = (props) => {
   const {
     onChange, onFileChange, study, setAllConsentGroupsSaved
   } = props;
@@ -153,4 +153,4 @@ export const StudyConsentGroupsUpdate = (props) => {
   ]);
 };
 
-export default StudyConsentGroupsUpdate;
+export default DataAccessGovernanceUpdate;

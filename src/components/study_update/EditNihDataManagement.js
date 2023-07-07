@@ -56,31 +56,6 @@ export const NihDataManagementUpdate = (props) => {
     }
   };
 
-  // const extract = useCallback((key) => {
-  //   const property = find({ key })(study.properties);
-  //   return property?.value;
-  // }, [study]);
-
-  // const prefillFormData = useCallback(async (study) => {
-  //   setFormData({
-  //     name: study.name,
-  //     properties: {
-  //       alternativeDataSharingPlan: extract('alternativeDataSharingPlan'),
-  //       phenotypeIndication: extract('phenotypeIndication'),
-  //       species: extract('species'),
-  //       dataSubmitterName: extract('dataSubmitterName'),
-  //       dataSubmitterEmail: extract('dataSubmitterEmail'),
-  //       dataCustodianEmail: extract('dataCustodianEmail'),
-  //     },
-  //   });
-  // }, [extract]);
-  
-  // useEffect(() => {
-  //   if (isNil(formData.name)) {
-  //     prefillFormData(study);
-  //   }
-  // }, [prefillFormData, study, formData]);
-
   return div({
     isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
     className: 'study-update-section',

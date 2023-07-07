@@ -5,37 +5,7 @@ import { find, isNil, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 export default function StudyInformationUpdate(props) {
-  const { study, user } = props;
-  const [formData, setFormData] = useState({});
-
-  const extract = useCallback((key) => {
-    const property = find({ key })(study.properties);
-    return property?.value;
-  }, [study]);
-
-  const prefillFormData = useCallback(async (study) => {
-    setFormData({
-      name: study.name,
-      description: study.description,
-      dataTypes: study.dataTypes,
-      piName: study.piName,
-      publicVisibility: study.publicVisibility,
-      properties: {
-        studyType: extract('studyType'),
-        phenotypeIndication: extract('phenotypeIndication'),
-        species: extract('species'),
-        dataSubmitterName: extract('dataSubmitterName'),
-        dataSubmitterEmail: extract('dataSubmitterEmail'),
-        dataCustodianEmail: extract('dataCustodianEmail'),
-      },
-    });
-  }, [extract]);
-  
-  useEffect(() => {
-    if (isNil(formData.name)) {
-      prefillFormData(study);
-    }
-  }, [prefillFormData, study, formData]);
+  const { study, user, formData } = props;
 
   return h(div, {
     className: 'study-update-section',

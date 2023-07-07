@@ -17,31 +17,6 @@ const nihAnvilUseLabels = {
 
 export default function NihAnvilUseUpdate(props) {
   const { study, onChange, formData } = props;
-  const [setFormData] = useState({});
-
-  // const extract = useCallback((key) => {
-  //   const property = find({ key })(study.properties);
-  //   return property?.value;
-  // }, [study]);
-
-  // const prefillFormData = useCallback(async (study) => {
-  //   setFormData({
-  //     name: study.name,
-  //     properties: {
-  //       nihAnvilUse: extract('nihAnvilUse'),
-  //       dbGaPPhsID: extract('dbGaPPhsID'),
-  //       dbGaPStudyRegistrationName: extract('dbGaPStudyRegistrationName'),
-  //       embargoReleaseDate: extract('embargoReleaseDate'),
-  //       sequencingCenter: extract('sequencingCenter')
-  //     },
-  //   });
-  // }, [extract]);
-
-  // useEffect(() => {
-  //   if (isNil(formData.name)) {
-  //     prefillFormData(study);
-  //   }
-  // }, [prefillFormData, study, formData]);
 
   return h(div, {
     className: 'study-update-section',
