@@ -29,7 +29,8 @@ const dataUseDescriptions = (translatedDataUse) => {
   return flatMap(key => {
     const dataUses = translatedDataUse[key];
     return map.convert({cap: false})((dataUse, index) => {
-      return div({key: dataUse.code + '-' + index}, [dataUse.description]);
+      const uniqKey = key + '-' + dataUse.code + '-' + index;
+      return div({ key: uniqKey }, [dataUse.description]);
     })(manuallyReviewedDataUses(dataUses));
   })(keys(translatedDataUse));
 };

@@ -4,7 +4,6 @@ import {DataUseTranslation} from '../../libs/dataUseTranslation';
 import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
 import {DataUsePills} from './DataUsePill';
 import DataUseAlertBox from './DataUseAlertBox';
-import {AnimatePresence, motion} from 'framer-motion';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
 import {Storage} from '../../libs/storage';
 import {
@@ -193,38 +192,32 @@ export default function ResearchProposalVoteSlab(props) {
           setExpanded,
           isRendered: !isLoading
         }),
-        h(AnimatePresence, { initial: false }, [
-          expanded && (
-            h(motion.section, animationAttributes, [
-              div({ datacy: 'rp-expanded', style: styles.expandedData }, [
-                div({ datacy: 'research-purpose' }, [
-                  span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
-                  h(ResearchPurposeSummary, {darInfo}),
-                  h(DataUseAlertBox, {translatedDataUse}),
-                  h(CollectionSubmitVoteBox, {
-                    question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
-                    votes: currentUserVotes,
-                    isFinal: false,
-                    isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
-                    isLoading,
-                    adminPage,
-                    bucketKey: bucket.key,
-                    updateFinalVote,
-                    key: bucket.key
-                  }),
-                  h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
-                  h(MemberVoteSummary, {
-                    title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
-                    isLoading,
-                    dacVotes,
-                    adminPage,
-                    isChair
-                  })
-                ]),
-              ]),
-            ])
-          )
-        ])
+        div({ datacy: 'rp-expanded', isRendered: expanded, style: styles.expandedData }, [
+          div({ datacy: 'research-purpose' }, [
+            span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
+            h(ResearchPurposeSummary, {darInfo}),
+            h(DataUseAlertBox, {translatedDataUse}),
+            !isEmpty(bucket) && h(CollectionSubmitVoteBox, {
+              question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
+              votes: currentUserVotes,
+              isFinal: false,
+              isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
+              isLoading,
+              adminPage,
+              bucketKey: bucket.key,
+              updateFinalVote,
+              key: bucket.key
+            }),
+            h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
+            h(MemberVoteSummary, {
+              title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
+              isLoading,
+              dacVotes,
+              adminPage,
+              isChair
+            })
+          ]),
+        ]),
       ]),
     ])
   ]);
