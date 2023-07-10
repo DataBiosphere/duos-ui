@@ -350,6 +350,27 @@ export default function ResearcherProfile(props) {
                   },
                   ['Profile name must be at least four characters.'])
               ]),
+              div({ className: 'col-xs-12' }, [
+                h(FormField, {
+                  type: FormFieldTypes.TEXT,
+                  title: 'Email',
+                  validators: [FormValidators.REQUIRED],
+                  id: 'profileEmail',
+                  defaultValue: profile.email,
+                  onChange,
+                }),
+              ]),
+
+              //   p(
+              //     {
+              //       isRendered: !profileNameIsValid() && !isLoading,
+              //       style: {
+              //         fontStyle: 'italic',
+              //         color: '#D13B07',
+              //       }
+              //     },
+              //     ['Profile name must be at least four characters.'])
+              // ]),
             ]),
             div({ className: 'flex' }, [
               div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
