@@ -10,11 +10,6 @@ import { Notifications, getPropertyValuesFromUser} from '../libs/utils';
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
     profileName: '',
-    institutionId: undefined,
-    suggestedInstitution: undefined,
-    selectedSigningOfficialId: undefined,
-    suggestedSigningOfficial: undefined,
-    eraCommonsId: undefined,
     email: undefined,
     id: undefined
   });
