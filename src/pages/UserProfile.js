@@ -3,9 +3,9 @@ import {div, h, hr} from 'react-hyperscript-helpers';
 import {PageHeading} from '../components/PageHeading';
 import {Notification} from '../components/Notification';
 import {FormField, FormFieldTypes, FormValidators} from '../components/forms/forms';
-import {Institution, User} from '../libs/ajax';
+import {User} from '../libs/ajax';
 import {NotificationService} from '../libs/notificationService';
-import { Notifications, getPropertyValuesFromUser} from '../libs/utils';
+import { Notifications} from '../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -30,29 +30,10 @@ export default function ResearcherProfile(props) {
     init();
   }, [props.history]);
 
-  useEffect(() => {
-    if (profile.institutionId) {
-      Institution.getById(profile.institutionId).then((institution) => {
-        if (!institution) {
-          return;
-        }
-
-      });
-    }
-  }, [profile.institutionId]);
-
-
-
   const getResearcherProfile = async () => {
     const user = await User.getMe();
-    const userProps = getPropertyValuesFromUser(user);
 
     setProfile({
-      institutionId: user.institutionId || userProps.institutionId,
-      suggestedInstitution: userProps.suggestedInstitution,
-      selectedSigningOfficialId: parseInt(userProps.selectedSigningOfficialId),
-      suggestedSigningOfficial: userProps.suggestedSigningOfficial,
-      eraCommonsId: userProps.eraCommonsId,
       profileName: user.displayName,
       email: user.email,
       id: user.userId
