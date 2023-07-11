@@ -1,13 +1,12 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useState } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
-import { find, isNil, isEmpty } from 'lodash/fp';
+import { isNil, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 import { nihInstitutions } from '../data_submission/nih_institutions';
-import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './EditNihAnvilUse';
 
 export const NihAdministrationInfoUpdate = (props) => {
-  const { study, institutions, onChange, formData } = props;
+  const { institutions, onChange, formData, validation, onValidationChange} = props;
 
   const [showMultiCenterStudy, setShowMultiCenterStudy] = useState(formData?.multiCenterStudy === true || false);
   const [showGSRRequiredExplanation, setShowGSRRequiredExplanation] = useState(formData?.controlledAccessRequiredForGenomicSummaryResultsGSR === false || false);
@@ -23,7 +22,7 @@ export const NihAdministrationInfoUpdate = (props) => {
   };
 
   return div({
-    isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
+    isRendered: ['yes_nhgri_yes_phs_id', 'yes_nhgri_no_phs_id', 'no_nhgri_yes_anvil'].includes(formData.properties.nihAnvilUse),
     className: 'study-update-section',
   }, [
     h2('NIH Administrative Information'),
@@ -39,14 +38,18 @@ export const NihAdministrationInfoUpdate = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: !isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null,
+      defaultValue: !isNil(formData.properties.piInstitution) ? findInstitutionSelectOption(formData.properties.piInstitution) : null,
+      validation: validation.piInstitution,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihGrantContractNumber',
       title: 'NIH Grant or Contract Number',
       validators: [FormValidators.REQUIRED],
       onChange,
-      defaultValue: formData?.nihGrantContractNumber,
+      defaultValue: formData?.properties.nihGrantContractNumber,
+      validation: validation.nihGrantContractNumber,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihICsSupportingStudy',
@@ -55,15 +58,19 @@ export const NihAdministrationInfoUpdate = (props) => {
       onChange,
       type: FormFieldTypes.SELECT,
       isMulti: true,
-      defaultValue: formData?.nihICsSupportingStudy,
+      defaultValue: formData?.properties.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
+      validation: validation.nihICsSupportingStudy,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihProgramOfficerName',
       title: 'NIH Program Officer Name',
       onChange,
       placeholder: 'Officer Name',
-      defaultValue: formData?.nihProgramOfficerName,
+      defaultValue: formData?.properties.nihProgramOfficerName,
+      validation: validation.nihProgramOfficerName,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihInstitutionCenterSubmission',
@@ -71,24 +78,30 @@ export const NihAdministrationInfoUpdate = (props) => {
       placeholder: 'Institute/Center Name',
       onChange,
       type: FormFieldTypes.SELECT,
-      defaultValue: formData?.nihInstitutionCenterSubmission,
+      defaultValue: formData?.properties.nihInstitutionCenterSubmission,
       selectOptions: nihInstitutions,
+      validation: validation.nihInstitutionCenterSubmission,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'nihGenomicProgramAdministratorName',
       title: 'NIH Genomic Program Administrator Name',
-      defaultValue: formData?.nihGenomicProgramAdministratorName,
+      defaultValue: formData?.properties.nihGenomicProgramAdministratorName,
       onChange,
+      validation: validation.nihGenomicProgramAdministratorName,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'multiCenterStudy',
       title: 'Is this a multi-center study?',
       type: FormFieldTypes.YESNORADIOGROUP,
-      defaultValue: formData?.multiCenterStudy,
+      defaultValue: formData?.properties.multiCenterStudy,
       onChange: ({key, value}) => {
         setShowMultiCenterStudy(value);
         onChange({key, value});
       },
+      validation: validation.multiCenterStudy,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'collaboratingSites',
@@ -106,13 +119,15 @@ export const NihAdministrationInfoUpdate = (props) => {
         },
       },
       placeholder: 'List site and hit enter here...',
-      defaultValue: formData?.collaboratingSites,
+      defaultValue: formData?.properties.collaboratingSites,
       onChange,
+      validation: validation.collaboratingSites,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
       title: 'Is controlled access required for genomic summary results (GSR)?',
-      defaultValue: formData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      defaultValue: formData?.properties.controlledAccessRequiredForGenomicSummaryResultsGSR,
       type: FormFieldTypes.YESNORADIOGROUP,
       onChange: ({key, value}) => {
         setShowGSRRequiredExplanation(value);
@@ -122,6 +137,8 @@ export const NihAdministrationInfoUpdate = (props) => {
           value: (value ? gsrRequiredExplanation : undefined),
         });
       },
+      validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      onValidationChange,
     }),
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation',
@@ -133,6 +150,8 @@ export const NihAdministrationInfoUpdate = (props) => {
         setGSRRequiredExplanation(value);
         onChange({key, value});
       },
+      validation: validation.controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation,
+      onValidationChange,
     }),
   ]);
 };

@@ -1,11 +1,10 @@
-import { useCallback, useState, useEffect } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
-import { find, isNil, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 export default function StudyInformationUpdate(props) {
-  const { study, user, formData } = props;
+  const { user, formData, onChange, validation, onValidationChange } = props;
 
   return h(div, {
     className: 'study-update-section',
@@ -17,9 +16,9 @@ export default function StudyInformationUpdate(props) {
       validators: [FormValidators.REQUIRED],
       defaultValue: formData?.name,
       disabled: true,
-      onChange: ({ value }) => {
-        formData.properties.name = value;
-      },
+      validation: validation.studyName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'studyType',
@@ -34,9 +33,9 @@ export default function StudyInformationUpdate(props) {
       isCreatable: true,
       selectConfig: {},
       defaultValue: formData?.studyType,
-      onChange: ({ value }) => {
-        formData.properties.studyType = value;
-      },
+      validation: validation.studyType,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       type: FormFieldTypes.TEXTAREA,
@@ -46,9 +45,9 @@ export default function StudyInformationUpdate(props) {
       placeholder: 'Description',
       validators: [FormValidators.REQUIRED],
       defaultValue: formData?.description,
-      onChange: ({ value }) => {
-        formData.properties.description = value;
-      },
+      validation: validation.description,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'dataTypes',
@@ -72,34 +71,34 @@ export default function StudyInformationUpdate(props) {
         'Whole Exome (WES)',
       ],
       defaultValue: formData?.dataTypes,
-      onChange: ({ value }) => {
-        formData.properties.dataTypes = value;
-      },
+      validation: validation.dataTypes,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
       defaultValue: formData?.phenotypeIndication,
-      onChange: ({ value }) => {
-        formData.properties.phenotypeIndication = value;
-      },
+      validation: validation.phenotypeIndication,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'species',
       title: 'Species',
       defaultValue: formData?.species,
-      onChange: ({ value }) => {
-        formData.properties.species = value;
-      },
+      validation: validation.species,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'piName',
       title: 'Principal Investigator Name',
       validators: [FormValidators.REQUIRED],
       defaultValue: formData?.piName,
-      onChange: ({ value }) => {
-        formData.properties.piName = value;
-      },
+      validation: validation.piName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       isRendered: !isEmpty(user),
@@ -108,9 +107,9 @@ export default function StudyInformationUpdate(props) {
       description: `The individual completing this form will be saved with the study.`,
       defaultValue: user?.displayName,
       disabled: true,
-      onChange: ({ value }) => {
-        formData.properties.dataSubmitterName = value;
-      },
+      validation: validation.displayName,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       isRendered: !isEmpty(user),
@@ -118,9 +117,9 @@ export default function StudyInformationUpdate(props) {
       title: 'Data Submitter Email',
       defaultValue: user?.email,
       disabled: true,
-      onChange: ({ value }) => {
-        formData.properties.dataSubmitterEmail = value;
-      },
+      validation: validation.email,
+      onChange,
+      onValidationChange
     }),
     h(FormField, {
       id: 'dataCustodianEmail',
@@ -140,9 +139,9 @@ export default function StudyInformationUpdate(props) {
       },
       placeholder: 'Add one or more emails',
       defaultValue: formData?.dataCustodianEmail,
-      onChange: ({ value }) => {
-        formData.properties.dataCustodianEmail = value;
-      },
+      validation: validation.dataCustodianEmail,
+      onChange,
+      onValidationChange
     }),
     div({
       style: {
@@ -161,9 +160,9 @@ export default function StudyInformationUpdate(props) {
         title: 'Target Delivery Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
         validators: [FormValidators.DATE],
-        onChange: ({ value }) => {
-          formData.properties.alternativeDataSharingPlanTargetDeliveryDate = value;
-        },
+        validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
+        onChange,
+        onValidationChange
       }),
       h(FormField, {
         id: 'alternativeDataSharingPlanTargetPublicReleaseDate',
@@ -174,9 +173,9 @@ export default function StudyInformationUpdate(props) {
         title: 'Target Public Release Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
         validators: [FormValidators.DATE],
-        onChange: ({ value }) => {
-          formData.properties.alternativeDataSharingPlanTargetPublicReleaseDate = value;
-        },
+        validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
+        onChange,
+        onValidationChange
       }),
     ]),
     h(FormField, {
@@ -191,9 +190,9 @@ export default function StudyInformationUpdate(props) {
         { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' }
       ],
       defaultValue: formData?.publicVisibility,
-      onChange: ({ value }) => {
-        formData.properties.publicVisibility = value;
-      },
+      validation: validation.publicVisibility,
+      onChange,
+      onValidationChange
     }),
   ]);
 }

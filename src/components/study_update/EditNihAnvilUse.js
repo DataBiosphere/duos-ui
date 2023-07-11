@@ -1,6 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
 import { h, h2, div } from 'react-hyperscript-helpers';
-import { find, isNil } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
@@ -16,7 +14,7 @@ const nihAnvilUseLabels = {
 };
 
 export default function NihAnvilUseUpdate(props) {
-  const { study, onChange, formData } = props;
+  const { onChange, formData, validation, onValidationChange } = props;
 
   return h(div, {
     className: 'study-update-section',
@@ -32,44 +30,54 @@ export default function NihAnvilUseUpdate(props) {
         {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
-      defaultValue: formData?.nihAnvilUse,
+      defaultValue: formData?.properties.nihAnvilUse,
       validators: [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
       },
+      validation: validation.nihAnvilUse,
+      onValidationChange,
     }),
-    div({ isRendered: formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID}, [
+    div({ isRendered: formData?.properties.nihAnvilUse === 'yes_nhgri_yes_phs_id'}, [
       h(FormField, {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
         validators: [FormValidators.REQUIRED],
-        defaultValue: formData?.dbGaPPhsID,
+        defaultValue: formData?.properties.dbGaPPhsID,
         onChange,
+        validation: validation.dbGaPPhsID,
+        onValidationChange,
       }),
       h(FormField, {
         id: 'dbGaPStudyRegistrationName',
         title: 'dbGaP Study Registration Name',
         placeholder: 'Name',
-        defaultValue: formData?.dbGaPStudyRegistrationName,
+        defaultValue: formData?.properties.dbGaPStudyRegistrationName,
         onChange,
+        validation: validation.dbGaPStudyRegistrationName,
+        onValidationChange,
       }),
       h(FormField, {
         id: 'embargoReleaseDate',
         title: 'Embargo Release Date',
         placeholder: 'YYYY-MM-DD',
         validators: [FormValidators.DATE],
-        defaultValue: formData?.embargoReleaseDate,
+        defaultValue: formData?.properties.embargoReleaseDate,
         onChange,
+        validation: validation.embargoReleaseDate,
+        onValidationChange,
       }),
       h(FormField, {
         id: 'sequencingCenter',
         title: 'Sequencing Center',
         placeholder: 'Name',
-        defaultValue: formData?.sequencingCenter,
+        defaultValue: formData?.properties.sequencingCenter,
         onChange,
-     }),
+        validation: validation.sequencingCenter,
+        onValidationChange,
+      }),
     ])
   ]);
 }
