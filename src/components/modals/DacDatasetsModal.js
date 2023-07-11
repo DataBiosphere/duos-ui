@@ -12,7 +12,7 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
   constructor() {
     super();
     this.state = {
-      translatedDatasetRestrictions: [],
+      translatedDataUse: [],
       getStructuredUseRestrictionLink: this.getStructuredUseRestrictionLink.bind(this)
     };
   }
@@ -46,14 +46,14 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
 
   getStructuredUseRestrictionLink = (index) => {
     if(this.state.translatedDatasetRestrictions && this.state.translatedDatasetRestrictions[index]) {
-      const translatedUseRestrictions = this.state.translatedDatasetRestrictions[index]
+      const translatedDataUse = this.state.translatedDatasetRestrictions[index]
         .map((translations) => translations.description)
         .join('\n');
-      if (isEmpty(translatedUseRestrictions)) {
+      if (isEmpty(translatedDataUse)) {
         return span({ className: 'disabled' }, ['---']);
       }
       return ReadMore({
-        content: translatedUseRestrictions,
+        content: translatedDataUse,
         className: 'row no-margin',
         style: { whiteSpace: 'pre-line' },
         charLimit: 30,

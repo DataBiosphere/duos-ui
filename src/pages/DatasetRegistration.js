@@ -610,7 +610,7 @@ class DatasetRegistration extends Component {
     result.datasetName = data.datasetName;
     result.dacId = this.state.selectedDac.dacId;
     result.consentId = data.consentId;
-    result.translatedUseRestriction = data.translatedUseRestriction;
+    result.translatedDataUse = data.translatedDataUse;
     result.deletable = true;
     result.active = true;
     result.needsApproval = data.needsApproval;
