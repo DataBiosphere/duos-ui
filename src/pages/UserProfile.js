@@ -66,7 +66,7 @@ export default function ResearcherProfile(props) {
 
         setInstitutionList(await Institution.list());
 
-        props.history.push('profile');
+        props.history.push('test_user_profile');
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
         setIsLoading(false);
       } catch (error) {
