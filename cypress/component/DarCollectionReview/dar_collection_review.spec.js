@@ -476,7 +476,7 @@ const dar = {
       },
       'dacId': 1,
       'consentId': 'B177D3C2-CDD8-4153-9CBF-AE4F0C34609A',
-      'translatedUseRestriction': 'Samples are restricted for use under the following conditions:\nData use is limited for studying: sleep apnea [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]',
+      'translatedDataUse': 'Samples are restricted for use under the following conditions:\nData use is limited for studying: sleep apnea [DS]\nFuture use for population origins or ancestry research is prohibited. [POA]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nFuture use as a control set for diseases other than those specified is prohibited. [NCTRL]',
       'deletable': false,
       'sharingPlanDocument': null,
       'sharingPlanDocumentName': null,
@@ -668,7 +668,7 @@ const dacDatasets = [{
   'dacId': 3,
   'dataSetId': 13,
   'consentId': 'B177D3C2-CDD8-4153-9CBF-AE4F0C34609A',
-  'translatedUseRestriction': '',
+  'translatedDataUse': '',
   'deletable': null,
   'properties': [
     {
