@@ -63,7 +63,7 @@ const Routes = (props) => (
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <Route path="/nih_dms_policy" component={NIHDMSPolicyInfo} />
     <Route path="/anvil_dms_policy" component={AnVILDMSPolicyInfo} />
-    <AuthenticatedRoute path="/test_user_profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
+    <AuthenticatedRoute path="/user_profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_review_collection/:collectionId" component={DarCollectionReview} props={Object.assign({adminPage: true}, props)} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_edit_user/:userId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
