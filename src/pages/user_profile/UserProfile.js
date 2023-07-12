@@ -1,11 +1,11 @@
 import {useState, useEffect} from 'react';
 import {div, h, hr} from 'react-hyperscript-helpers';
-import {PageHeading} from '../components/PageHeading';
-import {Notification} from '../components/Notification';
-import {FormField, FormFieldTypes, FormValidators} from '../components/forms/forms';
-import {User} from '../libs/ajax';
-import {NotificationService} from '../libs/notificationService';
-import { Notifications} from '../libs/utils';
+import {PageHeading} from '../../components/PageHeading';
+import {Notification} from '../../components/Notification';
+import {FormField, FormFieldTypes, FormValidators} from '../../components/forms/forms';
+import {User} from '../../libs/ajax';
+import {NotificationService} from '../../libs/notificationService';
+import { Notifications} from '../../libs/utils';
 
 export default function ResearcherProfile(props) {
   const [profile, setProfile] = useState({
@@ -28,7 +28,7 @@ export default function ResearcherProfile(props) {
     };
 
     init();
-  }, [props.history]);
+  }, []);
 
   const getResearcherProfile = async () => {
     const user = await User.getMe();

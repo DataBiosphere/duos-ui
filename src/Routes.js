@@ -15,7 +15,7 @@ import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
 import ResearcherProfile from './pages/ResearcherProfile';
-import UserProfile from './pages/UserProfile';
+import UserProfile from './pages/user_profile/UserProfile';
 import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/signing_official_console/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/signing_official_console/SigningOfficialDataSubmitters';
