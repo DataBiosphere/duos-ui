@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react';
-import {div, h1, hr} from 'react-hyperscript-helpers';
+import {div, h, h1, hr} from 'react-hyperscript-helpers';
+import {FormField, FormFieldTypes} from '../../components/forms/forms';
 import {PageHeading} from '../../components/PageHeading';
 import {Notification} from '../../components/Notification';
 import {User} from '../../libs/ajax';
@@ -68,31 +69,19 @@ export default function UserProfile() {
             fontWeight: '600',
           } }, ['Full Name:']),
           div({ className: '', style: { 'marginTop': '10px' } }, []),
-          div({ style: {
-            width: '981px',
-            height: '40px',
-            borderRadius: '4px',
-            border: '1px solid #ABABAB',
-            background: '#F0F0F0',
-            fontSize: '16px',
-            fontWeight: '400',
-            paddingLeft: '21.54px',
-            paddingTop: '7.5px',
-
-          } }, [profile.profileName]),
+          h(FormField, {
+            id: 'profileName',
+            type: FormFieldTypes.TEXT,
+            defaultValue: profile.profileName,
+            readOnly: true,
+          }),
           div({ className: '', style: { 'marginTop': '10px' } }, []),
-          div({ style: {
-            width: '981px',
-            height: '40px',
-            borderRadius: '4px',
-            border: '1px solid #ABABAB',
-            background: '#F0F0F0',
-            fontSize: '16px',
-            fontWeight: '400',
-            paddingLeft: '21.54px',
-            paddingTop: '7.5px',
-
-          } }, [profile.email]),
+          h(FormField, {
+            id: 'profileEmail',
+            type: FormFieldTypes.TEXT,
+            defaultValue: profile.email,
+            readOnly: true,
+          }),
         ])
       ])
     ])
