@@ -1,13 +1,12 @@
 import {useState, useEffect} from 'react';
-import {div, h, hr} from 'react-hyperscript-helpers';
+import {div, h1, hr} from 'react-hyperscript-helpers';
 import {PageHeading} from '../../components/PageHeading';
 import {Notification} from '../../components/Notification';
-import {FormField, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import {User} from '../../libs/ajax';
 import {NotificationService} from '../../libs/notificationService';
 import { Notifications} from '../../libs/utils';
 
-export default function ResearcherProfile(props) {
+export default function UserProfile() {
   const [profile, setProfile] = useState({
     profileName: '',
     email: undefined,
@@ -19,7 +18,7 @@ export default function ResearcherProfile(props) {
   useEffect(() => {
     const init = async () => {
       try {
-        await getResearcherProfile();
+        await getUserProfile();
 
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
       } catch (error) {
@@ -30,7 +29,7 @@ export default function ResearcherProfile(props) {
     init();
   }, []);
 
-  const getResearcherProfile = async () => {
+  const getUserProfile = async () => {
     const user = await User.getMe();
 
     setProfile({
@@ -47,7 +46,7 @@ export default function ResearcherProfile(props) {
         color: '#333F52',
       },
     }, [
-      div({ className: 'row no-margin' }, [
+      div({ className: 'row no-margin'}, [
         div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           Notification({notificationData}),
           PageHeading({
@@ -58,21 +57,42 @@ export default function ResearcherProfile(props) {
           }),
           hr({ className: 'section-separator' })
         ]),
-        div({ className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding' }, [
-          h(FormField, {
-            type: FormFieldTypes.TEXT,
-            title: 'Full Name',
-            validators: [FormValidators.REQUIRED],
-            id: 'profileName',
-            defaultValue: profile.profileName,
-          }),
-          div({ className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding', style: { 'marginTop': '20px' } }, []),
-          h(FormField, {
-            type: FormFieldTypes.TEXT,
-            validators: [FormValidators.REQUIRED],
-            id: 'profileName',
-            defaultValue: profile.email,
-          }),
+        div({
+          className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding',
+          style: {
+            fontFamily: 'Montserrat',
+          } }, [
+          h1({style: {
+            color: '#01549F',
+            fontSize: '20px',
+            fontWeight: '600',
+          } }, ['Full Name:']),
+          div({ className: '', style: { 'marginTop': '10px' } }, []),
+          div({ style: {
+            width: '981px',
+            height: '40px',
+            borderRadius: '4px',
+            border: '1px solid #ABABAB',
+            background: '#F0F0F0',
+            fontSize: '16px',
+            fontWeight: '400',
+            paddingLeft: '21.54px',
+            paddingTop: '7.5px',
+
+          } }, [profile.profileName]),
+          div({ className: '', style: { 'marginTop': '10px' } }, []),
+          div({ style: {
+            width: '981px',
+            height: '40px',
+            borderRadius: '4px',
+            border: '1px solid #ABABAB',
+            background: '#F0F0F0',
+            fontSize: '16px',
+            fontWeight: '400',
+            paddingLeft: '21.54px',
+            paddingTop: '7.5px',
+
+          } }, [profile.email]),
         ])
       ])
     ])
