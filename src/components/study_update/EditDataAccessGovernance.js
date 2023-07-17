@@ -1,9 +1,10 @@
-import ConsentGroupForm from '../data_submission/consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC, DAR } from '../../libs/ajax';
 import {StudyConsentGroupsUpdate} from './StudyEditConsentGroups';
+import StudyConsentGroupsSummary from './StudyConsentGroupsSummary';
+
 
 import '../data_submission/ds_common.css';
 import { isEmpty } from 'lodash';
@@ -15,12 +16,15 @@ export const DataAccessGovernanceUpdate = (props) => {
     setAllConsentGroupsSaved,
     datasets,
     validation,
-    onValidationChange
+    onValidationChange,
+    studyEditMode,
+    setStudyEditMode
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
   const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {} });
+  const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -59,6 +63,7 @@ export const DataAccessGovernanceUpdate = (props) => {
     // const dacs = await DAC.list();
     setFormData({
       datasetId: dataset.datasetId,
+      //nihInstitutionalCertificationFile: dataset.nihInstitutionalCertificationFile,
       properties: {
         datasetName: extract('Dataset Name', dataset),
         dataLocation: extract('Data Location', dataset),
@@ -170,10 +175,20 @@ export const DataAccessGovernanceUpdate = (props) => {
             }
 
             return div({ key: state.key },
-              [
+              [(studyEditMode ?
                 h(StudyConsentGroupsUpdate, {
+                  studyEditMode,
+                  setStudyEditMode,
                   formData,
-                }),
+                  saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
+                  updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
+                  // dacs
+                })
+                : h(StudyConsentGroupsSummary, {
+                  ...props,
+                  ...{consentGroup: formData, id: idx+'_studyConsentGroupSummary', nihInstitutionalCertificationFile},
+                }
+                )),
               ]
             );
           }),

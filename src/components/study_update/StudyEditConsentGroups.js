@@ -1,13 +1,19 @@
-import { useCallback, useState, useEffect } from 'react';
-import { button, h, h2, div } from 'react-hyperscript-helpers';
+import { button, h, h2, div, span, a } from 'react-hyperscript-helpers';
 import { find, isArray, isNil, isEmpty } from 'lodash/fp';
 
 import { FormFieldTypes, FormField, FormValidators, FormFieldTitle, FormTable} from '../forms/forms';
 import { DAC, DAR, DataSet } from '../../libs/ajax';
-import { Notifications } from '../../libs/utils';
+import { computeConsentGroupValidationErrors } from '../data_submission/consent_group/ConsentGroupErrors';
 
 export const StudyConsentGroupsUpdate = (props) => {
-  const { formData, dacs } = props;
+  const {
+    formData,
+    dacs,
+    saveConsentGroup,
+    idx,
+    studyEditMode,
+    setStudyEditMode,
+  } = props;
 
   const searchOntologies = async (query, callback) => {
     let options = [];
@@ -37,20 +43,20 @@ export const StudyConsentGroupsUpdate = (props) => {
       borderRadius: '4px',
       marginBottom: '2rem',
     },
-    //id: idx+'_consentGroupForm'
+    id: idx + '_studyConsentGroupForm'
   }, [
     div({
-        style: {
-          width: '70%'
-        }
+      style: {
+        width: '70%'
+      }
     }, [
       // name
       h(FormField, {
-        id: '_consentGroupName',
+        id: idx + '_consentGroupName',
         title: 'Consent Group Name',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Enter name',
-        defaultValue: formData.properties.datasetName,
+        defaultValue: formData?.properties.datasetName,
         onChange: ({ value }) => {
           formData.properties.datasetName = value;
         },
@@ -61,37 +67,37 @@ export const StudyConsentGroupsUpdate = (props) => {
       div({}, [
         h(FormField, {
           title: 'Primary Data Use Terms*',
-          id: '_primaryConsent_gru',
+          id: idx + '_primaryConsent_gru',
           description: 'Please select one of the following data use permissions for your dataset',
           type: FormFieldTypes.RADIOBUTTON,
           value: 'generalResearchUse',
           toggleText: 'General Research Use',
-          defaultValue: formData.dataUse.generalUse === true ? '_primaryConsent_gru' : undefined,
+          defaultValue: formData?.dataUse.generalUse === true ? 'generalResearchUse' : undefined,
           disabled: true,
         }),
 
         h(FormField, {
           type: FormFieldTypes.RADIOBUTTON,
-          id: '_primaryConsent_hmb',
+          id: idx + '_primaryConsent_hmb',
           value: 'hmb',
           toggleText: 'Health/Medical/Biomedical Research Use',
-          defaultValue: formData.dataUse.hmbResearch === true ? '_primaryConsent_hmb' : undefined,
+          defaultValue: formData?.dataUse.hmbResearch === true ? 'hmb' : undefined,
           disabled: true,
         }),
-    
+
         h(FormField, {
           type: FormFieldTypes.RADIOBUTTON,
-          id: '_primaryConsent_diseaseSpecificUse',
+          id: idx + '_primaryConsent_diseaseSpecificUse',
           value: 'diseaseSpecificUse',
           toggleText: 'Disease-Specific Research Use',
-          defaultValue: isArray(formData.dataUse.diseaseRestrictions) && formData.dataUse.diseaseRestrictions.length > 0 ? '_primaryConsent_diseaseSpecificUse' : undefined,
+          defaultValue: isArray(formData?.dataUse.diseaseRestrictions) && formData?.dataUse.diseaseRestrictions.length > 0 ? 'diseaseSpecificUse' : undefined,
           disabled: true,
         }),
 
         div({
           style: {
-          isRendered: (!isEmpty(formData.dataUse.diseaseLabels)),
-          marginBottom: '1.0rem'
+            isRendered: (!isEmpty(formData?.dataUse.diseaseLabels)),
+            marginBottom: '1.0rem'
           }
         }, [
           h(FormField, {
@@ -100,53 +106,53 @@ export const StudyConsentGroupsUpdate = (props) => {
             isCreatable: true,
             optionsAreString: true,
             isAsync: true,
-            id: 'diseaseRestrictionsText',
+            id: idx + '_diseaseRestrictionsText',
             validators: [FormValidators.REQUIRED],
             placeholder: 'none',
             loadOptions: searchOntologies,
-            defaultValue: formData.dataUse.diseaseLabels,
+            defaultValue: formData?.dataUse.diseaseLabels,
             disabled: true,
           }),
         ]),
-    
+
         h(FormField, {
           type: FormFieldTypes.RADIOBUTTON,
-          id: '_primaryConsent_poa',
+          id: idx + '_primaryConsent_poa',
           value: 'poa',
           toggleText: 'Populations, Origins, Ancestry Use',
-          defaultValue: formData.dataUse.populationsOriginsAncestry === true ? '_primaryConsent_poa' : undefined,
-          disabled: true,
-        }),
-    
-        h(FormField, {
-          type: FormFieldTypes.RADIOBUTTON,
-          id: '_primaryConsent_openAccess',
-          value: 'openAccess',
-          toggleText: 'No Restrictions (Open Access Data)',
-          defaultValue: formData.dataUse.openAccess === true ? '_primaryConsent_openAccess' : undefined,
+          defaultValue: formData?.dataUse.populationsOriginsAncestry === true ? 'poa' : undefined,
           disabled: true,
         }),
 
         h(FormField, {
           type: FormFieldTypes.RADIOBUTTON,
-          id: '_primaryConsent_otherPrimary',
+          id: idx + '_primaryConsent_openAccess',
+          value: 'openAccess',
+          toggleText: 'No Restrictions (Open Access Data)',
+          defaultValue: formData?.properties.openAccess ? 'openAccess' : undefined,
+          disabled: true,
+        }),
+
+        h(FormField, {
+          type: FormFieldTypes.RADIOBUTTON,
+          id: idx + '_primaryConsent_otherPrimary',
           value: 'otherPrimary',
           toggleText: 'Other',
-          defaultValue: formData.dataUse.otherRestrictions ? '_primaryConsent_otherPrimary' : undefined,
+          defaultValue: formData?.dataUse.otherRestrictions ? 'otherPrimary' : undefined,
           disabled: true,
         }),
 
         div({
           style: {
-          isRendered: (!isEmpty(formData.dataUse.otherRestrictions)),
-          marginBottom: '1.0rem'
+            isRendered: (!isEmpty(formData?.dataUse.otherRestrictions)),
+            marginBottom: '1.0rem'
           }
         }, [
           h(FormField, {
-            id: '_otherPrimaryText',
+            id: idx + '_otherPrimaryText',
             validators: [FormValidators.REQUIRED],
             placeholder: 'none',
-            defaultValue: formData.dataUse.other,
+            defaultValue: formData?.dataUse.other,
             disabled: true,
           }),
         ]),
@@ -157,81 +163,81 @@ export const StudyConsentGroupsUpdate = (props) => {
           title: 'Secondary Data Use Terms',
           description: 'Please select all applicable data use parameters.',
           type: FormFieldTypes.CHECKBOX,
-          id: 'methodsResearch',
+          id: idx + '_methodsResearch',
           toggleText: 'No methods development or validation studies (NMDS)',
-          defaultValue: formData.dataUse.methodsResearch === true,
+          defaultValue: formData?.dataUse.methodsResearch === true,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'geneticStudiesOnly',
+          id: idx + '_geneticStudiesOnly',
           toggleText: 'Genetic studies only (GSO)',
-          defaultValue: formData.dataUse.geneticStudiesOnly === true,
+          defaultValue: formData?.dataUse.geneticStudiesOnly === true,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'publicationResults',
+          id: idx + '_publicationResults',
           toggleText: 'Publication Required (PUB)',
-          defaultValue: formData.dataUse.publicationResults === true,
+          defaultValue: formData?.dataUse.publicationResults === true,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'collaboratorRequired',
+          id: idx + '_collaboratorRequired',
           toggleText: 'Collaboration Required (COL)',
-          defaultValue: formData.dataUse.collaboratorRequired === true,
+          defaultValue: formData?.dataUse.collaboratorRequired === true,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'ethicsApprovalRequired',
+          id: idx + '_ethicsApprovalRequired',
           name: 'ethicsApprovalRequired',
           toggleText: 'Ethics Approval Required (IRB)',
-          defaultValue: formData.dataUse.ethicsApprovalRequired === true,
+          defaultValue: formData?.dataUse.ethicsApprovalRequired === true,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'geographicalRestrictions',
+          id: idx + '_geographicalRestrictions',
           toggleText: 'Geographic Restriction (GS-)',
-          defaultValue: formData.dataUse.geographicalRestrictions === 'Yes',
+          defaultValue: formData?.dataUse.geographicalRestrictions === 'Yes',
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'publicationMoratorium',
+          id: idx + '_publicationMoratorium',
           toggleText: 'Publication Moratorium (MOR)',
-          defaultValue: formData.dataUse.publicationMoratorium === 'true',
+          defaultValue: formData?.dataUse.publicationMoratorium === 'true',
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'nonCommercialUse',
+          id: idx + '_nonCommercialUse',
           toggleText: 'Non-profit Use Only (NPU)',
-          defaultValue: formData.dataUse.commercialUse === false,
+          defaultValue: formData?.dataUse.commercialUse === false,
           disabled: true,
         }),
         h(FormField, {
           type: FormFieldTypes.CHECKBOX,
-          id: 'otherSecondary',
+          id: idx + '_otherSecondary',
           toggleText: 'Other',
-          defaultValue: formData.dataUse.hasSecondaryOther,
+          defaultValue: formData?.dataUse.hasSecondaryOther,
           disabled: true,
         }),
         h(FormField, {
-          id: 'otherSecondaryText',
+          id: idx + '_otherSecondaryText',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Please specify',
-          defaultValue: formData.dataUse.secondaryOther,
+          defaultValue: formData?.dataUse.secondaryOther,
           disabled: true,
         }),
       ]),
     ]),
     // data access committee
     // h(FormField, {
-    //   isRendered: formData.dataUse.openAccess !== true,
-    //   id: 'dataAccessCommitteeId',
+    //   isRendered: formData?.dataUse.openAccess !== true,
+    //   id: idx + '_dataAccessCommitteeId',
     //   title: 'Data Access Committee',
     //   description: 'Please select which DAC should govern requests for this dataset',
     //   type: FormFieldTypes.SELECT,
@@ -261,7 +267,7 @@ export const StudyConsentGroupsUpdate = (props) => {
           'Not Determined'
         ],
         placeholder: 'Data Location(s)',
-        defaultValue: formData.properties.dataLocation,
+        defaultValue: formData?.properties.dataLocation,
 //  TODO: get help!!!!
         // onChange: ({key, value, isValid}) => {
 
@@ -276,35 +282,35 @@ export const StudyConsentGroupsUpdate = (props) => {
       }),
       h(FormField, {
         style: { width: '50%', paddingLeft: '1.5%' },
-        id: '_url',
+        id: idx + '_url',
         name: 'url',
         validators: [FormValidators.URL],
-        disabled: formData.properties.dataLocation === 'Not Determined',
+        disabled: formData?.properties.dataLocation === 'Not Determined',
         placeholder: 'Enter a URL for your data location here',
-        defaultValue: formData.properties.dataLocationURL,
+        defaultValue: formData?.properties.dataLocationURL,
         // onchange
       }),
     ]),
     // file types
     h(FormTable, {
-      id: '_fileTypes',
+      id: idx + '_fileTypes',
       name: 'fileTypes',
       formFields: [
         {
-          id: '_fileType',
+          id: idx + '_fileType',
           name: 'fileType',
           title: 'File Type',
           type: FormFieldTypes.SELECT,
           selectOptions: ['Arrays', 'Genome', 'Exome', 'Survey', 'Phenotype'],
         },
         {
-          id: '_functionalEquivalence',
+          id: idx + '_functionalEquivalence',
           name: 'functionalEquivalence',
           title: 'Functional Equivalence',
           placeholder: 'Type',
         }
       ],
-      defaultValue: formData.properties.fileTypes,
+      defaultValue: formData?.properties.fileTypes,
       enableAddingRow: true,
       addRowLabel: 'Add New File Type',
       minLength: 1,
@@ -315,13 +321,13 @@ export const StudyConsentGroupsUpdate = (props) => {
       style: { width: '50%' }
     }, [
       h(FormField, {
-        id: '_numberOfParticipants',
+        id: idx + '_numberOfParticipants',
         name: 'numberOfParticipants',
         title: '# of Participants',
         placeholder: 'Number',
         type: FormFieldTypes.NUMBER,
         validators: [FormValidators.REQUIRED],
-        defaultValue: formData.properties.numberOfParticipants,
+        defaultValue: formData?.properties.numberOfParticipants,
         //onChange,
       }),
     ]),
@@ -331,7 +337,7 @@ export const StudyConsentGroupsUpdate = (props) => {
         type: FormFieldTypes.FILE,
         title: 'NIH Institutional Certification',
         description: 'If an Institutional Certification for this consent group exists, please upload it here',
-        id: '_nihInstituionalCertificationFile',
+        id: idx + '_nihInstituionalCertificationFile',
         name: 'nihInstituionalCertificationFile',
         hideTextBar: true,
         hideInput: true,
@@ -339,20 +345,67 @@ export const StudyConsentGroupsUpdate = (props) => {
       h(FormField, {
         style: {margin: '11px'},
         type: FormFieldTypes.FILE,
-        id: '_fileInputSection',
-        defaultValue: formData.nihInstitutionalCertificationFile,
+        id: idx + '_fileInputSection',
+        defaultValue: formData?.nihInstitutionalCertificationFile,
         //onChange: ({value}) => setNihInstitutionalCertificationFile(value),
         hideTextBar: true,
       }),
     ]),
     h(FormField, {
-      isRendered: !isNil(formData.nihInstitutionalCertificationFile),
-      id: `_fileName`,
+      isRendered: !isNil(formData?.nihInstitutionalCertificationFile),
+      id: `${idx}_fileName`,
       placeholder: 'Filename.txt',
-      defaultValue: formData.nihInstitutionalCertificationFile?.name,
+      defaultValue: formData?.nihInstitutionalCertificationFile?.name,
       readOnly: true,
-    })
-  ])
+    }),
+    // save + cancel
+    div({
+      style: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: '2rem',
+      }
+    }, [
+      div({}, [
+        button({
+          className: 'study-edit-form-cancel-button f-left btn',
+          type: 'button',
+          onClick: () => setStudyEditMode(false),
+        }, ['Cancel']),
+      ]),
+      div({}, [
+        button({
+          id: idx + '_editConsentGroup',
+          type: 'button',
+          isRendered: !studyEditMode,
+          onClick: () => {
+            setStudyEditMode(true);
+          },
+          className: 'f-right btn-primary common-background',
+        }, ['Edit']),
+
+        button({
+          id: idx + '_saveConsentGroup',
+          type: 'button',
+          isRendered: studyEditMode,
+          onClick: () => {
+            const errors = null;
+            computeConsentGroupValidationErrors(formData);
+            const valid = isEmpty(errors);
+
+            //setValidation(errors);
+
+            if (valid) {
+              saveConsentGroup({ value: formData, valid: true });
+              setStudyEditMode(false);
+            }
+          },
+          className: 'f-right btn-primary common-background',
+        }, ['Save']),
+      ]),
+    ])
+  ]);
 };
 
 export default StudyConsentGroupsUpdate;

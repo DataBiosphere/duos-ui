@@ -27,6 +27,7 @@ export const StudyUpdateForm = (props) => {
   const [institutions, setInstitutions] = useState([]);
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
   const [formFiles, setFormFiles] = useState({});
+  const [studyEditMode, setStudyEditMode] = useState(true);
 
   useEffect(() => {
     const getAllInstitutions = async() => {
@@ -257,11 +258,11 @@ export const StudyUpdateForm = (props) => {
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800 }}>
-      <StudyInformationUpdate user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange}/>
-      <NihAnvilUseUpdate onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange}/>
-      <NihAdministrationInfoUpdate institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange}/>
-      <NihDataManagementUpdate onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange}/>
-      <DataAccessGovernanceUpdate onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange}/>
+      <StudyInformationUpdate user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NihAnvilUseUpdate onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NihAdministrationInfoUpdate institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NihDataManagementUpdate onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <DataAccessGovernanceUpdate onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode} setStudyEditMode={setStudyEditMode}/>
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>
