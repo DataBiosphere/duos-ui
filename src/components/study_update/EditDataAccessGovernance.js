@@ -5,7 +5,6 @@ import { DAC, DAR } from '../../libs/ajax';
 import {StudyConsentGroupsUpdate} from './StudyEditConsentGroups';
 import StudyConsentGroupsSummary from './StudyConsentGroupsSummary';
 
-
 import '../data_submission/ds_common.css';
 import { isEmpty } from 'lodash';
 

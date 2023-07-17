@@ -7,10 +7,10 @@ import { find, cloneDeep, isNil, isEmpty, toLower } from 'lodash/fp';
 import { validateForm } from '../utils/JsonSchemaUtils';
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 
-import StudyInformationUpdate from '../components/study_update/EditStudyInfo';
-import NihAnvilUseUpdate from '../components/study_update/EditNihAnvilUse';
-import NihAdministrationInfoUpdate from '../components/study_update/EditNihAdminInfo';
-import NihDataManagementUpdate from '../components/study_update/EditNihDataManagement';
+import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
+import NihAnvilUse from '../components/data_submission/NihAnvilUse';
+import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
+import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import DataAccessGovernanceUpdate from '../components/study_update/EditDataAccessGovernance';
 import { DataSet, User, Institution } from '../libs/ajax';
 import { set } from 'lodash';
@@ -258,10 +258,10 @@ export const StudyUpdateForm = (props) => {
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800 }}>
-      <StudyInformationUpdate user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NihAnvilUseUpdate onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NihAdministrationInfoUpdate institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NihDataManagementUpdate onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <DataSubmissionStudyInformation user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NIHAdministrativeInformation institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <NIHDataManagement onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <DataAccessGovernanceUpdate onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode} setStudyEditMode={setStudyEditMode}/>
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>

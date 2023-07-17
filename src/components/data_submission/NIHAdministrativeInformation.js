@@ -9,6 +9,7 @@ export const NIHAdministrativeInformation = (props) => {
   const {
     formData,
     onChange,
+    studyEditMode,
     institutions,
     validation,
     onValidationChange,
@@ -28,7 +29,10 @@ export const NIHAdministrativeInformation = (props) => {
   };
 
   return div({
-    isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
+    isRendered: 
+      (studyEditMode ?
+        ['yes_nhgri_yes_phs_id', 'yes_nhgri_no_phs_id', 'no_nhgri_yes_anvil'].includes(formData.properties.nihAnvilUse)
+        : [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse)),
     className: 'data-submitter-section',
   }, [
     h2('NIH Administrative Information'),
@@ -44,7 +48,10 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: !isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null,
+      defaultValue: 
+        (studyEditMode ? 
+          (!isNil(formData.properties.piInstitution) ? findInstitutionSelectOption(formData.properties.piInstitution) : null)
+          : (!isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null)),
       validation: validation.piInstitution,
       onValidationChange,
     }),
@@ -53,7 +60,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'NIH Grant or Contract Number',
       validators: [FormValidators.REQUIRED],
       onChange,
-      defaultValue: formData?.nihGrantContractNumber,
+      defaultValue: studyEditMode ? formData?.properties.nihGrantContractNumber : formData?.nihGrantContractNumber,
       validation: validation.nihGrantContractNumber,
       onValidationChange,
     }),
@@ -64,7 +71,7 @@ export const NIHAdministrativeInformation = (props) => {
       onChange,
       type: FormFieldTypes.SELECT,
       isMulti: true,
-      defaultValue: formData?.nihICsSupportingStudy,
+      defaultValue: studyEditMode ? formData?.properties.nihICsSupportingStudy : formData?.nihICsSupportingStudy,
       selectOptions: nihInstitutions,
       validation: validation.nihICsSupportingStudy,
       onValidationChange,
@@ -74,7 +81,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'NIH Program Officer Name',
       onChange,
       placeholder: 'Officer Name',
-      defaultValue: formData?.nihProgramOfficerName,
+      defaultValue: studyEditMode ? formData?.properties.nihProgramOfficerName : formData?.nihProgramOfficerName,
       validation: validation.nihProgramOfficerName,
       onValidationChange,
     }),
@@ -84,7 +91,7 @@ export const NIHAdministrativeInformation = (props) => {
       placeholder: 'Institute/Center Name',
       onChange,
       type: FormFieldTypes.SELECT,
-      defaultValue: formData?.nihInstitutionCenterSubmission,
+      defaultValue: studyEditMode ? formData?.properties.nihInstitutionCenterSubmission : formData?.nihInstitutionCenterSubmission,
       selectOptions: nihInstitutions,
       validation: validation.nihInstitutionCenterSubmission,
       onValidationChange,
@@ -92,7 +99,7 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'nihGenomicProgramAdministratorName',
       title: 'NIH Genomic Program Administrator Name',
-      defaultValue: formData?.nihGenomicProgramAdministratorName,
+      defaultValue: studyEditMode ? formData?.properties.nihGenomicProgramAdministratorName : formData?.nihGenomicProgramAdministratorName,
       onChange,
       validation: validation.nihGenomicProgramAdministratorName,
       onValidationChange,
@@ -101,7 +108,7 @@ export const NIHAdministrativeInformation = (props) => {
       id: 'multiCenterStudy',
       title: 'Is this a multi-center study?',
       type: FormFieldTypes.YESNORADIOGROUP,
-      defaultValue: formData?.multiCenterStudy,
+      defaultValue: studyEditMode ? formData?.properties.multiCenterStudy : formData?.multiCenterStudy,
       onChange: ({key, value}) => {
         setShowMultiCenterStudy(value);
         onChange({key, value});
@@ -125,7 +132,7 @@ export const NIHAdministrativeInformation = (props) => {
         },
       },
       placeholder: 'List site and hit enter here...',
-      defaultValue: formData?.collaboratingSites,
+      defaultValue: studyEditMode ? formData?.properties.collaboratingSites : formData?.collaboratingSites,
       onChange,
       validation: validation.collaboratingSites,
       onValidationChange,
@@ -133,7 +140,7 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'controlledAccessRequiredForGenomicSummaryResultsGSR',
       title: 'Is controlled access required for genomic summary results (GSR)?',
-      defaultValue: formData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      defaultValue: studyEditMode ? formData?.properties.controlledAccessRequiredForGenomicSummaryResultsGSR : formData?.controlledAccessRequiredForGenomicSummaryResultsGSR,
       type: FormFieldTypes.YESNORADIOGROUP,
       onChange: ({key, value}) => {
         setShowGSRRequiredExplanation(value);
