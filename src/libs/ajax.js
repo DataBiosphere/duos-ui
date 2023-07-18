@@ -426,14 +426,6 @@ export const Email = {
   }
 };
 
-export const Files = {
-
-  getApprovedUsersFile: async (fileName, dataSetId) => {
-    const url = `${await getApiUrl()}/api/dataset/${dataSetId}/approved/users`;
-    return getFile(url, fileName);
-  }
-};
-
 export const Summary = {
   getFile: async (fileName) => {
     const URI = `/api/consent/cases/summary/file?type=${fileName}`;
