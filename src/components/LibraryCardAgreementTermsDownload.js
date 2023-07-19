@@ -3,7 +3,7 @@ import DownloadIcon from 'react-material-icon-svg/dist/Download';
 import {a, div} from 'react-hyperscript-helpers';
 import React from 'react';
 
-const downloadIcon = <DownloadIcon fill={'black'} style={{verticalAlign: 'middle'}}/>;
+const downloadIcon = <DownloadIcon fill={'black'} style={{verticalAlign: 'middle', height: '24px'}}/>;
 export const LibraryCardAgreementTermsDownload =
   div({}, [
     'I agree to the terms of the Library Card Agreement',

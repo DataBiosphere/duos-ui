@@ -23,7 +23,7 @@ const sampleDataset = {
   },
   'dacId': 1,
   'consentId': 'dcf14449-ff38-4fc5-8ab1-4e08f91f2521',
-  'translatedUseRestriction': 'Samples are restricted for use under the following conditions:\nData is limited for health/medical/biomedical research. [HMB]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nRestrictions for use as a control set for diseases other than those defined were not specified.',
+  'translatedDataUse': 'Samples are restricted for use under the following conditions:\nData is limited for health/medical/biomedical research. [HMB]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nRestrictions for use as a control set for diseases other than those defined were not specified.',
   'deletable': true,
   'properties': [
     {
