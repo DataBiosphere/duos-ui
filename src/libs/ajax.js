@@ -168,6 +168,7 @@ export const DAC = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.status;
   }
+
 };
 
 export const Collections = {
@@ -296,6 +297,7 @@ export const DAR = {
       return axios.post(url, formData, authOpts);
     }
   }
+
 };
 
 export const DataSet = {

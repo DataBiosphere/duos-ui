@@ -1,13 +1,20 @@
 import {useState, useEffect} from 'react';
-import {div, h, h1, hr} from 'react-hyperscript-helpers';
+import {div, h, h1, hr, form, p, label, h2, button, a} from 'react-hyperscript-helpers';
 import {FormField, FormFieldTypes} from '../../components/forms/forms';
 import {PageHeading} from '../../components/PageHeading';
 import {Notification} from '../../components/Notification';
+import ControlledAccessGrants from './ControlledAccessGrants';
+import AffilliationAndRoles from './AffiliationAndRoles';
 import {User} from '../../libs/ajax';
+import { Storage } from '../../libs/storage';
 import {NotificationService} from '../../libs/notificationService';
-import { Notifications} from '../../libs/utils';
+import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
 
 export default function UserProfile() {
+
+  const [user, setUser] = useState({});
+  const [userProps, setUserProps] = useState({});
+  
   const [profile, setProfile] = useState({
     profileName: '',
     email: undefined,
@@ -20,7 +27,6 @@ export default function UserProfile() {
     const init = async () => {
       try {
         await getUserProfile();
-
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve user data from server'});
@@ -31,8 +37,11 @@ export default function UserProfile() {
   }, []);
 
   const getUserProfile = async () => {
-    const user = await User.getMe();
-
+    const currentUser = await Storage.getCurrentUser()
+    setUser(currentUser)
+    const currentUserProps = getPropertyValuesFromUser(user)
+    
+    setUserProps(currentUserProps)
     setProfile({
       profileName: user.displayName,
       email: user.email,
@@ -47,7 +56,7 @@ export default function UserProfile() {
         color: '#333F52',
       },
     }, [
-      div({ className: 'row no-margin'}, [
+      div({ className: 'row no-margin' }, [
         div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           Notification({notificationData}),
           PageHeading({
@@ -58,30 +67,50 @@ export default function UserProfile() {
           }),
           hr({ className: 'section-separator' })
         ]),
-        div({
-          className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding',
-          style: {
-            fontFamily: 'Montserrat',
-          } }, [
-          h1({style: {
-            color: '#01549F',
-            fontSize: '20px',
-            fontWeight: '600',
-          } }, ['Full Name:']),
-          div({ className: '', style: { 'marginTop': '10px' } }, []),
-          h(FormField, {
-            id: 'profileName',
-            type: FormFieldTypes.TEXT,
-            defaultValue: profile.profileName,
-            readOnly: true,
-          }),
-          div({ className: '', style: { 'marginTop': '10px' } }, []),
-          h(FormField, {
-            id: 'profileEmail',
-            type: FormFieldTypes.TEXT,
-            defaultValue: profile.email,
-            readOnly: true,
-          }),
+        div({ className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding' }, [
+          form({
+            name: 'researcherForm',
+            onKeyDown: (e) => {
+              if (e.key == 'Enter') {
+                e.preventDefault();
+              }
+            }
+          }, [
+            div({ className: 'form-group' }, [
+              div({ className: 'col-xs-12' }, [
+                h1({style: {
+                  color: '#01549F',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  marginBottom: '15px'
+                } }, ['Full Name']),
+                h(FormField, {
+                  type: FormFieldTypes.TEXT,
+                  id: 'profileName',
+                  defaultValue: profile.profileName,
+                  readOnly: true,
+                }),
+                div({ className: 'col-xs-12', style: { 'marginTop': '15px' } }, []),
+                h(FormField, {
+                  type: FormFieldTypes.TEXT,
+                  id: 'profileEmail',
+                  defaultValue: profile.email,
+                  readOnly: true,
+                }),
+              ]),
+            ]),
+            div({ className: 'flex' }, [
+
+              div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
+                AffilliationAndRoles({
+                  user: Storage.getCurrentUser(),
+                  userProps: getPropertyValuesFromUser(Storage.getCurrentUser())
+                }),
+              ]),
+
+
+            ]),
+          ])
         ])
       ])
     ])
