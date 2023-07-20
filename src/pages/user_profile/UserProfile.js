@@ -86,6 +86,11 @@ export default function UserProfile() {
       readOnly: true,
     }),
     div({ className: '', style: { 'marginTop': '60px' } }, []),
+    AffiliationAndRoles({
+      user: user,
+      userProps: userProps,
+      institutions: institutions
+    }),
   ]);
 
 }
