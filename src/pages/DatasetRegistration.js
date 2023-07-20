@@ -610,7 +610,8 @@ class DatasetRegistration extends Component {
     result.datasetName = data.datasetName;
     result.dacId = this.state.selectedDac.dacId;
     result.consentId = data.consentId;
-    result.translatedUseRestriction = data.translatedUseRestriction;
+    // The deprecated API this posts to is expecting a `translatedUseRestriction` field
+    result.translatedUseRestriction = data.translatedDataUse;
     result.deletable = true;
     result.active = true;
     result.needsApproval = data.needsApproval;
