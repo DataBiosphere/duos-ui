@@ -102,5 +102,5 @@ export default function ChairConsole(props) {
       goToVote,
       consoleType: consoleTypes.CHAIR
     }),
-  ]);  
+  ]);
 }
