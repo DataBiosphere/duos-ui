@@ -20,6 +20,7 @@ const secondaryConsentText = {
   mor: 'Publication Moratorium (MOR)',
   npu: 'Non-profit Use Only (NPU)',
   otherSecondary: 'Other',
+
 };
 
 // returns { field: string, value: ? } or undefined
@@ -74,11 +75,8 @@ export const StudyConsentGroupSummary = (props) => {
     id
   } = props;
 
-  console.log(formData);
-
-
   const summarizePrimaryGroup = () => {
-    const field = findFirstSetField(formData?.properties, primaryConsentFields);
+    const field = findFirstSetField(formData, primaryConsentFields);
 
     if (isNil(field)) {
       return 'No selection.';
@@ -209,7 +207,7 @@ export const StudyConsentGroupSummary = (props) => {
           disabled: true,
           type: 'text',
           className: 'form-control',
-          value: formData?.properties.url,
+          value: formData?.properties.dataLocationURL,
         }),
         div({style: { marginTop: '2px' }}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${formData?.properties.numberOfParticipants}`])]),
         p({

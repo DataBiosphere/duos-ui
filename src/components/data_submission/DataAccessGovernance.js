@@ -1,9 +1,8 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
-import { isNil, every, cloneDeep } from 'lodash/fp';
+import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC } from '../../libs/ajax';
-import {StudyConsentGroupsUpdate} from '../study_update/StudyEditConsentGroups';
+import { DAC, DAR } from '../../libs/ajax';
 
 import './ds_common.css';
 
@@ -14,12 +13,65 @@ export const DataAccessGovernance = (props) => {
     setStudyEditMode,
     onFileChange,
     validation,
+    datasets,
     onValidationChange,
     setAllConsentGroupsSaved
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
+
+  const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {} });
+
+  const getDiseaseLabels = async (ontologyIds) => {
+    let labels = [];
+    if (!isEmpty(ontologyIds)) {
+      const idList = ontologyIds.join(',');
+      const result = await DAR.searchOntologyIdList(idList);
+      labels = result.map(r => r.label);
+    }
+    return labels;
+  };
+
+  const normalizeDataUse = useCallback(async (dataUse) => {
+    let du = dataUse;
+    if (!isNil(dataUse.diseaseRestrictions)) {
+      du.hasDiseaseRestrictions = true;
+      du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
+    }
+    if (!isNil(dataUse.other)) {
+      du.hasPrimaryOther = true;
+    }
+    if (!isNil(dataUse.secondaryOther)) {
+      du.hasSecondaryOther = true;
+    }
+    return du;
+  }, []);
+
+  // method to extract consent group data from datasets
+  const extract = useCallback((propertyName, dataset) => {
+    const property = find({ propertyName })(dataset.properties);
+    return property?.propertyValue;
+  }, []);
+
+  //extract consent groups from datasets
+  const prefillFormData = useCallback(async (dataset) => {
+    // const dac = await DAC.get(dataset?.dacId);
+    // const dacs = await DAC.list();
+    setFormData({
+      datasetId: dataset.datasetId,
+      properties: {
+        datasetName: extract('Dataset Name', dataset),
+        dataLocation: extract('Data Location', dataset),
+        // dataLocationURL: extract()
+        fileTypes: extract('File Types', dataset),
+        openAccess: extract('Open Access', dataset),
+        numberOfParticipants: extract('Number of Participants', dataset)
+      },
+      dataUse: await normalizeDataUse(dataset?.dataUse),
+      // dac: { ...dac, dacs },
+    });
+  }, [extract, normalizeDataUse]);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -58,6 +110,14 @@ export const DataAccessGovernance = (props) => {
       return newConsentGroupsState;
     });
   }, []);
+
+  useEffect(() => {
+    datasets?.forEach((dataset)=> {
+      if (isNil(formData.datasetId)) {
+        prefillFormData(dataset);
+      }
+    });
+  }, [prefillFormData, datasets, formData]);
 
   // pre-populate the page with a consent group
   useEffect(() => {
@@ -124,6 +184,7 @@ export const DataAccessGovernance = (props) => {
                 h(ConsentGroupForm, {
                   idx: idx,
                   dacs: dacs,
+                  formData,
                   studyEditMode,
                   disableDelete: consentGroupsState.length === 1,
                   saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
@@ -152,7 +213,7 @@ export const DataAccessGovernance = (props) => {
           a({
             id: 'btn_addConsentGroup',
             className: 'btn-primary btn-add common-background',
-            onClick: () => addNewConsentGroup(),
+            onClick: () => { addNewConsentGroup() }
           }, [
             span({}, ['Add Consent Group'])
           ])
