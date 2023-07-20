@@ -103,4 +103,5 @@ export default function ChairConsole(props) {
       consoleType: consoleTypes.CHAIR
     }),
   ]);
+  
 }
