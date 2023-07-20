@@ -11,7 +11,7 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
-import DataAccessGovernanceUpdate from '../components/study_update/EditDataAccessGovernance';
+import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
 import { DataSet, User, Institution } from '../libs/ajax';
 import { set } from 'lodash';
 
@@ -258,11 +258,11 @@ export const StudyUpdateForm = (props) => {
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800 }}>
-      <DataSubmissionStudyInformation user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+      <DataSubmissionStudyInformation onChange={onChange} user={user} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHAdministrativeInformation institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHDataManagement onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <DataAccessGovernanceUpdate onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode} setStudyEditMode={setStudyEditMode}/>
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

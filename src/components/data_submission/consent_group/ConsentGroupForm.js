@@ -4,6 +4,7 @@ import ConsentGroupSummary from './ConsentGroupSummary';
 import { EditConsentGroup } from './EditConsentGroup';
 import { computeConsentGroupValidationErrors } from './ConsentGroupErrors';
 import { isEmpty, cloneDeep, set } from 'lodash';
+import StudyEditConsentGroups from '../../study_update/StudyEditConsentGroups';
 
 export const ConsentGroupForm = (props) => {
   const {
@@ -12,7 +13,61 @@ export const ConsentGroupForm = (props) => {
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
     disableDelete,
+    dataset,
+    studyEditMode,
   } = props;
+
+  const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {} });
+
+  const getDiseaseLabels = async (ontologyIds) => {
+    let labels = [];
+    if (!isEmpty(ontologyIds)) {
+      const idList = ontologyIds.join(',');
+      const result = await DAR.searchOntologyIdList(idList);
+      labels = result.map(r => r.label);
+    }
+    return labels;
+  };
+
+  const normalizeDataUse = useCallback(async (dataUse) => {
+    let du = dataUse;
+    if (!isNil(dataUse.diseaseRestrictions)) {
+      du.hasDiseaseRestrictions = true;
+      du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
+    }
+    if (!isNil(dataUse.other)) {
+      du.hasPrimaryOther = true;
+    }
+    if (!isNil(dataUse.secondaryOther)) {
+      du.hasSecondaryOther = true;
+    }
+    return du;
+  }, []);
+
+  // method to extract consent group data from datasets
+  const extract = useCallback((propertyName, dataset) => {
+    const property = find({ propertyName })(dataset.properties);
+    return property?.propertyValue;
+  }, []);
+
+  //extract consent groups from datasets
+  const preExistingConsentGroup = useCallback(async (dataset) => {
+    // const dac = await DAC.get(dataset?.dacId);
+    // const dacs = await DAC.list();
+    setFormData({
+      datasetId: dataset.datasetId,
+      //nihInstitutionalCertificationFile: dataset.nihInstitutionalCertificationFile,
+      properties: {
+        datasetName: extract('Dataset Name', dataset),
+        dataLocation: extract('Data Location', dataset),
+        fileTypes: extract('File Types', dataset),
+        openAccess: extract('Open Access', dataset),
+        numberOfParticipants: extract('Number of Participants', dataset)
+      },
+      dataUse: await normalizeDataUse(dataset?.dataUse),
+      // dac: { ...dac, dacs },
+    });
+  }, [extract, normalizeDataUse]);
 
   const [consentGroup, setConsentGroup] = useState({
     consentGroupName: '',
@@ -69,26 +124,32 @@ export const ConsentGroupForm = (props) => {
     id: idx+'_consentGroupForm'
   }, [
 
-    (editMode
-      ? h(EditConsentGroup, {
-        ...props,
-        ...{
-          consentGroup: consentGroup,
-          setConsentGroup: setConsentGroup,
-          nihInstitutionalCertificationFile,
-          setNihInstitutionalCertificationFile: (file) => {
-            setNihInstitutionalCertificationFile(file);
-            updateNihInstitutionalCertificationFile(file);
-          },
-          validation,
-          onValidationChange
-        },
+    (studyEditMode
+      ? h(StudyEditConsentGroups, {
+        saveConsentGroup,
+        idx,
+        formData,
       })
-      : h(ConsentGroupSummary, {
-        ...props,
-        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
-      })),
-
+      : (editMode
+        ? h(EditConsentGroup, {
+          ...props,
+          ...{
+            consentGroup: consentGroup,
+            setConsentGroup: setConsentGroup,
+            nihInstitutionalCertificationFile,
+            setNihInstitutionalCertificationFile: (file) => {
+              setNihInstitutionalCertificationFile(file);
+              updateNihInstitutionalCertificationFile(file);
+            },
+            validation,
+            onValidationChange
+          },
+        })
+        : h(ConsentGroupSummary, {
+          ...props,
+          ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
+        }))
+    ),
     // save + delete
     div({
       style: {

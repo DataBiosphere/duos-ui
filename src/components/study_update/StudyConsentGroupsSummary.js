@@ -20,7 +20,6 @@ const secondaryConsentText = {
   mor: 'Publication Moratorium (MOR)',
   npu: 'Non-profit Use Only (NPU)',
   otherSecondary: 'Other',
-
 };
 
 // returns { field: string, value: ? } or undefined
@@ -74,11 +73,12 @@ export const StudyConsentGroupSummary = (props) => {
     nihInstitutionalCertificationFile,
     id
   } = props;
-  console.log(formData.dataUse);
+
+  console.log(formData);
 
 
   const summarizePrimaryGroup = () => {
-    const field = findFirstSetField(formData.dataUse, primaryConsentFields);
+    const field = findFirstSetField(formData?.properties, primaryConsentFields);
 
     if (isNil(field)) {
       return 'No selection.';
@@ -218,15 +218,15 @@ export const StudyConsentGroupSummary = (props) => {
             fontSize: '16px',
           }
         }, ['File Types']),
-        // div({}, formData?.properties.fileTypes.map((ft, idx) => div({
-        //   key: idx,
-        //   style: {
-        //     marginBottom: '20px',
-        //   }
-        // }, [
-        //   div({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
-        //   div({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
-        // ]))),
+        div({}, formData?.properties.fileTypes.map((ft, idx) => div({
+          key: idx,
+          style: {
+            marginBottom: '20px',
+          }
+        }, [
+          div({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
+          div({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
+        ]))),
       ]),
     ]),
     div({

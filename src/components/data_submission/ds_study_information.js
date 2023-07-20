@@ -10,7 +10,7 @@ import initialFormData from './NIHDataManagement';
 import './ds_common.css';
 
 export default function DataSubmissionStudyInformation(props) {
-  const { 
+  const {
     onChange,
     validation,
     onValidationChange,

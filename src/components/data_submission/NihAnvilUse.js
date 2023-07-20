@@ -46,9 +46,9 @@ export default function NihAnvilUse(props) {
       onValidationChange,
     }),
 
-    div({ 
-      isRendered: 
-        (studyEditMode ? 
+    div({
+      isRendered:
+        (studyEditMode ?
           formData?.properties.nihAnvilUse === 'yes_nhgri_yes_phs_id'
           : formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) }, [
       h(FormField, {
