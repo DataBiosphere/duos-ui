@@ -92,9 +92,6 @@ export default function UserProfile() {
       userProps: userProps,
       institutions: institutions
     }),
-    NewRole({
-      profile: profile
-    }),
   ]);
 
 }
