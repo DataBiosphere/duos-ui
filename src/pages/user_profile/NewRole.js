@@ -170,6 +170,6 @@ export default function NewRole(props) {
     }, ['Submit']),
     div({ className: '', style: { 'marginTop': '100px' } }, []),
   ])
-    ;
+  ;
 
 }
