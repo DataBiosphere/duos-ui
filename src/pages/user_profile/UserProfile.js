@@ -5,7 +5,6 @@ import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
-import NewRole from './NewRole';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
@@ -87,11 +86,6 @@ export default function UserProfile() {
       readOnly: true,
     }),
     div({ className: '', style: { 'marginTop': '60px' } }, []),
-    AffiliationAndRoles({
-      user: user,
-      userProps: userProps,
-      institutions: institutions
-    }),
   ]);
 
 }
