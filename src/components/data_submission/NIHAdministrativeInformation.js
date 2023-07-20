@@ -29,7 +29,7 @@ export const NIHAdministrativeInformation = (props) => {
   };
 
   return div({
-    isRendered: 
+    isRendered:
       (studyEditMode ?
         ['yes_nhgri_yes_phs_id', 'yes_nhgri_no_phs_id', 'no_nhgri_yes_anvil'].includes(formData.properties.nihAnvilUse)
         : [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse)),
@@ -48,8 +48,8 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: 
-        (studyEditMode ? 
+      defaultValue:
+        (studyEditMode ?
           (!isNil(formData.properties.piInstitution) ? findInstitutionSelectOption(formData.properties.piInstitution) : null)
           : (!isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null)),
       validation: validation.piInstitution,

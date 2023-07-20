@@ -3,12 +3,19 @@ import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAC } from '../../libs/ajax';
+import {StudyConsentGroupsUpdate} from '../study_update/StudyEditConsentGroups';
 
 import './ds_common.css';
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange, onFileChange, validation, onValidationChange, setAllConsentGroupsSaved
+    onChange,
+    studyEditMode,
+    setStudyEditMode,
+    onFileChange,
+    validation,
+    onValidationChange,
+    setAllConsentGroupsSaved
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
@@ -117,6 +124,7 @@ export const DataAccessGovernance = (props) => {
                 h(ConsentGroupForm, {
                   idx: idx,
                   dacs: dacs,
+                  studyEditMode,
                   disableDelete: consentGroupsState.length === 1,
                   saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
                   deleteConsentGroup: () => deleteConsentGroup(idx),

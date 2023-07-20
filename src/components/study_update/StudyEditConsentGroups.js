@@ -1,3 +1,4 @@
+import { useEffect, useState, useCallback } from 'react';
 import { button, h, h2, div, span, a } from 'react-hyperscript-helpers';
 import { find, isArray, isNil, isEmpty } from 'lodash/fp';
 
@@ -7,12 +8,9 @@ import { computeConsentGroupValidationErrors } from '../data_submission/consent_
 
 export const StudyConsentGroupsUpdate = (props) => {
   const {
-    formData,
-    dacs,
-    saveConsentGroup,
     idx,
-    studyEditMode,
-    setStudyEditMode,
+    dataset,
+    formData
   } = props;
 
   const searchOntologies = async (query, callback) => {
