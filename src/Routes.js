@@ -16,7 +16,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
 import ResearcherProfile from './pages/ResearcherProfile';
 import UserProfile from './pages/user_profile/UserProfile';
-import ControlledAccessGrants from './pages/user_profile/ControlledAccessGrants';
 import AffiliationsAndRoles from './pages/user_profile/AffiliationAndRoles';
 import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
 import SigningOfficialDarRequests from './pages/signing_official_console/SigningOfficialDarRequests';
