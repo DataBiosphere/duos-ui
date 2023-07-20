@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { div, h, h1, hr } from 'react-hyperscript-helpers';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
@@ -44,7 +45,6 @@ export default function UserProfile() {
 
     init();
   }, []);
-
 
   return div({
     className: '',
