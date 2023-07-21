@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { div, h, h1, hr, button } from 'react-hyperscript-helpers';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
@@ -53,7 +52,7 @@ export default function UserProfile(props) {
        state: {data: profile}
     });
   }
-
+  
   return div({
     className: '',
     style: {
