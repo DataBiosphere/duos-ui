@@ -1,17 +1,17 @@
 
 import { useState, useEffect } from 'react';
-import { div, h, h1, hr } from 'react-hyperscript-helpers';
+import { div, h, h1, hr, button } from 'react-hyperscript-helpers';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
-import NewRole from './NewRole';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
+import { useHistory } from 'react-router-dom';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
 
-export default function UserProfile() {
+export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
   const [userProps, setUserProps] = useState({});
@@ -46,6 +46,13 @@ export default function UserProfile() {
 
     init();
   }, []);
+
+  const goToRequestRole = () => {
+    props.history.push({
+       pathname: '/request_role',
+       state: {data: profile}
+    });
+  }
 
   return div({
     className: '',
@@ -92,9 +99,14 @@ export default function UserProfile() {
       userProps: userProps,
       institutions: institutions
     }),
-    NewRole({
-      profile: profile
-    }),
+    button({
+      className: 'f-left btn-primary common-background',
+      onClick: goToRequestRole,
+      style: {
+        marginTop: '10px',
+        marginBottom: '50px'
+      },
+    }, ['Request a New Role']),
   ]);
 
 }

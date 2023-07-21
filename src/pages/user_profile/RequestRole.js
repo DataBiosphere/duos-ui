@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { div, h, h2, button } from 'react-hyperscript-helpers';
+import { useState, useEffect } from 'react';
+import { div, h, h2, p, button } from 'react-hyperscript-helpers';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
+import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
-export default function NewRole(props) {
+export default function RequestRole(props) {
 
-  const {
-    profile
-  } = props; //hello
+  const profile = props.location.state?.data || undefined;
 
   const headerStyle = {
     fontWeight: 'bold',
@@ -103,21 +102,25 @@ export default function NewRole(props) {
     }
   };
 
-  // useEffect(() => {
-  //   const init = async () => {
-  //     try {
-  //       if (!isNil(profile)) {
+  useEffect(() => {
+    if (!isNil(profile)) {
+      sendSupportRequests();
+    }
+  }, [profile]);
 
-  //       }
-  //     } catch (error) {
-  //       Notifications.showError({ text: 'Error: Unable to load page' });
-  //     }
-  //   };
-
-  //   init();
-  // }, [profile]);
-
-  return div({}, [
+  return div({
+    style: {
+      padding: '25px 270px 0px 270px'
+    }
+  }, [
+    p({
+      style: {
+        color: '#01549F',
+        fontFamily: 'Montserrat',
+        fontSize: '20px',
+        fontWeight: '600',
+      }
+    }, ['Request a New Role in DUOS']),
     div({
       style: {
         backgroundColor: '#F2F2F2',
@@ -168,7 +171,6 @@ export default function NewRole(props) {
         marginTop: '50px',
       },
     }, ['Submit']),
-    div({ className: '', style: { 'marginTop': '100px' } }, []),
   ])
     ;
 
