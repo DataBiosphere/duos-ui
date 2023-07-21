@@ -8,7 +8,7 @@ export default function NewRole(props) {
 
   const {
     profile
-  } = props; //hello
+  } = props;
 
   const headerStyle = {
     fontWeight: 'bold',
