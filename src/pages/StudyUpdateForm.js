@@ -97,9 +97,25 @@ export const StudyUpdateForm = (props) => {
     }
   };
 
-  const extract = useCallback((key) => {
-    const property = find({ key })(study.properties);
-    return property?.value;
+  // convert property to date
+  const toYYYYMMDD = (dateString) => {
+    return new Date(dateString).toISOString().split('T')[0];
+  }
+
+  const extractAllProperties = useCallback(() => {
+    var properties = {};
+
+    study.properties.forEach((property) => {
+      properties[property.key] = property?.value;
+    });
+
+    // fix up some of the properties
+    properties['nihAnvilUse'] = radioSelectionToLabels(properties['nihAnvilUse']);
+    properties['alternativeDataSharingPlanTargetDeliveryDate'] = toYYYYMMDD(properties['alternativeDataSharingPlanTargetDeliveryDate']);
+    properties['alternativeDataSharingPlanTargetPublicReleaseDate'] = toYYYYMMDD(properties['alternativeDataSharingPlanTargetPublicReleaseDate']);
+    properties['embargoReleaseDate'] = toYYYYMMDD(properties['embargoReleaseDate']);
+
+    return properties;
   }, [study]);
 
   const prefillFormData = useCallback(async (study) => {
@@ -110,44 +126,9 @@ export const StudyUpdateForm = (props) => {
       piName: study.piName,
       publicVisibility: study.publicVisibility,
       datasets: study.datasets,
-      properties: {
-        // study info
-        studyType: extract('studyType'),
-        phenotypeIndication: extract('phenotypeIndication'),
-        species: extract('species'),
-        dataSubmitterName: extract('dataSubmitterName'),
-        dataSubmitterEmail: extract('dataSubmitterEmail'),
-        dataCustodianEmail: extract('dataCustodianEmail'),
-
-        // nih anvil use
-        nihAnvilUse: radioSelectionToLabels(extract('nihAnvilUse')),
-        dbGaPPhsID: extract('dbGaPPhsID'),
-        dbGaPStudyRegistrationName: extract('dbGaPStudyRegistrationName'),
-        embargoReleaseDate: extract('embargoReleaseDate'),
-        sequencingCenter: extract('sequencingCenter'),
-
-        // nih admin info
-        piInstitution: extract('piInstitution'),
-        nihGrantContractNumber: extract('nihGrantContractNumber'),
-        nihICsSupportingStudy: extract('nihICsSupportingStudy'),
-        nihProgramOfficerName: extract('nihProgramOfficerName'),
-        nihInstitutionCenterSubmission: extract('nihInstitutionCenterSubmission'),
-        nihGenomicProgramAdministratorName: extract('nihGenomicProgramAdministratorName'),
-        multiCenterStudy: extract('multiCenterStudy'),
-        collaboratingSites: extract('collaboratingSites'),
-        controlledAccessRequiredForGenomicSummaryResultsGSR: extract('controlledAccessRequiredForGenomicSummaryResultsGSR'),
-        controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation: extract('controlledAccessRequiredForGenomicSummaryResultsGSRNotRequiredExplanation'),
-
-        // nih data management
-        alternativeDataSharingPlan: extract('alternativeDataSharingPlan'),
-        alternativeDataSharingPlanReasons: extract('alternativeDataSharingPlanReasons'),
-        alternativeDataSharingPlanExplanation: extract('alternativeDataSharingPlanExplanation'),
-        alternativeDataSharingPlanFile: extract('alternativeDataSharingPlanFile'),
-        alternativeDataSharingPlanDataSubmitted: extract('alternativeDataSharingPlanDataSubmitted'),
-        alternativeDataSharingPlanDataReleased: extract('alternativeDataSharingPlanDataReleased'),
-      },
+      properties: extractAllProperties()
     });
-  }, [extract]);
+  }, [extractAllProperties]);
 
   useEffect(() => {
     if (isNil(formData.name) && !isEmpty(study)) {

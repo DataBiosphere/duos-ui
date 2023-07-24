@@ -65,7 +65,7 @@ export default function DataSubmissionStudyInformation(props) {
       isCreatable: true,
       validation: validation.studyType,
       selectConfig: {},
-      defaultValue: studyEditMode ? formData?.studyType : undefined,
+      defaultValue: studyEditMode ? formData?.properties.studyType : undefined,
       onChange,
       onValidationChange
     }),
@@ -110,7 +110,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
-      defaultValue: studyEditMode ? formData?.phenotypeIndication : undefined,
+      defaultValue: studyEditMode ? formData?.properties.phenotypeIndication : undefined,
       validation: validation.phenotypeIndication,
       onChange,
       onValidationChange
@@ -118,7 +118,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'species',
       title: 'Species',
-      defaultValue: studyEditMode ? formData?.species : undefined,
+      defaultValue: studyEditMode ? formData?.properties.species : undefined,
       validation: validation.species,
       onChange,
       onValidationChange
@@ -173,7 +173,7 @@ export default function DataSubmissionStudyInformation(props) {
         },
       },
       placeholder: 'Add one or more emails',
-      defaultValue: studyEditMode ? formData?.dataCustodianEmail : undefined,
+      defaultValue: studyEditMode ? formData?.properties.dataCustodianEmail : undefined,
       validation: validation.dataCustodianEmail,
       onChange,
       onValidationChange
@@ -193,7 +193,7 @@ export default function DataSubmissionStudyInformation(props) {
         },
         title: 'Target Delivery Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
-        defaultValue: studyEditMode ? formData?.alternativeDataSharingPlanTargetDeliveryDate : initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
+        defaultValue: studyEditMode ? formData?.properties.alternativeDataSharingPlanTargetDeliveryDate : initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
         validators: [FormValidators.DATE],
         onChange,
         validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
@@ -206,7 +206,7 @@ export default function DataSubmissionStudyInformation(props) {
         },
         title: 'Target Public Release Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
-        defaultValue: studyEditMode ? formData?.alternativeDataSharingPlanTargetPublicReleaseDate : initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
+        defaultValue: studyEditMode ? formData?.properties.alternativeDataSharingPlanTargetPublicReleaseDate : initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
         validators: [FormValidators.DATE],
         onChange,
         validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
