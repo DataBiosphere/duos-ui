@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { div, h, h2, p, button } from 'react-hyperscript-helpers';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
+import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
 export default function RequestRole(props) {
@@ -55,7 +56,9 @@ export default function RequestRole(props) {
 
   const submitForm = async (event) => {
     event.preventDefault();
-    await sendSupportRequests();
+    if (!isNil(profile)) {
+      await sendSupportRequests();
+    }
   };
 
 
