@@ -115,7 +115,7 @@ export const EditConsentGroup = (props) => {
         placeholder: 'Enter name',
         disabled: studyEditMode ? true : false,
         defaultValue: studyEditMode ?
-          formData?.properties.datasetName
+          consentGroup.consentGroupName
           : consentGroup.consentGroupName,
         onChange,
         validation: validation.consentGroupName,
@@ -134,7 +134,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'General Research Use',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.generalUse === true ? 'generalResearchUse' : undefined
+          selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -154,7 +154,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Health/Medical/Biomedical Research Use',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.hmbResearch === true ? 'hmb' : undefined
+          selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -173,7 +173,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Disease-Specific Research Use',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            isArray(formData?.dataUse.diseaseRestrictions) && formData?.dataUse.diseaseRestrictions.length > 0 ? 'diseaseSpecificUse' : undefined
+            selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
@@ -189,7 +189,7 @@ export const EditConsentGroup = (props) => {
 
         div({
           isRendered: studyEditMode ?
-            !isEmpty(formData?.dataUse.diseaseLabels)
+            showDiseaseSpecificUseSearchbar
             : showDiseaseSpecificUseSearchbar,
           style: {
             marginBottom: '1.0rem'
@@ -208,7 +208,7 @@ export const EditConsentGroup = (props) => {
             placeholder: 'Please enter one or more diseases',
             disabled: studyEditMode ? true : false,
             defaultValue: studyEditMode ?
-              formData?.dataUse.diseaseLabels
+              selectedDiseases
               : selectedDiseases,
             validation: validation.diseaseSpecificUse,
             onValidationChange: ({ validation }) => {
@@ -233,7 +233,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Populations, Origins, Ancestry Use',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.populationsOriginsAncestry === true ? 'poa' : undefined
+          selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -252,7 +252,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'No Restrictions (Open Access Data)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.properties.openAccess ? 'openAccess' : undefined
+          selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -271,7 +271,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Other',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.otherRestrictions ? 'otherPrimary' : undefined
+            selectedPrimaryGroup(consentGroup)
             : selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: otherPrimaryText });
@@ -284,7 +284,7 @@ export const EditConsentGroup = (props) => {
 
         h(FormField, {
           isRendered: studyEditMode ?
-            !isEmpty(formData?.dataUse.otherRestrictions)
+            showOtherPrimaryText
             : showOtherPrimaryText,
           id: idx + '_otherPrimaryText',
           name: 'otherPrimary',
@@ -292,7 +292,7 @@ export const EditConsentGroup = (props) => {
           placeholder: 'Please specify',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.other
+            otherPrimaryText
             : otherPrimaryText,
           onChange: ({ key, value, isValid }) => {
             setOtherPrimaryText(value);
@@ -308,7 +308,7 @@ export const EditConsentGroup = (props) => {
       // secondary
       div({
         isRendered: studyEditMode ?
-          formData?.properties.openAccess !== true
+          consentGroup.openAccess !== true
           : consentGroup.openAccess !== true,
       }, [
         h(FormField, {
@@ -320,7 +320,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'No methods development or validation studies (NMDS)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.methodsResearch === true
+            consentGroup.nmds
             : consentGroup.nmds,
           onChange,
           validation: validation.nmds,
@@ -333,7 +333,7 @@ export const EditConsentGroup = (props) => {
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Genetic studies only (GSO)',
           defaultValue: studyEditMode ?
-            formData?.dataUse.geneticStudiesOnly === true
+          consentGroup.gso
             : consentGroup.gso,
           onChange,
           validation: validation.gso,
@@ -347,7 +347,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Publication Required (PUB)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.publicationResults === true
+          consentGroup.pub
             : consentGroup.pub,
           onChange,
           validation: validation.pub,
@@ -361,7 +361,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Collaboration Required (COL)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.collaboratorRequired === true
+          consentGroup.col
             : consentGroup.col,
           onChange,
           validation: validation.col,
@@ -375,7 +375,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Ethics Approval Required (IRB)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.ethicsApprovalRequired === true
+          consentGroup.irb
             : consentGroup.irb,
           onChange,
           validation: validation.irb,
@@ -389,7 +389,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Geographic Restriction (GS-)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.geographicalRestrictions === 'Yes'
+          showGSText
             : showGSText,
           onChange: ({ key, value }) => {
             setShowGSText(value);
@@ -410,7 +410,7 @@ export const EditConsentGroup = (props) => {
           placeholder: 'Specify Geographic Restriction',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.geographicalRestrictions
+          gsText || ''
             : gsText || '',
           onChange: ({ key, value, isValid }) => {
             setGSText(value);
@@ -427,7 +427,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Publication Moratorium (MOR)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.publicationMoratorium === 'true'
+          showMORText
             : showMORText,
           onChange: ({ key, value }) => {
             setShowMORText(value);
@@ -443,7 +443,7 @@ export const EditConsentGroup = (props) => {
           placeholder: 'Please specify date (YYYY-MM-DD)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.publicationMoratorium
+          morText
             : morText,
           onChange: ({ key, value, isValid }) => {
             setMORText(value);
@@ -460,7 +460,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Non-profit Use Only (NPU)',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.commercialUse === false
+          consentGroup.npu
             : consentGroup.npu,
           onChange,
           validation: validation.npu,
@@ -474,7 +474,7 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Other',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.hasSecondaryOther
+          showOtherSecondaryText
             : showOtherSecondaryText,
           onChange: ({ key, value }) => {
             setShowOtherSecondaryText(value);
@@ -495,7 +495,7 @@ export const EditConsentGroup = (props) => {
           placeholder: 'Please specify',
           disabled: studyEditMode ? true : false,
           defaultValue: studyEditMode ?
-            formData?.dataUse.secondaryOther
+          otherSecondaryText || ''
             : otherSecondaryText || '',
           onChange: ({ key, value, isValid }) => {
             setOtherSecondaryText(value);
@@ -552,7 +552,7 @@ export const EditConsentGroup = (props) => {
         ],
         placeholder: 'Data Location(s)',
         defaultValue: studyEditMode ?
-          formData?.properties.dataLocation
+        consentGroup.dataLocation
           : consentGroup.dataLocation,
         onChange: ({key, value, isValid}) => {
 
@@ -573,11 +573,11 @@ export const EditConsentGroup = (props) => {
         name: 'url',
         validators: [FormValidators.URL],
         disabled: studyEditMode ?
-          formData?.properties.dataLocation === 'Not Determined'
+        consentGroup.dataLocation === 'Not Determined'
           : consentGroup.dataLocation === 'Not Determined',
         placeholder: 'Enter a URL for your data location here',
         defaultValue: studyEditMode ?
-          formData?.properties.dataLocationURL
+        consentGroup.url
           : consentGroup.url,
         onChange,
         validation: validation.url,
@@ -603,7 +603,7 @@ export const EditConsentGroup = (props) => {
         }
       ],
       defaultValue: studyEditMode ?
-        formData?.properties.fileTypes
+      consentGroup.fileTypes
         : consentGroup.fileTypes,
       enableAddingRow: true,
       addRowLabel: 'Add New File Type',
@@ -623,7 +623,7 @@ export const EditConsentGroup = (props) => {
         type: FormFieldTypes.NUMBER,
         validators: [FormValidators.REQUIRED],
         defaultValue: studyEditMode ?
-          formData?.properties.numberOfParticipants
+          consentGroup.numberOfParticipants
           : consentGroup.numberOfParticipants,
         validation: validation.numberOfParticipants,
         onChange,

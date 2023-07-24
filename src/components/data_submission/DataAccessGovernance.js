@@ -18,10 +18,45 @@ export const DataAccessGovernance = (props) => {
     setAllConsentGroupsSaved
   } = props;
 
-  const [consentGroupsState, setConsentGroupsState] = useState([]);
+  const [consentGroupsState, setConsentGroupsState] = useState([
+    // default consent group to test out functionality
+    /*
+    {
+      "consentGroup": {
+        "consentGroupName": "hello world",
+        "generalResearchUse": false,
+        "hmb": false,
+        "poa": true,
+        "openAccess": false,
+        "nmds": true,
+        "gso": true,
+        "pub": true,
+        "col": true,
+        "irb": true,
+        "gs": "timbuktu",
+        "mor": "1970-01-01",
+        "npu": true,
+        "otherSecondary": "stuff",
+        "dataLocation": "Not Determined",
+        "numberOfParticipants": 5000,
+        "fileTypes": [
+          {
+            "fileType": "Exome",
+            "functionalEquivalence": "gdv"
+          }
+        ],
+        "dataAccessCommitteeId": 43
+      },
+      "key": 1,
+      "nihInstitutionalCertificationFile": null,
+      "editMode": false,
+      "valid": true
+    }
+    */
+  ]);
   const [dacs, setDacs] = useState([]);
 
-  const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {}, consentGroupsState: {} });
+  const [formData, setFormData] = useState([]);
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -55,7 +90,11 @@ export const DataAccessGovernance = (props) => {
   }, []);
 
   //extract consent groups from datasets
-  const prefillFormData = useCallback(async (dataset) => {
+  const prefillFormData = useCallback(async (datasets) => {
+
+    //console.log(datasets);
+    //console.log(formData);
+    /*
     // DAC is required if openAcess is false
     const openAccess = extract('Open Access', dataset);
     const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
@@ -75,10 +114,9 @@ export const DataAccessGovernance = (props) => {
       dac: { ...dac, dacs },
       consentGroupsState: addExistingConsentGroup,
     });
+    */
   
-  }, [extract, normalizeDataUse, addExistingConsentGroup]);
-
-  console.log(formData);
+  }, [extract, normalizeDataUse, addNewConsentGroup]);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -108,50 +146,48 @@ export const DataAccessGovernance = (props) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
-        key: console.log('new:', consentGroupsState) || Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
+        key: Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
         nihInstitutionalCertificationFile: null,
-        editMode: false,
-        valid: false,
-      });
-
-      return console.log('here', newConsentGroupsState.editMode) || newConsentGroupsState;
-    });
-  }, []);
-
-  const addExistingConsentGroup = useCallback(() => {
-    setConsentGroupsState((consentGroupsState) => {
-      const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState.push({
-        consentGroup: prefillFormData,
-        key: console.log('existing:', consentGroupsState) || Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
-        nihInstitutionalCertificationFile: null,
-        editMode: false,
+        editMode: true,
         valid: false,
       });
 
       return newConsentGroupsState;
     });
-  }, [prefillFormData]);
+  }, []);
 
-  // create prepopulated consent groups
-  // prefilling consentGroup but object is empty, Array(0) but page is prefilled
-  // need to add consent group state to prefilled set
-// console.log(datasets.properties);
   useEffect(() => {
-    datasets?.forEach((dataset)=> {
-      if (isNil(formData.datasetId)) {
-        prefillFormData(dataset);
-        // console.log(dataset);
-        //addExistingConsentGroup();
-      }
-    });
+    if(isNil(formData) || formData.length === 0) {
+      prefillFormData(datasets);
+    }
   }, [prefillFormData, datasets, formData]);
 
   // pre-populate the page with a consent group
   useEffect(() => {
-    addExistingConsentGroup();
-    //console.log(consentGroupsState.editMode);
-  }, [addExistingConsentGroup]);
+    // when in edit study mode, pre-populate the page with the study's consent groups
+    //prefillConsentGroups(); this method would extract consent groups from datasets
+    //pseudocode of this method:
+    //prefillConsentGroups = useCallback(async () => {
+    // from datasets array to consent group array (needs to match the existing consent group structure)
+    // var consentGroups = datasets.map(dataset => {
+    //    // extract the consent group data from the dataset
+    //    return {
+    //        key: <...>,
+    //        consentGroup: {
+    //            consentGroupName: <...>,
+    //            generalResearchUse: <...>,
+    //            poa: <...>,
+    //        },
+    //        nihInstitutionalCertificationFile: <...>
+    //    }
+    //  }
+    // once arrray is created, set the consent group state
+    // setConsentGroupsState(consentGroups);
+    //}, [datasets]);
+    //fill the consent group state with the study's consent groups
+    // otherwise add a new consent group
+    addNewConsentGroup();
+  }, [addNewConsentGroup]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
@@ -213,6 +249,7 @@ export const DataAccessGovernance = (props) => {
                 h(ConsentGroupForm, {
                   idx: idx,
                   dacs: dacs,
+                  consentGroupsState,
                   formData,
                   studyEditMode,
                   disableDelete: consentGroupsState.length === 1,

@@ -13,14 +13,18 @@ export const ConsentGroupForm = (props) => {
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
     disableDelete,
+    consentGroupsState,
     formData,
     studyEditMode,
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
-    consentGroupName: '',
+    // this will need to change to studyEditMode ? <consentGroupsState property> : <default>
+    consentGroupName: consentGroupsState[idx].consentGroup.consentGroupName || '',
 
     // primary: one of these needs to be filled
+    // if in edit study mode, give each of these the value of the consent group state at the index
+    // otherwise give them the default value
     generalResearchUse: undefined,
     hmb: undefined,
     diseaseSpecificUse: undefined, // string
@@ -75,7 +79,7 @@ export const ConsentGroupForm = (props) => {
       ? h(EditConsentGroup, {
         ...props,
         ...{
-          consentGroup: consentGroup,
+          consentGroup: console.log('consent group and state:', consentGroupsState, consentGroup) || consentGroup,
           setConsentGroup: setConsentGroup,
           nihInstitutionalCertificationFile,
           setNihInstitutionalCertificationFile: (file) => {
@@ -88,17 +92,10 @@ export const ConsentGroupForm = (props) => {
           onValidationChange
         },
       })
-      :
-      (studyEditMode ?
-        h(StudyConsentGroupSummary, {
-          ...props,
-          ...{formData: formData, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
-        })
-        : h(ConsentGroupSummary, {
-          ...props,
-          ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
-        })
-      )
+      : h(ConsentGroupSummary, {
+        ...props,
+        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
+      })
     ),
     // save, cancel and delete
     div({
