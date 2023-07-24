@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { div, h, h2, p, button } from 'react-hyperscript-helpers';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
-import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
 export default function RequestRole(props) {
@@ -44,6 +43,11 @@ export default function RequestRole(props) {
     extraRequest: undefined
   });
 
+  const goToPrevPage = async (event) => {
+    event.preventDefault();
+    await props.history.push('/user_profile');
+  };
+
   const handleSupportRequestsChange = ({ key, value }) => {
     let newSupportRequests = Object.assign({}, supportRequests, { [key]: value });
     setSupportRequests(newSupportRequests);
@@ -54,71 +58,80 @@ export default function RequestRole(props) {
     await sendSupportRequests();
   };
 
-  const processSupportRequests = () => {
-    const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key]);
-    return [
-      filteredRequests.length > 0,
-      filteredRequests
-        .map(x => `- ${x.label}`)
-        .join('\n')
-    ];
-  };
 
-  const sendSupportRequests = async () => {
-    const [hasSupportRequests, requestText] = processSupportRequests();
-
-    // if there are no supportRequests, don't create a new support ticket
-    if (!hasSupportRequests) {
-      return;
-    }
-
-    const ticketInfo = {
-      attachmentToken: [],
-      type: 'task',
-      subject: `DUOS: User Request for ${profile.profileName}`,
-      description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
-        + requestText
-        + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : '')
+  const processSupportRequests =
+    () => {
+      const filteredRequests = possibleSupportRequests.filter(request => supportRequests[request.key]);
+      return [
+        filteredRequests.length > 0,
+        filteredRequests
+          .map(x => `- ${x.label}`)
+          .join('\n')
+      ];
     };
 
-    const ticket = Support.createTicket(
-      profile.profileName, ticketInfo.type, profile.email,
-      ticketInfo.subject,
-      ticketInfo.description,
-      ticketInfo.attachmentToken,
-      'User Profile Page'
-    );
+  const sendSupportRequests =
+    async () => {
+      const [hasSupportRequests, requestText] = processSupportRequests();
 
-    const response = await Support.createSupportRequest(ticket);
-    if (response.status === 201) {
-      Notifications.showSuccess(
-        { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 }
+      // if there are no supportRequests, don't create a new support ticket
+      if (!hasSupportRequests) {
+        return;
+      }
+
+      const ticketInfo = {
+        attachmentToken: [],
+        type: 'task',
+        subject: `DUOS: User Request for ${profile.profileName}`,
+        description: `User (${profile.id}, ${profile.email}) has selected the following options:\n`
+          + requestText
+          + (supportRequests.extraRequest ? `\n- ${supportRequests.extraRequest}` : '')
+      };
+
+      const ticket = Support.createTicket(
+        profile.profileName, ticketInfo.type, profile.email,
+        ticketInfo.subject,
+        ticketInfo.description,
+        ticketInfo.attachmentToken,
+        'User Profile Page'
       );
-    } else {
-      Notifications.showError({
-        text: `ERROR ${response.status} : Unable To Send Requests`,
-        layout: 'topRight',
-      });
-    }
-  };
 
-  useEffect(() => {
-    if (!isNil(profile)) {
-      sendSupportRequests();
-    }
-  }, [profile]);
+      const response = await Support.createSupportRequest(ticket);
+      if (response.status === 201) {
+        Notifications.showSuccess(
+          { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 }
+        );
+      } else {
+        Notifications.showError({
+          text: `ERROR ${response.status} : Unable To Send Requests`,
+          layout: 'topRight',
+        });
+      }
+    };
 
   return div({
     style: {
       padding: '25px 270px 0px 270px'
     }
   }, [
+    button({
+      id: 'btn_submit',
+      onClick: goToPrevPage,
+      className: 'f-right',
+      style: {
+        marginTop: 7,
+        fontFamily: 'Montserrat',
+        fontSize: '18px',
+        padding: 5
+      },
+    }, ['< Go back to User Profile']),
     p({
       style: {
         color: '#01549F',
         fontFamily: 'Montserrat',
         fontSize: '20px',
         fontWeight: '600',
+        marginTop: 10
       }
     }, ['Request a New Role in DUOS']),
     div({
@@ -171,7 +184,5 @@ export default function RequestRole(props) {
         marginTop: '50px',
       },
     }, ['Submit']),
-  ])
-    ;
-
+  ]);
 }

@@ -6,7 +6,6 @@ import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
-import { useHistory } from 'react-router-dom';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
 
@@ -48,11 +47,11 @@ export default function UserProfile(props) {
 
   const goToRequestRole = () => {
     props.history.push({
-       pathname: '/request_role',
-       state: {data: profile}
+      pathname: '/request_role',
+      state: { data: profile }
     });
-  }
-  
+  };
+
   return div({
     className: '',
     style: {
@@ -61,7 +60,7 @@ export default function UserProfile(props) {
     }
   }, [
     div({ className: '' }, [
-      Notification({notificationData}),
+      Notification({ notificationData }),
       PageHeading({
         id: 'researcherProfile',
         color: 'common',
