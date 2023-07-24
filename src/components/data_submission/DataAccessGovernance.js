@@ -21,7 +21,7 @@ export const DataAccessGovernance = (props) => {
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
 
-  const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {} });
+  const [formData, setFormData] = useState({ properties: {}, dataUse: {}, dac: {}, consentGroupsState: {} });
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -56,22 +56,29 @@ export const DataAccessGovernance = (props) => {
 
   //extract consent groups from datasets
   const prefillFormData = useCallback(async (dataset) => {
-    // const dac = await DAC.get(dataset?.dacId);
-    // const dacs = await DAC.list();
+    // DAC is required if openAcess is false
+    const openAccess = extract('Open Access', dataset);
+    const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
+    const dacs = openAccess ? undefined : await DAC.list();
+
     setFormData({
       datasetId: dataset.datasetId,
       properties: {
         datasetName: extract('Dataset Name', dataset),
         dataLocation: extract('Data Location', dataset),
-        // dataLocationURL: extract()
+        dataLocationURL: extract('URL', dataset),
         fileTypes: extract('File Types', dataset),
         openAccess: extract('Open Access', dataset),
         numberOfParticipants: extract('Number of Participants', dataset)
       },
       dataUse: await normalizeDataUse(dataset?.dataUse),
-      // dac: { ...dac, dacs },
+      dac: { ...dac, dacs },
+      consentGroupsState: addExistingConsentGroup,
     });
-  }, [extract, normalizeDataUse]);
+  
+  }, [extract, normalizeDataUse, addExistingConsentGroup]);
+
+  console.log(formData);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -101,28 +108,50 @@ export const DataAccessGovernance = (props) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
       newConsentGroupsState.push({
         consentGroup: {},
-        key: Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
+        key: console.log('new:', consentGroupsState) || Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
         nihInstitutionalCertificationFile: null,
-        editMode: true,
+        editMode: false,
+        valid: false,
+      });
+
+      return console.log('here', newConsentGroupsState.editMode) || newConsentGroupsState;
+    });
+  }, []);
+
+  const addExistingConsentGroup = useCallback(() => {
+    setConsentGroupsState((consentGroupsState) => {
+      const newConsentGroupsState = cloneDeep(consentGroupsState);
+      newConsentGroupsState.push({
+        consentGroup: prefillFormData,
+        key: console.log('existing:', consentGroupsState) || Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
+        nihInstitutionalCertificationFile: null,
+        editMode: false,
         valid: false,
       });
 
       return newConsentGroupsState;
     });
-  }, []);
+  }, [prefillFormData]);
 
+  // create prepopulated consent groups
+  // prefilling consentGroup but object is empty, Array(0) but page is prefilled
+  // need to add consent group state to prefilled set
+// console.log(datasets.properties);
   useEffect(() => {
     datasets?.forEach((dataset)=> {
       if (isNil(formData.datasetId)) {
         prefillFormData(dataset);
+        // console.log(dataset);
+        //addExistingConsentGroup();
       }
     });
   }, [prefillFormData, datasets, formData]);
 
   // pre-populate the page with a consent group
   useEffect(() => {
-    addNewConsentGroup();
-  }, [addNewConsentGroup]);
+    addExistingConsentGroup();
+    //console.log(consentGroupsState.editMode);
+  }, [addExistingConsentGroup]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
@@ -213,7 +242,10 @@ export const DataAccessGovernance = (props) => {
           a({
             id: 'btn_addConsentGroup',
             className: 'btn-primary btn-add common-background',
-            onClick: () => { addNewConsentGroup() }
+            onClick: () => { addNewConsentGroup(); }
+            // button could add 1 to the consent group state index
+            // look into sychronizing consent groups and formData
+
           }, [
             span({}, ['Add Consent Group'])
           ])
