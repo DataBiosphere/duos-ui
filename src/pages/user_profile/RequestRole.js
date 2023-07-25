@@ -23,10 +23,6 @@ export default function RequestRole(props) {
       label: 'Register a dataset'
     },
     {
-      key: 'checkRequestDataAccess',
-      label: 'Request access to data',
-    },
-    {
       key: 'checkSOPermissions',
       label: `I am a Signing Official and I want to issue permissions to my institution's users`
     },
