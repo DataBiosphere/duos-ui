@@ -23,7 +23,7 @@ export const NIHAdministrativeInformation = (props) => {
     const institution = institutions.find((inst) => inst.id === id);
 
     return {
-      displayText: institution.name || 'Unknown',
+      displayText: institution?.name || 'Unknown',
       id: id,
     };
   };

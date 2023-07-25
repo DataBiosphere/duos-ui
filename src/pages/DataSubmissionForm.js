@@ -28,7 +28,7 @@ export const DataSubmissionForm = (props) => {
   const [failedInit, setFailedInit] = useState(false);
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
-  const [studyEditMode] = useState(false);
+  const studyEditMode = false;
 
   useEffect(() => {
     const getAllInstitutions = async() => {

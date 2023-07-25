@@ -27,7 +27,7 @@ export const StudyUpdateForm = (props) => {
   const [institutions, setInstitutions] = useState([]);
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
   const [formFiles, setFormFiles] = useState({});
-  const [studyEditMode, setStudyEditMode] = useState(true);
+  const studyEditMode = true;
 
   useEffect(() => {
     const getAllInstitutions = async() => {
@@ -99,7 +99,9 @@ export const StudyUpdateForm = (props) => {
 
   // convert property to date
   const toYYYYMMDD = (dateString) => {
-    return new Date(dateString).toISOString().split('T')[0];
+    if(!isNil(dateString)){
+      return new Date(dateString).toISOString().split('T')[0];
+    }
   }
 
   const extractAllProperties = useCallback(() => {
@@ -243,7 +245,7 @@ export const StudyUpdateForm = (props) => {
       <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHAdministrativeInformation institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHDataManagement onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode} setStudyEditMode={setStudyEditMode}/>
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

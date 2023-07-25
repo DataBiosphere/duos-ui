@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { div, h, span, a, button } from 'react-hyperscript-helpers';
 import ConsentGroupSummary from './ConsentGroupSummary';
-import StudyConsentGroupSummary from './StudyConsentGroupSummary.js';
 import { EditConsentGroup } from './EditConsentGroup';
 import { computeConsentGroupValidationErrors } from './ConsentGroupErrors';
 import { isEmpty, cloneDeep, set } from 'lodash';
@@ -79,7 +78,8 @@ export const ConsentGroupForm = (props) => {
       ? h(EditConsentGroup, {
         ...props,
         ...{
-          consentGroup: console.log('consent group and state:', consentGroupsState, consentGroup) || consentGroup,
+          consentGroup:
+          consentGroup,
           setConsentGroup: setConsentGroup,
           nihInstitutionalCertificationFile,
           setNihInstitutionalCertificationFile: (file) => {
