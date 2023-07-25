@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { Notifications } from '../libs/utils';
 import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
-import { find, cloneDeep, isNil, isEmpty, toLower } from 'lodash/fp';
+import { cloneDeep, isNil, isEmpty, toLower } from 'lodash/fp';
 import { validateForm } from '../utils/JsonSchemaUtils';
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 
@@ -102,7 +102,7 @@ export const StudyUpdateForm = (props) => {
     if(!isNil(dateString)){
       return new Date(dateString).toISOString().split('T')[0];
     }
-  }
+  };
 
   const extractAllProperties = useCallback(() => {
     var properties = {};

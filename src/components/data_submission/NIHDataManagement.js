@@ -78,7 +78,7 @@ export const NIHDataManagement = (props) => {
       onValidationChange,
     }),
     div({
-      isRendered: showAlternativeDataSharingPlan,
+      isRendered: studyEditMode ? formData?.properties.alternativeDataSharingPlan : showAlternativeDataSharingPlan,
     }, [
       h3(
         'Please mark the reasons for which you are requesting an Alernative Data Sharing plan (check all that apply)*',
@@ -114,7 +114,13 @@ export const NIHDataManagement = (props) => {
         },
       }),
       div({
-        isRendered: showInadequateConsentProcessesQuestions,
+        isRendered: studyEditMode ?
+          formData
+            ?.properties.alternativeDataSharingPlanReasons
+            ?.includes(
+              alternativeDataSharingPlanReasonValues
+                .isInformedConsentProcessesInadequate)
+          : showInadequateConsentProcessesQuestions,
         style: {
           marginLeft: '2rem',
         },

@@ -98,28 +98,29 @@ export const DataAccessGovernance = (props) => {
       const openAccess = extract('Open Access', dataset);
       const dac = openAccess ? undefined : DAC.get(dataset?.dacId);
       const dacs = openAccess ? undefined : DAC.list();
+
       // extract the consent group data from the dataset
       return {
         consentGroup: {
           consentGroupName: dataset?.datasetName,
 
           // primary
-          generalResearchUse: dataUse?.generalResearchUse,
-          hmb: dataUse?.hmbResearch,
-          poa: dataUse?.populationsOriginsAncestry,
-          openAccess: dataset?.properties.openAccess,
-          otherPrimary: dataUse?.other,
+          generalResearchUse: dataset?.dataUse.generalResearchUse,
+          hmb: dataset?.dataUse.hmbResearch,
+          poa: dataset?.dataUse.populationsOriginsAncestry,
+          openAccess: dataset.properties.openAccess,
+          otherPrimary: dataset?.dataUse.other,
 
           // secondary
-          nmds: dataUse?.methodsResearch,
-          gso: dataUse?.geneticStudiesOnly,
-          pub: dataUse?.publicationResults,
-          col: dataUse?.collaboratorRequired,
-          irb: dataUse?.ethicsApprovalRequired,
-          gs: dataUse?.geographicalRestrictions,
-          mor: dataUse?.publicationMoratorium,
-          npu: dataUse?.commercialUse,
-          otherSecondary: dataUse?.otherSecondary,
+          nmds: dataset?.dataUse.methodsResearch,
+          gso: dataset?.dataUse.geneticStudiesOnly,
+          pub: dataset?.dataUse.publicationResults,
+          col: dataset?.dataUse.collaboratorRequired,
+          irb: dataset?.dataUse.ethicsApprovalRequired,
+          gs: dataset?.dataUse.geographicalRestrictions,
+          mor: dataset?.dataUse.publicationMoratorium,
+          npu: dataset?.dataUse.commercialUse,
+          otherSecondary: dataset?.dataUse.otherSecondary,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
           numberOfParticipants: extract('Number of Participants', dataset),
@@ -139,7 +140,7 @@ export const DataAccessGovernance = (props) => {
     });
     setConsentGroupsState(consentGroups);
     return consentGroupsState;
-  }, [normalizeDataUse, extract, datasets, consentGroupsState, setConsentGroupsState]);
+  }, [normalizeDataUse, extract, datasets, consentGroupsState]);
 
   // pre-populate the page with a consent group
   useEffect(() => {
