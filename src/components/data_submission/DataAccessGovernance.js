@@ -2,7 +2,7 @@ import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC, DAR } from '../../libs/ajax';
+import { DAC } from '../../libs/ajax';
 
 import './ds_common.css';
 
@@ -19,31 +19,6 @@ export const DataAccessGovernance = (props) => {
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
-
-  const getDiseaseLabels = async (ontologyIds) => {
-    let labels = [];
-    if (!isEmpty(ontologyIds)) {
-      const idList = ontologyIds.join(',');
-      const result = await DAR.searchOntologyIdList(idList);
-      labels = result.map(r => r.label);
-    }
-    return labels;
-  };
-
-  const normalizeDataUse = useCallback(async (dataUse) => {
-    let du = dataUse;
-    if (!isNil(dataUse.diseaseRestrictions)) {
-      du.hasDiseaseRestrictions = true;
-      du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
-    }
-    if (!isNil(dataUse.other)) {
-      du.hasPrimaryOther = true;
-    }
-    if (!isNil(dataUse.secondaryOther)) {
-      du.hasSecondaryOther = true;
-    }
-    return du;
-  }, []);
 
   // method to extract consent group data from datasets
   const extract = useCallback((propertyName, dataset) => {
@@ -83,6 +58,7 @@ export const DataAccessGovernance = (props) => {
         nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
+        disableFields: false,
       });
 
       return newConsentGroupsState;
@@ -92,8 +68,7 @@ export const DataAccessGovernance = (props) => {
   // extract consent groups from datasets
   const prefillConsentGroups = useCallback(async () => {
     // from datasets array to consent group array (needs to match the existing consent group structure)
-    var consentGroups = datasets?.map(dataset => {
-      const dataUse = normalizeDataUse(dataset?.dataUse);
+    var consentGroups = datasets?.map((dataset, idx) => {
       // DAC is required if openAcess is false
       const openAccess = extract('Open Access', dataset);
       const dac = openAccess ? undefined : DAC.get(dataset?.dacId);
@@ -105,10 +80,10 @@ export const DataAccessGovernance = (props) => {
           consentGroupName: dataset?.datasetName,
 
           // primary
-          generalResearchUse: dataset?.dataUse.generalResearchUse,
+          generalResearchUse: dataset?.dataUse.generalUse,
           hmb: dataset?.dataUse.hmbResearch,
-          poa: dataset?.dataUse.populationsOriginsAncestry,
-          openAccess: dataset.properties.openAccess,
+          poa: dataset?.dataUse.populationOriginsAncestry,
+          openAccess: openAccess,
           otherPrimary: dataset?.dataUse.other,
 
           // secondary
@@ -120,7 +95,7 @@ export const DataAccessGovernance = (props) => {
           gs: dataset?.dataUse.geographicalRestrictions,
           mor: dataset?.dataUse.publicationMoratorium,
           npu: dataset?.dataUse.commercialUse,
-          otherSecondary: dataset?.dataUse.otherSecondary,
+          otherSecondary: dataset?.dataUse.secondaryOther,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
           numberOfParticipants: extract('Number of Participants', dataset),
@@ -132,15 +107,18 @@ export const DataAccessGovernance = (props) => {
           ],
           dataAccessCommitteeId: { ...dac, dacs },
         },
-        key: 'consentGroups',
+        key: `prefilledConsentGroups[${idx}]`,
         nihInstitutionalCertificationFile: null,
         editMode: false,
         valid: false,
+        disableFields: true,
       };
     });
-    setConsentGroupsState(consentGroups);
+    if(isEmpty(consentGroupsState)){
+      setConsentGroupsState(consentGroups);
+    }
     return consentGroupsState;
-  }, [normalizeDataUse, extract, datasets, consentGroupsState]);
+  }, [extract, datasets, consentGroupsState]);
 
   // pre-populate the page with a consent group
   useEffect(() => {

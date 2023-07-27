@@ -207,6 +207,7 @@ export const StudyUpdateForm = (props) => {
     // no validation issues, matches json schema: continue to submission
     const multiPartFormData = createMultiPartFormData(registration);
 
+    // TO DO: update study endpoint
     DataSet.registerDataset(multiPartFormData).then(() => {
       history.push('/dataset_catalog');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });

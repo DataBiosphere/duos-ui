@@ -38,6 +38,7 @@ export const EditConsentGroup = (props) => {
   const {
     consentGroup,
     setConsentGroup,
+    disableFields,
     nihInstitutionalCertificationFile,
     setNihInstitutionalCertificationFile,
     validation,
@@ -112,7 +113,7 @@ export const EditConsentGroup = (props) => {
         title: 'Consent Group Name',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Enter name',
-        disabled: studyEditMode ? true : false,
+        disabled: studyEditMode ? disableFields : false,
         defaultValue: consentGroup.consentGroupName,
         onChange,
         validation: validation.consentGroupName,
@@ -129,7 +130,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'generalResearchUse',
           toggleText: 'General Research Use',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -147,7 +148,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'hmb',
           toggleText: 'Health/Medical/Biomedical Research Use',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -164,7 +165,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'diseaseSpecificUse',
           toggleText: 'Disease-Specific Research Use',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
@@ -217,7 +218,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'poa',
           toggleText: 'Populations, Origins, Ancestry Use',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -234,7 +235,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'openAccess',
           toggleText: 'No Restrictions (Open Access Data)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -251,7 +252,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'otherPrimary',
           toggleText: 'Other',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: otherPrimaryText });
@@ -268,7 +269,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherPrimary',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Please specify',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: otherPrimaryText,
           onChange: ({ key, value, isValid }) => {
             setOtherPrimaryText(value);
@@ -292,7 +293,7 @@ export const EditConsentGroup = (props) => {
           name: 'nmds',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'No methods development or validation studies (NMDS)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: consentGroup.nmds,
           onChange,
           validation: validation.nmds,
@@ -315,7 +316,7 @@ export const EditConsentGroup = (props) => {
           name: 'pub',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Publication Required (PUB)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: consentGroup.pub,
           onChange,
           validation: validation.pub,
@@ -327,7 +328,7 @@ export const EditConsentGroup = (props) => {
           name: 'col',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Collaboration Required (COL)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: consentGroup.col,
           onChange,
           validation: validation.col,
@@ -339,7 +340,7 @@ export const EditConsentGroup = (props) => {
           name: 'irb',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Ethics Approval Required (IRB)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: consentGroup.irb,
           onChange,
           validation: validation.irb,
@@ -351,7 +352,7 @@ export const EditConsentGroup = (props) => {
           name: 'gs',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Geographic Restriction (GS-)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: showGSText,
           onChange: ({ key, value }) => {
             setShowGSText(value);
@@ -370,7 +371,7 @@ export const EditConsentGroup = (props) => {
           name: 'gs',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Specify Geographic Restriction',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: gsText || '',
           onChange: ({ key, value, isValid }) => {
             setGSText(value);
@@ -385,7 +386,7 @@ export const EditConsentGroup = (props) => {
           name: 'mor',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Publication Moratorium (MOR)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: showMORText,
           onChange: ({ key, value }) => {
             setShowMORText(value);
@@ -399,7 +400,7 @@ export const EditConsentGroup = (props) => {
           name: 'mor',
           validators: [FormValidators.REQUIRED, FormValidators.DATE],
           placeholder: 'Please specify date (YYYY-MM-DD)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: morText,
           onChange: ({ key, value, isValid }) => {
             setMORText(value);
@@ -414,7 +415,7 @@ export const EditConsentGroup = (props) => {
           name: 'npu',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Non-profit Use Only (NPU)',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: consentGroup.npu,
           onChange,
           validation: validation.npu,
@@ -426,7 +427,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherSecondary',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Other',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: showOtherSecondaryText,
           onChange: ({ key, value }) => {
             setShowOtherSecondaryText(value);
@@ -445,7 +446,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherSecondary',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Please specify',
-          disabled: studyEditMode ? true : false,
+          disabled: studyEditMode ? disableFields : false,
           defaultValue: otherSecondaryText || '',
           onChange: ({ key, value, isValid }) => {
             setOtherSecondaryText(value);
@@ -472,7 +473,7 @@ export const EditConsentGroup = (props) => {
         },
         validators: [FormValidators.REQUIRED],
         validation: validation.dataAccessCommitteeId,
-        disabled: studyEditMode ? true : false,
+        disabled: studyEditMode ? disableFields : false,
         defaultValue: dacs.map((dac) => {
           return { dacId: dac.dacId, displayText: dac.name };
         }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
