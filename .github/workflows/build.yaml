@@ -69,7 +69,6 @@ jobs:
         channel: "#duos-notifications"
         fields: repo,commit,author,action,eventName,ref,workflow,job,took
   report-to-sherlock:
-    if: github.event_name == 'push'
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [tag-build-push]
     with:
