@@ -106,6 +106,7 @@ export default function UserProfile(props) {
         marginBottom: '50px'
       },
     }, ['Request a New Role']),
+
     div({ className: '', style: { 'marginTop': '115px' } }, []),
     ResearcherStatus({
       user: user,
