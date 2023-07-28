@@ -476,7 +476,7 @@ export const EditConsentGroup = (props) => {
         validation: validation.dataAccessCommitteeId,
         disabled: studyEditMode ? disableFields : false,
         defaultValue: studyEditMode ?
-          consentGroup.dataAccessCommitteeId.name
+          consentGroup.dataAccessCommitteeId?.name
           : dacs.map((dac) => {
             return { dacId: dac.dacId, displayText: dac.name };
           }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
