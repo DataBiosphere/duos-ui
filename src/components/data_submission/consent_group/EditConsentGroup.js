@@ -196,6 +196,7 @@ export const EditConsentGroup = (props) => {
             name: 'diseaseSpecificUse',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
+            disabled: studyEditMode ? disableFields : false,
             defaultValue: selectedDiseases,
             validation: validation.diseaseSpecificUse,
             onValidationChange: ({ validation }) => {
