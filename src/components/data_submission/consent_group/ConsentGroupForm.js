@@ -13,7 +13,6 @@ export const ConsentGroupForm = (props) => {
     deleteConsentGroup,
     disableDelete,
     consentGroupsState,
-    formData,
     studyEditMode,
     dacs,
   } = props;
@@ -90,7 +89,6 @@ export const ConsentGroupForm = (props) => {
             updateNihInstitutionalCertificationFile(file);
           },
           studyEditMode,
-          formData,
           validation,
           onValidationChange,
           dacs
