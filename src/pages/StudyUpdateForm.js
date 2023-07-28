@@ -208,7 +208,7 @@ export const StudyUpdateForm = (props) => {
     const multiPartFormData = createMultiPartFormData(registration);
 
     // TO DO: update study endpoint
-    DataSet.registerDataset(multiPartFormData).then(() => {
+    DataSet.updateStudy(multiPartFormData).then(() => {
       history.push('/dataset_catalog');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });
     }, (e) => {

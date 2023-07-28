@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isString } from 'lodash/fp';
+import { isNil, isString, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
 import { DAR } from '../../../libs/ajax';
 import { cloneDeep } from 'lodash';
@@ -57,7 +57,7 @@ export const EditConsentGroup = (props) => {
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary || '');
 
-  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
+  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup.diseaseSpecificUse));
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
@@ -196,7 +196,7 @@ export const EditConsentGroup = (props) => {
             name: 'diseaseSpecificUse',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
-            disabled: selectedDiseases,
+            defaultValue: selectedDiseases,
             validation: validation.diseaseSpecificUse,
             onValidationChange: ({ validation }) => {
               onValidationChange({ key: 'diseaseSpecificUse', validation });
@@ -474,9 +474,11 @@ export const EditConsentGroup = (props) => {
         validators: [FormValidators.REQUIRED],
         validation: validation.dataAccessCommitteeId,
         disabled: studyEditMode ? disableFields : false,
-        defaultValue: dacs.map((dac) => {
-          return { dacId: dac.dacId, displayText: dac.name };
-        }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
+        defaultValue: studyEditMode ?
+          consentGroup.dataAccessCommitteeId.name
+          : dacs.map((dac) => {
+            return { dacId: dac.dacId, displayText: dac.name };
+          }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
         onValidationChange,
       }),
     ]),

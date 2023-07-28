@@ -2,7 +2,7 @@ import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC } from '../../libs/ajax';
+import { DAC, DAR } from '../../libs/ajax';
 
 import './ds_common.css';
 
@@ -19,6 +19,50 @@ export const DataAccessGovernance = (props) => {
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
+
+  const getDiseaseLabels = async (ontologyIds) => {
+    let labels = [];
+    if (!isEmpty(ontologyIds)) {
+      const idList = ontologyIds.join(',');
+      const result = await DAR.searchOntologyIdList(idList);
+      labels = result.map(r => r.label);
+    }
+    return labels;
+  };
+
+  const normalizeDataUse = useCallback(async (dataUse) => {
+    let du = dataUse;
+    if (!isNil(dataUse.diseaseRestrictions)) {
+      du.hasDiseaseRestrictions = true;
+      try {
+        du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
+      } catch {
+        // do nothing
+      }
+
+    }
+    if (!isNil(dataUse.other)) {
+      du.hasPrimaryOther = true;
+    }
+    if (!isNil(dataUse.secondaryOther)) {
+      du.hasSecondaryOther = true;
+    }
+    return du;
+  }, []);
+
+  const extractFileTypes = useCallback((propertyName, fileTypesName, dataset) => {
+    const property = find({ propertyName })(dataset.properties);
+
+    const fileTypesArr = [];
+    const idx = 0;
+
+    property?.propertyValue.forEach(()=> {
+      fileTypesName === 'fileType' ?
+        fileTypesArr.push(property.propertyValue[idx]?.fileType)
+        : fileTypesArr.push(property.propertyValue[idx]?.functionalEquivalence);
+    });
+    return fileTypesArr;
+  }, []);
 
   // method to extract consent group data from datasets
   const extract = useCallback((propertyName, dataset) => {
@@ -68,41 +112,43 @@ export const DataAccessGovernance = (props) => {
   // extract consent groups from datasets
   const prefillConsentGroups = useCallback(async () => {
     // from datasets array to consent group array (needs to match the existing consent group structure)
-    var consentGroups = datasets?.map((dataset, idx) => {
+    var consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
+      const dataUse = await normalizeDataUse(dataset?.dataUse);
       // DAC is required if openAcess is false
       const openAccess = extract('Open Access', dataset);
-      const dac = openAccess ? undefined : DAC.get(dataset?.dacId);
-      const dacs = openAccess ? undefined : DAC.list();
+      const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
+      const dacs = openAccess ? undefined : await DAC.list();
 
       // extract the consent group data from the dataset
       return {
         consentGroup: {
-          consentGroupName: dataset?.datasetName,
+          consentGroupName: dataset.datasetName,
 
           // primary
-          generalResearchUse: dataset?.dataUse.generalUse,
-          hmb: dataset?.dataUse.hmbResearch,
-          poa: dataset?.dataUse.populationOriginsAncestry,
+          generalResearchUse: dataUse.generalUse,
+          hmb: dataUse.hmbResearch,
+          diseaseSpecificUse: dataUse.diseaseRestrictions,
+          poa: dataUse.populationOriginsAncestry,
           openAccess: openAccess,
-          otherPrimary: dataset?.dataUse.other,
+          otherPrimary: dataUse.other,
 
           // secondary
-          nmds: dataset?.dataUse.methodsResearch,
-          gso: dataset?.dataUse.geneticStudiesOnly,
-          pub: dataset?.dataUse.publicationResults,
-          col: dataset?.dataUse.collaboratorRequired,
-          irb: dataset?.dataUse.ethicsApprovalRequired,
-          gs: dataset?.dataUse.geographicalRestrictions,
-          mor: dataset?.dataUse.publicationMoratorium,
-          npu: dataset?.dataUse.commercialUse,
-          otherSecondary: dataset?.dataUse.secondaryOther,
+          nmds: dataUse.methodsResearch,
+          gso: dataUse.geneticStudiesOnly,
+          pub: dataUse.publicationResults,
+          col: dataUse.collaboratorRequired,
+          irb: dataUse.ethicsApprovalRequired,
+          gs: dataUse.geographicalRestrictions,
+          mor: dataUse.publicationMoratorium,
+          npu: dataUse.commercialUse,
+          otherSecondary: dataUse.secondaryOther,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
-          numberOfParticipants: extract('Number of Participants', dataset),
+          numberOfParticipants: extract('Number Of Participants', dataset),
           fileTypes: [
             {
-              fileType: extract('File Types', dataset),
-              //functionalEquivalence: dataset.properties.fileTypes.functionalEquivalence
+              fileType: extractFileTypes('File Types', 'fileType', dataset),
+              functionalEquivalence: extractFileTypes('File Types', 'functionalEquivalence', dataset)
             }
           ],
           dataAccessCommitteeId: { ...dac, dacs },
@@ -113,18 +159,29 @@ export const DataAccessGovernance = (props) => {
         valid: false,
         disableFields: true,
       };
-    });
-    if(isEmpty(consentGroupsState)){
+    }));
+    if (isEmpty(consentGroupsState)) {
       setConsentGroupsState(consentGroups);
     }
     return consentGroupsState;
-  }, [extract, datasets, consentGroupsState]);
+  }, [consentGroupsState, datasets, normalizeDataUse, extract, extractFileTypes]);
 
   // pre-populate the page with a consent group
   useEffect(() => {
     // when in edit study mode, pre-populate the page with the study's consent groups otherwise add new
-    studyEditMode ? prefillConsentGroups() : addNewConsentGroup();
-  }, [prefillConsentGroups, addNewConsentGroup, studyEditMode]);
+    const init = async () => {
+      if (studyEditMode) {
+        if (!isNil(datasets)) {
+          await prefillConsentGroups();
+        }
+      } else {
+        if (isEmpty(consentGroupsState)) {
+          addNewConsentGroup();
+        }
+      }
+    };
+    init();
+  }, [prefillConsentGroups, addNewConsentGroup, studyEditMode, datasets, consentGroupsState]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
