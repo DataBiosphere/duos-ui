@@ -52,14 +52,12 @@ export const DataAccessGovernance = (props) => {
 
   const extractFileTypes = useCallback((propertyName, fileTypesName, dataset) => {
     const property = find({ propertyName })(dataset.properties);
-
     const fileTypesArr = [];
-    const idx = 0;
 
-    property?.propertyValue.forEach(()=> {
+    property?.propertyValue.forEach((propValue)=> {
       fileTypesName === 'fileType' ?
-        fileTypesArr.push(property.propertyValue[idx]?.fileType)
-        : fileTypesArr.push(property.propertyValue[idx]?.functionalEquivalence);
+        fileTypesArr.push(propValue?.fileType)
+        : fileTypesArr.push(propValue?.functionalEquivalence);
     });
     return fileTypesArr;
   }, []);
