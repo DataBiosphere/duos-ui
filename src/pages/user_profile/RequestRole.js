@@ -23,10 +23,6 @@ export default function RequestRole(props) {
       label: 'Register a dataset'
     },
     {
-      key: 'checkRequestDataAccess',
-      label: 'Request access to data',
-    },
-    {
       key: 'checkSOPermissions',
       label: `I am a Signing Official and I want to issue permissions to my institution's users`
     },
@@ -117,17 +113,6 @@ export default function RequestRole(props) {
       padding: '25px 270px 0px 270px'
     }
   }, [
-    button({
-      id: 'btn_submit',
-      onClick: goToPrevPage,
-      className: 'f-right',
-      style: {
-        marginTop: 7,
-        fontFamily: 'Montserrat',
-        fontSize: '18px',
-        padding: 5
-      },
-    }, ['< Go back to User Profile']),
     p({
       style: {
         color: '#01549F',
@@ -178,9 +163,16 @@ export default function RequestRole(props) {
         onChange: handleSupportRequestsChange,
       }),
     ]),
-
     button({
-      id: 'btn_submit',
+      id: 'btn_save',
+      onClick: goToPrevPage,
+      className: 'f-left btn-primary btn-back',
+      style: {
+        marginTop: '50px',
+      },
+    }, ['Back']),
+    button({
+      id: 'btn_save',
       onClick: submitForm,
       className: 'f-right btn-primary common-background',
       style: {
