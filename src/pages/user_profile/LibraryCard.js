@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { eRACommons } from '../../components/eRACommons';
-import { Notifications } from '../../libs/utils';
+import React from 'react';
 
 export default function LibraryCard(props) {
 
@@ -34,5 +32,5 @@ export default function LibraryCard(props) {
       <p style={{ margin: '0px 0px 0px 10px' }}>Issued on: {issuedOn}</p>
       <p style={{ margin: '0px 0px 0px 10px' }}>Issued by: {issuedBy}</p>
     </div>
-  </div>
+  </div>;
 }
