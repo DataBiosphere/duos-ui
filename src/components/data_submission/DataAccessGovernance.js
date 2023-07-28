@@ -120,7 +120,7 @@ export const DataAccessGovernance = (props) => {
       // extract the consent group data from the dataset
       return {
         consentGroup: {
-          consentGroupName: dataset.datasetName,
+          consentGroupName: dataset.name,
 
           // primary
           generalResearchUse: dataUse.generalUse,
