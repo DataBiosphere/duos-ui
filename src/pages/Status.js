@@ -44,8 +44,8 @@ export const Status = hh(class Status extends Component {
   }
 
   render() {
-    const healthyState = <CheckboxMarkedCircleOutline fill={ 'green' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
-    const unhealthyState = <DiameterVariant fill={ 'red' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
+    const healthyState = <CheckboxMarkedCircleOutline fill={ 'green' } style={ { marginLeft: '2rem', verticalAlign: 'middle', height: '24px' } }/>;
+    const unhealthyState = <DiameterVariant fill={ 'red' } style={ { marginLeft: '2rem', verticalAlign: 'middle', height: '24px' } }/>;
     const consentHealthy = this.isConsentHealthy(this.state.consentStatus) ? healthyState : unhealthyState;
     const ontologyHealthy = this.isOntologyHealthy(this.state.ontologyStatus) ? healthyState : unhealthyState;
 
