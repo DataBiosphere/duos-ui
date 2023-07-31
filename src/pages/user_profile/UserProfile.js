@@ -4,11 +4,12 @@ import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
-import ResearcherStatus from './ResearcherStatus';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
+import ResearcherStatus from './ResearcherStatus';
+import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 
 export default function UserProfile(props) {
 
@@ -106,13 +107,15 @@ export default function UserProfile(props) {
         marginBottom: '50px'
       },
     }, ['Request a New Role']),
-
     div({ className: '', style: { 'marginTop': '115px' } }, []),
     ResearcherStatus({
       user: user,
       pageProps: props,
       profile: profile
-    })
+    }),
+    div({ className: '', style: { 'marginTop': '115px' } }, []),
+    AcceptedAcknowledgements(),
+    div({ className: '', style: { 'marginTop': '50px' } }, []),
   ]);
 
 }
