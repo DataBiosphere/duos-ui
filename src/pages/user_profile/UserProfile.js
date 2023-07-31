@@ -4,6 +4,7 @@ import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
+import ResearcherStatus from './ResearcherStatus';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
@@ -105,6 +106,13 @@ export default function UserProfile(props) {
         marginBottom: '50px'
       },
     }, ['Request a New Role']),
+
+    div({ className: '', style: { 'marginTop': '115px' } }, []),
+    ResearcherStatus({
+      user: user,
+      pageProps: props,
+      profile: profile
+    })
   ]);
 
 }
