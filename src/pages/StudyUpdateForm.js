@@ -122,8 +122,8 @@ export const StudyUpdateForm = (props) => {
 
   const prefillFormData = useCallback(async (study) => {
     setFormData({
-      name: study.name,
-      description: study.description,
+      studyName: study.name,
+      studyDescription: study.description,
       dataTypes: study.dataTypes,
       piName: study.piName,
       publicVisibility: study.publicVisibility,
@@ -133,7 +133,7 @@ export const StudyUpdateForm = (props) => {
   }, [extractAllProperties]);
 
   useEffect(() => {
-    if (isNil(formData.name) && !isEmpty(study)) {
+    if (isNil(formData.studyName) && !isEmpty(study)) {
       prefillFormData(study);
     }
   }, [prefillFormData, study, formData]);

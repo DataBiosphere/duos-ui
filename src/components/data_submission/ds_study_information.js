@@ -49,7 +49,7 @@ export default function DataSubmissionStudyInformation(props) {
       validation: validation.studyName,
       onChange,
       onValidationChange,
-      defaultValue: studyEditMode ? formData?.name : undefined,
+      defaultValue: studyEditMode ? formData?.studyName : undefined,
       disabled: studyEditMode ? true : false,
     }),
     h(FormField, {
@@ -75,7 +75,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
-      defaultValue: studyEditMode ? formData?.description : undefined,
+      defaultValue: studyEditMode ? formData?.studyDescription : undefined,
       validators: [FormValidators.REQUIRED],
       validation: validation.studyDescription,
       onChange,
