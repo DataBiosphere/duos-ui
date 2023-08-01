@@ -330,6 +330,12 @@ export const DataSet = {
     return await res.json();
   },
 
+  searchDatasetIndex: async (query) => {
+    const url = `${await getApiUrl()}/api/dataset/search/index`;
+    const res = await axios.post(url, query, Config.authOpts());
+    return res.data;
+  },
+
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await getApiUrl()}/api/dataset/v2/${dataSetId}`;
     const res = await fetchOk(url, Config.authOpts());
