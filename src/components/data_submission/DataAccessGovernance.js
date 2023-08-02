@@ -69,6 +69,7 @@ export const DataAccessGovernance = (props) => {
   }, []);
 
   useEffect(() => {
+    console.log('this');
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
@@ -115,7 +116,6 @@ export const DataAccessGovernance = (props) => {
       // DAC is required if openAcess is false
       const openAccess = extract('Open Access', dataset);
       const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
-      const dacs = openAccess ? undefined : await DAC.list();
 
       // extract the consent group data from the dataset
       return {
@@ -149,7 +149,7 @@ export const DataAccessGovernance = (props) => {
               functionalEquivalence: extractFileTypes('File Types', 'functionalEquivalence', dataset)
             }
           ],
-          dataAccessCommitteeId: { ...dac, dacs },
+          dataAccessCommitteeId: dac?.dacId,
         },
         key: `prefilledConsentGroups[${idx}]`,
         nihInstitutionalCertificationFile: null,
