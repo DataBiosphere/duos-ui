@@ -13,8 +13,7 @@ export const ConsentGroupForm = (props) => {
     deleteConsentGroup,
     disableDelete,
     consentGroupsState,
-    studyEditMode,
-    dacs,
+    studyEditMode
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
@@ -51,7 +50,7 @@ export const ConsentGroupForm = (props) => {
     numberOfParticipants: consentGroupsState[idx].consentGroup.numberOfParticipants || undefined, // numeric
     fileTypes: consentGroupsState[idx].consentGroup.fileTypes || [{}],
 
-    dataAccessCommitteeId: (consentGroupsState[idx].consentGroup.dataAccessCommitteeId || null), // string
+    dataAccessCommitteeId: consentGroupsState[idx].consentGroup.dataAccessCommitteeId || null, // string
   });
 
   const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
@@ -91,7 +90,6 @@ export const ConsentGroupForm = (props) => {
           studyEditMode,
           validation,
           onValidationChange,
-          dacs
         },
       })
       : h(ConsentGroupSummary, {
