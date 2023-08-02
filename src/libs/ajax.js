@@ -330,6 +330,12 @@ export const DataSet = {
     return await res.json();
   },
 
+  searchDatasetIndex: async (query) => {
+    const url = `${await getApiUrl()}/api/dataset/search/index`;
+    const res = await axios.post(url, query, Config.authOpts());
+    return res.data;
+  },
+
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await getApiUrl()}/api/dataset/v2/${dataSetId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -403,7 +409,7 @@ export const DataSet = {
 
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
-    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(studyObject), {method: 'PUT'}]));
+    return await axios.put(url, Config.jsonBody(studyObject), Config.multiPartOpts());
   },
 };
 

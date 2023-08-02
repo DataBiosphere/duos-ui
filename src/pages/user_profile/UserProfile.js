@@ -1,16 +1,17 @@
-
 import { useState, useEffect } from 'react';
-import { div, h, h1, hr } from 'react-hyperscript-helpers';
+import { div, h, h1, hr, button } from 'react-hyperscript-helpers';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
 import AffiliationAndRoles from './AffiliationAndRoles';
+import ResearcherStatus from './ResearcherStatus';
+import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
 
-export default function UserProfile() {
+export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
   const [userProps, setUserProps] = useState({});
@@ -46,6 +47,13 @@ export default function UserProfile() {
     init();
   }, []);
 
+  const goToRequestRole = () => {
+    props.history.push({
+      pathname: '/request_role',
+      state: { data: profile }
+    });
+  };
+
   return div({
     className: '',
     style: {
@@ -54,7 +62,7 @@ export default function UserProfile() {
     }
   }, [
     div({ className: '' }, [
-      Notification({notificationData}),
+      Notification({ notificationData }),
       PageHeading({
         id: 'researcherProfile',
         color: 'common',
@@ -91,6 +99,23 @@ export default function UserProfile() {
       userProps: userProps,
       institutions: institutions
     }),
+    button({
+      className: 'f-left btn-primary common-background',
+      onClick: goToRequestRole,
+      style: {
+        marginTop: '10px',
+        marginBottom: '50px'
+      },
+    }, ['Request a New Role']),
+    div({ className: '', style: { 'marginTop': '115px' } }, []),
+    ResearcherStatus({
+      user: user,
+      pageProps: props,
+      profile: profile
+    }),
+    div({ className: '', style: { 'marginTop': '115px' } }, []),
+    AcceptedAcknowledgements(),
+    div({ className: '', style: { 'marginTop': '50px' } }, []),
   ]);
 
 }
