@@ -97,7 +97,6 @@ export const StudyUpdateForm = (props) => {
     }
   };
 
-  // convert property to date
   const toYYYYMMDD = (dateString) => {
     if(!isNil(dateString)){
       return new Date(dateString).toISOString().split('T')[0];
@@ -121,7 +120,6 @@ export const StudyUpdateForm = (props) => {
   }, [study]);
 
   const prefillFormData = useCallback(async (study) => {
-    // get dataSubmitter information
     const userId = study.createUserId;
     const dataSubmitter = await User.getById(userId);
 

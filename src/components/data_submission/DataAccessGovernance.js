@@ -62,28 +62,26 @@ export const DataAccessGovernance = (props) => {
     return fileTypesArr;
   }, []);
 
-  // method to extract consent group data from datasets
   const extract = useCallback((propertyName, dataset) => {
     const property = find({ propertyName })(dataset.properties);
     return property?.propertyValue;
   }, []);
 
   useEffect(() => {
-    console.log('this');
     DAC.list(false).then((dacList) => {
       setDacs(dacList);
     });
   }, [setDacs]);
 
   useEffect(() => {
-    const filteredConsentGroupsState = consentGroupsState?.filter(state => !isNil(state));
+    const filteredConsentGroupsState = consentGroupsState.filter(state => !isNil(state));
 
-    const groups = filteredConsentGroupsState?.map(state => state.consentGroup);
-    const valid = every(filteredConsentGroupsState?.map(state => (!state.editMode) && state.valid));
+    const groups = filteredConsentGroupsState.map(state => state.consentGroup);
+    const valid = every(filteredConsentGroupsState.map(state => (!state.editMode) && state.valid));
 
     onChange({ key: 'consentGroups', value: groups, isValid: valid });
 
-    filteredConsentGroupsState?.forEach((cgState, idx) => {
+    filteredConsentGroupsState.forEach((cgState, idx) => {
       onFileChange({
         key: `consentGroups[${idx}].nihInstitutionalCertificationFile`,
         value: cgState?.nihInstitutionalCertificationFile,
@@ -95,7 +93,7 @@ export const DataAccessGovernance = (props) => {
   const addNewConsentGroup = useCallback(() => {
     setConsentGroupsState((consentGroupsState) => {
       const newConsentGroupsState = cloneDeep(consentGroupsState);
-      newConsentGroupsState?.push({
+      newConsentGroupsState.push({
         consentGroup: {},
         key: Math.max(0, ...consentGroupsState.map((state) => state.key)) + 1,
         nihInstitutionalCertificationFile: null,
@@ -110,14 +108,12 @@ export const DataAccessGovernance = (props) => {
 
   // extract consent groups from datasets
   const prefillConsentGroups = useCallback(async () => {
-    // from datasets array to consent group array (needs to match the existing consent group structure)
     var consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
       const dataUse = await normalizeDataUse(dataset?.dataUse);
-      // DAC is required if openAcess is false
+      // DAC is required if openAccess is false
       const openAccess = extract('Open Access', dataset);
       const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
 
-      // extract the consent group data from the dataset
       return {
         consentGroup: {
           consentGroupName: dataset.name,
@@ -164,9 +160,8 @@ export const DataAccessGovernance = (props) => {
     return consentGroupsState;
   }, [consentGroupsState, datasets, normalizeDataUse, extract, extractFileTypes]);
 
-  // pre-populate the page with a consent group
+  // when in edit study mode, pre-populate the page with the study's consent groups otherwise add new
   useEffect(() => {
-    // when in edit study mode, pre-populate the page with the study's consent groups otherwise add new
     const init = async () => {
       if (studyEditMode) {
         if (!isNil(datasets)) {
@@ -220,7 +215,7 @@ export const DataAccessGovernance = (props) => {
   }, []);
 
   useEffect(() => {
-    setAllConsentGroupsSaved(consentGroupsState?.every((state) => state.editMode === false));
+    setAllConsentGroupsSaved(consentGroupsState.every((state) => state.editMode === false));
   }, [consentGroupsState, setAllConsentGroupsSaved]);
 
   return div({
@@ -270,7 +265,7 @@ export const DataAccessGovernance = (props) => {
           a({
             id: 'btn_addConsentGroup',
             className: 'btn-primary btn-add common-background',
-            onClick: () => { addNewConsentGroup(); }
+            onClick: () => addNewConsentGroup(),
           }, [
             span({}, ['Add Consent Group'])
           ])

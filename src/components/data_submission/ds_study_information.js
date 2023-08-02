@@ -50,7 +50,7 @@ export default function DataSubmissionStudyInformation(props) {
       onChange,
       onValidationChange,
       defaultValue: studyEditMode ? formData?.studyName : undefined,
-      disabled: studyEditMode ? true : false,
+      disabled: studyEditMode,
     }),
     h(FormField, {
       id: 'studyType',

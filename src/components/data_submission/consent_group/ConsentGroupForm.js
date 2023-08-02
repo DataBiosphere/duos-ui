@@ -17,12 +17,9 @@ export const ConsentGroupForm = (props) => {
   } = props;
 
   const [consentGroup, setConsentGroup] = useState({
-    // this will need to change to studyEditMode ? <consentGroupsState property> : <default>
     consentGroupName: consentGroupsState[idx].consentGroup.consentGroupName || '',
 
-    // primary: one of these needs to be filled
-    // if in edit study mode, give each of these the value of the consent group state at the index
-    // otherwise give them the default value
+    // primary:
     generalResearchUse: consentGroupsState[idx].consentGroup.generalResearchUse || undefined,
     hmb: consentGroupsState[idx].consentGroup.hmb || undefined,
     diseaseSpecificUse: consentGroupsState[idx].consentGroup.diseaseSpecificUse || undefined, // string
