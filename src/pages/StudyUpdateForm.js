@@ -121,6 +121,10 @@ export const StudyUpdateForm = (props) => {
   }, [study]);
 
   const prefillFormData = useCallback(async (study) => {
+    // get dataSubmitter information
+    const userId = study.createUserId;
+    const dataSubmitter = await User.getById(userId);
+
     setFormData({
       studyName: study.name,
       studyDescription: study.description,
@@ -128,6 +132,8 @@ export const StudyUpdateForm = (props) => {
       piName: study.piName,
       publicVisibility: study.publicVisibility,
       datasets: study.datasets,
+      dataSubmitterName: dataSubmitter.displayName,
+      dataSubmitterEmail: dataSubmitter.email,
       properties: extractAllProperties()
     });
   }, [extractAllProperties]);
