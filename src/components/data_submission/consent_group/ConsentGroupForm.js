@@ -16,38 +16,39 @@ export const ConsentGroupForm = (props) => {
     studyEditMode
   } = props;
 
+  const curConsentGroup = consentGroupsState[idx].consentGroup;
   const [consentGroup, setConsentGroup] = useState({
-    consentGroupName: consentGroupsState[idx].consentGroup.consentGroupName || '',
+    consentGroupName: curConsentGroup.consentGroupName || '',
 
     // primary:
-    generalResearchUse: consentGroupsState[idx].consentGroup.generalResearchUse || undefined,
-    hmb: consentGroupsState[idx].consentGroup.hmb || undefined,
-    diseaseSpecificUse: consentGroupsState[idx].consentGroup.diseaseSpecificUse || undefined, // string
-    poa: consentGroupsState[idx].consentGroup.poa || undefined,
-    openAccess: consentGroupsState[idx].consentGroup.openAccess || undefined,
-    otherPrimary: consentGroupsState[idx].consentGroup.otherPrimary || undefined, // string
+    generalResearchUse: curConsentGroup.generalResearchUse || undefined,
+    hmb: curConsentGroup.hmb || undefined,
+    diseaseSpecificUse: curConsentGroup.diseaseSpecificUse || undefined, // string
+    poa: curConsentGroup.poa || undefined,
+    openAccess: curConsentGroup.openAccess || undefined,
+    otherPrimary: curConsentGroup.otherPrimary || undefined, // string
 
     // secondary:
-    nmds: consentGroupsState[idx].consentGroup.nmds || false, // No Methods Development or validation studies
-    gso: consentGroupsState[idx].consentGroup.gso || false, // genetic studies only
-    pub: consentGroupsState[idx].consentGroup.pub || false, // publication required
-    col: consentGroupsState[idx].consentGroup.col || false, // collaboration required
-    irb: consentGroupsState[idx].consentGroup.irb || false, // irb approval required
-    gs: consentGroupsState[idx].consentGroup.gs || null, // string: geographic restriction
-    mor: consentGroupsState[idx].consentGroup.mor || undefined, // date (string): publication moratorium
-    npu: consentGroupsState[idx].consentGroup.npu || false, // non profit only
-    otherSecondary: consentGroupsState[idx].consentGroup.otherSecondary || null, // string
+    nmds: curConsentGroup.nmds || false, // No Methods Development or validation studies
+    gso: curConsentGroup.gso || false, // genetic studies only
+    pub: curConsentGroup.pub || false, // publication required
+    col: curConsentGroup.col || false, // collaboration required
+    irb: curConsentGroup.irb || false, // irb approval required
+    gs: curConsentGroup.gs || null, // string: geographic restriction
+    mor: curConsentGroup.mor || undefined, // date (string): publication moratorium
+    npu: curConsentGroup.npu || false, // non profit only
+    otherSecondary: curConsentGroup.otherSecondary || null, // string
 
     // dataLocation is one of:
     // "AnVIL Workspace", "Terra Workspace",
     // "TDR Location", "Not Determined"
-    dataLocation: consentGroupsState[idx].consentGroup.dataLocation || null,
+    dataLocation: curConsentGroup.dataLocation || null,
 
-    url: consentGroupsState[idx].consentGroup.url || '',
-    numberOfParticipants: consentGroupsState[idx].consentGroup.numberOfParticipants || undefined, // numeric
-    fileTypes: consentGroupsState[idx].consentGroup.fileTypes || [{}],
+    url: curConsentGroup.url || '',
+    numberOfParticipants: curConsentGroup.numberOfParticipants || undefined, // numeric
+    fileTypes: curConsentGroup.fileTypes || [{}],
 
-    dataAccessCommitteeId: consentGroupsState[idx].consentGroup.dataAccessCommitteeId || null, // string
+    dataAccessCommitteeId: curConsentGroup.dataAccessCommitteeId || null, // string
   });
 
   const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);

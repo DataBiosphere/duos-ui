@@ -34,6 +34,7 @@ export const DataAccessGovernance = (props) => {
     let du = dataUse;
     if (!isNil(dataUse.diseaseRestrictions)) {
       du.hasDiseaseRestrictions = true;
+      // The disease restriction may not cleanly map to the label
       try {
         du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
       } catch {
