@@ -13,6 +13,7 @@ import NIHAdministrativeInformation from '../components/data_submission/NIHAdmin
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
 import { DataSet, User, Institution } from '../libs/ajax';
+import {Storage} from '../libs/storage';
 import { set } from 'lodash';
 
 
@@ -68,7 +69,7 @@ export const StudyUpdateForm = (props) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const me = await User.getMe();
+        const me = Storage.getCurrentUser();
         setUser(me);
         setStudy(await DataSet.getStudyById(studyId));
         setFailedInit(false);
