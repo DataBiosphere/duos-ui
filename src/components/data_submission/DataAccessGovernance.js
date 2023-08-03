@@ -19,6 +19,7 @@ export const DataAccessGovernance = (props) => {
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getDiseaseLabels = async (ontologyIds) => {
     let labels = [];
@@ -157,6 +158,7 @@ export const DataAccessGovernance = (props) => {
     }));
     if (isEmpty(consentGroupsState)) {
       setConsentGroupsState(consentGroups);
+      setIsLoading(false);
     }
     return consentGroupsState;
   }, [consentGroupsState, datasets, normalizeDataUse, extract, extractFileTypes]);
@@ -165,7 +167,7 @@ export const DataAccessGovernance = (props) => {
   useEffect(() => {
     const init = async () => {
       if (studyEditMode) {
-        if (!isNil(datasets)) {
+        if (!isNil(datasets) && isLoading) {
           await prefillConsentGroups();
         }
       } else {
@@ -175,7 +177,7 @@ export const DataAccessGovernance = (props) => {
       }
     };
     init();
-  }, [prefillConsentGroups, addNewConsentGroup, studyEditMode, datasets, consentGroupsState]);
+  }, [prefillConsentGroups, addNewConsentGroup, studyEditMode, datasets, consentGroupsState, isLoading]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
