@@ -37,7 +37,7 @@ export default function NihAnvilUse(props) {
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
       defaultValue: studyEditMode ? formData?.properties.nihAnvilUse : undefined,
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
@@ -56,7 +56,7 @@ export default function NihAnvilUse(props) {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
-        validators: [FormValidators.REQUIRED],
+        validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
         defaultValue: studyEditMode ? formData?.properties.dbGaPPhsID : formData.dbGaPPhsID,
         onChange,
         validation: validation.dbGaPPhsID,

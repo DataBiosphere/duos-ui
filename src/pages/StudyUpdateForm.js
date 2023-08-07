@@ -4,8 +4,6 @@ import { Notifications } from '../libs/utils';
 import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
 import { cloneDeep, isNil, isEmpty, toLower } from 'lodash/fp';
-import { validateForm } from '../utils/JsonSchemaUtils';
-import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
@@ -148,13 +146,14 @@ export const StudyUpdateForm = (props) => {
   const [formValidation, setFormValidation] = useState({});
 
   const formatForRegistration = (formData) => {
+
     for (const key of Object.keys(formData)) {
       if (isNil(formData[key])) {
         formData[key] = undefined;
       }
     }
 
-    formData.consentGroups.forEach((cg) => {
+    formData?.consentGroups?.forEach((cg) => {
       for (const key of Object.keys(cg)) {
         if (isNil(cg[key])) {
           cg[key] = undefined;
@@ -165,11 +164,11 @@ export const StudyUpdateForm = (props) => {
   };
 
   // compute multipart/form-data object, includes registration information and all files
-  const createMultiPartFormData = (registration) => {
+  const createMultiPartFormData = (update) => {
 
     const multiPartFormData = new FormData();
 
-    multiPartFormData.append('dataset', JSON.stringify(registration));
+    multiPartFormData.append('dataset', JSON.stringify(update));
 
     for (const field of Object.keys(formFiles)) {
       if (!isNil(formFiles[field])) {
@@ -187,32 +186,11 @@ export const StudyUpdateForm = (props) => {
       return;
     }
 
-    const registration = cloneDeep(formData);
-    formatForRegistration(registration);
+    const update = cloneDeep(formData);
+    formatForRegistration(update);
+    const multiPartFormData = createMultiPartFormData(update);
 
-    // check against json schema to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(validateSchema, registration);
-    if (formData.alternativeDataSharingPlan === true) {
-      if (isNil(formFiles.alternativeDataSharingPlanFile)) {
-        validation.alternativeDataSharingPlanFile = {
-          valid: false,
-          failed: ['required']
-        };
-        valid = false;
-      }
-    }
-
-    setFormValidation(validation);
-
-    if (!valid) {
-      Notifications.showError({ text: 'There are errors in your form. Please fix and try again.' });
-      return;
-    }
-
-    // no validation issues, matches json schema: continue to submission
-    const multiPartFormData = createMultiPartFormData(registration);
-
-    DataSet.updateStudy(multiPartFormData).then(() => {
+    DataSet.updateStudy(studyId, multiPartFormData).then(() => {
       history.push('/dataset_catalog');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });
     }, (e) => {

@@ -40,7 +40,7 @@ export const NIHAdministrativeInformation = (props) => {
       id: 'piInstitution',
       title: 'Principal Investigator Institution',
       isRendered: !isEmpty(institutions),
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
       selectOptions: institutions.map((inst) => { return { displayText: inst.name, id: inst.id };}),
       isCreatable: false,
@@ -58,7 +58,7 @@ export const NIHAdministrativeInformation = (props) => {
     h(FormField, {
       id: 'nihGrantContractNumber',
       title: 'NIH Grant or Contract Number',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange,
       defaultValue: studyEditMode ? formData?.properties.nihGrantContractNumber : formData?.nihGrantContractNumber,
       validation: validation.nihGrantContractNumber,
@@ -158,7 +158,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'If yes, explain why controlled access is needed for GSR.',
       isRendered: showGSRRequiredExplanation,
       defaultValue: gsrRequiredExplanation,
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
         setGSRRequiredExplanation(value);
         onChange({key, value});

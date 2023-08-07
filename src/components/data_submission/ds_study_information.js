@@ -45,7 +45,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'studyName',
       title: 'Study Name',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.studyName,
       onChange,
       onValidationChange,
@@ -76,7 +76,7 @@ export default function DataSubmissionStudyInformation(props) {
       title: 'Study Description',
       placeholder: 'Description',
       defaultValue: studyEditMode ? formData?.studyDescription : undefined,
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.studyDescription,
       onChange,
       onValidationChange
@@ -85,7 +85,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
       isCreatable: true,
       isMulti: true,
@@ -127,7 +127,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'piName',
       title: 'Principal Investigator Name',
       defaultValue: studyEditMode ? formData?.piName : undefined,
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.piName,
       onChange,
       onValidationChange
@@ -216,7 +216,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.RADIOGROUP,
       description: 'Please select one of the following data use permissions for your dataset',
       name: 'publicVisibility',
