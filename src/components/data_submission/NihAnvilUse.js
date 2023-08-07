@@ -41,7 +41,7 @@ export default function NihAnvilUse(props) {
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
-        formData.properties.nihAnvilUse = config.value;
+        studyEditMode ? formData.properties.nihAnvilUse = config.value : undefined;
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
