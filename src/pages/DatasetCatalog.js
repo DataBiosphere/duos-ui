@@ -71,9 +71,7 @@ export default function DatasetCatalog(props) {
 
   // Modal States
   const [showConnectDataset, setShowConnectDataset] = useState(false);
-  //const [showDatasetDisable, setShowDatasetDisable] = useState(false);
   const [showDatasetDelete, setShowDatasetDelete] = useState(false);
-  //const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
 
