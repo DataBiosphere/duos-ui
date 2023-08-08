@@ -381,6 +381,7 @@ const match_results = [
     'purpose': 'dar-reference-id-1',
     'match': true,
     'failed': false,
+    'abstain': false,
     'createDate': 'Jan 23, 2023',
     'algorithmVersion': 'v2'
   },
@@ -390,6 +391,7 @@ const match_results = [
     'purpose': 'dar-reference-id-1',
     'match': true,
     'failed': false,
+    'abstain': false,
     'createDate': 'Jan 23, 2023',
     'algorithmVersion': 'v2'
   }
@@ -489,9 +491,10 @@ describe('BucketUtils', () => {
         'purpose': 'dar-reference-id-1',
         'match': false,
         'failed': false,
+        'abstain': true,
         'createDate': 'Jan 23, 2023',
         'algorithmVersion': 'v2',
-        'failureReasons': ['1', '2', '3']
+        'rationales': ['1', '2', '3']
       },
       {
         'id': 2,
@@ -499,23 +502,24 @@ describe('BucketUtils', () => {
         'purpose': 'dar-reference-id-1',
         'match': false,
         'failed': false,
+        'abstain': true,
         'createDate': 'Jan 23, 2023',
         'algorithmVersion': 'v2',
-        'failureReasons': ['1', '2', '3', '4', '5']
+        'rationales': ['1', '2', '3', '4', '5']
       }
     ];
     cy.stub(Match, 'findMatchBatch').returns(failing_matches);
     const buckets = await binCollectionToBuckets(dar_collection);
     expect(buckets).to.not.be.empty;
-    let failureReasonCheck = false;
+    let rationaleCheck = false;
     forEach(b => {
       if (!isEmpty(b.matchResults)) {
-        expect(b.algorithmResult.failureReasons).to.not.be.empty;
-        expect(b.algorithmResult.failureReasons.length).to.eq(5, 'Failure reasons should be length 5');
-        failureReasonCheck = true;
+        expect(b.algorithmResult.rationales).to.not.be.empty;
+        expect(b.algorithmResult.rationales.length).to.eq(5, 'Rationales should be length 5');
+        rationaleCheck = true;
       }
     })(buckets);
-    expect(failureReasonCheck).to.eq(true, 'Failure reason checks should have occurred');
+    expect(rationaleCheck).to.eq(true, 'Rationale checks should have occurred');
   });
 
   it('marks three unequal data uses as unequal', async () => {

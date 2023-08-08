@@ -197,7 +197,7 @@ const filterDatasetsByDACs = (dacIds, datasets) => {
  *
  * @private
  * @param bucket
- * @returns {{result: string, failureReasons: string[], id, createDate: undefined}|{result: (string|string), failureReasons: *, id: *, createDate: *}|{result: string, failureReasons: undefined, id, createDate: undefined}}
+ * @returns {{result: string, rationales: string[], id, createDate: undefined}|{result: (string|string), rationales: *, id: *, createDate: *}|{result: string, rationales: undefined, id, createDate: undefined}}
  */
 const calculateAlgorithmResultForBucket = (bucket) => {
   // V1 and V2: We actually DO NOT want to show system match results when the data use indicates
@@ -217,20 +217,20 @@ const calculateAlgorithmResultForBucket = (bucket) => {
 
   // check results based on matchVals
   if (isEmpty(matchVals)) {
-    return {result: 'N/A', createDate: undefined, failureReasons: undefined, id: bucket.key};
+    return {result: 'N/A', createDate: undefined, rationales: undefined, id: bucket.key};
   }
   else if ((matchVals.length === 1)) {
-    const failureReasons = flow(
-      flatMap(match => match.failureReasons),
+    const rationales = flow(
+      flatMap(match => match.rationales),
       uniq
     )(bucket.matchResults);
     const {createDate, failed, id, match} = bucket.matchResults[0];
-    const matchResult = {createDate, failureReasons, failed, id, match};
+    const matchResult = {createDate, rationales, failed, id, match};
     if (abstain) {
       return {
         result: 'Abstain',
         createDate,
-        failureReasons,
+        rationales,
         id,
       };
     }
@@ -238,7 +238,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
       return {
         result: processMatchData(matchResult),
         createDate,
-        failureReasons,
+        rationales,
         id,
       };
     }
@@ -248,7 +248,7 @@ const calculateAlgorithmResultForBucket = (bucket) => {
     return {
       result: 'Unable to determine a system match',
       createDate: undefined,
-      failureReasons: ['Algorithm matched both true and false for this combination of datasets'],
+      rationales: ['Algorithm matched both true and false for this combination of datasets'],
       id: bucket.key
     };
   }
