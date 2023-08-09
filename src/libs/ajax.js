@@ -409,7 +409,7 @@ export const DataSet = {
 
   updateStudy: async (studyId, studyObject) => {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
-    return await axios.put(url, Config.jsonBody(studyObject), Config.multiPartOpts());
+    return await axios.put(url, studyObject, Config.multiPartOpts());
   },
 };
 

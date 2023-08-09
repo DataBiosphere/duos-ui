@@ -52,16 +52,19 @@ export const DataAccessGovernance = (props) => {
     return du;
   }, []);
 
-  const extractFileTypes = useCallback((propertyName, fileTypesName, dataset) => {
+  const extractFileTypes = useCallback((propertyName, dataset) => {
     const property = find({ propertyName })(dataset.properties);
-    const fileTypesArr = [];
+    let fileTypes = [];
 
     property?.propertyValue.forEach((propValue)=> {
-      fileTypesName === 'fileType' ?
-        fileTypesArr.push(propValue?.fileType)
-        : fileTypesArr.push(propValue?.functionalEquivalence);
+      fileTypes = [
+        {
+          fileType: propValue?.fileType,
+          functionalEquivalence: propValue?.functionalEquivalence
+        }
+      ]
     });
-    return fileTypesArr;
+    return fileTypes;
   }, []);
 
   const extract = useCallback((propertyName, dataset) => {
@@ -141,12 +144,7 @@ export const DataAccessGovernance = (props) => {
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
           numberOfParticipants: extract('Number Of Participants', dataset),
-          fileTypes: [
-            {
-              fileType: extractFileTypes('File Types', 'fileType', dataset),
-              functionalEquivalence: extractFileTypes('File Types', 'functionalEquivalence', dataset)
-            }
-          ],
+          fileTypes: extractFileTypes('File Types', dataset),
           dataAccessCommitteeId: dac?.dacId,
         },
         key: `prefilledConsentGroups[${idx}]`,
