@@ -18,6 +18,7 @@ export const ConsentGroupForm = (props) => {
 
   const curConsentGroup = consentGroupsState[idx].consentGroup;
   const [consentGroup, setConsentGroup] = useState({
+    datasetId: curConsentGroup.datasetId || null,
     consentGroupName: curConsentGroup.consentGroupName || '',
 
     // primary:
@@ -85,7 +86,6 @@ export const ConsentGroupForm = (props) => {
             setNihInstitutionalCertificationFile(file);
             updateNihInstitutionalCertificationFile(file);
           },
-          studyEditMode,
           validation,
           onValidationChange,
         },

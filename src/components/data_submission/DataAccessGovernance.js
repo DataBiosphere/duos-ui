@@ -121,6 +121,7 @@ export const DataAccessGovernance = (props) => {
 
       return {
         consentGroup: {
+          datasetId: dataset.dataSetId,
           consentGroupName: dataset.name,
 
           // primary
