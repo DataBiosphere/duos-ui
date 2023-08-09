@@ -5,7 +5,7 @@ import{ isEmpty, isNil } from 'lodash/fp';
 
 export default function CollectionAlgorithmDecision(props) {
   const {algorithmResult = {}, styleOverride = {}} = props;
-  const { createDate, id, result, failureReasons} = algorithmResult;
+  const { createDate, id, result, rationales} = algorithmResult;
 
   function YesResult() {
     return (<span style={{color: 'rgb(31,163,113)'}}><strong>YES</strong></span>);
@@ -63,7 +63,7 @@ export default function CollectionAlgorithmDecision(props) {
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Reason:']),
           span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
-            [!isEmpty(failureReasons) ? failureReasons.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
+            [!isEmpty(rationales) ? rationales.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
         ]),
         div({style: {fontSize: '1.5rem'}}, [
           span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),

@@ -4,9 +4,13 @@
 # ./src/assets/schemas. The schemas downloaded are based on the
 # backend configured in ./public/config.json.
 #
-# You MUST have jq and ajv installed to be able to use this script.
+# You MUST have jq, ajv, and ajv-cli installed to be able to use this script.
 #
-# USAGE: ./compile-jsonschema.sh 
+# npm install ajv
+# npm install -g ajv-cli
+# npm install -g ajv-formats
+#
+# USAGE: From the project root directory, run: ./scripts/compile-jsonschema.sh
 #
 
 set -eu
