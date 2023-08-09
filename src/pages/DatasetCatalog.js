@@ -27,15 +27,18 @@ const canApplyForDataset = (dataset) => {
   return dataset.active && !isNil(dataset.dacId);
 };
 
+const extractDatasetProp = (propertyName, dataset) => {
+  const property = find({ propertyName })(dataset.properties);
+  return property?.propertyValue;
+};
+
 const isVisible = (dataset) => {
-  if(dataset.dacApproval) {
-    if(!isNil(dataset.study.publicVisibility)){
-      return dataset.study?.publicVisibility && dataset.active;
-    } else {
-      return dataset.active;
-    }
+  const openAccess = extractDatasetProp('Open Access', dataset);
+  if(!isNil(openAccess)){
+    // if open Access is false, dac approval required
+    return openAccess ? dataset.study.publicVisibility : (dataset.dacApproval && dataset.study.publicVisibility);
   } else {
-    return false;
+    return dataset.active;
   }
 };
 
