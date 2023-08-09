@@ -27,14 +27,16 @@ const canApplyForDataset = (dataset) => {
   return dataset.active && !isNil(dataset.dacId);
 };
 
-
-// add condition based on dac vote decision:
-// if vote === true -> disabled = publicVisibility
 const isVisible = (dataset) => {
-  // need to get study? need to get correct study info to get public visibility
-  //const publicVisibility = dataset.study?.publicVisibility;
-  // return dataset.dacApproval ? dataset.study?.publicVisibility : false;
-  return dataset.dacApproval && dataset.active;
+  if(dataset.dacApproval) {
+    if(!isNil(dataset.study.publicVisibility)){
+      return dataset.study?.publicVisibility && dataset.active;
+    } else {
+      return dataset.active;
+    }
+  } else {
+    return false;
+  }
 };
 
 export default function DatasetCatalog(props) {
