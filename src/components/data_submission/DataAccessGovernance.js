@@ -62,7 +62,7 @@ export const DataAccessGovernance = (props) => {
           fileType: propValue?.fileType,
           functionalEquivalence: propValue?.functionalEquivalence
         }
-      ]
+      ];
     });
     return fileTypes;
   }, []);

@@ -148,15 +148,26 @@ export const StudyUpdateForm = (props) => {
   const formatForRegistration = (formData) => {
 
     for (const key of Object.keys(formData)) {
-      if (isNil(formData[key])) {
+      const illegalStudyFields = [formData.studyName, formData.dataSubmitterEmail, formData.dataSubmitterName];
+      if (isNil(formData[key]) && illegalStudyFields.includes(formData[key])) {
         formData[key] = undefined;
       }
     }
 
     formData?.consentGroups?.forEach((cg) => {
-      for (const key of Object.keys(cg)) {
-        if (isNil(cg[key])) {
-          cg[key] = undefined;
+      const validCgFields = [cg.dataLocation, cg.url, cg.fileTypes, cg.numberOfParticipants];
+
+      if(!isNil(cg.datasetId)){
+        for (const key of Object.keys(cg)) {
+          if(cg[key]!==cg.datasetId && !validCgFields.includes(cg[key])){
+            cg[key] = undefined;
+          }
+        }
+      } else {
+        for (const key of Object.keys(cg)) {
+          if (isNil(cg[key])) {
+            cg[key] = undefined;
+          }
         }
       }
     });
