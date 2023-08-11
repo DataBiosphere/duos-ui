@@ -74,7 +74,7 @@ export const DatasetSearchTable = (props) => {
               value: entry[0].study.dataCustodian,
             },
           ],
-          table: {
+          subtable: {
             headers: datasetTableHeader.map((header) => ({ value: header })),
             rows: entry.map((dataset) => {
               return {

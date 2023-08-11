@@ -44,7 +44,7 @@ const table = {
           value: 'Row 1, Cell 3',
         }
       ],
-      table: {
+      subtable: {
         headers: [
           {
             value: 'Sub header 1',
@@ -112,6 +112,43 @@ const StyledTableCell = styled(TableCell)(() => ({
   },
 }));
 
+const SubTable = (props) => {
+  const { subtable, open } = props;
+
+  return (
+    <TableRow>
+      <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6} component="th">
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <Box sx={{ margin: 2 }}>
+            <Table>
+              {/* subtable header */}
+              <TableHead>
+                <TableRow>
+                  {subtable.headers.map((header, i) => (
+                    <StyledTableCell key={i}>{header.value}</StyledTableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              {/* subtable rows */}
+              <TableBody>
+                {subtable.rows.map((subRow, j) => (
+                  <TableRow key={j}>
+                    {subRow.data.map((cell, k) => (
+                      <StyledTableCell key={k} component="th">
+                        {cell.value}
+                      </StyledTableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </Collapse>
+      </StyledTableCell>
+    </TableRow>
+  );
+};
+
 const CollapsibleRow = (props) => {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
@@ -128,40 +165,13 @@ const CollapsibleRow = (props) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </StyledTableCell>
-        {row.data.map((cell) => (
-          <StyledTableCell key={cell.id} component="th">
+        {row.data.map((cell, i) => (
+          <StyledTableCell key={i} component="th">
             {cell.value}
           </StyledTableCell>
         ))}
       </TableRow>
-      <TableRow>
-        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6} component="th">
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {row.table.headers.map((header) => (
-                      <StyledTableCell key={header.value}>{header.value}</StyledTableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.table.rows.map((subRow) => (
-                    <TableRow key={subRow.id}>
-                      {subRow.data.map((cell) => (
-                        <StyledTableCell key={cell.id} component="th">
-                          {cell.value}
-                        </StyledTableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </StyledTableCell>
-      </TableRow>
+      <SubTable subtable={row.subtable} open={open} />
     </React.Fragment>
   );
 };
