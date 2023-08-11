@@ -36,7 +36,7 @@ const isVisible = (dataset) => {
   const openAccess = extractDatasetProp('Open Access', dataset);
   if(!isNil(openAccess)){
     // if open Access is false, dac approval required
-    return openAccess ? dataset.study.publicVisibility : (dataset.dacApproval && dataset.study.publicVisibility);
+    return openAccess ? dataset.study?.publicVisibility : (dataset.dacApproval && dataset.study?.publicVisibility);
   } else {
     return dataset.active;
   }
