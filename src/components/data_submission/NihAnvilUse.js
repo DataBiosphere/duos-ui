@@ -36,12 +36,12 @@ export default function NihAnvilUse(props) {
         {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
-      defaultValue: studyEditMode ? formData?.properties.nihAnvilUse : undefined,
+      defaultValue: studyEditMode ? formData?.nihAnvilUse : undefined,
       validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
-        studyEditMode ? formData.properties.nihAnvilUse = config.value : undefined;
+        studyEditMode ? formData.nihAnvilUse = config.value : undefined;
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
@@ -50,14 +50,14 @@ export default function NihAnvilUse(props) {
     div({
       isRendered:
         (studyEditMode ?
-          formData?.properties.nihAnvilUse === 'yes_nhgri_yes_phs_id'
+          formData?.nihAnvilUse === 'yes_nhgri_yes_phs_id'
           : formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) }, [
       h(FormField, {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
         validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
-        defaultValue: studyEditMode ? formData?.properties.dbGaPPhsID : formData.dbGaPPhsID,
+        defaultValue: formData.dbGaPPhsID,
         onChange,
         validation: validation.dbGaPPhsID,
         onValidationChange,
@@ -66,7 +66,7 @@ export default function NihAnvilUse(props) {
         id: 'dbGaPStudyRegistrationName',
         title: 'dbGaP Study Registration Name',
         placeholder: 'Name',
-        defaultValue: studyEditMode ? formData?.properties.dbGaPStudyRegistrationName : formData.dbGaPStudyRegistrationName,
+        defaultValue: formData.dbGaPStudyRegistrationName,
         onChange,
         validation: validation.dbGaPStudyRegistrationName,
         onValidationChange,
@@ -77,7 +77,7 @@ export default function NihAnvilUse(props) {
         title: 'Embargo Release Date',
         placeholder: 'YYYY-MM-DD',
         validators: [FormValidators.DATE],
-        defaultValue: studyEditMode ? formData?.properties.embargoReleaseDate : formData.embargoReleaseDate,
+        defaultValue: formData.embargoReleaseDate,
         onChange,
         validation: validation.embargoReleaseDate,
         onValidationChange,
@@ -86,7 +86,7 @@ export default function NihAnvilUse(props) {
         id: 'sequencingCenter',
         title: 'Sequencing Center',
         placeholder: 'Name',
-        defaultValue: studyEditMode ? formData?.properties.sequencingCenter : formData.sequencingCenter,
+        defaultValue: formData.sequencingCenter,
         onChange,
         validation: validation.sequencingCenter,
         onValidationChange,

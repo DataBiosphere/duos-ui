@@ -121,17 +121,46 @@ export const StudyUpdateForm = (props) => {
   const prefillFormData = useCallback(async (study) => {
     const userId = study.createUserId;
     const dataSubmitter = await User.getById(userId);
+    const properties = extractAllProperties();
 
     setFormData({
       studyName: study.name,
+      studyType: properties.studyType,
       studyDescription: study.description,
       dataTypes: study.dataTypes,
       piName: study.piName,
+      phenotypeIndication: properties.phenotypeIndication,
+      species: properties.species,
+      dataCustodianEmail: properties.dataCustodianEmail,
       publicVisibility: study.publicVisibility,
-      datasets: study.datasets,
+      nihAnvilUse: properties.nihAnvilUse,
+      dbGaPPhsID: properties.dbGaPPhsID,
+      dbGaPStudyRegistrationName: properties.dbGaPStudyRegistrationName,
+      embargoReleaseDate: properties.embargoReleaseDate,
+      sequencingCenter: properties.sequencingCenter,
+      piInstitution: properties.piInstitution,
+      nihGrantContractNumber: properties.nihGrantContractNumber,
+      nihICsSupportingStudy: properties.nihICsSupportingStudy,
+      nihProgramOfficerName: properties.nihProgramOfficerName,
+      nihInstitutionCenterSubmission: properties.nihInstitutionCenterSubmission,
+      nihGenomicProgramAdministratorName: properties.nihGenomicProgramAdministratorName,
+      multiCenterStudy: properties.multiCenterStudy,
+      collaboratingSites: properties.collaboratingSites,
+      controlledAccessRequiredForGenomicSummaryResultsGSR: properties.controlledAccessRequiredForGenomicSummaryResultsGSR,
+      controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation: properties.controlledAccessRequiredForGenomicSummaryResultsGSRRequiredExplanation,
+      alternativeDataSharingPlan: properties.alternativeDataSharingPlan,
+      alternativeDataSharingPlanReasons: properties.alternativeDataSharingPlanReasons,
+      alternativeDataSharingPlanExplanation: properties.alternativeDataSharingPlanExplanation,
+      alternativeDataSharingPlanFileName: properties.alternativeDataSharingPlanFileName,
+      alternativeDataSharingPlanDataSubmitted: properties.alternativeDataSharingPlanDataSubmitted,
+      alternativeDataSharingPlanDataReleased: properties.alternativeDataSharingPlanDataReleased,
+      alternativeDataSharingPlanTargetDeliveryDate: properties.alternativeDataSharingPlanTargetDeliveryDate,
+      alternativeDataSharingPlanTargetPublicReleaseDate: properties.alternativeDataSharingPlanTargetPublicReleaseDate,
+      alternativeDataSharingPlanControlledOpenAccess: properties.alternativeDataSharingPlanControlledOpenAccess,
       dataSubmitterName: dataSubmitter.displayName,
       dataSubmitterEmail: dataSubmitter.email,
-      properties: extractAllProperties()
+
+      datasets: study.datasets,
     });
   }, [extractAllProperties]);
 
