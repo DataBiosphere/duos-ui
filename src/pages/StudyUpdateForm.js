@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from 'react';
 import { Notifications } from '../libs/utils';
 import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
-import { cloneDeep, isNil, isEmpty, toLower } from 'lodash/fp';
+import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
 
 import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
@@ -78,24 +78,6 @@ export const StudyUpdateForm = (props) => {
     init();
   }, [studyId]);
 
-  const radioSelectionToLabels = (selection) => {
-    if (!isNil(selection)) {
-      const lowerCaseSelection = toLower(selection);
-      switch (lowerCaseSelection) {
-        case 'i am nhgri funded and i have a dbgap phs id already':
-          return 'yes_nhgri_yes_phs_id';
-        case 'i am nhgri funded and i do not have a dbgap phs id already':
-          return 'yes_nhgri_no_phs_id';
-        case 'i am not nhgri funded but i am seeking to submit data to anvil':
-          return 'no_nhgri_yes_anvil';
-        case 'i am not nhgri funded and do not plan to store data in anvil':
-          return 'no_nhgri_no_anvil';
-        default:
-          return undefined;
-      }
-    }
-  };
-
   const toYYYYMMDD = (dateString) => {
     if(!isNil(dateString)){
       return new Date(dateString).toISOString().split('T')[0];
@@ -110,7 +92,6 @@ export const StudyUpdateForm = (props) => {
     });
 
     // fix up some of the properties
-    properties['nihAnvilUse'] = radioSelectionToLabels(properties['nihAnvilUse']);
     properties['alternativeDataSharingPlanTargetDeliveryDate'] = toYYYYMMDD(properties['alternativeDataSharingPlanTargetDeliveryDate']);
     properties['alternativeDataSharingPlanTargetPublicReleaseDate'] = toYYYYMMDD(properties['alternativeDataSharingPlanTargetPublicReleaseDate']);
     properties['embargoReleaseDate'] = toYYYYMMDD(properties['embargoReleaseDate']);

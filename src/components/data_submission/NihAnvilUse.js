@@ -1,5 +1,6 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
+import { isNil, toLower } from 'lodash/fp';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
 export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID';
@@ -11,6 +12,24 @@ const nihAnvilUseLabels = {
   yes_nhgri_no_phs_id: YES_NHGRI_NO_PHS_ID,
   no_nhgri_yes_anvil: NO_NHGRI_YES_ANVIL,
   no_nhgri_no_anvil: NO_NHGRI_NO_ANVIL,
+};
+
+const radioSelectionToLabels = (selection) => {
+  if (!isNil(selection)) {
+    const lowerCaseSelection = toLower(selection);
+    switch (lowerCaseSelection) {
+      case 'i am nhgri funded and i have a dbgap phs id already':
+        return 'yes_nhgri_yes_phs_id';
+      case 'i am nhgri funded and i do not have a dbgap phs id already':
+        return 'yes_nhgri_no_phs_id';
+      case 'i am not nhgri funded but i am seeking to submit data to anvil':
+        return 'no_nhgri_yes_anvil';
+      case 'i am not nhgri funded and do not plan to store data in anvil':
+        return 'no_nhgri_no_anvil';
+      default:
+        return undefined;
+    }
+  }
 };
 
 export default function NihAnvilUse(props) {
@@ -36,7 +55,7 @@ export default function NihAnvilUse(props) {
         {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
-      defaultValue: studyEditMode ? formData?.nihAnvilUse : undefined,
+      defaultValue: studyEditMode ? radioSelectionToLabels(formData?.nihAnvilUse) : undefined,
       validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
@@ -47,11 +66,7 @@ export default function NihAnvilUse(props) {
       onValidationChange,
     }),
 
-    div({
-      isRendered:
-        (studyEditMode ?
-          formData?.nihAnvilUse === 'yes_nhgri_yes_phs_id'
-          : formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID) }, [
+    div({ isRendered: formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID }, [
       h(FormField, {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
