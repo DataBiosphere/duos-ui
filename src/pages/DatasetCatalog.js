@@ -17,6 +17,7 @@ import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import {isDevEnv} from '../utils/EnvironmentUtils';
+import DuosLogo from '../images/duos-network-logo.svg';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -435,11 +436,11 @@ export default function DatasetCatalog(props) {
           }, [
             PageHeading({
               id: 'datasetCatalog',
-              imgSrc: isCustomDacDatasetPage ? undefined : datasetIcon,
+              imgSrc: isCustomDacDatasetPage ? undefined : DuosLogo,
               iconSize: isCustomDacDatasetPage ? 'none' : 'large',
               color: color,
-              title: (!isCustomDacDatasetPage ? 'Dataset Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
-              description: 'Search and select datasets then click \'Apply for Access\' to request access'
+              title: (!isCustomDacDatasetPage ? 'All DUOS Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
+              description: 'Search and select datasets registered in DUOS. Click \'Apply for Access\' to request access'
             }),
             div({
               isRendered: isCustomDacDatasetPage,
