@@ -10,7 +10,13 @@ import initialFormData from './NIHDataManagement';
 import './ds_common.css';
 
 export default function DataSubmissionStudyInformation(props) {
-  const { onChange, validation, onValidationChange } = props;
+  const {
+    onChange,
+    validation,
+    onValidationChange,
+    formData,
+    studyEditMode,
+  } = props;
   const [user, setUser] = useState();
 
   //init hook, need to make ajax calls here
@@ -39,10 +45,12 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'studyName',
       title: 'Study Name',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.studyName,
       onChange,
-      onValidationChange
+      onValidationChange,
+      defaultValue: studyEditMode ? formData?.studyName : undefined,
+      disabled: studyEditMode,
     }),
     h(FormField, {
       id: 'studyType',
@@ -57,6 +65,7 @@ export default function DataSubmissionStudyInformation(props) {
       isCreatable: true,
       validation: validation.studyType,
       selectConfig: {},
+      defaultValue: studyEditMode ? formData?.studyType : undefined,
       onChange,
       onValidationChange
     }),
@@ -66,7 +75,8 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'studyDescription',
       title: 'Study Description',
       placeholder: 'Description',
-      validators: [FormValidators.REQUIRED],
+      defaultValue: studyEditMode ? formData?.studyDescription : undefined,
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.studyDescription,
       onChange,
       onValidationChange
@@ -75,7 +85,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataTypes',
       title: 'Data Types',
       placeholder: 'Type',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
       isCreatable: true,
       isMulti: true,
@@ -92,6 +102,7 @@ export default function DataSubmissionStudyInformation(props) {
         'Whole Genome (WGS)',
         'Whole Exome (WES)',
       ],
+      defaultValue: studyEditMode ? formData?.dataTypes : undefined,
       validation: validation.dataTypes,
       onChange,
       onValidationChange
@@ -99,6 +110,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'phenotypeIndication',
       title: 'Phenotype/Indication Studied',
+      defaultValue: studyEditMode ? formData?.phenotypeIndication : undefined,
       validation: validation.phenotypeIndication,
       onChange,
       onValidationChange
@@ -106,6 +118,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'species',
       title: 'Species',
+      defaultValue: studyEditMode ? formData?.species : undefined,
       validation: validation.species,
       onChange,
       onValidationChange
@@ -113,7 +126,8 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'piName',
       title: 'Principal Investigator Name',
-      validators: [FormValidators.REQUIRED],
+      defaultValue: studyEditMode ? formData?.piName : undefined,
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       validation: validation.piName,
       onChange,
       onValidationChange
@@ -123,7 +137,7 @@ export default function DataSubmissionStudyInformation(props) {
       id: 'dataSubmitterName',
       title: 'Data Submitter Name ',
       description: `The individual completing this form will be saved with the study.`,
-      defaultValue: user?.displayName,
+      defaultValue: studyEditMode ? formData?.dataSubmitterName : user?.displayName,
       validation: validation.dataSubmitterName,
       disabled: true,
       onChange,
@@ -133,7 +147,7 @@ export default function DataSubmissionStudyInformation(props) {
       isRendered: !isEmpty(user),
       id: 'dataSubmitterEmail',
       title: 'Data Submitter Email',
-      defaultValue: user?.email,
+      defaultValue: studyEditMode ? formData?.dataSubmitterEmail : user?.email,
       validation: validation.dataSubmitterEmail,
       disabled: true,
       onChange,
@@ -159,6 +173,7 @@ export default function DataSubmissionStudyInformation(props) {
         },
       },
       placeholder: 'Add one or more emails',
+      defaultValue: studyEditMode ? formData?.dataCustodianEmail : undefined,
       validation: validation.dataCustodianEmail,
       onChange,
       onValidationChange
@@ -176,9 +191,9 @@ export default function DataSubmissionStudyInformation(props) {
         style: {
           width: '45%',
         },
-        defaultValue: initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
         title: 'Target Delivery Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
+        defaultValue: studyEditMode ? formData?.alternativeDataSharingPlanTargetDeliveryDate : initialFormData?.alternativeDataSharingPlanTargetDeliveryDate,
         validators: [FormValidators.DATE],
         onChange,
         validation: validation.alternativeDataSharingPlanTargetDeliveryDate,
@@ -189,9 +204,9 @@ export default function DataSubmissionStudyInformation(props) {
         style: {
           width: '45%',
         },
-        defaultValue: initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
         title: 'Target Public Release Date',
         placeholder: 'Please enter date (YYYY-MM-DD)',
+        defaultValue: studyEditMode ? formData?.alternativeDataSharingPlanTargetPublicReleaseDate : initialFormData?.alternativeDataSharingPlanTargetPublicReleaseDate,
         validators: [FormValidators.DATE],
         onChange,
         validation: validation.alternativeDataSharingPlanTargetPublicReleaseDate,
@@ -201,7 +216,7 @@ export default function DataSubmissionStudyInformation(props) {
     h(FormField, {
       id: 'publicVisibility',
       title: 'Public Visibility',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.RADIOGROUP,
       description: 'Please select one of the following data use permissions for your dataset',
       name: 'publicVisibility',
@@ -209,6 +224,7 @@ export default function DataSubmissionStudyInformation(props) {
         { name: true, text: 'Yes, I want my dataset info to be visible and available for requests' },
         { name: false, text: 'No, I do not want my dataset info to be visible and available for requests' }
       ],
+      defaultValue: studyEditMode ? formData?.publicVisibility : undefined,
       onChange,
       validation: validation.publicVisibility,
       onValidationChange

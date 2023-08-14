@@ -1,5 +1,6 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
 import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
+import { isNil, toLower } from 'lodash/fp';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
 export const YES_NHGRI_NO_PHS_ID = 'I am NHGRI funded and I do not have a dbGaP PHS ID';
@@ -13,10 +14,29 @@ const nihAnvilUseLabels = {
   no_nhgri_no_anvil: NO_NHGRI_NO_ANVIL,
 };
 
+const radioSelectionToLabels = (selection) => {
+  if (!isNil(selection)) {
+    const lowerCaseSelection = toLower(selection);
+    switch (lowerCaseSelection) {
+      case 'i am nhgri funded and i have a dbgap phs id already':
+        return 'yes_nhgri_yes_phs_id';
+      case 'i am nhgri funded and i do not have a dbgap phs id already':
+        return 'yes_nhgri_no_phs_id';
+      case 'i am not nhgri funded but i am seeking to submit data to anvil':
+        return 'no_nhgri_yes_anvil';
+      case 'i am not nhgri funded and do not plan to store data in anvil':
+        return 'no_nhgri_no_anvil';
+      default:
+        return undefined;
+    }
+  }
+};
+
 export default function NihAnvilUse(props) {
   const {
     onChange,
     formData,
+    studyEditMode,
     validation,
     onValidationChange,
   } = props;
@@ -35,10 +55,12 @@ export default function NihAnvilUse(props) {
         {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
-      validators: [FormValidators.REQUIRED],
+      defaultValue: studyEditMode ? radioSelectionToLabels(formData?.nihAnvilUse) : undefined,
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
+        studyEditMode ? formData.nihAnvilUse = config.value : undefined;
       },
       validation: validation.nihAnvilUse,
       onValidationChange,
@@ -49,7 +71,7 @@ export default function NihAnvilUse(props) {
         id: 'dbGaPPhsID',
         title: 'dbGaP phs ID',
         placeholder: 'Firstname Lastname',
-        validators: [FormValidators.REQUIRED],
+        validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
         defaultValue: formData.dbGaPPhsID,
         onChange,
         validation: validation.dbGaPPhsID,

@@ -19,6 +19,7 @@ export const NIHDataManagement = (props) => {
   const {
     formData,
     onChange,
+    studyEditMode,
     onFileChange,
     validation,
     onValidationChange,
@@ -57,7 +58,10 @@ export const NIHDataManagement = (props) => {
   };
 
   return div({
-    isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
+    isRendered:
+      (studyEditMode ?
+        ['yes_nhgri_yes_phs_id', 'yes_nhgri_no_phs_id', 'no_nhgri_yes_anvil'].includes(formData.nihAnvilUse)
+        : [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse)),
     className: 'data-submitter-section',
   }, [
     h2('NIH Data Management & Sharing Policy Details'),
@@ -161,7 +165,7 @@ export const NIHDataManagement = (props) => {
         defaultValue: formData?.alternativeDataSharingPlanExplanation,
         onChange,
         title: 'Explanation for request',
-        validators: [FormValidators.REQUIRED],
+        validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
         validation: validation.alternativeDataSharingPlanExplanation,
         onValidationChange,
       }),
@@ -169,7 +173,7 @@ export const NIHDataManagement = (props) => {
         type: FormFieldTypes.FILE,
         title: 'Upload your alternative sharing plan.',
         id: 'alternativeDataSharingPlanFile',
-        validators: [FormValidators.REQUIRED],
+        validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
         validation: validation.alternativeDataSharingPlanFile,
         onValidationChange,
         onChange: onFileChange,

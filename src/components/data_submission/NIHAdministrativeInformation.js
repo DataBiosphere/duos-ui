@@ -9,6 +9,7 @@ export const NIHAdministrativeInformation = (props) => {
   const {
     formData,
     onChange,
+    studyEditMode,
     institutions,
     validation,
     onValidationChange,
@@ -22,13 +23,16 @@ export const NIHAdministrativeInformation = (props) => {
     const institution = institutions.find((inst) => inst.id === id);
 
     return {
-      displayText: institution.name || 'Unknown',
+      displayText: institution?.name || 'Unknown',
       id: id,
     };
   };
 
   return div({
-    isRendered: [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse),
+    isRendered:
+      (studyEditMode ?
+        ['yes_nhgri_yes_phs_id', 'yes_nhgri_no_phs_id', 'no_nhgri_yes_anvil'].includes(formData.nihAnvilUse)
+        : [YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL].includes(formData.nihAnvilUse)),
     className: 'data-submitter-section',
   }, [
     h2('NIH Administrative Information'),
@@ -36,7 +40,7 @@ export const NIHAdministrativeInformation = (props) => {
       id: 'piInstitution',
       title: 'Principal Investigator Institution',
       isRendered: !isEmpty(institutions),
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       type: FormFieldTypes.SELECT,
       selectOptions: institutions.map((inst) => { return { displayText: inst.name, id: inst.id };}),
       isCreatable: false,
@@ -44,14 +48,14 @@ export const NIHAdministrativeInformation = (props) => {
       onChange: ({key, value, isValid}) => {
         onChange({key, value: value?.id, isValid});
       },
-      defaultValue: !isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null,
+      defaultValue:!isNil(formData.piInstitution) ? findInstitutionSelectOption(formData.piInstitution) : null,
       validation: validation.piInstitution,
       onValidationChange,
     }),
     h(FormField, {
       id: 'nihGrantContractNumber',
       title: 'NIH Grant or Contract Number',
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange,
       defaultValue: formData?.nihGrantContractNumber,
       validation: validation.nihGrantContractNumber,
@@ -151,7 +155,7 @@ export const NIHAdministrativeInformation = (props) => {
       title: 'If yes, explain why controlled access is needed for GSR.',
       isRendered: showGSRRequiredExplanation,
       defaultValue: gsrRequiredExplanation,
-      validators: [FormValidators.REQUIRED],
+      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
       onChange: ({key, value}) => {
         setGSRRequiredExplanation(value);
         onChange({key, value});

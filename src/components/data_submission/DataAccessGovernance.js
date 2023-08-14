@@ -1,18 +1,76 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
-import { isNil, every, cloneDeep } from 'lodash/fp';
+import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC } from '../../libs/ajax';
+import { DAC, DAR } from '../../libs/ajax';
 
 import './ds_common.css';
 
 export const DataAccessGovernance = (props) => {
   const {
-    onChange, onFileChange, validation, onValidationChange, setAllConsentGroupsSaved
+    onChange,
+    studyEditMode,
+    onFileChange,
+    validation,
+    datasets,
+    onValidationChange,
+    setAllConsentGroupsSaved
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
   const [dacs, setDacs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const getDiseaseLabels = async (ontologyIds) => {
+    let labels = [];
+    if (!isEmpty(ontologyIds)) {
+      const idList = ontologyIds.join(',');
+      const result = await DAR.searchOntologyIdList(idList);
+      labels = result.map(r => r.label);
+    }
+    return labels;
+  };
+
+  const normalizeDataUse = useCallback(async (dataUse) => {
+    let du = dataUse;
+    if (!isNil(dataUse.diseaseRestrictions)) {
+      du.hasDiseaseRestrictions = true;
+      // The disease restriction may not cleanly map to the label
+      try {
+        du.diseaseLabels = await getDiseaseLabels(dataUse.diseaseRestrictions);
+      } catch {
+        // do nothing
+      }
+
+    }
+    if (!isNil(dataUse.other)) {
+      du.hasPrimaryOther = true;
+    }
+    if (!isNil(dataUse.secondaryOther)) {
+      du.hasSecondaryOther = true;
+    }
+    return du;
+  }, []);
+
+  const extractFileTypes = useCallback((propertyName, dataset) => {
+    const property = find({ propertyName })(dataset.properties);
+    let fileTypes = [];
+
+    property?.propertyValue.forEach((propValue)=> {
+      fileTypes = [
+        {
+          fileType: propValue?.fileType,
+          functionalEquivalence: propValue?.functionalEquivalence
+        }
+      ];
+    });
+    return fileTypes;
+  }, []);
+
+  const extract = useCallback((propertyName, dataset) => {
+    const property = find({ propertyName })(dataset.properties);
+    return property?.propertyValue;
+  }, []);
 
   useEffect(() => {
     DAC.list(false).then((dacList) => {
@@ -46,16 +104,79 @@ export const DataAccessGovernance = (props) => {
         nihInstitutionalCertificationFile: null,
         editMode: true,
         valid: false,
+        disableFields: false,
       });
 
       return newConsentGroupsState;
     });
   }, []);
 
-  // pre-populate the page with a consent group
+  // extract consent groups from datasets
+  const prefillConsentGroups = useCallback(async () => {
+    var consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
+      const dataUse = await normalizeDataUse(dataset?.dataUse);
+      // DAC is required if openAccess is false
+      const openAccess = extract('Open Access', dataset);
+      const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
+
+      return {
+        consentGroup: {
+          datasetId: dataset.dataSetId,
+          consentGroupName: dataset.name,
+
+          // primary
+          generalResearchUse: dataUse.generalUse,
+          hmb: dataUse.hmbResearch,
+          diseaseSpecificUse: dataUse.diseaseRestrictions,
+          poa: dataUse.populationOriginsAncestry,
+          openAccess: openAccess,
+          otherPrimary: dataUse.other,
+
+          // secondary
+          nmds: dataUse.methodsResearch,
+          gso: dataUse.geneticStudiesOnly,
+          pub: dataUse.publicationResults,
+          col: dataUse.collaboratorRequired,
+          irb: dataUse.ethicsApprovalRequired,
+          gs: dataUse.geographicalRestrictions,
+          mor: dataUse.publicationMoratorium,
+          npu: dataUse.commercialUse,
+          otherSecondary: dataUse.secondaryOther,
+          url: extract('URL', dataset),
+          dataLocation: extract('Data Location', dataset),
+          numberOfParticipants: extract('Number Of Participants', dataset),
+          fileTypes: extractFileTypes('File Types', dataset),
+          dataAccessCommitteeId: dac?.dacId,
+        },
+        key: `prefilledConsentGroups[${idx}]`,
+        nihInstitutionalCertificationFile: null,
+        editMode: false,
+        valid: false,
+        disableFields: true,
+      };
+    }));
+    if (isEmpty(consentGroupsState)) {
+      setConsentGroupsState(consentGroups);
+      setIsLoading(false);
+    }
+    return consentGroupsState;
+  }, [consentGroupsState, datasets, normalizeDataUse, extract, extractFileTypes]);
+
+  // when in edit study mode, pre-populate the page with the study's consent groups otherwise add new
   useEffect(() => {
-    addNewConsentGroup();
-  }, [addNewConsentGroup]);
+    const init = async () => {
+      if (studyEditMode) {
+        if (!isNil(datasets) && isLoading) {
+          await prefillConsentGroups();
+        }
+      } else {
+        if (isEmpty(consentGroupsState)) {
+          addNewConsentGroup();
+        }
+      }
+    };
+    init();
+  }, [prefillConsentGroups, addNewConsentGroup, studyEditMode, datasets, consentGroupsState, isLoading]);
 
   const deleteConsentGroup = useCallback((idx) => {
     setConsentGroupsState((consentGroupsState) => {
@@ -117,6 +238,8 @@ export const DataAccessGovernance = (props) => {
                 h(ConsentGroupForm, {
                   idx: idx,
                   dacs: dacs,
+                  consentGroupsState,
+                  studyEditMode,
                   disableDelete: consentGroupsState.length === 1,
                   saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
                   deleteConsentGroup: () => deleteConsentGroup(idx),

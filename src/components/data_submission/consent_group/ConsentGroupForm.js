@@ -12,38 +12,44 @@ export const ConsentGroupForm = (props) => {
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
     disableDelete,
+    consentGroupsState,
+    studyEditMode
   } = props;
 
+  const curConsentGroup = consentGroupsState[idx].consentGroup;
   const [consentGroup, setConsentGroup] = useState({
-    consentGroupName: '',
+    datasetId: curConsentGroup.datasetId || null,
+    consentGroupName: curConsentGroup.consentGroupName || '',
 
-    // primary: one of these needs to be filled
-    generalResearchUse: undefined,
-    hmb: undefined,
-    diseaseSpecificUse: undefined, // string
-    poa: undefined,
-    openAccess: undefined,
-    otherPrimary: undefined, // string
+    // primary:
+    generalResearchUse: curConsentGroup.generalResearchUse || undefined,
+    hmb: curConsentGroup.hmb || undefined,
+    diseaseSpecificUse: curConsentGroup.diseaseSpecificUse || undefined, // string
+    poa: curConsentGroup.poa || undefined,
+    openAccess: curConsentGroup.openAccess || undefined,
+    otherPrimary: curConsentGroup.otherPrimary || undefined, // string
 
     // secondary:
-    nmds: false, // No Methods Development or validation studies
-    gso: false, // genetic studies only
-    pub: false, // publication required
-    col: false, // collaboration required
-    irb: false, // irb approval required
-    gs: null, // string: geographic restriction
-    mor: undefined, // date (string): publication moratorium
-    npu: false, // non profit only
-    otherSecondary: null, // string
+    nmds: curConsentGroup.nmds || false, // No Methods Development or validation studies
+    gso: curConsentGroup.gso || false, // genetic studies only
+    pub: curConsentGroup.pub || false, // publication required
+    col: curConsentGroup.col || false, // collaboration required
+    irb: curConsentGroup.irb || false, // irb approval required
+    gs: curConsentGroup.gs || null, // string: geographic restriction
+    mor: curConsentGroup.mor || undefined, // date (string): publication moratorium
+    npu: curConsentGroup.npu || false, // non profit only
+    otherSecondary: curConsentGroup.otherSecondary || null, // string
 
     // dataLocation is one of:
     // "AnVIL Workspace", "Terra Workspace",
     // "TDR Location", "Not Determined"
-    dataLocation: null,
+    dataLocation: curConsentGroup.dataLocation || null,
 
-    url: '',
-    numberOfParticipants: undefined, // numeric
-    fileTypes: [{}],
+    url: curConsentGroup.url || '',
+    numberOfParticipants: curConsentGroup.numberOfParticipants || undefined, // numeric
+    fileTypes: curConsentGroup.fileTypes || [{}],
+
+    dataAccessCommitteeId: curConsentGroup.dataAccessCommitteeId || null, // string
   });
 
   const [nihInstitutionalCertificationFile, setNihInstitutionalCertificationFile] = useState(null);
@@ -57,7 +63,7 @@ export const ConsentGroupForm = (props) => {
     });
   };
 
-  const [editMode, setEditMode] = useState(true);
+  const [editMode, setEditMode] = useState(consentGroupsState[idx].editMode);
 
   return div({
     style: {
@@ -68,28 +74,28 @@ export const ConsentGroupForm = (props) => {
     },
     id: idx+'_consentGroupForm'
   }, [
-
     (editMode
       ? h(EditConsentGroup, {
         ...props,
         ...{
           consentGroup: consentGroup,
           setConsentGroup: setConsentGroup,
+          disableFields: consentGroupsState[idx].disableFields,
           nihInstitutionalCertificationFile,
           setNihInstitutionalCertificationFile: (file) => {
             setNihInstitutionalCertificationFile(file);
             updateNihInstitutionalCertificationFile(file);
           },
           validation,
-          onValidationChange
+          onValidationChange,
         },
       })
       : h(ConsentGroupSummary, {
         ...props,
         ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
-      })),
-
-    // save + delete
+      })
+    ),
+    // save, cancel and delete
     div({
       style: {
         display: 'flex',
@@ -99,6 +105,7 @@ export const ConsentGroupForm = (props) => {
       }
     }, [
       a({
+        isRendered: !studyEditMode || !consentGroupsState[idx].disableFields,
         id: idx+'_deleteConsentGroup',
         onClick: () => deleteConsentGroup(),
         disabled: disableDelete,
@@ -112,6 +119,14 @@ export const ConsentGroupForm = (props) => {
             marginLeft: '1rem',
           }
         }, ['Delete this entry']),
+      ]),
+      div({}, [
+        button({
+          isRendered: studyEditMode && editMode && consentGroupsState[idx].disableFields,
+          className: 'study-edit-form-cancel-button f-left btn',
+          type: 'button',
+          onClick: () => setEditMode(false),
+        }, ['Cancel']),
       ]),
       div({}, [
         button({
