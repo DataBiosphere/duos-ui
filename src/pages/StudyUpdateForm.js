@@ -43,10 +43,18 @@ export const StudyUpdateForm = (props) => {
           text: 'Error: Unable to initialize data from server',
         });
       }
+      try {
+        const me = Storage.getCurrentUser();
+        setUser(me);
+        setStudy(await DataSet.getStudyById(studyId));
+        setFailedInit(false);
+      } catch (error) {
+        Notifications.showError({ text: 'Failed to load study' });
+      }
     };
 
     init();
-  }, []);
+  }, [studyId]);
 
   const onFileChange = useCallback(({ key, value }) => {
     setFormFiles((val) => {
@@ -63,20 +71,6 @@ export const StudyUpdateForm = (props) => {
       return newForm;
     });
   }, [setFormData]);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const me = Storage.getCurrentUser();
-        setUser(me);
-        setStudy(await DataSet.getStudyById(studyId));
-        setFailedInit(false);
-      } catch (error) {
-        Notifications.showError({ text: 'Failed to load study' });
-      }
-    };
-    init();
-  }, [studyId]);
 
   const toYYYYMMDD = (dateString) => {
     if(!isNil(dateString)){
