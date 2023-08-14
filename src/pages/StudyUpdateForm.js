@@ -47,8 +47,8 @@ export const StudyUpdateForm = (props) => {
         const me = Storage.getCurrentUser();
         setUser(me);
         setStudy(await DataSet.getStudyById(studyId));
-        setFailedInit(false);
       } catch (error) {
+        setFailedInit(true);
         Notifications.showError({ text: 'Failed to load study' });
       }
     };
