@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { h, div } from 'react-hyperscript-helpers';
-import datasetIcon from '../../images/icon_dataset_.png';
+import datasetIcon from '../../logo.svg';
 import { Styles } from '../../libs/theme';
 import { groupBy } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
@@ -112,7 +112,7 @@ export const DatasetSearchTable = (props) => {
   return div({ style: Styles.PAGE }, [
     h(TableHeaderSection, {
       icon: datasetIcon,
-      title: 'Data Catalog',
+      title: 'Broad Data Library',
       description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access'
     }),
     div({ style: { paddingTop: '2rem' } }, [
