@@ -10,10 +10,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Checkbox from '@mui/material/Checkbox';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useEffect } from 'react';
-import { isEmpty } from 'lodash';
+import { useEffect, useState } from 'react';
+import { isEmpty, isNil, map } from 'lodash/fp';
 
 /*
 The data should follow the following format:
@@ -114,6 +115,7 @@ const StyledTableCell = styled(TableCell)(() => ({
 
 const SubTable = (props) => {
   const { subtable, open } = props;
+  //const [checked, setChecked] = useState([]);
 
   return (
     <TableRow>
@@ -124,6 +126,8 @@ const SubTable = (props) => {
               {/* subtable header */}
               <TableHead>
                 <TableRow>
+                  <StyledTableCell component="th">
+                  </StyledTableCell>
                   {subtable.headers.map((header, i) => (
                     <StyledTableCell key={i}>{header.value}</StyledTableCell>
                   ))}
@@ -133,6 +137,12 @@ const SubTable = (props) => {
               <TableBody>
                 {subtable.rows.map((subRow, j) => (
                   <TableRow key={j}>
+                    <StyledTableCell component="th">
+                      <Checkbox
+                        color="primary"
+                        //onChange={onChange}
+                      />
+                    </StyledTableCell>
                     {subRow.data.map((cell, k) => (
                       <StyledTableCell key={k} component="th">
                         {cell.value}
@@ -150,12 +160,19 @@ const SubTable = (props) => {
 };
 
 const CollapsibleRow = (props) => {
-  const { row } = props;
+  const { row, checkSingleRow } = props;
   const [open, setOpen] = React.useState(false);
 
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <StyledTableCell component="th">
+          <Checkbox
+            color="primary"
+            aria-label="select"
+            //onClick={checkAllSubComponents}
+          />
+        </StyledTableCell>
         <StyledTableCell component="th">
           <IconButton
             aria-label="expand row"
@@ -177,8 +194,7 @@ const CollapsibleRow = (props) => {
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, isLoading } = props;
-
+  const { data, summary, isLoading, selectAllOnPage, allOnPageSelected, checkSingleRow } = props;
   const [table, setTable] = React.useState([]);
 
   useEffect(() => {
@@ -191,6 +207,16 @@ export const CollapsibleTable = (props) => {
         <Table aria-label={summary}>
           <TableHead>
             <TableRow>
+              <StyledTableCell>
+                <Checkbox
+                  color="primary"
+                  onClick={selectAllOnPage}
+                  checked={allOnPageSelected}
+                  inputProps={{
+                    'aria-label': 'select all on page',
+                  }}
+                />
+              </StyledTableCell>
               <StyledTableCell />
               {data.headers.map((header) => (
                 <StyledTableCell key={header.value}>{header.value}</StyledTableCell>
@@ -199,7 +225,7 @@ export const CollapsibleTable = (props) => {
           </TableHead>
           <TableBody>
             {data.rows.map((row) => (
-              <CollapsibleRow key={row.id} row={row} />
+              <CollapsibleRow checkSingleRow={checkSingleRow} key={row.id} row={row} />
             ))}
           </TableBody>
         </Table>
