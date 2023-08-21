@@ -1,26 +1,10 @@
 import React from 'react';
 import SortableTable from '../../components/SortableTable'
 
+
 export default function ControlledAccessGrants() {
 
-  const example = [
-    {
-      alias: 1,
-      darCode: "darCode1",
-      datasetName: "datasetName1",
-      dacName: "dacName1",
-      approvalDate: "approvalDate1",
-      datasetIdentifier: "datasetIdentifier1"
-    },
-    {
-      alias: 2,
-      darCode: 'darCode2',
-      datasetName: "datasetName2",
-      dacName: "dacName2",
-      approvalDate: "approvalDate2",
-      datasetIdentifier: "datasetIdentifier2"
-    }
-  ];
+  const example = []
 
   const rows = [
     example.map((exampleRow, i) => (
@@ -57,6 +41,6 @@ export default function ControlledAccessGrants() {
       Your current dataset approvals
     </p>
     <div style={{ marginTop: '20px' }} />
-    <SortableTable rows={example} rowNames={rowNames} />
+    <SortableTable/>
   </div>;
 }

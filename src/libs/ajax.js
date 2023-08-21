@@ -679,6 +679,11 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
     const res = await axios.post(url, keys, Config.authOpts());
     return res.data;
+  },
+  getApprovedDatasets: async () => {
+    const url = `${await getApiUrl()}/api/user/me/researcher/datasets`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   }
 };
 
