@@ -28,7 +28,7 @@ export default function ControlledAccessGrants() {
     ))
   ]
 
-  const columns = ["DAR ID", "Approval Date", "Dataset ID", "Dataset Name", "Data Access Committee"];
+  const columns = ['DAR ID', "Approval Date", "Dataset ID", "Dataset Name", "Data Access Committee"];
 
   function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
     return {darCode, approvalDate, datasetIdentifier, datasetName, dacName};
