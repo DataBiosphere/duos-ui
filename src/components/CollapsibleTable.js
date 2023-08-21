@@ -14,6 +14,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useEffect } from 'react';
 import { isEmpty } from 'lodash';
+import { Check } from '@mui/icons-material';
+import { Checkbox } from '@mui/material';
+import { Style } from '@mui/icons-material';
 
 /*
 The data should follow the following format:
@@ -124,6 +127,7 @@ const SubTable = (props) => {
               {/* subtable header */}
               <TableHead>
                 <TableRow>
+                  <StyledTableCell component="th" />
                   {subtable.headers.map((header, i) => (
                     <StyledTableCell key={i}>{header.value}</StyledTableCell>
                   ))}
@@ -133,6 +137,9 @@ const SubTable = (props) => {
               <TableBody>
                 {subtable.rows.map((subRow, j) => (
                   <TableRow key={j}>
+                    <StyledTableCell component="th">
+                      <Checkbox aria-label="select subtable row" />
+                    </StyledTableCell>
                     {subRow.data.map((cell, k) => (
                       <StyledTableCell key={k} component="th">
                         {cell.value}
@@ -156,6 +163,9 @@ const CollapsibleRow = (props) => {
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <StyledTableCell component="th">
+          <Checkbox aria-label="select row" />
+        </StyledTableCell>
         <StyledTableCell component="th">
           <IconButton
             aria-label="expand row"
@@ -191,6 +201,9 @@ export const CollapsibleTable = (props) => {
         <Table aria-label={summary}>
           <TableHead>
             <TableRow>
+              <StyledTableCell>
+                <Checkbox aria-label="select all on page" />
+              </StyledTableCell>
               <StyledTableCell />
               {data.headers.map((header) => (
                 <StyledTableCell key={header.value}>{header.value}</StyledTableCell>

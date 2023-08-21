@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { h, div } from 'react-hyperscript-helpers';
+import { h, div, button } from 'react-hyperscript-helpers';
 import datasetIcon from '../../logo.svg';
 import { Styles } from '../../libs/theme';
 import { groupBy } from 'lodash';
@@ -121,6 +121,16 @@ export const DatasetSearchTable = (props) => {
         isLoading,
         summary: 'faceted study search table'
       }),
+    ]),
+    div({ className: 'f-right' }, [
+      button({
+        id: 'btn_applyAccess',
+        isRendered: true,
+        disabled: false,
+        className: `btn-primary dataset-background search-wrapper`,
+        'data-tip': 'Request Access for selected Studies', 'data-for': 'tip_requestAccess',
+        style: { marginBottom: '30%'}
+      }, ['Apply for Access'])
     ]),
   ]);
 };
