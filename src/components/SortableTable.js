@@ -40,7 +40,6 @@ export default function SortableTable(props) {
     }
     return 0
   }
-    
   function getComparator(order, orderBy) {
     return order === 'desc'
       ? (a, b) => descendingComparator(a, b, orderBy)
