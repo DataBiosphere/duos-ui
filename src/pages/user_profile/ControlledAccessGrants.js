@@ -14,7 +14,7 @@ export default function ControlledAccessGrants() {
     },
     {
       alias: 2,
-      darCode: "darCode2",
+      darCode: 'darCode2',
       datasetName: "datasetName2",
       dacName: "dacName2",
       approvalDate: "approvalDate2",
