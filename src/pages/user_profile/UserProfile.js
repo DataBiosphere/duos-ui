@@ -3,13 +3,14 @@ import { div, h, h1, hr, button } from 'react-hyperscript-helpers';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import AffiliationAndRoles from './AffiliationAndRoles';
-import ResearcherStatus from './ResearcherStatus';
-import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
+import AffiliationAndRoles from './AffiliationAndRoles';
+import ResearcherStatus from './ResearcherStatus';
+import AcceptedAcknowledgements from './AcceptedAcknowledgements';
+import ControlledAccessGrants from './ControlledAccessGrants';
 
 export default function UserProfile(props) {
 
@@ -116,6 +117,7 @@ export default function UserProfile(props) {
     div({ className: '', style: { 'marginTop': '115px' } }, []),
     AcceptedAcknowledgements(),
     div({ className: '', style: { 'marginTop': '50px' } }, []),
+    ControlledAccessGrants(),
   ]);
 
 }
