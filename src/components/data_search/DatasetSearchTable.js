@@ -68,10 +68,10 @@ export const DatasetSearchTable = (props) => {
               value: entry[0].study.piName,
             },
             {
-              value: entry[0].study.dataSubmitterId,
+              value: entry[0].study.dataSubmitterEmail,
             },
             {
-              value: entry[0].study.dataCustodian,
+              value: entry[0].study.dataCustodianEmail.join(', '),
             },
           ],
           subtable: {
