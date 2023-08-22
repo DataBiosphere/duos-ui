@@ -1,25 +1,80 @@
-import React from 'react';
-import SortableTable from '../../components/SortableTable'
+import React, { useState, useEffect } from 'react';
+import SortableTable from '../../components/SortableTable';
+import { User } from '../../libs/ajax';
+import { Notifications } from '../../libs/utils';
 
 
 export default function ControlledAccessGrants() {
 
-  const example = []
+  const [example, setExample] = useState([]);
 
-  const rows = [
-    example.map((exampleRow, i) => (
-      createData(exampleRow.darCode, exampleRow.approvalDate, exampleRow.datasetIdentifier, exampleRow.datasetName, exampleRow.dacName)
+  const rows = createRows()
+
+  function createRows() {
+    const rows = []
+    example.map((exampleRow) => (
+      rows.push(createData(exampleRow.darCode, exampleRow.approvalDate, exampleRow.datasetIdentifier, exampleRow.datasetName, exampleRow.dacName))
     ))
-  ]
-
-  const columns = ['DAR ID', "Approval Date", "Dataset ID", "Dataset Name", "Data Access Committee"];
-
-  function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
-    return {darCode, approvalDate, datasetIdentifier, datasetName, dacName};
+    return rows
   }
 
-  const rowNames = [{name: "DAR ID", sortable: false}, {name: "Approval Date", sortable: false}, {name: "Dataset ID", sortable: false}, {name: "Dataset Name", sortable: false}, {name: "Data Access Committee", sortable: false}]
-  
+  function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
+    return {
+      darCode,
+      approvalDate,
+      datasetIdentifier,
+      datasetName,
+      dacName
+    };
+  }
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const res = await User.getApprovedDatasets();
+        setExample(res)
+      } catch (error) {
+        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
+      }
+    };
+
+    init();
+  });
+
+  const headCells = [
+    {
+      id: 'darCode',
+      numeric: false,
+      disablePadding: false,
+      label: 'DAR Code',
+    },
+    {
+      id: 'approvalDate',
+      numeric: true,
+      disablePadding: false,
+      label: 'Approval Date',
+    },
+    {
+      id: 'datasetIdentifier',
+      numeric: true,
+      disablePadding: false,
+      label: 'Dataset Identifier',
+    },
+    {
+      id: 'datasetName',
+      numeric: true,
+      disablePadding: false,
+      label: 'Dataset Name',
+    },
+    {
+      id: 'dacName',
+      numeric: true,
+      disablePadding: false,
+      label: 'DAC Name',
+    },
+  ];
+
+
 
   return <div>
     <h1
@@ -41,6 +96,6 @@ export default function ControlledAccessGrants() {
       Your current dataset approvals
     </p>
     <div style={{ marginTop: '20px' }} />
-    <SortableTable/>
+    <SortableTable />
   </div>;
 }

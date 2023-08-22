@@ -12,8 +12,6 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { visuallyHidden } from '@mui/utils';
-import { User } from '../libs/ajax';
-
 
 // const example = [
 //   {
@@ -34,32 +32,6 @@ import { User } from '../libs/ajax';
 //   }
 // ];
 
-const example = await User.getApprovedDatasets();
-
-// function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
-//   return {darCode, approvalDate, datasetIdentifier, datasetName, dacName};
-// }
-
-const rows = createRows()
-
-function createRows() {
-  const rows = []
-  example.map((exampleRow) => (
-    rows.push(createData(exampleRow.darCode, exampleRow.approvalDate, exampleRow.datasetIdentifier, exampleRow.datasetName, exampleRow.dacName))
-  ))
-  return rows
-}
-
-function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
-  return {
-    darCode,
-    approvalDate,
-    datasetIdentifier,
-    datasetName,
-    dacName
-  };
-}
-
 // const rows = [
 //   createData("Cupcake", 305, 3.7, 67, 4.3),
 //   createData("Donut", 452, 25.0, 51, 4.9),
@@ -75,39 +47,6 @@ function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacNa
 //   createData("Nougat", 360, 19.0, 9, 37.0),
 //   createData("Oreo", 437, 18.0, 63, 4.0)
 // ];
-
-const headCells = [
-  {
-    id: 'darCode',
-    numeric: false,
-    disablePadding: false,
-    label: 'DAR Code',
-  },
-  {
-    id: 'approvalDate',
-    numeric: true,
-    disablePadding: false,
-    label: 'Approval Date',
-  },
-  {
-    id: 'datasetIdentifier',
-    numeric: true,
-    disablePadding: false,
-    label: 'Dataset Identifier',
-  },
-  {
-    id: 'datasetName',
-    numeric: true,
-    disablePadding: false,
-    label: 'Dataset Name',
-  },
-  {
-    id: 'dacName',
-    numeric: true,
-    disablePadding: false,
-    label: 'DAC Name',
-  },
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -130,6 +69,7 @@ function getComparator(order, orderBy) {
 // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
 // with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
+  console.log(array)
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -142,7 +82,7 @@ function stableSort(array, comparator) {
 }
 
 function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, headCells } =
     props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -188,7 +128,13 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-export default function SortableTable() {
+export default function SortableTable(props) {
+
+  const {
+    rows,
+    headCells
+  } = props;
+
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
@@ -250,6 +196,7 @@ export default function SortableTable() {
 
   const visibleRows = React.useMemo(
     () =>
+    console.log("hello " + rows),
       stableSort(rows, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
@@ -273,9 +220,10 @@ export default function SortableTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
+              headCells={headCells}
             />
             <TableBody>
-            {visibleRows.map((row, index) => {
+              {visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(row.name);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
