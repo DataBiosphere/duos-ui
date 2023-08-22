@@ -1,14 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import SortableTable from '../../components/SortableTable';
-import { User } from '../../libs/ajax';
-import { Notifications } from '../../libs/utils';
-
+import React from 'react';
+import SortableTable from '../../components/SortableTable'
 
 export default function ControlledAccessGrants() {
 
-  const [example, setExample] = useState([]);
-
-  const rows = createRows()
+  const example = [
+    {
+      alias: 1,
+      darCode: "darCode1",
+      datasetName: "datasetName1",
+      dacName: "dacName1",
+      approvalDate: "approvalDate1",
+      datasetIdentifier: "datasetIdentifier1"
+    },
+    {
+      alias: 2,
+      darCode: 'darCode2',
+      datasetName: "datasetName2",
+      dacName: "dacName2",
+      approvalDate: "approvalDate2",
+      datasetIdentifier: "datasetIdentifier2"
+    }
+  ];
 
   function createRows() {
     const rows = []
@@ -96,6 +108,6 @@ export default function ControlledAccessGrants() {
       Your current dataset approvals
     </p>
     <div style={{ marginTop: '20px' }} />
-    <SortableTable />
+    <SortableTable rows={example} rowNames={rowNames} />
   </div>;
 }
