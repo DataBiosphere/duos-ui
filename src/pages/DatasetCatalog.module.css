@@ -1,0 +1,111 @@
+.first-child {
+  position: absolute;
+  margin-left: -40px;
+}
+
+.checkbox {
+  margin-top: 0;
+  display: inline;
+}
+
+.checkbox label {
+  padding-top: 1px;
+}
+
+.checkbox[disabled] .regular-checkbox {
+  cursor: not-allowed !important;
+  opacity: 0.65;
+}
+
+.checkbox[disabled] .regular-checkbox:before  {
+  background-color: #eee;
+  border: 1px solid #ccc;
+}
+
+.regular-checkbox {
+  cursor: pointer;
+  position: relative;
+  padding-left: 25px !important;
+  margin-right: 15px;
+  font-size: 13px;
+}
+
+.regular-checkbox.normal {
+  font-weight: normal;
+  font-size: 15px;
+  color: #777777;
+}
+
+.regular-checkbox:before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  position: absolute;
+  left: 0;
+  background-color: #ffffff;
+  border-radius: 3px;
+}
+
+.form-control, .regular-checkbox:before {
+  border: 1px solid #999999;
+}
+
+.cell-size {
+  white-space: nowrap;
+  overflow: hidden;
+  width: 1%;
+}
+
+.cell-size p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px!important;
+}
+
+.table-scroll {
+  overflow-x: scroll;
+  margin: 0 25px 5px 60px;
+  overflow-y: visible;
+}
+
+.table-scroll-admin {
+  overflow-x: scroll;
+  margin: 0 25px 5px 60px !important;
+  overflow-y: visible;
+}
+
+.table-scroll-admin thead, .table-scroll thead {
+  padding: 0 10px 0 10px;
+}
+
+.display-inline-block {
+  display: inline-block !important;
+}
+
+.dataset-actions {
+  display: inline !important;
+  margin: 0;
+  padding-right: 10px;
+}
+
+.dataset-actions a {
+  display: inline !important;
+  margin: 0 5px 0 0;
+}
+
+.dataset-actions a:hover span {
+  color: #2FA4E7 !important;
+}
+
+.dataset-actions a .glyphicon {
+  text-shadow: 1px 1px 0 #ffffff !important;
+  padding: 0;
+  vertical-align: bottom;
+  font-size: 1.15em;
+}
+
+.dataset-disabled, .dataset-disabled p, .dataset-disabled a {
+  color: #cccccc !important;
+}
