@@ -499,7 +499,7 @@ export default function DatasetCatalog(props) {
         div({style: Theme.lightTable}, [
           form({ className: 'pos-relative' }, [
             div({
-              className: style['checkbox display-inline-block'],
+              className: `${style['checkbox']} ${style['display-inline-block']}`,
               style: {
                 marginLeft: '28px',
                 marginBottom: '0px',
@@ -532,7 +532,7 @@ export default function DatasetCatalog(props) {
             ]),
 
             div({
-              className: style['checkbox display-inline-block'],
+              className: `${style['checkbox']} ${style['display-inline-block']}`,
               style: {
                 marginLeft: '18px',
                 marginBottom: '0px',
