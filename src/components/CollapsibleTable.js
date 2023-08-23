@@ -120,7 +120,7 @@ const SubTable = (props) => {
 
   return (
     <TableRow>
-      <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6} component="th">
+      <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
         <Collapse in={open} timeout="auto" unmountOnExit>
           <Box sx={{ margin: 2 }}>
             <Table>
@@ -137,11 +137,11 @@ const SubTable = (props) => {
               <TableBody>
                 {subtable.rows.map((subRow, j) => (
                   <TableRow key={j}>
-                    <StyledTableCell component="th">
+                    <StyledTableCell>
                       <Checkbox aria-label="select subtable row" />
                     </StyledTableCell>
                     {subRow.data.map((cell, k) => (
-                      <StyledTableCell key={k} component="th">
+                      <StyledTableCell key={k}>
                         {cell.value}
                       </StyledTableCell>
                     ))}
@@ -162,11 +162,11 @@ const CollapsibleRow = (props) => {
 
   return (
     <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <StyledTableCell component="th">
+      <TableRow>
+        <StyledTableCell>
           <Checkbox aria-label="select row" />
         </StyledTableCell>
-        <StyledTableCell component="th">
+        <StyledTableCell>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -176,7 +176,7 @@ const CollapsibleRow = (props) => {
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => (
-          <StyledTableCell key={i} component="th">
+          <StyledTableCell key={i}>
             {cell.value}
           </StyledTableCell>
         ))}
@@ -201,12 +201,12 @@ export const CollapsibleTable = (props) => {
         <Table aria-label={summary}>
           <TableHead>
             <TableRow>
-              <StyledTableCell>
+              <StyledTableCell component="th">
                 <Checkbox aria-label="select all on page" />
               </StyledTableCell>
-              <StyledTableCell />
+              <StyledTableCell component="th" />
               {data.headers.map((header) => (
-                <StyledTableCell key={header.value}>{header.value}</StyledTableCell>
+                <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
               ))}
             </TableRow>
           </TableHead>
