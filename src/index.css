@@ -1643,16 +1643,6 @@ input:-webkit-autofill {
   overflow-y: visible;
 }
 
-.table-scroll-admin {
-  overflow-x: scroll;
-  margin: 0 25px 5px 60px !important;
-  overflow-y: visible;
-}
-
-.table-scroll-admin thead, .table-scroll thead {
-  padding: 0 10px 0 10px;
-}
-
 .table {
   margin: 15px 0 !important;
 }
@@ -1675,20 +1665,6 @@ input:-webkit-autofill {
 
 .table-titles label {
   padding-top: 5px;
-}
-
-td:first-child {
-  position: absolute;
-  margin-left: -40px;
-}
-
-td:first-child .checkbox {
-  margin-top: 0px;
-  display: inline;
-}
-
-td:first-child .checkbox label {
-  padding-top: 1px;
 }
 
 .dataset-actions {
@@ -1771,10 +1747,6 @@ td:first-child .checkbox label {
   margin-bottom: 0;
   padding: 0 15px 0 0;
   display: inline;
-}
-
-.dataset-disabled, .dataset-disabled p, .dataset-disabled a {
-  color: #cccccc !important;
 }
 
 .accordion-title {
@@ -1983,11 +1955,6 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 .noty_type__success {
   background-color: #00928A;
-}
-
-.layout-table td:first-child {
-  position: inherit;
-  margin-left: -40px;
 }
 
 .layout-table th,td {
