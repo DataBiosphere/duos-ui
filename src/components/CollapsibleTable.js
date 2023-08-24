@@ -14,9 +14,8 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { Check } from '@mui/icons-material';
 import { Checkbox } from '@mui/material';
-import { Style } from '@mui/icons-material';
+import { useState } from 'react';
 
 /*
 The data should follow the following format:
@@ -115,56 +114,26 @@ const StyledTableCell = styled(TableCell)(() => ({
   },
 }));
 
-const SubTable = (props) => {
-  const { subtable, open } = props;
-
-  return (
-    <TableRow>
-      <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <Box sx={{ margin: 2 }}>
-            <Table>
-              {/* subtable header */}
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell component="th" />
-                  {subtable.headers.map((header, i) => (
-                    <StyledTableCell key={i}>{header.value}</StyledTableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              {/* subtable rows */}
-              <TableBody>
-                {subtable.rows.map((subRow, j) => (
-                  <TableRow key={j}>
-                    <StyledTableCell>
-                      <Checkbox aria-label="select subtable row" />
-                    </StyledTableCell>
-                    {subRow.data.map((cell, k) => (
-                      <StyledTableCell key={k}>
-                        {cell.value}
-                      </StyledTableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
-        </Collapse>
-      </StyledTableCell>
-    </TableRow>
-  );
-};
-
 const CollapsibleRow = (props) => {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
+  const { row, row: { subtable: { rows: subrows } }, selected, selectHandler } = props;
+
+  const [open, setOpen] = useState(false);
+
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const allSelected = subrows.every((row) => isSelected(row.id));
+  const someSelected = subrows.some((row) => isSelected(row.id));
 
   return (
     <React.Fragment>
+      {/* main table row */}
       <TableRow>
         <StyledTableCell>
-          <Checkbox aria-label="select row" />
+          <Checkbox
+            aria-label="select row"
+            onClick={(event) => selectHandler(event, row, "row")}
+            checked={allSelected}
+            indeterminate={someSelected && !allSelected}
+          />
         </StyledTableCell>
         <StyledTableCell>
           <IconButton
@@ -181,48 +150,96 @@ const CollapsibleRow = (props) => {
           </StyledTableCell>
         ))}
       </TableRow>
-      <SubTable subtable={row.subtable} open={open} />
+      {/* subtable */}
+      <TableRow>
+        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 2 }}>
+              <Table>
+                {/* subtable header */}
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell component="th" />
+                    {row.subtable.headers.map((header, i) => (
+                      <StyledTableCell key={i}>{header.value}</StyledTableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                {/* subtable rows */}
+                <TableBody>
+                  {subrows.map((subRow, j) => (
+                    <TableRow key={j}>
+                      <StyledTableCell>
+                        <Checkbox
+                          aria-label="select subtable row"
+                          onClick={(event) => selectHandler(event, subRow, "subrow")}
+                          checked={isSelected(subRow.id)}
+                        />
+                      </StyledTableCell>
+                      {subRow.data.map((cell, k) => (
+                        <StyledTableCell key={k}>
+                          {cell.value}
+                        </StyledTableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </StyledTableCell>
+      </TableRow>
     </React.Fragment>
   );
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, isLoading } = props;
+  const { data, summary, isLoading, selected, selectHandler } = props;
 
-  const [table, setTable] = React.useState([]);
+  const [allSelected, setAllSelected] = useState(false);
+  const [someSelected, setSomeSelected] = useState(false);
 
   useEffect(() => {
-    if (isLoading || isEmpty(data)) {
-      return;
+    const isSelected = (id) => selected.indexOf(id) !== -1;
+    if (!isEmpty(data)) {
+      setAllSelected(data.rows.every((row) => {
+        return row.subtable.rows.every((subRow) => isSelected(subRow.id));
+      }));
+      setSomeSelected(data.rows.some((row) => {
+        return row.subtable.rows.some((subRow) => isSelected(subRow.id));
+      }));
     }
+  }, [data, selected]);
 
-    const innerTable = (
-      <TableContainer component={Paper}>
-        <Table aria-label={summary}>
-          <TableHead>
-            <TableRow>
-              <StyledTableCell component="th">
-                <Checkbox aria-label="select all on page" />
-              </StyledTableCell>
-              <StyledTableCell component="th" />
-              {data.headers.map((header) => (
-                <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.rows.map((row) => (
-              <CollapsibleRow key={row.id} row={row} />
+  return !isLoading && !isEmpty(data) && (
+    <TableContainer component={Paper}>
+      <Table aria-label={summary}>
+        {/* main table header */}
+        <TableHead>
+          <TableRow>
+            <StyledTableCell component="th">
+              <Checkbox
+                aria-label="select all on page"
+                onClick={(event) => selectHandler(event, data, "all")}
+                checked={allSelected}
+                indeterminate={someSelected && !allSelected}
+              />
+            </StyledTableCell>
+            <StyledTableCell component="th" />
+            {data.headers.map((header) => (
+              <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
-
-    setTable(innerTable);
-  }, [isLoading, data, summary]);
-
-  return table;
+          </TableRow>
+        </TableHead>
+        {/* main table rows */}
+        <TableBody>
+          {data.rows.map((row) => (
+            <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} />
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 };
 
 export default CollapsibleTable;
