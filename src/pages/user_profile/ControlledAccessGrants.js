@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SortableTable from '../../components/SortableTable';
-import { User } from '../libs/ajax';
+import { User } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 
 const headCells = [

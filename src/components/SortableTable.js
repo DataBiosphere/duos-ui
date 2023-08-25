@@ -28,21 +28,17 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// // Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// // stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// // with exampleArray.slice().sort(exampleComparator)
-// function stableSort(array, comparator) {
-//   const stabilizedThis = array.map((el, index) => [el, index]);
-//   stabilizedThis.sort((a, b) => {
-//     const order = comparator(a[0], b[0]);
-//     if (order !== 0) {
-//       return order;
-//     }
-//     return a[1] - b[1];
-//   });
-//   return stabilizedThis.map((el) => el[0]);
-// }
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) {
+      return order;
+    }
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
 
 function EnhancedTableHead(props) {
   const { 
@@ -122,7 +118,7 @@ export default function SortableTable(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   
-  const classes = useStyles();
+  // const classes = useStyles();
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -169,10 +165,10 @@ export default function SortableTable(props) {
 
   const visibleRows = React.useMemo(
     () =>
-      rows.slice(
+      stableSort(rows, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
-      ).sort(getComparator(order, orderBy))
+      ),
     [order, orderBy, page, rows, rowsPerPage],
   );
 
@@ -184,7 +180,7 @@ export default function SortableTable(props) {
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
             size='medium'
-            className={classes.table}
+            // className={classes.table}
           >
             <EnhancedTableHead
               order={order}
