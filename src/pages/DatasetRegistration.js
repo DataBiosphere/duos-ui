@@ -81,10 +81,7 @@ class DatasetRegistration extends Component {
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.getDatasets();
-    const allDatasetNames = allDatasets.map(d => {
-      let name = d.properties.find(p => p.propertyName === 'Dataset Name');
-      return name.propertyValue;
-    });
+    const allDatasetNames = allDatasets.map(d => d.name);
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.notificationData = notificationData;
@@ -131,7 +128,7 @@ class DatasetRegistration extends Component {
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
-    let name = fp.find({propertyName: 'Dataset Name'})(dataset.properties);
+    let name = dataset.name;
     let collectionId = fp.find({propertyName: 'Sample Collection ID'})(dataset.properties);
     let dataType = fp.find({propertyName: 'Data Type'})(dataset.properties);
     let species = fp.find({propertyName: 'Species'})(dataset.properties);
@@ -145,7 +142,7 @@ class DatasetRegistration extends Component {
     let dac = fp.find({dacId: dataset.dacId})(this.state.dacList);
 
     this.setState(prev => {
-      prev.datasetData.datasetName = name ? name.propertyValue : '';
+      prev.datasetData.datasetName = name ? name : '';
       prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
       prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
       prev.datasetData.species = species ? species.propertyValue : '';
@@ -319,7 +316,7 @@ class DatasetRegistration extends Component {
     }
     // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
-      let updateDatasetName = fp.find(p => p.propertyName === 'Dataset Name', this.state.updateDataset.properties).propertyValue;
+      let updateDatasetName = this.state.updateDataset.name;
       if (name === updateDatasetName) {
         return 'form-control';
       }

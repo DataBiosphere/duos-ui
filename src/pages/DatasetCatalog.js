@@ -199,13 +199,11 @@ export default function DatasetCatalog(props) {
     let datasetIdList = [];
     selectedDatasets
       .forEach(dataset => {
-        const dsNameProp = find({propertyName: 'Dataset Name'})(dataset.properties);
-        const label = dsNameProp.propertyValue;
         datasets.push({
           key: dataset.dataSetId,
           value: dataset.dataSetId,
-          label: label,
-          concatenation: label,
+          label: dataset.name,
+          concatenation: dataset.name,
         });
         datasetIdList.push(dataset.dataSetId);
       });
@@ -642,7 +640,7 @@ export default function DatasetCatalog(props) {
                           id: trIndex + '_datasetName', name: 'datasetName',
                           className: `${style['cell-size']} ` + (!isVisible(dataset) ? !! style['dataset-disabled'] : ''),
                           style: tableBody
-                        }, [findPropertyValue(dataset, 'Dataset Name')]),
+                        }, dataset.name),
 
                         td({
                           id: trIndex + '_dac', name: 'dac',
