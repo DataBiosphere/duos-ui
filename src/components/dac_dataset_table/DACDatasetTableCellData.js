@@ -35,8 +35,8 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
 
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
   return {
-    data: <div className={style['cell-data']}>{dataset.datasetName}</div>,
-    value: dataset.datasetName,
+    data: <div className={style['cell-data']}>{dataset.name}</div>,
+    value: dataset.name,
     id: `name-cell-data-${dataset.dataSetId}`,
     cellStyle: {width: styles.cellWidths.datasetName},
     label

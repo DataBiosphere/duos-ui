@@ -81,7 +81,7 @@ class DatasetRegistration extends Component {
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.getDatasets();
-    const allDatasetNames = allDatasets.map(d => d.datasetName);
+    const allDatasetNames = allDatasets.map(d => d.name);
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.notificationData = notificationData;
@@ -128,7 +128,7 @@ class DatasetRegistration extends Component {
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
-    let name = dataset.datasetName;
+    let name = dataset.name;
     let collectionId = fp.find({propertyName: 'Sample Collection ID'})(dataset.properties);
     let dataType = fp.find({propertyName: 'Data Type'})(dataset.properties);
     let species = fp.find({propertyName: 'Species'})(dataset.properties);
@@ -316,7 +316,7 @@ class DatasetRegistration extends Component {
     }
     // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
-      let updateDatasetName = this.state.updateDataset.datasetName;
+      let updateDatasetName = this.state.updateDataset.name;
       if (name === updateDatasetName) {
         return 'form-control';
       }

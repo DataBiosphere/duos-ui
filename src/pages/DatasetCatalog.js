@@ -202,8 +202,8 @@ export default function DatasetCatalog(props) {
         datasets.push({
           key: dataset.dataSetId,
           value: dataset.dataSetId,
-          label: dataset.datasetName,
-          concatenation: dataset.datasetName,
+          label: dataset.name,
+          concatenation: dataset.name,
         });
         datasetIdList.push(dataset.dataSetId);
       });
@@ -640,7 +640,7 @@ export default function DatasetCatalog(props) {
                           id: trIndex + '_datasetName', name: 'datasetName',
                           className: `${style['cell-size']} ` + (!isVisible(dataset) ? !! style['dataset-disabled'] : ''),
                           style: tableBody
-                        }, dataset.datasetName),
+                        }, dataset.name),
 
                         td({
                           id: trIndex + '_dac', name: 'dac',
