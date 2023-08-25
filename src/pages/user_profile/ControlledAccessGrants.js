@@ -70,8 +70,8 @@ export default function ControlledAccessGrants() {
       }
     };
     init();
-  }, [User.getApprovedDatasets]);
-  
+  }, []);
+
   return <div>
     <h1
       style={{
@@ -92,6 +92,6 @@ export default function ControlledAccessGrants() {
       Your current dataset approvals
     </p>
     <div style={{ marginTop: '20px' }} />
-    <SortableTable rows={rows} headCells={headCells}/>
+    <SortableTable rows={rows} headCells={headCells} />
   </div>;
 }
