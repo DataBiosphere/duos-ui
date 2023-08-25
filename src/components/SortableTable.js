@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -11,95 +11,6 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
 import { visuallyHidden } from '@mui/utils';
-import { User } from '../libs/ajax';
-import { isNil } from 'lodash';
-import { makeStyles } from 'tss-react/mui';
-import { useTheme } from '@mui/material/styles';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    color: 'yellow',
-    '&.MuiTableSortLabel-active': {
-      color: 'yellow',
-    },
-  },
-}));
-
-
-
-// const example = [
-//   {
-//     alias: 1,
-//     darCode: "darCode1",
-//     datasetName: "datasetName1",
-//     dacName: "dacName1",
-//     approvalDate: "approvalDate1",
-//     datasetIdentifier: "datasetIdentifier1"
-//   },
-//   {
-//     alias: 2,
-//     darCode: 'darCode2',
-//     datasetName: "datasetName2",
-//     dacName: "dacName2",
-//     approvalDate: "approvalDate2",
-//     datasetIdentifier: "datasetIdentifier2"
-//   }
-// ];
-
-
-// const rows = createRows()
-
-// function createRows() {
-//   const rows = []
-//   example.map((exampleRow) => (
-//     rows.push(createData(exampleRow.darCode, exampleRow.approvalDate, exampleRow.datasetIdentifier, exampleRow.datasetName, exampleRow.dacName))
-//   ))
-//   return rows
-// }
-
-function createData(darCode, approvalDate, datasetIdentifier, datasetName, dacName) {
-  return {
-    darCode,
-    approvalDate,
-    datasetIdentifier,
-    datasetName,
-    dacName
-  };
-}
-
-
-const headCells = [
-  {
-    id: 'darCode',
-    numeric: false,
-    disablePadding: false,
-    label: 'DAR Code',
-  },
-  {
-    id: 'approvalDate',
-    numeric: true,
-    disablePadding: false,
-    label: 'Approval Date',
-  },
-  {
-    id: 'datasetIdentifier',
-    numeric: true,
-    disablePadding: false,
-    label: 'Dataset Identifier',
-  },
-  {
-    id: 'datasetName',
-    numeric: true,
-    disablePadding: false,
-    label: 'Dataset Name',
-  },
-  {
-    id: 'dacName',
-    numeric: true,
-    disablePadding: false,
-    label: 'DAC Name',
-  },
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -117,33 +28,32 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+// // Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
+// // stableSort() brings sort stability to non-modern browsers (notably IE11). If you
+// // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
+// // with exampleArray.slice().sort(exampleComparator)
+// function stableSort(array, comparator) {
+//   const stabilizedThis = array.map((el, index) => [el, index]);
+//   stabilizedThis.sort((a, b) => {
+//     const order = comparator(a[0], b[0]);
+//     if (order !== 0) {
+//       return order;
+//     }
+//     return a[1] - b[1];
+//   });
+//   return stabilizedThis.map((el) => el[0]);
+// }
 
 function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
-    props;
+  const { 
+    order, 
+    orderBy,
+    onRequestSort,
+    headCells
+  } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
-
-  // Inside your component
-const theme = useTheme();
-
-  const classes = useStyles();
 
   return (
     <TableHead>
@@ -154,28 +64,27 @@ const theme = useTheme();
             align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
-            // sx={{
-            //   // color: '#626262',
-            //   // fontFamily: 'Montserrat',
-            //   // fontSize: '14px',
-            //   // fontStyle: 'normal',
-            //   // fontWeight: '600',
-            //   // lineHeight: 'normal',
-            //   '& .MuiButtonBase-root-MuiTableSortLabel-root-root.Mui-active': {
-            //     color: 'green',
-            // },
-            // }}
+            sx={{
+              color: '#626262',
+              fontFamily: 'Montserrat',
+              fontSize: '14px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: 'normal',
+              '& .MuiButtonBase-root-MuiTableSortLabel-root-root.Mui-active': {
+                color: 'green',
+            },
+            }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : 'asc'}
               onClick={createSortHandler(headCell.id)}
               sx={{
-                color: orderBy === headCell.id ? theme.palette.primary.main : theme.palette.text.primary,
                 fontFamily: 'Montserrat',
                 fontSize: '16px',
                 fontStyle: 'normal',
-                fontWeight: orderBy === headCell.id ? '600' : '400',
+                fontWeight: '400',
                 lineHeight: 'normal'
               }}
             >
@@ -194,59 +103,31 @@ const theme = useTheme();
 }
 
 EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
 };
 
-export default function SortableTable() {
+export default function SortableTable(props) {
+
+  const {
+    rows,
+    headCells
+  } = props;
+
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('darCode');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [rows, setRows] = useState([]);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const userRows = await User.getApprovedDatasets();
-        setRows(createRows(userRows));
-        console.log("useEffect " + userRows)
-      } catch (error) {
-        console.error('Error  data:', error);
-      }
-    };
-    init();
-  }, [User.getApprovedDatasets]);
-
-  function createRows(userRows) {
-    return userRows.map((exampleRow) => createData(
-      exampleRow.darCode,
-      exampleRow.approvalDate,
-      exampleRow.datasetIdentifier,
-      exampleRow.datasetName,
-      exampleRow.dacName
-    ));
-  }
+  
+  const classes = useStyles();
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rows.map((n) => n.name);
-      setSelected(newSelected);
-      return;
-    }
-    setSelected([]);
   };
 
 
@@ -288,10 +169,10 @@ export default function SortableTable() {
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
+      rows.slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
-      ),
+      ).sort(getComparator(order, orderBy))
     [order, orderBy, page, rows, rowsPerPage],
   );
 
@@ -303,14 +184,13 @@ export default function SortableTable() {
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
             size='medium'
+            className={classes.table}
           >
             <EnhancedTableHead
-              numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              headCells={headCells}
             />
             <TableBody>
               {visibleRows.map((row, index) => {
@@ -324,7 +204,9 @@ export default function SortableTable() {
                     tabIndex={-1}
                     key={row.datasetIdentifier}
                     selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
+                    // sx={{ cursor: "pointer" }}
+                    sx={{ '&:last-child td, &:last-child th':
+                                { border: 0 } }}
                   >
                     <TableCell
                       component="th"
@@ -382,7 +264,7 @@ export default function SortableTable() {
             fontFamily: 'Montserrat',
             fontSize: '14px',
             fontStyle: 'normal',
-            fontWeight: '600',
+            fontWeight: '800',
           }}
         />
       </Paper>
