@@ -98,7 +98,7 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
             this.props.datasets.map((dataset, index) => {
               return tr({ key: dataset.datasetIdentifier }, [
                 td({ className: 'table-items cell-size', style: { position: 'relative' } }, [dataset.datasetIdentifier]),
-                td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Dataset Name', '---')]),
+                td({ className: 'table-items cell-size' }, [dataset.datasetName]),
                 td({ className: 'table-items cell-size' }, [this.getDbGapLinkValue(dataset.properties)]),
                 td({ className: 'table-items cell-size' }, [this.getStructuredUseRestrictionLink(index)]),
                 td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Data Type', '---')]),
