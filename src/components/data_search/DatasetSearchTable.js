@@ -5,6 +5,7 @@ import { Styles } from '../../libs/theme';
 import { groupBy } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
+import { DAR } from '../../libs/ajax';
 
 const studyTableHeader = [
   'Study Name',
@@ -59,6 +60,12 @@ export const DatasetSearchTable = (props) => {
     setSelected(newSelected);
   };
 
+  const applyForAccess = async () => {
+    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
+    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    window.location.href = `/dar_application/${darDraft.referenceId}`;
+  };
+
   useEffect(() => {
     if (isLoading) {
       return;
@@ -107,7 +114,7 @@ export const DatasetSearchTable = (props) => {
             headers: datasetTableHeader.map((header) => ({ value: header })),
             rows: entry.map((dataset) => {
               return {
-                id: dataset.datasetIdentifier,
+                id: 'dataset-' + dataset.datasetId,
                 data: [
                   {
                     value: dataset.datasetIdentifier,
@@ -157,6 +164,7 @@ export const DatasetSearchTable = (props) => {
       button({
         id: 'btn_applyAccess',
         className: `btn-primary dataset-background search-wrapper`,
+        onClick: applyForAccess,
         'data-tip': 'Request Access for selected Studies', 'data-for': 'tip_requestAccess',
         style: { marginBottom: '30%' }
       }, ['Apply for Access'])
