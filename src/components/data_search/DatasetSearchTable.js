@@ -29,23 +29,23 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, isLoading } = props;
+  const { datasets, isLoading, history } = props;
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
 
   const selectHandler = (event, data, selector) => {
     let idsToModify = [];
-    if (selector === "all") {
+    if (selector === 'all') {
       data.rows.forEach((row) => {
         row.subtable.rows.forEach((subRow) => {
           idsToModify.push(subRow.id);
         });
       });
-    } else if (selector === "row") {
+    } else if (selector === 'row') {
       data.subtable.rows.forEach((row) => {
         idsToModify.push(row.id);
       });
-    } else if (selector === "subrow") {
+    } else if (selector === 'subrow') {
       idsToModify.push(data.id);
     }
 
@@ -63,7 +63,7 @@ export const DatasetSearchTable = (props) => {
   const applyForAccess = async () => {
     const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    window.location.href = `/dar_application/${darDraft.referenceId}`;
+    history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
   useEffect(() => {

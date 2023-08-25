@@ -130,7 +130,7 @@ const CollapsibleRow = (props) => {
         <StyledTableCell>
           <Checkbox
             aria-label="select row"
-            onClick={(event) => selectHandler(event, row, "row")}
+            onClick={(event) => selectHandler(event, row, 'row')}
             checked={allSelected}
             indeterminate={someSelected && !allSelected}
           />
@@ -172,7 +172,7 @@ const CollapsibleRow = (props) => {
                       <StyledTableCell>
                         <Checkbox
                           aria-label="select subtable row"
-                          onClick={(event) => selectHandler(event, subRow, "subrow")}
+                          onClick={(event) => selectHandler(event, subRow, 'subrow')}
                           checked={isSelected(subRow.id)}
                         />
                       </StyledTableCell>
@@ -220,7 +220,7 @@ export const CollapsibleTable = (props) => {
             <StyledTableCell component="th">
               <Checkbox
                 aria-label="select all on page"
-                onClick={(event) => selectHandler(event, data, "all")}
+                onClick={(event) => selectHandler(event, data, 'all')}
                 checked={allSelected}
                 indeterminate={someSelected && !allSelected}
               />
