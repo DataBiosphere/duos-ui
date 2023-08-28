@@ -2,7 +2,6 @@ import React from 'react';
 import CollectionSubmitVoteBox from '../collection_vote_box/CollectionSubmitVoteBox';
 import {
   filter,
-  flatMap,
   flow,
   map,
   isNil,
