@@ -242,12 +242,6 @@ export const DAR = {
     return await res.data;
   },
 
-  getAutoCompleteDS: async partial => {
-    const url = `${await getApiUrl()}/api/dataset/autocomplete/${partial}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   getAutoCompleteOT: async partial => {
     const url = `${await getOntologyUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
