@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { h, div } from 'react-hyperscript-helpers';
+import { h, div, button } from 'react-hyperscript-helpers';
 import datasetIcon from '../../logo.svg';
 import { Styles } from '../../libs/theme';
 import { groupBy } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
+import { DAR } from '../../libs/ajax';
 
 const studyTableHeader = [
   'Study Name',
@@ -28,8 +29,42 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, isLoading } = props;
+  const { datasets, isLoading, history } = props;
   const [tableData, setTableData] = useState({});
+  const [selected, setSelected] = useState([]);
+
+  const selectHandler = (event, data, selector) => {
+    let idsToModify = [];
+    if (selector === 'all') {
+      data.rows.forEach((row) => {
+        row.subtable.rows.forEach((subRow) => {
+          idsToModify.push(subRow.id);
+        });
+      });
+    } else if (selector === 'row') {
+      data.subtable.rows.forEach((row) => {
+        idsToModify.push(row.id);
+      });
+    } else if (selector === 'subrow') {
+      idsToModify.push(data.id);
+    }
+
+    let newSelected = [];
+    const allSelected = idsToModify.every((id) => selected.includes(id));
+    if (allSelected) {
+      newSelected = selected.filter((id) => !idsToModify.includes(id));
+    } else {
+      newSelected = selected.concat(idsToModify);
+    }
+
+    setSelected(newSelected);
+  };
+
+  const applyForAccess = async () => {
+    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
+    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    history.push(`/dar_application/${darDraft.referenceId}`);
+  };
 
   useEffect(() => {
     if (isLoading) {
@@ -38,13 +73,14 @@ export const DatasetSearchTable = (props) => {
 
     const studies = groupBy(datasets, 'study.studyId');
     const table = {
+      id: 'study-table',
       headers: studyTableHeader.map((header) => ({ value: header })),
       rows: Object.values(studies).map((entry) => {
         const sum = entry.reduce((acc, dataset) => {
           return acc + dataset.participantCount;
         }, 0);
         return {
-          id: entry[0].study.studyId,
+          id: 'study-' + entry[0].study.studyId,
           data: [
             {
               value: entry[0].study.studyName,
@@ -78,7 +114,7 @@ export const DatasetSearchTable = (props) => {
             headers: datasetTableHeader.map((header) => ({ value: header })),
             rows: entry.map((dataset) => {
               return {
-                id: dataset.datasetId,
+                id: 'dataset-' + dataset.datasetId,
                 data: [
                   {
                     value: dataset.datasetIdentifier,
@@ -118,9 +154,20 @@ export const DatasetSearchTable = (props) => {
     div({ style: { paddingTop: '2rem' } }, [
       h(CollapsibleTable, {
         data: tableData,
+        selected,
+        selectHandler,
         isLoading,
         summary: 'faceted study search table'
       }),
+    ]),
+    div({ className: 'f-right' }, [
+      button({
+        id: 'btn_applyAccess',
+        className: `btn-primary dataset-background search-wrapper`,
+        onClick: applyForAccess,
+        'data-tip': 'Request Access for selected Studies', 'data-for': 'tip_requestAccess',
+        style: { marginBottom: '30%' }
+      }, ['Apply for Access'])
     ]),
   ]);
 };

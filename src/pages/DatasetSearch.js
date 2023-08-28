@@ -44,7 +44,7 @@ export const DatasetSearch = (props) => {
 
   return (
     <div>
-      <DatasetSearchTable datasets={datasets} isLoading={isLoading} props={props} />
+      <DatasetSearchTable {...props} datasets={datasets} isLoading={isLoading} />
     </div>
   );
 };
