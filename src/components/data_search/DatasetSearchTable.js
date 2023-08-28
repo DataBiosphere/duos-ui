@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import datasetIcon from '../../logo.svg';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import { DAR } from '../../libs/ajax';
@@ -31,7 +31,7 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, isLoading, history } = props;
+  const { datasets, history } = props;
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
@@ -70,7 +70,7 @@ export const DatasetSearchTable = (props) => {
   };
 
   useEffect(() => {
-    if (isLoading) {
+    if (isEmpty(filtered)) {
       return;
     }
 
@@ -146,7 +146,7 @@ export const DatasetSearchTable = (props) => {
     };
 
     setTableData(table);
-  }, [filtered, isLoading]);
+  }, [filtered]);
 
   useEffect(() => {
     setFiltered(datasets);
@@ -160,7 +160,7 @@ export const DatasetSearchTable = (props) => {
           <DatasetFilterList />
         </Box>
         <Box sx={{ width: '85%', padding: '0 1em' }}>
-          <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} isLoading={isLoading} summary='faceted study search table' />
+          <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
         </Box>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em' }}>

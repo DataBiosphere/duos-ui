@@ -194,7 +194,7 @@ const CollapsibleRow = (props) => {
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, isLoading, selected, selectHandler } = props;
+  const { data, summary, selected, selectHandler } = props;
 
   const [allSelected, setAllSelected] = useState(false);
   const [someSelected, setSomeSelected] = useState(false);
@@ -211,7 +211,7 @@ export const CollapsibleTable = (props) => {
     }
   }, [data, selected]);
 
-  return !isLoading && !isEmpty(data) && (
+  return !isEmpty(data) && (
     <TableContainer component={Paper}>
       <Table aria-label={summary}>
         {/* main table header */}
