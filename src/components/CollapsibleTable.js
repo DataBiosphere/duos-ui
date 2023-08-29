@@ -201,7 +201,7 @@ export const CollapsibleTable = (props) => {
 
   useEffect(() => {
     const isSelected = (id) => selected.indexOf(id) !== -1;
-    if (!isEmpty(data)) {
+    if (!isEmpty(data) && !isEmpty(data.rows)) {
       setAllSelected(data.rows.every((row) => {
         return row.subtable.rows.every((subRow) => isSelected(subRow.id));
       }));

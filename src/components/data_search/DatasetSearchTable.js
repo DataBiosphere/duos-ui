@@ -1,11 +1,13 @@
+import * as React from 'react';
+import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { h, div, button } from 'react-hyperscript-helpers';
 import datasetIcon from '../../logo.svg';
-import { Styles } from '../../libs/theme';
 import { groupBy } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import { DAR } from '../../libs/ajax';
+import DatasetFilterList from './DatasetFilterList';
+import { Box } from '@mui/material';
 
 const studyTableHeader = [
   'Study Name',
@@ -30,6 +32,7 @@ const datasetTableHeader = [
 
 export const DatasetSearchTable = (props) => {
   const { datasets, isLoading, history } = props;
+  const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
 
@@ -71,7 +74,7 @@ export const DatasetSearchTable = (props) => {
       return;
     }
 
-    const studies = groupBy(datasets, 'study.studyId');
+    const studies = groupBy(filtered, 'study.studyId');
     const table = {
       id: 'study-table',
       headers: studyTableHeader.map((header) => ({ value: header })),
@@ -143,33 +146,30 @@ export const DatasetSearchTable = (props) => {
     };
 
     setTableData(table);
-  }, [datasets, isLoading]);
+  }, [filtered, isLoading]);
 
-  return div({ style: Styles.PAGE }, [
-    h(TableHeaderSection, {
-      icon: datasetIcon,
-      title: 'Broad Data Library',
-      description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access'
-    }),
-    div({ style: { paddingTop: '2rem' } }, [
-      h(CollapsibleTable, {
-        data: tableData,
-        selected,
-        selectHandler,
-        isLoading,
-        summary: 'faceted study search table'
-      }),
-    ]),
-    div({ className: 'f-right' }, [
-      button({
-        id: 'btn_applyAccess',
-        className: `btn-primary dataset-background search-wrapper`,
-        onClick: applyForAccess,
-        'data-tip': 'Request Access for selected Studies', 'data-for': 'tip_requestAccess',
-        style: { marginBottom: '30%' }
-      }, ['Apply for Access'])
-    ]),
-  ]);
+  useEffect(() => {
+    setFiltered(datasets);
+  }, [datasets]);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <TableHeaderSection icon={datasetIcon} title='Broad Data Library' description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+      <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
+        <Box sx={{ width: '14%', padding: '0 1em' }}>
+          <DatasetFilterList />
+        </Box>
+        <Box sx={{ width: '85%', padding: '0 1em' }}>
+          <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} isLoading={isLoading} summary='faceted study search table' />
+        </Box>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em' }}>
+        <Button variant="contained" size="large" onClick={applyForAccess} data-tip='Request Access for selected Studies' data-for='tip_requestAccess'>
+            Apply for Access
+        </Button>
+      </Box>
+    </Box>
+  );
 };
 
 export default DatasetSearchTable;
