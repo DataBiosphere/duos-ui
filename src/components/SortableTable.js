@@ -11,6 +11,54 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
 import { visuallyHidden } from '@mui/utils';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+const theme = createTheme({
+  components: {
+    MuiTableSortLabel: {
+      styleOverrides: {
+        root: {
+          textAlign: 'center',
+          color: '#626262',
+          '&.Mui-active': {
+            color: '#626262'
+          }
+        },
+      }
+    },
+    MuiTablePagination: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Montserrat',
+          color: '#000',
+          fontSize: '14px',
+          fontWeight: '400',
+          padding: '7px 20px 7px 20px'
+        },
+        actions: {
+          marginRight: '20px',
+          marginLeft: '25px'
+        },
+        displayedRows: {
+          fontFamily: 'Montserrat',
+          color: '#626262',
+          fontSize: '12px',
+        }
+      }
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Montserrat',
+          color: '#000',
+          fontSize: '14px',
+          fontWeight: '400',
+          padding: '7px 20px 7px 20px'
+        }
+      }
+    },
+  }
+});
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -41,8 +89,8 @@ function stableSort(array, comparator) {
 }
 
 function EnhancedTableHead(props) {
-  const { 
-    order, 
+  const {
+    order,
     orderBy,
     onRequestSort,
     headCells
@@ -52,49 +100,42 @@ function EnhancedTableHead(props) {
   };
 
   return (
-    <TableHead>
-      <TableRow>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
-            sortDirection={orderBy === headCell.id ? order : false}
-            sx={{
-              color: '#626262',
-              fontFamily: 'Montserrat',
-              fontSize: '14px',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              lineHeight: 'normal',
-              '& .MuiButtonBase-root-MuiTableSortLabel-root-root.Mui-active': {
-                color: 'green',
-            },
-            }}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : 'asc'}
-              onClick={createSortHandler(headCell.id)}
+    <ThemeProvider theme={theme}>
+      <TableHead>
+        <TableRow>
+          {headCells.map((headCell) => (
+            <TableCell
+              key={headCell.id}
+              align={headCell.numeric ? 'right' : 'left'}
+              padding={headCell.disablePadding ? 'none' : 'normal'}
+              sortDirection={orderBy === headCell.id ? order : false}
               sx={{
-                fontFamily: 'Montserrat',
-                fontSize: '16px',
-                fontStyle: 'normal',
-                fontWeight: '400',
-                lineHeight: 'normal'
+                lineHeight: 'normal',
+                fontWeight: '600',
+                padding: '10px'
               }}
             >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : 'asc'}
+                onClick={createSortHandler(headCell.id)}
+                sx={{
+                  fontSize: '16px',
+                  fontWeight: '400'
+                }}
+              >
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <Box component='span' sx={visuallyHidden}>
+                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+    </ThemeProvider>
   );
 }
 
@@ -115,10 +156,7 @@ export default function SortableTable(props) {
   const [orderBy, setOrderBy] = React.useState('darCode');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  
-  // const classes = useStyles();
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -145,7 +183,7 @@ export default function SortableTable(props) {
     }
 
     setSelected(newSelected);
-  };//
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -159,7 +197,6 @@ export default function SortableTable(props) {
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
-  // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -173,97 +210,83 @@ export default function SortableTable(props) {
   );
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2, fontFamily: 'Montserrat', fontSize: '100' }}>
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size='medium'
-            // className={classes.table}
-          >
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              headCells={headCells}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.name);
-                const labelId = `enhanced-table-checkbox-${index}`;
-
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.name)}
-                    tabIndex={-1}
-                    key={row.datasetIdentifier}
-                    selected={isItemSelected}
-                    // sx={{ cursor: "pointer" }}
-                    sx={{ '&:last-child td, &:last-child th':
-                                { border: 0 } }}
-                  >
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                      sx={{ fontFamily: 'Montserrat', color: '#000', fontSize: '14px', fontWeight: '400' }}
-                    >
-                      {row.darCode}
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: 'Montserrat', color: '#000', fontSize: '14px', fontWeight: '400' }}
-                      align="right">
-                      {row.approvalDate}
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontFamily: 'Montserrat', color: '#000', fontSize: '14px', fontWeight: '400' }}
-                      align="right">
-                      {row.datasetIdentifier}
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontFamily: 'Montserrat', color: '#000', fontSize: '14px', fontWeight: '400' }}
-                      align="right">
-                      {row.datasetName}
-                    </TableCell>
-                    <TableCell
-                      sx={{ fontFamily: 'Montserrat', color: '#000', fontSize: '14px', fontWeight: '400' }}
-                      align="right">
-                      {row.dacName}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          width: '100%',
+          fill: '#FFF',
+          strokeWidth: '1px',
+          stroke: '#ABABAB',
+          filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))'
+        }}
+      >
+        <Paper
           sx={{
-            color: '#626262',
+            width: '100%',
+            mb: 2,
             fontFamily: 'Montserrat',
-            fontSize: '14px',
-            fontStyle: 'normal',
-            fontWeight: '800',
-          }}
-        />
-      </Paper>
-    </Box >
+            fontSize: '100'
+          }}>
+          <TableContainer>
+            <Table>
+              <EnhancedTableHead
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+                headCells={headCells}
+                sx={{ marginBottom: '15px' }}
+              />
+              <TableBody>
+                {visibleRows.map((row, index) => {
+                  const isItemSelected = isSelected(row.name);
+                  const labelId = `enhanced-table-checkbox-${index}`;
+
+                  return (
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, row.name)}
+                      tabIndex={-1}
+                      key={row.datasetIdentifier}
+                      selected={isItemSelected}
+                    >
+                      <TableCell
+                        component='th'
+                        id={labelId}
+                        scope='row'
+                        padding='none'
+                      >
+                        {row.darCode}
+                      </TableCell>
+                      <TableCell align='right'>{row.approvalDate}</TableCell>
+                      <TableCell align='right'>{row.datasetIdentifier}</TableCell>
+                      <TableCell align='right'>{row.datasetName}</TableCell>
+                      <TableCell align='right'>{row.dacName}</TableCell>
+                    </TableRow>
+                  );
+                })}
+                {emptyRows > 0 && (
+                  <TableRow
+                    style={{
+                      height: 53 * emptyRows,
+                    }}
+                  >
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[]}
+            component='div'
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      </Box >
+    </ThemeProvider>
   );
 }
