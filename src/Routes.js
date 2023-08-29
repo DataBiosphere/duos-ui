@@ -34,6 +34,7 @@ import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from './pages/AdminEditUser';
 import ChairConsole from './pages/ChairConsole';
 import MemberConsole from './pages/MemberConsole';
+import DataSubmitterConsole from './pages/data_submitter_console/DataSubmitterConsole';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import {HealthCheck} from './pages/HealthCheck';
@@ -89,6 +90,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
+    <AuthenticatedRoute path="/data_submitter_console" component={DataSubmitterConsole} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_update/:datasetId" component={DatasetUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

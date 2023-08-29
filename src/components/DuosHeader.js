@@ -127,10 +127,10 @@ export const headerTabsConfig = [
   },
   {
     label: 'DS Console',
-    link: '/data_submission_form',
-    search: 'data_submission_form',
+    link: '/data_submitter_console',
+    search: 'data_submitter_console',
     children: [
-      { label: 'Datasets', link: '/data_submission_form' }
+      { label: 'My Submitted Datasets', link: '/data_submitter_console' }
     ],
     isRendered: (user) => user.isDataSubmitter
   },
