@@ -192,8 +192,8 @@ export const DatasetSearchTable = (props) => {
           <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em' }}>
-        <Button variant="contained" size="large" onClick={applyForAccess} data-tip='Request Access for selected Studies' data-for='tip_requestAccess'>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
+        <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
         </Button>
       </Box>
