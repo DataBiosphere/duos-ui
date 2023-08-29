@@ -16,28 +16,28 @@ export const DatasetFilterList = (props) => {
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
-      <Typography variant="h5" gutterBottom component="div">
+      <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
         Filters
       </Typography>
       <Divider />
-      <Typography variant="h6" gutterBottom component="div" marginTop="1em">
+      <Typography variant="h6" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }} marginTop="1em">
         Access Type
       </Typography>
-      <List>
+      <List sx={{ margin: '-0.5em -0.5em'}}>
         <ListItem disablePadding>
-          <ListItemButton onClick={(event) => filterHandler(event, datasets, 'open')}>
+          <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, 'open')}>
             <ListItemIcon>
               <Checkbox checked={isFiltered('open')} />
             </ListItemIcon>
-            <ListItemText primary="Open" />
+            <ListItemText primary="Open" sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={(event) => filterHandler(event, datasets, 'controlled')}>
+          <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, 'controlled')}>
             <ListItemIcon>
               <Checkbox checked={isFiltered('controlled')} />
             </ListItemIcon>
-            <ListItemText primary="Controlled" />
+            <ListItemText primary="Controlled" sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
           </ListItemButton>
         </ListItem>
       </List>
