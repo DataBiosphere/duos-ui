@@ -32,9 +32,38 @@ const datasetTableHeader = [
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history } = props;
+  const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
+
+  const isFiltered = (filter) => filters.indexOf(filter) > -1;
+
+  const filterHandler = (event, data, filter) => {
+    var newFilters = [];
+    if (!isFiltered(filter)) {
+      newFilters = filters.concat(filter);
+    } else {
+      newFilters = filters.filter((f) => f !== filter);
+    }
+    setFilters(newFilters);
+
+    var newFiltered = [];
+    if (newFilters.length === 0) {
+      newFiltered = data;
+    } else {
+      newFiltered = data.filter((dataset) => {
+        if (newFilters.includes('open') && dataset.openAccess) {
+          return true;
+        }
+        if (newFilters.includes('controlled') && !dataset.openAccess) {
+          return true;
+        }
+        return false;
+      });
+    }
+    setFiltered(newFiltered);
+  };
 
   const selectHandler = (event, data, selector) => {
     let idsToModify = [];
@@ -157,7 +186,7 @@ export const DatasetSearchTable = (props) => {
       <TableHeaderSection icon={datasetIcon} title='Broad Data Library' description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
       <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
         <Box sx={{ width: '14%', padding: '0 1em' }}>
-          <DatasetFilterList />
+          <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />
         </Box>
         <Box sx={{ width: '85%', padding: '0 1em' }}>
           <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />

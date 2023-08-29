@@ -7,9 +7,13 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import { Typography } from '@mui/material';
-import { CheckBox } from '@mui/icons-material';
+import { Checkbox } from '@mui/material';
 
-export const DatasetFilterList = () => {
+export const DatasetFilterList = (props) => {
+  const { datasets, filters, filterHandler } = props;
+
+  const isFiltered = (filter) => filters.indexOf(filter) > -1;
+
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
       <Typography variant="h5" gutterBottom component="div">
@@ -21,17 +25,17 @@ export const DatasetFilterList = () => {
       </Typography>
       <List>
         <ListItem disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={(event) => filterHandler(event, datasets, "open")}>
             <ListItemIcon>
-              <CheckBox />
+              <Checkbox checked={isFiltered("open")} />
             </ListItemIcon>
             <ListItemText primary="Open" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-        <ListItemButton>
+          <ListItemButton onClick={(event) => filterHandler(event, datasets, "controlled")}>
             <ListItemIcon>
-              <CheckBox />
+              <Checkbox checked={isFiltered("controlled")} />
             </ListItemIcon>
             <ListItemText primary="Controlled" />
           </ListItemButton>
