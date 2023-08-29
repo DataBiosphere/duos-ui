@@ -25,17 +25,17 @@ export const DatasetFilterList = (props) => {
       </Typography>
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={(event) => filterHandler(event, datasets, "open")}>
+          <ListItemButton onClick={(event) => filterHandler(event, datasets, 'open')}>
             <ListItemIcon>
-              <Checkbox checked={isFiltered("open")} />
+              <Checkbox checked={isFiltered('open')} />
             </ListItemIcon>
             <ListItemText primary="Open" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={(event) => filterHandler(event, datasets, "controlled")}>
+          <ListItemButton onClick={(event) => filterHandler(event, datasets, 'controlled')}>
             <ListItemIcon>
-              <Checkbox checked={isFiltered("controlled")} />
+              <Checkbox checked={isFiltered('controlled')} />
             </ListItemIcon>
             <ListItemText primary="Controlled" />
           </ListItemButton>
