@@ -72,14 +72,19 @@ export default function UserProfile(props) {
       >
         <div
           style={{
-            display: 'flex'
+            marginBottom: '40px'
           }}
         >
-          <img src={userProfileIcon} />
           <PageHeading
             id='researcherProfile'
             color='common'
             title='Your Profile'
+            descriptionStyle={{fontSize: '10000px'}}
+            style={{
+              float: 'left',
+            }}
+            imgSrc={userProfileIcon}
+            iconSize='large'
           />
         </div>
         <div
@@ -87,7 +92,16 @@ export default function UserProfile(props) {
             display: 'flex'
           }}
         >
-          <img src={ga4ghLogo} />
+          <img
+            src={ga4ghLogo}
+            style={{
+              width: '166px',
+              height: '48px',
+              top: '213px',
+              left: '230px',
+              marginRight: '50px'
+            }}
+          />
           <p>
             DUOS user profile components are based off of the GA4GH Passports specification Visa types. More information on the GA4GH Passports standard can be found&nbsp;
             <a href='https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md'>

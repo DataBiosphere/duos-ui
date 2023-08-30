@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Institution, User } from '../../libs/ajax';
 import { find, isNil, isNumber } from 'lodash';
-import { div, p, h1, h, input, button } from 'react-hyperscript-helpers';
 import { Notifications } from '../../libs/utils';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
@@ -96,20 +95,20 @@ export default function AffiliationAndRole(props) {
 
   const generateInstitutionSelectionDisplay = () => {
     if (!isSigningOfficial() || (isNil(profile.institutionId) && isNil(profile.suggestedInstitution))) {
-      return div({},
-        [
-          h(FormField, {
-            id: 'institutionId',
-            type: FormFieldTypes.SELECT,
-            selectOptions: (institutions).map((i) => {
+      return <div>
+        <h>
+          <FormField
+            id='institutionId'
+            type={FormFieldTypes.SELECT}
+            selectOptions={(institutions).map((i) => {
               return {
                 institutionId: i.id,
                 displayText: i.name,
               };
-            }),
-            placeholder: 'Search for Institution...',
-            isCreatable: true,
-            defaultValue: {
+            })}
+            placeholder='Search for Institution...'
+            isCreatable={true}
+            defaultValue={{
               institutionId: selectedInstitution?.institutionId,
               suggestedInstitution: profile.suggestedInstitution,
               displayText: (
@@ -119,8 +118,8 @@ export default function AffiliationAndRole(props) {
                     ? `${profile.suggestedInstitution}`
                     : ''))
               ),
-            },
-            selectConfig: {
+            }}
+            selectConfig={{
               clearValue: () => {
                 setProfile(Object.assign({},
                   profile,
@@ -129,8 +128,8 @@ export default function AffiliationAndRole(props) {
                     suggestedInstitution: undefined
                   }));
               },
-            },
-            onChange: ({ value }) => {
+            }}
+            onChange={({ value }) => {
               if (!isNil(value?.institutionId)) {
                 setProfile(Object.assign({}, profile, {
                   institutionId: value?.institutionId,
@@ -142,67 +141,67 @@ export default function AffiliationAndRole(props) {
                   suggestedInstitution: value?.displayText
                 }));
               }
-            }
-          }),
-        ]
-      );
+            }}
+          >
+          </FormField>
+        </h>
+      </div>;
     } else {
       let institution = (profile.institutionId ? find(institutions, { id: profile.institutionId }) : null);
       const institutionName = (institution ? institution.name : profile.suggestedInstitution);
-
-
-      return div({
-        className: '',
-        style: { padding: 0 },
-      }, [
-        input({
-          id: 'profileInstitution',
-          name: 'institution',
-          type: 'text',
-          disabled: true,
-          className: 'form-control',
-          value: institutionName,
-        }),
-      ]);
+      return <div style={{ padding: 0 }}>
+        <input
+          id='profileInstitution'
+          name='institution'
+          type='text'
+          disabled={true}
+          className='form-control'
+          value={institutionName}
+        />
+      </div>;
     }
   };
 
-  return div({}, [
-    h1({
-      style: {
+  return <div>
+    <h1
+      style={{
         color: '#01549F',
         fontSize: '20px',
         fontWeight: '600',
-      }
-    }, ['Affiliation & Role']),
-    div({ className: '', style: { 'marginTop': '20px' } }, []),
-    div({
-      style:
-      {
+      }}
+    >
+      Affiliation & Role
+    </h1>
+    <div style={{ marginTop: '20px' }} />
+    <div
+      style={{
         color: '#000',
         fontFamily: 'Montserrat',
         fontSize: '16px',
         fontStyle: 'normal',
         fontWeight: '600',
         lineHeight: 'normal'
-      }
-    },
-    [
-      p({}, ['Institution']),
-      div({ style: { marginBottom: '15px' } }, []),
-      generateInstitutionSelectionDisplay(),
-      button({
-        id: 'btn_submit',
-        onClick: submitForm,
-        className: 'f-right btn-primary common-background',
-        style: {
+      }}
+    >
+      <p>Institution</p>
+      <div style={{ marginTop: '15px' }} />
+      {generateInstitutionSelectionDisplay()}
+      <button
+        id='btn_submit'
+        onClick={submitForm}
+        className='f-right btn-primary common-background'
+        style={{
           marginTop: '2rem',
-        },
-        disabled: !formIsValid(),
-      }, ['Save']),
-      div({ className: '', style: { 'marginTop': '83px' } }, []),
-      p({}, ['Role']),
-    ]),
-    p({}, [profile.roles]),
-  ]);
+        }}
+        disabled={!formIsValid()}
+      >
+        Save
+      </button>
+      <div style={{ marginTop: '83px' }} />
+      <p>Role</p>
+    </div>
+    <p>
+      {profile.roles}
+    </p>
+  </div>;
 }
