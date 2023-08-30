@@ -95,6 +95,8 @@ export default function UserProfile(props) {
       readOnly: true,
     }),
     div({ className: '', style: { 'marginTop': '60px' } }, []),
+    ControlledAccessGrants(),
+    div({ className: '', style: { 'marginTop': '60px' } }, []),
     AffiliationAndRoles({
       user: user,
       userProps: userProps,
@@ -117,7 +119,6 @@ export default function UserProfile(props) {
     div({ className: '', style: { 'marginTop': '115px' } }, []),
     AcceptedAcknowledgements(),
     div({ className: '', style: { 'marginTop': '50px' } }, []),
-    ControlledAccessGrants(),
   ]);
 
 }
