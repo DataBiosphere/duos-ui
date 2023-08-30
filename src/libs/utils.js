@@ -443,6 +443,7 @@ export const getSearchFilterFunctions = () => {
        * pre-populated with data use codes and translations
        */
       const loweredTerm = toLower(term);
+      const name = dataset.name;
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
       const allPropValues = dataset.properties.map((p) => p.propertyValue).join('');
@@ -453,6 +454,7 @@ export const getSearchFilterFunctions = () => {
           : 'rejected'
         : 'yes no';
       return includes(loweredTerm, toLower(alias)) ||
+          includes(loweredTerm, toLower(name)) ||
           includes(loweredTerm, toLower(identifier)) ||
           includes(loweredTerm, toLower(allPropValues)) ||
           includes(loweredTerm, toLower(dataset.codeList)) ||
