@@ -35,12 +35,14 @@ const extractDatasetProp = (propertyName, dataset) => {
 
 const isVisible = (dataset) => {
   const openAccess = extractDatasetProp('Open Access', dataset);
-  const publicVisibility = extractDatasetProp('Public Visibility', dataset);
-  if (!isNil(dataset.dacApproval)) { return dataset.dacApproval; }
-  if (!isNil(publicVisibility)) { return publicVisibility; }
-  if (!isNil(dataset.study?.publicVisibility)) { return dataset.study.publicVisibility; }
-  if (!isNil(openAccess)) { return openAccess; }
-  return true;
+  const publicDataset = extractDatasetProp('Public Visibility', dataset);
+  const publicStudy = !isNil(dataset.study?.publicVisibility) ? dataset.study?.publicVisibility : true;
+
+  const open = !isNil(openAccess) ? openAccess : false;
+  const dacApproved = (!isNil(dataset.dacApproval) && dataset.dacApproval);
+  const publiclyVisible = !isNil(publicDataset) ? publicDataset : publicStudy;
+
+  return open || (dacApproved && publiclyVisible);
 };
 
 export default function DatasetCatalog(props) {
