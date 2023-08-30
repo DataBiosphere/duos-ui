@@ -1,10 +1,40 @@
-import React from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Styles, Theme} from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import {Link} from 'react-router-dom';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
+import SearchBar from '../../components/SearchBar';
+import {DataSet} from '../../libs/ajax';
 
-export default function DataSubmitterConsole(props) {
+export default function DataSubmitterConsole() {
+
+  const [datasets, setDatasets] = useState([]);
+  const [filteredList, setFilteredList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const searchRef = useRef('');
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        const myDatasets = await DataSet.getDatasetsAsCustodian();
+        setDatasets(myDatasets);
+        setFilteredList(myDatasets);
+        setIsLoading(false);
+      } catch (error) {
+        Notifications.showError({text: 'Error initializing datasets table'});
+      }
+    };
+    init();
+  }, []);
+
+  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
+    searchTerms,
+    datasets,
+    getSearchFilterFunctions().datasets,
+    setFilteredList
+  ), [datasets]);
 
   const addDatasetButtonStyle = {
     color: Theme.palette.link,
@@ -34,9 +64,7 @@ export default function DataSubmitterConsole(props) {
           marginLeft: '-6%',
           padding: '0 2.5%'
         }}>
-        <div
-          className={'left-header-section'}
-          style={Styles.LEFT_HEADER_SECTION}>
+        <div className={'left-header-section'} style={Styles.LEFT_HEADER_SECTION}>
           <div
             style={Styles.ICON_CONTAINER}>
             <img
@@ -62,7 +90,13 @@ export default function DataSubmitterConsole(props) {
             </div>
           </div>
         </div>
+        <div className={'right-header-section'} style={{width: '50%', display: 'flex', justifyContent: 'flex-end'}}>
+          <SearchBar
+            handleSearchChange={handleSearchChange}
+            searchRef={searchRef}/>
+        </div>
       </div>
+      {/* TODO: Add table!!! */}
     </div>
   );
 }
