@@ -519,7 +519,7 @@ export default function DatasetCatalog(props) {
             div({
               className: style['display-inline-block'],
               style: {
-                top: '13px',
+                top: '4px',
                 position: 'absolute',
               }
             }, [
