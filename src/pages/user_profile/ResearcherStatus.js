@@ -79,7 +79,7 @@ export default function ResearcherStatus(props) {
       location: pageProps.location,
       header: false
     })}
-    <div style={{ marginTop: '10px' }} />
+    <div style={{ marginTop: '20px' }} />
     <p
       style={{
         color: '#000',

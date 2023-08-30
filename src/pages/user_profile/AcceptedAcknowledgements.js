@@ -58,8 +58,16 @@ export default function AcceptedAcknowledgements() {
       Accepted Terms & Policies
     </h1>
     <div style={{ marginTop: '20px' }} />
-    {acceptedAcknowledgements.map((value, index) => (
-      <Acknowledgment key={index} value={value} />
-    ))}
+    {
+      (acceptedAcknowledgements.length === 0)
+        ?
+        <div>
+          <p>No Accepted Terms & Policies Found</p>
+        </div>
+        :
+        acceptedAcknowledgements.map((value, index) => (
+          <Acknowledgment key={index} value={value} />
+        ))
+    }
   </div>;
 }
