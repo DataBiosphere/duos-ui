@@ -39,7 +39,7 @@ const isVisible = (dataset) => {
     // if open Access is false, dac approval required
     return openAccess ? dataset.study?.publicVisibility : (dataset.dacApproval && dataset.study?.publicVisibility);
   } else {
-    return dataset.active;
+    return true;
   }
 };
 
@@ -347,6 +347,13 @@ export default function DatasetCatalog(props) {
     setDatasetList(selectedDatasets);
   };
 
+  const unapprovedStyle = (dataset) => {
+    if (!isVisible(dataset)) {
+      return {cursor: 'default', opacity: '50%'};
+    }
+    return {};
+  };
+
   const findPropertyValue = (dataSet, propName, defaultVal) => {
     const defaultValue = isNil(defaultVal) ? '' : defaultVal;
     return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties));
@@ -579,6 +586,8 @@ export default function DatasetCatalog(props) {
                             }),
                             label({
                               className: style['regular-checkbox'],
+                              // Apply additional styling for inactive datasets
+                              style: unapprovedStyle(dataset),
                               htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),
