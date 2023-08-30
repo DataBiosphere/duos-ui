@@ -640,7 +640,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_datasetName', name: 'datasetName',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? !! style['dataset-disabled'] : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
                           style: tableBody
                         }, dataset.name),
 
