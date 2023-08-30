@@ -72,18 +72,6 @@ const styles = {
   }
 };
 
-const animationAttributes = {
-  key:'content',
-  initial:'collapsed',
-  animate:'expanded',
-  exit:'collapsed',
-  variants: {
-    collapsed: {opacity: 0, height: 0, y: -50, overflow: 'hidden'},
-    expanded: {opacity: 1, height: 'auto', y: 0, overflow: 'hidden'}
-  },
-  transition:{duration: 0.5, ease: [0.50, 0.62, 0.23, 0.98]}
-};
-
 const highlightedWords = [
   {
     bgColor: 'rgba(0,0,100,.2)',
