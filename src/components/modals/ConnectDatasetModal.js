@@ -60,7 +60,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   createOrUpdateAssociations = () => {
     const usersId = [];
     this.state.selectedclients.forEach(user => {
-      usersId.push(JSON.parse(user.id));
+      const userId = user.id.replace(/'/g, '');
+      usersId.push(userId);
     });
 
     if (this.state.isUpdate) {
