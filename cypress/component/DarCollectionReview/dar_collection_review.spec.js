@@ -657,9 +657,10 @@ const matchResponse = [
     'purpose': 'dars-id-123',
     'match': true,
     'failed': false,
+    'abstain': false,
     'createDate': 1668729600000,
     'algorithmVersion': 'v2',
-    'failureReasons': []
+    'rationales': []
   }
 ];
 

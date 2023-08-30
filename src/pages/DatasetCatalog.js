@@ -11,12 +11,13 @@ import {SearchBox} from '../components/SearchBox';
 import {DAC, DAR, DataSet} from '../libs/ajax';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
-import datasetIcon from '../images/icon_dataset_.png';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import {isDevEnv} from '../utils/EnvironmentUtils';
+import DuosLogo from '../images/duos-network-logo.svg';
+import style from './DatasetCatalog.module.css';
 
 const tableBody = {
   ...Theme.textTableBody,
@@ -25,6 +26,21 @@ const tableBody = {
 
 const canApplyForDataset = (dataset) => {
   return dataset.active && !isNil(dataset.dacId);
+};
+
+const extractDatasetProp = (propertyName, dataset) => {
+  const property = find({ propertyName })(dataset.properties);
+  return property?.propertyValue;
+};
+
+const isVisible = (dataset) => {
+  const openAccess = extractDatasetProp('Open Access', dataset);
+  if(!isNil(openAccess)){
+    // if open Access is false, dac approval required
+    return openAccess ? dataset.study?.publicVisibility : (dataset.dacApproval && dataset.study?.publicVisibility);
+  } else {
+    return dataset.active;
+  }
 };
 
 export default function DatasetCatalog(props) {
@@ -61,9 +77,7 @@ export default function DatasetCatalog(props) {
 
   // Modal States
   const [showConnectDataset, setShowConnectDataset] = useState(false);
-  const [showDatasetDisable, setShowDatasetDisable] = useState(false);
   const [showDatasetDelete, setShowDatasetDelete] = useState(false);
-  const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
 
@@ -185,13 +199,11 @@ export default function DatasetCatalog(props) {
     let datasetIdList = [];
     selectedDatasets
       .forEach(dataset => {
-        const dsNameProp = find({propertyName: 'Dataset Name'})(dataset.properties);
-        const label = dsNameProp.propertyValue;
         datasets.push({
           key: dataset.dataSetId,
           value: dataset.dataSetId,
-          label: label,
-          concatenation: label,
+          label: dataset.name,
+          concatenation: dataset.name,
         });
         datasetIdList.push(dataset.dataSetId);
       });
@@ -225,16 +237,6 @@ export default function DatasetCatalog(props) {
     setSelectedDatasetId(datasetId);
   };
 
-  const openEnable = (datasetId) => () => {
-    setShowDatasetEnable(true);
-    setSelectedDatasetId(datasetId);
-  };
-
-  const openDisable = (datasetId) => () => {
-    setShowDatasetDisable(true);
-    setSelectedDatasetId(datasetId);
-  };
-
   const dialogHandlerDelete = async (e) => {
     const answer = getBooleanFromEventHtmlDataValue(e);
     if (answer) {
@@ -248,42 +250,6 @@ export default function DatasetCatalog(props) {
       });
     } else {
       setShowDatasetDelete(false);
-      setErrorMessage(undefined);
-      setErrorTitle(undefined);
-    }
-  };
-
-  const dialogHandlerEnable = async(e) => {
-    const answer = getBooleanFromEventHtmlDataValue(e);
-    if (answer) {
-      DataSet.disableDataset(selectedDatasetId, true).then(() => {
-        getDatasets();
-        setShowDatasetEnable(false);
-      }).catch(() => {
-        setShowDatasetEnable(true);
-        setErrorMessage('Please try again later.');
-        setErrorTitle('Something went wrong');
-      });
-    } else {
-      setShowDatasetEnable(false);
-      setErrorMessage(undefined);
-      setErrorTitle(undefined);
-    }
-  };
-
-  const dialogHandlerDisable = async (e) => {
-    const answer = getBooleanFromEventHtmlDataValue(e);
-    if (answer) {
-      DataSet.disableDataset(selectedDatasetId, false).then(() => {
-        getDatasets();
-        setShowDatasetDisable(false);
-      }).catch(() => {
-        setShowDatasetDisable(true);
-        setErrorMessage('Please try again later.');
-        setErrorTitle('Something went wrong');
-      });
-    } else {
-      setShowDatasetDisable(false);
       setErrorMessage(undefined);
       setErrorTitle(undefined);
     }
@@ -382,7 +348,7 @@ export default function DatasetCatalog(props) {
   };
 
   const inactiveCheckboxStyle = (dataset) => {
-    if (!dataset.active) {
+    if (!isVisible(dataset)) {
       return {cursor: 'default', opacity: '50%'};
     }
     return {};
@@ -468,11 +434,11 @@ export default function DatasetCatalog(props) {
           }, [
             PageHeading({
               id: 'datasetCatalog',
-              imgSrc: isCustomDacDatasetPage ? undefined : datasetIcon,
+              imgSrc: isCustomDacDatasetPage ? undefined : DuosLogo,
               iconSize: isCustomDacDatasetPage ? 'none' : 'large',
               color: color,
-              title: (!isCustomDacDatasetPage ? 'Dataset Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
-              description: 'Search and select datasets then click \'Apply for Access\' to request access'
+              title: (!isCustomDacDatasetPage ? 'All DUOS Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
+              description: 'Search and select datasets registered in DUOS. Click \'Apply for Access\' to request access'
             }),
             div({
               isRendered: isCustomDacDatasetPage,
@@ -489,13 +455,11 @@ export default function DatasetCatalog(props) {
               })
             ])
           ]),
-          div({
-            className: 'right'
-          }, [
+          div({}, [
             div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper', style: { display: 'flex' } }, [
               h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' }),
               div({
-                className: 'checkbox',
+                className: style['checkbox'],
                 isRendered: isCustomDacDatasetPage,
                 style: {
                   marginLeft: '10px',
@@ -506,7 +470,7 @@ export default function DatasetCatalog(props) {
                   checked: useCustomFilter,
                   type: 'checkbox',
                   'select-all': 'true',
-                  className: 'checkbox-inline',
+                  className: style['checkbox-inline'],
                   id: 'chk_filterDacId',
                   onChange: () => {
                     setUseCustomFilter(!useCustomFilter);
@@ -514,7 +478,7 @@ export default function DatasetCatalog(props) {
                     setCurrentPageAllDatasets(1);
                   },
                 }),
-                label({ className: 'regular-checkbox', htmlFor: 'chk_filterDacId' }, [`Filter to only ${customDacDatasetPage?.dacName} data`]),
+                label({ className: style['regular-checkbox'], htmlFor: 'chk_filterDacId' }, [`Filter to only ${customDacDatasetPage?.dacName} data`]),
               ]),
             ]),
 
@@ -533,7 +497,7 @@ export default function DatasetCatalog(props) {
         div({style: Theme.lightTable}, [
           form({ className: 'pos-relative' }, [
             div({
-              className: 'checkbox display-inline-block',
+              className: `${style['checkbox']} ${style['display-inline-block']}`,
               style: {
                 marginLeft: '28px',
                 marginBottom: '0px',
@@ -551,7 +515,7 @@ export default function DatasetCatalog(props) {
             ]),
             // vertical line
             div({
-              className: 'display-inline-block',
+              className: style['display-inline-block'],
               style: {
                 top: '13px',
                 position: 'absolute',
@@ -566,7 +530,7 @@ export default function DatasetCatalog(props) {
             ]),
 
             div({
-              className: 'checkbox display-inline-block',
+              className: `${style['checkbox']} ${style['display-inline-block']}`,
               style: {
                 marginLeft: '18px',
                 marginBottom: '0px',
@@ -576,34 +540,33 @@ export default function DatasetCatalog(props) {
                 type: 'checkbox',
                 id: 'chk_onlySelected',
                 checked: filterToOnlySelected,
-                className: 'checkbox-inline',
                 onChange: () => {
                   setFilterToOnlySelected(!filterToOnlySelected);
                 }
               }),
-              label({ id: 'lbl_onlySelected', className: 'regular-checkbox', htmlFor: 'chk_onlySelected' },
+              label({ id: 'lbl_onlySelected', className: style['regular-checkbox'], htmlFor: 'chk_onlySelected' },
                 [`Show ${numDatasetsSelected} Dataset${(numDatasetsSelected != 1?'s':'')} Selected`])
             ]),
           ]),
 
-          div({ className: currentUser.isAdmin ? 'table-scroll-admin' : 'table-scroll' }, [
+          div({ className: currentUser.isAdmin ? style['table-scroll-admin'] : style['table-scroll'] }, [
             table({ className: 'table' }, [
               thead({}, [
                 tr({}, [
                   th(),
-                  th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Dataset Name' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Access Committee' })]),
-                  th({ className: 'cell-size' }, ['Data Source']),
-                  th({ className: 'cell-size' }, ['Data Use Terms']),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Type' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Disease Studied' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Principal Investigator (PI)' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: '# of Participants' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Description' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Species' })]),
-                  th({ className: 'cell-size' }, [getSortDisplay({ field: 'Data Custodian' })]),
+                  th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: style['cell-size'], style: { minWidth: '14rem' }}, ['Actions']),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Dataset Name' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Access Committee' })]),
+                  th({ className: style['cell-size'] }, ['Data Source']),
+                  th({ className: style['cell-size'] }, ['Data Use Terms']),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Type' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Disease Studied' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Principal Investigator (PI)' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: '# of Participants' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Description' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Species' })]),
+                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Custodian' })]),
                 ])
               ]),
 
@@ -611,19 +574,18 @@ export default function DatasetCatalog(props) {
                 datasetsOnPage
                   .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
-                      tr({ className: 'tableRow' }, [
-                        td({ width: '60px' }, [
-                          div({ className: 'checkbox', isRendered: !isNil(dataset.dacId)}, [
+                      tr({}, [
+                        td({ className: style['first-child'], width: '60px' }, [
+                          div({ className: style['checkbox'], isRendered: !isNil(dataset.dacId)}, [
                             input({
                               type: 'checkbox',
                               id: trIndex + '_chkSelect',
                               name: 'chk_select',
                               checked: dataset.checked,
-                              className: 'checkbox-inline user-checkbox',
                               onChange: checkSingleRow(dataset)
                             }),
                             label({
-                              className: 'regular-checkbox rp-choice-questions',
+                              className: style['regular-checkbox'],
                               // Apply additional styling for inactive datasets
                               style: inactiveCheckboxStyle(dataset),
                               htmlFor: trIndex + '_chkSelect' })
@@ -631,7 +593,7 @@ export default function DatasetCatalog(props) {
                         ]),
 
                         td({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson) }, [
-                          div({ className: 'dataset-actions' }, [
+                          div({ className: style['dataset-actions'] }, [
                             a({
                               id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataset.dataSetId),
                               disabled: (!dataset.deletable || !isEditDatasetEnabled(dataset))
@@ -653,28 +615,6 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
-                              id: trIndex + '_btnDisable', name: 'btn_disable', isRendered: dataset.active,
-                              onClick: openDisable(dataset.dataSetId),
-                              disabled: !isEditDatasetEnabled(dataset)
-                            }, [
-                              span({
-                                className: `cm-icon-button glyphicon glyphicon-ok-circle caret-margin ${color}-color`, 'aria-hidden': 'true',
-                                'data-tip': 'Disable dataset', 'data-for': 'tip_disable'
-                              })
-                            ]),
-
-                            a({
-                              id: trIndex + '_btnEnable', name: 'btn_enable', isRendered: !dataset.active,
-                              onClick: openEnable(dataset.dataSetId),
-                              disabled: !isEditDatasetEnabled(dataset)
-                            }, [
-                              span({
-                                className: 'cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color', 'aria-hidden': 'true',
-                                'data-tip': 'Enable dataset', 'data-for': 'tip_enable'
-                              })
-                            ]),
-
-                            a({
                               isRendered: currentUser.isAdmin,
                               id: trIndex + '_btnConnect', name: 'btn_connect',
                               onClick: () => openConnectDataset(dataset),
@@ -690,7 +630,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: dataset.datasetIdentifier + '_dataset', name: 'datasetIdentifier',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['Dataset ID']
@@ -698,39 +638,39 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_datasetName', name: 'datasetName',
-                          className: 'cell-size ' + (!dataset.active ? !!'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? !! style['dataset-disabled'] : ''),
                           style: tableBody
-                        }, [findPropertyValue(dataset, 'Dataset Name')]),
+                        }, dataset.name),
 
                         td({
                           id: trIndex + '_dac', name: 'dac',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['Data Access Committee']
                         ]),
 
                         td({
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           getLinkDisplay(dataset, trIndex)
                         ]),
 
                         td({
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           a({
                             id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
                             onClick: () => openTranslatedDUL(dataset.dataUse),
-                            className: (!dataset.active ? 'dataset-disabled' : 'enabled')
+                            className: (!isVisible(dataset) ?  style['dataset-disabled'] : 'enabled')
                           }, dataset.codeList)
                         ]),
 
                         td({
                           id: trIndex + '_dataType', name: 'dataType',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           findPropertyValue(dataset, 'Data Type')
@@ -738,14 +678,14 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_phenotype', name: 'phenotype',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['Disease Studied']
                         ]),
 
                         td({
-                          id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['Principal Investigator (PI)']
@@ -753,7 +693,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_participants', name: 'participants',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['# of Participants']
@@ -761,7 +701,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_description', name: 'description',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           findPropertyValue(dataset, 'Description')
@@ -769,7 +709,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_species', name: 'species',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           findPropertyValue(dataset, 'Species')
@@ -777,7 +717,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_depositor', name: 'depositor',
-                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
                           style: tableBody
                         }, [
                           dataset['Data Custodian']
@@ -842,24 +782,6 @@ export default function DatasetCatalog(props) {
         }, [div({ className: 'dialog-description' }, ['Are you sure you want to delete this Dataset?']),]),
 
         ConfirmationDialog({
-          title: 'Disable Dataset Confirmation?',
-          color: 'dataset',
-          showModal: showDatasetDisable,
-          alertMessage: errorMessage,
-          alertTitle: errorTitle,
-          action: { label: 'Yes', handler: () => dialogHandlerDisable }
-        }, [div({ className: 'dialog-description' }, ['If you disable a Dataset, Researchers won\'t be able to request access on it from now on. New Access elections related to this dataset won\'t be available but opened ones will continue.']),]),
-
-        ConfirmationDialog({
-          title: 'Enable Dataset Confirmation?',
-          color: 'dataset',
-          alertMessage: errorMessage,
-          alertTitle: errorTitle,
-          showModal: showDatasetEnable,
-          action: { label: 'Yes', handler: () => dialogHandlerEnable }
-        }, [div({ className: 'dialog-description' }, ['If you enable a Dataset, Researchers will be able to request access on it from now on.']),]),
-
-        ConfirmationDialog({
           title: 'Edit Dataset Confirmation?',
           color: 'dataset',
           alertMessage: errorMessage,
@@ -877,20 +799,6 @@ export default function DatasetCatalog(props) {
         }),
         h(ReactTooltip, {
           id: 'tip_delete',
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_disable',
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_enable',
           place: 'right',
           effect: 'solid',
           multiline: true,

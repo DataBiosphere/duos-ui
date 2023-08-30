@@ -23,6 +23,15 @@ const props = {
   deleteConsentGroup: () => {},
   nihInstitutionalCertificationFile: null,
   updateNihInstitutionalCertificationFile: () => {},
+  consentGroupsState: [
+    {
+      consentGroup: {
+        consentGroupName: 'name',
+      },
+      disableFields: false,
+    }
+  ],
+  studyEditMode: false,
   validation: {},
   onValidationChange: () => {}
 };
@@ -39,6 +48,7 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
+    cy.get('#0_editConsentGroup').click();
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
 
@@ -105,6 +115,7 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
+    cy.get('#0_editConsentGroup').click();
     cy.get('#0_consentGroupName').type('Hello!');
     cy.get('#0_url').type('https://www.asdf.gov');
     cy.get('#0_primaryConsent_hmb').check();
@@ -117,6 +128,7 @@ describe('Consent Group', function () {
 
     mount(<ConsentGroupForm {...propCopy}/>);
 
+    cy.get('#0_editConsentGroup').click();
     cy.get('#0_primaryConsent_generalResearchUse').click();
 
     cy.get('#0_gsText').should('not.exist');

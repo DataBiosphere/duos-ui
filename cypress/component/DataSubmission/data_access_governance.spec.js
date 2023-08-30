@@ -86,7 +86,7 @@ describe('Data Access Governance', function () {
     cy.get('#3_consentGroupForm').should('not.exist');
 
     cy.get('#0_deleteConsentGroup').click();
-    cy.get('#0_consentGroupForm').should('not.exist');
+    cy.get('#0_consentGroupForm').should('exist');
     cy.get('#1_consentGroupForm').should('not.exist');
     cy.get('#2_consentGroupForm').should('not.exist');
     cy.get('#3_consentGroupForm').should('not.exist');

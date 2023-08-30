@@ -11,12 +11,19 @@ export const DatasetSearch = (props) => {
   useEffect(() => {
     const init = async () => {
       const query = {
+        'from': 0,
+        'size': 10000,
         'query': {
           'bool': {
             'must': [
               {
                 'match': {
                   '_type': 'dataset'
+                }
+              },
+              {
+                'exists': {
+                  'field': 'study'
                 }
               }
             ]
@@ -37,7 +44,7 @@ export const DatasetSearch = (props) => {
 
   return (
     <div>
-      <DatasetSearchTable datasets={datasets} isLoading={isLoading} props={props} />
+      <DatasetSearchTable {...props} datasets={datasets} isLoading={isLoading} />
     </div>
   );
 };

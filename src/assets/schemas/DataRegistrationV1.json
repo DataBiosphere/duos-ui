@@ -604,6 +604,10 @@
         }
       ],
       "properties": {
+        "datasetId": {
+          "type": "integer",
+          "description": "Dataset Id"
+        },
         "consentGroupName": {
           "type": "string",
           "label": "Consent Group Name",

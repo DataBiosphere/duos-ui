@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { isNil, isString } from 'lodash/fp';
+import { isNil, isString, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
 import { DAR } from '../../../libs/ajax';
 import { cloneDeep } from 'lodash';
@@ -38,6 +38,7 @@ export const EditConsentGroup = (props) => {
   const {
     consentGroup,
     setConsentGroup,
+    disableFields,
     nihInstitutionalCertificationFile,
     setNihInstitutionalCertificationFile,
     validation,
@@ -55,7 +56,7 @@ export const EditConsentGroup = (props) => {
   const [showOtherPrimaryText, setShowOtherPrimaryText] = useState(!isNil(consentGroup.otherPrimary));
   const [otherPrimaryText, setOtherPrimaryText] = useState(consentGroup.otherPrimary || '');
 
-  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isNil(consentGroup.diseaseSpecificUse));
+  const [showDiseaseSpecificUseSearchbar, setShowDiseaseSpecificUseSearchbar] = useState(!isEmpty(consentGroup.diseaseSpecificUse));
   const [selectedDiseases, setSelectedDiseases] = useState(consentGroup.diseaseSpecificUse || []);
 
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
@@ -103,11 +104,7 @@ export const EditConsentGroup = (props) => {
   };
 
   return div({}, [
-    div({
-      style: {
-        width: '70%'
-      }
-    }, [
+    div({}, [
       // name
       h(FormField, {
         id: idx + '_consentGroupName',
@@ -115,6 +112,7 @@ export const EditConsentGroup = (props) => {
         title: 'Consent Group Name',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Enter name',
+        disabled: disableFields,
         defaultValue: consentGroup.consentGroupName,
         onChange,
         validation: validation.consentGroupName,
@@ -131,6 +129,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'generalResearchUse',
           toggleText: 'General Research Use',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -139,6 +138,7 @@ export const EditConsentGroup = (props) => {
           onValidationChange: ({ validation }) => {
             onValidationChange({ key: 'primaryConsent', validation });
           },
+
         }),
 
         h(FormField, {
@@ -147,6 +147,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'hmb',
           toggleText: 'Health/Medical/Biomedical Research Use',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -163,6 +164,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'diseaseSpecificUse',
           toggleText: 'Disease-Specific Research Use',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           validation: validation.primaryConsent,
           onValidationChange: ({ validation }) => {
@@ -193,6 +195,7 @@ export const EditConsentGroup = (props) => {
             name: 'diseaseSpecificUse',
             validators: [FormValidators.REQUIRED],
             placeholder: 'Please enter one or more diseases',
+            disabled: disableFields,
             defaultValue: selectedDiseases,
             validation: validation.diseaseSpecificUse,
             onValidationChange: ({ validation }) => {
@@ -215,6 +218,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'poa',
           toggleText: 'Populations, Origins, Ancestry Use',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -231,6 +235,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'openAccess',
           toggleText: 'No Restrictions (Open Access Data)',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: true });
@@ -247,6 +252,7 @@ export const EditConsentGroup = (props) => {
           name: 'primaryConsent',
           value: 'otherPrimary',
           toggleText: 'Other',
+          disabled: disableFields,
           defaultValue: selectedPrimaryGroup(consentGroup),
           onChange: ({ value }) => {
             onPrimaryChange({ key: value, value: otherPrimaryText });
@@ -263,6 +269,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherPrimary',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Please specify',
+          disabled: disableFields,
           defaultValue: otherPrimaryText,
           onChange: ({ key, value, isValid }) => {
             setOtherPrimaryText(value);
@@ -286,6 +293,7 @@ export const EditConsentGroup = (props) => {
           name: 'nmds',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'No methods development or validation studies (NMDS)',
+          disabled: disableFields,
           defaultValue: consentGroup.nmds,
           onChange,
           validation: validation.nmds,
@@ -308,6 +316,7 @@ export const EditConsentGroup = (props) => {
           name: 'pub',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Publication Required (PUB)',
+          disabled: disableFields,
           defaultValue: consentGroup.pub,
           onChange,
           validation: validation.pub,
@@ -319,6 +328,7 @@ export const EditConsentGroup = (props) => {
           name: 'col',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Collaboration Required (COL)',
+          disabled: disableFields,
           defaultValue: consentGroup.col,
           onChange,
           validation: validation.col,
@@ -330,6 +340,7 @@ export const EditConsentGroup = (props) => {
           name: 'irb',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Ethics Approval Required (IRB)',
+          disabled: disableFields,
           defaultValue: consentGroup.irb,
           onChange,
           validation: validation.irb,
@@ -341,6 +352,7 @@ export const EditConsentGroup = (props) => {
           name: 'gs',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Geographic Restriction (GS-)',
+          disabled: disableFields,
           defaultValue: showGSText,
           onChange: ({ key, value }) => {
             setShowGSText(value);
@@ -359,6 +371,7 @@ export const EditConsentGroup = (props) => {
           name: 'gs',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Specify Geographic Restriction',
+          disabled: disableFields,
           defaultValue: gsText || '',
           onChange: ({ key, value, isValid }) => {
             setGSText(value);
@@ -373,6 +386,7 @@ export const EditConsentGroup = (props) => {
           name: 'mor',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Publication Moratorium (MOR)',
+          disabled: disableFields,
           defaultValue: showMORText,
           onChange: ({ key, value }) => {
             setShowMORText(value);
@@ -386,6 +400,7 @@ export const EditConsentGroup = (props) => {
           name: 'mor',
           validators: [FormValidators.REQUIRED, FormValidators.DATE],
           placeholder: 'Please specify date (YYYY-MM-DD)',
+          disabled: disableFields,
           defaultValue: morText,
           onChange: ({ key, value, isValid }) => {
             setMORText(value);
@@ -400,6 +415,7 @@ export const EditConsentGroup = (props) => {
           name: 'npu',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Non-profit Use Only (NPU)',
+          disabled: disableFields,
           defaultValue: consentGroup.npu,
           onChange,
           validation: validation.npu,
@@ -411,6 +427,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherSecondary',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Other',
+          disabled: disableFields,
           defaultValue: showOtherSecondaryText,
           onChange: ({ key, value }) => {
             setShowOtherSecondaryText(value);
@@ -429,6 +446,7 @@ export const EditConsentGroup = (props) => {
           name: 'otherSecondary',
           validators: [FormValidators.REQUIRED],
           placeholder: 'Please specify',
+          disabled: disableFields,
           defaultValue: otherSecondaryText || '',
           onChange: ({ key, value, isValid }) => {
             setOtherSecondaryText(value);
@@ -455,6 +473,7 @@ export const EditConsentGroup = (props) => {
         },
         validators: [FormValidators.REQUIRED],
         validation: validation.dataAccessCommitteeId,
+        disabled: disableFields,
         defaultValue: dacs.map((dac) => {
           return { dacId: dac.dacId, displayText: dac.name };
         }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
@@ -463,7 +482,6 @@ export const EditConsentGroup = (props) => {
     ]),
 
     // location
-
     div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between' }}, [
       h(FormFieldTitle, {
         required: true,
