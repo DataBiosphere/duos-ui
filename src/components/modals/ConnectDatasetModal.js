@@ -1,8 +1,8 @@
 import { Component, Fragment } from 'react';
-import { div, h, form, input, label, select, hh, option } from 'react-hyperscript-helpers';
+import { div, h, form, input, select, hh, option } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
-import { DatasetAssociation, DataSet } from '../../libs/ajax';
+import { DatasetAssociation } from '../../libs/ajax';
 import datasetLinkIcon from '../../images/icon_dataset_link.png';
 
 export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Component {
@@ -14,15 +14,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       selected: [],
       availableclients: [],
       selectedclients: [],
-      needsApproval: props.dataset.needsApproval,
       updatedInfoModal: false,
-      needsApprovalModified: false,
       showError: false,
       alert: {},
       isUpdate: false,
     };
-
-    this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
 
     this.closeHandler = this.closeHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
@@ -58,18 +54,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   OKHandler() {
-    if (this.state.needsApprovalModified) {
-      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(() => {
-        this.createOrUpdateAssociations();
-      }, () => {
-        this.setState(prev => {
-          prev.showError = true;
-          return prev;
-        });
-      });
-    } else {
-      this.createOrUpdateAssociations();
-    }
+    this.createOrUpdateAssociations();
   }
 
   createOrUpdateAssociations = () => {
@@ -103,15 +88,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   closeHandler() {
     this.props.onCloseRequest();
-  }
-
-  handleNeedsApprovalChange(event) {
-    const checked = event.target.checked;
-    this.setState(prev =>{
-      prev.needsApproval = checked;
-      return prev;
-    },
-    () => this.handleStateSubmit() );
   }
 
   moveLItem = () => {
@@ -171,16 +147,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   handleStateSubmit = () => {
     const modifiedList = this.isSelectedListModified();
 
-    if (this.props.dataset.needsApproval !== this.state.needsApproval) {
-      this.setState(prev => {
-        prev.needsApprovalModified = true;
-        return prev;
-      });
-    }
-
-    if ((this.props.dataset.needsApproval !== this.state.needsApproval && this.state.selectedclients.length > 0) ||
-      (modifiedList && this.state.selectedclients.length > 0) ||
-      (modifiedList && this.state.needsApproval === false && this.state.selectedclients.length === 0) ) {
+    if ((this.state.selectedclients.length > 0) || (modifiedList && this.state.selectedclients.length > 0)) {
       this.setState({ updatedInfoModal: true });
     } else {
       this.setState({ updatedInfoModal: false });
@@ -300,23 +267,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
               ])
             ]),
 
-          ]),
-
-          div({ className: 'form-group row', style: { 'margin': '10px 0' } }, [
-            div({ className: 'checkbox dataset-label' }, [
-              input({ id: 'chk_needsApproval',
-                onChange: this.handleNeedsApprovalChange,
-                checked: this.state.needsApproval,
-                type: 'checkbox',
-                className: 'checkbox-inline',
-                name: 'needsApproval'
-              }),
-              label({
-                id: 'lbl_needsApproval',
-                className: 'regular-checkbox dataset-label',
-                htmlFor: 'chk_needsApproval'
-              }, ['Needs Data Owner\'s approval']),
-            ]),
           ]),
         ]),
         div({ isRendered: this.state.showError}, [
