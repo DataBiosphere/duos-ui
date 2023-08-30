@@ -347,13 +347,6 @@ export default function DatasetCatalog(props) {
     setDatasetList(selectedDatasets);
   };
 
-  const inactiveCheckboxStyle = (dataset) => {
-    if (!isVisible(dataset)) {
-      return {cursor: 'default', opacity: '50%'};
-    }
-    return {};
-  };
-
   const findPropertyValue = (dataSet, propName, defaultVal) => {
     const defaultValue = isNil(defaultVal) ? '' : defaultVal;
     return getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties));
@@ -586,8 +579,6 @@ export default function DatasetCatalog(props) {
                             }),
                             label({
                               className: style['regular-checkbox'],
-                              // Apply additional styling for inactive datasets
-                              style: inactiveCheckboxStyle(dataset),
                               htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),

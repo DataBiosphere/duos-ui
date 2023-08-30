@@ -363,12 +363,6 @@ export const DataSet = {
     return await res;
   },
 
-  disableDataset: async (datasetObjectId, active) => {
-    const url = `${await getApiUrl()}/api/dataset/disable/${datasetObjectId}/${active}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res;
-  },
-
   reviewDataSet: async (dataSetId, needsApproval) => {
     const url = `${await getApiUrl()}/api/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));

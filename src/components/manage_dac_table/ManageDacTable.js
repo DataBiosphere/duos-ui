@@ -195,11 +195,9 @@ export const ManageDacTable = function ManageDacTable(props) {
 
   const viewDatasets = useCallback(async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
-    const activeDatasets = filter({ active: true })(datasets);
-
     setShowDatasetsModal(true);
     setSelectedDac(selectedDac);
-    setSelectedDatasets(activeDatasets);
+    setSelectedDatasets(datasets);
   }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets]);
 
   const changeTableSize = useCallback((value) => {
