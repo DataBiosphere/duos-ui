@@ -76,7 +76,7 @@ export default function DataSubmitterConsole() {
           <div
             style={Styles.HEADER_CONTAINER}>
             <div
-              style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem'}}>
+              style={Styles.TITLE}>
               My Submitted Datasets
             </div>
             <div
