@@ -193,12 +193,12 @@ export default function AffiliationAndRole(props) {
         disabled={!formIsValid()}
         data-for={'tip-connect'}
         data-tip={!formIsValid()} >
-          Save
+        Save
       </button>
       <ReactTooltip
-      place={'left'}
-      effect={'solid'}
-      id={'tip_connect'}>
+        place={'left'}
+        effect={'solid'}
+        id={'tip_connect'}>
         You cannot edit your institution if you are a signing official associated with an institution already.
       </ReactTooltip>
       <div style={{ marginTop: '83px' }} />
