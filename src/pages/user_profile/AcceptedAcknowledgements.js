@@ -11,7 +11,6 @@ const Acknowledgment = ({ value }) =>
     fontStyle: 'normal',
     fontWeight: '400',
     width: '675px'
-
   }}>
     <p>{value.name}</p>
     <div style={{ flex: '1' }} />
@@ -53,8 +52,7 @@ export default function AcceptedAcknowledgements() {
         color: '#01549F',
         fontSize: '20px',
         fontWeight: '600',
-      }}
-    >
+      }}>
       Accepted Terms & Policies
     </h1>
     <div style={{ marginTop: '20px' }} />

@@ -141,8 +141,7 @@ export default function AffiliationAndRole(props) {
                   suggestedInstitution: value?.displayText
                 }));
               }
-            }}
-          >
+            }} >
           </FormField>
         </h>
       </div>;
@@ -156,8 +155,7 @@ export default function AffiliationAndRole(props) {
           type='text'
           disabled={true}
           className='form-control'
-          value={institutionName}
-        />
+          value={institutionName} />
       </div>;
     }
   };
@@ -168,8 +166,7 @@ export default function AffiliationAndRole(props) {
         color: '#01549F',
         fontSize: '20px',
         fontWeight: '600',
-      }}
-    >
+      }} >
       Affiliation & Role
     </h1>
     <div style={{ marginTop: '20px' }} />
@@ -193,8 +190,7 @@ export default function AffiliationAndRole(props) {
         style={{
           marginTop: '2rem',
         }}
-        disabled={!formIsValid()}
-      >
+        disabled={!formIsValid()} >
         Save
       </button>
       <div style={{ marginTop: '83px' }} />
