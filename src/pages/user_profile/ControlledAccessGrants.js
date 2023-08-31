@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SortableTable from '../../components/SortableTable';
+import SortableTable from '../../components/sortable_table/SortableTable';
 import { User } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 
@@ -12,25 +12,25 @@ const headCells = [
   },
   {
     id: 'approvalDate',
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: 'Approval Date',
   },
   {
     id: 'datasetIdentifier',
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: 'Dataset Identifier',
   },
   {
     id: 'datasetName',
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: 'Dataset Name',
   },
   {
     id: 'dacName',
-    numeric: true,
+    numeric: false,
     disablePadding: false,
     label: 'DAC Name',
   },
