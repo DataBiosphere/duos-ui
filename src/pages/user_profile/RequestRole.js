@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { div, h, h2, p, button } from 'react-hyperscript-helpers';
+import React, { useState } from 'react';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
@@ -130,27 +129,28 @@ export default function RequestRole(props) {
         style={{ ...headerStyle, marginTop: 0 }}>
         Which of the following are you looking to do?*
       </h2>
-      {possibleSupportRequests.map(supportRequest => {
-        return <h>
+      {possibleSupportRequests.map((i, supportRequest) => {
+        return <h key={i}>
           <FormField
             toggleText={supportRequest.label}
             type={FormFieldTypes.CHECKBOX}
             key={supportRequest.key}
             id={supportRequest.key}
             onChange={handleSupportRequestsChange} />
-        </h>
+        </h>;
       })}
-      <div
-        isRendered={supportRequests.checkRequestDataAccess}
-        style={{
-          border: '1px solid purple',
-          color: 'purple',
-          padding: '10px'
-        }}>
-        Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS
-      </div>
+      {supportRequests.checkRequestDataAccess && (
+        <div
+          style={{
+            border: '1px solid purple',
+            color: 'purple',
+            padding: '10px'
+          }}>
+          Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS
+        </div>
+      )}
       <div style={{ margin: '15px 0 10px' }}>
-        Is there anything else you'd like to request?
+        Is there anything else you would like to request?
       </div>
       <h>
         <FormField
