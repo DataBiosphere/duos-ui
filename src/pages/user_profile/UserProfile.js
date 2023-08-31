@@ -128,7 +128,7 @@ export default function UserProfile(props) {
         type={FormFieldTypes.TEXT}
         id='profileName'
         defaultValue={profile.profileName}
-        readOnly={true}
+        disabled={true}
       />
     </h>
     <div style={{ marginTop: '10px' }} />
@@ -137,7 +137,7 @@ export default function UserProfile(props) {
         type={FormFieldTypes.TEXT}
         id='profileEmail'
         defaultValue={profile.email}
-        readOnly={true}
+        disabled={true}
       />
     </h>
     <div style={{ marginTop: '60px' }} />
