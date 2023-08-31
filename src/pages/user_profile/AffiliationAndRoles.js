@@ -3,7 +3,7 @@ import { Institution, User } from '../../libs/ajax';
 import { find, isNil, isNumber } from 'lodash';
 import { Notifications } from '../../libs/utils';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
-
+import ReactTooltip from 'react-tooltip';
 
 export default function AffiliationAndRole(props) {
 
@@ -46,8 +46,8 @@ export default function AffiliationAndRole(props) {
       } catch (error) {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
+      ReactTooltip.rebuild();
     };
-
     init();
 
   }, [user, userProps]);
@@ -190,9 +190,17 @@ export default function AffiliationAndRole(props) {
         style={{
           marginTop: '2rem',
         }}
-        disabled={!formIsValid()} >
-        Save
+        disabled={!formIsValid()}
+        data-for={'tip-connect'}
+        data-tip={!formIsValid()} >
+          Save
       </button>
+      <ReactTooltip
+      place={'left'}
+      effect={'solid'}
+      id={'tip_connect'}>
+        You cannot edit your institution if you are a signing official associated with an institution already.
+      </ReactTooltip>
       <div style={{ marginTop: '83px' }} />
       <p>Role</p>
     </div>
