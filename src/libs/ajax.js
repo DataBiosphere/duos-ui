@@ -346,12 +346,6 @@ export const DataSet = {
     return await res;
   },
 
-  reviewDataSet: async (dataSetId, needsApproval) => {
-    const url = `${await getApiUrl()}/api/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
-    return res.json();
-  },
-
   updateDataset: async (datasetId, dataSetObject) => {
     const url = `${await getApiUrl()}/api/dataset/${datasetId}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
