@@ -1,11 +1,13 @@
+import * as React from 'react';
+import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { h, div, button } from 'react-hyperscript-helpers';
 import datasetIcon from '../../logo.svg';
-import { Styles } from '../../libs/theme';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import { DAR } from '../../libs/ajax';
+import DatasetFilterList from './DatasetFilterList';
+import { Box } from '@mui/material';
 
 const studyTableHeader = [
   'Study Name',
@@ -29,9 +31,39 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, isLoading, history } = props;
+  const { datasets, history } = props;
+  const [filters, setFilters] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
+
+  const isFiltered = (filter) => filters.indexOf(filter) > -1;
+
+  const filterHandler = (event, data, filter) => {
+    var newFilters = [];
+    if (!isFiltered(filter)) {
+      newFilters = filters.concat(filter);
+    } else {
+      newFilters = filters.filter((f) => f !== filter);
+    }
+    setFilters(newFilters);
+
+    var newFiltered = [];
+    if (newFilters.length === 0) {
+      newFiltered = data;
+    } else {
+      newFiltered = data.filter((dataset) => {
+        if (newFilters.includes('open') && dataset.openAccess) {
+          return true;
+        }
+        if (newFilters.includes('controlled') && !dataset.openAccess) {
+          return true;
+        }
+        return false;
+      });
+    }
+    setFiltered(newFiltered);
+  };
 
   const selectHandler = (event, data, selector) => {
     let idsToModify = [];
@@ -67,11 +99,11 @@ export const DatasetSearchTable = (props) => {
   };
 
   useEffect(() => {
-    if (isLoading) {
+    if (isEmpty(filtered)) {
       return;
     }
 
-    const studies = groupBy(datasets, 'study.studyId');
+    const studies = groupBy(filtered, 'study.studyId');
     const table = {
       id: 'study-table',
       headers: studyTableHeader.map((header) => ({ value: header })),
@@ -143,33 +175,30 @@ export const DatasetSearchTable = (props) => {
     };
 
     setTableData(table);
-  }, [datasets, isLoading]);
+  }, [filtered]);
 
-  return div({ style: Styles.PAGE }, [
-    h(TableHeaderSection, {
-      icon: datasetIcon,
-      title: 'Broad Data Library',
-      description: 'Search, filter, and select datasets, then click \'Apply for Access\' to request access'
-    }),
-    div({ style: { paddingTop: '2rem' } }, [
-      h(CollapsibleTable, {
-        data: tableData,
-        selected,
-        selectHandler,
-        isLoading,
-        summary: 'faceted study search table'
-      }),
-    ]),
-    div({ className: 'f-right' }, [
-      button({
-        id: 'btn_applyAccess',
-        className: `btn-primary dataset-background search-wrapper`,
-        onClick: applyForAccess,
-        'data-tip': 'Request Access for selected Studies', 'data-for': 'tip_requestAccess',
-        style: { marginBottom: '30%' }
-      }, ['Apply for Access'])
-    ]),
-  ]);
+  useEffect(() => {
+    setFiltered(datasets);
+  }, [datasets]);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <TableHeaderSection icon={datasetIcon} title='Broad Data Library' description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+      <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
+        <Box sx={{ width: '14%', padding: '0 1em' }}>
+          <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />
+        </Box>
+        <Box sx={{ width: '85%', padding: '0 1em' }}>
+          <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
+        </Box>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
+        <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+            Apply for Access
+        </Button>
+      </Box>
+    </Box>
+  );
 };
 
 export default DatasetSearchTable;

@@ -1,5 +1,5 @@
 import {styles} from './DarDatasetTable';
-import {filter, flatMap, flow, get, isEmpty, isUndefined, map, uniq, values} from 'lodash/fp';
+import {filter, flatMap, flow, get, isEmpty, isUndefined, map, values} from 'lodash/fp';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {

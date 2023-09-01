@@ -4,7 +4,7 @@ import { div, img } from 'react-hyperscript-helpers';
 export const TableHeaderSection = (props) => {
   const { icon, title, description } = props;
 
-  return div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
+  return div({ style: { display: 'flex', padding: '0 0 0 2em' } }, [
     div(
       { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
       [
@@ -15,12 +15,12 @@ export const TableHeaderSection = (props) => {
             style: Styles.HEADER_IMG,
           }),
         ]),
-        div({ style: Styles.HEADER_CONTAINER }, [
+        div({ style: { ...Styles.HEADER_CONTAINER, width: '120%' } }, [
           div({
             style: {
               fontFamily: 'Montserrat',
               fontWeight: 600,
-              fontSize: '2.8rem'
+              fontSize: '2.8rem',
             }
           }, [
             title,
