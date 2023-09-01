@@ -3,9 +3,38 @@ import { Institution, User } from '../../libs/ajax';
 import { find, isNil, isNumber } from 'lodash';
 import { Notifications } from '../../libs/utils';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
-import ReactTooltip from 'react-tooltip';
+import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 export default function AffiliationAndRole(props) {
+
+  const theme = createTheme({
+    components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            fontSize: '14px',
+            color: 'white',
+            fontFamily: 'Montserrat'
+          }
+        }
+      },
+      MuiBotton: {
+        styleOverrides: {
+          root: {
+            fontSize: '14px',
+            color: 'white',
+            fontFamily: 'Montserrat',
+            backgroundColor: 'blue', // Add your background color
+            '&:hover': {
+              backgroundColor: 'darkblue', // Add hover background color
+            },
+          },
+        }
+      }
+    }
+  });
 
   const {
     user,
@@ -46,7 +75,6 @@ export default function AffiliationAndRole(props) {
       } catch (error) {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
-      ReactTooltip.rebuild();
     };
     init();
 
@@ -183,24 +211,35 @@ export default function AffiliationAndRole(props) {
       <p>Institution</p>
       <div style={{ marginTop: '15px' }} />
       {generateInstitutionSelectionDisplay()}
-      <button
-        id='btn_submit'
-        onClick={submitForm}
-        className='f-right btn-primary common-background'
-        style={{
-          marginTop: '2rem',
-        }}
-        disabled={!formIsValid()}
-        data-for={'tip-connect'}
-        data-tip={!formIsValid()} >
-        Save
-      </button>
-      <ReactTooltip
-        place={'left'}
-        effect={'solid'}
-        id={'tip_connect'}>
-        You cannot edit your institution if you are a signing official associated with an institution already.
-      </ReactTooltip>
+      {formIsValid() ? (
+        <button
+          id='btn_submit'
+          onClick={submitForm}
+          className='f-right btn-primary common-background'
+          style={{
+            marginTop: '2rem',
+          }}
+          disabled={!formIsValid()}
+          title='hello'>
+          Save
+        </button>
+      ) : (
+        <ThemeProvider theme={theme}>
+
+          <Tooltip arrow title='You cannot edit your institution if you are a signing official who is already associated with an institution.'>
+            <span>
+              <Button
+                disabled
+                style={{
+                  marginTop: '2rem'
+                }}
+              >
+                Save
+              </Button>
+            </span>
+          </Tooltip>
+        </ThemeProvider>
+      )}
       <div style={{ marginTop: '83px' }} />
       <p>Role</p>
     </div>
