@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import AffiliationAndRoles from './AffiliationAndRoles';
-import ResearcherStatus from './ResearcherStatus';
-import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import { Institution } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
+import AffiliationAndRoles from './AffiliationAndRoles';
+import ResearcherStatus from './ResearcherStatus';
+import AcceptedAcknowledgements from './AcceptedAcknowledgements';
+import ControlledAccessGrants from './ControlledAccessGrants';
 import ga4ghLogo from '../../images/ga4gh-logo.png';
 import userProfileIcon from '../../images/user-profile.png';
 
@@ -141,6 +142,9 @@ export default function UserProfile(props) {
       />
     </h>
     <div style={{ marginTop: '60px' }} />
+    <div style={{ 'marginTop': '60px' }} />
+    <ControlledAccessGrants />
+    <div style={{ 'marginTop': '60px' }} />
     <AffiliationAndRoles
       user={user}
       userProps={userProps}

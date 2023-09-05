@@ -194,14 +194,14 @@ const CollapsibleRow = (props) => {
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, isLoading, selected, selectHandler } = props;
+  const { data, summary, selected, selectHandler } = props;
 
   const [allSelected, setAllSelected] = useState(false);
   const [someSelected, setSomeSelected] = useState(false);
 
   useEffect(() => {
     const isSelected = (id) => selected.indexOf(id) !== -1;
-    if (!isEmpty(data)) {
+    if (!isEmpty(data) && !isEmpty(data.rows)) {
       setAllSelected(data.rows.every((row) => {
         return row.subtable.rows.every((subRow) => isSelected(subRow.id));
       }));
@@ -211,7 +211,7 @@ export const CollapsibleTable = (props) => {
     }
   }, [data, selected]);
 
-  return !isLoading && !isEmpty(data) && (
+  return !isEmpty(data) && (
     <TableContainer component={Paper}>
       <Table aria-label={summary}>
         {/* main table header */}

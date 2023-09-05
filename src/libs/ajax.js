@@ -242,12 +242,6 @@ export const DAR = {
     return await res.data;
   },
 
-  getAutoCompleteDS: async partial => {
-    const url = `${await getApiUrl()}/api/dataset/autocomplete/${partial}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   getAutoCompleteOT: async partial => {
     const url = `${await getOntologyUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -258,17 +252,6 @@ export const DAR = {
     const url = `${await getOntologyUrl()}/search?id=${ids}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-  },
-
-  getDARDocument: async (referenceId, fileType) => {
-    const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
-    authOpts.headers = Object.assign(authOpts.headers, {
-      'Content-Type': 'application/octet-stream',
-      'Accept': 'application/octet-stream'
-    });
-    const url = `${await getApiUrl()}/api/dar/v2/${referenceId}/${fileType}`;
-    const res = await axios.get(url, authOpts);
-    return res.data;
   },
 
   downloadDARDocument: async (referenceId, fileType, fileName) => {
@@ -361,18 +344,6 @@ export const DataSet = {
     const url = `${await getApiUrl()}/api/dataset/${datasetObjectId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
-  },
-
-  disableDataset: async (datasetObjectId, active) => {
-    const url = `${await getApiUrl()}/api/dataset/disable/${datasetObjectId}/${active}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res;
-  },
-
-  reviewDataSet: async (dataSetId, needsApproval) => {
-    const url = `${await getApiUrl()}/api/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
-    return res.json();
   },
 
   updateDataset: async (datasetId, dataSetObject) => {
@@ -689,6 +660,11 @@ export const User = {
 
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
     const res = await axios.post(url, keys, Config.authOpts());
+    return res.data;
+  },
+  getApprovedDatasets: async () => {
+    const url = `${await getApiUrl()}/api/user/me/researcher/datasets`;
+    const res = await axios.get(url, Config.authOpts());
     return res.data;
   }
 };

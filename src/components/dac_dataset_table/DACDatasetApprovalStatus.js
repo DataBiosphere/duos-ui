@@ -21,7 +21,7 @@ export default function DACDatasetApprovalStatus(props) {
       style={{marginLeft: '15px'}}
       id={`${dataset.dataSetId}_edit`}
       className={'glyphicon glyphicon-pencil'}
-      to={`dataset_registration/${dataset.dataSetId}`}
+      to={dataset.study?.studyId === undefined ? `dataset_registration/${dataset.dataSetId}` : `study_update/${dataset.study.studyId}`}
     />
   </div>;
 

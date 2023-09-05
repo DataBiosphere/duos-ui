@@ -63,7 +63,6 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        needsApproval: false,
         isValidName: false
       },
       problemSavingRequest: false,
@@ -138,7 +137,6 @@ class DatasetRegistration extends Component {
     let datasetRepoUrl = fp.find({propertyName: 'dbGAP'})(dataset.properties);
     let researcher = fp.find({propertyName: 'Data Depositor'})(dataset.properties);
     let pi = fp.find({propertyName: 'Principal Investigator(PI)'})(dataset.properties);
-    let needsApproval = dataset.needsApproval;
     let dac = fp.find({dacId: dataset.dacId})(this.state.dacList);
 
     this.setState(prev => {
@@ -152,7 +150,6 @@ class DatasetRegistration extends Component {
       prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.principalInvestigator = pi ? pi.propertyValue : '';
-      prev.datasetData.needsApproval = needsApproval;
       prev.datasetData.dac = dac;
       prev.selectedDac = dac;
       let validName = this.validateDatasetName(prev.datasetData.datasetName);
@@ -435,13 +432,6 @@ class DatasetRegistration extends Component {
     return !valid;
   };
 
-  setNeedsApproval = (value) => {
-    this.setState(prev => {
-      prev.datasetData.needsApproval = value;
-      return prev;
-    });
-  };
-
   setGeneralUse = () => {
     this.setState(prev => {
       prev.formData.generalUse = true;
@@ -610,8 +600,6 @@ class DatasetRegistration extends Component {
     // The deprecated API this posts to is expecting a `translatedUseRestriction` field
     result.translatedUseRestriction = data.translatedDataUse;
     result.deletable = true;
-    result.active = true;
-    result.needsApproval = data.needsApproval;
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
@@ -710,7 +698,6 @@ class DatasetRegistration extends Component {
       generalUse = false,
     } = this.state.formData;
     const { ontologies } = this.state.formData;
-    const { needsApproval = false } = this.state.datasetData;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
@@ -1448,35 +1435,6 @@ class DatasetRegistration extends Component {
                         span({ className: 'glyphicon glyphicon-download' }),
                         'DUOS Data Provider Agreement'
                       ])
-                    ]),
-                  ]),
-
-                  div({ className: 'row no-margin'}, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ style: controlLabelStyle, className: 'default-color' },
-                        ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
-
-                      div({style: {display: 'flex'}}, [
-                        RadioButton({
-                          id: 'checkNeedsApproval_yes',
-                          name: 'checkNeedsApproval',
-                          value: 'yes',
-                          defaultChecked: !needsApproval,
-                          onClick: () => this.setNeedsApproval(false),
-                          label: 'Yes'
-                        }),
-
-                        div({style: {width: '10%'}}),
-
-                        RadioButton({
-                          id: 'checkNeedsApproval_no',
-                          name: 'checkNeedsApproval',
-                          value: 'no',
-                          defaultChecked: needsApproval,
-                          onClick: () => this.setNeedsApproval(true),
-                          label: 'No'
-                        }),
-                      ]),
                     ]),
                   ]),
 
