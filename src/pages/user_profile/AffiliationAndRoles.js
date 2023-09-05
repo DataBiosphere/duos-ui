@@ -4,7 +4,7 @@ import { find, isNil, isNumber } from 'lodash';
 import { Notifications } from '../../libs/utils';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import Tooltip from '@mui/material/Tooltip';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 export default function AffiliationAndRole(props) {
@@ -20,17 +20,17 @@ export default function AffiliationAndRole(props) {
           }
         }
       },
-      MuiBotton: {
-        styleOverrides: {
-          root: {
-            fontSize: '14px',
-            color: 'white',
-            fontFamily: 'Montserrat',
-            backgroundColor: 'blue', // Add your background color
-            '&:hover': {
-              backgroundColor: 'darkblue', // Add hover background color
-            },
+      MuiButton: {
+        // styleOverrides: {
+        root: {
+          fontSize: '14px',
+          color: 'white',
+          fontFamily: 'Montserrat',
+          background: 'blue',
+          '&:hover': {
+            backgroundColor: 'darkblue',
           },
+          // },
         }
       }
     }
@@ -219,26 +219,36 @@ export default function AffiliationAndRole(props) {
           style={{
             marginTop: '2rem',
           }}
-          disabled={!formIsValid()}
-          title='hello'>
+          disabled={!formIsValid()}>
           Save
         </button>
       ) : (
-        <ThemeProvider theme={theme}>
+        <div>
+          <ThemeProvider theme={theme}>
+            <Tooltip
+              title="You cannot edit your institution if you are a signing official already associated with an institution."
+              arrow
+            >
+              <div className='f-right btn-primary common-background' style={{
+                marginTop: '2rem', paddingTop: '10px'
+              }}>
 
-          <Tooltip arrow title='You cannot edit your institution if you are a signing official who is already associated with an institution.'>
-            <span>
-              <Button
-                disabled
-                style={{
-                  marginTop: '2rem'
-                }}
-              >
                 Save
-              </Button>
-            </span>
-          </Tooltip>
-        </ThemeProvider>
+              </div>
+            </Tooltip>
+          </ThemeProvider>
+          <button
+            id='btn_submit'
+            onClick={submitForm}
+            className='f-right btn-primary common-background'
+            style={{
+              marginTop: '2rem',
+            }}
+            disabled={!formIsValid()}
+            title='You cannot edit your institution if you are a signing official already associated with an institution.'>
+            Save
+          </button>
+        </div>
       )}
       <div style={{ marginTop: '83px' }} />
       <p>Role</p>

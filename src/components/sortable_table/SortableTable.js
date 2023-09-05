@@ -147,10 +147,10 @@ export default function SortableTable(props) {
                         padding='none' >
                         {row.darCode}
                       </TableCell>
-                      <TableCell align='right'>{row.approvalDate}</TableCell>
-                      <TableCell align='right'>{row.datasetIdentifier}</TableCell>
-                      <TableCell align='right'>{row.datasetName}</TableCell>
-                      <TableCell align='right'>{row.dacName}</TableCell>
+                      <TableCell align='center'>{row.approvalDate}</TableCell>
+                      <TableCell align='center'>{row.datasetIdentifier}</TableCell>
+                      <TableCell align='center'>{row.datasetName}</TableCell>
+                      <TableCell align='center'>{row.dacName}</TableCell>
                     </TableRow>
                   );
                 })}
