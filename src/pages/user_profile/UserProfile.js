@@ -80,7 +80,7 @@ export default function UserProfile(props) {
             id='researcherProfile'
             color='common'
             title='Your Profile'
-            descriptionStyle={{fontSize: '10000px'}}
+            descriptionStyle={{ fontSize: '10000px' }}
             style={{
               float: 'left',
             }}
@@ -124,23 +124,19 @@ export default function UserProfile(props) {
     >
       Full Name
     </h1>
-    <h>
-      <FormField
-        type={FormFieldTypes.TEXT}
-        id='profileName'
-        defaultValue={profile.profileName}
-        disabled={true}
-      />
-    </h>
+    <FormField
+      type={FormFieldTypes.TEXT}
+      id='profileName'
+      defaultValue={profile.profileName}
+      disabled={true}
+    />
     <div style={{ marginTop: '10px' }} />
-    <h>
-      <FormField
-        type={FormFieldTypes.TEXT}
-        id='profileEmail'
-        defaultValue={profile.email}
-        disabled={true}
-      />
-    </h>
+    <FormField
+      type={FormFieldTypes.TEXT}
+      id='profileEmail'
+      defaultValue={profile.email}
+      disabled={true}
+    />
     <div style={{ marginTop: '60px' }} />
     <div style={{ 'marginTop': '60px' }} />
     <ControlledAccessGrants />

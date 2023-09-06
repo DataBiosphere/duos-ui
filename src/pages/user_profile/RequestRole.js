@@ -129,15 +129,13 @@ export default function RequestRole(props) {
         style={{ ...headerStyle, marginTop: 0 }}>
         Which of the following are you looking to do?*
       </h2>
-      {possibleSupportRequests.map((i, supportRequest) => {
-        return <h key={i}>
-          <FormField
-            toggleText={supportRequest.label}
-            type={FormFieldTypes.CHECKBOX}
-            key={supportRequest.key}
-            id={supportRequest.key}
-            onChange={handleSupportRequestsChange} />
-        </h>;
+      {possibleSupportRequests.map((supportRequest) => {
+        return <FormField
+          toggleText={supportRequest.label}
+          type={FormFieldTypes.CHECKBOX}
+          key={supportRequest.key}
+          id={supportRequest.key}
+          onChange={handleSupportRequestsChange} />;
       })}
       {supportRequests.checkRequestDataAccess && (
         <div
@@ -152,15 +150,13 @@ export default function RequestRole(props) {
       <div style={{ margin: '15px 0 10px' }}>
         Is there anything else you would like to request?
       </div>
-      <h>
-        <FormField
-          type={FormFieldTypes.TEXTAREA}
-          id='extraRequest'
-          placeholder='Enter your request'
-          maxLength='512'
-          rows='3'
-          onChange={handleSupportRequestsChange} />
-      </h>
+      <FormField
+        type={FormFieldTypes.TEXTAREA}
+        id='extraRequest'
+        placeholder='Enter your request'
+        maxLength='512'
+        rows='3'
+        onChange={handleSupportRequestsChange} />
     </div>
     <button
       id='btn_save'

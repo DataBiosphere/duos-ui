@@ -123,54 +123,52 @@ export default function AffiliationAndRole(props) {
   const generateInstitutionSelectionDisplay = () => {
     if (!isSigningOfficial() || (isNil(profile.institutionId) && isNil(profile.suggestedInstitution))) {
       return <div>
-        <h>
-          <FormField
-            id='institutionId'
-            type={FormFieldTypes.SELECT}
-            selectOptions={(institutions).map((i) => {
-              return {
-                institutionId: i.id,
-                displayText: i.name,
-              };
-            })}
-            placeholder='Search for Institution...'
-            isCreatable={true}
-            defaultValue={{
-              institutionId: selectedInstitution?.institutionId,
-              suggestedInstitution: profile.suggestedInstitution,
-              displayText: (
-                (!isNil(selectedInstitution)
-                  ? `${selectedInstitution.name}`
-                  : (!isNil(profile.suggestedInstitution)
-                    ? `${profile.suggestedInstitution}`
-                    : ''))
-              ),
-            }}
-            selectConfig={{
-              clearValue: () => {
-                setProfile(Object.assign({},
-                  profile,
-                  {
-                    institutionId: undefined,
-                    suggestedInstitution: undefined
-                  }));
-              },
-            }}
-            onChange={({ value }) => {
-              if (!isNil(value?.institutionId)) {
-                setProfile(Object.assign({}, profile, {
-                  institutionId: value?.institutionId,
+        <FormField
+          id='institutionId'
+          type={FormFieldTypes.SELECT}
+          selectOptions={(institutions).map((i) => {
+            return {
+              institutionId: i.id,
+              displayText: i.name,
+            };
+          })}
+          placeholder='Search for Institution...'
+          isCreatable={true}
+          defaultValue={{
+            institutionId: selectedInstitution?.institutionId,
+            suggestedInstitution: profile.suggestedInstitution,
+            displayText: (
+              (!isNil(selectedInstitution)
+                ? `${selectedInstitution.name}`
+                : (!isNil(profile.suggestedInstitution)
+                  ? `${profile.suggestedInstitution}`
+                  : ''))
+            ),
+          }}
+          selectConfig={{
+            clearValue: () => {
+              setProfile(Object.assign({},
+                profile,
+                {
+                  institutionId: undefined,
                   suggestedInstitution: undefined
                 }));
-              } else {
-                setProfile(Object.assign({}, profile, {
-                  institutionId: undefined,
-                  suggestedInstitution: value?.displayText
-                }));
-              }
-            }} >
-          </FormField>
-        </h>
+            },
+          }}
+          onChange={({ value }) => {
+            if (!isNil(value?.institutionId)) {
+              setProfile(Object.assign({}, profile, {
+                institutionId: value?.institutionId,
+                suggestedInstitution: undefined
+              }));
+            } else {
+              setProfile(Object.assign({}, profile, {
+                institutionId: undefined,
+                suggestedInstitution: value?.displayText
+              }));
+            }
+          }} >
+        </FormField>
       </div>;
     } else {
       let institution = (profile.institutionId ? find(institutions, { id: profile.institutionId }) : null);
@@ -227,7 +225,7 @@ export default function AffiliationAndRole(props) {
             <Tooltip
               title='You cannot edit your institution if you are a signing official already associated with an institution.'
               arrow>
-              <div style={{float: 'right'}}>
+              <div style={{ float: 'right' }}>
                 <button
                   id='btn_submit'
                   onClick={submitForm}
