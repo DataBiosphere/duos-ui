@@ -35,12 +35,14 @@ const extractDatasetProp = (propertyName, dataset) => {
 
 const isVisible = (dataset) => {
   const openAccess = extractDatasetProp('Open Access', dataset);
-  if(!isNil(openAccess)){
-    // if open Access is false, dac approval required
-    return openAccess ? dataset.study?.publicVisibility : (dataset.dacApproval && dataset.study?.publicVisibility);
-  } else {
-    return dataset.active;
-  }
+  const publicDataset = extractDatasetProp('Public Visibility', dataset);
+  const publicStudy = !isNil(dataset.study?.publicVisibility) ? dataset.study?.publicVisibility : true;
+
+  const open = !isNil(openAccess) ? openAccess : false;
+  const dacApproved = (!isNil(dataset.dacApproval) && dataset.dacApproval);
+  const publiclyVisible = !isNil(publicDataset) ? publicDataset : publicStudy;
+
+  return open || (dacApproved && publiclyVisible);
 };
 
 export default function DatasetCatalog(props) {
@@ -347,7 +349,7 @@ export default function DatasetCatalog(props) {
     setDatasetList(selectedDatasets);
   };
 
-  const inactiveCheckboxStyle = (dataset) => {
+  const unapprovedStyle = (dataset) => {
     if (!isVisible(dataset)) {
       return {cursor: 'default', opacity: '50%'};
     }
@@ -517,7 +519,7 @@ export default function DatasetCatalog(props) {
             div({
               className: style['display-inline-block'],
               style: {
-                top: '13px',
+                top: '4px',
                 position: 'absolute',
               }
             }, [
@@ -587,7 +589,7 @@ export default function DatasetCatalog(props) {
                             label({
                               className: style['regular-checkbox'],
                               // Apply additional styling for inactive datasets
-                              style: inactiveCheckboxStyle(dataset),
+                              style: unapprovedStyle(dataset),
                               htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),
@@ -638,7 +640,7 @@ export default function DatasetCatalog(props) {
 
                         td({
                           id: trIndex + '_datasetName', name: 'datasetName',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? !! style['dataset-disabled'] : ''),
+                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
                           style: tableBody
                         }, dataset.name),
 

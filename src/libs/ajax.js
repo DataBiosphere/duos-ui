@@ -352,12 +352,6 @@ export const DataSet = {
     return await res;
   },
 
-  reviewDataSet: async (dataSetId, needsApproval) => {
-    const url = `${await getApiUrl()}/api/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
-    return res.json();
-  },
-
   updateDataset: async (datasetId, dataSetObject) => {
     const url = `${await getApiUrl()}/api/dataset/${datasetId}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
@@ -672,6 +666,11 @@ export const User = {
 
     const url = `${await getApiUrl()}/api/user/acknowledgements`;
     const res = await axios.post(url, keys, Config.authOpts());
+    return res.data;
+  },
+  getApprovedDatasets: async () => {
+    const url = `${await getApiUrl()}/api/user/me/researcher/datasets`;
+    const res = await axios.get(url, Config.authOpts());
     return res.data;
   }
 };

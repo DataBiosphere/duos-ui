@@ -5,7 +5,6 @@ import { DataSet } from '../libs/ajax';
 import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
 
 export const DatasetSearch = (props) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [datasets, setDatasets] = useState([]);
 
   useEffect(() => {
@@ -37,15 +36,12 @@ export const DatasetSearch = (props) => {
       } catch (error) {
         Notifications.showError({ text: 'Failed to load Elasticsearch index' });
       }
-      setIsLoading(false);
     };
     init();
   }, []);
 
   return (
-    <div>
-      <DatasetSearchTable {...props} datasets={datasets} isLoading={isLoading} />
-    </div>
+    <DatasetSearchTable {...props} datasets={datasets} />
   );
 };
 
