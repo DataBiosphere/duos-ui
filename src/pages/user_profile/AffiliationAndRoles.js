@@ -4,7 +4,6 @@ import { find, isNil, isNumber } from 'lodash';
 import { Notifications } from '../../libs/utils';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import Tooltip from '@mui/material/Tooltip';
-// import Button from '@mui/material/Button';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 export default function AffiliationAndRole(props) {
@@ -226,28 +225,23 @@ export default function AffiliationAndRole(props) {
         <div>
           <ThemeProvider theme={theme}>
             <Tooltip
-              title="You cannot edit your institution if you are a signing official already associated with an institution."
-              arrow
-            >
-              <div className='f-right btn-primary common-background' style={{
-                marginTop: '2rem', paddingTop: '10px'
-              }}>
-
-                Save
+              title='You cannot edit your institution if you are a signing official already associated with an institution.'
+              arrow>
+              <div style={{float: 'right'}}>
+                <button
+                  id='btn_submit'
+                  onClick={submitForm}
+                  className='f-right btn-primary common-background'
+                  style={{
+                    marginTop: '2rem',
+                  }}
+                  disabled={!formIsValid()}
+                  title='You cannot edit your institution if you are a signing official already associated with an institution.'>
+                  Save
+                </button>
               </div>
             </Tooltip>
           </ThemeProvider>
-          <button
-            id='btn_submit'
-            onClick={submitForm}
-            className='f-right btn-primary common-background'
-            style={{
-              marginTop: '2rem',
-            }}
-            disabled={!formIsValid()}
-            title='You cannot edit your institution if you are a signing official already associated with an institution.'>
-            Save
-          </button>
         </div>
       )}
       <div style={{ marginTop: '83px' }} />
