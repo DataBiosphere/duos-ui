@@ -31,6 +31,7 @@ export default function RequestRole(props) {
     }
   ];
 
+  const [hasSupportRequests, setHasSupportRequests] = useState(false);
   const [supportRequests, setSupportRequests] = useState({
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
@@ -47,6 +48,8 @@ export default function RequestRole(props) {
   const handleSupportRequestsChange = ({ key, value }) => {
     let newSupportRequests = Object.assign({}, supportRequests, { [key]: value });
     setSupportRequests(newSupportRequests);
+    const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key]);
+    setHasSupportRequests(hasAnyRequests);
   };
 
   const submitForm = async (event) => {
@@ -160,20 +163,19 @@ export default function RequestRole(props) {
     </div>
     <button
       id='btn_save'
-      onClick={submitForm}
-      className='f-left btn-primary common-background'
-      style={{
-        marginTop: '50px',
-      }}>
+      onClick={goToPrevPage}
+      className='f-left btn-primary btn-back'
+      style={{ marginTop: '50px' }}>
       Back
     </button>
     <button
       id='btn_save'
-      onClick={goToPrevPage}
-      className='f-right btn-primary btn-back'
+      onClick={submitForm}
+      className='f-right btn-primary common-background'
       style={{
         marginTop: '50px',
-      }}>
+      }}
+      disabled={!hasSupportRequests}>
       Submit
     </button>
   </div>;
