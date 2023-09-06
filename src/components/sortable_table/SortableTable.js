@@ -11,6 +11,34 @@ import { ThemeProvider } from '@mui/material/styles';
 import EnhancedTableHead from './EnhancedTableHead';
 import { theme } from './Themes';
 
+// headCells and rows should be in the following format:
+
+// const headCells = [
+//   {
+//     id: 'id1',
+//     label: 'label1', // this will be displayed as the column name
+//   },
+//   {
+//     id: 'id2',
+//     label: 'label2',
+//   }
+// ];
+
+// const rows = [
+//   {
+//     id1: 'id1_value1', // use the id values from headCells for each item
+//     id2: 'id2_value1'
+//   },
+//   {
+//     id1: 'id1_value2',
+//     id2: 'id2_value2'
+//   },
+//   {
+//     id1: 'id1_value3',
+//     id2: 'id2_value3'
+//   }
+// ];
+
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -132,25 +160,24 @@ export default function SortableTable(props) {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
                   return (
                     <TableRow
                       hover
                       onClick={(event) => handleClick(event, row.name)}
                       tabIndex={-1}
-                      key={row.datasetIdentifier}
-                      selected={isItemSelected} >
-                      <TableCell
-                        component='th'
-                        id={labelId}
-                        scope='row'
-                        padding='none' >
-                        {row.darCode}
-                      </TableCell>
-                      <TableCell align='center'>{row.approvalDate}</TableCell>
-                      <TableCell align='center'>{row.datasetIdentifier}</TableCell>
-                      <TableCell align='center'>{row.datasetName}</TableCell>
-                      <TableCell align='center'>{row.dacName}</TableCell>
+                      key={index}
+                      selected={isItemSelected}>
+                      {Object.keys(row).map((category) => (
+                        <TableCell
+                          key={category}
+                          component='th'
+                          id={labelId}
+                          scope='row'
+                          padding='none'
+                          align='center'>
+                          {row[category]}
+                        </TableCell>
+                      ))}
                     </TableRow>
                   );
                 })}
