@@ -6,6 +6,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
 import SearchBar from '../../components/SearchBar';
 import {DataSet} from '../../libs/ajax';
+import DataSubmitterDatasetsTable from './DataSubmitterDatasetsTable';
 
 export default function DataSubmitterConsole() {
 
@@ -96,7 +97,9 @@ export default function DataSubmitterConsole() {
             searchRef={searchRef}/>
         </div>
       </div>
-      {/* TODO: Add table!!! */}
+      <div>
+        <DataSubmitterDatasetsTable datasets={filteredList} isLoading={isLoading}/>
+      </div>
     </div>
   );
 }
