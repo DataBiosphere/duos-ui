@@ -14,7 +14,7 @@ const Acknowledgment = ({ value }) =>
   }}>
     <p>{value.name}</p>
     <div style={{ flex: '1' }} />
-    <p>attested on: {value.attestedTime}</p>
+    {value.attestedTime === '' ? '' : <p>attested on: {value.attestedTime}</p> }
   </div>;
 
 export default function AcceptedAcknowledgements() {
@@ -24,6 +24,11 @@ export default function AcceptedAcknowledgements() {
   useEffect(() => {
     const init = async () => {
       const allAcknowledgements = [];
+      const ToS = {
+        name: 'DUOS/Terra Terms of Service',
+        attestedTime: ''
+      };
+      allAcknowledgements.push(ToS);
       try {
         const acknowledgements = await User.getAcknowledgements();
         for (const key in acknowledgements) {

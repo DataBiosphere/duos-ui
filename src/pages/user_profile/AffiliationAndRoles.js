@@ -20,7 +20,6 @@ export default function AffiliationAndRole(props) {
         }
       },
       MuiButton: {
-        // styleOverrides: {
         root: {
           fontSize: '14px',
           color: 'white',
@@ -29,7 +28,6 @@ export default function AffiliationAndRole(props) {
           '&:hover': {
             backgroundColor: 'darkblue',
           },
-          // },
         }
       }
     }

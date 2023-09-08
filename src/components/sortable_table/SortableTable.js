@@ -1,3 +1,44 @@
+/*
+Steps for using the SortableTable component:
+Step 1: Create an array for the headCells prop
+  - This array will contain the column labels
+  - It should follow this format:
+
+const headCells = [
+  {
+    id: 'id1',
+    label: 'label1', // this will be displayed as the column name
+  },
+  {
+    id: 'id2',
+    label: 'label2',
+  }
+];
+
+Step 2: Create an array for the rows prop
+  - This array will contain the data that will be displayed in the table under the columns
+  - It should follow this format:
+
+const rows = [
+  {
+    id1: 'id1_value1', // use the id values from headCells for each item
+    id2: 'id2_value1'
+  },
+  {
+    id1: 'id1_value2',
+    id2: 'id2_value2'
+  },
+  {
+    id1: 'id1_value3',
+    id2: 'id2_value3'
+  }
+];
+
+Step 3: Pass both arrays into the headCells and rows props
+  - Example: <SortableTable rows={rows} headCells={headCells}
+
+*/
+
 import React from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -10,34 +51,6 @@ import Paper from '@mui/material/Paper';
 import { ThemeProvider } from '@mui/material/styles';
 import EnhancedTableHead from './EnhancedTableHead';
 import { theme } from './Themes';
-
-// headCells and rows should be in the following format:
-
-// const headCells = [
-//   {
-//     id: 'id1',
-//     label: 'label1', // this will be displayed as the column name
-//   },
-//   {
-//     id: 'id2',
-//     label: 'label2',
-//   }
-// ];
-
-// const rows = [
-//   {
-//     id1: 'id1_value1', // use the id values from headCells for each item
-//     id2: 'id2_value1'
-//   },
-//   {
-//     id1: 'id1_value2',
-//     id2: 'id2_value2'
-//   },
-//   {
-//     id1: 'id1_value3',
-//     id2: 'id2_value3'
-//   }
-// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
