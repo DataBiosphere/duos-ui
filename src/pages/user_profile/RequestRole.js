@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { div, h, h2, p, button } from 'react-hyperscript-helpers';
+import React, { useState } from 'react';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
@@ -32,6 +31,7 @@ export default function RequestRole(props) {
     }
   ];
 
+  const [hasSupportRequests, setHasSupportRequests] = useState(false);
   const [supportRequests, setSupportRequests] = useState({
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
@@ -42,12 +42,14 @@ export default function RequestRole(props) {
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
-    await props.history.push('/user_profile');
+    await props.history.push('/profile');
   };
 
   const handleSupportRequestsChange = ({ key, value }) => {
     let newSupportRequests = Object.assign({}, supportRequests, { [key]: value });
     setSupportRequests(newSupportRequests);
+    const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key]);
+    setHasSupportRequests(hasAnyRequests);
   };
 
   const submitForm = async (event) => {
@@ -108,76 +110,73 @@ export default function RequestRole(props) {
       }
     };
 
-  return div({
-    style: {
-      padding: '25px 270px 0px 270px'
-    }
-  }, [
-    p({
-      style: {
+  return <div style={{ padding: '25px 270px 0px 270px' }}>
+    <p
+      style={{
         color: '#01549F',
         fontFamily: 'Montserrat',
         fontSize: '20px',
         fontWeight: '600',
         marginTop: 10
-      }
-    }, ['Request a New Role in DUOS']),
-    div({
-      style: {
+      }}>
+      Request a New Role in DUOS
+    </p>
+    <div
+      style={{
         backgroundColor: '#F2F2F2',
         padding: 25,
         marginTop: 40
-      }
-    }, [
-      h2({
-        id: 'lbl_supportRequests',
-        style: { ...headerStyle, marginTop: 0 },
-      }, ['Which of the following are you looking to do?*']),
-      possibleSupportRequests.map(supportRequest => {
-        return h(FormField, {
-          toggleText: supportRequest.label,
-          type: FormFieldTypes.CHECKBOX,
-
-          key: supportRequest.key,
-          id: supportRequest.key,
-          onChange: handleSupportRequestsChange,
-        });
-      }),
-      div({
-        isRendered: supportRequests.checkRequestDataAccess,
-        style: {
-          border: '1px solid purple', color: 'purple', padding: '10px'
-        }
-      }, [
-        'Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS'
-      ]),
-      div({ style: { margin: '15px 0 10px' } }, [
-        `Is there anything else you'd like to request?`
-      ]),
-      h(FormField, {
-        type: FormFieldTypes.TEXTAREA,
-        id: 'extraRequest',
-        placeholder: 'Enter your request',
-        maxLength: '512',
-        rows: '3',
-        onChange: handleSupportRequestsChange,
-      }),
-    ]),
-    button({
-      id: 'btn_save',
-      onClick: goToPrevPage,
-      className: 'f-left btn-primary btn-back',
-      style: {
+      }}>
+      <h2
+        id='lbl_supportRequests'
+        style={{ ...headerStyle, marginTop: 0 }}>
+        Which of the following are you looking to do?*
+      </h2>
+      {possibleSupportRequests.map((supportRequest) => {
+        return <FormField
+          toggleText={supportRequest.label}
+          type={FormFieldTypes.CHECKBOX}
+          key={supportRequest.key}
+          id={supportRequest.key}
+          onChange={handleSupportRequestsChange} />;
+      })}
+      {supportRequests.checkRequestDataAccess && (
+        <div
+          style={{
+            border: '1px solid purple',
+            color: 'purple',
+            padding: '10px'
+          }}>
+          Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS
+        </div>
+      )}
+      <div style={{ margin: '15px 0 10px' }}>
+        Is there anything else you would like to request?
+      </div>
+      <FormField
+        type={FormFieldTypes.TEXTAREA}
+        id='extraRequest'
+        placeholder='Enter your request'
+        maxLength='512'
+        rows='3'
+        onChange={handleSupportRequestsChange} />
+    </div>
+    <button
+      id='btn_save'
+      onClick={goToPrevPage}
+      className='f-left btn-primary btn-back'
+      style={{ marginTop: '50px' }}>
+      Back
+    </button>
+    <button
+      id='btn_save'
+      onClick={submitForm}
+      className='f-right btn-primary common-background'
+      style={{
         marginTop: '50px',
-      },
-    }, ['Back']),
-    button({
-      id: 'btn_save',
-      onClick: submitForm,
-      className: 'f-right btn-primary common-background',
-      style: {
-        marginTop: '50px',
-      },
-    }, ['Submit']),
-  ]);
+      }}
+      disabled={!hasSupportRequests}>
+      Submit
+    </button>
+  </div>;
 }

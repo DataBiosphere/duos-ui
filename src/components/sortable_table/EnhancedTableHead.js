@@ -24,34 +24,53 @@ export default function EnhancedTableHead(props) {
     <ThemeProvider theme={theme}>
       <TableHead>
         <TableRow>
-          {headCells.map((headCell) => (
+          {headCells.map((headCell, index) => (
             <TableCell
               key={headCell.id}
-              align={headCell.numeric ? 'right' : 'left'}
+              align='center'
               padding={headCell.disablePadding ? 'none' : 'normal'}
               sortDirection={orderBy === headCell.id ? order : false}
               sx={{
                 lineHeight: 'normal',
                 fontWeight: '600',
                 padding: '10px'
-              }}
-            >
-              <TableSortLabel
-                active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : 'asc'}
-                onClick={createSortHandler(headCell.id)}
-                sx={{
-                  fontSize: '16px',
-                  fontWeight: '400'
-                }}
-              >
-                {headCell.label}
-                {orderBy === headCell.id ? (
-                  <Box component='span' sx={visuallyHidden}>
-                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </Box>
-                ) : null}
-              </TableSortLabel>
+              }}>
+              {index === 0 ? (
+                <TableSortLabel
+                  active={orderBy === headCell.id}
+                  direction={orderBy === headCell.id ? order : 'asc'}
+                  onClick={createSortHandler(headCell.id)}
+                  sx={{
+                    fontSize: '16px',
+                    fontWeight: '400',
+                    width: '100px',
+                    paddingLeft: '17px'
+                  }}>
+                  {headCell.label}
+                  {orderBy === headCell.id ? (
+                    <Box component='span' sx={visuallyHidden}>
+                      {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                    </Box>
+                  ) : null}
+                </TableSortLabel>
+              ) : (
+                <TableSortLabel
+                  active={orderBy === headCell.id}
+                  direction={orderBy === headCell.id ? order : 'asc'}
+                  onClick={createSortHandler(headCell.id)}
+                  sx={{
+                    fontSize: '16px',
+                    fontWeight: '400',
+                    width: '100px',
+                    paddingLeft: '12px' }}>
+                  {headCell.label}
+                  {orderBy === headCell.id ? (
+                    <Box component='span' sx={visuallyHidden}>
+                      {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                    </Box>
+                  ) : null}
+                </TableSortLabel>
+              )}
             </TableCell>
           ))}
         </TableRow>

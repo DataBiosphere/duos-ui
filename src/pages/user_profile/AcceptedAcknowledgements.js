@@ -11,11 +11,10 @@ const Acknowledgment = ({ value }) =>
     fontStyle: 'normal',
     fontWeight: '400',
     width: '675px'
-
   }}>
     <p>{value.name}</p>
     <div style={{ flex: '1' }} />
-    <p>attested on: {value.attestedTime}</p>
+    {value.attestedTime === '' ? '' : <p>attested on: {value.attestedTime}</p> }
   </div>;
 
 export default function AcceptedAcknowledgements() {
@@ -25,6 +24,11 @@ export default function AcceptedAcknowledgements() {
   useEffect(() => {
     const init = async () => {
       const allAcknowledgements = [];
+      const ToS = {
+        name: 'DUOS/Terra Terms of Service',
+        attestedTime: ''
+      };
+      allAcknowledgements.push(ToS);
       try {
         const acknowledgements = await User.getAcknowledgements();
         for (const key in acknowledgements) {
@@ -53,13 +57,20 @@ export default function AcceptedAcknowledgements() {
         color: '#01549F',
         fontSize: '20px',
         fontWeight: '600',
-      }}
-    >
+      }}>
       Accepted Terms & Policies
     </h1>
     <div style={{ marginTop: '20px' }} />
-    {acceptedAcknowledgements.map((value, index) => (
-      <Acknowledgment key={index} value={value} />
-    ))}
+    {
+      (acceptedAcknowledgements.length === 0)
+        ?
+        <div>
+          <p>No Accepted Terms & Policies Found</p>
+        </div>
+        :
+        acceptedAcknowledgements.map((value, index) => (
+          <Acknowledgment key={index} value={value} />
+        ))
+    }
   </div>;
 }
