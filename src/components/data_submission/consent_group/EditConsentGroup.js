@@ -305,6 +305,7 @@ export const EditConsentGroup = (props) => {
           name: 'gso',
           type: FormFieldTypes.CHECKBOX,
           toggleText: 'Genetic studies only (GSO)',
+          disabled: disableFields,
           defaultValue: consentGroup.gso,
           onChange,
           validation: validation.gso,
