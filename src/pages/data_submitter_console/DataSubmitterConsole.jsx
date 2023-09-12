@@ -5,11 +5,12 @@ import {Link} from 'react-router-dom';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
 import SearchBar from '../../components/SearchBar';
-import {DataSet} from '../../libs/ajax';
+import {DAC, DataSet} from '../../libs/ajax';
 import DataSubmitterDatasetsTable from './DataSubmitterDatasetsTable';
 
 export default function DataSubmitterConsole() {
 
+  const [dacs, setDacs] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,15 +18,21 @@ export default function DataSubmitterConsole() {
 
   useEffect(() => {
     const init = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
+        const dacList = await DAC.list(false);
+        setDacs(dacList);
+      } catch (error) {
+        Notifications.showError({text: 'Error initializing data access committees'});
+      }
+      try {
         const myDatasets = await DataSet.getDatasetsAsCustodian();
         setDatasets(myDatasets);
         setFilteredList(myDatasets);
-        setIsLoading(false);
       } catch (error) {
         Notifications.showError({text: 'Error initializing datasets table'});
       }
+      setIsLoading(false);
     };
     init();
   }, []);
@@ -102,7 +109,7 @@ export default function DataSubmitterConsole() {
         marginTop: 10,
         marginLeft: 25
       }}>
-        <DataSubmitterDatasetsTable datasets={filteredList} isLoading={isLoading}/>
+        <DataSubmitterDatasetsTable dacs={dacs} datasets={filteredList} isLoading={isLoading}/>
       </div>
     </div>
   );
