@@ -97,7 +97,11 @@ export default function DataSubmitterConsole() {
             searchRef={searchRef}/>
         </div>
       </div>
-      <div>
+      <div style={{
+        width: '100%',
+        marginTop: 10,
+        marginLeft: 25
+      }}>
         <DataSubmitterDatasetsTable datasets={filteredList} isLoading={isLoading}/>
       </div>
     </div>

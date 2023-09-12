@@ -2,17 +2,8 @@ import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
-import {ThemeProvider} from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import TableContainer from '@mui/material/TableContainer';
-import Table from '@mui/material/Table';
-import EnhancedTableHead from '../../components/sortable_table/EnhancedTableHead';
-import TableBody from '@mui/material/TableBody';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import TablePagination from '@mui/material/TablePagination';
-import {TableTheme} from './DataSubmitterTheme';
+import SortableTable from '../../components/sortable_table/SortableTable';
+import {isNil} from 'lodash/fp';
 
 
 export default function DataSubmitterDatasetsTable(props) {
@@ -26,26 +17,70 @@ export default function DataSubmitterDatasetsTable(props) {
       id: 'datasetIdentifier',
       numeric: false,
       disablePadding: false,
-      label: 'Dataset Identifier',
+      label: 'DUOS ID',
+    },
+    {
+      id: 'datasetName',
+      numeric: false,
+      disablePadding: false,
+      label: 'Dataset Name',
+    },
+    {
+      id: 'datasetSubmitter',
+      numeric: false,
+      disablePadding: false,
+      label: 'Dataset Submitter',
+    },
+    {
+      id: 'datasetCustodians',
+      numeric: false,
+      disablePadding: false,
+      label: 'Dataset Custodians',
+    },
+    {
+      id: 'dac',
+      numeric: false,
+      disablePadding: false,
+      label: 'DAC',
+    },
+    {
+      id: 'dataUse',
+      numeric: false,
+      disablePadding: false,
+      label: 'Data Use',
+    },
+    {
+      id: 'status',
+      numeric: false,
+      disablePadding: false,
+      label: 'Status',
+    },
+    {
+      id: 'actions',
+      numeric: false,
+      disablePadding: false,
+      label: 'Actions',
     }
   ];
 
   const [datasets, setDatasets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('datasetIdentifier');
-
-  const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback(() => {
     const rows = datasets.map((dataset) => {
-      return {datasetIdentifier: dataset.datasetIdentifier};
+      const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
+      return {
+        datasetIdentifier: dataset.datasetIdentifier,
+        datasetName: dataset.name,
+        dataSubmitter: dataset?.createUser?.displayName,
+        datasetCustodians: '',
+        dac: '',
+        dataUse: '',
+        status: status,
+        actions: ''
+      };
     });
     setRows(rows);
   }, [datasets]);
@@ -63,63 +98,7 @@ export default function DataSubmitterDatasetsTable(props) {
     init();
   }, [props, redrawRows]);
 
-  const table = <ThemeProvider theme={TableTheme()}>
-    <Box
-      sx={{
-        width: '100%',
-        fill: '#FFF',
-        strokeWidth: '1px',
-        stroke: '#ABABAB',
-        filter: 'drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25))',
-        marginTop: 4,
-        marginLeft: 4
-      }}>
-      <Paper
-        sx={{
-          width: '100%',
-          mb: 2,
-          fontFamily: 'Montserrat',
-          fontSize: '100'
-        }}>
-        <TableContainer>
-          <Table>
-            <EnhancedTableHead
-              headCells={columns}
-              sx={{marginBottom: '15px'}}
-              onRequestSort={handleRequestSort}
-              order={order}
-              orderBy={orderBy}/>
-            <TableBody>
-              {rows.map((row, index) => {
-                // const isItemSelected = isSelected(row.name);
-                const labelId = `enhanced-table-checkbox-${index}`;
-                return (<TableRow
-                  hover
-                  tabIndex={-1}
-                  key={row.datasetIdentifier}>
-                  <TableCell
-                    component='th'
-                    id={labelId}
-                    scope='row'
-                    padding='none'>
-                    {row.datasetIdentifier}
-                  </TableCell>
-                </TableRow>);
-              })
-              }
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[]}
-          component='div'
-          count={rows.length}
-          rowsPerPage={10}
-          page={0}
-          onPageChange={() => {}}/>
-      </Paper>
-    </Box>
-  </ThemeProvider>;
+  const sortableTable = <SortableTable headCells={columns} rows={rows}/>;
 
-  return isLoading ? spinner : table;
+  return isLoading ? spinner : sortableTable;
 }
