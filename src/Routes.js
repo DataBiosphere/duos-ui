@@ -14,7 +14,6 @@ import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
-import ResearcherProfile from './pages/ResearcherProfile';
 import UserProfile from './pages/user_profile/UserProfile';
 import RequestRole from './pages/user_profile/RequestRole';
 import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
@@ -67,7 +66,7 @@ const Routes = (props) => (
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <Route path="/nih_dms_policy" component={NIHDMSPolicyInfo} />
     <Route path="/anvil_dms_policy" component={AnVILDMSPolicyInfo} />
-    <AuthenticatedRoute path="/user_profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
+    <AuthenticatedRoute path="/profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/request_role" component={RequestRole} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_review_collection/:collectionId" component={DarCollectionReview} props={Object.assign({adminPage: true}, props)} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
@@ -86,7 +85,6 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}

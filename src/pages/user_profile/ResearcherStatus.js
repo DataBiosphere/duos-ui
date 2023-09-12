@@ -50,8 +50,7 @@ export default function ResearcherStatus(props) {
         color: '#01549F',
         fontSize: '20px',
         fontWeight: '600',
-      }}
-    >
+      }} >
       Researcher Status
     </h1>
     <div style={{ marginTop: '20px' }} />
@@ -63,7 +62,7 @@ export default function ResearcherStatus(props) {
         fontStyle: 'normal',
         fontWeight: '600',
         lineHeight: 'normal'
-      }}>
+      }} >
       eRA Commons ID
     </p>
     <p>
@@ -79,7 +78,7 @@ export default function ResearcherStatus(props) {
       location: pageProps.location,
       header: false
     })}
-    <div style={{ marginTop: '10px' }} />
+    <div style={{ marginTop: '20px' }} />
     <p
       style={{
         color: '#000',
@@ -88,7 +87,7 @@ export default function ResearcherStatus(props) {
         fontStyle: 'normal',
         fontWeight: '600',
         lineHeight: 'normal'
-      }}>
+      }} >
       Library Card
     </p>
     <div style={{ marginTop: '15px' }} />
@@ -105,7 +104,7 @@ export default function ResearcherStatus(props) {
           style={{
             marginTop: '10px',
             marginBottom: '50px'
-          }}>
+          }} >
           Request a Library Card
         </button>
       </div>

@@ -1,3 +1,44 @@
+/*
+Steps for using the SortableTable component:
+Step 1: Create an array for the headCells prop
+  - This array will contain the column labels
+  - It should follow this format:
+
+const headCells = [
+  {
+    id: 'id1',
+    label: 'label1', // this will be displayed as the column name
+  },
+  {
+    id: 'id2',
+    label: 'label2',
+  }
+];
+
+Step 2: Create an array for the rows prop
+  - This array will contain the data that will be displayed in the table under the columns
+  - It should follow this format:
+
+const rows = [
+  {
+    id1: 'id1_value1', // use the id values from headCells for each item
+    id2: 'id2_value1'
+  },
+  {
+    id1: 'id1_value2',
+    id2: 'id2_value2'
+  },
+  {
+    id1: 'id1_value3',
+    id2: 'id2_value3'
+  }
+];
+
+Step 3: Pass both arrays into the headCells and rows props
+  - Example: <SortableTable rows={rows} headCells={headCells}
+
+*/
+
 import React from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -132,25 +173,24 @@ export default function SortableTable(props) {
                 {visibleRows.map((row, index) => {
                   const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
                   return (
                     <TableRow
                       hover
                       onClick={(event) => handleClick(event, row.name)}
                       tabIndex={-1}
-                      key={row.datasetIdentifier}
-                      selected={isItemSelected} >
-                      <TableCell
-                        component='th'
-                        id={labelId}
-                        scope='row'
-                        padding='none' >
-                        {row.darCode}
-                      </TableCell>
-                      <TableCell align='right'>{row.approvalDate}</TableCell>
-                      <TableCell align='right'>{row.datasetIdentifier}</TableCell>
-                      <TableCell align='right'>{row.datasetName}</TableCell>
-                      <TableCell align='right'>{row.dacName}</TableCell>
+                      key={index}
+                      selected={isItemSelected}>
+                      {Object.keys(row).map((category) => (
+                        <TableCell
+                          key={category}
+                          component='th'
+                          id={labelId}
+                          scope='row'
+                          padding='none'
+                          align='center'>
+                          {row[category]}
+                        </TableCell>
+                      ))}
                     </TableRow>
                   );
                 })}
