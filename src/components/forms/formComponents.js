@@ -485,6 +485,7 @@ export const FormInputCheckbox = (config) => {
     label({
       className: `regular-checkbox ${!isValid(validation) ? 'errored' : ''}`,
       htmlFor: `${id}`,
+      style: disabled ? { cursor: 'not-allowed' } : null
     }, [toggleText])
   ]);
 };
