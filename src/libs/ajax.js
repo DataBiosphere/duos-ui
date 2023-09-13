@@ -301,12 +301,6 @@ export const DataSet = {
     return await res.json();
   },
 
-  getDatasetsAsCustodian: async () => {
-    const url = `${await getApiUrl()}/api/dataset/v2?asCustodian=true`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   getDatasetsByIds: async (ids) => {
     const url = `${await getApiUrl()}/api/dataset/batch?ids=${ids.join('&ids=')}`;
     const res = await fetchOk(url, Config.authOpts());
