@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import {isNil} from 'lodash/fp';
+import {concat, isNil, join} from 'lodash/fp';
 
 
 export default function DataSubmitterDatasetsTable(props) {
@@ -71,13 +71,15 @@ export default function DataSubmitterDatasetsTable(props) {
   const redrawRows = useCallback(() => {
     const rows = datasets.map((dataset) => {
       const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
+      const primaryCodes = dataset.dataUse?.primary.map(du => du.code);
+      const secondaryCodes = dataset.dataUse?.secondary.map(du => du.code);
       return {
         datasetIdentifier: dataset.datasetIdentifier,
         datasetName: dataset.datasetName,
         dataSubmitter: dataset?.createUserDisplayName,
         datasetCustodians: '',
         dac: dataset.dacName,
-        dataUse: '',
+        dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
         actions: ''
       };

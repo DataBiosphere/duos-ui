@@ -39,7 +39,6 @@ export default function DataSubmitterConsole() {
           }
         }
       };
-
       setIsLoading(true);
       try {
         const myDatasets = await DataSet.searchDatasetIndex(query);
