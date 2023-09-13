@@ -4,6 +4,7 @@ import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
 import {concat, isNil, join} from 'lodash/fp';
+import Button from '@mui/material/Button';
 
 
 export default function DataSubmitterDatasetsTable(props) {
@@ -73,6 +74,14 @@ export default function DataSubmitterDatasetsTable(props) {
       const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
       const primaryCodes = dataset.dataUse?.primary.map(du => du.code);
       const secondaryCodes = dataset.dataUse?.secondary.map(du => du.code);
+      const editButton = (status === 'Accepted') ?
+        <div/> :
+        <div>
+          <Button
+            onClick={() => {}}>
+            Edit
+          </Button>
+        </div>;
       return {
         datasetIdentifier: dataset.datasetIdentifier,
         datasetName: dataset.datasetName,
@@ -81,7 +90,7 @@ export default function DataSubmitterDatasetsTable(props) {
         dac: dataset.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
-        actions: ''
+        actions: editButton
       };
     });
     setRows(rows);
