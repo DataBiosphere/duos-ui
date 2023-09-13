@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import {isNil, filter, first} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 
 
 export default function DataSubmitterDatasetsTable(props) {
@@ -63,7 +63,6 @@ export default function DataSubmitterDatasetsTable(props) {
     }
   ];
 
-  const [dacs, setDacs] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
@@ -72,26 +71,23 @@ export default function DataSubmitterDatasetsTable(props) {
   const redrawRows = useCallback(() => {
     const rows = datasets.map((dataset) => {
       const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
-      const dac = isNil(dataset.dacId) ? null : first(filter({dacId: dataset.dacId})(dacs));
-      const dacName = isNil(dac) ? '' : dac.name;
       return {
         datasetIdentifier: dataset.datasetIdentifier,
-        datasetName: dataset.name,
-        dataSubmitter: dataset?.createUser?.displayName,
+        datasetName: dataset.datasetName,
+        dataSubmitter: dataset?.createUserDisplayName,
         datasetCustodians: '',
-        dac: dacName,
+        dac: dataset.dacName,
         dataUse: '',
         status: status,
         actions: ''
       };
     });
     setRows(rows);
-  }, [dacs, datasets]);
+  }, [datasets]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        setDacs(props.dacs);
         setDatasets(props.datasets);
         setIsLoading(props.isLoading);
         redrawRows();

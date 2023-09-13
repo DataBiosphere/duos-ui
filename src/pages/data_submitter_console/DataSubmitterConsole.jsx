@@ -5,12 +5,12 @@ import {Link} from 'react-router-dom';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
 import SearchBar from '../../components/SearchBar';
-import {DAC, DataSet} from '../../libs/ajax';
+import {DataSet} from '../../libs/ajax';
 import DataSubmitterDatasetsTable from './DataSubmitterDatasetsTable';
+import {Storage} from '../../libs/storage';
 
 export default function DataSubmitterConsole() {
 
-  const [dacs, setDacs] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,15 +18,31 @@ export default function DataSubmitterConsole() {
 
   useEffect(() => {
     const init = async () => {
+      const user = Storage.getCurrentUser();
+      const query = {
+        'from': 0,
+        'size': 10000,
+        'query': {
+          'bool': {
+            'must': [
+              {
+                'match': {
+                  '_type': 'dataset'
+                }
+              },
+              {
+                'term': {
+                  'createUserId': { 'value': user.userId }
+                }
+              }
+            ]
+          }
+        }
+      };
+
       setIsLoading(true);
       try {
-        const dacList = await DAC.list(false);
-        setDacs(dacList);
-      } catch (error) {
-        Notifications.showError({text: 'Error initializing data access committees'});
-      }
-      try {
-        const myDatasets = await DataSet.getDatasetsAsCustodian();
+        const myDatasets = await DataSet.searchDatasetIndex(query);
         setDatasets(myDatasets);
         setFilteredList(myDatasets);
       } catch (error) {
@@ -109,7 +125,7 @@ export default function DataSubmitterConsole() {
         marginTop: 10,
         marginLeft: 25
       }}>
-        <DataSubmitterDatasetsTable dacs={dacs} datasets={filteredList} isLoading={isLoading}/>
+        <DataSubmitterDatasetsTable datasets={filteredList} isLoading={isLoading}/>
       </div>
     </div>
   );
