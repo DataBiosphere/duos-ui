@@ -109,7 +109,7 @@ export default function DataSubmitterDatasetsTable(props) {
     init();
   }, [props, redrawRows]);
 
-  const sortableTable = <SortableTable headCells={columns} rows={rows}/>;
+  const sortableTable = <SortableTable headCells={columns} rows={rows} defaultSort={columns[0].id}/>;
 
   return isLoading ? spinner : sortableTable;
 }
