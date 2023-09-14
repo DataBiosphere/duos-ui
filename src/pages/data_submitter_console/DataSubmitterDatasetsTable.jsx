@@ -91,11 +91,12 @@ export default function DataSubmitterDatasetsTable(props) {
             Edit
           </Button>
         </div>;
+      const custodians = join(', ')(term.study?.dataCustodianEmail);
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
         dataSubmitter: term?.createUserDisplayName,
-        datasetCustodians: '',
+        datasetCustodians: custodians,
         dac: term.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,

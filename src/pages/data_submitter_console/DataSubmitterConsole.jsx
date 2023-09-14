@@ -31,8 +31,30 @@ export default function DataSubmitterConsole() {
                 }
               },
               {
-                'term': {
-                  'createUserId': { 'value': user.userId }
+                'bool': {
+                  'should': [
+                    {
+                      'term': {
+                        'createUserId': {
+                          'value': user.userId
+                        }
+                      }
+                    },
+                    {
+                      'term': {
+                        'study.dataSubmitterId': {
+                          'value': user.userId
+                        }
+                      }
+                    },
+                    {
+                      'term': {
+                        'study.dataCustodianEmail': {
+                          'value': user.email
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             ]
