@@ -64,17 +64,17 @@ export default function DataSubmitterDatasetsTable(props) {
     }
   ];
 
-  const [datasets, setDatasets] = useState([]);
+  const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback(() => {
-    const rows = datasets.map((dataset) => {
-      const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
-      const primaryCodes = dataset.dataUse?.primary.map(du => du.code);
-      const secondaryCodes = dataset.dataUse?.secondary.map(du => du.code);
-      const editLink = isNil(dataset.study?.studyId) ? '/dataset_update/' + dataset.datasetId : '/study_update/' + dataset.study.studyId;
+    const rows = terms.map((term) => {
+      const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
+      const primaryCodes = term.dataUse?.primary.map(du => du.code);
+      const secondaryCodes = term.dataUse?.secondary.map(du => du.code);
+      const editLink = isNil(term.study?.studyId) ? '/dataset_update/' + term.datasetId : '/study_update/' + term.study.studyId;
       const editButton = (status === 'Accepted') ?
         <div/> :
         <div>
@@ -92,23 +92,23 @@ export default function DataSubmitterDatasetsTable(props) {
           </Button>
         </div>;
       return {
-        datasetIdentifier: dataset.datasetIdentifier,
-        datasetName: dataset.datasetName,
-        dataSubmitter: dataset?.createUserDisplayName,
+        datasetIdentifier: term.datasetIdentifier,
+        datasetName: term.datasetName,
+        dataSubmitter: term?.createUserDisplayName,
         datasetCustodians: '',
-        dac: dataset.dacName,
+        dac: term.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
         actions: editButton
       };
     });
     setRows(rows);
-  }, [datasets]);
+  }, [terms]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        setDatasets(props.datasets);
+        setTerms(props.terms);
         setIsLoading(props.isLoading);
         redrawRows();
       } catch (error) {

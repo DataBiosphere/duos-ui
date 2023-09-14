@@ -460,6 +460,37 @@ export const getSearchFilterFunctions = () => {
           includes(loweredTerm, toLower(dataset.codeList)) ||
           includes(loweredTerm, toLower(status));
     }, targetList),
+    datasetTerms: (term, targetList) => filter(datasetTerm => {
+      /**
+       * This filter function is intended for Dataset Index Terms
+       */
+      const loweredTerm = toLower(term);
+      // Approval status
+      const status = !isNil(datasetTerm.dacApproval)
+        ? datasetTerm.dacApproval
+          ? 'accepted'
+          : 'rejected'
+        : 'pending';
+      const primaryCodes = datasetTerm.dataUse?.primary.map(du => du.code);
+      const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code);
+      const codes = join(', ')(concat(primaryCodes)(secondaryCodes));
+      const dataTypes = join(', ')(datasetTerm.study?.dataTypes);
+      return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
+          includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
+          includes(loweredTerm, toLower(datasetTerm.dacName)) ||
+          includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
+          includes(loweredTerm, toLower(codes)) ||
+          includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||
+          includes(loweredTerm, toLower(datasetTerm.url)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.description)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail)) ||
+          includes(loweredTerm, toLower(dataTypes)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.phenotype)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.piName)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.species)) ||
+          includes(loweredTerm, toLower(datasetTerm.study?.studyName)) ||
+          includes(loweredTerm, toLower(status));
+    }, targetList),
   };
 };
 

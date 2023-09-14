@@ -11,8 +11,8 @@ import {Storage} from '../../libs/storage';
 
 export default function DataSubmitterConsole() {
 
-  const [datasets, setDatasets] = useState([]);
-  const [filteredList, setFilteredList] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [filteredTerms, setFilteredTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
 
@@ -41,9 +41,9 @@ export default function DataSubmitterConsole() {
       };
       setIsLoading(true);
       try {
-        const myDatasets = await DataSet.searchDatasetIndex(query);
-        setDatasets(myDatasets);
-        setFilteredList(myDatasets);
+        const queryTerms = await DataSet.searchDatasetIndex(query);
+        setTerms(queryTerms);
+        setFilteredTerms(queryTerms);
       } catch (error) {
         Notifications.showError({text: 'Error initializing datasets table'});
       }
@@ -54,10 +54,10 @@ export default function DataSubmitterConsole() {
 
   const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
     searchTerms,
-    datasets,
-    getSearchFilterFunctions().datasets,
-    setFilteredList
-  ), [datasets]);
+    terms,
+    getSearchFilterFunctions().datasetTerms,
+    setFilteredTerms
+  ), [terms]);
 
   const addDatasetButtonStyle = {
     color: Theme.palette.link,
@@ -124,7 +124,7 @@ export default function DataSubmitterConsole() {
         marginTop: 10,
         marginLeft: 25
       }}>
-        <DataSubmitterDatasetsTable datasets={filteredList} isLoading={isLoading}/>
+        <DataSubmitterDatasetsTable terms={filteredTerms} isLoading={isLoading}/>
       </div>
     </div>
   );
