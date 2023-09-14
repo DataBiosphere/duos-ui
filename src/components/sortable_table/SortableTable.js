@@ -51,7 +51,6 @@ import Paper from '@mui/material/Paper';
 import { ThemeProvider } from '@mui/material/styles';
 import EnhancedTableHead from './EnhancedTableHead';
 import { theme } from './Themes';
-import {isNil} from 'lodash/fp';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -86,11 +85,12 @@ export default function SortableTable(props) {
   const {
     rows,
     headCells,
-    defaultSort
+    defaultSort = 'darCode',
+    cellAlignment = 'center'
   } = props;
 
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState(isNil(props.defaultSort) ? 'darCode' : props.defaultSort);
+  const [orderBy, setOrderBy] = useState(defaultSort);
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -189,7 +189,7 @@ export default function SortableTable(props) {
                           id={labelId}
                           scope='row'
                           padding='none'
-                          align='center'>
+                          align={cellAlignment}>
                           {row[category]}
                         </TableCell>
                       ))}
