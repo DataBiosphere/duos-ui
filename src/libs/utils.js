@@ -479,6 +479,7 @@ export const getSearchFilterFunctions = () => {
       const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code);
       const codes = join(', ')(concat(primaryCodes)(secondaryCodes));
       const dataTypes = join(', ')(datasetTerm.study?.dataTypes);
+      const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
       return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
         includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
         includes(loweredTerm, toLower(datasetTerm.dacName)) ||
@@ -489,6 +490,7 @@ export const getSearchFilterFunctions = () => {
         includes(loweredTerm, toLower(datasetTerm.study?.description)) ||
         includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail)) ||
         includes(loweredTerm, toLower(dataTypes)) ||
+        includes(loweredTerm, toLower(custodians)) ||
         includes(loweredTerm, toLower(datasetTerm.study?.phenotype)) ||
         includes(loweredTerm, toLower(datasetTerm.study?.piName)) ||
         includes(loweredTerm, toLower(datasetTerm.study?.species)) ||
