@@ -74,11 +74,20 @@ export default function DataSubmitterDatasetsTable(props) {
       const status = isNil(dataset.dacApproval) ? 'Pending' : (dataset.dacApproval ? 'Accepted' : 'Rejected');
       const primaryCodes = dataset.dataUse?.primary.map(du => du.code);
       const secondaryCodes = dataset.dataUse?.secondary.map(du => du.code);
+      const editLink = isNil(dataset.study?.studyId) ? '/dataset_update/' + dataset.datasetId : '/study_update/' + dataset.study.studyId;
       const editButton = (status === 'Accepted') ?
         <div/> :
         <div>
           <Button
-            onClick={() => {}}>
+            href={editLink}
+            sx={{
+              fontSize: 14,
+              border: '1px solid #0948B7',
+              borderRadius: '4px',
+              height: 25,
+              cursor: 'pointer',
+              color: '#0948B7',
+            }}>
             Edit
           </Button>
         </div>;
