@@ -126,21 +126,13 @@ export const headerTabsConfig = [
     isRendered: (user) => user.isMember
   },
   {
-    label: 'DS Console',
-    link: '/data_submitter_console',
-    search: 'data_submitter_console',
-    children: [
-      { label: 'My Submitted Datasets', link: '/data_submitter_console' }
-    ],
-    isRendered: (user) => user.isDataSubmitter
-  },
-  {
     label: 'Researcher Console',
     link: '/dataset_catalog',
     search: 'dataset_catalog',
     children: [
       { label: 'Data Catalog', link: '/dataset_catalog' },
-      { label: 'DAR Requests', link: '/researcher_console' }
+      { label: 'DAR Requests', link: '/researcher_console' },
+      { label: 'Submitted Datasets', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
     ],
     isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }
@@ -321,7 +313,10 @@ const NavigationTabsComponent = (props) => {
         const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ?
           true :
           tab.isRendered();
-        return isRendered ? h(Tab, {
+        const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser))) ?
+          true :
+          tab.isRenderedForUser(currentUser);
+        return (isRendered && isRenderedForUser) ? h(Tab, {
           key: `${tab.link}_${tabIndex}`,
           label: tab.label,
           style: selectedSubTab === tabIndex ? styles.subTabActive : styles.subTab,

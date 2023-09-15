@@ -6,10 +6,10 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
 import SearchBar from '../../components/SearchBar';
 import {DataSet} from '../../libs/ajax';
-import DataSubmitterDatasetsTable from './DataSubmitterDatasetsTable';
+import DatasetSubmissionsTable from './DatasetSubmissionsTable';
 import {Storage} from '../../libs/storage';
 
-export default function DataSubmitterConsole() {
+export default function DatasetSubmissions() {
 
   const [terms, setTerms] = useState([]);
   const [filteredTerms, setFilteredTerms] = useState([]);
@@ -146,7 +146,7 @@ export default function DataSubmitterConsole() {
         marginTop: 10,
         marginLeft: 25
       }}>
-        <DataSubmitterDatasetsTable terms={filteredTerms} isLoading={isLoading}/>
+        <DatasetSubmissionsTable terms={filteredTerms} isLoading={isLoading}/>
       </div>
     </div>
   );

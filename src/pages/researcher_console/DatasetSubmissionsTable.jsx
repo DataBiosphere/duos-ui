@@ -7,7 +7,7 @@ import {concat, isNil, join} from 'lodash/fp';
 import Button from '@mui/material/Button';
 
 
-export default function DataSubmitterDatasetsTable(props) {
+export default function DatasetSubmissionsTable(props) {
 
   const spinner = <div style={{textAlign: 'center', height: '44', width: '180'}}>
     <img src={loadingIndicator} alt={'Loading'}/>
