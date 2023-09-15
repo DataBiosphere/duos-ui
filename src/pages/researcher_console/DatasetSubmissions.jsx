@@ -14,11 +14,13 @@ export default function DatasetSubmissions() {
   const [terms, setTerms] = useState([]);
   const [filteredTerms, setFilteredTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState({});
   const searchRef = useRef('');
 
   useEffect(() => {
     const init = async () => {
       const user = Storage.getCurrentUser();
+      setCurrentUser(user);
       const query = {
         'from': 0,
         'size': 10000,
@@ -99,6 +101,14 @@ export default function DatasetSubmissions() {
     marginTop: 10
   };
 
+  const addDatasetButton = (currentUser.libraryCards?.length > 0)
+    ? <button style={addDatasetButtonStyle}>
+      <AddCircleOutlineIcon/><Link to={'/data_submission_form'} style={{marginLeft: 5}}>Add Dataset</Link>
+    </button>
+    : <button style={Object.assign({}, addDatasetButtonStyle, {cursor: 'not-allowed'})} disabled={true}>
+      <AddCircleOutlineIcon/><span style={{marginLeft: 5}}>Add Dataset</span>
+    </button>;
+
   return (
     <div style={Styles.PAGE}>
       <div
@@ -128,11 +138,7 @@ export default function DatasetSubmissions() {
               style={{fontFamily: 'Montserrat', fontSize: '1.6rem'}}>
               View the status of datasets registered in DUOS
             </div>
-            <div>
-              <button style={addDatasetButtonStyle}>
-                <AddCircleOutlineIcon/><Link to={'/data_submission_form'} style={{marginLeft: 5}}>Add Dataset</Link>
-              </button>
-            </div>
+            <div>{addDatasetButton}</div>
           </div>
         </div>
         <div className={'right-header-section'} style={{width: '50%', display: 'flex', justifyContent: 'flex-end'}}>
