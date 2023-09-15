@@ -72,9 +72,9 @@ export default function DataSubmitterDatasetsTable(props) {
   const redrawRows = useCallback(() => {
     const rows = terms.map((term) => {
       const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
-      const primaryCodes = term.dataUse?.primary.map(du => du.code);
-      const secondaryCodes = term.dataUse?.secondary.map(du => du.code);
-      const editLink = isNil(term.study?.studyId) ? '/dataset_update/' + term.datasetId : '/study_update/' + term.study.studyId;
+      const primaryCodes = term.dataUse?.primary?.map(du => du.code);
+      const secondaryCodes = term.dataUse?.secondary?.map(du => du.code);
+      const editLink = (term.study?.studyId) ? '/study_update/' + term.study.studyId : '/dataset_update/' + term.datasetId;
       const editButton = (status === 'Accepted') ?
         <div/> :
         <div>
@@ -95,7 +95,7 @@ export default function DataSubmitterDatasetsTable(props) {
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
-        dataSubmitter: term?.createUserDisplayName,
+        dataSubmitter: term.createUserDisplayName,
         datasetCustodians: custodians,
         dac: term.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
