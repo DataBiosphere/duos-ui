@@ -25,7 +25,7 @@ const tableBody = {
 };
 
 const canApplyForDataset = (dataset) => {
-  return dataset.active && !isNil(dataset.dacId);
+  return !isNil(dataset.dacId);
 };
 
 const extractDatasetProp = (propertyName, dataset) => {
@@ -335,6 +335,7 @@ export default function DatasetCatalog(props) {
   };
 
   const checkSingleRow = (dataset) => (e) => {
+    console.log(dataset);
     const checked = isNil(e.target.checked) ? false : e.target.checked;
     const selectedDatasets = map(row => {
       if (row.dataSetId === dataset.dataSetId) {
@@ -346,6 +347,7 @@ export default function DatasetCatalog(props) {
     })(datasetList);
 
     // Update state
+    console.log(e.target);
     setDatasetList(selectedDatasets);
   };
 
