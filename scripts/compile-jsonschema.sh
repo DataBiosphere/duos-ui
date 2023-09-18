@@ -50,7 +50,7 @@ download_and_compile_schema() {
   curl -s -S -X 'GET'  "$1/schemas/dataset-registration/v1"  -H 'accept: application/json' -o ./src/assets/schemas/DataRegistrationV1.json
 
   # Generate the data submission schema validation code
-  ajv compile -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
+  ajv compile --code-lines -s ./src/assets/schemas/DataRegistrationV1.json -o ./src/assets/schemas/DataRegistrationV1Validation.js --spec draft2019 -c ajv-formats --strict false --all-errors
 
   # Prevent linting errors (minified file)
   prepend_text "/* eslint-disable */" ./src/assets/schemas/DataRegistrationV1Validation.js
