@@ -25,7 +25,7 @@ const tableBody = {
 };
 
 const canApplyForDataset = (dataset) => {
-  return !isNil(dataset.dacId);
+  return !isNil(dataset.dacId) && dataset.dacApproval;
 };
 
 const extractDatasetProp = (propertyName, dataset) => {
