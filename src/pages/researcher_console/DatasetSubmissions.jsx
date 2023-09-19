@@ -8,6 +8,7 @@ import SearchBar from '../../components/SearchBar';
 import {DataSet} from '../../libs/ajax';
 import DatasetSubmissionsTable from './DatasetSubmissionsTable';
 import {Storage} from '../../libs/storage';
+import styles from './DatasetTerms.module.css';
 
 export default function DatasetSubmissions() {
 
@@ -111,14 +112,7 @@ export default function DatasetSubmissions() {
 
   return (
     <div style={Styles.PAGE}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          width: '112%',
-          marginLeft: '-6%',
-          padding: '0 2.5%'
-        }}>
+      <div className={styles['submitted-datasets-header']}>
         <div className={'left-header-section'} style={Styles.LEFT_HEADER_SECTION}>
           <div
             style={Styles.ICON_CONTAINER}>
@@ -141,17 +135,13 @@ export default function DatasetSubmissions() {
             <div>{addDatasetButton}</div>
           </div>
         </div>
-        <div className={'right-header-section'} style={{width: '50%', display: 'flex', justifyContent: 'flex-end'}}>
+        <div className={`right-header-section ${styles['search-box-container']}`}>
           <SearchBar
             handleSearchChange={handleSearchChange}
             searchRef={searchRef}/>
         </div>
       </div>
-      <div style={{
-        width: '100%',
-        marginTop: 10,
-        marginLeft: 25
-      }}>
+      <div className={styles['term-table-container']}>
         <DatasetSubmissionsTable terms={filteredTerms} isLoading={isLoading}/>
       </div>
     </div>

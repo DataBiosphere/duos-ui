@@ -5,6 +5,7 @@ import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
 import {concat, isNil, join} from 'lodash/fp';
 import Button from '@mui/material/Button';
+import styles from './DatasetTerms.module.css';
 
 
 export default function DatasetSubmissionsTable(props) {
@@ -80,14 +81,7 @@ export default function DatasetSubmissionsTable(props) {
         <div>
           <Button
             href={editLink}
-            sx={{
-              fontSize: 14,
-              border: '1px solid #0948B7',
-              borderRadius: '4px',
-              height: 25,
-              cursor: 'pointer',
-              color: '#0948B7',
-            }}>
+            className={styles['action-button']}>
             Edit
           </Button>
         </div>;
