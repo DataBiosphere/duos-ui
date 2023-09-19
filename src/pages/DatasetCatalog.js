@@ -335,7 +335,6 @@ export default function DatasetCatalog(props) {
   };
 
   const checkSingleRow = (dataset) => (e) => {
-    console.log(dataset);
     const checked = isNil(e.target.checked) ? false : e.target.checked;
     const selectedDatasets = map(row => {
       if (row.dataSetId === dataset.dataSetId) {
@@ -347,7 +346,6 @@ export default function DatasetCatalog(props) {
     })(datasetList);
 
     // Update state
-    console.log(e.target);
     setDatasetList(selectedDatasets);
   };
 
