@@ -159,7 +159,7 @@ export const StudyUpdateForm = (props) => {
     }
 
     formData?.consentGroups?.forEach((cg) => {
-      const validCgFields = [cg.dataLocation, cg.url, cg.fileTypes, cg.numberOfParticipants];
+      const validCgFields = [cg.dataLocation, cg.url, cg.fileTypes, cg.numberOfParticipants, cg.dataAccessCommitteeId];
 
       if(!isNil(cg.datasetId)){
         for (const key of Object.keys(cg)) {
