@@ -39,7 +39,7 @@ Step 3: Pass both arrays into the headCells and rows props
 
 */
 
-import React from 'react';
+import React, {useState, useMemo} from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -84,14 +84,16 @@ export default function SortableTable(props) {
 
   const {
     rows,
-    headCells
+    headCells,
+    defaultSort = 'darCode',
+    cellAlignment = 'center'
   } = props;
 
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('darCode');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState(defaultSort);
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -135,7 +137,7 @@ export default function SortableTable(props) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
+  const visibleRows = useMemo(
     () =>
       stableSort(rows, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
@@ -187,7 +189,7 @@ export default function SortableTable(props) {
                           id={labelId}
                           scope='row'
                           padding='none'
-                          align='center'>
+                          align={cellAlignment}>
                           {row[category]}
                         </TableCell>
                       ))}

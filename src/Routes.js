@@ -13,7 +13,7 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import PrivacyPolicy from './pages/PrivacyPolicy';
-import ResearcherConsole from './pages/ResearcherConsole';
+import ResearcherConsole from './pages/researcher_console/ResearcherConsole';
 import UserProfile from './pages/user_profile/UserProfile';
 import RequestRole from './pages/user_profile/RequestRole';
 import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
@@ -33,6 +33,7 @@ import AdminManageDarCollections from './pages/AdminManageDarCollections';
 import {AdminEditUser} from './pages/AdminEditUser';
 import ChairConsole from './pages/ChairConsole';
 import MemberConsole from './pages/MemberConsole';
+import DatasetSubmissions from './pages/researcher_console/DatasetSubmissions';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import {HealthCheck} from './pages/HealthCheck';
@@ -87,6 +88,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
+    <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_update/:datasetId" component={DatasetUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

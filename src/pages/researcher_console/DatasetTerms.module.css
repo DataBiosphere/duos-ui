@@ -1,0 +1,28 @@
+.submitted-datasets-header {
+    display: flex;
+    justify-content: space-between;
+    width: 112%;
+    margin-left: -6%;
+    padding: 0 2.5%;
+}
+
+.term-table-container {
+    width: 100%;
+    margin-top: 10px;
+    margin-left: 22px;
+}
+
+.search-box-container {
+    width: 50%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.action-button {
+    font-size: 14px;
+    border: 1px solid #0948B7;
+    border-radius: 4px;
+    height: 25px;
+    cursor: pointer;
+    color: #0948B7;
+}
