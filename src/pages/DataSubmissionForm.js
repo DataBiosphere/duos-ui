@@ -18,6 +18,7 @@ import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 // schama changes, then run `npm run genschemas` to regenerate this code
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
+import UsgOmbText from '../components/UsgOmbText';
 
 export const DataSubmissionForm = (props) => {
   const {
@@ -152,36 +153,39 @@ export const DataSubmissionForm = (props) => {
   };
 
 
-  return !failedInit && <div style={Styles.PAGE} >
-    <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-      <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION} >
-        <div style={Styles.ICON_CONTAINER}>
-          <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} />
-        </div>
-        <div style={Styles.HEADER_CONTAINER}>
-          <div style={Styles.TITLE}>
-            Study Registration Form
-            <div style={Styles.MEDIUM_DESCRIPTION}>
-            Submit new datasets to DUOS
+  return <div>
+    {!failedInit && <div style={Styles.PAGE} >
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+        <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION} >
+          <div style={Styles.ICON_CONTAINER}>
+            <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div style={Styles.TITLE}>
+              Study Registration Form
+              <div style={Styles.MEDIUM_DESCRIPTION}>
+                Submit new datasets to DUOS
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <form style={{ margin: 'auto', maxWidth: 800}}>
+      <form style={{ margin: 'auto', maxWidth: 800}}>
 
 
-      <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NIHAdministrativeInformation formData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <NIHDataManagement formData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode}/>
+        <DataSubmissionStudyInformation onChange={onChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+        <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+        <NIHAdministrativeInformation formData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+        <NIHDataManagement formData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
+        <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode}/>
 
-      <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
-        <a className='button button-white' onClick={submit}>Submit</a>
-      </div>
-    </form>
+        <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
+          <a className='button button-white' onClick={submit}>Submit</a>
+        </div>
+      </form>
+    </div>}
+    <UsgOmbText />
   </div>;
 };
 

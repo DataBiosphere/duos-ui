@@ -24,6 +24,7 @@ import {
 } from '../../utils/darFormUtils';
 import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
+import UsgOmbText from '../../components/UsgOmbText';
 
 const ApplicationTabs = [
   { name: 'Researcher Information' },
@@ -471,41 +472,16 @@ const DataAccessRequestApplication = (props) => {
                 Back
               </a>
             </div>
-          }
-        </div>
-      </div>
-
-      <div style={{ clear: 'both' }} />
-      <form name='form' noValidate={true} className='forms-v2'>
-        <div className='multi-step-buttons-container'>
-          <Tabs
-            value={step}
-            variant='scrollable'
-            scrollButtons='auto'
-            orientation='vertical'
-            TabIndicatorProps={{
-              style: { background: '#2BBD9B' }
-            }}
-            onChange={(event, step) => {
-              goToStep(step);
-            }}
-          >
-            {
-              applicationTabs.map((tabConfig, index) => {
-                const { name, showStep = true } = tabConfig;
-                return <Tab
-                  key={`step-${index}-${name}`}
-                  label={<div>
-                    {showStep && <div className='step'>{`Step ${index + 1}`}</div>}
-                    <div className='title'>{name}</div>
-                  </div>}
-                  value={index + 1}
-                />;
-              })
+            {formData.darCode !== null &&
+              <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
+                <a id='btn_back' onClick={back} className='btn-primary btn-back'>
+                  <i className='glyphicon glyphicon-chevron-left' />
+                  Back
+                </a>
+              </div>
             }
-          </Tabs>
+          </div>
         </div>
-
         <div id='form-views'>
           <ConfirmationDialog
             title='Save changes?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
@@ -587,15 +563,37 @@ const DataAccessRequestApplication = (props) => {
                 save={() => setShowDialogSave(true)}
               /> : <div />}
             </div>
-
-            {isAttested &&
               <div className='step-container'>
-                <DucAddendum doSubmit={doSubmit} save={() => setShowDialogSave(true)} isLoading={isLoading} formData={formData} datasets={datasets} dataUseTranslations={dataUseTranslations} />
+                <ResearchPurposeStatement
+                  darCode={formData.darCode}
+                  readOnlyMode={isAttested}
+                  validation={formValidation.rusErrors}
+                  formValidationChange={(val) => formValidationChange('rusErrors', val)}
+                  formFieldChange={formFieldChange}
+                  formData={formData}
+                />
               </div>
-            }
+
+              <div className='step-container'>
+                <DataUseAgreements
+                  darCode={formData.darCode}
+                  cancelAttest={() => setIsAttested(false)}
+                  isAttested={isAttested}
+                  attest={attemptSubmit}
+                  save={() => setShowDialogSave(true)}
+                />
+              </div>
+
+              {isAttested &&
+                <div className='step-container'>
+                  <DucAddendum doSubmit={doSubmit} save={() => setShowDialogSave(true)} isLoading={isLoading} formData={formData} datasets={datasets} dataUseTranslations={dataUseTranslations} />
+                </div>
+              }
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
+      <UsgOmbText />
     </div>
   );
 };

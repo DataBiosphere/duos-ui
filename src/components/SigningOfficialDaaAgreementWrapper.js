@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { spinnerService } from '../libs/spinner-service';
 import { isNil, isNull } from 'lodash';
 import { Styles } from '../libs/theme';
+import UsgOmbText from './UsgOmbText';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
@@ -98,10 +99,14 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
 // Wraps component and ensures that SO agrees to the
 // Broad and NIH agreements before proceeding to the given
 // component.
-export const ensureSoHasDaaAcknowledgement = (component, isDataSubmitterTab=false) => {
-  return (props) => h(SigningOfficialDaaAgreementWrapper, {isDataSubmitterTab}, [
-    h(component, props),
-  ]);
+export const ensureSoHasDaaAcknowledgement = (component, isLibraryCardIssueTable = false, isDataSubmitterTab = false) => {
+  return (props) => (
+    div({}, [
+      h(SigningOfficialDaaAgreementWrapper, { isDataSubmitterTab }, [
+        h(component, props),
+      ]),
+      isLibraryCardIssueTable && UsgOmbText()
+    ]));
 };
 
 export default SigningOfficialDaaAgreementWrapper;
