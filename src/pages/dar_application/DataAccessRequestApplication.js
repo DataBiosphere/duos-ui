@@ -451,7 +451,7 @@ const DataAccessRequestApplication = (props) => {
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
-    <div className='container' style={{ paddingBottom: '2%' }}>
+    <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
       <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
         <div className='row no-margin'>
           <Notification notificationData={notificationData} />
@@ -460,10 +460,11 @@ const DataAccessRequestApplication = (props) => {
               'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
             <PageHeading
               title='Data Access Request Application'
-              description='Please complete the fields below to request access to data.'
+              description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
             />
           </div>
           {formData.darCode !== null &&
+            !props.readOnlyMode &&
             <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
               <a id='btn_back' onClick={back} className='btn-primary btn-back'>
                 <i className='glyphicon glyphicon-chevron-left' />
@@ -528,6 +529,7 @@ const DataAccessRequestApplication = (props) => {
               <ResearcherInfo
                 completed={!isNil(get('institutionId', researcher))}
                 readOnlyMode={props.readOnlyMode || isAttested}
+                includeInstructions={!props.readOnlyMode}
                 darCode={formData.darCode}
                 formData={formData}
                 validation={formValidation.researcherInfoErrors}
@@ -550,6 +552,7 @@ const DataAccessRequestApplication = (props) => {
               <DataAccessRequest
                 formData={formData}
                 readOnlyMode={props.readOnlyMode || isAttested}
+                includeInstructions={!props.readOnlyMode}
                 datasets={datasets}
                 validation={formValidation.darErrors}
                 formValidationChange={(val) => formValidationChange('darErrors', val)}
@@ -576,13 +579,13 @@ const DataAccessRequestApplication = (props) => {
             </div>
 
             <div className='step-container'>
-              <DataUseAgreements
+              {!props.readOnlyMode ? <DataUseAgreements
                 darCode={formData.darCode}
                 cancelAttest={() => setIsAttested(false)}
                 isAttested={isAttested}
                 attest={attemptSubmit}
                 save={() => setShowDialogSave(true)}
-              />
+              /> : <div />}
             </div>
 
             {isAttested &&

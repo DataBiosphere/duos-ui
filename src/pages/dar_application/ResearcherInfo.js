@@ -19,6 +19,7 @@ export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     readOnlyMode,
+    includeInstructions,
     completed,
     darCode,
     eRACommonsDestination,
@@ -85,8 +86,8 @@ export default function ResearcherInfo(props) {
         div({className: 'dar-application-row'}, [
           h3('1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')),
           span({ className: `${showNihValidationError ? 'errored' : 'default-color'}`, isRendered: formData.checkCollaborator !== true }, [
-            'Please authenticate with ',
-            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
+            includeInstructions ? ('Please authenticate with ',
+            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.') : ''
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
@@ -151,13 +152,13 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'internal-lab-staff'}, [
           h3('1.4 Internal Lab Staff'),
-          div(
+          includeInstructions ? div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
-            this data access request, including any that are downloaded or utilized in the cloud. 
-            please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
-            level here. If your DAR is approved, you will be responsible for the appropriate use of the 
+            this data access request, including any that are downloaded or utilized in the cloud.
+            Please do not list External Collaborators or Internal Collaborators at a PI or equivalent
+            level here. If your DAR is approved, you will be responsible for the appropriate use of the
             data by each individual listed in this section.`
-          ),
+          ) : div(),
           h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.labCollaborators,
@@ -173,7 +174,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'internal-collaborators'}, [
           h3('1.5 Internal Collaborators'),
-          div(
+          includeInstructions ? div(
             `Please list Internal Collaborators here. Internal Collaborators are defined as individuals
             who are not under the direct supervision of the PI (e.g., not a member of the PI's 
             laboratory) who assists with the PI's research project involving controlled-access data 
@@ -184,7 +185,7 @@ export default function ResearcherInfo(props) {
             Downloader/Approver status so that they may add their own relevant Internal Lab Staff. 
             Internal Collaborators will not be required to submit an independent DAR to collaborate 
             on this project.`
-          ),
+          ) : div(),
           h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.internalCollaborators,
@@ -364,7 +365,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'external-collaborators'}, [
           h3('1.9 External Collaborators'),
-          div(
+          !readOnlyMode ? div(
             `Please list External collaborators here. External Collaborators are not employees of the 
             Requesting PI's institution and/or do not work at the same location as the PI, and 
             consequently must be independently approved to access controlled-access data subject to 
@@ -374,7 +375,7 @@ export default function ResearcherInfo(props) {
             to collaborate on this project. External Collaborators will be able to add their Lab Staff, 
             as needed, via their independent DAR. Approval of this DAR does not indicate approval of 
             the External Collaborators listed.`
-          ),
+          ) : div(),
           h(CollaboratorList, {
             formFieldChange,
             collaborators: formData.externalCollaborators,
