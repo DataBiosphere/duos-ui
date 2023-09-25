@@ -153,7 +153,7 @@ export default function ApplicationInformation(props) {
   ];
 
   return (
-    div({className: '', style: {padding: '2% 3%', backgroundColor: 'white'}}, [
+    div({className: 'application-information-page', style: {padding: '2% 3%', backgroundColor: 'white'}}, [
       div({className: 'applicant-information-container', style: { margin: '0 0 2.5rem 0'}}, [
         div({className: 'applicant-information-subheader', style: styles.title}, ['Applicant Information']),
         div({className: 'information-row', style: styles.row}, [
