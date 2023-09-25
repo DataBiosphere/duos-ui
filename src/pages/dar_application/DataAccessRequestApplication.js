@@ -25,7 +25,6 @@ import {
 import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
-
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -286,7 +285,7 @@ const DataAccessRequestApplication = (props) => {
 
   const updateDraftResponse = async (formattedFormData, referenceId) => {
     let darPartialResponse;
-    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+    if (!isNil(referenceId) && !isEmpty(referenceId)) {
       darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId);
     } else {
       darPartialResponse = await DAR.postDarDraft(formattedFormData);
@@ -452,27 +451,21 @@ const DataAccessRequestApplication = (props) => {
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
-    <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
-      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
-        <div className='row no-margin'>
-          <Notification notificationData={notificationData} />
-          <div
-            className={(formData.darCode !== null ?
-              'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
-            <PageHeading
-              title='Data Access Request Application'
-              description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
-            />
-          </div>
-          {formData.darCode !== null &&
-            !props.readOnlyMode &&
-            <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
-              <a id='btn_back' onClick={back} className='btn-primary btn-back'>
-                <i className='glyphicon glyphicon-chevron-left' />
-                Back
-              </a>
+    <div>
+      <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
+        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+          <div className='row no-margin'>
+            <Notification notificationData={notificationData} />
+            <div
+              className={(formData.darCode !== null ?
+                'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
+              <PageHeading
+                title='Data Access Request Application'
+                description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
+              />
             </div>
             {formData.darCode !== null &&
+              !props.readOnlyMode &&
               <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
                 <a id='btn_back' onClick={back} className='btn-primary btn-back'>
                   <i className='glyphicon glyphicon-chevron-left' />
@@ -482,91 +475,103 @@ const DataAccessRequestApplication = (props) => {
             }
           </div>
         </div>
-        <div id='form-views'>
-          <ConfirmationDialog
-            title='Save changes?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
-            showModal={showDialogSave} action={{ label: 'Yes', handler: onSaveConfirmation }}
-          >
-            <div className='dialog-description'>
-              Are you sure you want to save this Data Access Request? Previous changes will be overwritten.
-            </div>
-          </ConfirmationDialog>
-          <ConfirmationDialog
-            title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color='' id='submitConfirmationModal'
-            showModal={showDialogSubmit} action={{ label: 'Yes', handler: onSubmitConfirmation }}
-          >
-            <div className='dialog-description'>
-              Are you sure you want to submit this Data Access Request? This cannot be undone.
-            </div>
-          </ConfirmationDialog>
 
-          <div className='dar-steps'>
-            <div className='step-container'>
-              <ResearcherInfo
-                completed={!isNil(get('institutionId', researcher))}
-                readOnlyMode={props.readOnlyMode || isAttested}
-                includeInstructions={!props.readOnlyMode}
-                darCode={formData.darCode}
-                formData={formData}
-                validation={formValidation.researcherInfoErrors}
-                formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
-                eRACommonsDestination={eRACommonsDestination}
-                formFieldChange={formFieldChange}
-                location={props.location}
-                nihValid={nihValid}
-                onNihStatusUpdate={setNihValid}
-                showNihValidationError={showNihValidationError}
-                researcher={researcher}
-                allSigningOfficials={allSigningOfficials}
-                setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
-                setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
-                setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
-              />
-            </div>
+        <div style={{ clear: 'both' }} />
+        <form name='form' noValidate={true} className='forms-v2'>
+          <div className='multi-step-buttons-container'>
+            <Tabs
+              value={step}
+              variant='scrollable'
+              scrollButtons='auto'
+              orientation='vertical'
+              TabIndicatorProps={{
+                style: { background: '#2BBD9B' }
+              }}
+              onChange={(event, step) => {
+                goToStep(step);
+              }}
+            >
+              {
+                applicationTabs.map((tabConfig, index) => {
+                  const { name, showStep = true } = tabConfig;
+                  return <Tab
+                    key={`step-${index}-${name}`}
+                    label={<div>
+                      {showStep && <div className='step'>{`Step ${index + 1}`}</div>}
+                      <div className='title'>{name}</div>
+                    </div>}
+                    value={index + 1}
+                  />;
+                })
+              }
+            </Tabs>
+          </div>
 
-            <div className='step-container'>
-              <DataAccessRequest
-                formData={formData}
-                readOnlyMode={props.readOnlyMode || isAttested}
-                includeInstructions={!props.readOnlyMode}
-                datasets={datasets}
-                validation={formValidation.darErrors}
-                formValidationChange={(val) => formValidationChange('darErrors', val)}
-                dataUseTranslations={dataUseTranslations}
-                formFieldChange={formFieldChange}
-                batchFormFieldChange={batchFormFieldChange}
-                uploadedCollaborationLetter={uploadedCollaborationLetter}
-                updateCollaborationLetter={updateCollaborationLetter}
-                uploadedIrbDocument={uploadedIrbDocument}
-                updateUploadedIrbDocument={updateIrbDocument}
-                setDatasets={setDatasets}
-              />
-            </div>
+          <div id='form-views'>
+            <ConfirmationDialog
+              title='Save changes?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color=''
+              showModal={showDialogSave} action={{ label: 'Yes', handler: onSaveConfirmation }}
+            >
+              <div className='dialog-description'>
+                Are you sure you want to save this Data Access Request? Previous changes will be overwritten.
+              </div>
+            </ConfirmationDialog>
+            <ConfirmationDialog
+              title='Submit Data Access Request?' disableOkBtn={disableOkBtn} disableNoBtn={disableOkBtn} color='' id='submitConfirmationModal'
+              showModal={showDialogSubmit} action={{ label: 'Yes', handler: onSubmitConfirmation }}
+            >
+              <div className='dialog-description'>
+                Are you sure you want to submit this Data Access Request? This cannot be undone.
+              </div>
+            </ConfirmationDialog>
 
-            <div className='step-container'>
-              <ResearchPurposeStatement
-                darCode={formData.darCode}
-                readOnlyMode={props.readOnlyMode || isAttested}
-                validation={formValidation.rusErrors}
-                formValidationChange={(val) => formValidationChange('rusErrors', val)}
-                formFieldChange={formFieldChange}
-                formData={formData}
-              />
-            </div>
+            <div className='dar-steps'>
+              <div className='step-container'>
+                <ResearcherInfo
+                  completed={!isNil(get('institutionId', researcher))}
+                  readOnlyMode={props.readOnlyMode || isAttested}
+                  includeInstructions={!props.readOnlyMode}
+                  darCode={formData.darCode}
+                  formData={formData}
+                  validation={formValidation.researcherInfoErrors}
+                  formValidationChange={(val) => formValidationChange('researcherInfoErrors', val)}
+                  eRACommonsDestination={eRACommonsDestination}
+                  formFieldChange={formFieldChange}
+                  location={props.location}
+                  nihValid={nihValid}
+                  onNihStatusUpdate={setNihValid}
+                  showNihValidationError={showNihValidationError}
+                  researcher={researcher}
+                  allSigningOfficials={allSigningOfficials}
+                  setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
+                  setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
+                  setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
+                />
+              </div>
 
-            <div className='step-container'>
-              {!props.readOnlyMode ? <DataUseAgreements
-                darCode={formData.darCode}
-                cancelAttest={() => setIsAttested(false)}
-                isAttested={isAttested}
-                attest={attemptSubmit}
-                save={() => setShowDialogSave(true)}
-              /> : <div />}
-            </div>
+              <div className='step-container'>
+                <DataAccessRequest
+                  formData={formData}
+                  readOnlyMode={props.readOnlyMode || isAttested}
+                  includeInstructions={!props.readOnlyMode}
+                  datasets={datasets}
+                  validation={formValidation.darErrors}
+                  formValidationChange={(val) => formValidationChange('darErrors', val)}
+                  dataUseTranslations={dataUseTranslations}
+                  formFieldChange={formFieldChange}
+                  batchFormFieldChange={batchFormFieldChange}
+                  uploadedCollaborationLetter={uploadedCollaborationLetter}
+                  updateCollaborationLetter={updateCollaborationLetter}
+                  uploadedIrbDocument={uploadedIrbDocument}
+                  updateUploadedIrbDocument={updateIrbDocument}
+                  setDatasets={setDatasets}
+                />
+              </div>
+
               <div className='step-container'>
                 <ResearchPurposeStatement
                   darCode={formData.darCode}
-                  readOnlyMode={isAttested}
+                  readOnlyMode={props.readOnlyMode || isAttested}
                   validation={formValidation.rusErrors}
                   formValidationChange={(val) => formValidationChange('rusErrors', val)}
                   formFieldChange={formFieldChange}
@@ -575,13 +580,13 @@ const DataAccessRequestApplication = (props) => {
               </div>
 
               <div className='step-container'>
-                <DataUseAgreements
+                {!props.readOnlyMode ? <DataUseAgreements
                   darCode={formData.darCode}
                   cancelAttest={() => setIsAttested(false)}
                   isAttested={isAttested}
                   attest={attemptSubmit}
                   save={() => setShowDialogSave(true)}
-                />
+                /> : <div />}
               </div>
 
               {isAttested &&
@@ -593,7 +598,7 @@ const DataAccessRequestApplication = (props) => {
           </div>
         </form>
       </div>
-      <UsgOmbText />
+      {!props.readOnlyMode ? <UsgOmbText /> : null}
     </div>
   );
 };
