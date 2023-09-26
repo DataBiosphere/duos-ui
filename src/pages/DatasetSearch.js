@@ -21,6 +21,11 @@ export const DatasetSearch = (props) => {
                 }
               },
               {
+                'match': {
+                  'submitter.institution.id': '150' // Broad Institute of MIT and Harvard
+                }
+              },
+              {
                 'exists': {
                   'field': 'study'
                 }
