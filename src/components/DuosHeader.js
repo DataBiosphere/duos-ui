@@ -131,6 +131,7 @@ export const headerTabsConfig = [
     search: 'dataset_catalog',
     children: [
       { label: 'Data Catalog', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
       { label: 'Submitted Datasets', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
     ],

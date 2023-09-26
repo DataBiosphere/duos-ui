@@ -3,9 +3,32 @@ import { useEffect, useState } from 'react';
 import { Notifications } from '../libs/utils';
 import { DataSet } from '../libs/ajax';
 import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
+import broadIcon from '../logo.svg';
+import duosIcon from '../images/duos-network-logo.svg';
 
 export const DatasetSearch = (props) => {
+  const { location } = props;
   const [datasets, setDatasets] = useState([]);
+
+  // branded study table versions
+  const versions = {
+    '/datalibrary': {
+      query: null,
+      icon: duosIcon,
+      title: 'DUOS Data Library',
+    },
+    '/datalibrary_broad': {
+      query: {
+        'match': {
+          'submitter.institution.id': '150' // Broad Institute of MIT and Harvard
+        }
+      },
+      icon: broadIcon,
+      title: 'Broad Data Library',
+    },
+  }
+
+  const version = versions[location.pathname];
 
   useEffect(() => {
     const init = async () => {
@@ -20,11 +43,7 @@ export const DatasetSearch = (props) => {
                   '_type': 'dataset'
                 }
               },
-              {
-                'match': {
-                  'submitter.institution.id': '150' // Broad Institute of MIT and Harvard
-                }
-              },
+              version.query,
               {
                 'exists': {
                   'field': 'study'
@@ -46,7 +65,7 @@ export const DatasetSearch = (props) => {
   }, []);
 
   return (
-    <DatasetSearchTable {...props} datasets={datasets} />
+    <DatasetSearchTable {...props} datasets={datasets} icon={version.icon} title={version.title} />
   );
 };
 
