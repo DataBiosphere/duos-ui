@@ -626,6 +626,12 @@ export const User = {
     return res.json();
   },
 
+  // getSOsForGivenUser: async (userId) => {
+  //   const url = `${await getApiUrl()}/api/user/signing-officials/${userId}`;
+  //   const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
+  //   return res.json();
+  // },
+
   getUnassignedUsers: async () => {
     const url = `${await getApiUrl()}/api/user/institution/unassigned`;
     const res = await axios.get(url, Config.authOpts());

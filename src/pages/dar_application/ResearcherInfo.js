@@ -97,6 +97,7 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showNihValidationError,
               readOnly: readOnlyMode,
+              researcher: props.researcher,
               header: true,
               required: formData.checkCollaborator !== true,
             })

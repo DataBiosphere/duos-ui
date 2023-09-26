@@ -227,11 +227,19 @@ const DataAccessRequestApplication = (props) => {
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
-    const researcher = await User.getMe();
-    const signingOfficials = await User.getSOsForCurrentUser();
+    if (props.researcher === undefined) {
+      const researcher = await User.getMe();
+      const signingOfficials = await User.getSOsForCurrentUser();
+      setResearcher(researcher);
+      setAllSigningOfficials(signingOfficials);
+    }
+    else {
+      const researcher = props.researcher;
+      // const signingOfficials = await User.getSOsForGivenUser(props.researcher.userId);
+      setResearcher(researcher);
+      setAllSigningOfficials(['Hello']);
+    }
 
-    setResearcher(researcher);
-    setAllSigningOfficials(signingOfficials);
     setIsLoading(false);
 
     if (!isNil(collectionId)) {
@@ -259,7 +267,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params]);
+  }, [onScroll, props.match.params, props.researcher, researcher]);
 
   useEffect(() => {
     init();
@@ -541,7 +549,7 @@ const DataAccessRequestApplication = (props) => {
                   nihValid={nihValid}
                   onNihStatusUpdate={setNihValid}
                   showNihValidationError={showNihValidationError}
-                  researcher={researcher}
+                  researcher={(props.researcher === undefined) ? researcher : props.researcher}
                   allSigningOfficials={allSigningOfficials}
                   setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}

@@ -205,6 +205,7 @@ export default function DarCollectionReview(props) {
         }),
         h(DataAccessRequestApplication, {
           isRendered: selectedTab === tabs.fullDAR,
+          researcher: researcherProfile,
           readOnlyMode: true,
           ...props
         }),

@@ -15,7 +15,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     expirationCount: 0,
     eraCommonsId: '',
     nihError: false,
-    isHovered: false
+    isHovered: false,
+    isCurrentUser: true
   };
 
   componentDidMount = async () => {
@@ -48,7 +49,17 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const response = await User.getMe();
+    let response = await User.getMe();
+    if (this.props.researcher !== undefined) {
+      const givenUser = this.props.researcher;
+      if (givenUser.userId != response.userId) {
+        this.setState(prev => {
+          prev.isCurrentUser = false;
+          return prev;
+        });
+      }
+      response = givenUser;
+    }
     const props = response.researcherProperties;
     const authProp = find({'propertyKey':'eraAuthorized'})(props);
     const expProp = find({'propertyKey':'eraExpiration'})(props);
@@ -191,7 +202,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding'
           }, [
             div({ isRendered: this.state.expirationCount >= 0, className: 'fadein' }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
-            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, ['Your NIH authentication has expired'])
+            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, [this.state.isCurrentUser ? 'Your NIH authentication has expired' : `This user's NIH authentication has expired`])
           ])
         ])
       ])
