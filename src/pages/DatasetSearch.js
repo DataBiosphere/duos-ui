@@ -5,6 +5,7 @@ import { DataSet } from '../libs/ajax';
 import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
 import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
+import mgbIcon from '../images/mass-general-brigham-logo.svg';
 
 export const DatasetSearch = (props) => {
   const { location } = props;
@@ -26,6 +27,15 @@ export const DatasetSearch = (props) => {
       icon: broadIcon,
       title: 'Broad Data Library',
     },
+    '/datalibrary_mgb': {
+      query: {
+        'match': {
+          'submitter.institution.id': '88' // Massachusetts General Hospital
+        }
+      },
+      icon: mgbIcon,
+      title: 'Mass General Brigham Data Library',
+    }
   }
 
   const version = versions[location.pathname];
