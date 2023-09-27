@@ -588,13 +588,13 @@ const DataAccessRequestApplication = (props) => {
               </div>
 
               <div className='step-container'>
-                {!props.readOnlyMode ? <DataUseAgreements
+                <DataUseAgreements
                   darCode={formData.darCode}
                   cancelAttest={() => setIsAttested(false)}
                   isAttested={isAttested}
                   attest={attemptSubmit}
                   save={() => setShowDialogSave(true)}
-                /> : <div />}
+                />
               </div>
 
               {isAttested &&
