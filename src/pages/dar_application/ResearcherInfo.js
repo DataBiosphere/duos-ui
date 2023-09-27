@@ -201,7 +201,7 @@ export default function ResearcherInfo(props) {
         ]),
 
         div({className: 'dar-application-row'}, [
-          h(FormField, {
+          includeInstructions && h(FormField, {
             id: 'signingOfficial',
             type: FormFieldTypes.SELECT,
             description: 'I certify that the individual listed below is my Institutional Signing official',
