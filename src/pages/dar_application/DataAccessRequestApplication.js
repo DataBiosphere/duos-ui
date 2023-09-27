@@ -25,6 +25,12 @@ import {
 import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
+const ApplicationTabs = [
+  { name: 'Researcher Information' },
+  { name: 'Data Access Request' },
+  { name: 'Research Purpose Statement' },
+  { name: 'Data Use Agreement' }
+];
 
 const fetchAllDatasets = async (dsIds) => {
   if (isEmpty(dsIds)) {
@@ -37,13 +43,6 @@ const fetchAllDatasets = async (dsIds) => {
 const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
-
-const ApplicationTabs = [
-  { name: 'Researcher Information' },
-  { name: 'Data Access Request' },
-  { name: 'Research Purpose Statement' },
-  { name: 'Data Use Agreement' }
-];
 
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
@@ -126,7 +125,7 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
-  const [applicationTabs, setApplicationTabs] = useState();
+  const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({ key, value }) => {
@@ -230,15 +229,17 @@ const DataAccessRequestApplication = (props) => {
     let formData = {};
     if (props.researcher === undefined) {
       const researcher = await User.getMe();
+      const signingOfficials = await User.getSOsForCurrentUser();
       setResearcher(researcher);
+      setAllSigningOfficials(signingOfficials);
     }
     else {
       const researcher = props.researcher;
+      // const signingOfficials = await User.getSOsForGivenUser(props.researcher.userId);
       setResearcher(researcher);
+      setAllSigningOfficials(['Hello']);
     }
 
-    const signingOfficials = await User.getSOsForCurrentUser();
-    setAllSigningOfficials(signingOfficials);
     setIsLoading(false);
 
     if (!isNil(collectionId)) {

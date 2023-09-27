@@ -200,7 +200,7 @@ export default function ResearcherInfo(props) {
           }),
         ]),
 
-        includeInstructions && div({className: 'dar-application-row'}, [
+        div({className: 'dar-application-row'}, [
           h(FormField, {
             id: 'signingOfficial',
             type: FormFieldTypes.SELECT,
