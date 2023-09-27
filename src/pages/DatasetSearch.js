@@ -6,6 +6,7 @@ import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
 import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
+import elwaziIcon from '../images/elwazi-logo-color.svg';
 
 export const DatasetSearch = (props) => {
   const { location } = props;
@@ -56,6 +57,15 @@ export const DatasetSearch = (props) => {
       },
       icon: mgbIcon,
       title: 'Mass General Brigham Data Library',
+    },
+    '/datalibrary_elwazi': {
+      query: {
+        'match_phrase': {
+          'submitter.institution.name': 'eLwazi'
+        }
+      },
+      icon: elwaziIcon,
+      title: 'eLwazi Data Library',
     }
   }
 

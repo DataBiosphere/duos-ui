@@ -12,7 +12,10 @@ export const TableHeaderSection = (props) => {
           img({
             id: 'dataset-icon',
             src: icon,
-            style: Styles.HEADER_IMG,
+            style: {
+              width: icon.width,
+              height: icon.height,
+            }
           }),
         ]),
         div({ style: { ...Styles.HEADER_CONTAINER, width: '120%' } }, [
