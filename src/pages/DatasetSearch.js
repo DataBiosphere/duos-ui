@@ -20,8 +20,8 @@ export const DatasetSearch = (props) => {
     },
     '/datalibrary_broad': {
       query: {
-        'match': {
-          'submitter.institution.id': '150' // Broad Institute of MIT and Harvard
+        'match_phrase': {
+          'submitter.institution.name': 'The Broad Institute of MIT and Harvard'
         }
       },
       icon: broadIcon,
@@ -29,8 +29,29 @@ export const DatasetSearch = (props) => {
     },
     '/datalibrary_mgb': {
       query: {
-        'match': {
-          'submitter.institution.id': '88' // Massachusetts General Hospital
+        'bool': {
+          'should': [
+            {
+              'match_phrase': {
+                'submitter.institution.name': 'Massachusetts General Hospital'
+              }
+            },
+            {
+              'match_phrase': {
+                'submitter.institution.name': 'Brigham and Women\'s Hospital'
+              }
+            },
+            {
+              'match_phrase': {
+                'submitter.institution.name': 'Faulkner Hospital' // TODO: identify exact name
+              }
+            },
+            {
+              'match_phrase': {
+                'submitter.institution.name': 'Spaulding Hospital' // TODO: identify exact name
+              }
+            }
+          ]
         }
       },
       icon: mgbIcon,
