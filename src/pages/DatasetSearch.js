@@ -72,7 +72,7 @@ export const DatasetSearch = (props) => {
     '/datalibrary_myinstitution': {
       query: {
         'match_phrase': {
-          'submitter.institution.name': user.isSigningOfficial ? user.institution.name : null
+          'submitter.institution.id': user.isSigningOfficial ? user.institution.id : null
         }
       },
       icon: null,
