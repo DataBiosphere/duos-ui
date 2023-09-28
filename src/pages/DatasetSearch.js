@@ -9,6 +9,45 @@ import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
 import { Storage } from '../libs/storage';
 
+const signingOfficialQuery = (user) => {
+  return {
+    'match_phrase': {
+      'submitter.institution.id': user.institution.id
+    }
+  };
+}
+
+// query to return approved DAC studies from the user's institution and open access studies
+const myInstitutionQuery = (user) => {
+  return {
+    'bool': {
+      'should': [
+        {
+          'bool': {
+            'must': [
+              {
+                'match_phrase': {
+                  'submitter.institution.id': user.institution.id
+                }
+              },
+              {
+                'term': {
+                  'dacApproval': true
+                }
+              }
+            ]
+          }
+        },
+        {
+          'term': {
+            'openAccess': true
+          }
+        }
+      ],
+    }
+  };
+}
+
 export const DatasetSearch = (props) => {
   const { location } = props;
   const [datasets, setDatasets] = useState([]);
@@ -70,11 +109,7 @@ export const DatasetSearch = (props) => {
       title: 'eLwazi Data Library',
     },
     '/datalibrary_myinstitution': {
-      query: {
-        'match_phrase': {
-          'submitter.institution.id': user.isSigningOfficial ? user.institution.id : null
-        }
-      },
+      query: user.isSigningOfficial ? signingOfficialQuery(user) : myInstitutionQuery(user),
       icon: null,
       title: user.institution.name + ' Data Library',
     },
