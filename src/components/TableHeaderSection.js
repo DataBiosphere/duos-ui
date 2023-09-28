@@ -8,7 +8,7 @@ export const TableHeaderSection = (props) => {
     div(
       { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
       [
-        div({ style: Styles.ICON_CONTAINER }, [
+        icon !== null && div({ style: Styles.ICON_CONTAINER }, [
           img({
             id: 'dataset-icon',
             src: icon,

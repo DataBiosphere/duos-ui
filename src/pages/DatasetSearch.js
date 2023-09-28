@@ -7,10 +7,12 @@ import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
+import { Storage } from '../libs/storage';
 
 export const DatasetSearch = (props) => {
   const { location } = props;
   const [datasets, setDatasets] = useState([]);
+  const user = Storage.getCurrentUser();
 
   // branded study table versions
   const versions = {
@@ -66,7 +68,16 @@ export const DatasetSearch = (props) => {
       },
       icon: elwaziIcon,
       title: 'eLwazi Data Library',
-    }
+    },
+    '/datalibrary_myinstitution': {
+      query: {
+        'match_phrase': {
+          'submitter.institution.name': user.isSigningOfficial ? user.institution.name : null
+        }
+      },
+      icon: null,
+      title: user.institution.name + ' Data Library',
+    },
   }
 
   const version = versions[location.pathname];
