@@ -532,6 +532,7 @@ const DataAccessRequestApplication = (props) => {
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
+                  researcherProfile={props.researcherProfile}
                   includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}

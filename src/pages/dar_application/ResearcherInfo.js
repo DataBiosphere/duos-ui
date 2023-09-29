@@ -19,6 +19,7 @@ export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     readOnlyMode,
+    researcherProfile,
     includeInstructions,
     completed,
     darCode,
@@ -97,6 +98,7 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showNihValidationError,
               readOnly: readOnlyMode,
+              researcherProfile: researcherProfile,
               header: true,
               required: formData.checkCollaborator !== true,
             })
