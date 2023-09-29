@@ -28,8 +28,7 @@ import UsgOmbText from '../../components/UsgOmbText';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
-  { name: 'Research Purpose Statement' },
-  { name: 'Data Use Agreement' }
+  { name: 'Research Purpose Statement' }
 ];
 
 const fetchAllDatasets = async (dsIds) => {
@@ -125,6 +124,9 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
+  if (!props.readOnlyMode) {
+    ApplicationTabs.push({ name: 'Data Use Agreement' });
+  }
   const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -579,15 +581,16 @@ const DataAccessRequestApplication = (props) => {
                 />
               </div>
 
-              <div className='step-container'>
-                {!props.readOnlyMode ? <DataUseAgreements
-                  darCode={formData.darCode}
-                  cancelAttest={() => setIsAttested(false)}
-                  isAttested={isAttested}
-                  attest={attemptSubmit}
-                  save={() => setShowDialogSave(true)}
-                /> : <div />}
-              </div>
+              {!props.readOnlyMode ?
+                <div className='step-container'>
+                  <DataUseAgreements
+                    darCode={formData.darCode}
+                    cancelAttest={() => setIsAttested(false)}
+                    isAttested={isAttested}
+                    attest={attemptSubmit}
+                    save={() => setShowDialogSave(true)}
+                  />
+                </div> : <div />}
 
               {isAttested &&
                 <div className='step-container'>
