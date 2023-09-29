@@ -199,7 +199,7 @@ export default function ResearcherInfo(props) {
           }),
         ]),
 
-        div({className: 'dar-application-row'}, [
+        !props.readOnlyMode && div({className: 'dar-application-row'}, [
           h(FormField, {
             id: 'signingOfficial',
             type: FormFieldTypes.SELECT,
