@@ -15,8 +15,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     expirationCount: 0,
     eraCommonsId: '',
     nihError: false,
-    isHovered: false,
-    isCurrentUser: true
+    isHovered: false
   };
 
   componentDidMount = async () => {
@@ -49,31 +48,40 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    let response = await User.getMe();
-    if (this.props.researcher !== undefined) {
-      const givenUser = this.props.researcher;
-      if (givenUser.userId != response.userId) {
-        this.setState(prev => {
-          prev.isCurrentUser = false;
-          return prev;
-        });
-      }
-      response = givenUser;
+    if (this.props.researcherProfile === undefined) {
+      const response = await User.getMe();
+      const props = response.researcherProperties;
+      const authProp = find({'propertyKey':'eraAuthorized'})(props);
+      const expProp = find({'propertyKey':'eraExpiration'})(props);
+      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
+      const nihValid = isAuthorized && expirationCount > 0;
+      const eraCommonsId = response.eraCommonsId;
+      this.props.onNihStatusUpdate(nihValid);
+      this.setState(prev => {
+        prev.isAuthorized = isAuthorized;
+        prev.expirationCount = expirationCount;
+        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
+        return prev;
+      });
     }
-    const props = response.researcherProperties;
-    const authProp = find({'propertyKey':'eraAuthorized'})(props);
-    const expProp = find({'propertyKey':'eraExpiration'})(props);
-    const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-    const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
-    const nihValid = isAuthorized && expirationCount > 0;
-    const eraCommonsId = response.eraCommonsId;
-    this.props.onNihStatusUpdate(nihValid);
-    this.setState(prev => {
-      prev.isAuthorized = isAuthorized;
-      prev.expirationCount = expirationCount;
-      prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
-      return prev;
-    });
+    else {
+      const response = this.props.researcherProfile;
+      const props = response.researcherProperties;
+      const authProp = find({'propertyKey':'eraAuthorized'})(props);
+      const expProp = find({'propertyKey':'eraExpiration'})(props);
+      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
+      const nihValid = isAuthorized && expirationCount > 0;
+      const eraCommonsId = response.eraCommonsId;
+      this.props.onNihStatusUpdate(nihValid);
+      this.setState(prev => {
+        prev.isAuthorized = isAuthorized;
+        prev.expirationCount = expirationCount;
+        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
+        return prev;
+      });
+    }
   };
 
   verifyToken = async (parsedToken) => {
@@ -202,7 +210,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding'
           }, [
             div({ isRendered: this.state.expirationCount >= 0, className: 'fadein' }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
-            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, [this.state.isCurrentUser ? 'Your NIH authentication has expired' : `This user's NIH authentication has expired`])
+            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, [(this.props.researcherProfile === undefined) ? 'Your NIH authentication has expired' : `This user's NIH authentication has expired`])
           ])
         ])
       ])
