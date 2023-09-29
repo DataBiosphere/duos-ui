@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Button } from '@mui/material';
 import { useEffect, useState } from 'react';
-import datasetIcon from '../../logo.svg';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
@@ -31,7 +30,7 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, history } = props;
+  const { datasets, history, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
@@ -183,7 +182,7 @@ export const DatasetSearchTable = (props) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <TableHeaderSection icon={datasetIcon} title='Broad Data Library' description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+      <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
       <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
         <Box sx={{ width: '14%', padding: '0 1em' }}>
           <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />

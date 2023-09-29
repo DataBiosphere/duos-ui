@@ -1,3 +1,4 @@
+import { isNil } from 'lodash';
 import { Styles } from '../libs/theme';
 import { div, img } from 'react-hyperscript-helpers';
 
@@ -8,11 +9,14 @@ export const TableHeaderSection = (props) => {
     div(
       { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
       [
-        div({ style: Styles.ICON_CONTAINER }, [
+        !isNil(icon) && div({ style: Styles.ICON_CONTAINER }, [
           img({
             id: 'dataset-icon',
             src: icon,
-            style: Styles.HEADER_IMG,
+            style: {
+              width: icon.width,
+              height: icon.height,
+            }
           }),
         ]),
         div({ style: { ...Styles.HEADER_CONTAINER, width: '120%' } }, [
