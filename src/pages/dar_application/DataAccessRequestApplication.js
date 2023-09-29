@@ -124,9 +124,6 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
-  if (!props.readOnlyMode) {
-    ApplicationTabs.push({ name: 'Data Use Agreement' });
-  }
   const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -190,7 +187,11 @@ const DataAccessRequestApplication = (props) => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
     });
-  }, [formData.datasetIds]);
+    if (!props.readOnlyMode) {
+      ApplicationTabs.push({ name: 'Data Use Agreement' });
+      setApplicationTabs(ApplicationTabs)
+    }
+  }, [formData.datasetIds, props.readOnlyMode]);
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
