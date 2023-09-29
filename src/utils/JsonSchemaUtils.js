@@ -1,29 +1,27 @@
 import {default as Ajv} from 'ajv/dist/2019';
-import {
-  urlValidator,
-  dateValidator,
-  emailValidator
-} from '../components/forms/formValidation';
-import {
-  get, set, isNil
-} from 'lodash';
+import {dateValidator, emailValidator, uniqueValidator, urlValidator} from '../components/forms/formValidation';
+import {get, isNil, set} from 'lodash';
 
 const formats = {
   date: dateValidator.isValid,
   uri: urlValidator.isValid,
-  email: emailValidator.isValid
+  email: emailValidator.isValid,
+  unique: uniqueValidator.isValid
 };
 
 /**
  * Validates given object according to the schema in a format that
  * our internal form components can understand.
  *
- * @param {*} compiledSchema Compiled schema
+ * @param {*} validate Compiled schema
  * @param {*} obj Form data
+ * @param {*} studyNames List of existing study names
  * @returns Form component compatible validation object
  */
-export const validateForm = (validate, obj) => {
-  const valid = validate(obj);
+export const validateForm = (validate, obj, studyNames = []) => {
+
+  const studyNameUnique = !studyNames.includes(obj.studyName);
+  const valid = validate(obj) && studyNameUnique;
 
   if (valid) {
     return [true, {}];
@@ -34,10 +32,13 @@ export const validateForm = (validate, obj) => {
 
     let path;
     let errorType;
-    if (error.keyword === 'required') {
-      path = error.instancePath +'/'+ error.params.missingProperty;
+    if (error.keyword === 'unique') {
+      path = error.instancePath + '/' + error.params.missingProperty;
+      errorType = 'unique';
+    } else if (error.keyword === 'required') {
+      path = error.instancePath + '/' + error.params.missingProperty;
       errorType = 'required';
-    } else if (error.keyword === 'format'){
+    } else if (error.keyword === 'format') {
       // format errors are, e.g., date/email/uri errors
       path = error.instancePath;
       errorType = error.params.format; // e.g., 'date'
@@ -57,6 +58,13 @@ export const validateForm = (validate, obj) => {
     const newValidation = updateValidation(existingValidation, errorType);
     set(validationObject, splitPath, newValidation);
   });
+
+  if (!studyNameUnique) {
+    validationObject.studyName = {
+      failed: ['unique'],
+      valid: false
+    };
+  }
 
   return [false, validationObject];
 };

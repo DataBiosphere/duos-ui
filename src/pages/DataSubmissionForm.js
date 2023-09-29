@@ -3,7 +3,7 @@ import { validateForm } from '../utils/JsonSchemaUtils';
 
 import { cloneDeep, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import { Institution, DataSet } from '../libs/ajax';
+import { Institution, DataSet, Study } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 
 import lockIcon from '../images/lock-icon.png';
@@ -15,7 +15,7 @@ import NIHAdministrativeInformation from '../components/data_submission/NIHAdmin
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 // schema validation is auto-generated from pre-compiled code - if the backend
-// schama changes, then run `npm run genschemas` to regenerate this code
+// schema changes, then run `npm run genschemas` to regenerate this code
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
 import UsgOmbText from '../components/UsgOmbText';
@@ -26,6 +26,7 @@ export const DataSubmissionForm = (props) => {
   } = props;
 
   const [institutions, setInstitutions] = useState([]);
+  const [studyNames, setStudyNames] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
@@ -37,9 +38,15 @@ export const DataSubmissionForm = (props) => {
       setInstitutions(institutions);
     };
 
+    const getAllStudies = async() => {
+      const studyNames = await Study.getStudyNames();
+      setStudyNames(studyNames);
+    };
+
     const init = async () => {
       try {
-        getAllInstitutions();
+        await getAllInstitutions();
+        await getAllStudies();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -99,7 +106,7 @@ export const DataSubmissionForm = (props) => {
     formatForRegistration(registration);
 
     // check against json schema to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(validateSchema, registration);
+    let [valid, validation] = validateForm(validateSchema, registration, studyNames);
     if (formData.alternativeDataSharingPlan === true) {
       if (isNil(formFiles.alternativeDataSharingPlanFile)) {
         validation.alternativeDataSharingPlanFile = {
