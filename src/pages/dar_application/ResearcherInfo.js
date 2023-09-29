@@ -79,7 +79,7 @@ export default function ResearcherInfo(props) {
             title: '1.1 Researcher',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            defaultValue: researcher.displayName,
+            defaultValue: (researcherProfile === undefined) ? researcher.displayName : researcherProfile.displayName,
             disabled: true
           }),
         ]),
