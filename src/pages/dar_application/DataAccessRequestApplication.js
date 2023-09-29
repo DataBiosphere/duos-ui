@@ -28,8 +28,7 @@ import UsgOmbText from '../../components/UsgOmbText';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
-  { name: 'Research Purpose Statement' },
-  { name: 'Data Use Agreement' }
+  { name: 'Research Purpose Statement' }
 ];
 
 const fetchAllDatasets = async (dsIds) => {
@@ -125,6 +124,9 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
+  if (!props.readOnlyMode) {
+    ApplicationTabs.push({ name: 'Data Use Agreement' });
+  }
   const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -227,19 +229,11 @@ const DataAccessRequestApplication = (props) => {
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
-    if (props.researcher === undefined) {
-      const researcher = await User.getMe();
-      const signingOfficials = await User.getSOsForCurrentUser();
-      setResearcher(researcher);
-      setAllSigningOfficials(signingOfficials);
-    }
-    else {
-      const researcher = props.researcher;
-      // const signingOfficials = await User.getSOsForGivenUser(props.researcher.userId);
-      setResearcher(researcher);
-      setAllSigningOfficials(['Hello']);
-    }
+    const researcher = await User.getMe();
+    const signingOfficials = await User.getSOsForCurrentUser();
 
+    setResearcher(researcher);
+    setAllSigningOfficials(signingOfficials);
     setIsLoading(false);
 
     if (!isNil(collectionId)) {
@@ -267,7 +261,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params, props.researcher, researcher]);
+  }, [onScroll, props.match.params]);
 
   useEffect(() => {
     init();
@@ -538,6 +532,7 @@ const DataAccessRequestApplication = (props) => {
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
+                  researcherProfile={props.researcherProfile}
                   includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
@@ -549,7 +544,7 @@ const DataAccessRequestApplication = (props) => {
                   nihValid={nihValid}
                   onNihStatusUpdate={setNihValid}
                   showNihValidationError={showNihValidationError}
-                  researcher={(props.researcher === undefined) ? researcher : props.researcher}
+                  researcher={researcher}
                   allSigningOfficials={allSigningOfficials}
                   setLabCollaboratorsCompleted={setLabCollaboratorsCompleted}
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
@@ -587,15 +582,16 @@ const DataAccessRequestApplication = (props) => {
                 />
               </div>
 
-              <div className='step-container'>
-                {!props.readOnlyMode ? <DataUseAgreements
-                  darCode={formData.darCode}
-                  cancelAttest={() => setIsAttested(false)}
-                  isAttested={isAttested}
-                  attest={attemptSubmit}
-                  save={() => setShowDialogSave(true)}
-                /> : <div />}
-              </div>
+              {!props.readOnlyMode ?
+                <div className='step-container'>
+                  <DataUseAgreements
+                    darCode={formData.darCode}
+                    cancelAttest={() => setIsAttested(false)}
+                    isAttested={isAttested}
+                    attest={attemptSubmit}
+                    save={() => setShowDialogSave(true)}
+                  />
+                </div> : <div />}
 
               {isAttested &&
                 <div className='step-container'>

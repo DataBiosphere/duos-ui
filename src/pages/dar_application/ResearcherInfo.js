@@ -19,6 +19,7 @@ export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     readOnlyMode,
+    researcherProfile,
     includeInstructions,
     completed,
     darCode,
@@ -78,7 +79,7 @@ export default function ResearcherInfo(props) {
             title: '1.1 Researcher',
             validators: [FormValidators.REQUIRED],
             ariaLevel: ariaLevel + 1,
-            defaultValue: researcher.displayName,
+            defaultValue: (researcherProfile === undefined) ? researcher.displayName : researcherProfile.displayName,
             disabled: true
           }),
         ]),
@@ -97,7 +98,7 @@ export default function ResearcherInfo(props) {
               location: location,
               validationError: showNihValidationError,
               readOnly: readOnlyMode,
-              researcher: props.researcher,
+              researcherProfile: researcherProfile,
               header: true,
               required: formData.checkCollaborator !== true,
             })
@@ -200,7 +201,7 @@ export default function ResearcherInfo(props) {
           }),
         ]),
 
-        div({className: 'dar-application-row'}, [
+        !props.readOnlyMode && div({className: 'dar-application-row'}, [
           h(FormField, {
             id: 'signingOfficial',
             type: FormFieldTypes.SELECT,
