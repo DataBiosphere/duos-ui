@@ -122,36 +122,6 @@ export default function DatasetStatistics(props) {
               ])
             ])
           ]),
-          div({style: Styles.SUB_HEADER}, ['Summary of Research Findings to Date']),
-          div({style: {display: 'flex'}}, [
-            div({style: Styles.SQUARE_BOX}, [
-              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['Data Access Requests']),
-              LINE,
-              div({style: Styles.JUMBO}, [dars?.length])
-            ]),
-            div({style: Styles.DESCRIPTION_BOX}, [
-              div({style: {...Styles.MINOR_HEADER, paddingLeft:'10px'}}, ['DAR Project Titles:']),
-              LINE,
-              div({style: {fontSize: Theme.font.size.small, padding: '1rem'}}, [
-                dars?.map((dar) => a({style: {display: 'block'}, href: `#${dar.darCode}`}, [dar.projectTitle]))
-              ])
-            ]),
-            div({style: Styles.SQUARE_BOX}, [
-              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Approved']),
-              LINE,
-              div({style: Styles.JUMBO}, [darsApproved?.length])
-            ]),
-            div({style: Styles.SQUARE_BOX}, [
-              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Denied']),
-              LINE,
-              div({style: Styles.JUMBO}, [darsDenied?.length])
-            ]),
-            div({style: Styles.SQUARE_BOX}, [
-              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ['DARs Open, Canceled, Unreviewed']),
-              LINE,
-              div({style: Styles.JUMBO}, [darsOpen?.length + darsCanceled?.length + darsUnreviewed?.length])
-            ]),
-          ]),
           div({style: Styles.SUB_HEADER}, ['Data Access Requests - Research Statements']),
           dars?.map((dar) =>
             div({style: Styles.READ_MORE, id: `${dar.darCode}` }, [
@@ -173,10 +143,6 @@ export default function DatasetStatistics(props) {
                       div({style: Styles.SMALL_BOLD}, ['Last Updated: ']),
                       div({style: Styles.SMALL_BOLD}, [formatDate(dar.updateDate)]),
                     ]),
-                    div({style: {display: 'flex'}}, [
-                      div({style: Styles.SMALL_BOLD}, ['Status: ']),
-                      div({style: Styles.SMALL_BOLD}, [getDisplayStatusForDar(dar.referenceId)]),
-                    ])
                   ]),
                   div({style: {backgroundColor: 'white'}}, [
                     div({style: Styles.SMALL_BOLD}, ['NonTechnical Summary:']),
