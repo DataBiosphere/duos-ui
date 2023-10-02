@@ -2,7 +2,7 @@ import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h2, h3, h4, span } from 'react-hyperscript-helpers';
-import { eRACommons } from '../../components/eRACommons';
+import ERACommons from '../../components/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
 import { isEmpty, isNil, get } from 'lodash/fp';
 import { FormField, FormValidators, FormFieldTypes } from '../../components/forms/forms';
@@ -92,7 +92,7 @@ export default function ResearcherInfo(props) {
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
-            eRACommons({
+            ERACommons({
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
