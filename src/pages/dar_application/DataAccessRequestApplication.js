@@ -100,6 +100,8 @@ const DataAccessRequestApplication = (props) => {
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
+  const [researcherProfile, setResearcherProfile] = useState({});
+
   const [nihValid, setNihValid] = useState(true);
   const [showNihValidationError, setShowNihValidationError] = useState(false);
 
@@ -189,7 +191,7 @@ const DataAccessRequestApplication = (props) => {
     });
     if (!props.readOnlyMode) {
       ApplicationTabs.push({ name: 'Data Use Agreement' });
-      setApplicationTabs(ApplicationTabs)
+      setApplicationTabs(ApplicationTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);
 
@@ -229,6 +231,9 @@ const DataAccessRequestApplication = (props) => {
 
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
+    const collection = await Collections.getCollectionById(collectionId);
+    const researcherProfile = await User.getById(collection.createUserId);
+    setResearcherProfile(researcherProfile);
     let formData = {};
     const researcher = await User.getMe();
     const signingOfficials = await User.getSOsForCurrentUser();
@@ -533,7 +538,7 @@ const DataAccessRequestApplication = (props) => {
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
-                  researcherProfile={props.researcherProfile}
+                  researcherProfile={props.readOnlyMode ? researcherProfile : researcher}
                   includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
