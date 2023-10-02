@@ -188,13 +188,23 @@ export const DatasetSearchTable = (props) => {
           <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />
         </Box>
         <Box sx={{ width: '85%', padding: '0 1em' }}>
-          <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
+          {
+            isEmpty(datasets) ?
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <h1>No datasets registered for this library.</h1>
+              </Box>
+              :
+              <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
+          }
         </Box>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
-        <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+        {
+          !isEmpty(datasets) &&
+          <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
-        </Button>
+          </Button>
+        }
       </Box>
     </Box>
   );
