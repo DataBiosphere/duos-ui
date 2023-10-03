@@ -126,7 +126,7 @@ export default function DatasetSubmissions() {
             style={Styles.HEADER_CONTAINER}>
             <div
               style={Styles.TITLE}>
-              My Submitted Datasets
+              My Data Submissions
             </div>
             <div
               style={{fontFamily: 'Montserrat', fontSize: '1.6rem'}}>
