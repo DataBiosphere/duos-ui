@@ -18,6 +18,7 @@ import NihAnvilUse from '../components/data_submission/NihAnvilUse';
 // If any validation changes, it needs to be manually updated in both DataRegistrationV1Validation
 // and JsonSchemaUtils
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
+import {uniqueValidator} from '../components/forms/formValidation';
 import { set } from 'lodash';
 import UsgOmbText from '../components/UsgOmbText';
 
@@ -108,7 +109,7 @@ export const DataSubmissionForm = (props) => {
 
     // check against json schema to see if there are uncaught validation issues
     let [valid, validation] = validateForm(validateSchema, registration);
-    if (studyNames.includes(registration.studyName)) {
+    if (!uniqueValidator.isValid(registration.studyName, studyNames)) {
       validation.studyName = {
         failed: ['unique'],
         valid: false
