@@ -94,7 +94,7 @@ export const DatasetSearch = (props) => {
     '/datalibrary_elwazi': {
       query: {
         'match_phrase': {
-          'submitter.institution.name': 'eLwazi'
+          'study.description': 'elwazi'
         }
       },
       icon: elwaziIcon,
