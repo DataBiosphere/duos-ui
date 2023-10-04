@@ -14,8 +14,9 @@ import DataSubmissionStudyInformation from '../components/data_submission/ds_stu
 import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from '../components/data_submission/NIHDataManagement';
 import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-// schema validation is auto-generated from pre-compiled code - if the backend
-// schema changes, then run `npm run genschemas` to regenerate this code
+// Schema validation was previously auto-generated from pre-compiled code
+// If any validation changes, it needs to be manually updated in both DataRegistrationV1Validation
+// and JsonSchemaUtils
 import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
 import { set } from 'lodash';
 import UsgOmbText from '../components/UsgOmbText';
