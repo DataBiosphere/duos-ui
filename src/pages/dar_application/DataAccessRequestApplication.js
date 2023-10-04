@@ -116,6 +116,7 @@ const DataAccessRequestApplication = (props) => {
   const [notificationData, setNotificationData] = useState(undefined);
 
   const [researcher, setResearcher] = useState({});
+  const [submittingResearcher, setSubmittingResearcher] = useState({});
   const [allSigningOfficials, setAllSigningOfficials] = useState([]);
 
   const [uploadedIrbDocument, setUploadedIrbDocument] = useState(null);
@@ -228,7 +229,15 @@ const DataAccessRequestApplication = (props) => {
   }, []);
 
   const init = useCallback(async () => {
+    
     const { dataRequestId, collectionId } = props.match.params;
+    if (props.readOnlyMode) {
+      console.log(props)
+      const collection = await Collections.getCollectionById(collectionId);
+      const response = await User.getById(collection.createUserId);
+      setSubmittingResearcher(response);
+      console.log(submittingResearcher)
+    }
     let formData = {};
     const researcher = await User.getMe();
     const signingOfficials = await User.getSOsForCurrentUser();
@@ -533,7 +542,7 @@ const DataAccessRequestApplication = (props) => {
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
-                  researcherProfile={props.researcherProfile}
+                  researcherProfile={submittingResearcher}
                   includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}

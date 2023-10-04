@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ERACommons from '../../components/ERACommons';
+import { eRACommons } from '../../components/eRACommons';
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import { isNil } from 'lodash';
@@ -72,7 +72,7 @@ export default function ResearcherStatus(props) {
       </a>
       &nbsp;is required to submit a dar.
     </p>
-    {ERACommons({
+    {eRACommons({
       destination: 'profile',
       onNihStatusUpdate: () => { },
       location: pageProps.location,
