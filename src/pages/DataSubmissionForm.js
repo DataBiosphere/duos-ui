@@ -107,7 +107,14 @@ export const DataSubmissionForm = (props) => {
     formatForRegistration(registration);
 
     // check against json schema to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(validateSchema, registration, studyNames);
+    let [valid, validation] = validateForm(validateSchema, registration);
+    if (studyNames.includes(registration.studyName)) {
+      validation.studyName = {
+        failed: ['unique'],
+        valid: false
+      };
+    }
+
     if (formData.alternativeDataSharingPlan === true) {
       if (isNil(formFiles.alternativeDataSharingPlanFile)) {
         validation.alternativeDataSharingPlanFile = {
