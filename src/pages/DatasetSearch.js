@@ -23,29 +23,18 @@ const signingOfficialQuery = (user) => {
 const myInstitutionQuery = (user) => {
   return {
     'bool': {
-      'should': [
+      'must': [
         {
-          'bool': {
-            'must': [
-              {
-                'match_phrase': {
-                  'submitter.institution.id': user.institution.id
-                }
-              },
-              {
-                'term': {
-                  'dacApproval': true
-                }
-              }
-            ]
+          'match_phrase': {
+            'submitter.institution.id': user.institution.id
           }
         },
         {
           'term': {
-            'openAccess': true
+            'dacApproval': true
           }
         }
-      ],
+      ]
     }
   };
 }
