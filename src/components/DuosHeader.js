@@ -133,7 +133,7 @@ export const headerTabsConfig = [
       { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'Data Library', link: '/datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
-      { label: 'Submitted Datasets', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
+      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
     ],
     isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }
