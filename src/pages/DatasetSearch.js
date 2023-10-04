@@ -7,8 +7,8 @@ import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
+import nhgriIcon from '../images/nhgri-logo-color.svg'
 import { Storage } from '../libs/storage';
-import { isEmpty, isNil } from 'lodash';
 import { Box, CircularProgress } from '@mui/material';
 
 const signingOfficialQuery = (user) => {
@@ -105,6 +105,15 @@ export const DatasetSearch = (props) => {
       icon: null,
       title: user.institution.name + ' Data Library',
     },
+    '/datalibrary_nhgri': {
+      query: {
+        'match_phrase': {
+          'study.description': 'anvil'
+        }
+      },
+      icon: nhgriIcon,
+      title: 'NHGRI Data Library',
+    }
   }
 
   const version = versions[location.pathname];
