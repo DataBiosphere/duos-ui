@@ -8,6 +8,8 @@ import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
 import { Storage } from '../libs/storage';
+import { isEmpty, isNil } from 'lodash';
+import { Box, CircularProgress } from '@mui/material';
 
 const signingOfficialQuery = (user) => {
   return {
@@ -51,6 +53,7 @@ const myInstitutionQuery = (user) => {
 export const DatasetSearch = (props) => {
   const { location } = props;
   const [datasets, setDatasets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
 
   // branded study table versions
@@ -143,6 +146,7 @@ export const DatasetSearch = (props) => {
       try {
         await DataSet.searchDatasetIndex(query).then((datasets) => {
           setDatasets(datasets);
+          setLoading(false);
         });
       } catch (error) {
         Notifications.showError({ text: 'Failed to load Elasticsearch index' });
@@ -152,7 +156,12 @@ export const DatasetSearch = (props) => {
   }, []);
 
   return (
-    <DatasetSearchTable {...props} datasets={datasets} icon={version.icon} title={version.title} />
+    loading ?
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+      :
+      <DatasetSearchTable {...props} datasets={datasets} icon={version.icon} title={version.title} />
   );
 };
 
