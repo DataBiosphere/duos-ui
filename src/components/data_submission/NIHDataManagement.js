@@ -1,4 +1,4 @@
-import {div, h, h2, h3} from 'react-hyperscript-helpers';
+import {div, h, h2, h3, span, a} from 'react-hyperscript-helpers';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { useState } from 'react';
 import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './NihAnvilUse';
@@ -69,7 +69,11 @@ export const NIHDataManagement = (props) => {
       type: FormFieldTypes.YESNORADIOGROUP,
       id: 'alternativeDataSharingPlan',
       defaultValue: formData?.alternativeDataSharingPlan,
-      title: 'Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public repository or database?',
+      title: span([
+        'Are you requesting an Alternative Data Sharing Plan ',
+        a({href: 'https://www.genome.gov/about-nhgri/Policies-Guidance/Data-Sharing-Policies-and-Expectations#genomic-data-sharing'}, '(info)'),
+        ' for samples that cannot be shared through a public repository or database?'
+      ]),
       onChange: ({key, value}) => {
         setShowAlternativeDataSharingPlan(value);
         onChange({key, value});
