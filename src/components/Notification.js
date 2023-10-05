@@ -38,7 +38,7 @@ export const Notification = (props) => {
         break;
     }
     // eslint-disable-next-line react/no-children-prop
-    const content = <ReactMarkdown children={notificationData.message} linkTarget={'_blank'} className={style['underlined']}/>;
+    const content = <ReactMarkdown children={notificationData.message} className={style['underlined']}/>;
     notificationDiv = <div
       key={key}
       className={'row no-margin alert alert-' + notificationData.level}>
