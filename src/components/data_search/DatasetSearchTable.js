@@ -163,7 +163,7 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.dataLocation,
                   },
                   {
-                    value: dataset.dacId,
+                    value: dataset.dacName,
                   },
                 ],
               };
