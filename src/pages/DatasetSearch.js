@@ -7,7 +7,8 @@ import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
-import nhgriIcon from '../images/nhgri-logo-color.svg'
+import nhgriIcon from '../images/nhgri-logo-color.svg';
+import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
 
@@ -41,6 +42,7 @@ const myInstitutionQuery = (user) => {
 
 export const DatasetSearch = (props) => {
   const { location } = props;
+  const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
@@ -113,10 +115,30 @@ export const DatasetSearch = (props) => {
       },
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
+    },
+    'custom': {
+      query: {
+        'bool': {
+          'should': [
+            {
+              'match_phrase': {
+                'study.description': query
+              }
+            },
+            {
+              'match_phrase': {
+                'submitter.institution.name': query
+              }
+            },
+          ]
+        }
+      },
+      icon: homeIcon,
+      title: query + ' Data Library',
     }
   }
 
-  const version = versions[location.pathname];
+  const version = query === undefined ? versions[location.pathname] : versions['custom'];
 
   useEffect(() => {
     const init = async () => {
