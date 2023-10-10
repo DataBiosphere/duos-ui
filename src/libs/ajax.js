@@ -384,6 +384,16 @@ export const DataSet = {
   },
 };
 
+export const Study = {
+
+  getStudyNames: async () => {
+    const url = `${await getApiUrl()}/api/dataset/studyNames`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+
+};
+
 export const DatasetAssociation = {
 
   createDatasetAssociations: async (objectId, usersIdList) => {
