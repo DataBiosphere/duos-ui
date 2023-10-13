@@ -7,7 +7,7 @@ import {Notifications, searchOntologies} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {useState} from 'react';
 
-const buttonStyle = { marginBottom: '2rem', color: '#777' };
+const buttonStyle = { marginBottom: '2rem', color: '#777',  };
 const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
 
 export default function DataSharingLanguageTool() {
@@ -63,7 +63,7 @@ export default function DataSharingLanguageTool() {
   return (
     div({style: {...Styles.PAGE, color: '#1f3b50' }}, [
       div({style: {...Styles.TITLE, marginTop: '3.5rem'}}, [
-        'Standardized Data Sharing Language Tool'
+        'Consent Form Text Generator'
       ]),
       div({style: {...Styles.SMALL, marginTop: '1rem'}}, [
         'This tool is made publicly available by the DUOS team for anyone' +
@@ -83,7 +83,8 @@ export default function DataSharingLanguageTool() {
       ]),
       div({className: 'form-group', style: {marginTop: '1rem'}}, [
         label({style: Styles.MEDIUM}, [
-          '1. Choose the permitted data uses for your study\'s data ', br(),
+          '1. Permitted data uses', br(),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['Choose the permitted data uses for your study\'s data.']), br(),
           span({style: Styles.MEDIUM_DESCRIPTION}, ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
           ' You do this by selecting one of the options in the following section:']),
         ]),
@@ -94,7 +95,7 @@ export default function DataSharingLanguageTool() {
             onClick: () => {
               setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
-            label: 'General Research Use: ',
+            label: 'General Research Use (GRU): ',
             description: 'use is permitted for any research purpose',
             style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
@@ -105,7 +106,7 @@ export default function DataSharingLanguageTool() {
             onClick: () => {
               setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
-            label: 'Health/Medical/Biomedical Use: ',
+            label: 'Health/Medical/Biomedical Use (HMB): ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
             style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
@@ -116,7 +117,7 @@ export default function DataSharingLanguageTool() {
             onClick: () => {
               setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
             },
-            label: 'Disease-related studies: ',
+            label: 'Disease-related studies (DS): ',
             description: 'use is permitted for research on the specified disease',
             style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
@@ -161,7 +162,8 @@ export default function DataSharingLanguageTool() {
 
       div({className: 'form-group', style: {marginTop: '2rem'}}, [
         label({style: {...Styles.MEDIUM, marginBottom: '5px'}}, [
-          '2. Choose any additional constraints you need to put on future uses of your data', br(),
+          '2. Additional constraints', br(),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['Choose any additional constraints you need to put on future uses of your data.']), br(),
           span({style: Styles.MEDIUM_DESCRIPTION}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
         ]),
 
@@ -266,26 +268,23 @@ export default function DataSharingLanguageTool() {
         ])
       ]),
 
-      div({className: 'form-group'}, [
-        label({style: Styles.MEDIUM}, [
-          '3. Generate your suggested Standardized Data Sharing Language below', br(),
-          span({style: Styles.MEDIUM_DESCRIPTION}, ['If your selections above are complete, press generate and the suggested consent form text ' +
-          'based on the GA4GH Data Use Ontology and Machine Readable Consent Guidance will appear below.']),
-          button({
-            style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
-            className: 'button',
-            onClick: () => generate(),
-          }, ['Generate Standardized Data Sharing Language']),
-          textarea({
-            defaultValue: sdsl,
-            className: 'form-control',
-            rows: '12',
-            required: false,
-            readOnly: true,
-            style: {backgroundColor: '#fff'}
-          })
-        ]),
-      ])
+      button({
+        style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
+        className: 'button',
+        onClick: () => generate(),
+      }, ['Generate']),
+
+      textarea({
+        defaultValue: sdsl,
+        className: 'form-control',
+        rows: '12',
+        required: false,
+        readOnly: true,
+        style: {backgroundColor: '#fff'}
+      }),
+
+      div({style: {marginBottom: '2rem'}})
+
     ])
   );
 }

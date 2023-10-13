@@ -63,7 +63,7 @@ const Routes = (props) => (
     <Route path="/privacy" component={PrivacyPolicy} />
     <Route path="/tos" component={TermsOfService} props={props} />
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
-    <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
+    <Route path="/consent_form_generator" component={DataSharingLanguageTool} />
     <Route path="/nih_dms_policy" component={NIHDMSPolicyInfo} />
     <Route path="/anvil_dms_policy" component={AnVILDMSPolicyInfo} />
     <AuthenticatedRoute path="/profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
