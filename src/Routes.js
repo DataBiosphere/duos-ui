@@ -24,7 +24,7 @@ import NIHPilotInfo from './pages/NIHPilotInfo';
 import {Status} from './pages/Status';
 import {SummaryVotes} from './pages/SummaryVotes';
 import BackgroundSignIn from './pages/BackgroundSignIn';
-import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
+import ConsentTextGenerator from './pages/ConsentTextGenerator';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from './pages/DatasetStatistics';
@@ -63,7 +63,7 @@ const Routes = (props) => (
     <Route path="/privacy" component={PrivacyPolicy} />
     <Route path="/tos" component={TermsOfService} props={props} />
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
-    <Route path="/consent_form_generator" component={DataSharingLanguageTool} />
+    <Route path="/consent_text_generator" component={ConsentTextGenerator} />
     <Route path="/nih_dms_policy" component={NIHDMSPolicyInfo} />
     <Route path="/anvil_dms_policy" component={AnVILDMSPolicyInfo} />
     <AuthenticatedRoute path="/profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />

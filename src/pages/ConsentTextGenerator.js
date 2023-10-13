@@ -10,7 +10,7 @@ import {useState} from 'react';
 const buttonStyle = { marginBottom: '2rem', color: '#777',  };
 const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
 
-export default function DataSharingLanguageTool() {
+export default function ConsentTextGenerator() {
   const [general, setGeneral] = useState(false);
   const [hmb, setHmb] = useState(false);
   const [diseases, setDiseases] = useState(false);
@@ -63,7 +63,7 @@ export default function DataSharingLanguageTool() {
   return (
     div({style: {...Styles.PAGE, color: '#1f3b50' }}, [
       div({style: {...Styles.TITLE, marginTop: '3.5rem'}}, [
-        'Consent Form Text Generator'
+        'Consent Text Generator'
       ]),
       div({style: {...Styles.SMALL, marginTop: '1rem'}}, [
         'This tool is made publicly available by the DUOS team for anyone' +
@@ -84,9 +84,7 @@ export default function DataSharingLanguageTool() {
       div({className: 'form-group', style: {marginTop: '1rem'}}, [
         label({style: Styles.MEDIUM}, [
           '1. Permitted data uses', br(),
-          span({style: Styles.MEDIUM_DESCRIPTION}, ['Choose the permitted data uses for your study\'s data.']), br(),
-          span({style: Styles.MEDIUM_DESCRIPTION}, ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
-          ' You do this by selecting one of the options in the following section:']),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['Determine what type of secondary use is permitted for you study\'s data.']),
         ]),
         div({}, [
           RadioButton({
@@ -163,8 +161,7 @@ export default function DataSharingLanguageTool() {
       div({className: 'form-group', style: {marginTop: '2rem'}}, [
         label({style: {...Styles.MEDIUM, marginBottom: '5px'}}, [
           '2. Additional constraints', br(),
-          span({style: Styles.MEDIUM_DESCRIPTION}, ['Choose any additional constraints you need to put on future uses of your data.']), br(),
-          span({style: Styles.MEDIUM_DESCRIPTION}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['If necessary, choose any additional terms on your study\'s data to govern its use.']),
         ]),
 
         div({}, [
