@@ -7,7 +7,7 @@ import {Notifications, searchOntologies} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {useState} from 'react';
 
-const buttonStyle = { marginBottom: '2rem', color: '#777',  };
+const buttonStyle = { marginBottom: '2rem', color: '#777' };
 const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
 
 export default function ConsentTextGenerator() {
