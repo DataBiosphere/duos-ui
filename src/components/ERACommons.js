@@ -15,7 +15,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     expirationCount: 0,
     eraCommonsId: '',
     nihError: false,
-    isHovered: false
+    isHovered: false,
+    researcherProfile: {}
   };
 
   componentDidMount = async () => {
@@ -25,6 +26,13 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       await this.getUserInfo();
     }
   };
+
+  componentDidUpdate(prevProps) {
+    if (this.props.researcherProfile !== prevProps.researcherProfile) {
+      this.setState({ researcherProfile: this.props.researcherProfile });
+      this.getUserInfo();
+    }
+  }
 
   onMouseEnter = () => {
     this.setState({ isHovered: true });
@@ -48,8 +56,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const response = await User.getMe();
-    console.log(this.props)
+    const response = this.props.readOnly ? this.state.researcherProfile : await User.getMe();
     const props = response.researcherProperties;
     const authProp = find({'propertyKey':'eraAuthorized'})(props);
     const expProp = find({'propertyKey':'eraExpiration'})(props);
@@ -141,12 +148,11 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         div({
           isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
         }, [
-          a({
+          !this.props.readOnly && a({
             style: buttonStyle,
             onMouseEnter: this.onMouseEnter,
             onMouseLeave: this.onMouseLeave,
             onClick: this.redirectToNihLogin,
-            disabled: this.props.readOnly,
             target: '_blank'
           }, [
             div({ style: logoStyle }),
@@ -170,13 +176,12 @@ export const eRACommons = hh(class eRACommons extends React.Component {
                 paddingTop: 5
               }
             }, [this.state.eraCommonsId]),
-            button({
+            !this.props.readOnly && button({
               style: {
                 float: 'left',
                 margin: '2px 0 0 10px'
               },
               type: 'button',
-              disabled: this.props.readOnly,
               onClick: this.deleteNihAccount,
               className: 'close'
             }, [
@@ -191,8 +196,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             },
             className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding'
           }, [
-            div({ isRendered: this.state.expirationCount >= 0, className: 'fadein' }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
-            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, ['Your NIH authentication has expired'])
+            div({ isRendered: this.state.expirationCount >= 0, className: 'fadein' }, [`${this.props.readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${this.state.expirationCount} days`]),
+            div({ isRendered: this.state.expirationCount < 0, className: 'fadein' }, [`${this.props.readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`])
           ])
         ])
       ])
