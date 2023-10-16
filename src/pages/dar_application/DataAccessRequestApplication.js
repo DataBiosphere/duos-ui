@@ -100,8 +100,6 @@ const DataAccessRequestApplication = (props) => {
 
   const [formValidation, setFormValidation] = useState({ researcherInfoErrors: {}, darErrors: {}, rusErrors: {} });
 
-  const [researcherProfile, setResearcherProfile] = useState({});
-
   const [nihValid, setNihValid] = useState(true);
   const [showNihValidationError, setShowNihValidationError] = useState(false);
 
@@ -252,10 +250,6 @@ const DataAccessRequestApplication = (props) => {
   }, [props.match.params, props.readOnlyMode]);
 
   const init = useCallback(async () => {
-    const { dataRequestId, collectionId } = props.match.params;
-    const collection = await Collections.getCollectionById(collectionId);
-    const researcherProfile = await User.getById(collection.createUserId);
-    setResearcherProfile(researcherProfile);
     let formData = {};
     setIsLoading(false);
 
