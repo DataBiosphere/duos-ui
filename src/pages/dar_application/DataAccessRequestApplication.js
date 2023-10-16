@@ -251,6 +251,7 @@ const DataAccessRequestApplication = (props) => {
 
   const init = useCallback(async () => {
     let formData = {};
+    const { dataRequestId, collectionId } = props.match.params;
     setIsLoading(false);
 
     if (!isNil(collectionId)) {
