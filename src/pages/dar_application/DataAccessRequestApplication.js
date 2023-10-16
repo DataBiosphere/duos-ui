@@ -229,17 +229,34 @@ const DataAccessRequestApplication = (props) => {
     setStep(newStep);
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { collectionId } = props.match.params;
+        if (props.readOnlyMode) {
+          const collection = await Collections.getCollectionById(collectionId);
+          const response = await User.getById(collection.createUserId);
+          setResearcher(response);
+        } else {
+          const response = await User.getMe();
+          const signingOfficials = await User.getSOsForCurrentUser();
+          setResearcher(response);
+          setAllSigningOfficials(signingOfficials);
+        }
+      } catch (error) {
+        setShowDialogSave(false);
+        NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
+      }
+    };
+    fetchData();
+  }, [props.match.params, props.readOnlyMode]);
+
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     const collection = await Collections.getCollectionById(collectionId);
     const researcherProfile = await User.getById(collection.createUserId);
     setResearcherProfile(researcherProfile);
     let formData = {};
-    const researcher = await User.getMe();
-    const signingOfficials = await User.getSOsForCurrentUser();
-
-    setResearcher(researcher);
-    setAllSigningOfficials(signingOfficials);
     setIsLoading(false);
 
     if (!isNil(collectionId)) {
@@ -267,7 +284,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params]);
+  }, [onScroll, props.match.params, researcher]);
 
   useEffect(() => {
     init();
@@ -538,7 +555,6 @@ const DataAccessRequestApplication = (props) => {
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
-                  researcherProfile={props.readOnlyMode ? researcherProfile : researcher}
                   includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
