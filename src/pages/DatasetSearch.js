@@ -41,7 +41,6 @@ const myInstitutionQuery = (user) => {
 }
 
 export const DatasetSearch = (props) => {
-  const { location } = props;
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +53,7 @@ export const DatasetSearch = (props) => {
       icon: duosIcon,
       title: 'DUOS Data Library',
     },
-    '/datalibrary_broad': {
+    'broad': {
       query: {
         'match_phrase': {
           'submitter.institution.name': 'The Broad Institute of MIT and Harvard'
@@ -63,7 +62,7 @@ export const DatasetSearch = (props) => {
       icon: broadIcon,
       title: 'Broad Data Library',
     },
-    '/datalibrary_mgb': {
+    'mgb': {
       query: {
         'bool': {
           'should': [
@@ -93,7 +92,7 @@ export const DatasetSearch = (props) => {
       icon: mgbIcon,
       title: 'Mass General Brigham Data Library',
     },
-    '/datalibrary_elwazi': {
+    'elwazi': {
       query: {
         'match_phrase': {
           'study.description': 'elwazi'
@@ -102,12 +101,12 @@ export const DatasetSearch = (props) => {
       icon: elwaziIcon,
       title: 'eLwazi Data Library',
     },
-    '/datalibrary_myinstitution': {
+    'myinstitution': {
       query: user.isSigningOfficial ? signingOfficialQuery(user) : myInstitutionQuery(user),
       icon: null,
       title: user.institution.name + ' Data Library',
     },
-    '/datalibrary_nhgri': {
+    'nhgri': {
       query: {
         'match_phrase': {
           'study.description': 'anvil'
@@ -116,7 +115,7 @@ export const DatasetSearch = (props) => {
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
     },
-    'custom': {
+    '/custom': {
       query: {
         'bool': {
           'should': [
@@ -138,7 +137,8 @@ export const DatasetSearch = (props) => {
     }
   }
 
-  const version = query === undefined ? versions[location.pathname] : versions['custom'];
+  const key = query === undefined ? '/datalibrary' : query;
+  const version = versions[key] === undefined ? versions['/custom'] : versions[key];
 
   useEffect(() => {
     const init = async () => {
