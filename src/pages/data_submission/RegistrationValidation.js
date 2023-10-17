@@ -16,10 +16,11 @@ export const compileSchema = (schema) => {
   ajv.addFormat('date', dateValidator.isValid);
   ajv.addFormat('uri', urlValidator.isValid);
   ajv.addFormat('email', emailValidator.isValid);
-  const clone = Object.assign({}, schema);
-  delete clone['$schema'];
-  delete clone['version'];
-  return ajv.compile(clone);
+
+  // Ajv doesn't like the `$schema` and `version` properties
+  // eslint-disable-next-line no-unused-vars
+  const {$schema, version, ...obj} = schema;
+  return ajv.compile(obj);
 };
 
 /**
@@ -37,7 +38,16 @@ export const validateForm = (schema, formData) => {
   return [valid, validation];
 };
 
-// Construct an object of the form: validation.`fieldName` { failed: ['required'], valid: true|false}
+/**
+ * Construct a validation object of the form:
+ * {
+ *  <fieldName>: { failed: ['required'], valid: true|false},
+ *  <fieldName>: { failed: ['required'], valid: true|false},
+ * }
+ *
+ * @param errors Schema validation errors from Ajv
+ * @returns {{}}
+ */
 function errorsToValidation(errors) {
   let validation = {};
   if (errors !== null) {
