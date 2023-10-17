@@ -109,12 +109,14 @@ export const DataSubmissionForm = (props) => {
 
     // check against json schema validator to see if there are uncaught validation issues
     let [valid, validation] = validateForm(registrationSchema, registration);
+
     // check secondary validation for non-schema validation issues
     if (!uniqueValidator.isValid(registration.studyName, studyNames)) {
       validation.studyName = {
         failed: ['unique'],
         valid: false
       };
+      valid = false;
     }
 
     if (formData.alternativeDataSharingPlan === true) {

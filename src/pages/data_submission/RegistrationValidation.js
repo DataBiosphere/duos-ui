@@ -18,7 +18,7 @@ export const compileSchema = (schema) => {
 };
 
 /**
- * Validates given object according to the schema in a format that
+ * Validates given form data object according to the schema in a format that
  * our internal form components can understand.
  *
  * @param {*} schema The dataset registration schema
