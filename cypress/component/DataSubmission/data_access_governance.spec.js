@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
 import { DAC, User, Institution, Schema, Study } from '../../../src/libs/ajax';
-import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
+import DataSubmissionForm from '../../../src/pages/data_submission/DataSubmissionForm';
 import { mount } from 'cypress/react';
 
 const dacs = [

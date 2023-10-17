@@ -1,5 +1,5 @@
 import {div, h, h2, h3, span, a} from 'react-hyperscript-helpers';
-import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
+import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms';
 import { useState } from 'react';
 import { YES_NHGRI_YES_PHS_ID, YES_NHGRI_NO_PHS_ID, NO_NHGRI_YES_ANVIL  } from './NihAnvilUse';
 

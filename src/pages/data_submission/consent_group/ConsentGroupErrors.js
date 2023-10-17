@@ -1,7 +1,7 @@
 import { selectedPrimaryGroup } from './EditConsentGroup';
 import { isNil, isEmpty } from 'lodash/fp';
-import { dateValidator } from '../../forms/formValidation';
-import { FormValidators } from '../../forms/forms';
+import { dateValidator } from '../../../components/forms/formValidation';
+import { FormValidators } from '../../../components/forms/forms';
 
 const requiredError = {
   valid: false,
