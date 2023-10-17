@@ -10,12 +10,12 @@ import {get, isNil, set} from 'lodash';
  */
 export const compileSchema = (schema) => {
   const ajv = new Ajv({strict: false, allErrors: true});
-  ajv.addKeyword('label');
-  ajv.addKeyword('prompt');
   addFormats(ajv);
-  ajv.addFormat('date', dateValidator.isValid);
-  ajv.addFormat('uri', urlValidator.isValid);
-  ajv.addFormat('email', emailValidator.isValid);
+  ajv.addKeyword('label')
+    .addKeyword('prompt')
+    .addFormat('date', dateValidator.isValid)
+    .addFormat('uri', urlValidator.isValid)
+    .addFormat('email', emailValidator.isValid);
 
   // Ajv doesn't like the `$schema` and `version` properties
   // eslint-disable-next-line no-unused-vars
