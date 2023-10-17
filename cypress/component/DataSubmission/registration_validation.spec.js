@@ -14,10 +14,6 @@ const formData = {
   'dataSubmitterUserId': 1,
   'nihAnvilUse': 'I am not NHGRI funded and do not plan to store data in AnVIL',
   'consentGroups': [{
-    'fileTypes': [{
-      'fileType': 'Arrays',
-      'functionalEquivalence': 'equivalence'
-    }],
     'numberOfParticipants': 2,
     'consentGroupName': 'name',
     'generalResearchUse': true,
@@ -29,8 +25,8 @@ const formData = {
 let schema = undefined;
 
 beforeEach(function () {
-  cy.fixture('dataset-registration-v1').then(function (schemaData) {
-    schema = schemaData;
+  cy.fixture('dataset-registration-v1').then(function (data) {
+    schema = data;
   });
 });
 
