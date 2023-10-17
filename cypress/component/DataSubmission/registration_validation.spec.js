@@ -49,4 +49,60 @@ describe('Dataset Registration Schema Validator', () => {
     expect(validation).to.not.be.empty;
   });
 
+  it('Validates a valid date field', () => {
+    const form = Object.assign({}, formData, {targetDeliveryDate: '2021-01-01', targetPublicReleaseDate: '2021-01-01'});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.true;
+    expect(validation).to.be.empty;
+  });
+
+  it('Invalidates an invalid date field', () => {
+    const form = Object.assign({}, formData, {targetDeliveryDate: '20210101', targetPublicReleaseDate: '20210101'});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.false;
+    expect(validation).to.not.be.empty;
+  });
+
+  it('Validates a valid email field', () => {
+    const form = Object.assign({}, formData, {dataCustodianEmail: ['user@test.com']});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.true;
+    expect(validation).to.be.empty;
+  });
+
+  it('Invalidates an invalid email field', () => {
+    const form = Object.assign({}, formData, {dataCustodianEmail: ['user']});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.false;
+    expect(validation).to.not.be.empty;
+  });
+
+  it('Validates a valid uri field', () => {
+    const consentGroup = {
+      'numberOfParticipants': 2,
+      'consentGroupName': 'name',
+      'generalResearchUse': true,
+      'dataAccessCommitteeId': 1,
+      'url': 'https://some.site.org'
+    };
+    const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.true;
+    expect(validation).to.be.empty;
+  });
+
+  it('Invalidates an invalid uri field', () => {
+    const consentGroup = {
+      'numberOfParticipants': 2,
+      'consentGroupName': 'name',
+      'generalResearchUse': true,
+      'dataAccessCommitteeId': 1,
+      'url': 'some place . org'
+    };
+    const form = Object.assign({}, formData, {consentGroups: [consentGroup]});
+    const [valid, validation] = validateForm(schema, form);
+    expect(valid).to.be.false;
+    expect(validation).to.not.be.empty;
+  });
+
 });
