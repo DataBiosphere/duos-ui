@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import {dateValidator, emailValidator, urlValidator} from '../../components/forms/formValidation';
+import {get, isNil, set} from 'lodash';
 
 /**
  * Generate a ValidateFunction from a dataset registration schema
@@ -40,24 +41,56 @@ export const validateForm = (schema, formData) => {
 function errorsToValidation(errors) {
   let validation = {};
   if (errors !== null) {
-    errors.forEach(err => {
-      let field = extractFieldFromError(err);
-      if (field !== null) {
-        Object.assign(validation, {[field]: {failed: [err.keyword], valid: false}});
+    errors.forEach(error => {
+      let path;
+      let errorType;
+      if (error.keyword === 'required') {
+        path = error.instancePath + '/' + error.params.missingProperty;
+        errorType = 'required';
+      } else if (error.keyword === 'format') {
+        // format errors are, e.g., date/email/uri errors
+        path = error.instancePath;
+        errorType = error.params.format; // e.g., 'date'
+      } else if (error.keyword === 'type') {
+        path = error.instancePath;
+        errorType = error.params.type; // e.g., 'integer'
+      } else {
+        path = error.instancePath;
+        errorType = 'unknown';
       }
+      const splitPath = splitJsonPointer(path);
+      // update the validation object for the current field with this new error
+      const existingValidation = get(validation, splitPath);
+      const newValidation = updateValidation(existingValidation, errorType);
+      set(validation, splitPath, newValidation);
     });
   }
   return validation;
 }
 
-function extractFieldFromError(err) {
-  let field = null;
-  if (err.keyword === 'required') {
-    field = err.params.missingProperty;
-  } else if (err.keyword === 'format') {
-    // This isn't right for nested instance paths ...
-    // /consentGroups/0/url --> url, etc.
-    field = err.instancePath.split('/').pop();
+const updateValidation = (existingValidation, validationError) => {
+  if (isNil(existingValidation)) {
+    return {
+      valid: false,
+      failed: [validationError]
+    };
   }
-  return field;
-}
+  // if the field is required and empty, we shouldn't also error on, e.g., that it isn't a date format
+  if (existingValidation.failed.includes('required') || validationError === 'required') {
+    return {
+      valid: false,
+      failed: ['required']
+    };
+  }
+  return {
+    valid: false,
+    failed: existingValidation.failed + [validationError],
+  };
+};
+
+const splitJsonPointer = (jsonPointer) => {
+  if (jsonPointer[0] === '/') {
+    jsonPointer = jsonPointer.substring(1, jsonPointer.length);
+  }
+  return jsonPointer.split('/');
+};
