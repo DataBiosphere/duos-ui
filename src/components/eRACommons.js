@@ -58,8 +58,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   getUserInfo = async () => {
     const response = this.props.readOnly ? this.state.researcherProfile : await User.getMe();
-    // console.log('response:')
-    // console.log(response)
     const props = response.researcherProperties;
     const authProp = find({'propertyKey':'eraAuthorized'})(props);
     const expProp = find({'propertyKey':'eraExpiration'})(props);
@@ -136,8 +134,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     const nihErrorMessage = 'Something went wrong. Please try again.';
 
     return (
-      // console.log('render:'),
-      // console.log(this.state.researcherProfile),
       div({
         className: this.props.className,
         style: { minHeight: 65, ...this.props.style }
