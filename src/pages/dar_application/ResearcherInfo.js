@@ -59,7 +59,7 @@ export default function ResearcherInfo(props) {
         div({
           datacy: 'researcher-info-profile-submitted',
           isRendered: (completed === false && libraryCardReqSatisfied === false), className: 'rp-alert' }, [
-          Alert({
+          !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'important',
             title: span([
