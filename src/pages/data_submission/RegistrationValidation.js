@@ -86,7 +86,7 @@ const updateValidation = (existingValidation, validationError) => {
     };
   }
   // if the field is required and empty, we shouldn't also error on, e.g., that it isn't a date format
-  if (existingValidation.failed.includes('required') || validationError === 'required') {
+  if ((existingValidation.failed && existingValidation.failed.includes('required')) || validationError === 'required') {
     return {
       valid: false,
       failed: ['required']

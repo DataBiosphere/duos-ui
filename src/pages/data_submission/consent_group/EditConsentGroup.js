@@ -14,8 +14,6 @@ export const selectedPrimaryGroup = (consentGroup) => {
     return 'diseaseSpecificUse';
   } else if (!isNil(consentGroup.poa) && consentGroup.poa) {
     return 'poa';
-  } else if (!isNil(consentGroup.openAccess) && consentGroup.openAccess) {
-    return 'openAccess';
   } else if (!isNil(consentGroup.otherPrimary) && isString(consentGroup.otherPrimary)) {
     return 'otherPrimary';
   }
@@ -119,8 +117,60 @@ export const EditConsentGroup = (props) => {
         onValidationChange,
       }),
 
-      // primary
+      // controlled, open and external access
       div({}, [
+        h(FormField, {
+          title: 'Data Access Management',
+          description: 'Select a data access management strategy',
+          id: idx + '_accessManagement_controlled',
+          name: 'accessManagement',
+          value: 'controlled',
+          type: FormFieldTypes.RADIOBUTTON,
+          toggleText: 'Controlled Access (managed by a DAC in DUOS)',
+          disabled: disableFields,
+          defaultValue: consentGroup.accessManagement,
+          onChange,
+          validation: validation.accessManagement,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'accessManagement', validation });
+          },
+        }),
+
+        h(FormField, {
+          id: idx + '_accessManagement_open',
+          name: 'accessManagement',
+          value: 'open',
+          type: FormFieldTypes.RADIOBUTTON,
+          toggleText: 'Open Access (does not need DAC approval)',
+          disabled: disableFields,
+          defaultValue: consentGroup.accessManagement,
+          onChange,
+          validation: validation.accessManagement,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'accessManagement', validation });
+          },
+        }),
+
+        h(FormField, {
+          id: idx + '_accessManagement_external',
+          name: 'accessManagement',
+          value: 'external',
+          type: FormFieldTypes.RADIOBUTTON,
+          toggleText: 'External Access (managed by a DAC external to DUOS)',
+          disabled: disableFields,
+          defaultValue: consentGroup.accessManagement,
+          onChange,
+          validation: validation.accessManagement,
+          onValidationChange: ({ validation }) => {
+            onValidationChange({ key: 'accessManagement', validation });
+          },
+        }),
+      ]),
+
+      // primary
+      div({
+        isRendered: consentGroup.accessManagement !== 'open',
+      }, [
         h(FormField, {
           title: 'Primary Data Use Terms*',
           description: 'Please select one of the following data use permissions for your dataset',
@@ -231,23 +281,6 @@ export const EditConsentGroup = (props) => {
 
         h(FormField, {
           type: FormFieldTypes.RADIOBUTTON,
-          id: idx + '_primaryConsent_openAccess',
-          name: 'primaryConsent',
-          value: 'openAccess',
-          toggleText: 'No Restrictions (Open Access Data)',
-          disabled: disableFields,
-          defaultValue: selectedPrimaryGroup(consentGroup),
-          onChange: ({ value }) => {
-            onPrimaryChange({ key: value, value: true });
-          },
-          validation: validation.primaryConsent,
-          onValidationChange: ({ validation }) => {
-            onValidationChange({ key: 'primaryConsent', validation });
-          },
-        }),
-
-        h(FormField, {
-          type: FormFieldTypes.RADIOBUTTON,
           id: idx + '_primaryConsent_otherPrimary',
           name: 'primaryConsent',
           value: 'otherPrimary',
@@ -284,7 +317,7 @@ export const EditConsentGroup = (props) => {
 
       // secondary
       div({
-        isRendered: consentGroup.openAccess !== true,
+        isRendered: consentGroup.accessManagement !== 'open',
       }, [
         h(FormField, {
           title: 'Secondary Data Use Terms',
@@ -460,10 +493,10 @@ export const EditConsentGroup = (props) => {
 
       // data access committee
       h(FormField, {
-        isRendered: consentGroup.openAccess !== true,
+        isRendered: consentGroup.accessManagement === 'controlled',
         id: idx + 'dataAccessCommitteeId',
         name: 'dataAccessCommitteeId',
-        title: 'Data Access Committee',
+        title: 'Data Access Committee (DAC)',
         description: 'Please select which DAC should govern requests for this dataset',
         type: FormFieldTypes.SELECT,
         selectOptions: dacs.map((dac) => {
@@ -472,7 +505,7 @@ export const EditConsentGroup = (props) => {
         onChange: ({ key, value }) => {
           onChange({ key, value: value?.dacId });
         },
-        validators: [FormValidators.REQUIRED],
+        //validators: consentGroup.accessManagement === 'controlled' ? [FormValidators.REQUIRED] : undefined,
         validation: validation.dataAccessCommitteeId,
         disabled: disableFields,
         defaultValue: dacs.map((dac) => {
