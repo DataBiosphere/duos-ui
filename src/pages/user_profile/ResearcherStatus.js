@@ -28,7 +28,7 @@ export default function ResearcherStatus(props) {
     const init = async () => {
       try {
         if (!isNil(user) && !isNil(user.libraryCards)) {
-          if (user.libraryCards.length == 0) {
+          if (user.libraryCards.length === 0) {
             setHasCard(false);
           }
           else {
