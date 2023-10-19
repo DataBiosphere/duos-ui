@@ -12,7 +12,7 @@ import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
 import { Collections } from '../../libs/ajax';
-
+import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication';
 const tabContainerColor = 'rgb(115,154,164)';
 
 const tabStyleOverride = {
@@ -48,6 +48,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
   if (adminPage) {
     return {
       applicationInformation: 'Application Information',
+      fullDAR: 'Full DAR',
       chairVote: 'Chair Vote'
     };
   }
@@ -66,7 +67,7 @@ const tabsForUser = (user, buckets, adminPage = false) => {
     flatMap(da => da.chairpersonVotes),
     filter(v => v.userId === user.userId)
   )(dataAccessBuckets);
-  const updatedTabs = { applicationInformation: 'Application Information' };
+  const updatedTabs = { applicationInformation: 'Application Information', fullDAR: 'Full DAR' };
   if (!isEmpty(myMemberVotes)) {
     updatedTabs.memberVote = 'Member Vote';
   }
@@ -84,7 +85,8 @@ export default function DarCollectionReview(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [subcomponentLoading, setSubcomponentLoading] = useState(true);
   const [tabs, setTabs] = useState({
-    applicationInformation: 'Application Information'
+    applicationInformation: 'Application Information',
+    fullDAR: 'Full DAR'
   });
   const [selectedTab, setSelectedTab] = useState(tabs.applicationInformation);
   const [researcherProfile, setResearcherProfile] = useState({});
@@ -200,6 +202,12 @@ export default function DarCollectionReview(props) {
           collaborationLetterLocation: darInfo.collaborationLetterLocation,
           irbDocumentName: darInfo.irbDocumentName,
           collaborationLetterName: darInfo.collaborationLetterName
+        }),
+        h(DataAccessRequestApplication, {
+          isRendered: selectedTab === tabs.fullDAR,
+          readOnlyMode: true,
+          researcherProfile: researcherProfile,
+          ...props
         }),
         h(MultiDatasetVotingTab, {
           isRendered: !adminPage && selectedTab === tabs.memberVote,

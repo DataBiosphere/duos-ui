@@ -25,12 +25,10 @@ import {
 import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
-
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
-  { name: 'Research Purpose Statement' },
-  { name: 'Data Use Agreement' }
+  { name: 'Research Purpose Statement' }
 ];
 
 const fetchAllDatasets = async (dsIds) => {
@@ -189,7 +187,11 @@ const DataAccessRequestApplication = (props) => {
     fetchAllDatasets(formData.datasetIds).then((datasets) => {
       setDatasets(datasets);
     });
-  }, [formData.datasetIds]);
+    if (!props.readOnlyMode) {
+      ApplicationTabs.push({ name: 'Data Use Agreement' });
+      setApplicationTabs(ApplicationTabs);
+    }
+  }, [formData.datasetIds, props.readOnlyMode]);
 
   useEffect(() => {
     translateDataUseRestrictionsFromDataUseArray(datasets.map((ds) => ds.dataUse)).then((translations) => {
@@ -225,14 +227,31 @@ const DataAccessRequestApplication = (props) => {
     setStep(newStep);
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { collectionId } = props.match.params;
+        if (props.readOnlyMode) {
+          const collection = await Collections.getCollectionById(collectionId);
+          const response = await User.getById(collection.createUserId);
+          setResearcher(response);
+        } else {
+          const response = await User.getMe();
+          const signingOfficials = await User.getSOsForCurrentUser();
+          setResearcher(response);
+          setAllSigningOfficials(signingOfficials);
+        }
+      } catch (error) {
+        setShowDialogSave(false);
+        NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
+      }
+    };
+    fetchData();
+  }, [props.match.params, props.readOnlyMode]);
+
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
-    const researcher = await User.getMe();
-    const signingOfficials = await User.getSOsForCurrentUser();
-
-    setResearcher(researcher);
-    setAllSigningOfficials(signingOfficials);
     setIsLoading(false);
 
     if (!isNil(collectionId)) {
@@ -260,7 +279,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params]);
+  }, [onScroll, props.match.params, researcher]);
 
   useEffect(() => {
     init();
@@ -286,7 +305,7 @@ const DataAccessRequestApplication = (props) => {
 
   const updateDraftResponse = async (formattedFormData, referenceId) => {
     let darPartialResponse;
-    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+    if (!isNil(referenceId) && !isEmpty(referenceId)) {
       darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId);
     } else {
       darPartialResponse = await DAR.postDarDraft(formattedFormData);
@@ -453,7 +472,7 @@ const DataAccessRequestApplication = (props) => {
 
   return (
     <div>
-      <div className='container' style={{ paddingBottom: '2%' }}>
+      <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
           <div className='row no-margin'>
             <Notification notificationData={notificationData} />
@@ -462,10 +481,11 @@ const DataAccessRequestApplication = (props) => {
                 'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
               <PageHeading
                 title='Data Access Request Application'
-                description='Please complete the fields below to request access to data.'
+                description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
               />
             </div>
             {formData.darCode !== null &&
+              !props.readOnlyMode &&
               <div className='col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding'>
                 <a id='btn_back' onClick={back} className='btn-primary btn-back'>
                   <i className='glyphicon glyphicon-chevron-left' />
@@ -529,7 +549,8 @@ const DataAccessRequestApplication = (props) => {
               <div className='step-container'>
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
-                  readOnlyMode={isAttested}
+                  readOnlyMode={props.readOnlyMode || isAttested}
+                  includeInstructions={!props.readOnlyMode}
                   darCode={formData.darCode}
                   formData={formData}
                   validation={formValidation.researcherInfoErrors}
@@ -551,7 +572,8 @@ const DataAccessRequestApplication = (props) => {
               <div className='step-container'>
                 <DataAccessRequest
                   formData={formData}
-                  readOnlyMode={isAttested}
+                  readOnlyMode={props.readOnlyMode || isAttested}
+                  includeInstructions={!props.readOnlyMode}
                   datasets={datasets}
                   validation={formValidation.darErrors}
                   formValidationChange={(val) => formValidationChange('darErrors', val)}
@@ -569,7 +591,7 @@ const DataAccessRequestApplication = (props) => {
               <div className='step-container'>
                 <ResearchPurposeStatement
                   darCode={formData.darCode}
-                  readOnlyMode={isAttested}
+                  readOnlyMode={props.readOnlyMode || isAttested}
                   validation={formValidation.rusErrors}
                   formValidationChange={(val) => formValidationChange('rusErrors', val)}
                   formFieldChange={formFieldChange}
@@ -577,15 +599,16 @@ const DataAccessRequestApplication = (props) => {
                 />
               </div>
 
-              <div className='step-container'>
-                <DataUseAgreements
-                  darCode={formData.darCode}
-                  cancelAttest={() => setIsAttested(false)}
-                  isAttested={isAttested}
-                  attest={attemptSubmit}
-                  save={() => setShowDialogSave(true)}
-                />
-              </div>
+              {!props.readOnlyMode ?
+                <div className='step-container'>
+                  <DataUseAgreements
+                    darCode={formData.darCode}
+                    cancelAttest={() => setIsAttested(false)}
+                    isAttested={isAttested}
+                    attest={attemptSubmit}
+                    save={() => setShowDialogSave(true)}
+                  />
+                </div> : <div />}
 
               {isAttested &&
                 <div className='step-container'>
@@ -596,7 +619,7 @@ const DataAccessRequestApplication = (props) => {
           </div>
         </form>
       </div>
-      <UsgOmbText />
+      {!props.readOnlyMode ? <UsgOmbText /> : null}
     </div>
   );
 };

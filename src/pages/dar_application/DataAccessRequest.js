@@ -73,6 +73,7 @@ export default function DataAccessRequest(props) {
     setDatasets,
     validation,
     readOnlyMode,
+    includeInstructions,
     formValidationChange,
     ariaLevel = 2
   } = props;
@@ -132,7 +133,7 @@ export default function DataAccessRequest(props) {
           validators: [FormValidators.REQUIRED],
           validation: validation.datasetIds,
           onValidationChange,
-          description: 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:',
+          description: includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : '',
           defaultValue: datasets?.map((ds) => formatSearchDataset(ds)),
           selectConfig: {
             // return custom html for displaying
@@ -156,7 +157,7 @@ export default function DataAccessRequest(props) {
           disabled: readOnlyMode,
           validators: [FormValidators.REQUIRED],
           validation: validation.projectTitle,
-          description: 'Please note that coordinated requests by External Collaborators should each use the same title.',
+          description: includeInstructions ? 'Please note that coordinated requests by External Collaborators should each use the same title.' : '',
           id: 'projectTitle',
           placeholder: 'Project Title',
           defaultValue: formData.projectTitle,
@@ -304,7 +305,7 @@ export default function DataAccessRequest(props) {
           type: FormFieldTypes.TEXTAREA,
           title: '2.4 Non-Technical Summary',
           validators: [FormValidators.REQUIRED],
-          description: 'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).',
+          description: includeInstructions ? 'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).' : '',
           placeholder: 'Please limit your your non-technical summary to 1100 characters',
           rows: 6,
           maxLength: 1100,
@@ -317,7 +318,7 @@ export default function DataAccessRequest(props) {
 
         h(FormFieldTitle, {
           title: '2.5 Data Use Acknowledgements',
-          description: 'Please confirm listed acknowledgements and/or document requirements below:',
+          description: includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : '',
           isRendered: needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets),
         }),
 

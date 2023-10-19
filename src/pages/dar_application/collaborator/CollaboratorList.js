@@ -96,11 +96,16 @@ export default function CollaboratorList(props) {
           id: `add-${collaboratorKey}-btn`,
           type: 'button', // default button element type inside a form is "submit".
           className: 'button button-white',
-          style: { marginTop: 25, marginBottom: 5 },
+          style: {
+            marginTop: 25,
+            marginBottom: 5,
+            ...(props.disabled ? { cursor: 'not-allowed' } : {}),
+          },
           onClick: () => {
             !props.disabled && setShowNewForm(true);
           },
-          isRendered: !showNewForm
+          isRendered: !showNewForm,
+          disabled: props.disabled,
         }, [`Add ${collaboratorLabel}`]),
         h(CollaboratorForm, {
           index: collaborators.length,

@@ -19,6 +19,7 @@ export default function ResearcherInfo(props) {
   const {
     allSigningOfficials,
     readOnlyMode,
+    includeInstructions,
     completed,
     darCode,
     eRACommonsDestination,
@@ -58,7 +59,7 @@ export default function ResearcherInfo(props) {
         div({
           datacy: 'researcher-info-profile-submitted',
           isRendered: (completed === false && libraryCardReqSatisfied === false), className: 'rp-alert' }, [
-          Alert({
+          !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'important',
             title: span([
@@ -84,7 +85,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row'}, [
           h3('1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')),
-          span({ className: `${showNihValidationError ? 'errored' : 'default-color'}`, isRendered: formData.checkCollaborator !== true }, [
+          !readOnlyMode && span({ className: `${showNihValidationError ? 'errored' : 'default-color'}`, isRendered: formData.checkCollaborator !== true }, [
             'Please authenticate with ',
             a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
           ]),
@@ -92,6 +93,7 @@ export default function ResearcherInfo(props) {
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
             eRACommons({
               destination: eRACommonsDestination,
+              researcherProfile: researcher,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
               validationError: showNihValidationError,
@@ -104,17 +106,17 @@ export default function ResearcherInfo(props) {
             div({
               datacy: 'researcher-info-missing-library-cards',
               isRendered: libraryCardReqSatisfied === false, className: 'rp-alert' }, [
-              Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
+              !readOnlyMode && Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
             ]),
             div({
               datacy: 'researcher-info-profile-unsubmitted',
               isRendered: (completed === false && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
-              Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
+              !readOnlyMode && Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
             ]),
             div({
               datacy: 'researcher-info-profile-submitted',
               isRendered: (completed === true && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
-              Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
+              !readOnlyMode && Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
             ]),
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
@@ -151,7 +153,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'internal-lab-staff'}, [
           h3('1.4 Internal Lab Staff'),
-          div(
+          includeInstructions && div(
             `Please add internal Lab Staff here. Internal Lab Staff are defined as users of data from
             this data access request, including any that are downloaded or utilized in the cloud. 
             please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
@@ -173,7 +175,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'internal-collaborators'}, [
           h3('1.5 Internal Collaborators'),
-          div(
+          includeInstructions && div(
             `Please list Internal Collaborators here. Internal Collaborators are defined as individuals
             who are not under the direct supervision of the PI (e.g., not a member of the PI's 
             laboratory) who assists with the PI's research project involving controlled-access data 
@@ -364,7 +366,7 @@ export default function ResearcherInfo(props) {
 
         div({className: 'dar-application-row', datacy: 'external-collaborators'}, [
           h3('1.9 External Collaborators'),
-          div(
+          includeInstructions && div(
             `Please list External collaborators here. External Collaborators are not employees of the 
             Requesting PI's institution and/or do not work at the same location as the PI, and 
             consequently must be independently approved to access controlled-access data subject to 
