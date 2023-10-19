@@ -32,9 +32,10 @@ export default function ResearcherStatus(props) {
             setHasCard(false);
           }
           else {
-            const signingOfficialUser = await User.getById(user.libraryCards[0].institution.createUserId);
+            const signingOfficialUsers = await User.getSOsForCurrentUser();
             setIssuedOn(user.libraryCards[0].createDate);
-            setIssuedBy(signingOfficialUser.displayName);
+            const names = signingOfficialUsers.map(so => so.displayName);
+            setIssuedBy(names.join(', '));
           }
         }
       } catch (error) {
