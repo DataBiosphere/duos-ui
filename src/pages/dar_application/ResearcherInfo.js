@@ -106,17 +106,17 @@ export default function ResearcherInfo(props) {
             div({
               datacy: 'researcher-info-missing-library-cards',
               isRendered: libraryCardReqSatisfied === false, className: 'rp-alert' }, [
-              Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
+              !readOnlyMode && Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
             ]),
             div({
               datacy: 'researcher-info-profile-unsubmitted',
               isRendered: (completed === false && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
-              Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
+              !readOnlyMode && Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
             ]),
             div({
               datacy: 'researcher-info-profile-submitted',
               isRendered: (completed === true && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
-              Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
+              !readOnlyMode && Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
             ]),
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start' } }, [
