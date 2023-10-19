@@ -22,6 +22,7 @@ export const DataSubmissionForm = (props) => {
   const [registrationSchema, setRegistrationSchema] = useState({});
   const [institutions, setInstitutions] = useState([]);
   const [studyNames, setStudyNames] = useState([]);
+  const [datasetNames, setDatasetNames] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
@@ -44,11 +45,17 @@ export const DataSubmissionForm = (props) => {
       setStudyNames(studyNames);
     };
 
+    const getAllDatasetNames = async() => {
+      const datasetNames = await DataSet.getDatasetNames();
+      setDatasetNames(datasetNames);
+    };
+
     const init = async () => {
       try {
         await getRegistrationSchema();
         await getAllInstitutions();
         await getAllStudies();
+        await getAllDatasetNames();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
