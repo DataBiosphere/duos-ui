@@ -40,7 +40,7 @@ export const DataSubmissionForm = (props) => {
       setInstitutions(institutions);
     };
 
-    const getAllStudies = async() => {
+    const getAllStudyNames = async() => {
       const studyNames = await Study.getStudyNames();
       setStudyNames(studyNames);
     };
@@ -54,7 +54,7 @@ export const DataSubmissionForm = (props) => {
       try {
         await getRegistrationSchema();
         await getAllInstitutions();
-        await getAllStudies();
+        await getAllStudyNames();
         await getAllDatasetNames();
       } catch (error) {
         setFailedInit(true);
@@ -204,7 +204,7 @@ export const DataSubmissionForm = (props) => {
         <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
         <NIHAdministrativeInformation formData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
         <NIHDataManagement formData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-        <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode}/>
+        <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode} datasetNames={datasetNames}/>
 
         <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
           <a className='button button-white' onClick={submit}>Submit</a>
