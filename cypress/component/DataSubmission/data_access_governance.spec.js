@@ -24,7 +24,7 @@ beforeEach(() => {
   cy.stub(Schema, 'datasetRegistrationV1').returns({});
   cy.stub(Study, 'getStudyNames').returns([]);
   cy.stub(DataSet, 'getDatasetNames').returns([]);
-  cy.fixture('dataset-registration-v1').then(function (data) {
+  cy.fixture('dataset-registration-schema_v1').then(function (data) {
     cy.stub(DataSet, 'getRegistrationSchema').returns(data);
   });
 });
