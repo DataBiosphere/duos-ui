@@ -17,10 +17,10 @@ export const compileSchema = (schema) => {
     .addFormat('uri', urlValidator.isValid)
     .addFormat('email', emailValidator.isValid);
 
-  // Ajv doesn't like the `$schema` and `version` properties
+  // Ajv doesn't like the `$schema` and `version` properties so we destructure them away
   // eslint-disable-next-line no-unused-vars
-  const {$schema, version, ...obj} = schema;
-  return ajv.compile(obj);
+  const {$schema, version, ...filteredSchema} = schema;
+  return ajv.compile(filteredSchema);
 };
 
 /**
