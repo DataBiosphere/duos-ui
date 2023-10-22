@@ -26,7 +26,6 @@ export const StudyUpdateForm = (props) => {
   const [institutions, setInstitutions] = useState([]);
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
   const [formFiles, setFormFiles] = useState({});
-  const [datasetNames, setDatasetNames] = useState([]);
   const studyEditMode = true;
 
   useEffect(() => {
@@ -35,15 +34,9 @@ export const StudyUpdateForm = (props) => {
       setInstitutions(institutions);
     };
 
-    const getAllDatasetNames = async() => {
-      const datasetNames = await DataSet.getDatasetNames();
-      setDatasetNames(datasetNames);
-    };
-
     const init = async () => {
       try {
         await getAllInstitutions();
-        await getAllDatasetNames();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -250,7 +243,7 @@ export const StudyUpdateForm = (props) => {
       <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHAdministrativeInformation institutions={institutions}  onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
       <NIHDataManagement onChange={onChange} onFileChange={onFileChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode} datasetNames={datasetNames}/>
+      <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} datasets={datasets} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
 
       <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
         <a className='button button-white' onClick={submit}>Submit</a>

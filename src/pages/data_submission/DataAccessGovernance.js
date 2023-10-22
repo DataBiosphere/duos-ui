@@ -15,7 +15,7 @@ export const DataAccessGovernance = (props) => {
     datasets,
     onValidationChange,
     setAllConsentGroupsSaved,
-    datasetNames
+    datasetNames = []
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
