@@ -109,6 +109,7 @@ export const headerTabsConfig = [
     search: 'chair_console',
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
+      { label: 'Datasets', link: '/dataset_catalog' },
       { label: 'DAC Members', link: '/manage_dac' },
       { label: "My DAC's Datasets", link: '/dac_datasets' }
     ],
