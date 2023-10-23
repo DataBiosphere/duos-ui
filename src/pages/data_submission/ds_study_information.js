@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash/fp';
 
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax';
-import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
+import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms';
 import initialFormData from './NIHDataManagement';
 
 import './ds_common.css';

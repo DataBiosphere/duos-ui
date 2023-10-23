@@ -1,5 +1,5 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
-import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
+import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms';
 import { nihInstitutions } from './nih_institutions';
 import { isEmpty, isNil } from 'lodash/fp';
 import { useState } from 'react';

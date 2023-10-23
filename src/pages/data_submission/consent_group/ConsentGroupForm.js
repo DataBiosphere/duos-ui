@@ -13,7 +13,8 @@ export const ConsentGroupForm = (props) => {
     deleteConsentGroup,
     disableDelete,
     consentGroupsState,
-    studyEditMode
+    studyEditMode,
+    datasetNames
   } = props;
 
   const curConsentGroup = consentGroupsState[idx].consentGroup;
@@ -144,7 +145,7 @@ export const ConsentGroupForm = (props) => {
           type: 'button',
           isRendered: editMode,
           onClick: () => {
-            const errors = computeConsentGroupValidationErrors(consentGroup);
+            const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames);
             const valid = isEmpty(errors);
 
             setValidation(errors);

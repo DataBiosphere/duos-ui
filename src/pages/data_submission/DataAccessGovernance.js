@@ -14,7 +14,8 @@ export const DataAccessGovernance = (props) => {
     validation,
     datasets,
     onValidationChange,
-    setAllConsentGroupsSaved
+    setAllConsentGroupsSaved,
+    datasetNames = []
   } = props;
 
   const [consentGroupsState, setConsentGroupsState] = useState([]);
@@ -248,7 +249,8 @@ export const DataAccessGovernance = (props) => {
                   validation: validation?.consentGroups?.at(idx) || {},
                   onValidationChange: (change) => {
                     onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
-                  }
+                  },
+                  datasetNames: datasetNames
                 })
               ]
             );

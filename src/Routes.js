@@ -37,7 +37,7 @@ import DatasetSubmissions from './pages/researcher_console/DatasetSubmissions';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import {HealthCheck} from './pages/HealthCheck';
-import DataSubmissionForm from './pages/DataSubmissionForm';
+import DataSubmissionForm from './pages/data_submission/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 import CustomDatasetCatalog from './pages/dac_dataset_catalog/CustomDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
