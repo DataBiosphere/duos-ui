@@ -99,7 +99,7 @@ export const headerTabsConfig = [
       { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
       { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
-      { label: 'My Datasets', link: '/dataset_catalog' }
+      { label: 'My Datasets', link: '/datalibrary/myinstitution' }
     ],
     isRendered: (user) => user.isSigningOfficial
   },
