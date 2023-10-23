@@ -450,7 +450,6 @@
       "type": "object",
       "required": [
         "consentGroupName",
-        "fileTypes",
         "numberOfParticipants"
       ],
       "allOf": [
@@ -681,7 +680,6 @@
         },
         "fileTypes": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "$ref": "#/$defs/fileTypeObject"
           },

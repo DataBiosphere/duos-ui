@@ -1,11 +1,16 @@
 import { selectedPrimaryGroup } from './EditConsentGroup';
 import { isNil, isEmpty } from 'lodash/fp';
-import { dateValidator } from '../../forms/formValidation';
-import { FormValidators } from '../../forms/forms';
+import { dateValidator, uniqueValidator } from '../../../components/forms/formValidation';
+import { FormValidators } from '../../../components/forms/forms';
 
 const requiredError = {
   valid: false,
   failed: ['required']
+};
+
+const uniqueError = {
+  valid: false,
+  failed: ['unique']
 };
 
 const invalidFormatError = (format) => {
@@ -15,7 +20,7 @@ const invalidFormatError = (format) => {
   };
 };
 
-export const computeConsentGroupValidationErrors = (consentGroup) => {
+export const computeConsentGroupValidationErrors = (consentGroup, datasetNames = []) => {
   const validation = {};
 
   if (isNil(selectedPrimaryGroup(consentGroup))) {
@@ -38,6 +43,10 @@ export const computeConsentGroupValidationErrors = (consentGroup) => {
 
   if (isNil(consentGroup.consentGroupName) || consentGroup.consentGroupName === '') {
     validation.consentGroupName = requiredError;
+  } else {
+    if (!uniqueValidator.isValid(consentGroup.consentGroupName, datasetNames)) {
+      validation.consentGroupName = uniqueError;
+    }
   }
 
   if (isNil(consentGroup.dataLocation) || consentGroup.dataLocation === '') {

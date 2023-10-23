@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import ConsentGroupForm from '../../../src/components/data_submission/consent_group/ConsentGroupForm';
+import ConsentGroupForm from '../../../src/pages/data_submission/consent_group/ConsentGroupForm';
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'cypress/react';
 

@@ -1,54 +1,61 @@
-import React,  { useCallback } from 'react';
-import { validateForm } from '../utils/JsonSchemaUtils';
-
-import { cloneDeep, isNil } from 'lodash/fp';
-import { useState, useEffect } from 'react';
-import { Institution, DataSet, Study } from '../libs/ajax';
-import { Notifications } from '../libs/utils';
-
-import lockIcon from '../images/lock-icon.png';
-import {Styles} from '../libs/theme';
-
-import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
-import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
-import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
-import NIHDataManagement from '../components/data_submission/NIHDataManagement';
-import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-// Schema validation was previously auto-generated from pre-compiled code
-// If any validation changes, it needs to be manually updated in both DataRegistrationV1Validation
-// and JsonSchemaUtils
-import validateSchema from '../assets/schemas/DataRegistrationV1Validation';
-import {uniqueValidator} from '../components/forms/formValidation';
-import { set } from 'lodash';
-import UsgOmbText from '../components/UsgOmbText';
+import React, {useCallback, useEffect, useState} from 'react';
+import {validateForm} from './RegistrationValidation';
+import {cloneDeep, isNil} from 'lodash/fp';
+import {DataSet, Institution, Study} from '../../libs/ajax';
+import {Notifications} from '../../libs/utils';
+import lockIcon from '../../images/lock-icon.png';
+import {Styles} from '../../libs/theme';
+import DataAccessGovernance from './DataAccessGovernance';
+import DataSubmissionStudyInformation from './ds_study_information';
+import NIHAdministrativeInformation from './NIHAdministrativeInformation';
+import NIHDataManagement from './NIHDataManagement';
+import NihAnvilUse from './NihAnvilUse';
+import {uniqueValidator} from '../../components/forms/formValidation';
+import {set} from 'lodash';
+import UsgOmbText from '../../components/UsgOmbText';
 
 export const DataSubmissionForm = (props) => {
   const {
     history
   } = props;
 
+  const [registrationSchema, setRegistrationSchema] = useState({});
   const [institutions, setInstitutions] = useState([]);
   const [studyNames, setStudyNames] = useState([]);
+  const [datasetNames, setDatasetNames] = useState([]);
   const [failedInit, setFailedInit] = useState(false);
 
   const [allConsentGroupsSaved, setAllConsentGroupsSaved] = useState(false);
   const studyEditMode = false;
 
   useEffect(() => {
+
+    const getRegistrationSchema = async() => {
+      const schema = await DataSet.getRegistrationSchema();
+      setRegistrationSchema(schema);
+    };
+
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
       setInstitutions(institutions);
     };
 
-    const getAllStudies = async() => {
+    const getAllStudyNames = async() => {
       const studyNames = await Study.getStudyNames();
       setStudyNames(studyNames);
     };
 
+    const getAllDatasetNames = async() => {
+      const datasetNames = await DataSet.getDatasetNames();
+      setDatasetNames(datasetNames);
+    };
+
     const init = async () => {
       try {
+        await getRegistrationSchema();
         await getAllInstitutions();
-        await getAllStudies();
+        await getAllStudyNames();
+        await getAllDatasetNames();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({
@@ -107,13 +114,16 @@ export const DataSubmissionForm = (props) => {
     const registration = cloneDeep(formData);
     formatForRegistration(registration);
 
-    // check against json schema to see if there are uncaught validation issues
-    let [valid, validation] = validateForm(validateSchema, registration);
+    // check against json schema validator to see if there are uncaught validation issues
+    let [valid, validation] = validateForm(registrationSchema, registration);
+
+    // check secondary validation for non-schema validation issues
     if (!uniqueValidator.isValid(registration.studyName, studyNames)) {
       validation.studyName = {
         failed: ['unique'],
         valid: false
       };
+      valid = false;
     }
 
     if (formData.alternativeDataSharingPlan === true) {
@@ -194,7 +204,7 @@ export const DataSubmissionForm = (props) => {
         <NihAnvilUse onChange={onChange} formData={formData} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
         <NIHAdministrativeInformation formData={formData} onChange={onChange} institutions={institutions} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
         <NIHDataManagement formData={formData} onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} studyEditMode={studyEditMode}/>
-        <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode}/>
+        <DataAccessGovernance onChange={onChange} onFileChange={onFileChange} validation={formValidation} onValidationChange={onValidationChange} setAllConsentGroupsSaved={setAllConsentGroupsSaved} studyEditMode={studyEditMode} datasetNames={datasetNames}/>
 
         <div className='flex flex-row' style={{justifyContent: 'flex-end', marginBottom: '2rem'}}>
           <a className='button button-white' onClick={submit}>Submit</a>

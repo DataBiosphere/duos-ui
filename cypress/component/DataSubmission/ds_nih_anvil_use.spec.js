@@ -2,7 +2,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import  NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from '../../../src/components/data_submission/NihAnvilUse';
+import  NihAnvilUse, { YES_NHGRI_YES_PHS_ID } from '../../../src/pages/data_submission/NihAnvilUse';
 
 let propCopy;
 
