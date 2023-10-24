@@ -642,7 +642,11 @@ export default function DatasetCatalog(props) {
                           id: trIndex + '_datasetName', name: 'datasetName',
                           className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
                           style: tableBody
-                        }, dataset.name),
+                        }, [
+                          a({
+                            href: `/dataset_statistics/${dataset.dataSetId}`,
+                          }, dataset.name)
+                        ]),
 
                         td({
                           id: trIndex + '_dac', name: 'dac',

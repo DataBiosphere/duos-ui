@@ -109,7 +109,6 @@ export const headerTabsConfig = [
     search: 'chair_console',
     children: [
       { label: 'DAR Requests', link: '/chair_console' },
-      { label: 'Datasets', link: '/dataset_catalog' },
       { label: 'DAC Members', link: '/manage_dac' },
       { label: "My DAC's Datasets", link: '/dac_datasets' }
     ],
@@ -131,8 +130,9 @@ export const headerTabsConfig = [
     search: 'dataset_catalog',
     children: [
       { label: 'Data Catalog', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
-      { label: 'Submitted Datasets', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
+      { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
     ],
     isRendered: (user) => user.isResearcher && !isOnlySigningOfficial(user)
   }

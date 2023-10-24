@@ -28,13 +28,14 @@ export default function ResearcherStatus(props) {
     const init = async () => {
       try {
         if (!isNil(user) && !isNil(user.libraryCards)) {
-          if (user.libraryCards.length == 0) {
+          if (user.libraryCards.length === 0) {
             setHasCard(false);
           }
           else {
-            const signingOfficialUser = await User.getById(user.libraryCards[0].institution.createUserId);
+            const signingOfficialUsers = await User.getSOsForCurrentUser();
             setIssuedOn(user.libraryCards[0].createDate);
-            setIssuedBy(signingOfficialUser.displayName);
+            const names = signingOfficialUsers.map(so => so.displayName);
+            setIssuedBy(names.join(', '));
           }
         }
       } catch (error) {

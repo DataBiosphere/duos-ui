@@ -5,11 +5,11 @@ import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
 import { cloneDeep, isNil, isEmpty } from 'lodash/fp';
 
-import DataSubmissionStudyInformation from '../components/data_submission/ds_study_information';
-import NihAnvilUse from '../components/data_submission/NihAnvilUse';
-import NIHAdministrativeInformation from '../components/data_submission/NIHAdministrativeInformation';
-import NIHDataManagement from '../components/data_submission/NIHDataManagement';
-import DataAccessGovernance from '../components/data_submission/DataAccessGovernance';
+import DataSubmissionStudyInformation from './data_submission/ds_study_information';
+import NihAnvilUse from './data_submission/NihAnvilUse';
+import NIHAdministrativeInformation from './data_submission/NIHAdministrativeInformation';
+import NIHDataManagement from './data_submission/NIHDataManagement';
+import DataAccessGovernance from './data_submission/DataAccessGovernance';
 import { DataSet, User, Institution } from '../libs/ajax';
 import {Storage} from '../libs/storage';
 import { set } from 'lodash';
@@ -36,7 +36,7 @@ export const StudyUpdateForm = (props) => {
 
     const init = async () => {
       try {
-        getAllInstitutions();
+        await getAllInstitutions();
       } catch (error) {
         setFailedInit(true);
         Notifications.showError({

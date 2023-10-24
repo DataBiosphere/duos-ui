@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { DAC, User, Institution, Schema } from '../../../src/libs/ajax';
-import DataSubmissionForm from '../../../src/pages/DataSubmissionForm';
+import {DAC, User, Institution, Schema, Study, DataSet} from '../../../src/libs/ajax';
+import DataSubmissionForm from '../../../src/pages/data_submission/DataSubmissionForm';
 import { mount } from 'cypress/react';
 
 const dacs = [
@@ -22,6 +22,11 @@ beforeEach(() => {
   cy.stub(User, 'getMe').returns(user);
   cy.stub(Institution, 'list').returns([{name: 'Test Institution'}]);
   cy.stub(Schema, 'datasetRegistrationV1').returns({});
+  cy.stub(Study, 'getStudyNames').returns([]);
+  cy.stub(DataSet, 'getDatasetNames').returns([]);
+  cy.fixture('dataset-registration-schema_v1').then(function (data) {
+    cy.stub(DataSet, 'getRegistrationSchema').returns(data);
+  });
 });
 
 describe('Data Access Governance', function () {

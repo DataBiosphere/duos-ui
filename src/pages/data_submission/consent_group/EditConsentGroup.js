@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString, isEmpty } from 'lodash/fp';
-import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../forms/forms';
+import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../../components/forms/forms';
 import { DAR } from '../../../libs/ajax';
 import { cloneDeep } from 'lodash';
 
@@ -524,7 +524,8 @@ export const EditConsentGroup = (props) => {
         validators: [FormValidators.URL],
         disabled: consentGroup.dataLocation === 'Not Determined',
         placeholder: 'Enter a URL for your data location here',
-        defaultValue: consentGroup.url,
+        // React doesn't rerender this value when it is undefined, so set it to empty string
+        defaultValue: consentGroup.dataLocation === 'Not Determined' ? '' : consentGroup.url,
         onChange,
         validation: validation.url,
         onValidationChange,

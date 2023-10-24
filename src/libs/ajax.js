@@ -283,6 +283,18 @@ export const DAR = {
 
 export const DataSet = {
 
+  getDatasetNames: async () => {
+    const url = `${await getApiUrl()}/api/dataset/datasetNames`;
+    const res = await axios.get(url, Config.authOpts());
+    return await res.data;
+  },
+
+  getRegistrationSchema: async () => {
+    const url = `${await getApiUrl()}/schemas/dataset-registration/v1`;
+    const res = await axios.get(url, Config.authOpts());
+    return await res.data;
+  },
+
   postDatasetForm: async (form) => {
     const url = `${await getApiUrl()}/api/dataset/v2`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(form), { method: 'POST' }]));
@@ -382,6 +394,16 @@ export const DataSet = {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
     return await axios.put(url, studyObject, Config.multiPartOpts());
   },
+};
+
+export const Study = {
+
+  getStudyNames: async () => {
+    const url = `${await getApiUrl()}/api/dataset/studyNames`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+
 };
 
 export const DatasetAssociation = {

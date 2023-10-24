@@ -1,5 +1,5 @@
 {
-  "$id": "https://consent.dsde-prod.broadinstitute.org/schemas/dataset-registration",
+  "$id": "https://consent.dsde-prod.broadinstitute.org/schemas/dataset-registration/v1",
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "title": "Dataset Registration Schema",
   "version": 1,
@@ -99,6 +99,11 @@
     }
   ],
   "properties": {
+    "studyId": {
+      "type": "number",
+      "label": "Study Id",
+      "description": "The study id"
+    },
     "studyName": {
       "type": "string",
       "label": "Study Name",
@@ -445,7 +450,6 @@
       "type": "object",
       "required": [
         "consentGroupName",
-        "fileTypes",
         "numberOfParticipants"
       ],
       "allOf": [
@@ -608,6 +612,11 @@
           "type": "integer",
           "description": "Dataset Id"
         },
+        "datasetIdentifier": {
+          "type": "string",
+          "label": "Dataset Identifier",
+          "description": "Dataset Identifier"
+        },
         "consentGroupName": {
           "type": "string",
           "label": "Consent Group Name",
@@ -671,7 +680,6 @@
         },
         "fileTypes": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "$ref": "#/$defs/fileTypeObject"
           },

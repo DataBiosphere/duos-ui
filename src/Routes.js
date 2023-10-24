@@ -24,7 +24,7 @@ import NIHPilotInfo from './pages/NIHPilotInfo';
 import {Status} from './pages/Status';
 import {SummaryVotes} from './pages/SummaryVotes';
 import BackgroundSignIn from './pages/BackgroundSignIn';
-import DataSharingLanguageTool from './pages/DataSharingLanguageTool';
+import ConsentTextGenerator from './pages/ConsentTextGenerator';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
 import DatasetStatistics from './pages/DatasetStatistics';
@@ -37,7 +37,7 @@ import DatasetSubmissions from './pages/researcher_console/DatasetSubmissions';
 import TermsOfService from './pages/TermsOfService';
 import TermsOfServiceAcceptance from './pages/TermsOfServiceAcceptance';
 import {HealthCheck} from './pages/HealthCheck';
-import DataSubmissionForm from './pages/DataSubmissionForm';
+import DataSubmissionForm from './pages/data_submission/DataSubmissionForm';
 import {ensureSoHasDaaAcknowledgement} from './components/SigningOfficialDaaAgreementWrapper';
 import CustomDatasetCatalog from './pages/dac_dataset_catalog/CustomDatasetCatalog';
 import {AnVILDMSPolicyInfo, NIHDMSPolicyInfo} from './pages/DMSPolicyInfo';
@@ -63,7 +63,7 @@ const Routes = (props) => (
     <Route path="/privacy" component={PrivacyPolicy} />
     <Route path="/tos" component={TermsOfService} props={props} />
     <Route path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} />
-    <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
+    <Route path="/consent_text_generator" component={ConsentTextGenerator} />
     <Route path="/nih_dms_policy" component={NIHDMSPolicyInfo} />
     <Route path="/anvil_dms_policy" component={AnVILDMSPolicyInfo} />
     <AuthenticatedRoute path="/profile" component={UserProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
@@ -97,7 +97,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_dar_collections/" component={AdminManageDarCollections} props={props} rolesAllowed={[USER_ROLES.admin]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/dataset_catalog/:variant" component={CustomDatasetCatalog} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/dataset_search" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
+    <AuthenticatedRoute path="/datalibrary/:query" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
+    <AuthenticatedRoute path="/datalibrary" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
       rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />

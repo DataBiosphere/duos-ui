@@ -30,7 +30,13 @@ export const dateValidator = {
   msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
 };
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator];
+export const uniqueValidator = {
+  id: 'unique',
+  isValid: (val, list) => !list.includes(val),
+  msg: 'Please enter a unique value that doesn\'t exist in the system'
+};
+
+const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, uniqueValidator];
 
 /**
  * Validates the form value

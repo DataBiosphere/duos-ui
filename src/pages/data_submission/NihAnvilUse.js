@@ -1,5 +1,5 @@
 import {div, h, h2} from 'react-hyperscript-helpers';
-import {FormField, FormFieldTypes, FormValidators} from '../forms/forms';
+import {FormField, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import { isNil, toLower } from 'lodash/fp';
 
 export const YES_NHGRI_YES_PHS_ID = 'I am NHGRI funded and I have a dbGaP PHS ID already';
