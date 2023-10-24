@@ -81,7 +81,7 @@ export default function DACDatasets(props) {
     <div>
       <Button
         className={style['add-button']}
-        onClick={() => history.push({pathname: isDevEnv() ? 'data_submission_form' : 'dataset_registration'})}
+        onClick={() => history.push('data_submission_form')}
         variant="outlined">
         <div style={{verticalAlign: 'center', color: '#0948B7'}}>
           <span
