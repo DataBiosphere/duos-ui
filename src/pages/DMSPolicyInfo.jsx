@@ -32,12 +32,12 @@ function DMSPolicyInfo(props) {
   } = props;
 
   const renderSectionImage = (url, alt) => (
-    <img src={url} alt={alt} />
+    <img src={url} alt={alt}/>
   );
 
   const renderInfoBox = (text, index) => (
     <div className="info-box" key={`${index}`}>
-      <CheckCircleIcon htmlColor="#74ae43" fontSize='large' />
+      <CheckCircleIcon htmlColor="#74ae43" fontSize='large'/>
       <div>
         {text}
       </div>
@@ -119,8 +119,8 @@ function DMSPolicyInfo(props) {
       break;
   }
 
-  return (
-    <div className="base-style" style={{ ...styles.baseStyle, ...backgroundStyle }}>
+  return(
+    <div className="base-style" style={{...styles.baseStyle, ...backgroundStyle}}>
       <div className="section title-text">
         <div className="section-text">
           <div className="centered" style={Styles.TITLE}>
@@ -136,7 +136,7 @@ function DMSPolicyInfo(props) {
       </div>
 
       <div className="section subtitle-section">
-        <img src={subtitleImage} />
+        <img src={subtitleImage}/>
         <div className="section-text">
           <div className="centered">
             {subtitleText}
@@ -247,5 +247,5 @@ function DMSPolicyInfo(props) {
   );
 }
 
-export const NIHDMSPolicyInfo = (props) => (<DMSPolicyInfo {...props} variant="NIH" />);
-export const AnVILDMSPolicyInfo = (props) => (<DMSPolicyInfo {...props} variant="ANVIL" />);
+export const NIHDMSPolicyInfo = (props) => (<DMSPolicyInfo {...props} variant="NIH"/>);
+export const AnVILDMSPolicyInfo = (props) => (<DMSPolicyInfo {...props} variant="ANVIL"/>);
