@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 import {compileSchema, validateForm} from '../../../src/pages/data_submission/RegistrationValidation.js';
+import schema from '../../../src/assets/schemas/dataset-registration-schema_v1.json';
 
 const formData = {
   'studyType': 'Observational',
@@ -21,14 +22,6 @@ const formData = {
     'url': 'https://asdf.com'
   }]
 };
-
-let schema = undefined;
-
-beforeEach(function () {
-  cy.fixture('dataset-registration-schema_v1').then(function (data) {
-    schema = data;
-  });
-});
 
 describe('Dataset Registration Schema Validator', () => {
 

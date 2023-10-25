@@ -13,6 +13,7 @@ import NihAnvilUse from './NihAnvilUse';
 import {uniqueValidator} from '../../components/forms/formValidation';
 import {set} from 'lodash';
 import UsgOmbText from '../../components/UsgOmbText';
+import schema from '../../assets/schemas/dataset-registration-schema_v1.json';
 
 export const DataSubmissionForm = (props) => {
   const {
@@ -29,11 +30,6 @@ export const DataSubmissionForm = (props) => {
   const studyEditMode = false;
 
   useEffect(() => {
-
-    const getRegistrationSchema = async() => {
-      const schema = await DataSet.getRegistrationSchema();
-      setRegistrationSchema(schema);
-    };
 
     const getAllInstitutions = async() => {
       const institutions = await Institution.list();
@@ -52,7 +48,7 @@ export const DataSubmissionForm = (props) => {
 
     const init = async () => {
       try {
-        await getRegistrationSchema();
+        setRegistrationSchema(schema);
         await getAllInstitutions();
         await getAllStudyNames();
         await getAllDatasetNames();
