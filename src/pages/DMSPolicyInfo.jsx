@@ -199,7 +199,7 @@ function DMSPolicyInfo(props) {
                       In <b>DUOS</b>, institutions are able to set up their own central DAC, allow investigators to create and administer DACs themselves, or
                       leverage DUOS&apos; internal DAC for a fee.
                     </p> :
-                    <p><b>DUOS</b> can register open-access and controlled-access datasets, regardless of the storage locationn, or if the DAC received
+                    <p><b>DUOS</b> can register open-access and controlled-access datasets, regardless of the storage location, or if the DAC received
                       requests via DUOS or another mechanism.</p>
                 }
 
