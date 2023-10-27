@@ -188,8 +188,8 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(datasets);
     });
     if (!props.readOnlyMode) {
-      ApplicationTabs.push({ name: 'Data Use Agreement' });
-      setApplicationTabs(ApplicationTabs);
+      const updatedTabs = [...ApplicationTabs, { name: 'Data Use Agreement' }];
+      setApplicationTabs(updatedTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);
 
