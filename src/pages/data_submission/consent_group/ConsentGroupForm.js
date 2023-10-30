@@ -8,6 +8,7 @@ import { isEmpty, cloneDeep, set } from 'lodash';
 export const ConsentGroupForm = (props) => {
   const {
     idx,
+    dacs,
     saveConsentGroup,
     updateNihInstitutionalCertificationFile,
     deleteConsentGroup,
@@ -89,6 +90,7 @@ export const ConsentGroupForm = (props) => {
           },
           validation,
           onValidationChange,
+          dacs
         },
       })
       : h(ConsentGroupSummary, {

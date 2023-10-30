@@ -56,7 +56,7 @@ export default function NihAnvilUse(props) {
         {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
       ],
       defaultValue: studyEditMode ? radioSelectionToLabels(formData?.nihAnvilUse) : undefined,
-      validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
+      validators: [FormValidators.REQUIRED],
       onChange: (config) => {
         const value = nihAnvilUseLabels[config.value];
         onChange({key: config.key, value: value, isValid: config.isValid});
