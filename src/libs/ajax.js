@@ -436,18 +436,6 @@ export const Email = {
   }
 };
 
-export const Summary = {
-  getFile: async (fileName) => {
-    const URI = `/api/consent/cases/summary/file?type=${fileName}`;
-    const url = `${await getApiUrl()}/${URI}`;
-    if (fileName === 'TranslateDUL') {
-      return await getFile(url, 'DUL_summary.tsv');
-    } else {
-      return await getFile(url, 'DAR_summary.tsv');
-    }
-  }
-};
-
 export const Metrics = {
 
   getDatasetStats: async (datasetId) => {
@@ -502,73 +490,6 @@ export const Match = {
     const config = Object.assign({}, Config.authOpts(), {params: { purposeIds}});
     const res = await axios.get(url, config);
     return res.data;
-  }
-};
-
-export const PendingCases = {
-
-  findSummary: async () => {
-    const consentUrl = `${await getApiUrl()}/api/consent/cases/summary`;
-    const dataAccessUrl = `${await getApiUrl()}/api/dataRequest/cases/summary/DataAccess`;
-    const rpUrl = `${await getApiUrl()}/api/dataRequest/cases/summary/RP`;
-    const matchUrl = `${await getApiUrl()}/api/dataRequest/cases/matchsummary`;
-    const accessResponse = await fetchOk(consentUrl, Config.authOpts());
-    const access = await accessResponse.json();
-    let data = dataTemplate;
-    data.dulTotal[1][1] = access.reviewedPositiveCases + access.reviewedNegativeCases;
-    // pending cases
-    data.dulTotal[2][1] = access.pendingCases;
-    // positive cases
-    data.dulReviewed[1][1] = access.reviewedPositiveCases;
-    // negative cases
-    data.dulReviewed[2][1] = access.reviewedNegativeCases;
-
-    const dulResponse = await fetchOk(dataAccessUrl, Config.authOpts());
-    const dul = await dulResponse.json();
-    // reviewed cases
-    data.accessTotal[1][1] = dul.reviewedPositiveCases + dul.reviewedNegativeCases;
-    // pending cases
-    data.accessTotal[2][1] = dul.pendingCases;
-    // positive cases
-    data.accessReviewed[1][1] = dul.reviewedPositiveCases;
-    // negative cases
-    data.accessReviewed[2][1] = dul.reviewedNegativeCases;
-
-    const rpResponse = await fetchOk(rpUrl, Config.authOpts());
-    const rp = await rpResponse.json();
-
-    // reviewed cases
-    data.RPTotal[1][1] = rp.reviewedPositiveCases + rp.reviewedNegativeCases;
-    // pending cases
-    data.RPTotal[2][1] = rp.pendingCases;
-    // positive cases
-    data.RPReviewed[1][1] = rp.reviewedPositiveCases;
-    // negative cases
-    data.RPReviewed[2][1] = rp.reviewedNegativeCases;
-    const matchResponse = await fetchOk(matchUrl, Config.authOpts());
-    const match = await matchResponse.json();
-    if (match[0]) {
-      // positive cases
-      data.VaultReviewed[1][1] = match[0].reviewedPositiveCases;
-      // negative cases
-      data.VaultReviewed[2][1] = match[0].reviewedNegativeCases;
-    }
-    if (match[1]) {
-      // positive cases
-      data.Agreement[1][1] = match[1].reviewedPositiveCases;
-      // negative cases
-      data.Agreement[2][1] = match[1].reviewedNegativeCases;
-    }
-    return data;
-  }
-
-};
-
-export const StatFiles = {
-
-  getDARsReport: async (reportType, fileName) => {
-    const url = `${await getApiUrl()}/api/dataRequest/${reportType}`;
-    return getFile(url, fileName);
   }
 };
 
