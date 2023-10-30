@@ -73,7 +73,7 @@ export const EditConsentGroup = (props) => {
     setConsentGroup((cg) => {
       const consentGroup = cloneDeep(cg);
 
-      updates.forEach(({key, value}) => {
+      updates.forEach(({ key, value }) => {
         consentGroup[key] = value;
       });
 
@@ -89,7 +89,6 @@ export const EditConsentGroup = (props) => {
         hmb: false,
         diseaseSpecificUse: undefined,
         poa: false,
-        openAccess: false,
         otherPrimary: undefined,
       },
       ...{
@@ -144,7 +143,9 @@ export const EditConsentGroup = (props) => {
           toggleText: 'Open Access (does not need DAC approval)',
           disabled: disableFields,
           defaultValue: consentGroup.accessManagement,
-          onChange,
+          onChange: ({ key, value }) => {
+            onPrimaryChange({ key, value });
+          },
           validation: validation.accessManagement,
           onValidationChange: ({ validation }) => {
             onValidationChange({ key: 'accessManagement', validation });
@@ -505,7 +506,7 @@ export const EditConsentGroup = (props) => {
         onChange: ({ key, value }) => {
           onChange({ key, value: value?.dacId });
         },
-        //validators: consentGroup.accessManagement === 'controlled' ? [FormValidators.REQUIRED] : undefined,
+        validators: consentGroup.accessManagement === 'controlled' ? [FormValidators.REQUIRED] : undefined,
         validation: validation.dataAccessCommitteeId,
         disabled: disableFields,
         defaultValue: dacs.map((dac) => {
@@ -516,17 +517,17 @@ export const EditConsentGroup = (props) => {
     ]),
 
     // location
-    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'space-between' }}, [
+    div({ style: { display: 'flex', flexDirection: 'row', justifyContent: 'space-between' } }, [
       h(FormFieldTitle, {
         required: true,
         title: 'Data Location',
         description: 'Please provide the location of your data resource for this consent group',
       }),
     ]),
-    div({className: 'flex flex-row'}, [
+    div({ className: 'flex flex-row' }, [
       h(FormField, {
         style: { width: '50%' },
-        id: idx+'_dataLocation',
+        id: idx + '_dataLocation',
         name: 'dataLocation',
         type: FormFieldTypes.SELECT,
         selectOptions: [
@@ -537,14 +538,14 @@ export const EditConsentGroup = (props) => {
         ],
         placeholder: 'Data Location(s)',
         defaultValue: consentGroup.dataLocation,
-        onChange: ({key, value, isValid}) => {
+        onChange: ({ key, value, isValid }) => {
 
           if (value === 'Not Determined') {
             // if not determined, clear url field as well.
             // must do in one batch call, otherwise react gets confused.
-            onBatchChange({ key, value }, {key: 'url', value: undefined});
+            onBatchChange({ key, value }, { key: 'url', value: undefined });
           } else {
-            onChange({key, value, isValid});
+            onChange({ key, value, isValid });
           }
         },
         validation: validation.dataLocation,
@@ -552,7 +553,7 @@ export const EditConsentGroup = (props) => {
       }),
       h(FormField, {
         style: { width: '50%', paddingLeft: '1.5%' },
-        id: idx+'_url',
+        id: idx + '_url',
         name: 'url',
         validators: [FormValidators.URL],
         disabled: consentGroup.dataLocation === 'Not Determined',
@@ -565,7 +566,7 @@ export const EditConsentGroup = (props) => {
       }),
     ]),
     h(FormTable, {
-      id: idx+'_fileTypes',
+      id: idx + '_fileTypes',
       name: 'fileTypes',
       formFields: [
         {
@@ -606,22 +607,22 @@ export const EditConsentGroup = (props) => {
       }),
     ]),
 
-    div({style:{ display: 'flex', flexDirection:'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' }}, [
+    div({ style: { display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'flex-end', marginRight: '30px' } }, [
       h(FormField, {
         type: FormFieldTypes.FILE,
         title: 'NIH Institutional Certification',
         description: 'If an Institutional Certification for this consent group exists, please upload it here',
-        id: idx+'_nihInstituionalCertificationFile',
+        id: idx + '_nihInstituionalCertificationFile',
         name: 'nihInstituionalCertificationFile',
         hideTextBar: true,
         hideInput: true,
       }),
       h(FormField, {
-        style: {margin: '11px'},
+        style: { margin: '11px' },
         type: FormFieldTypes.FILE,
-        id: idx+'_fileInputSection',
+        id: idx + '_fileInputSection',
         defaultValue: nihInstitutionalCertificationFile,
-        onChange: ({value}) => setNihInstitutionalCertificationFile(value),
+        onChange: ({ value }) => setNihInstitutionalCertificationFile(value),
         hideTextBar: true,
       }),
     ]),
