@@ -116,9 +116,8 @@ export const DataAccessGovernance = (props) => {
   const prefillConsentGroups = useCallback(async () => {
     var consentGroups = await Promise.all(datasets?.map(async (dataset, idx) => {
       const dataUse = await normalizeDataUse(dataset?.dataUse);
-      // DAC is required if openAccess is false
-      const openAccess = extract('Open Access', dataset);
-      const dac = openAccess ? undefined : await DAC.get(dataset?.dacId);
+      const accessManagement = extract('Access Management', dataset);
+      const dac = 'dacId' in dataset ? await DAC.get(dataset.dacId) : undefined;
 
       return {
         consentGroup: {
@@ -130,7 +129,7 @@ export const DataAccessGovernance = (props) => {
           hmb: dataUse.hmbResearch,
           diseaseSpecificUse: dataUse.diseaseRestrictions,
           poa: dataUse.populationOriginsAncestry,
-          openAccess: openAccess,
+          accessManagement: accessManagement,
           otherPrimary: dataUse.other,
 
           // secondary

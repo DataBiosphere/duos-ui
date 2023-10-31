@@ -22,12 +22,14 @@ export const ConsentGroupForm = (props) => {
     datasetId: curConsentGroup.datasetId || null,
     consentGroupName: curConsentGroup.consentGroupName || '',
 
+    // access management is one of: "controlled", "open", "external"
+    accessManagement: curConsentGroup.accessManagement || undefined, // string
+
     // primary:
     generalResearchUse: curConsentGroup.generalResearchUse || undefined,
     hmb: curConsentGroup.hmb || undefined,
     diseaseSpecificUse: curConsentGroup.diseaseSpecificUse || undefined, // string
     poa: curConsentGroup.poa || undefined,
-    openAccess: curConsentGroup.openAccess || undefined,
     otherPrimary: curConsentGroup.otherPrimary || undefined, // string
 
     // secondary:

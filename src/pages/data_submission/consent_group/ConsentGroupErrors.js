@@ -23,7 +23,11 @@ const invalidFormatError = (format) => {
 export const computeConsentGroupValidationErrors = (consentGroup, datasetNames = []) => {
   const validation = {};
 
-  if (isNil(selectedPrimaryGroup(consentGroup))) {
+  if (isNil(consentGroup.accessManagement)) {
+    validation.accessManagement = requiredError;
+  }
+
+  if (isNil(selectedPrimaryGroup(consentGroup)) && consentGroup.accessManagement !== 'open') {
     validation.primaryConsent = requiredError;
   }
 
@@ -61,7 +65,7 @@ export const computeConsentGroupValidationErrors = (consentGroup, datasetNames =
     validation.otherPrimary = requiredError;
   }
 
-  if (isNil(consentGroup.dataAccessCommitteeId) && consentGroup.openAccess !== true) {
+  if (isNil(consentGroup.dataAccessCommitteeId) && consentGroup.accessManagement === 'controlled') {
     validation.dataAccessCommitteeId = requiredError;
   }
 
