@@ -85,7 +85,6 @@ export const headerTabsConfig = [
       { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
       { label: 'Dataset Catalog', link: '/dataset_catalog' },
       { label: 'DACs', link: '/manage_dac' },
-      { label: 'Statistics', link: '/summary_votes' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
       { label: 'Library Cards', link: '/admin_manage_lc' }
