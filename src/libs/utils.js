@@ -197,8 +197,7 @@ export const Navigation = {
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
-          : user.isAlumni ? '/summary_votes'
-            : '/';
+          : '/';
     history.push(page);
   },
   console: async (user, history) => {
@@ -207,8 +206,7 @@ export const Navigation = {
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
-          : user.isAlumni ? '/summary_votes'
-            : '/';
+          : '/';
     history.push(page);
   }
 };
