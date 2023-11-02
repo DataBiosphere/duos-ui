@@ -38,12 +38,15 @@ const table = {
       data: [
         {
           value: 'Row 1, Cell 1',
+          truncate: true,
         },
         {
           value: 'Row 1, Cell 2',
+          truncate: false,
         },
         {
           value: 'Row 1, Cell 3',
+          truncate: false,
         }
       ],
       subtable: {
@@ -114,6 +117,22 @@ const StyledTableCell = styled(TableCell)(() => ({
   },
 }));
 
+const TruncatedTableCell = styled(StyledTableCell)(() => ({
+  [`&.${tableCellClasses.root}`]: {
+    padding: '8px',
+    maxWidth: '20ch',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    transition: 'max-width 0.5s',
+    '&:hover': {
+      whiteSpace: 'normal',
+      overflow: 'normal',
+      wordBreak: 'break-all'
+    },
+  },
+}));
+
 const CollapsibleRow = (props) => {
   const { row, row: { subtable: { rows: subrows } }, selected, selectHandler } = props;
 
@@ -145,9 +164,14 @@ const CollapsibleRow = (props) => {
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => (
-          <StyledTableCell key={i}>
-            {cell.value}
-          </StyledTableCell>
+          cell.truncate ?
+            (<TruncatedTableCell key={i}>
+              {cell.value}
+            </TruncatedTableCell>
+            ) : (
+              <StyledTableCell key={i}>
+                {cell.value}
+              </StyledTableCell>)
         ))}
       </TableRow>
       {/* subtable */}
