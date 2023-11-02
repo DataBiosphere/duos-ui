@@ -165,13 +165,15 @@ const CollapsibleRow = (props) => {
         </StyledTableCell>
         {row.data.map((cell, i) => (
           cell.truncate ?
-            (<TruncatedTableCell key={i}>
-              {cell.value}
-            </TruncatedTableCell>
+            (
+              <TruncatedTableCell key={i}>
+                {cell.value}
+              </TruncatedTableCell>
             ) : (
               <StyledTableCell key={i}>
                 {cell.value}
-              </StyledTableCell>)
+              </StyledTableCell>
+            )
         ))}
       </TableRow>
       {/* subtable */}
