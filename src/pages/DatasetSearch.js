@@ -20,7 +20,7 @@ const signingOfficialQuery = (user) => {
   };
 }
 
-// query to return approved DAC studies from the user's institution and open access studies
+// query to return approved DAC studies from the user's institution
 const myInstitutionQuery = (user) => {
   return {
     'bool': {
