@@ -167,7 +167,7 @@ const CollapsibleRow = (props) => {
           if (!('truncate' in cell)) {
             cell.truncate = false;
           }
-          return cell?.truncate ? (
+          return cell.truncate ? (
             <TruncatedTableCell key={i}>
               {cell.value}
             </TruncatedTableCell>
