@@ -119,7 +119,6 @@ export const DatasetSearchTable = (props) => {
             },
             {
               value: entry[0].study.description,
-              truncate: false,
             },
             {
               value: entry.length,

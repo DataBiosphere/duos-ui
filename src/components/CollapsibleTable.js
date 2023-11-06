@@ -163,18 +163,20 @@ const CollapsibleRow = (props) => {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </StyledTableCell>
-        {row.data.map((cell, i) => (
-          cell.truncate ?
-            (
-              <TruncatedTableCell key={i}>
-                {cell.value}
-              </TruncatedTableCell>
-            ) : (
-              <StyledTableCell key={i}>
-                {cell.value}
-              </StyledTableCell>
-            )
-        ))}
+        {row.data.map((cell, i) => {
+          if (!('truncate' in cell)) {
+            cell.truncate = false;
+          }
+          return cell?.truncate ? (
+            <TruncatedTableCell key={i}>
+              {cell.value}
+            </TruncatedTableCell>
+          ) : (
+            <StyledTableCell key={i}>
+              {cell.value}
+            </StyledTableCell>
+          );
+        })}
       </TableRow>
       {/* subtable */}
       <TableRow>
