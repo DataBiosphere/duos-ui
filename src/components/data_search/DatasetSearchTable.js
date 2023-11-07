@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button } from '@mui/material';
+import { Button, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
@@ -160,7 +160,7 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value: dataset.dataLocation,
+                    value: dataset.url ? <Link href={dataset.url}>{dataset.dataLocation}</Link> : dataset.dataLocation,
                   },
                   {
                     value: dataset.dacName,
