@@ -60,10 +60,6 @@ export const EditConsentGroup = (props) => {
   const [showMORText, setShowMORText] = useState(!isNil(consentGroup.mor));
   const [morText, setMORText] = useState(consentGroup.mor || '');
 
-  const [consentGroupNameEditable, setConsentGroupNameEditable] = useState(consentGroup.consentGroupName?.length === 0);
-  const [consentGroupAccessManagementEditable, setConsentGroupAccessManagementEditable] = useState(isNil(consentGroup.accessManagement));
-  const [dacEditable, setDacEditable] = useState(isNil(consentGroup.dataAccessCommitteeId) && consentGroup?.accessManagement === 'controlled');
-
   const onChange = ({ key, value }) => {
     setConsentGroup({
       ...consentGroup,
@@ -71,7 +67,6 @@ export const EditConsentGroup = (props) => {
         [key]: value,
       },
     });
-    setDacEditable(isNil(consentGroup.dataAccessCommitteeId) && consentGroup?.accessManagement === 'controlled');
   };
 
   const onBatchChange = (...updates) => {
@@ -114,7 +109,7 @@ export const EditConsentGroup = (props) => {
         title: 'Consent Group Name',
         validators: [FormValidators.REQUIRED],
         placeholder: 'Enter name',
-        disabled: !consentGroupNameEditable,
+        disabled: disableFields,
         defaultValue: consentGroup.consentGroupName,
         onChange,
         validation: validation.consentGroupName,
@@ -131,7 +126,7 @@ export const EditConsentGroup = (props) => {
           value: 'controlled',
           type: FormFieldTypes.RADIOBUTTON,
           toggleText: 'Controlled Access (managed by a DAC in DUOS)',
-          disabled: !consentGroupAccessManagementEditable,
+          disabled: disableFields,
           defaultValue: consentGroup.accessManagement,
           onChange,
           validation: validation.accessManagement,
@@ -146,7 +141,7 @@ export const EditConsentGroup = (props) => {
           value: 'open',
           type: FormFieldTypes.RADIOBUTTON,
           toggleText: 'Open Access (does not need DAC approval)',
-          disabled: (!consentGroupAccessManagementEditable),
+          disabled: disableFields,
           defaultValue: consentGroup.accessManagement,
           onChange: ({ key, value }) => {
             onPrimaryChange({ key, value });
@@ -163,7 +158,7 @@ export const EditConsentGroup = (props) => {
           value: 'external',
           type: FormFieldTypes.RADIOBUTTON,
           toggleText: 'External Access (managed by a DAC external to DUOS)',
-          disabled: !consentGroupAccessManagementEditable,
+          disabled: disableFields,
           defaultValue: consentGroup.accessManagement,
           onChange,
           validation: validation.accessManagement,
@@ -513,7 +508,7 @@ export const EditConsentGroup = (props) => {
         },
         validators: consentGroup.accessManagement === 'controlled' ? [FormValidators.REQUIRED] : undefined,
         validation: validation.dataAccessCommitteeId,
-        disabled: !dacEditable,
+        disabled: disableFields,
         defaultValue: dacs.map((dac) => {
           return { dacId: dac.dacId, displayText: dac.name };
         }).find((dac) => dac.dacId === consentGroup.dataAccessCommitteeId),
