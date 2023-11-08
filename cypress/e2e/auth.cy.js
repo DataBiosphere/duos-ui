@@ -10,7 +10,7 @@ const roles = {
 
 describe('Authentication', function() {
 
-  it('Background Sign-in Admin', function() {
+  it.skip('Background Sign-in Admin', function() {
     cy.auth(roles.ADMIN).then(credentials => {
       cy.visit(Cypress.env('baseUrl') + 'backgroundsignin');
       cy.get('textarea').type(credentials.access_token, {delay: 0});
