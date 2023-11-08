@@ -47,50 +47,6 @@ export const getOntologyUrl = async(baseUrl = '') => {
   return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
 };
 
-const dataTemplate = {
-  accessTotal: [
-    ['Results', 'Votes'],
-    ['Reviewed cases', 0],
-    ['Pending cases', 0]
-  ],
-  accessReviewed: [
-    ['Results', 'Votes'],
-    ['Yes', 0],
-    ['No', 0]
-  ],
-  dulTotal: [
-    ['Results', 'Votes'],
-    ['Reviewed cases', 0],
-    ['Pending cases', 0]
-  ],
-  dulReviewed: [
-    ['Results', 'Votes'],
-    ['Yes', 0],
-    ['No', 0]
-  ],
-  RPTotal: [
-    ['Results', 'Votes'],
-    ['Reviewed cases', 0],
-    ['Pending cases', 0]
-  ],
-  RPReviewed: [
-    ['Results', 'Votes'],
-    ['Yes', 0],
-    ['No', 0]
-  ],
-  VaultReviewed: [
-    ['Results', 'Votes'],
-    ['Yes', 0],
-    ['No', 0]
-  ],
-  Agreement: [
-    ['Results', 'Votes'],
-    ['Agreement', 0],
-    ['Disagreement', 0]
-  ]
-};
-
-
 export const DAC = {
 
   list: async (withUsers) => {
@@ -812,13 +768,6 @@ const fetchAny = async (...args) => {
   }
   spinnerService.hideAll();
   return res;
-};
-
-const getFile = async (URI, fileName) => {
-  const res = await fetchOk(URI, Config.fileBody());
-  fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
-  let blob = await res.blob();
-  fileDownload(blob, fileName);
 };
 
 const getFileNameFromHttpResponse = (response) => {
