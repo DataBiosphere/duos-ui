@@ -151,7 +151,7 @@ export const StudyUpdateForm = (props) => {
   const formatForRegistration = (formData) => {
 
     for (const key of Object.keys(formData)) {
-      const illegalStudyFields = ['studyName', 'dataSubmitterEmail', 'dataSubmitterName', 'dataSubmitterUserId'];
+      const illegalStudyFields = [formData.studyName, formData.dataSubmitterEmail, formData.dataSubmitterName];
       if (isNil(formData[key]) && illegalStudyFields.includes(formData[key])) {
         formData[key] = undefined;
       }
@@ -159,21 +159,10 @@ export const StudyUpdateForm = (props) => {
 
     formData?.consentGroups?.forEach((cg) => {
       const validCgFields = [cg.dataLocation, cg.url, cg.fileTypes, cg.numberOfParticipants, cg.dataAccessCommitteeId];
-      // In the case of missing/required fields, we need to be able to populate them on save
-      // TODO: This doesn't work as expected
-      if (isNil(cg.consentGroupName) || cg?.consentGroupName.length === 0) {
-        validCgFields.push(cg.consentGroupName);
-      }
-      if (isNil(cg.accessManagement)) {
-        validCgFields.push(cg.accessManagement);
-      }
-      if (isNil(cg.dataAccessCommitteeId) && cg?.accessManagement === 'controlled') {
-        validCgFields.push(cg.dataAccessCommitteeId);
-      }
 
-      if (!isNil(cg.datasetId)) {
+      if(!isNil(cg.datasetId)){
         for (const key of Object.keys(cg)) {
-          if (cg[key] !== cg.datasetId && !validCgFields.includes(cg[key])) {
+          if(cg[key]!==cg.datasetId && !validCgFields.includes(cg[key])){
             cg[key] = undefined;
           }
         }
