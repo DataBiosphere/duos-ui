@@ -164,10 +164,7 @@ const CollapsibleRow = (props) => {
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => {
-          if (!('truncate' in cell)) {
-            cell.truncate = false;
-          }
-          return cell.truncate ? (
+          return cell?.truncate ? (
             <TruncatedTableCell key={i}>
               {cell.value}
             </TruncatedTableCell>
