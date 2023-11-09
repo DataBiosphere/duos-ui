@@ -81,7 +81,12 @@ export default function DatasetSubmissionsTable(props) {
         <div>
           <Button
             href={editLink}
-            className={styles['action-button']}>
+            sx={{
+              fontSize: '1.25rem',
+              border: '1px solid #0948B7',
+              borderRadius: 1,
+              height: 25
+            }}>
             Edit
           </Button>
         </div>;
