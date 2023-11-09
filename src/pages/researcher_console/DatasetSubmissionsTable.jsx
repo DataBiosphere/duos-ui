@@ -5,7 +5,6 @@ import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
 import {concat, isNil, join} from 'lodash/fp';
 import Button from '@mui/material/Button';
-import styles from './DatasetTerms.module.css';
 
 
 export default function DatasetSubmissionsTable(props) {
