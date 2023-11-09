@@ -15,7 +15,6 @@ import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {spinnerService} from '../libs/spinner-service';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
-import {isDevEnv} from '../utils/EnvironmentUtils';
 import DuosLogo from '../images/duos-network-logo.svg';
 import style from './DatasetCatalog.module.css';
 

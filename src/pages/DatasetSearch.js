@@ -20,7 +20,7 @@ const signingOfficialQuery = (user) => {
       'submitter.institution.id': user.institution.id
     }
   };
-}
+};
 
 // query to return approved DAC studies from the user's institution
 const myInstitutionQuery = (user) => {
@@ -40,7 +40,7 @@ const myInstitutionQuery = (user) => {
       ]
     }
   };
-}
+};
 
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
@@ -146,7 +146,7 @@ export const DatasetSearch = (props) => {
       icon: homeIcon,
       title: query + ' Data Library',
     }
-  }
+  };
 
   const key = query === undefined ? '/datalibrary' : toLower(query);
   const version = versions[key] === undefined ? versions['/custom'] : versions[key];
@@ -184,7 +184,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, []);
+  });
 
   return (
     loading ?
