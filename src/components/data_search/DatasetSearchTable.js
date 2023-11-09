@@ -16,7 +16,6 @@ const studyTableHeader = [
   'Phenotype',
   'Species',
   'PI Name',
-  'Data Submitter',
   'Data Custodian',
 ];
 
@@ -133,9 +132,6 @@ export const DatasetSearchTable = (props) => {
             },
             {
               value: entry[0].study.piName,
-            },
-            {
-              value: entry[0].study.dataSubmitterEmail,
             },
             {
               value: entry[0].study.dataCustodianEmail.join(', '),
