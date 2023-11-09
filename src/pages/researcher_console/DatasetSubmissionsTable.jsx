@@ -91,7 +91,7 @@ export default function DatasetSubmissionsTable(props) {
         datasetName: term.datasetName,
         dataSubmitter: term.createUserDisplayName,
         datasetCustodians: custodians,
-        dac: term.dacName,
+        dac: term.dac?.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
         actions: editButton
