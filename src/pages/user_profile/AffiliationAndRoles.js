@@ -116,8 +116,7 @@ export default function AffiliationAndRole(props) {
     };
 
     let updatedUser = await User.updateSelf(payload);
-    const user = await User.getMe();
-    setUserRoleStatuses(user, Storage);
+    setUserRoleStatuses(updatedUser, Storage);
     return updatedUser;
   };
 
