@@ -1,6 +1,6 @@
+import React from 'react';
 import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { div, form, input, label, textarea, br, h } from 'react-hyperscript-helpers';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -83,59 +83,58 @@ export default function BackgroundSignIn(props) {
     return () => { };
   }, [accessToken, history, onError, onSignIn]);
 
-  return div({}, [
-    div({
-      isRendered: loading
-    }, [
-      h(SpinnerComponent, {
-        show: true,
-        name: 'loadingSpinner',
-        loadingImage
-      }, [])
-    ]),
-    form({
-      name: 'accessTokenForm',
-      encType: 'multipart/form-data',
-      isRendered: !loading,
-      onSubmit: (e) => {
-        e.preventDefault();
-        setAccessToken(formToken);
+  return (
+    <div>
+      {loading
+        ? <div>
+          <SpinnerComponent show={true} name="loadingSpinner" loadingImage={loadingImage} />
+        </div>
+        : <form
+          name="accessTokenForm"
+          encType="multipart/form-data"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setAccessToken(formToken);
+          }}
+        >
+          <div className="form-group">
+            <div className="col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold">
+              {invalidToken &&
+                <div
+                  style={{ backgroundColor: '#FCEDEB', color: '#D13B07' }}
+                  className="col-lg-9 col-md-9 col-sm-9 col-xs-8 bold"
+                >
+                  The provided token is invalid.
+                </div>
+              }
+              <br />
+              <label id="lbl_accessToken" className="common-color">
+                Access Token
+              </label>
+              <div>
+                <textarea
+                  name="accessToken"
+                  className="form-control"
+                  style={{ maxWidth: '50%' }}
+                  autoFocus={true}
+                  value={formToken}
+                  onChange={(e) => {
+                    setFormToken(e.target.value);
+                  }}
+                />
+              </div>
+              <div>
+                <input
+                  type="submit"
+                  className="col-lg-8 col-md-8 col-sm-12 col-xs-12 btn-primary btn"
+                  style={{ marginTop: '5px', maxWidth: '50%' }}
+                  value="Submit"
+                />
+              </div>
+            </div>
+          </div>
+        </form>
       }
-    }, [
-      div({ className: 'form-group' }, [
-        div({ className: 'col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold' }, [
-          div({
-            isRendered: invalidToken,
-            style: { backgroundColor: '#FCEDEB', color: '#D13B07' },
-            className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold'
-          }, [
-            'The provided token is invalid.'
-          ]),
-          br(),
-          label({
-            id: 'lbl_accessToken',
-            className: 'common-color'
-          }, ['Access Token']),
-          div({}, [
-            textarea({
-              name: 'accessToken',
-              className: 'form-control',
-              style: { maxWidth: '50%' },
-              autoFocus: true,
-              value: formToken,
-              onChange: (e) => { setFormToken(e.target.value); }
-            })
-          ]),
-          div({}, [
-            input({
-              type: 'submit',
-              className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12 btn-primary btn',
-              style: { marginTop: '5px', maxWidth: '50%' },
-              value: 'Submit'
-            })
-          ])
-        ])
-      ])
-    ])
-  ]);
+    </div>
+  );
 }
