@@ -205,8 +205,14 @@ export const DAR = {
   },
 
   searchOntologyIdList: async ids => {
+    if (isNil(ids) || ids.length === 0) {
+      return [];
+    }
     const url = `${await getOntologyUrl()}/search?id=${ids}`;
-    const res = await fetchOk(url, Config.authOpts());
+    const res = await fetchAny(url, Config.authOpts());
+    if (res.status >= 400) {
+      return [];
+    }
     return await res.json();
   },
 

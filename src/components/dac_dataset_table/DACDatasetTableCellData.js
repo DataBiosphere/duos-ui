@@ -59,8 +59,8 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
 }
 
 export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
-  const translationList = map((translation) => {
-    return <li key={translation.code}>{translation.code}: {translation.description}</li>;
+  const translationList = map((translation, index) => {
+    return <li key={`${translation.code}_${index}`}>{translation.code}: {translation.description}</li>;
   })(dataset.translations);
   const display =
     <div className={style['cell-data']}>
