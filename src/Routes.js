@@ -22,7 +22,6 @@ import SigningOfficialDataSubmitters from './pages/signing_official_console/Sign
 import Translator from './pages/Translator';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import {Status} from './pages/Status';
-import {SummaryVotes} from './pages/SummaryVotes';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import ConsentTextGenerator from './pages/ConsentTextGenerator';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
@@ -73,7 +72,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_edit_user/:userId" component={AdminEditUser} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/summary_votes" component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]}/>

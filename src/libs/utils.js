@@ -197,8 +197,7 @@ export const Navigation = {
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
-          : user.isAlumni ? '/summary_votes'
-            : '/';
+          : '/';
     history.push(page);
   },
   console: async (user, history) => {
@@ -207,8 +206,7 @@ export const Navigation = {
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
-          : user.isAlumni ? '/summary_votes'
-            : '/';
+          : '/';
     history.push(page);
   }
 };
@@ -283,9 +281,9 @@ export const Notifications = {
  */
 export const PromiseSerial = funcs =>
   funcs.reduce((promise, func) =>
-      promise.then(result =>
-        func().then(Array.prototype.concat.bind(result))),
-    Promise.resolve([]));
+    promise.then(result =>
+      func().then(Array.prototype.concat.bind(result))),
+  Promise.resolve([]));
 
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
