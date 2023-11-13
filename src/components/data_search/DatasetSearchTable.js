@@ -114,27 +114,34 @@ export const DatasetSearchTable = (props) => {
           data: [
             {
               value: entry[0].study.studyName,
+              truncate: true,
             },
             {
               value: entry[0].study.description,
             },
             {
               value: entry.length,
+              truncate: true,
             },
             {
               value: isNaN(sum) ? undefined : sum,
+              truncate: true,
             },
             {
               value: entry[0].study.phenotype,
+              truncate: true,
             },
             {
               value: entry[0].study.species,
+              truncate: true,
             },
             {
               value: entry[0].study.piName,
+              truncate: true,
             },
             {
               value: entry[0].study.dataCustodianEmail.join(', '),
+              truncate: true,
             },
           ],
           subtable: {
