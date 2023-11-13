@@ -480,7 +480,8 @@ export const getSearchFilterFunctions = () => {
       const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
       return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
         includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
-        includes(loweredTerm, toLower(datasetTerm.dacName)) ||
+        includes(loweredTerm, toLower(datasetTerm.dac?.dacName)) ||
+        includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail)) ||
         includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
         includes(loweredTerm, toLower(codes)) ||
         includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||

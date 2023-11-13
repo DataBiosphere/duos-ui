@@ -166,7 +166,7 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.dataLocation,
                   },
                   {
-                    value: dataset.dacName,
+                    value: dataset.dac?.dacName,
                   },
                 ],
               };
