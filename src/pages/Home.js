@@ -102,7 +102,7 @@ const Home = (props) => {
             <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
             <h1 style={homeTitle}>Data Use Oversight System</h1>
             <div className="hidden-xs" style={homeBannerDescription}>
-              Expediting compliant data sharing, by facilitating data submissions and access requests for researchers and data access committees
+              Expediting compliant data sharing, by facilitating data submissions and access requests <br/> for researchers and data access committees
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ const Home = (props) => {
           <div style={{ margin: '5rem auto 0', backgroundColor: 'white' }}>
             <h1 style={header}>What is DUOS and how does it work?</h1>
             <h3 style={subHeader}>
-              DUOS is a multi-sided data sharing platform bringing together researchers submitting and requesting data, and data access committees and institutional officials overseeing the use of the data.
+              DUOS is a multi-sided data sharing platform bringing together researchers submitting and requesting data, <br /> and data access committees and institutional officials overseeing the use of the data.
             </h3>
             <div>
               <img className="col-sm-10 hidden-xs" style={{ padding: '1rem', margin: 'auto 8.25%' }} alt="What is DUOS graphic" src={duosDiagram} />
@@ -120,7 +120,7 @@ const Home = (props) => {
         <div className="row" style={{ background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' }}>
           <div className="col-lg-4 col-md-4">
             <p style={header}>DUOS for DACs</p>
-            <p style={description}>DACs can swiftly manage data access requests and clearly track data use compliance.</p>
+            <p style={description}>DACs can swiftly manage data access requests <br /> and clearly track data use compliance.</p>
             <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
               <a id="zendesk-dac-link" href="https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
             </div>

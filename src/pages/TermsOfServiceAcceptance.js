@@ -68,7 +68,7 @@ export default function TermsOfServiceAcceptance(props) {
 
   return (
     <div style={TosService.getBackgroundStyle()}>
-      <div style={{ ...TosService.getContainerStyle(), ...{ className: 'markdown-body' } }}>
+      <div style={TosService.getContainerStyle()} className='markdown-body'>
         <h1 style={{ marginLeft: '25px' }}>DUOS Terms of Service</h1>
         <div style={TosService.getScrollableStyle()}>{tosText}</div>
         <div style={{ marginTop: '.5rem', display: 'flex', alignItems: 'center', justifyContent: 'right' }}>

@@ -48,7 +48,7 @@ export default function AdminManageDarCollections() {
           <div style={Styles.ICON_CONTAINER}>
             <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} />
           </div>
-          <div style={{ flexDirection: 'row' }}>
+          <div style={Styles.HEADER_CONTAINER}>
             <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>
               All Data Access Requests
             </div>
