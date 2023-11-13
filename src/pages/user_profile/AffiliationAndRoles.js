@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Institution, User } from '../../libs/ajax';
 import { find, isNil, isNumber } from 'lodash';
-import { Notifications } from '../../libs/utils';
+import { Notifications, setUserRoleStatuses } from '../../libs/utils';
+import { Storage } from '../../libs/storage';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import Tooltip from '@mui/material/Tooltip';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -115,6 +116,7 @@ export default function AffiliationAndRole(props) {
     };
 
     let updatedUser = await User.updateSelf(payload);
+    setUserRoleStatuses(updatedUser, Storage);
     return updatedUser;
   };
 
