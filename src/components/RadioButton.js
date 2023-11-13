@@ -1,4 +1,4 @@
-import {div, input, label, span} from 'react-hyperscript-helpers';
+import React from 'react';
 import * as fp from 'lodash/fp';
 
 export const RadioButton = (props) => {
@@ -52,28 +52,26 @@ export const RadioButton = (props) => {
   };
 
   return (
-    div({style: props.style}, [
-      label({style: wrapperStyle}, [
-        div({style: {float: 'left'}}, [
-          input({
-            id: props.id,
-            type: 'radio',
-            name: props.name,
-            value: props.value,
-            checked: props.defaultChecked,
-            onClick: props.onClick,
-            disabled: props.disabled,
-            onChange: props.onChange ? props.onChange : () => {}
-          }),
-          span({
-            style: props.defaultChecked ? checkedStyle : uncheckedStyle,
-          }),
-        ]),
-        div({style: {marginLeft: '3rem'}}, [
-          span({style: labelStyle}, [props.label]),
-          span({style: descriptionStyle}, [props.description]),
-        ]),
-      ])
-    ])
+    <div style={props.style}>
+      <label style={wrapperStyle}>
+        <div style={{float: 'left'}}>
+          <input
+            id={props.id}
+            type="radio"
+            name={props.name}
+            value={props.value}
+            checked={props.defaultChecked}
+            onClick={props.onClick}
+            disabled={props.disabled}
+            onChange={props.onChange ? props.onChange : () => {}}
+          />
+          <span style={props.defaultChecked ? checkedStyle : uncheckedStyle} />
+        </div>
+        <div style={{marginLeft: '3rem'}}>
+          <span style={labelStyle}>{props.label}</span>
+          <span style={descriptionStyle}>{props.description}</span>
+        </div>
+      </label>
+    </div>
   );
 };
