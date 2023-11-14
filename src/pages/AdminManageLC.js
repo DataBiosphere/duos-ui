@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
-import { h } from 'react-hyperscript-helpers';
 import { Institution, User } from '../libs/ajax';
 import { LibraryCard } from '../libs/ajax';
 import { Notifications, USER_ROLES } from '../libs/utils';
@@ -39,5 +39,7 @@ export default function AdminManageLC() {
   }, []);
 
   //props are expecting array format
-  return h(LibraryCardTable, {users, institutions, libraryCards});
+  return (
+    <LibraryCardTable users={users} institutions={institutions} libraryCards={libraryCards} />
+  );
 }
