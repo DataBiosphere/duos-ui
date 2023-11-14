@@ -281,9 +281,9 @@ export const Notifications = {
  */
 export const PromiseSerial = funcs =>
   funcs.reduce((promise, func) =>
-      promise.then(result =>
-        func().then(Array.prototype.concat.bind(result))),
-    Promise.resolve([]));
+    promise.then(result =>
+      func().then(Array.prototype.concat.bind(result))),
+  Promise.resolve([]));
 
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
@@ -480,7 +480,8 @@ export const getSearchFilterFunctions = () => {
       const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
       return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
         includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
-        includes(loweredTerm, toLower(datasetTerm.dacName)) ||
+        includes(loweredTerm, toLower(datasetTerm.dac?.dacName)) ||
+        includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail)) ||
         includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
         includes(loweredTerm, toLower(codes)) ||
         includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||

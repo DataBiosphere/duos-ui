@@ -131,7 +131,6 @@ export const StudyUpdateForm = (props) => {
       alternativeDataSharingPlanDataReleased: properties.alternativeDataSharingPlanDataReleased,
       alternativeDataSharingPlanTargetDeliveryDate: properties.alternativeDataSharingPlanTargetDeliveryDate,
       alternativeDataSharingPlanTargetPublicReleaseDate: properties.alternativeDataSharingPlanTargetPublicReleaseDate,
-      alternativeDataSharingPlanControlledOpenAccess: properties.alternativeDataSharingPlanControlledOpenAccess,
       dataSubmitterName: dataSubmitter.displayName,
       dataSubmitterEmail: dataSubmitter.email,
 

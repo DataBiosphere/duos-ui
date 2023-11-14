@@ -17,12 +17,3 @@
     display: flex;
     justify-content: flex-end;
 }
-
-.action-button {
-    font-size: 14px;
-    border: 1px solid #0948B7;
-    border-radius: 4px;
-    height: 25px;
-    cursor: pointer;
-    color: #0948B7;
-}

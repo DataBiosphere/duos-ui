@@ -1,10 +1,9 @@
 import {useState, useEffect} from 'react';
 import {Metrics} from '../libs/ajax';
 import {Notifications} from '../libs/utils';
-import {div, a} from 'react-hyperscript-helpers';
+import {div} from 'react-hyperscript-helpers';
 import {Styles, Theme} from '../libs/theme';
-import {filter, map} from 'lodash/fp';
-import {difference, get, find} from 'lodash';
+import {get} from 'lodash';
 import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 
@@ -14,11 +13,6 @@ export default function DatasetStatistics(props) {
   const datasetId = props.match.params.datasetId;
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
-  const [darsApproved, setDarsApproved] = useState();
-  const [darsDenied, setDarsDenied] = useState();
-  const [darsOpen, setDarsOpen] = useState();
-  const [darsCanceled, setDarsCanceled] = useState();
-  const [darsUnreviewed, setDarsUnreviewed] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(()  => {
@@ -31,43 +25,11 @@ export default function DatasetStatistics(props) {
       const metrics = await Metrics.getDatasetStats(datasetId);
       setDataset(metrics.dataset);
       setDars(metrics.dars);
-
-      const approved = filter((election) => election.finalAccessVote === true && election.status !== 'Open' && election.status !== 'Canceled')(metrics.elections);
-      setDarsApproved(map((election) => election.referenceId)(approved));
-
-      const denied = filter((election) => election.finalAccessVote === false && election.status !== 'Open' && election.status !== 'Canceled')(metrics.elections);
-      setDarsDenied(map((election) => election.referenceId)(denied));
-
-      const open = filter((election) => election.status === 'Open')(metrics.elections);
-      setDarsOpen(map((election) => election.referenceId)(open));
-
-      const canceled = filter((election) => election.status === 'Canceled')(metrics.elections);
-      setDarsCanceled(map((election) => election.referenceId)(canceled));
-
-      const allDarReferenceIds = map((dar) => dar.referenceId)(metrics.dars);
-      const allElectionReferenceIds = map((election) => election.referenceId)(metrics.elections);
-      setDarsUnreviewed(difference(allDarReferenceIds, allElectionReferenceIds));
-
       setIsLoading(false);
     } catch(error) {
       Notifications.showError({text: 'Error: Unable to retrieve dataset statistics from server'});
       setIsLoading(false);
     }
-  };
-
-  const getDisplayStatusForDar = (referenceId) => {
-    if (darsApproved.includes(referenceId)) {
-      return 'APPROVED';
-    } else if (darsDenied.includes(referenceId)) {
-      return 'DENIED';
-    } else if (darsOpen.includes(referenceId)) {
-      return 'OPEN';
-    } else if (darsCanceled.includes(referenceId)) {
-      return 'CANCELED';
-    } else if (darsUnreviewed.includes(referenceId)) {
-      return 'UNREVIEWED';
-    }
-    return '';
   };
 
   if (!isLoading) {

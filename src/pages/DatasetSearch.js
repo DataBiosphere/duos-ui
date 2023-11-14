@@ -8,9 +8,11 @@ import duosIcon from '../images/duos-network-logo.svg';
 import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
 import nhgriIcon from '../images/nhgri-logo-color.svg';
+import anvilIcon from '../images/anvil-logo.svg';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
+import { toLower } from 'lodash';
 
 const signingOfficialQuery = (user) => {
   return {
@@ -18,7 +20,7 @@ const signingOfficialQuery = (user) => {
       'submitter.institution.id': user.institution.id
     }
   };
-}
+};
 
 // query to return approved DAC studies from the user's institution
 const myInstitutionQuery = (user) => {
@@ -38,7 +40,7 @@ const myInstitutionQuery = (user) => {
       ]
     }
   };
-}
+};
 
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
@@ -115,6 +117,15 @@ export const DatasetSearch = (props) => {
       icon: nhgriIcon,
       title: 'NHGRI Data Library',
     },
+    'anvil': {
+      query: {
+        'match_phrase': {
+          'study.description': 'anvil'
+        }
+      },
+      icon: anvilIcon,
+      title: 'AnVIL Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
@@ -135,9 +146,9 @@ export const DatasetSearch = (props) => {
       icon: homeIcon,
       title: query + ' Data Library',
     }
-  }
+  };
 
-  const key = query === undefined ? '/datalibrary' : query;
+  const key = query === undefined ? '/datalibrary' : toLower(query);
   const version = versions[key] === undefined ? versions['/custom'] : versions[key];
 
   useEffect(() => {
@@ -173,7 +184,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, []);
+  });
 
   return (
     loading ?

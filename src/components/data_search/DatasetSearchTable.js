@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button } from '@mui/material';
+import { Button, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
@@ -16,7 +16,6 @@ const studyTableHeader = [
   'Phenotype',
   'Species',
   'PI Name',
-  'Data Submitter',
   'Data Custodian',
 ];
 
@@ -115,30 +114,34 @@ export const DatasetSearchTable = (props) => {
           data: [
             {
               value: entry[0].study.studyName,
+              truncate: true,
             },
             {
               value: entry[0].study.description,
             },
             {
               value: entry.length,
+              truncate: true,
             },
             {
               value: isNaN(sum) ? undefined : sum,
+              truncate: true,
             },
             {
               value: entry[0].study.phenotype,
+              truncate: true,
             },
             {
               value: entry[0].study.species,
+              truncate: true,
             },
             {
               value: entry[0].study.piName,
-            },
-            {
-              value: entry[0].study.dataSubmitterEmail,
+              truncate: true,
             },
             {
               value: entry[0].study.dataCustodianEmail.join(', '),
+              truncate: true,
             },
           ],
           subtable: {
@@ -160,10 +163,10 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value: dataset.dataLocation,
+                    value: dataset.url ? <Link href={dataset.url}>{dataset.dataLocation}</Link> : dataset.dataLocation,
                   },
                   {
-                    value: dataset.dacName,
+                    value: dataset.dac?.dacName,
                   },
                 ],
               };

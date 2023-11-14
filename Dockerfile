@@ -13,6 +13,7 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY src /usr/src/app/src
 COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
+COPY package-lock.json /usr/src/app/package-lock.json
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm config set update-notifier false
 RUN npm install --silent
