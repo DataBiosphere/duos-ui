@@ -406,14 +406,15 @@ export default function SigningOfficialTable(props) {
           ]),
         ]),
       ]),
-      h(SearchBar, {style: {marginLeft: '25%', marginRight: '-10%'}}, { handleSearchChange, searchRef }),
+      h(SearchBar, {style: {marginLeft: '25%'}}, { handleSearchChange, searchRef }),
       div({style: { marginLeft: 15 }}, [
         h(SimpleButton, {
           onClick: () => showModalOnClick(),
           baseColor: Theme.palette.secondary,
-          label: 'Add New Researcher',
+          label: 'Add Library Card',
           additionalStyle: {
-            width: '26rem',
+            width: '22rem',
+            height: '4rem',
             padding: '4% 10%',
             fontWeight: '600'
           }
