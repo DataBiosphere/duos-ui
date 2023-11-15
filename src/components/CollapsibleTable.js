@@ -131,6 +131,15 @@ const TruncatedTableCell = styled(StyledTableCell)(() => ({
       wordBreak: 'break-all'
     },
   },
+  '&:nth-child(3)': {
+    maxWidth: '37ch'
+  }
+}));
+
+const StyledSubtableCell = styled(StyledTableCell)(() => ({
+  '&:nth-child(2)': {
+    maxWidth: '15ch'
+  }
 }));
 
 const CollapsibleRow = (props) => {
@@ -202,9 +211,9 @@ const CollapsibleRow = (props) => {
                         />
                       </StyledTableCell>
                       {subRow.data.map((cell, k) => (
-                        <StyledTableCell key={k}>
+                        <StyledSubtableCell key={k}>
                           {cell.value}
-                        </StyledTableCell>
+                        </StyledSubtableCell>
                       ))}
                     </TableRow>
                   ))}
