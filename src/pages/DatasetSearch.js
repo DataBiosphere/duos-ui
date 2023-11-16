@@ -184,7 +184,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  });
+  }, []);
 
   return (
     loading ?
