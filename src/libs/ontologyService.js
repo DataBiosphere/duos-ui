@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { Notifications } from './utils';
 import { getOntologyUrl } from './ajax';
-import isNil from 'lodash';
 
 
 export const OntologyService = {
   searchOntology: async (obolibraryURL) => {
-    if (isNil(obolibraryURL) || obolibraryURL.length === 0) {
+    if (obolibraryURL.length === 0) {
       return [];
     }
     const baseURL = await getOntologyUrl();
