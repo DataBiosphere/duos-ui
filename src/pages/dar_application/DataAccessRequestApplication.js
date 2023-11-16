@@ -233,8 +233,7 @@ const DataAccessRequestApplication = (props) => {
         const { collectionId } = props.match.params;
         if (props.readOnlyMode) {
           const collection = await Collections.getCollectionById(collectionId);
-          const response = await User.getById(collection.createUserId);
-          setResearcher(response);
+          setResearcher(collection.createUser);
         } else {
           const response = await User.getMe();
           const signingOfficials = await User.getSOsForCurrentUser();
