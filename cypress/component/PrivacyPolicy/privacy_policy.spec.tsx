@@ -1,11 +1,12 @@
 /* eslint-disable no-undef */
 
-import { mount } from 'cypress/react';
+import {mount} from 'cypress/react';
+import React from 'react';
 import PrivacyPolicy from '../../../src/pages/PrivacyPolicy';
 
 describe('Privacy Policy', () => {
   it('Renders the privacy policy page', () => {
-    mount(PrivacyPolicy);
+    mount(<PrivacyPolicy/>);
     cy.get('h1').should('contain', 'DUOS Privacy Policy');
   });
 });
