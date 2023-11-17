@@ -30,7 +30,7 @@
       1,
       {
         "extensions": [
-          ".js", ".jsx"
+          ".js", ".jsx", ".ts", ".tsx"
         ]
       }
     ],
