@@ -8,7 +8,9 @@
     "types": [
       "cypress",
       "node"
-    ]
+    ],
+    "jsx": "react",
+    "esModuleInterop": true
   },
   "include": [
     "**/*.ts",
