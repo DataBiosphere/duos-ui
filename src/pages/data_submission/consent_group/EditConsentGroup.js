@@ -26,7 +26,7 @@ const searchOntologies = (query, callback) => {
   DAR.getAutoCompleteOT(query).then(
     items => {
       options = items.map(function (item) {
-        return item.label;
+        return { displayText: item.label, id: item.id };
       });
       callback(options);
     });
@@ -240,7 +240,6 @@ export const EditConsentGroup = (props) => {
             isMulti: true,
             isCreatable: true,
             isAsync: true,
-            optionsAreString: true,
             loadOptions: searchOntologies,
             id: idx + '_diseaseSpecificUseText',
             name: 'diseaseSpecificUse',
@@ -253,10 +252,11 @@ export const EditConsentGroup = (props) => {
               onValidationChange({ key: 'diseaseSpecificUse', validation });
             },
             onChange: ({ key, value, isValid }) => {
+              const doids = value.map((v) => v.id);
               setSelectedDiseases(value);
               onChange({
                 key: key,
-                value: value,
+                value: doids,
                 isValid: isValid
               });
             },
