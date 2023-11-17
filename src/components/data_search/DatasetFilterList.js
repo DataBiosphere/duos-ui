@@ -12,6 +12,8 @@ import { Checkbox } from '@mui/material';
 export const DatasetFilterList = (props) => {
   const { datasets, filters, filterHandler } = props;
 
+  const accessManagementFilters = ['Controlled', 'Open', 'External'];
+
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
   return (
@@ -24,22 +26,21 @@ export const DatasetFilterList = (props) => {
         Access Type
       </Typography>
       <List sx={{ margin: '-0.5em -0.5em'}}>
-        <ListItem disablePadding>
-          <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, 'open')}>
-            <ListItemIcon>
-              <Checkbox checked={isFiltered('open')} />
-            </ListItemIcon>
-            <ListItemText primary="Open" sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, 'controlled')}>
-            <ListItemIcon>
-              <Checkbox checked={isFiltered('controlled')} />
-            </ListItemIcon>
-            <ListItemText primary="Controlled" sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
-          </ListItemButton>
-        </ListItem>
+        {
+          accessManagementFilters.map((filterName) => {
+            const filter = filterName.toLowerCase();
+            return (
+              <ListItem disablePadding key={filter}>
+                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, filter)}>
+                  <ListItemIcon>
+                    <Checkbox checked={isFiltered(filter)} />
+                  </ListItemIcon>
+                  <ListItemText primary={filterName} sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })
+        }
       </List>
     </Box>
   );
