@@ -12,7 +12,7 @@ module.exports = defineConfig({
   },
   component: {
     src: ['./src/components/common', './cypress/component/'],
-    specPattern: '**/*.spec.js',
+    specPattern: ['**/*.spec.js', '**/*.spec.tsx'],
     devServer: {
       framework: 'create-react-app',
       bundler: 'webpack',
