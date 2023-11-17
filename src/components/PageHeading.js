@@ -22,7 +22,7 @@ const margins = (iconSize) => {
   } else {
     return MEDIUM;
   }
-}
+};
 
 export const PageHeading = (props) => {
   const { id, title, description, imgSrc, color, iconSize, descriptionStyle } = props;
@@ -75,6 +75,6 @@ export const PageHeading = (props) => {
       </div>
     </div>
   );
-}
+};
 
 export default PageHeading;

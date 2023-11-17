@@ -168,7 +168,7 @@ export const SignIn = (props) => {
           />
         }
         <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
-      </div>
+      </div>;
   };
 
   return (
@@ -188,6 +188,6 @@ export const SignIn = (props) => {
       }
     </div>
   );
-}
+};
 
 export default SignIn;

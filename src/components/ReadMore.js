@@ -22,7 +22,7 @@ export const ReadMore = ({
 
   const getUnderLimit = () => {
     return !content || content.length <= charLimit;
-  }
+  };
 
   const getInlineContent = () => {
     const content = expanded
@@ -35,23 +35,23 @@ export const ReadMore = ({
         {content}
       </span>
     );
-  }
+  };
 
   const getFormattedContent = () => {
     return expanded ? [...content, ...moreContent] : content;
-  }
+  };
 
   const getContent = () => {
     return inline ? getInlineContent() : getFormattedContent();
-  }
+  };
 
   const readMore = () => {
     setExpanded(true);
-  }
+  };
 
   const readLess = () => {
     setExpanded(false);
-  }
+  };
 
   const getReadLink = (fun, text, classes) => {
     const { linkElements, linkElementsStyle } = inline
