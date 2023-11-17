@@ -183,7 +183,7 @@ class Home extends Component {
                         target: '_blank'
                       }, ['Machine Readable Consent Guidance.']),
                       ' For help determining your data\'s permitted uses, try our ',
-                      h(Link, { to: '/data_sharing_language_tool'}, ['Data Sharing Language Tool']),
+                      h(Link, { to: '/consent_text_generator'}, ['Data Sharing Language Tool']),
                       ' which follows GA4GH guidelines.'
                     ])
                   ],
