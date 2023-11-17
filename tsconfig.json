@@ -7,5 +7,9 @@
     "sourceMap": true,
     "jsx": "react",
     "esModuleInterop": true,
+    "strict": true,
+    "target": "es5",
+    "allowJs": true,
+    "checkJs": true,
   },
 }
