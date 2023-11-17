@@ -1,15 +1,21 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "noImplicitAny": true,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true,
-    "jsx": "react",
-    "esModuleInterop": true,
-    "strict": true,
-    "target": "es5",
     "allowJs": true,
     "checkJs": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2022",
+    "useUnknownInCatchVariables": true
   },
+  "include": [
+    "src"
+  ]
 }
