@@ -131,9 +131,6 @@ const TruncatedTableCell = styled(StyledTableCell)(() => ({
       wordBreak: 'break-all'
     },
   },
-  '&:nth-child(3)': {
-    maxWidth: '37ch'
-  }
 }));
 
 const CollapsibleRow = (props) => {
