@@ -1,11 +1,12 @@
-import { div, img } from 'react-hyperscript-helpers';
+import React from 'react';
 import loadingIndicator from '../images/loading-indicator.svg';
 
 //spinner constant to be used everywhere
-export const Spinner =
-  div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
-    img({ src: loadingIndicator, alt: 'spinner' })
-  ]);
+export const Spinner = (
+  <div style={{ textAlign: 'center', height: '44px', width: '180px' }}>
+    <img src={loadingIndicator} alt='spinner' />
+  </div>
+);
 
 // TODO: implement this spinner in every componentDidMount or Init method on
 // pages that call async methods upon loading the page.

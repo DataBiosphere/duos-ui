@@ -1,4 +1,4 @@
-import { button } from 'react-hyperscript-helpers';
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 const updateStyle = ({backgroundColor, fontColor, additionalStyle = {}, pointerBool, disabled, setStyle}) => {
@@ -46,5 +46,9 @@ export default function SimpleButton(props) {
     return baseAttributes;
   };
 
-  return button(getDivAttributes(disabled), [label]);
+  return (
+    <button {...getDivAttributes(disabled)}>
+      {label}
+    </button>
+  );
 }

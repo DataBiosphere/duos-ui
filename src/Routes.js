@@ -50,7 +50,7 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(mergeAll([routeProps, props]))} />
-    <Route exact path="/liveness" render={() => HealthCheck()} />
+    <Route exact path="/liveness" component={HealthCheck} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
         checkEnv(envGroups.NON_STAGING)
