@@ -1,4 +1,4 @@
-import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
+import React from 'react';
 import footerLogo from '../images/broad_logo_allwhite.png';
 
 function DuosFooter() {
@@ -24,17 +24,17 @@ function DuosFooter() {
   };
 
   return (
-    div({ style: footerStyle }, [
-      footer({ style: mainFooterStyle }, [
-        img({ src: footerLogo, style: footerLogoStyle, alt: 'Broad Institute logo' }),
-        ul({ className: 'footer-links' }, [
-          li({ className: 'footer-links__item' }, ['\u00A9 Broad Institute']),
-          li({ className: 'footer-links__item' }, [a({ href: '/privacy' }, ['Privacy Policy']),]),
-          li({ className: 'footer-links__item' }, [a({ href: '/tos' }, ['Terms of Service']),]),
-          li({ className: 'footer-links__item' }, [a({ href: '/status' }, ['Status'])])
-        ])
-      ])
-    ])
+    <div style={footerStyle}>
+      <footer style={mainFooterStyle}>
+        <img src={footerLogo} style={footerLogoStyle} alt='Broad Institute logo' />
+        <ul className='footer-links'>
+          <li className='footer-links__item'>© Broad Institute</li>
+          <li className='footer-links__item'><a href='/privacy'>Privacy Policy</a></li>
+          <li className='footer-links__item'><a href='/tos'>Terms of Service</a></li>
+          <li className='footer-links__item'><a href='/status'>Status</a></li>
+        </ul>
+      </footer>
+    </div>
   );
 }
 

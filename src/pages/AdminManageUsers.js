@@ -1,14 +1,14 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import { a, div, h, span, img } from 'react-hyperscript-helpers';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { User } from '../libs/ajax';
 import manageUsersIcon from '../images/icon_manage_users.png';
-import {USER_ROLES} from '../libs/utils';
+import { USER_ROLES } from '../libs/utils';
 import { isNil } from 'lodash/fp';
 import { ManageUsersTable } from '../components/manage_users_table/ManageUsersTable';
 import { Styles } from '../libs/theme';
 import SearchBar from '../components/SearchBar';
-import {Notification} from '../components/Notification';
+import { Notification } from '../components/Notification';
 
 const getUserList = async () => {
   const users = await User.list(USER_ROLES.admin);
@@ -44,7 +44,7 @@ export const AdminManageUsers = function AdminManageUsers() {
       setIsLoading(false);
     }).catch(() => {
       setIsLoading(false);
-      Notification.showError({text: 'Error: Unable to retrieve user data from server'});
+      Notification.showError({ text: 'Error: Unable to retrieve user data from server' });
     });
   }, []);
 
@@ -73,82 +73,47 @@ export const AdminManageUsers = function AdminManageUsers() {
     setSearchText(query);
   };
 
-  return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
-      div(
-        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
-        [
-          div({ style: Styles.ICON_CONTAINER }, [
-            img({
-              id: 'manage-users-icon',
-              src: manageUsersIcon,
-              style: Styles.HEADER_IMG,
-            }),
-          ]),
-          div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: {
-              fontFamily: 'Montserrat',
-              fontWeight: 600,
-              fontSize: '2.8rem'
-            } }, [
-              'Manage Users',
-            ]),
-            div(
-              {
-                style: {
-                  fontFamily: 'Montserrat',
-                  fontSize: '1.6rem'
-                },
-              },
-              ['Select and manage users and their roles']
-            ),
-          ]),
-        ]
-      ),
-      h(SearchBar, {
-        handleSearchChange: handleSearchUser,
-        searchRef,
-        style: {
-          width: '60%',
-          margin: '0 3% 0 0',
-        },
-        button: div({
-          style: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
+  return (
+    <div style={Styles.PAGE}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+          <div style={Styles.ICON_CONTAINER}>
+            <img id="manage-users-icon" src={manageUsersIcon} style={Styles.HEADER_IMG} />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>Manage Users</div>
+            <div style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}>Select and manage users and their roles</div>
+          </div>
+        </div>
+        <SearchBar
+          handleSearchChange={handleSearchUser}
+          searchRef={searchRef}
+          style={{ width: '60%', margin: '0 3% 0 0' }}
+          button={
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' }}>
+              <a
+                id="btn_addUser"
+                className="btn-primary btn-add common-background"
+                style={{ marginTop: '30%', display: 'flex' }}
+                onClick={addUser}
+              >
+                <span>Add User</span>
+              </a>
+            </div>
           }
-        }, [
-          a({
-            id: 'btn_addUser',
-            className: 'btn-primary btn-add common-background',
-            style: {
-              marginTop: '30%',
-              display: 'flex'
-            },
-            onClick: addUser
-          }, [
-            span({}, ['Add User']),
-          ]),
-        ]),
-      }),
-    ]),
-    h(ManageUsersTable, {
-      userList,
-      isLoading,
-      searchText
-    }),
-
-    AddUserModal({
-      isRendered: showAddUserModal,
-      showModal: showAddUserModal,
-      onOKRequest: okModal,
-      onCloseRequest: closeModal,
-      onAfterOpen: afterModalOpen,
-      user: selectedUser,
-    }),
-  ]);
+        />
+      </div>
+      <ManageUsersTable userList={userList} isLoading={isLoading} searchText={searchText} />
+      <AddUserModal
+        isRendered={showAddUserModal}
+        showModal={showAddUserModal}
+        onOKRequest={okModal}
+        onCloseRequest={closeModal}
+        onAfterOpen={afterModalOpen}
+        user={selectedUser}
+      />
+    </div>
+  );
 };
 
 export default AdminManageUsers;
