@@ -115,6 +115,7 @@ export const DatasetSearchTable = (props) => {
             {
               value: entry[0].study.studyName,
               truncate: true,
+              increaseWidth: true
             },
             {
               value: entry[0].study.description,
@@ -152,6 +153,7 @@ export const DatasetSearchTable = (props) => {
                 data: [
                   {
                     value: dataset.datasetIdentifier,
+                    increaseWidth: true
                   },
                   {
                     value: dataset.dataUse?.primary.map((use) => use.code).join(', ')

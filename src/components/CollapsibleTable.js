@@ -136,12 +136,6 @@ const TruncatedTableCell = styled(StyledTableCell)(() => ({
   }
 }));
 
-const StyledSubtableCell = styled(StyledTableCell)(() => ({
-  '&:nth-child(2)': {
-    maxWidth: '15ch'
-  }
-}));
-
 const CollapsibleRow = (props) => {
   const { row, row: { subtable: { rows: subrows } }, selected, selectHandler } = props;
 
@@ -173,15 +167,7 @@ const CollapsibleRow = (props) => {
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => {
-          return cell?.truncate ? (
-            <TruncatedTableCell key={i}>
-              {cell.value}
-            </TruncatedTableCell>
-          ) : (
-            <StyledTableCell key={i}>
-              {cell.value}
-            </StyledTableCell>
-          );
+          return <TableCellRenderer key={i} cell={cell} />;
         })}
       </TableRow>
       {/* subtable */}
@@ -210,11 +196,9 @@ const CollapsibleRow = (props) => {
                           checked={isSelected(subRow.id)}
                         />
                       </StyledTableCell>
-                      {subRow.data.map((cell, k) => (
-                        <StyledSubtableCell key={k}>
-                          {cell.value}
-                        </StyledSubtableCell>
-                      ))}
+                      {subRow.data.map((cell, k) => {
+                        return <SubtableCellRenderer key={k} cell={cell} />;
+                      })}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -277,3 +261,43 @@ export const CollapsibleTable = (props) => {
 };
 
 export default CollapsibleTable;
+
+const TableCellRenderer = ({ cell }) => {
+
+  if (cell?.truncate && cell?.increaseWidth) {
+    return <TruncatedTableCell style={{ maxWidth: '30ch' }}>
+      {cell.value}
+    </TruncatedTableCell>;
+  }
+
+  if (cell?.truncate) {
+    return <TruncatedTableCell>
+      {cell.value}
+    </TruncatedTableCell>;
+  }
+
+  if (cell?.increaseWidth) {
+    return <StyledTableCell style={{ width: '37ch' }}>
+      {cell.value}
+    </StyledTableCell>;
+  }
+
+  // Default case:
+  return <StyledTableCell>
+    {cell.value}
+  </StyledTableCell>;
+};
+
+const SubtableCellRenderer = ({ cell }) => {
+
+  if (cell?.increaseWidth) {
+    return <StyledTableCell style={{ width: '15ch' }}>
+      {cell.value}
+    </StyledTableCell>;
+  }
+
+  // Default case:
+  return <StyledTableCell>
+    {cell.value}
+  </StyledTableCell>;
+};
