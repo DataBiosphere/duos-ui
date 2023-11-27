@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
@@ -10,12 +10,13 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Popover from '@mui/material/Popover';
+import Typography from '@mui/material/Typography';
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import { Checkbox } from '@mui/material';
-import { useState } from 'react';
 
 /*
 The data should follow the following format:
@@ -104,16 +105,21 @@ const table = {
 
 const StyledTableCell = styled(TableCell)(() => ({
   [`&.${tableCellClasses.head}`]: {
-    fontSize: '1.4rem',
+    color: '#333F52',
     fontFamily: 'Montserrat',
-    fontWeight: 600,
+    fontSize: '14px',
+    fontWeight: 'bold',
+    lineHeight: '16px',
     backgroundColor: '#e2e8f4',
     textTransform: 'uppercase',
   },
   [`&.${tableCellClasses.body}`]: {
-    fontSize: '1.4rem',
+    fontSize: '14px',
+    lineHeight: '24px',
     fontFamily: 'Montserrat',
     fontWeight: 400,
+    color: '#333F52',
+    letterSpacing: 0,
   },
 }));
 
@@ -164,15 +170,7 @@ const CollapsibleRow = (props) => {
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => {
-          return cell?.truncate ? (
-            <TruncatedTableCell key={i}>
-              {cell.value}
-            </TruncatedTableCell>
-          ) : (
-            <StyledTableCell key={i}>
-              {cell.value}
-            </StyledTableCell>
-          );
+          return <TableCellRenderer key={i} cell={cell} />;
         })}
       </TableRow>
       {/* subtable */}
@@ -201,11 +199,9 @@ const CollapsibleRow = (props) => {
                           checked={isSelected(subRow.id)}
                         />
                       </StyledTableCell>
-                      {subRow.data.map((cell, k) => (
-                        <StyledTableCell key={k}>
-                          {cell.value}
-                        </StyledTableCell>
-                      ))}
+                      {subRow.data.map((cell, k) => {
+                        return <SubtableCellRenderer key={k} cell={cell} />;
+                      })}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -268,3 +264,91 @@ export const CollapsibleTable = (props) => {
 };
 
 export default CollapsibleTable;
+
+const TableCellRenderer = ({ cell }) => {
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const popoverOpen = Boolean(anchorEl);
+
+  if (cell?.hideUnderIcon) {
+    return (
+      <StyledTableCell>
+        <ArticleOutlinedIcon
+          aria-owns={popoverOpen ? 'mouse-over-popover' : undefined}
+          aria-haspopup="true"
+          onMouseEnter={handlePopoverOpen}
+          onMouseLeave={handlePopoverClose}
+          sx={{ color: '#0948B7' }}
+        />
+        <Popover
+          id="mouse-over-popover"
+          sx={{
+            pointerEvents: 'none',
+          }}
+          open={popoverOpen}
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          onClose={handlePopoverClose}
+          disableRestoreFocus
+        >
+          <Typography sx={{ p: 1, fontFamily: 'Montserrat', fontSize: '14px', maxWidth: '80rem' }}>
+            {cell.value}
+          </Typography>
+        </Popover>
+      </StyledTableCell>
+    );
+  }
+
+  if (cell?.truncate && cell?.increaseWidth) {
+    return <TruncatedTableCell style={{ maxWidth: '30ch' }}>
+      {cell.value}
+    </TruncatedTableCell>;
+  }
+
+  if (cell?.truncate) {
+    return <TruncatedTableCell>
+      {cell.value}
+    </TruncatedTableCell>;
+  }
+
+  if (cell?.increaseWidth) {
+    return <StyledTableCell style={{ width: '37ch' }}>
+      {cell.value}
+    </StyledTableCell>;
+  }
+
+  // Default case:
+  return <StyledTableCell>
+    {cell.value}
+  </StyledTableCell>;
+};
+
+const SubtableCellRenderer = ({ cell }) => {
+
+  if (cell?.increaseWidth) {
+    return <StyledTableCell style={{ width: '15ch' }}>
+      {cell.value}
+    </StyledTableCell>;
+  }
+
+  // Default case:
+  return <StyledTableCell>
+    {cell.value}
+  </StyledTableCell>;
+};
