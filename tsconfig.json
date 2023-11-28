@@ -13,9 +13,13 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2022",
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src"
-  ]
+  ],
+  "plugins": ["@typescript-eslint", "import"]
 }
