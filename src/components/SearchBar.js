@@ -1,14 +1,13 @@
-
+import React from 'react';
 import { useRef } from 'react';
-import { div, input } from 'react-hyperscript-helpers';
-import { Styles} from '../libs/theme';
+import { Styles } from '../libs/theme';
 import { defaultTo } from 'lodash/fp';
 
 export default function SearchBar(props) {
   const { handleSearchChange } = props;
   const searchTerms = useRef('');
 
-  const button = props.button ? props.button : div();
+  const button = props.button ? props.button : <div />;
 
   const style = {
     width: '100%',
@@ -22,17 +21,17 @@ export default function SearchBar(props) {
     ...props.style
   };
 
-  return div({className: 'right-header-section', style: Styles.RIGHT_HEADER_SECTION}, [
-    input({
-      'data-cy': 'search-bar',
-      type: 'text',
-      placeholder: 'Enter search terms',
-      //Styling seems to only work when defined here, variable reference doesn't work
-      //Odds are there's a competing style, need to figure out where it's coming from
-      style,
-      onChange:() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms),
-      ref: props.searchRef || searchTerms
-    }),
-    button
-  ]);
+  return (
+    <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+      <input
+        data-cy="search-bar"
+        type="text"
+        placeholder="Enter search terms"
+        style={style}
+        onChange={() => handleSearchChange(props.searchRef ? defaultTo('')(props.searchRef.current.value) : searchTerms)}
+        ref={props.searchRef || searchTerms}
+      />
+      {button}
+    </div>
+  );
 }

@@ -51,10 +51,16 @@ export const DatasetSearchTable = (props) => {
       newFiltered = data;
     } else {
       newFiltered = data.filter((dataset) => {
-        if (newFilters.includes('open') && dataset.openAccess) {
+        // TODO: remove extra checks when openAccess property is deprecated
+        if (newFilters.includes('open') && (dataset.openAccess || dataset.accessManagement === 'open')) {
           return true;
         }
-        if (newFilters.includes('controlled') && !dataset.openAccess) {
+        if (newFilters.includes('controlled') && (
+          (!dataset.openAccess && dataset.accessManagement === undefined) || (dataset.openAccess === undefined && dataset.accessManagement === 'controlled')
+        )) {
+          return true;
+        }
+        if (newFilters.includes('external') && dataset.accessManagement === 'external') {
           return true;
         }
         return false;

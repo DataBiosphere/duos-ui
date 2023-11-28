@@ -1,4 +1,3 @@
-import {div, h1} from 'react-hyperscript-helpers';
 import DOMPurify from 'dompurify';
 import './PrivacyPolicy.css';
 import ReactMarkdown from 'react-markdown';
@@ -62,13 +61,15 @@ We follow the laws of all the countries where we operate. We follow the laws of 
 `;
 
 const content = <ReactMarkdown
-  components={{a: (props) => <a target={'_blank'} {...props}/>}}>
+  components={{ a: (props) => <a target={'_blank'} {...props} /> }}>
   {DOMPurify.sanitize(privacyPolicy)}
 </ReactMarkdown>;
 
 export default function PrivacyPolicy() {
-  return div({className: 'markdown-body'}, [
-    h1({style: {paddingBottom: '1.5rem'}}, ['DUOS Privacy Policy']),
-    content
-  ]);
+  return (
+    <div className="markdown-body">
+      <h1 style={{ paddingBottom: '1.5rem' }}>DUOS Privacy Policy</h1>
+      {content}
+    </div>
+  );
 }

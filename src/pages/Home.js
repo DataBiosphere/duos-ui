@@ -1,92 +1,94 @@
-import { Component } from 'react';
-import { a, div, h, h1, h3, img, p } from 'react-hyperscript-helpers';
+import React from 'react';
 import SignIn from '../components/SignIn';
 import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
-import {Link} from 'react-router-dom';
-import {Storage} from '../libs/storage';
+import { Link } from 'react-router-dom';
+import { Storage } from '../libs/storage';
 
-class Home extends Component {
+const Home = (props) => {
+  const { onSignIn, history } = props;
+  const isLogged = Storage.userIsLogged();
 
-  render() {
-    const {
-      onSignIn,
-      history
-    } = this.props;
-    const isLogged = Storage.userIsLogged();
+  const homeTitle = {
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat',
+    fontSize: '28px',
+    fontWeight: 600,
+    textAlign: 'center',
+    padding: '0 5rem'
+  };
 
-    const homeTitle = {
-      color: '#FFFFFF',
-      fontFamily: 'Montserrat',
-      fontSize: '28px',
-      fontWeight: 600,
-      textAlign: 'center',
-      padding: '0 5rem'
-    };
+  const homeBannerDescription = {
+    color: '#FFFFFF',
+    fontFamily: 'Montserrat',
+    fontSize: '20px',
+    textAlign: 'center',
+    whiteSpace: 'pre-wrap',
+    padding: '0 10rem'
+  };
 
-    const homeBannerDescription = {
-      color: '#FFFFFF',
-      fontFamily: 'Montserrat',
-      fontSize: '20px',
-      textAlign: 'center',
-      whiteSpace: 'pre-wrap',
-      padding: '0 10rem'
-    };
+  const duosLogo = {
+    height: '80px',
+    width: '300px',
+    display: 'block',
+    margin: '0 auto 3rem',
+    padding: '0 3rem'
+  };
 
-    const duosLogo = {
-      height: '80px',
-      width: '300px',
-      display: 'block',
-      margin: '0 auto 3rem',
-      padding: '0 3rem'
-    };
+  const header = {
+    color: '#1F3B50',
+    fontFamily: 'Montserrat',
+    fontSize: '24px',
+    fontWeight: 600,
+    textAlign: 'center',
+    padding: '0 5rem'
+  };
 
-    const header = {
-      color: '#1F3B50',
-      fontFamily: 'Montserrat',
-      fontSize: '24px',
-      fontWeight: 600,
-      textAlign: 'center',
-      padding: '0 5rem'
-    };
+  const subHeader = {
+    color: '#1F3B50',
+    fontFamily: 'Montserrat',
+    fontSize: '16px',
+    textAlign: 'center',
+    whiteSpace: 'pre-wrap',
+    padding: '0 5rem'
+  };
 
-    const subHeader = {
-      color: '#1F3B50',
-      fontFamily: 'Montserrat',
-      fontSize: '16px',
-      textAlign: 'center',
-      whiteSpace: 'pre-wrap',
-      padding: '0 5rem'
-    };
+  const description = {
+    color: '#1F3B50',
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    textAlign: 'center',
+    textIndent: '10px',
+    whiteSpace: 'pre-wrap',
+    padding: '10px 1rem',
+  };
 
-    const description = {
-      color: '#1F3B50',
-      fontFamily: 'Montserrat',
-      fontSize: '14px',
-      textAlign: 'center',
-      textIndent: '10px',
-      whiteSpace: 'pre-wrap',
-      padding: '10px 1rem',
-    };
+  const paragraph = {
+    color: '#1F3B50',
+    padding: '0 5rem 2rem 5rem',
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    textAlign: 'justify',
+    textIndent: '10px'
+  };
 
-    const paragraph = {
-      color: '#1F3B50',
-      padding: '0 5rem 2rem 5rem',
-      fontFamily: 'Montserrat',
-      fontSize: '14px',
-      textAlign: 'justify',
-      textIndent: '10px'
-    };
+  const readMoreStyle = {
+    fontFamily: 'Montserrat',
+    fontSize: '14px',
+    fontWeight: 500,
+    textAlign: 'center',
+    display: 'block'
+  };
 
-    const readMoreStyle = {
-      fontFamily: 'Montserrat',
-      fontSize: '14px',
-      fontWeight: 500,
-      textAlign: 'center',
-      display: 'block'
-    };
+  const signInPositionStyle = {
+    padding: '1em 1em 0 0',
+    alignItems: 'center',
+    position: 'absolute',
+    top: '0',
+    right: '1rem',
+  };
 
     const signInPositionStyle = {
       padding: '1em 1em 0 0',

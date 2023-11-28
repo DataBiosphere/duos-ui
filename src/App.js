@@ -1,6 +1,5 @@
-import {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactGA from 'react-ga';
-import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
 import {Config} from './libs/config';
@@ -81,18 +80,16 @@ function App() {
   };
 
   return (
-    div({className: 'body'}, [
-      div({className: 'wrap'}, [
-        div({className: 'main'}, [
-          h(DuosHeader, {onSignOut: signOut}),
-          h(Spinner, {
-            name: 'mainSpinner', group: 'duos', loadingImage
-          }),
-          h(Routes, {onSignOut: signOut, onSignIn: signIn, isLogged: isLoggedIn, env: env})
-        ])
-      ]),
-      DuosFooter()
-    ])
+    <div className="body">
+      <div className="wrap">
+        <div className="main">
+          <DuosHeader onSignOut={signOut} />
+          <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
+          <Routes onSignOut={signOut} onSignIn={signIn} isLogged={isLoggedIn} env={env} />
+        </div>
+      </div>
+      <DuosFooter />
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect, useMemo } from 'react';
-import { div } from 'react-hyperscript-helpers';
 
 const defaultUnselectedStyle = {
   fontSize: '1.8rem',
@@ -24,7 +24,6 @@ export default function SelectableText({label, setSelected, selectedType, styleO
 
   const {baseStyle, tabSelected, tabUnselected, tabHover} = styleOverride;
 
-
   const utilizedUnselectedStyle = useMemo(() => {
     return Object.assign({}, tabUnselected || defaultUnselectedStyle, baseStyle);
   }, [tabUnselected, baseStyle]);
@@ -42,7 +41,6 @@ export default function SelectableText({label, setSelected, selectedType, styleO
     );
   }, [label, selectedType, utilizedSelectedStyle, utilizedUnselectedStyle]);
 
-
   const addHoverEffect = () => {
     setStyle(utilizedHoverStyle);
   };
@@ -50,14 +48,15 @@ export default function SelectableText({label, setSelected, selectedType, styleO
     setStyle(selectedType === label ? utilizedSelectedStyle : utilizedUnselectedStyle);
   };
 
-
-  return(
-    div({
-      style,
-      onMouseEnter: addHoverEffect,
-      onMouseLeave: removeHoverEffect,
-      onClick: () => !isDisabled && setSelected(label),
-      className: `tab-selection-${label}`
-    }, [label])
+  return (
+    <div
+      style={style}
+      onMouseEnter={addHoverEffect}
+      onMouseLeave={removeHoverEffect}
+      onClick={() => !isDisabled && setSelected(label)}
+      className={`tab-selection-${label}`}
+    >
+      {label}
+    </div>
   );
 }
