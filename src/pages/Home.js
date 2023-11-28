@@ -155,7 +155,7 @@ const Home = (props) => {
                     {' '}
                     For help determining your data&apos;s permitted uses, try our
                     {' '}
-                    <Link to="/data_sharing_language_tool">Data Sharing Language Tool</Link>, which follows GA4GH guidelines.
+                    <Link to="/consent_text_generator">Data Sharing Language Tool</Link>, which follows GA4GH guidelines.
                   </p>
                 ]}
                 moreContent={[
