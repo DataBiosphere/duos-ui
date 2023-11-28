@@ -89,16 +89,8 @@ const Home = (props) => {
     top: '0',
     right: '1rem',
   };
-
-    const signInPositionStyle = {
-      padding: '1em 1em 0 0',
-      alignItems: 'center',
-      position: 'absolute',
-      top: '0',
-      right: '1rem',
-    };
-
-    return (
+  
+  return (
     <div className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
