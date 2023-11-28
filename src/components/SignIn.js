@@ -1,22 +1,21 @@
-import React, {useEffect, useState} from 'react';
-import {isEmpty, isNil} from 'lodash/fp';
-import {a, div, h, img, span} from 'react-hyperscript-helpers';
-import {Alert} from './Alert';
-import {ToS, User} from '../libs/ajax';
+import React, { useEffect, useState } from 'react';
+import { isEmpty, isNil } from 'lodash/fp';
+import { Alert } from './Alert';
+import { ToS, User } from '../libs/ajax';
 import { Metrics } from '../libs/metrics';
-import {Config} from '../libs/config';
-import {Storage} from '../libs/storage';
-import {Navigation, setUserRoleStatuses} from '../libs/utils';
+import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
+import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
-import {Spinner} from './Spinner';
+import { Spinner } from './Spinner';
 import ReactTooltip from 'react-tooltip';
-import {GoogleIS} from '../libs/googleIS';
+import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
 
-export default function SignIn(props) {
+export const SignIn = (props) => {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState({});
-  const {onSignIn, history, customStyle} = props;
+  const { onSignIn, history, customStyle } = props;
 
   useEffect(() => {
     // Using `isSubscribed` resolves the
@@ -44,7 +43,7 @@ export default function SignIn(props) {
     setUserRoleStatuses(user, Storage);
     await onSignIn();
     const userStatus = await ToS.getStatus();
-    const {tosAccepted} = userStatus;
+    const { tosAccepted } = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
@@ -112,13 +111,13 @@ export default function SignIn(props) {
 
     switch (status) {
       case 400:
-        setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
+        setErrorDisplay({ show: true, title: 'Error', msg: JSON.stringify(error) });
         break;
       case 409:
         handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
-        setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
+        setErrorDisplay({ show: true, title: 'Error', msg: 'Unexpected error, please try again' });
         break;
     }
   };
@@ -134,65 +133,61 @@ export default function SignIn(props) {
   const onFailure = (response) => {
     Storage.clearStorage();
     if (response.error === 'popup_closed_by_user') {
-      setErrorDisplay({
-        description: span({}, ['Sign-in cancelled ... ', img({height: '20px', src: loadingIndicator})])
-      });
+      setErrorDisplay(
+        <span>
+          Sign-in cancelled ...
+          <img height="20px" src={loadingIndicator} />
+        </span>
+      );
       setTimeout(() => {
         setErrorDisplay({});
       }, 2000);
     } else {
-      setErrorDisplay({'title': response.error, 'description': response.details});
+      setErrorDisplay({ title: response.error, description: response.details });
     }
   };
 
   const spinnerOrSignInButton = () => {
-    const disabled = clientId === '';
-    return disabled ?
-      Spinner :
-      div({
-        style: {
-          display: 'flex'
-        }
-      }, [
-        isNil(customStyle) ?
-          GoogleIS.signInButton(clientId, onSuccess, onFailure) :
-          <button className={'btn-primary'} style={customStyle} onClick={() => {
+    return clientId === ''
+      ? Spinner
+      : <div style={{ display: 'flex' }}>
+        {isNil(customStyle)
+          ? GoogleIS.signInButton(clientId, onSuccess, onFailure)
+          : <button className={'btn-primary'} style={customStyle} onClick={() => {
             GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
-          }}>Submit a Data Access Request</button>,
-        a({
-          isRendered: isNil(customStyle),
-          className: 'navbar-duos-icon-help',
-          style: {
-            color: 'white',
-            height: 16, width: 16,
-            marginLeft: 5
-          },
-          href: 'https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email',
-          'data-for': 'tip_google-help',
-          'data-tip': 'No Google account? Click here!'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_google-help',
-          place: 'top',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        })
-      ]);
+          }}>
+            Submit a Data Access Request
+          </button>}
+        {isNil(customStyle) &&
+          <a
+            className='navbar-duos-icon-help'
+            style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
+            href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
+            data-for="tip_google-help"
+            data-tip="No Google help? Click here!"
+          />
+        }
+        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
+      </div>;
   };
 
   return (
-    div({}, [
-      div({isRendered: !isEmpty(errorDisplay), className: 'dialog-alert'}, [
-        Alert({
-          id: 'dialog',
-          type: 'danger',
-          title: errorDisplay.title,
-          description: errorDisplay.description
-        })
-      ]),
-      div({isRendered: isEmpty(errorDisplay)}, [spinnerOrSignInButton()])
-    ])
+    <div>
+      {isEmpty(errorDisplay)
+        ? <div>
+          {spinnerOrSignInButton()}
+        </div>
+        : <div className="dialog-alert">
+          <Alert
+            id="dialog"
+            type="danger"
+            title={errorDisplay.title}
+            description={errorDisplay.description}
+          />
+        </div>
+      }
+    </div>
   );
-}
+};
 
+export default SignIn;

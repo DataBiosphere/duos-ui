@@ -351,4 +351,5 @@ const SubtableCellRenderer = ({ cell }) => {
   return <StyledTableCell>
     {cell.value}
   </StyledTableCell>;
+
 };
