@@ -14,22 +14,22 @@ import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
 import { toLower } from 'lodash';
 
-const signingOfficialQuery = (user) => {
+const signingOfficialQuery = (institution) => {
   return {
     'match_phrase': {
-      'submitter.institution.id': user.institution.id
+      'submitter.institution.id': institution
     }
   };
 };
 
 // query to return approved DAC studies from the user's institution
-const myInstitutionQuery = (user) => {
+const myInstitutionQuery = (institution) => {
   return {
     'bool': {
       'must': [
         {
           'match_phrase': {
-            'submitter.institution.id': user.institution.id
+            'submitter.institution.id': institution
           }
         },
         {
@@ -47,6 +47,7 @@ export const DatasetSearch = (props) => {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
+  const institution = user.institution?.id;
 
   // branded study table versions
   const versions = {
@@ -104,9 +105,9 @@ export const DatasetSearch = (props) => {
       title: 'eLwazi Data Library',
     },
     'myinstitution': {
-      query: user.isSigningOfficial ? signingOfficialQuery(user) : myInstitutionQuery(user),
+      query: user.isSigningOfficial ? signingOfficialQuery(institution) : myInstitutionQuery(institution),
       icon: null,
-      title: user.institution.name + ' Data Library',
+      title: institution + ' Data Library',
     },
     'nhgri': {
       query: {
@@ -174,6 +175,11 @@ export const DatasetSearch = (props) => {
           }
         }
       };
+      if (institution === undefined && key === 'myinstitution') {
+        Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
+        props.history.push('/profile');
+        return;
+      }
       try {
         await DataSet.searchDatasetIndex(query).then((datasets) => {
           setDatasets(datasets);
