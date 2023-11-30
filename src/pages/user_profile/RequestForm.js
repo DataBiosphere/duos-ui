@@ -4,7 +4,7 @@ import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
-export default function RequestRole(props) {
+export default function SupportRequestsPage(props) {
 
   const profile = props.location.state?.data || undefined;
 
@@ -16,7 +16,7 @@ export default function RequestRole(props) {
     marginBottom: '1rem'
   };
 
-  const possibleSupportRequests = [
+  const possibleRoleRequests = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset'
@@ -31,14 +31,31 @@ export default function RequestRole(props) {
     }
   ];
 
-  const [hasSupportRequests, setHasSupportRequests] = useState(false);
-  const [supportRequests, setSupportRequests] = useState({
+  const possibleLCRequests = [
+    {
+      key: 'requestNewLC',
+      label: 'Request a new library card',
+      isDefaultOption: true,
+    }
+  ];
+
+  const possibleSupportRequests = props.isRequestRolePage ? possibleRoleRequests : (props.isRequestLCPage ? possibleLCRequests : []);
+
+  const [hasSupportRequests, setHasSupportRequests] = useState(props.isRequestLCPage);
+
+  const roleSupportRequests = {
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
     checkSOPermissions: false,
     checkJoinDac: false,
     extraRequest: undefined
-  });
+  };
+
+  const lcSupportRequests = {
+    requestNewLC: true,
+  };
+
+  const [supportRequests, setSupportRequests] = useState(props.isRequestRolePage ? roleSupportRequests : (props.isRequestLCPage ? lcSupportRequests : {}));
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
@@ -119,7 +136,7 @@ export default function RequestRole(props) {
         fontWeight: '600',
         marginTop: 10
       }}>
-      Request a New Role in DUOS
+      {props.isRequestRolePage ? 'Request a New Role' : (props.isRequestLCPage ? 'Request Library Card' : '')}
     </p>
     <div
       style={{
@@ -135,6 +152,8 @@ export default function RequestRole(props) {
       {possibleSupportRequests.map((supportRequest) => {
         return <FormField
           toggleText={supportRequest.label}
+          defaultValue={supportRequest?.isDefaultOption}
+          disabled={supportRequest?.isDefaultOption}
           type={FormFieldTypes.CHECKBOX}
           key={supportRequest.key}
           id={supportRequest.key}

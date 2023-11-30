@@ -19,7 +19,7 @@ export default function ResearcherStatus(props) {
 
   const goToRequestRole = () => {
     pageProps.history.push({
-      pathname: '/request_role',
+      pathname: '/request_lc',
       state: { data: profile }
     });
   };
