@@ -16,46 +16,55 @@ export default function SupportRequestsPage(props) {
     marginBottom: '1rem'
   };
 
-  const possibleRoleRequests = [
-    {
-      key: 'checkRegisterDataset',
-      label: 'Register a dataset'
-    },
-    {
-      key: 'checkSOPermissions',
-      label: `I am a Signing Official and I want to issue permissions to my institution's users`
-    },
-    {
-      key: 'checkJoinDac',
-      label: 'I am looking to join a DAC'
-    }
-  ];
+  var possibleSupportRequests;
+  var hasSupportRequestsCond;
+  var supportRequestsCond;
 
-  const possibleLCRequests = [
-    {
-      key: 'requestNewLC',
-      label: 'Request a new library card',
-      isDefaultOption: true,
-    }
-  ];
+  if (props.isRequestRolePage) {
+    possibleSupportRequests = [
+      {
+        key: 'checkRegisterDataset',
+        label: 'Register a dataset'
+      },
+      {
+        key: 'checkSOPermissions',
+        label: `I am a Signing Official and I want to issue permissions to my institution's users`
+      },
+      {
+        key: 'checkJoinDac',
+        label: 'I am looking to join a DAC'
+      }
+    ];
+    hasSupportRequestsCond = false;
+    supportRequestsCond = {
+      checkRegisterDataset: false,
+      checkRequestDataAccess: false,
+      checkSOPermissions: false,
+      checkJoinDac: false,
+      extraRequest: undefined
+    };
+  }
+  else if (props.isRequestLCPage) {
+    possibleSupportRequests = [
+      {
+        key: 'requestNewLC',
+        label: 'Request a new library card',
+        isDefaultOption: true,
+      }
+    ];
+    hasSupportRequestsCond = true;
+    supportRequestsCond = {
+      requestNewLC: true,
+    };
+  }
+  else {
+    possibleSupportRequests = [];
+    hasSupportRequestsCond = false;
+    supportRequestsCond = {};
+  }
 
-  const possibleSupportRequests = props.isRequestRolePage ? possibleRoleRequests : (props.isRequestLCPage ? possibleLCRequests : []);
-
-  const [hasSupportRequests, setHasSupportRequests] = useState(props.isRequestLCPage);
-
-  const roleSupportRequests = {
-    checkRegisterDataset: false,
-    checkRequestDataAccess: false,
-    checkSOPermissions: false,
-    checkJoinDac: false,
-    extraRequest: undefined
-  };
-
-  const lcSupportRequests = {
-    requestNewLC: true,
-  };
-
-  const [supportRequests, setSupportRequests] = useState(props.isRequestRolePage ? roleSupportRequests : (props.isRequestLCPage ? lcSupportRequests : {}));
+  const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond);
+  const [supportRequests, setSupportRequests] = useState(supportRequestsCond);
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
