@@ -8,7 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import TableRow, { tableRowClasses } from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
@@ -103,6 +103,21 @@ const table = {
 };
 */
 
+const StyledTableRow = styled(TableRow)(() => ({
+  [`&.${tableRowClasses.root}`]: {
+    height: '10px',
+    backgroundColor: 'white',
+    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', 
+    transition: 'box-shadow 0.3s ease-in-out',
+    '&:not(:last-child)': {
+      marginBottom: '20px',
+    },
+    '&:hover': {
+      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    },
+  },
+}));
+
 const StyledTableCell = styled(TableCell)(() => ({
   [`&.${tableCellClasses.head}`]: {
     color: '#333F52',
@@ -151,7 +166,7 @@ const CollapsibleRow = (props) => {
   return (
     <React.Fragment>
       {/* main table row */}
-      <TableRow>
+      <StyledTableRow>
         <StyledTableCell>
           <Checkbox
             aria-label="select row"
@@ -172,7 +187,7 @@ const CollapsibleRow = (props) => {
         {row.data.map((cell, i) => {
           return <TableCellRenderer key={i} cell={cell} />;
         })}
-      </TableRow>
+      </StyledTableRow>
       {/* subtable */}
       <TableRow>
         <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -191,7 +206,7 @@ const CollapsibleRow = (props) => {
                 {/* subtable rows */}
                 <TableBody>
                   {subrows.map((subRow, j) => (
-                    <TableRow key={j}>
+                    <StyledTableRow key={j}>
                       <StyledTableCell>
                         <Checkbox
                           aria-label="select subtable row"
@@ -202,7 +217,7 @@ const CollapsibleRow = (props) => {
                       {subRow.data.map((cell, k) => {
                         return <SubtableCellRenderer key={k} cell={cell} />;
                       })}
-                    </TableRow>
+                    </StyledTableRow>
                   ))}
                 </TableBody>
               </Table>
@@ -237,7 +252,7 @@ export const CollapsibleTable = (props) => {
       <Table aria-label={summary}>
         {/* main table header */}
         <TableHead>
-          <TableRow>
+          <StyledTableRow>
             <StyledTableCell component="th">
               <Checkbox
                 aria-label="select all on page"
@@ -250,7 +265,7 @@ export const CollapsibleTable = (props) => {
             {data.headers.map((header) => (
               <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
             ))}
-          </TableRow>
+          </StyledTableRow>
         </TableHead>
         {/* main table rows */}
         <TableBody>
