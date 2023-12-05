@@ -48,6 +48,7 @@ export const DatasetSearch = (props) => {
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
   const institution = user.institution?.id;
+  const institutionName = user.institution?.name;
 
   // branded study table versions
   const versions = {
@@ -107,7 +108,7 @@ export const DatasetSearch = (props) => {
     'myinstitution': {
       query: user.isSigningOfficial ? signingOfficialQuery(institution) : myInstitutionQuery(institution),
       icon: null,
-      title: user.institution?.name + ' Data Library',
+      title: institutionName + ' Data Library',
     },
     'nhgri': {
       query: {
