@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { Notifications } from '../libs/utils';
-import { DataSet, Institution } from '../libs/ajax';
+import { DataSet } from '../libs/ajax';
 import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
 import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';
@@ -48,7 +48,6 @@ export const DatasetSearch = (props) => {
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
   const institution = user.institution?.id;
-  const [institutionName, setInstitutionName] = useState();
 
   // branded study table versions
   const versions = {
@@ -108,7 +107,7 @@ export const DatasetSearch = (props) => {
     'myinstitution': {
       query: user.isSigningOfficial ? signingOfficialQuery(institution) : myInstitutionQuery(institution),
       icon: null,
-      title: institutionName + ' Data Library',
+      title: user.institution?.name + ' Data Library',
     },
     'nhgri': {
       query: {
@@ -180,10 +179,6 @@ export const DatasetSearch = (props) => {
         Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
         props.history.push('/profile');
         return;
-      }
-      else {
-        const res = await Institution.getById(institution);
-        setInstitutionName(res.name);
       }
       try {
         await DataSet.searchDatasetIndex(query).then((datasets) => {
