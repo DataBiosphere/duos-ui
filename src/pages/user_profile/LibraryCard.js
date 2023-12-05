@@ -9,8 +9,8 @@ export default function LibraryCard(props) {
 
   return <div style={{ display: 'flex' }}>
     <div style={{
-      height: '40px',
-      width: '60px',
+      height: '50px',
+      width: '160px',
       background: '#00A097',
       borderRadius: '4px',
       boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25) inset',
@@ -20,7 +20,7 @@ export default function LibraryCard(props) {
         fontFamily: 'Montserrat',
         fontSize: '16px',
         fontWeight: '500',
-        lineHeight: '20px',
+        lineHeight: '30px',
         letterSpacing: '0em',
         textAlign: 'center',
         color: 'rgba(255, 255, 255, 1)'
