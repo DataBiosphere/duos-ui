@@ -14,39 +14,75 @@ import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
 import { toLower } from 'lodash';
 
-const signingOfficialQuery = (institution) => {
-  return {
-    'match_phrase': {
-      'submitter.institution.id': institution
+const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
+  const queryChunks = [
+    {
+      'match': {
+        '_type': 'dataset'
+      }
+    },
+    {
+      'exists': {
+        'field': 'study'
+      }
     }
-  };
-};
+  ];
 
-// query to return approved DAC studies from the user's institution
-const myInstitutionQuery = (institution) => {
-  return {
-    'bool': {
-      'must': [
-        {
-          'match_phrase': {
-            'submitter.institution.id': institution
-          }
-        },
-        {
-          'term': {
-            'dacApproval': true
-          }
+  // do not apply modifier if user is signing official and viewing their own institution
+  if (!isSigningOfficial || !isInstitutionQuery) {
+    const visibilityModifier = [
+      {
+        'term': {
+          'study.publicVisibility': true
         }
-      ]
+      },
+      {
+        'bool': {
+          'should': [
+            {
+              'term': {
+                'dacApproval': true
+              }
+            },
+            {
+              'term': {
+                'accessManagement': 'open'
+              }
+            },
+            {
+              'term': {
+                'accessManagement': 'external'
+              }
+            }
+          ]
+        }
+      }
+    ];
+    queryChunks.push(...visibilityModifier);
+  }
+
+  if (subQuery !== null) {
+    queryChunks.push(subQuery);
+  }
+
+  return {
+    'from': 0,
+    'size': 10000,
+    'query': {
+      'bool': {
+        'must': queryChunks
+      }
     }
   };
-};
+}
 
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
+
+  const isSigningOfficial = user.isSigningOfficial;
   const institutionId = user.institution?.id;
   const institutionName = user.institution?.name;
 
@@ -106,7 +142,11 @@ export const DatasetSearch = (props) => {
       title: 'eLwazi Data Library',
     },
     'myinstitution': {
-      query: user.isSigningOfficial ? signingOfficialQuery(institutionId) : myInstitutionQuery(institutionId),
+      query: {
+        'match_phrase': {
+          'submitter.institution.id': institutionId
+        }
+      },
       icon: null,
       title: institutionName + ' Data Library',
     },
@@ -152,36 +192,17 @@ export const DatasetSearch = (props) => {
 
   const key = query === undefined ? '/datalibrary' : toLower(query);
   const version = versions[key] === undefined ? versions['/custom'] : versions[key];
+  const isInstitutionQuery = key === 'myinstitution';
 
   useEffect(() => {
     const init = async () => {
-      const query = {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': [
-              {
-                'match': {
-                  '_type': 'dataset'
-                }
-              },
-              version.query,
-              {
-                'exists': {
-                  'field': 'study'
-                }
-              }
-            ]
-          }
-        }
-      };
-      if (institutionId === undefined && key === 'myinstitution') {
+      if (institutionId === undefined && isInstitutionQuery) {
         Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
         props.history.push('/profile');
         return;
       }
       try {
+        const query = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
         await DataSet.searchDatasetIndex(query).then((datasets) => {
           setDatasets(datasets);
           setLoading(false);
