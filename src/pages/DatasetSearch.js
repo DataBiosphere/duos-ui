@@ -47,7 +47,8 @@ export const DatasetSearch = (props) => {
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
-  const institution = user.institution?.id;
+  const institutionId = user.institution?.id;
+  const institutionName = user.institution?.name;
 
   // branded study table versions
   const versions = {
@@ -105,9 +106,9 @@ export const DatasetSearch = (props) => {
       title: 'eLwazi Data Library',
     },
     'myinstitution': {
-      query: user.isSigningOfficial ? signingOfficialQuery(institution) : myInstitutionQuery(institution),
+      query: user.isSigningOfficial ? signingOfficialQuery(institutionId) : myInstitutionQuery(institutionId),
       icon: null,
-      title: institution + ' Data Library',
+      title: institutionName + ' Data Library',
     },
     'nhgri': {
       query: {
@@ -175,7 +176,7 @@ export const DatasetSearch = (props) => {
           }
         }
       };
-      if (institution === undefined && key === 'myinstitution') {
+      if (institutionId === undefined && key === 'myinstitution') {
         Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
         props.history.push('/profile');
         return;
