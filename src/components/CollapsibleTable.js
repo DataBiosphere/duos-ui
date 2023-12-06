@@ -3,8 +3,8 @@ import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
+import Table , { tableClasses } from '@mui/material/Table';
+import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
@@ -103,18 +103,23 @@ const table = {
 };
 */
 
+const StyledTable = styled(Table)(() => ({
+    borderSpacing: '0 15px',
+    // borderCollapse: 'separate',
+}));
+
+const StyledTableBody = styled(TableBody)(() => ({
+  "& > :not(:last-child)": {
+    borderBottom: "3px solid white"
+  }
+}));
+
 const StyledTableRow = styled(TableRow)(() => ({
   [`&.${tableRowClasses.root}`]: {
-    height: '10px',
-    backgroundColor: 'white',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', 
-    transition: 'box-shadow 0.3s ease-in-out',
-    '&:not(:last-child)': {
-      marginBottom: '20px',
-    },
-    '&:hover': {
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-    },
+    height: '40px',
+    border: '1px solid black',
+    padding: '5px',
+    borderSpacing: '5em'
   },
 }));
 
@@ -136,11 +141,14 @@ const StyledTableCell = styled(TableCell)(() => ({
     color: '#333F52',
     letterSpacing: 0,
   },
+  [`&.${tableCellClasses.root}`]: {
+    padding: '10px 10px 10px 10px'
+  },
 }));
 
 const TruncatedTableCell = styled(StyledTableCell)(() => ({
   [`&.${tableCellClasses.root}`]: {
-    padding: '8px',
+    // padding: '8px',
     maxWidth: '20ch',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -189,22 +197,22 @@ const CollapsibleRow = (props) => {
         })}
       </StyledTableRow>
       {/* subtable */}
-      <TableRow>
+      <StyledTableRow>
         <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2 }}>
-              <Table>
+              <StyledTable>
                 {/* subtable header */}
                 <TableHead>
-                  <TableRow>
+                  <StyledTableRow>
                     <StyledTableCell component="th" />
                     {row.subtable.headers.map((header, i) => (
                       <StyledTableCell key={i}>{header.value}</StyledTableCell>
                     ))}
-                  </TableRow>
+                  </StyledTableRow>
                 </TableHead>
                 {/* subtable rows */}
-                <TableBody>
+                <StyledTableBody>
                   {subrows.map((subRow, j) => (
                     <StyledTableRow key={j}>
                       <StyledTableCell>
@@ -219,12 +227,12 @@ const CollapsibleRow = (props) => {
                       })}
                     </StyledTableRow>
                   ))}
-                </TableBody>
-              </Table>
+                </StyledTableBody>
+              </StyledTable>
             </Box>
           </Collapse>
         </StyledTableCell>
-      </TableRow>
+      </StyledTableRow>
     </React.Fragment>
   );
 };
@@ -249,7 +257,7 @@ export const CollapsibleTable = (props) => {
 
   return !isEmpty(data) && (
     <TableContainer component={Paper}>
-      <Table aria-label={summary}>
+      <StyledTable aria-label={summary}>
         {/* main table header */}
         <TableHead>
           <StyledTableRow>
@@ -268,12 +276,12 @@ export const CollapsibleTable = (props) => {
           </StyledTableRow>
         </TableHead>
         {/* main table rows */}
-        <TableBody>
+        <StyledTableBody>
           {data.rows.map((row) => (
             <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} />
           ))}
-        </TableBody>
-      </Table>
+        </StyledTableBody>
+      </StyledTable>
     </TableContainer>
   );
 };
