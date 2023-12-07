@@ -227,7 +227,7 @@ const CollapsibleRow = (props) => {
   const someSelected = subrows.some((row) => isSelected(row.id));
 
   return (
-    <div className='test'>
+     <div className='test'>
       {/* main table row */}
       <StyledTableRow>
         {/* <Stack> */}
@@ -239,6 +239,7 @@ const CollapsibleRow = (props) => {
                 checked={allSelected}
                 indeterminate={someSelected && !allSelected}
               />
+              
             </StyledTableCell>
             <StyledTableCell>
               <IconButton
@@ -257,6 +258,7 @@ const CollapsibleRow = (props) => {
           {/* </React.Fragment> */}
           {/* <Box>Hello</Box> */}
         {/* </Stack> */}
+        
       </StyledTableRow>
       <TableRow sx={{paddingLeft: '50px'}}>
         <StyledSubtableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -265,7 +267,7 @@ const CollapsibleRow = (props) => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell component="th" />
+                    <TableCell  colSpan={7} component="th" />
                     {row.subtable.headers.map((header, i) => (
                       <StyledTableCell key={i}>{header.value}</StyledTableCell>
                     ))}
@@ -274,7 +276,7 @@ const CollapsibleRow = (props) => {
                 <TableBody>
                   {subrows.map((subRow, j) => (
                     <TableRow key={j}>
-                      <TableCell>
+                      <TableCell colSpan={7}>
                         <Checkbox
                           aria-label="select subtable row"
                           onClick={(event) => selectHandler(event, subRow, 'subrow')}
@@ -292,7 +294,7 @@ const CollapsibleRow = (props) => {
           </Collapse>
         </StyledSubtableCell>
       </TableRow>
-    </div>
+     </div>
   );
 };
 
