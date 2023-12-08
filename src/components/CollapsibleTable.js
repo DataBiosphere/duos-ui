@@ -119,7 +119,7 @@ const StyledTableHeaderRow = styled(TableRow)(() => ({
   [`&.${tableRowClasses.root}`]: {
     height: '40px',
     border: '1px solid black',
-    borderBottom: '1px solid black',
+    // borderBottom: '1px solid black',
     padding: '5px',
     borderSpacing: '5em',
   },
@@ -129,7 +129,7 @@ const StyledTableRow = styled(TableRow)(() => ({
   [`&.${tableRowClasses.root}`]: {
     height: '57px',
     border: '1px solid black',
-    borderBottom: '1px solid black',
+    // borderBottom: '1px solid black',
     padding: '5px',
     borderSpacing: '5em',
   },
@@ -145,7 +145,7 @@ const StyledTableCell = styled(TableCell)(() => ({
     lineHeight: '16px',
     backgroundColor: '#e2e8f4',
     textTransform: 'uppercase',
-    borderBottom: '1px solid green'
+    // borderBottom: '1px solid green'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: '14px',
@@ -158,17 +158,17 @@ const StyledTableCell = styled(TableCell)(() => ({
   [`&.${tableCellClasses.root}`]: {
     width: '150px',
     textAlign: 'center',
-    borderTop: '1px solid black',
+    // borderTop: '1px solid black',
     // borderRadius: '25%',
-    borderBottom: '1px solid black',
+    // borderBottom: '1px solid black',
     padding: '5px',
     '&:first-child': {
-      borderLeft: '1px solid black',
-      borderRadius: '12.5% 0 0 12.5%',
+      // borderLeft: '1px solid black',
+      // borderRadius: '12.5% 0 0 12.5%',
     },
     '&:last-child': {
-      borderRight: '1px solid black',
-      borderRadius: '0 5% 5% 0',
+      // borderRight: '1px solid black',
+      // borderRadius: '0 5% 5% 0',
     },
   },
 }));
@@ -227,7 +227,7 @@ const CollapsibleRow = (props) => {
   const someSelected = subrows.some((row) => isSelected(row.id));
 
   return (
-     <div className='test'>
+     <div>
       {/* main table row */}
       <StyledTableRow>
         {/* <Stack> */}
@@ -322,7 +322,7 @@ export const CollapsibleTable = (props) => {
         {/* main table header */}
         <TableHead>
           <StyledTableHeaderRow>
-            <StyledTableCell component="th">
+            <StyledTableCell component="th" colSpan={4}>
               <Checkbox
                 aria-label="select all on page"
                 onClick={(event) => selectHandler(event, data, 'all')}
