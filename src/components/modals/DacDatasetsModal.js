@@ -55,7 +55,7 @@ const DacDatasetsModal = (props) => {
         .join('\n');
       const shortenedDataUse = translatedDataUse.length >= 75 ?
         translatedDataUse.slice(0, 75) + '...' :
-        translatedDataUse.slice(0, 75);
+        translatedDataUse;
       if (isEmpty(translatedDataUse)) {
         return <span className={'disabled'}>---</span>;
       }
