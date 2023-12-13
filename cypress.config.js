@@ -11,8 +11,7 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:3000/',
   },
   component: {
-    src: ['./src/components/common', './cypress/component/'],
-    specPattern: '**/*.spec.js',
+    specPattern: ['**/*.spec.js', '**/*.spec.ts', '**/*.spec.tsx'],
     devServer: {
       framework: 'create-react-app',
       bundler: 'webpack',
