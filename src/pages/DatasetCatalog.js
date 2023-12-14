@@ -103,7 +103,7 @@ export default function DatasetCatalog(props) {
       return row;
     })(datasets);
     applyDatasetSort(sort, datasets);
-  }, [applyDatasetSort, sort]);
+  }, [sort]);
 
   useEffect(() => {
     const selected = datasetList.filter((ds) => ds.checked);
