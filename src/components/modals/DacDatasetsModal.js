@@ -5,7 +5,6 @@ import React, {useEffect, useState} from 'react';
 import {BaseModal} from '../BaseModal';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
 
-// @ts-ignore
 const DacDatasetsModal = (props) => {
 
   const {showModal, onCloseRequest, datasets, dac} = props;
@@ -13,32 +12,27 @@ const DacDatasetsModal = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      // @ts-ignore
       let translationPromises = datasets.map((dataset) =>
         DataUseTranslation.translateDataUseRestrictions(dataset.dataUse));
       const datasetTranslations = await Promise.all(translationPromises);
-      // @ts-ignore
       setTranslatedDatasetRestrictions(datasetTranslations);
     };
 
     init();
   }, [datasets]);
 
-  // @ts-ignore
   const getProperty = (properties, propName) => {
     return find(properties, p => {
       return p.propertyName.toLowerCase() === propName.toLowerCase();
     });
   };
 
-  // @ts-ignore
   const getPropertyValue = (properties, propName, defaultValue) => {
     const prop = getProperty(properties, propName);
     const val = get(prop, 'propertyValue', '');
     return isEmpty(val) ? <span className={'disabled'}>{defaultValue}</span> : val;
   };
 
-  // @ts-ignore
   const getDbGapLinkValue = (properties) => {
     const href = getPropertyValue(properties, 'dbGAP', '');
     return href.length > 0 ?
@@ -46,11 +40,9 @@ const DacDatasetsModal = (props) => {
       <span className={'disabled'}>---</span>;
   };
 
-  // @ts-ignore
   const getStructuredUseRestrictionLink = (index) => {
     if (translatedDatasetRestrictions[index]) {
       const translatedDataUse = translatedDatasetRestrictions[index]
-        // @ts-ignore
         .map((translations) => translations.description)
         .join('\n');
       const shortenedDataUse = translatedDataUse.length >= 75 ?
@@ -63,7 +55,6 @@ const DacDatasetsModal = (props) => {
     }
   };
 
-  // @ts-ignore
   return <BaseModal
     key={'dac_datasets_modal'}
     id={'dacDatasetsModal'}
@@ -94,7 +85,6 @@ const DacDatasetsModal = (props) => {
         </thead>
         <tbody key={'dac_datasets_table_body'}>
           {
-          // @ts-ignore
             datasets.map((dataset, index) => {
               return <tr key={'dac_datasets_table_row_' + index + '_' + dataset.datasetIdentifier}>
                 <td key={'1_' + dataset.datasetIdentifier} className={'table-items cell-size'}
