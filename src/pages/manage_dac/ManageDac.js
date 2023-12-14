@@ -8,7 +8,7 @@ import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
 import {AddDacModal} from './AddDacModal';
-import {DacDatasetsModal} from '../../components/modals/DacDatasetsModal';
+import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 
