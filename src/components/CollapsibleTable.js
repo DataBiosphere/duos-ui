@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
-import Table, { tableClasses } from '@mui/material/Table';
-import TableBody, { tableBodyClasses } from '@mui/material/TableBody';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
@@ -104,39 +103,16 @@ const table = {
 };
 */
 
-const StyledTable = styled(Table)(() => ({
-  borderCollapse: 'separate',
-  borderSpacing: '0 15px'
-}));
-
-const StyledTableBody = styled(TableBody)(() => ({
-  "& > :not(:last-child)": {
-    // borderBottom: "3px solid white"
+const SubtableRow = styled(TableRow)(() => ({
+  [`&.${tableRowClasses.root}`]: {
+    border: '1px solid rgba(224, 224, 224, 1)'
   }
 }));
 
-const StyledTableHeaderRow = styled(TableRow)(() => ({
-  [`&.${tableRowClasses.root}`]: {
-    height: '40px',
-    border: '1px solid black',
-    // borderBottom: '1px solid black',
-    padding: '5px',
-    borderSpacing: '5em',
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(() => ({
-  [`&.${tableRowClasses.root}`]: {
-    height: '57px',
-    border: '1px solid black',
-    // borderBottom: '1px solid black',
-    padding: '5px',
-    borderSpacing: '5em',
-  },
-}));
-
 const StyledTableCell = styled(TableCell)(() => ({
-  borderBottom: 'none',
+  paddingTop: '0px',
+  paddingBottom: '0px',
+  height: '57px',
   [`&.${tableCellClasses.head}`]: {
     color: '#333F52',
     fontFamily: 'Montserrat',
@@ -145,7 +121,6 @@ const StyledTableCell = styled(TableCell)(() => ({
     lineHeight: '16px',
     backgroundColor: '#e2e8f4',
     textTransform: 'uppercase',
-    // borderBottom: '1px solid green'
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: '14px',
@@ -154,56 +129,18 @@ const StyledTableCell = styled(TableCell)(() => ({
     fontWeight: 400,
     color: '#333F52',
     letterSpacing: 0,
-  },
-  [`&.${tableCellClasses.root}`]: {
-    width: '150px',
-    textAlign: 'center',
-    // borderTop: '1px solid black',
-    // borderRadius: '25%',
-    // borderBottom: '1px solid black',
-    padding: '5px',
-    '&:first-child': {
-      // borderLeft: '1px solid black',
-      // borderRadius: '12.5% 0 0 12.5%',
-    },
-    '&:last-child': {
-      // borderRight: '1px solid black',
-      // borderRadius: '0 5% 5% 0',
-    },
-  },
+  }
 }));
 
-const StyledSubtableCell = styled(TableCell)(() => ({
-  [`&.${tableCellClasses.head}`]: {
-    color: '#333F52',
-    fontFamily: 'Montserrat',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    lineHeight: '16px',
-    backgroundColor: '#e2e8f4',
-    textTransform: 'uppercase',
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: '14px',
-    lineHeight: '24px',
-    fontFamily: 'Montserrat',
-    fontWeight: 400,
-    color: '#333F52',
-    letterSpacing: 0,
-  },
+const HeaderCell = styled(StyledTableCell)(() => ({
   [`&.${tableCellClasses.root}`]: {
-    width: '150px',
-    textAlign: 'center',
-    borderTop: 'none',
-    // borderRadius: '25%',
-    borderBottom: 'none',
-    padding: '5px',
-  },
+    height: '40px'
+  }
 }));
 
 const TruncatedTableCell = styled(StyledTableCell)(() => ({
   [`&.${tableCellClasses.root}`]: {
-    // padding: '8px',
+    padding: '8px',
     maxWidth: '20ch',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -227,74 +164,68 @@ const CollapsibleRow = (props) => {
   const someSelected = subrows.some((row) => isSelected(row.id));
 
   return (
-     <div>
+    <React.Fragment>
       {/* main table row */}
-      <StyledTableRow>
-        {/* <Stack> */}
-          {/* <React.Fragment> */}
-            <StyledTableCell>
-              <Checkbox
-                aria-label="select row"
-                onClick={(event) => selectHandler(event, row, 'row')}
-                checked={allSelected}
-                indeterminate={someSelected && !allSelected}
-              />
-              
-            </StyledTableCell>
-            <StyledTableCell>
-              <IconButton
-                aria-label="expand row"
-                size="small"
-                onClick={() => setOpen(!open)}
-              >
-                {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-              </IconButton>
-              
-            </StyledTableCell>
-            {row.data.map((cell, i) => {
-              return <TableCellRenderer key={i} cell={cell} />;
-            })}
-
-          {/* </React.Fragment> */}
-          {/* <Box>Hello</Box> */}
-        {/* </Stack> */}
-        
-      </StyledTableRow>
-      <TableRow sx={{paddingLeft: '50px'}}>
-        <StyledSubtableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+      <TableRow>
+        <StyledTableCell>
+          <Checkbox
+            aria-label="select row"
+            onClick={(event) => selectHandler(event, row, 'row')}
+            checked={allSelected}
+            indeterminate={someSelected && !allSelected}
+          />
+        </StyledTableCell>
+        <StyledTableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </StyledTableCell>
+        {row.data.map((cell, i) => {
+          return <TableCellRenderer key={i} cell={cell} />;
+        })}
+      </TableRow>
+      {/* subtable */}
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0, borderBottom: 'none' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            
+            <Box sx={{ margin: 2 }}>
               <Table>
+                {/* subtable header */}
                 <TableHead>
-                  <TableRow>
-                    <TableCell  colSpan={7} component="th" />
+                  <SubtableRow>
+                    <StyledTableCell component="th" />
                     {row.subtable.headers.map((header, i) => (
                       <StyledTableCell key={i}>{header.value}</StyledTableCell>
                     ))}
-                  </TableRow>
+                  </SubtableRow>
                 </TableHead>
+                {/* subtable rows */}
                 <TableBody>
                   {subrows.map((subRow, j) => (
-                    <TableRow key={j}>
-                      <TableCell colSpan={7}>
+                    <SubtableRow key={j}>
+                      <StyledTableCell>
                         <Checkbox
                           aria-label="select subtable row"
                           onClick={(event) => selectHandler(event, subRow, 'subrow')}
                           checked={isSelected(subRow.id)}
                         />
-                      </TableCell>
+                      </StyledTableCell>
                       {subRow.data.map((cell, k) => {
-                        return <StyledTableCell key={k}>{cell.value}</StyledTableCell>
+                        return <SubtableCellRenderer key={k} cell={cell} />;
                       })}
-                    </TableRow>
+                    </SubtableRow>
                   ))}
                 </TableBody>
               </Table>
-            
+            </Box>
           </Collapse>
-        </StyledSubtableCell>
+        </TableCell>
       </TableRow>
-     </div>
+    </React.Fragment>
   );
 };
 
@@ -317,32 +248,32 @@ export const CollapsibleTable = (props) => {
   }, [data, selected]);
 
   return !isEmpty(data) && (
-    <TableContainer>
-      <StyledTable aria-label={summary}>
+    <TableContainer component={Paper}>
+      <Table aria-label={summary}>
         {/* main table header */}
         <TableHead>
-          <StyledTableHeaderRow>
-            <StyledTableCell component="th" colSpan={4}>
+          <TableRow>
+            <HeaderCell component="th">
               <Checkbox
                 aria-label="select all on page"
                 onClick={(event) => selectHandler(event, data, 'all')}
                 checked={allSelected}
                 indeterminate={someSelected && !allSelected}
               />
-            </StyledTableCell>
-            <StyledTableCell component="th" />
+            </HeaderCell>
+            <HeaderCell component="th" />
             {data.headers.map((header) => (
-              <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
+              <HeaderCell key={header.value} component="th">{header.value}</HeaderCell>
             ))}
-          </StyledTableHeaderRow>
+          </TableRow>
         </TableHead>
         {/* main table rows */}
-        <StyledTableBody>
+        <TableBody>
           {data.rows.map((row) => (
             <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} />
           ))}
-        </StyledTableBody>
-      </StyledTable>
+        </TableBody>
+      </Table>
     </TableContainer>
   );
 };
