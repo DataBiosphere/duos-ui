@@ -4,7 +4,7 @@ import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 
-export default function RequestRole(props) {
+export default function SupportRequestsPage(props) {
 
   const profile = props.location.state?.data || undefined;
 
@@ -16,29 +16,55 @@ export default function RequestRole(props) {
     marginBottom: '1rem'
   };
 
-  const possibleSupportRequests = [
-    {
-      key: 'checkRegisterDataset',
-      label: 'Register a dataset'
-    },
-    {
-      key: 'checkSOPermissions',
-      label: `I am a Signing Official and I want to issue permissions to my institution's users`
-    },
-    {
-      key: 'checkJoinDac',
-      label: 'I am looking to join a DAC'
-    }
-  ];
+  var possibleSupportRequests;
+  var hasSupportRequestsCond;
+  var supportRequestsCond;
 
-  const [hasSupportRequests, setHasSupportRequests] = useState(false);
-  const [supportRequests, setSupportRequests] = useState({
-    checkRegisterDataset: false,
-    checkRequestDataAccess: false,
-    checkSOPermissions: false,
-    checkJoinDac: false,
-    extraRequest: undefined
-  });
+  if (props.isRequestRolePage) {
+    possibleSupportRequests = [
+      {
+        key: 'checkRegisterDataset',
+        label: 'Register a dataset'
+      },
+      {
+        key: 'checkSOPermissions',
+        label: `I am a Signing Official and I want to issue permissions to my institution's users`
+      },
+      {
+        key: 'checkJoinDac',
+        label: 'I am looking to join a DAC'
+      }
+    ];
+    hasSupportRequestsCond = false;
+    supportRequestsCond = {
+      checkRegisterDataset: false,
+      checkRequestDataAccess: false,
+      checkSOPermissions: false,
+      checkJoinDac: false,
+      extraRequest: undefined
+    };
+  }
+  else if (props.isRequestLCPage) {
+    possibleSupportRequests = [
+      {
+        key: 'requestNewLC',
+        label: 'Request a new library card',
+        isDefaultOption: true,
+      }
+    ];
+    hasSupportRequestsCond = true;
+    supportRequestsCond = {
+      requestNewLC: true,
+    };
+  }
+  else {
+    possibleSupportRequests = [];
+    hasSupportRequestsCond = false;
+    supportRequestsCond = {};
+  }
+
+  const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond);
+  const [supportRequests, setSupportRequests] = useState(supportRequestsCond);
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
@@ -119,7 +145,7 @@ export default function RequestRole(props) {
         fontWeight: '600',
         marginTop: 10
       }}>
-      Request a New Role in DUOS
+      {props.isRequestRolePage ? 'Request a New Role' : (props.isRequestLCPage ? 'Request Library Card' : '')}
     </p>
     <div
       style={{
@@ -135,6 +161,8 @@ export default function RequestRole(props) {
       {possibleSupportRequests.map((supportRequest) => {
         return <FormField
           toggleText={supportRequest.label}
+          defaultValue={supportRequest?.isDefaultOption}
+          disabled={supportRequest?.isDefaultOption}
           type={FormFieldTypes.CHECKBOX}
           key={supportRequest.key}
           id={supportRequest.key}
