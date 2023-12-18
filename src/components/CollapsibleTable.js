@@ -8,7 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import TableRow, { tableRowClasses } from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
@@ -103,7 +103,16 @@ const table = {
 };
 */
 
+const SubtableRow = styled(TableRow)(() => ({
+  [`&.${tableRowClasses.root}`]: {
+    border: '1px solid rgba(224, 224, 224, 1)'
+  }
+}));
+
 const StyledTableCell = styled(TableCell)(() => ({
+  paddingTop: '0px',
+  paddingBottom: '0px',
+  height: '57px',
   [`&.${tableCellClasses.head}`]: {
     color: '#333F52',
     fontFamily: 'Montserrat',
@@ -120,7 +129,13 @@ const StyledTableCell = styled(TableCell)(() => ({
     fontWeight: 400,
     color: '#333F52',
     letterSpacing: 0,
-  },
+  }
+}));
+
+const HeaderCell = styled(StyledTableCell)(() => ({
+  [`&.${tableCellClasses.root}`]: {
+    height: '40px'
+  }
 }));
 
 const TruncatedTableCell = styled(StyledTableCell)(() => ({
@@ -175,23 +190,23 @@ const CollapsibleRow = (props) => {
       </TableRow>
       {/* subtable */}
       <TableRow>
-        <StyledTableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0, borderBottom: 'none' }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2 }}>
               <Table>
                 {/* subtable header */}
                 <TableHead>
-                  <TableRow>
+                  <SubtableRow>
                     <StyledTableCell component="th" />
                     {row.subtable.headers.map((header, i) => (
                       <StyledTableCell key={i}>{header.value}</StyledTableCell>
                     ))}
-                  </TableRow>
+                  </SubtableRow>
                 </TableHead>
                 {/* subtable rows */}
                 <TableBody>
                   {subrows.map((subRow, j) => (
-                    <TableRow key={j}>
+                    <SubtableRow key={j}>
                       <StyledTableCell>
                         <Checkbox
                           aria-label="select subtable row"
@@ -202,13 +217,13 @@ const CollapsibleRow = (props) => {
                       {subRow.data.map((cell, k) => {
                         return <SubtableCellRenderer key={k} cell={cell} />;
                       })}
-                    </TableRow>
+                    </SubtableRow>
                   ))}
                 </TableBody>
               </Table>
             </Box>
           </Collapse>
-        </StyledTableCell>
+        </TableCell>
       </TableRow>
     </React.Fragment>
   );
@@ -238,17 +253,17 @@ export const CollapsibleTable = (props) => {
         {/* main table header */}
         <TableHead>
           <TableRow>
-            <StyledTableCell component="th">
+            <HeaderCell component="th">
               <Checkbox
                 aria-label="select all on page"
                 onClick={(event) => selectHandler(event, data, 'all')}
                 checked={allSelected}
                 indeterminate={someSelected && !allSelected}
               />
-            </StyledTableCell>
-            <StyledTableCell component="th" />
+            </HeaderCell>
+            <HeaderCell component="th" />
             {data.headers.map((header) => (
-              <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
+              <HeaderCell key={header.value} component="th">{header.value}</HeaderCell>
             ))}
           </TableRow>
         </TableHead>
