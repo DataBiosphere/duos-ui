@@ -148,7 +148,7 @@ export const DatasetSearchTable = (props) => {
               truncate: true,
             },
             {
-              value: entry[0].study.dataCustodianEmail.join(', '),
+              value: entry[0].study.dataCustodianEmail?.join(', '),
               truncate: true,
             },
           ],
