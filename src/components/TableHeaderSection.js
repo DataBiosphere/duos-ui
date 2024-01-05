@@ -34,7 +34,7 @@ export const TableHeaderSection = (props) => {
               style: {
                 fontFamily: 'Montserrat',
                 fontSize: '1.4rem',
-                width: '150%' 
+                width: '150%'
               },
             },
             [description]

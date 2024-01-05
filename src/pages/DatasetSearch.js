@@ -74,7 +74,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
       }
     }
   };
-}
+};
 
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
@@ -212,7 +212,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, []);
+  }, [institutionId, isInstitutionQuery, isSigningOfficial, props.history, version.query]);
 
   return (
     loading ?
