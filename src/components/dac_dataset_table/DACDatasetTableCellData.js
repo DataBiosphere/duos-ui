@@ -5,6 +5,7 @@ import {DatasetService} from '../../utils/DatasetService';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import {isEmpty, map} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
+import { firstNonEmptyPropertyValue } from '../../utils/DatasetUtils';
 
 export const consoleTypes = { CHAIR: 'chair' };
 
@@ -43,10 +44,7 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
   // Newer datasets have a list of data custodian emails.
   // Older datasets may or may not have a data depositor
-  const datasetCustodians = DatasetService.findDatasetPropertyValueList(dataset, 'Data Custodian Email')?.join(', ');
-  const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
-  const studyCustodians = DatasetService.findDatasetPropertyValueList(dataset.study, 'dataCustodianEmail')?.join(', ');
-  const displayValue = isEmpty(datasetCustodians) ? (isEmpty(dataDepositor) ? studyCustodians : dataDepositor) : datasetCustodians;
+  const displayValue = firstNonEmptyPropertyValue(dataset, [ 'Data Custodian Email', 'Data Depositor', 'dataCustodianEmail' ]);
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
