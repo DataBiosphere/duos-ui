@@ -8,7 +8,7 @@ import { USER_ROLES } from '../../libs/utils';
 
 
 export default function SigningOfficialResearchers() {
-  const [signingOfficial, setSiginingOfficial] = useState({});
+  const [signingOfficial, setSigningOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
 
   //states to be added and used for manage researcher component
@@ -23,7 +23,7 @@ export default function SigningOfficialResearchers() {
         const researcherList = await User.list(USER_ROLES.signingOfficial);
 
         setResearchers(researcherList);
-        setSiginingOfficial(soUser);
+        setSigningOfficial(soUser);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
