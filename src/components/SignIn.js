@@ -25,7 +25,7 @@ export const SignIn = (props) => {
       if (isSubscribed) {
         const googleClientId = await Config.getGoogleClientId();
         setClientId(googleClientId);
-        if (GoogleIS.client === null) {
+        if (window.google !== undefined && GoogleIS.client === null) {
           await GoogleIS.initTokenClient(googleClientId, onSuccess, onFailure);
         }
       }
