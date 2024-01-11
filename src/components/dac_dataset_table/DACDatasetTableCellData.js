@@ -3,8 +3,9 @@ import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
 import {DatasetService} from '../../utils/DatasetService';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
-import {isEmpty, join, map} from 'lodash/fp';
+import {isEmpty, map} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
+import { firstNonEmptyPropertyValue } from '../../utils/DatasetUtils';
 
 export const consoleTypes = { CHAIR: 'chair' };
 
@@ -19,14 +20,11 @@ export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
 }
 
 export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}) {
-  // We need an update to the dac-dataset API to get the data submitter value.
-  // The Data Submitter is always pre-populated with the user who originally created the dataset.
-  // See https://broadworkbench.atlassian.net/browse/DUOS-2291 for details
-  // Until that happens, we can rely on the data depositor field.
   const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
+  const displayValue = isEmpty(dataDepositor) ? dataset.createUser.displayName : dataDepositor;
   return {
-    data: <div className={style['cell-data']}>{dataDepositor}</div>,
-    value: dataDepositor,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
     id: `data-submitter-cell-data-${dataset.dataSetId}`,
     cellStyle: {width: styles.cellWidths.dataSubmitter},
     label
@@ -46,9 +44,7 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
   // Newer datasets have a list of data custodian emails.
   // Older datasets may or may not have a data depositor
-  const dataCustodians = DatasetService.findDatasetPropertyValueList(dataset, 'Data Custodian Email');
-  const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
-  const displayValue = isEmpty(dataCustodians) ? dataDepositor : join(', ')(dataCustodians);
+  const displayValue = firstNonEmptyPropertyValue(dataset, [ 'Data Custodian Email', 'Data Depositor', 'dataCustodianEmail' ]);
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,

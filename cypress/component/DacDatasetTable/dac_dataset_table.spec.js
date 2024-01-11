@@ -80,7 +80,25 @@ const sampleDataset = {
       'propertyValue': 'human',
       'propertyType': 'String'
     }
-  ]
+  ],
+  'study': {
+    'studyId': 1,
+    'name': 'xyz 123',
+    'description': 'test',
+    'publicVisibility': true,
+    'datasetIds': [
+      1408
+    ],
+    'properties': [
+      {
+        'studyPropertyId': 110,
+        'studyId': 17,
+        'key': 'dataCustodianEmail',
+        'type': 'Json',
+        "value": []
+      }
+    ],
+  },
 };
 
 // It's necessary to wrap components that contain `Link` components
