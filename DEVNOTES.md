@@ -12,10 +12,10 @@ nvm install 16
 npm install
 ```
 
-3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `perf`, `alpha`, or `prod` 
+3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
 Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev` 
 ```
-cp config/perf.json public/config.json
+cp config/alpha.json public/config.json
 ```
 
 Ensure that your `/etc/hosts` file has an entry for `local.broadinstitute.org`
