@@ -85,6 +85,16 @@ export default function DatasetCatalog(props) {
   const [filterToOnlySelected, setFilterToOnlySelected] = useState(false);
 
 
+  const applyDatasetSort = useCallback((sortParams, datasets) => {
+    const sortedList = datasets.sort((a, b) => {
+      const aVal = a[sortParams.field] || findPropertyValue(a, sortParams.field);
+      const bVal = b[sortParams.field] || findPropertyValue(b, sortParams.field);
+      return aVal.localeCompare(bVal, 'en', {numeric: true}) * sortParams.dir;
+    });
+    setSort(sortParams);
+    setDatasetList(sortedList);
+  }, []);
+
   const getDatasets = useCallback(async () => {
     let datasets = await DataSet.getDatasets();
     let localDacs = await getDacs();
@@ -171,16 +181,6 @@ export default function DatasetCatalog(props) {
     doEnrichment();
 
   }, [searchDulText, pageSize, selectedDatasets, datasetList, filterToOnlySelected, currentPageOnlySelected, currentPageAllDatasets, dacFilter, useCustomFilter]);
-
-  const applyDatasetSort = useCallback((sortParams, datasets) => {
-    const sortedList = datasets.sort((a, b) => {
-      const aVal = a[sortParams.field] || findPropertyValue(a, sortParams.field);
-      const bVal = b[sortParams.field] || findPropertyValue(b, sortParams.field);
-      return aVal.localeCompare(bVal, 'en', {numeric: true}) * sortParams.dir;
-    });
-    setSort(sortParams);
-    setDatasetList(sortedList);
-  }, []);
 
   const getDacs = async () => {
     let dacs = await DAC.list(false);

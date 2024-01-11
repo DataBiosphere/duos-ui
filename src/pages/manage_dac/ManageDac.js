@@ -34,6 +34,19 @@ export const ManageDac = function ManageDac() {
   const [selectedDatasets, setSelectedDatasets] = useState([]);
 
 
+  const reloadDacList = useCallback(async () => {
+    setIsLoading(true);
+    DAC.list().then(
+      dacs => {
+        if (userRole === CHAIR) {
+          dacs = dacs.filter((dac) => dacIDs.includes(dac.dacId));
+        }
+        setDacs(dacs);
+        setIsLoading(false);
+      }
+    );
+  }, [dacIDs, userRole]);
+
   useEffect(() => {
     Promise.all([
       reloadUserRole(),
@@ -54,20 +67,6 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({text: 'DAC could not be deleted.'});
     }
   };
-
-  const reloadDacList = useCallback(async () => {
-    setIsLoading(true);
-    DAC.list().then(
-      dacs => {
-        if (userRole === CHAIR) {
-          dacs = dacs.filter((dac) => dacIDs.includes(dac.dacId));
-        }
-        setDacs(dacs);
-        setIsLoading(false);
-      }
-    );
-  }, [dacIDs, userRole]);
-
 
   const reloadUserRole = useCallback(async () => {
     setIsLoading(true);
