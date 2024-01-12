@@ -11,7 +11,6 @@ import {
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList
-
 } from '../../libs/utils';
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
@@ -402,11 +401,10 @@ export default function SigningOfficialTable(props) {
             }),
           },[
             'Issuing Library Card privileges is done in accordance with the ', a({target: '_blank', href: BroadLibraryCardAgreementLink}, ['Broad']), ' and ', a({target: '_blank', href: NhgriLibraryCardAgreementLink}, ['NHGRI']), ' Library Card Agreements.',
-
           ]),
         ]),
       ]),
-      h(SearchBar, {style: {marginLeft: '25%'}}, { handleSearchChange, searchRef }),
+      h(SearchBar, { handleSearchChange, searchRef, style: {marginLeft: '25%'}}),
       div({style: { marginLeft: 15 }}, [
         h(SimpleButton, {
           onClick: () => showModalOnClick(),
