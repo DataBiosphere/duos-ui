@@ -154,28 +154,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     setSelectedDatasets
   } = props;
 
-  useEffect(() => {
-    recalculateVisibleTable({
-      tableSize,
-      pageCount,
-      filteredList: processDacRowData({
-        dacs,
-        viewDatasets,
-        viewMembers,
-        editDac,
-        deleteDac,
-        userRole,
-        columns
-      }),
-      currentPage,
-      setPageCount: (c) => setPageCount(c),
-      setCurrentPage: (p) => setCurrentPage(p),
-      setVisibleList: (l) => setVisibleDacs(l),
-      sort
-    });
-  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers]);
-
-
   const editDac = useCallback((selectedDac) => {
     setShowDacModal(true);
     setSelectedDac(selectedDac);
@@ -200,6 +178,27 @@ export const ManageDacTable = function ManageDacTable(props) {
     setSelectedDac(selectedDac);
     setSelectedDatasets(approvedDatasets);
   }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets]);
+
+  useEffect(() => {
+    recalculateVisibleTable({
+      tableSize,
+      pageCount,
+      filteredList: processDacRowData({
+        dacs,
+        viewDatasets,
+        viewMembers,
+        editDac,
+        deleteDac,
+        userRole,
+        columns
+      }),
+      currentPage,
+      setPageCount: (c) => setPageCount(c),
+      setCurrentPage: (p) => setCurrentPage(p),
+      setVisibleList: (l) => setVisibleDacs(l),
+      sort
+    });
+  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers]);
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
