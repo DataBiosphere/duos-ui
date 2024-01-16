@@ -34,6 +34,20 @@ export const ManageDac = function ManageDac() {
   const [selectedDatasets, setSelectedDatasets] = useState([]);
 
 
+  const reloadUserRole = useCallback(async () => {
+    setIsLoading(true);
+    const currentUser = Storage.getCurrentUser();
+    const roles = currentUser.roles.map(r => r.name);
+    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
+    let dacIDs = filter({name: CHAIR})(currentUser.roles);
+    dacIDs = map('dacId')(dacIDs);
+    if (role === CHAIR) {
+      setDacIDs(dacIDs);
+    }
+    setUserRole(role);
+    setIsLoading(false);
+  }, []);
+
   const reloadDacList = useCallback(async () => {
     setIsLoading(true);
     DAC.list().then(
@@ -67,20 +81,6 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({text: 'DAC could not be deleted.'});
     }
   };
-
-  const reloadUserRole = useCallback(async () => {
-    setIsLoading(true);
-    const currentUser = Storage.getCurrentUser();
-    const roles = currentUser.roles.map(r => r.name);
-    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
-    let dacIDs = filter({name: CHAIR})(currentUser.roles);
-    dacIDs = map('dacId')(dacIDs);
-    if (role === CHAIR) {
-      setDacIDs(dacIDs);
-    }
-    setUserRole(role);
-    setIsLoading(false);
-  }, []);
 
   const closeViewMembersModal = () => {
     setShowMembersModal(false);
