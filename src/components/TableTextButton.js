@@ -1,5 +1,5 @@
-import {div} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
+import React from 'react';
+import { Styles } from '../libs/theme';
 import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils';
 
 export default function TableTextButton(props) {
@@ -28,6 +28,6 @@ export default function TableTextButton(props) {
   const style = setStyle(disabled, baseStyle, 'backgroundColor');
   const divAttributes = setDivAttributes(disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, keyProp);
   return (
-    div(divAttributes, [label])
+    <div {...divAttributes}>{label}</div>
   );
 }
