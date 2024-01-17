@@ -13,7 +13,6 @@ const profileLink = h(Link, {to:'/profile', style: linkStyle}, ['Your Profile'])
 const profileUnsubmitted = span(['Please submit ', profileLink, ' to be able to create a Data Access Request']);
 const profileSubmitted = span(['Please make sure ', profileLink, ' is updated as it will be used to pre-populate parts of the Data Access Request']);
 const libraryCardLink = a({href: 'https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs', style: linkStyle, target: '_blank'}, ['Library Card']);
-const missingLibraryCard = span(['You must submit ', profileLink, ' and obtain a ', libraryCardLink, ' from your Signing Official before you can submit a Data Access Request']);
 
 export default function ResearcherInfo(props) {
   const {
@@ -58,11 +57,12 @@ export default function ResearcherInfo(props) {
       div({ className: 'dar-step-card' }, [
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === false && libraryCardReqSatisfied === false), className: 'rp-alert' }, [
+          isRendered: (completed === false && libraryCardReqSatisfied === false), 
+          className: `${completed === false ? 'rp-error' : 'errored' }`}, [
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'important',
-            title: span([
+            title: span({className: `${completed === false ? 'rp-error' : 'errored' }`},[ 
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
@@ -103,11 +103,6 @@ export default function ResearcherInfo(props) {
             })
           ]),
           fieldset({ }, [
-            div({
-              datacy: 'researcher-info-missing-library-cards',
-              isRendered: libraryCardReqSatisfied === false, className: 'rp-alert' }, [
-              !readOnlyMode && Alert({ id: 'missingLibraryCard', type: 'danger', title: missingLibraryCard })
-            ]),
             div({
               datacy: 'researcher-info-profile-unsubmitted',
               isRendered: (completed === false && libraryCardReqSatisfied === true), className: 'rp-alert' }, [
