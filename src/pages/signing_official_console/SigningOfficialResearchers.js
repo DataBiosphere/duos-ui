@@ -1,11 +1,10 @@
+import React from 'react';
 import {useState, useEffect} from 'react';
 import {Notifications} from '../../libs/utils';
-import {div, h} from 'react-hyperscript-helpers';
 import {Styles} from '../../libs/theme';
 import SigningOfficialTable from './SigningOfficialTable';
 import {User} from '../../libs/ajax';
 import { USER_ROLES } from '../../libs/utils';
-
 
 export default function SigningOfficialResearchers() {
   const [signingOfficial, setSigningOfficial] = useState({});
@@ -13,7 +12,6 @@ export default function SigningOfficialResearchers() {
 
   //states to be added and used for manage researcher component
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     const init = async() => {
@@ -34,10 +32,10 @@ export default function SigningOfficialResearchers() {
   }, []);
 
   return (
-    div({style: Styles.PAGE}, [
-      div({style: {}, className: 'signing-official-tabs'}, [
-        h(SigningOfficialTable, {researchers, signingOfficial, isLoading}, []),
-      ])
-    ])
+    <div style={Styles.PAGE}>
+      <div className='signing-official-tabs'>
+        <SigningOfficialTable researchers={researchers} signingOfficial={signingOfficial} isLoading={isLoading} />
+      </div>
+    </div>
   );
-}
+};
