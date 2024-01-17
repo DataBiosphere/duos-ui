@@ -3,8 +3,11 @@ import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import {concat, isNil, join} from 'lodash/fp';
+import {cloneDeep, concat, findIndex, join, isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import {DataSet} from '../../libs/ajax';
 
 
 export default function DatasetSubmissionsTable(props) {
@@ -67,6 +70,61 @@ export default function DatasetSubmissionsTable(props) {
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedTerm, setSelectedTerm] = useState({});
+  const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
+  const [confirmationTitle, setConfirmationTitle] = useState('');
+
+  const showConfirmationModal = ({ dataset, message, title}) => {
+    setSelectedTerm(dataset);
+    setShowConfirmation(false);
+    setConfirmationModalMsg(message);
+    setConfirmationTitle(title);
+  };
+
+  const DeleteDatasetButton = (props) => {
+    const { dataset = {}, showConfirmationModal } = props;
+    const message = 'Are you sure you want to delete this dataset?';
+    const title = 'Delete dataset';
+    return (
+      <Button
+        onClick={showConfirmationModal({ dataset, message, title })}
+      >
+        <DeleteIcon/>
+      </Button>
+    );
+  };
+
+  const removeDataset = async (selectedTerm, terms) => {
+    // ??
+    // const termName = isStudy ? selectedTerm.study : selectedTerm.datasetName;
+    const termName = selectedTerm.datasetName;
+
+    // const termId = isStudy ? selectedTerm.study.studyId : selectedTerm.datasetId;
+    const termId = selectedTerm.datasetId;
+    console.log(termId);
+    // const { termName, termId } = selectedTerm;
+    // let updatedTerm = isStudy? await DataSet.deleteStudy() : await DataSet.deleteDataset(termId);
+    let updatedTerm = await DataSet.deleteDataset(termId);
+    const searchableKey = termId;
+    const listCopy = cloneDeep(terms);
+    const messageName = termName;
+    try {
+      const targetIndex = findIndex((term) => {
+        return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
+      })(listCopy);
+      listCopy[targetIndex] = updatedTerm;
+      setTerms(listCopy);
+      setShowConfirmation(false);
+      Notifications.showSuccess({
+        text: `Removed ${messageName} as a dataset`,
+      });
+    } catch (error) {
+      Notifications.showError({
+        text: `Error removing ${messageName} as a dataset`,
+      });
+    }
+  };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
   const redrawRows = useCallback(() => {
@@ -89,7 +147,23 @@ export default function DatasetSubmissionsTable(props) {
             Edit
           </Button>
         </div>;
+      const deleteButton = (status === 'Accepted') ?
+      <div/> :
+        DeleteDatasetButton ({
+          term,
+          showConfirmationModal,
+        });
       const custodians = join(', ')(term.study?.dataCustodianEmail);
+      const confirmationModalComponenet = (
+      <ConfirmationModal
+        showConfirmation={showConfirmation}
+        closeConfirmation={() => setShowConfirmation(false)}
+        title={confirmationTitle}
+        message={confirmationModalMsg}
+        header="header"
+        onConfirm={() =>removeDataset(term, terms)}
+      />
+      );
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
@@ -98,7 +172,7 @@ export default function DatasetSubmissionsTable(props) {
         dac: term.dac?.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
-        actions: editButton
+        actions: editButton, deleteButton, confirmationModalComponenet
       };
     });
     setRows(rows);
