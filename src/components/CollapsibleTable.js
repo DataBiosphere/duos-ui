@@ -1,5 +1,7 @@
 import * as React from 'react';
+import _ from 'lodash';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
@@ -26,7 +28,7 @@ const table = {
       value: 'Header 1',
     },
     {
-      value: 'Header 2',
+      value: () => 'Header 2',
     },
     {
       value: 'Header 3',
@@ -133,14 +135,48 @@ const TruncatedTableCell = styled(StyledTableCell)(() => ({
   },
 }));
 
+const renderValue = (data) => {
+  if (_.isEmpty(data)) {
+    return null;
+  }
+  if (_.isFunction(data.value)) {
+    return data.value();
+  }
+  return data.value;
+};
+
 const CollapsibleRow = (props) => {
-  const { row, row: { subtable: { rows: subrows } }, selected, selectHandler } = props;
+  const { row, row: { subtable: { rows: subrows } }, selected, selectHandler, expandHandler, collapseHandler } = props;
 
   const [open, setOpen] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const allSelected = subrows.every((row) => isSelected(row.id));
   const someSelected = subrows.some((row) => isSelected(row.id));
+
+  const openHandler = async (event, data) => {
+    if (_.isFunction(expandHandler)) {
+      await expandHandler(event, data);
+    }
+    setOpen(true);
+  };
+  const closeHandler = async (event, data) => {
+    if (_.isFunction(collapseHandler)) {
+      await collapseHandler(event, data);
+    }
+    setOpen(false);
+  };
+
+  const toggleHandler = async (event, data) => {
+    setToggling(true);
+    if (open) {
+      await closeHandler(event, data);
+    } else {
+      await openHandler(event, data);
+    }
+    setToggling(false);
+  };
 
   return (
     <React.Fragment>
@@ -158,19 +194,21 @@ const CollapsibleRow = (props) => {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={(event) => toggleHandler(event, row)}
+            disabled={toggling}
           >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {toggling && <CircularProgress size={14} />}
+            {!toggling ? (open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />) : null}
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => {
           return cell?.truncate ? (
             <TruncatedTableCell key={i}>
-              {cell.value}
+              {renderValue(cell)}
             </TruncatedTableCell>
           ) : (
             <StyledTableCell key={i}>
-              {cell.value}
+              {renderValue(cell)}
             </StyledTableCell>
           );
         })}
@@ -186,7 +224,7 @@ const CollapsibleRow = (props) => {
                   <TableRow>
                     <StyledTableCell component="th" />
                     {row.subtable.headers.map((header, i) => (
-                      <StyledTableCell key={i}>{header.value}</StyledTableCell>
+                      <StyledTableCell key={i}>{renderValue(header)}</StyledTableCell>
                     ))}
                   </TableRow>
                 </TableHead>
@@ -203,7 +241,7 @@ const CollapsibleRow = (props) => {
                       </StyledTableCell>
                       {subRow.data.map((cell, k) => (
                         <StyledTableCell key={k}>
-                          {cell.value}
+                          {renderValue(cell)}
                         </StyledTableCell>
                       ))}
                     </TableRow>
@@ -219,7 +257,7 @@ const CollapsibleRow = (props) => {
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, selected, selectHandler } = props;
+  const { data, summary, selected, selectHandler, expandHandler } = props;
 
   const [allSelected, setAllSelected] = useState(false);
   const [someSelected, setSomeSelected] = useState(false);
@@ -251,15 +289,15 @@ export const CollapsibleTable = (props) => {
               />
             </StyledTableCell>
             <StyledTableCell component="th" />
-            {data.headers.map((header) => (
-              <StyledTableCell key={header.value} component="th">{header.value}</StyledTableCell>
+            {data.headers.map((header, i) => (
+              <StyledTableCell key={i} component="th">{renderValue(header)}</StyledTableCell>
             ))}
           </TableRow>
         </TableHead>
         {/* main table rows */}
         <TableBody>
           {data.rows.map((row) => (
-            <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} />
+            <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} expandHandler={expandHandler} />
           ))}
         </TableBody>
       </Table>
