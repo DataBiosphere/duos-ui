@@ -4,6 +4,7 @@
   "hash": "dev",
   "apiUrl": "http://localhost:8180/api",
   "ontologyApiUrl": "https://ontologyURL.org/",
+  "tdrApiUrl": "https://tdrApiUrl.org/",
   "clientId": "111111111111-11111111111111111111111111111111.apps.googleusercontent.com",
   "errorApiKey": "example",
   "gaId": "",

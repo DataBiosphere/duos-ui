@@ -748,6 +748,45 @@ export const Translate = {
   },
 };
 
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+export const TerraDataRepo = {
+  listSnapshotsByDatasetIds: async (datasetIds) => {
+    const url = `${await Config.getTdrApiUrl()}/api/repository/v1/snapshots?duosDatasetIds=${datasetIds.join('&duosDatasetIds=')}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  prepareExport: async (snapshotId) => {
+    const url = `${await Config.getTdrApiUrl()}/api/repository/v1/snapshots/${snapshotId}/export`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  waitForJob: async (jobId) => {
+    const url = `${await Config.getTdrApiUrl()}/api/repository/v1/jobs/${jobId}`;
+    const resultsUrl = `${await Config.getTdrApiUrl()}/api/repository/v1/jobs/${jobId}/result`;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const res = await axios.get(url, Config.authOpts());
+      if (res.data.job_status === 'running') {
+        await sleep(1000);
+      } else if (res.data.job_status === 'succeeded') {
+        const finalResult = await axios.get(resultsUrl, Config.authOpts());
+        // Add the URL to link to
+        finalResult.data.terraImportLink =
+        `${await Config.getTerraUrl()}/#import-data?url=${window.location.origin}&snapshotId=${finalResult.data.snapshot.id}&format=tdrexport&snapshotName=${finalResult.data.snapshot.name}&tdrmanifest=${encodeURIComponent(finalResult.data.format.parquet.manifest)}&tdrSyncPermissions=false`;
+        return finalResult.data;
+      } else if (res.data.job_status === 'failed') {
+        return reportError(url, res.data.status_code);
+      }
+    }
+  },
+};
+
 const fetchOk = async (...args) => {
   //TODO: Remove spinnerService calls
   spinnerService.showAll();
