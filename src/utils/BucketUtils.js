@@ -266,17 +266,16 @@ const processV3Abstain = (matchResults) => {
 };
 
 /**
- * Calculate "Other" status for a data use. Data Uses can have 'otherRestrictions': TRUE|FALSE,
- * or they can have fields populated for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
+ * Calculate "Other" status for a data use. Data Uses can have fields populated
+ * for 'other': 'other restriction' and 'secondaryOther': 'yet other restriction'
  * @private
  * @param dataUse
  * @returns boolean
  */
 const isOther = (dataUse) => {
-  const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
   const primaryOther = !isEmpty(getOr('')('other')(dataUse));
   const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
-  return otherRestrictions || primaryOther || secondaryOther;
+  return primaryOther || secondaryOther;
 };
 
 /**
@@ -287,22 +286,22 @@ const isOther = (dataUse) => {
  */
 export const shouldAbstain = (dataUse) => {
   const abstainFields = [
-    'addiction',
     'collaboratorRequired',
     'ethicsApprovalRequired',
     'gender',
     'geneticStudiesOnly',
     'geographicalRestrictions',
     'illegalBehavior',
-    'manualReview',
-    'nonBiomedical',
+    'notHealth',
+    'other',
     'pediatric',
     'psychologicalTraits',
     'publicationResults',
+    'secondaryOther',
     'sexualDiseases',
     'stigmatizeDiseases',
     'vulnerablePopulations'];
-  return isOther(dataUse) || any(f => getOr(false)(f)(dataUse))(abstainFields);
+  return any(f => getOr(false)(f)(dataUse))(abstainFields);
 };
 
 /**
@@ -353,11 +352,12 @@ const createRpVoteStructureFromBuckets = (buckets) => {
 
 /**
  * Constrain the equality check to a limited number of fields. These
- * fields are the ones that are used in algorithm decisions and are what
+ * fields are the ones that are used in V3 algorithm decisions and are what
  * determine whether it falls into a Data Use bucket. We limit the fields
- * because there are quite a few that have no impact on decision-making.
- * Fields like recontactMay and recontactMust, and others, are not relevant
- * to DAC decisions.
+ * to those used in the V3 algorithm checks. There are quite a few legacy
+ * properties that have no impact on current decision-making. Fields like
+ * recontactMay and recontactMust, and others, are not relevant to DAC
+ * decisions.
  *
  * @public
  * @param a Data Use
@@ -365,32 +365,34 @@ const createRpVoteStructureFromBuckets = (buckets) => {
  * @returns {boolean}
  */
 export const isEqualDataUse = (a, b) => {
-  const fields = ['addiction',
-    'aggregateResearch',
+  // alpha sorted list of V3 fields:
+  const fields = [
     'collaboratorRequired',
-    'controlSetOption',
+    'commercialUse',
+    'controls',
+    'diseaseRestrictions',
     'ethicsApprovalRequired',
     'gender',
+    'generalUse',
     'geneticStudiesOnly',
     'geographicalRestrictions',
+    'hmbResearch',
     'illegalBehavior',
-    'manualReview',
     'methodsResearch',
-    'nonBiomedical',
+    'nonProfitUse',
+    'notHealth',
     'other',
-    'otherRestrictions',
     'pediatric',
+    'population',
+    'populationOriginsAncestry',
     'psychologicalTraits',
+    'publicationMoratorium',
     'publicationResults',
     'secondaryOther',
     'sexualDiseases',
     'stigmatizeDiseases',
-    'vulnerablePopulations',
-    'commercialUse',
-    'diseaseRestrictions',
-    'generalUse',
-    'hmbResearch',
-    'populationOriginsAncestry'];
+    'vulnerablePopulations'
+  ];
   const aCopy = pick(fields)(a);
   const bCopy = pick(fields)(b);
   return isEqual(aCopy)(bCopy);

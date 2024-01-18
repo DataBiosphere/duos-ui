@@ -350,9 +350,9 @@ export const DatasetUpdate = (props) => {
       }),
       h(FormField, {
         type: FormFieldTypes.CHECKBOX,
-        id: 'nonCommercialUse',
+        id: 'nonProfitUse',
         toggleText: 'Non-profit Use Only (NPU)',
-        defaultValue: formData.dataUse.commercialUse === false,
+        defaultValue: formData.dataUse.nonProfitUse === true,
         disabled: true,
       }),
       h(FormField, {

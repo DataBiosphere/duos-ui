@@ -43,7 +43,7 @@ export default function ConsentTextGenerator() {
   const generateHelper = async () => {
     const dataUse = {
       generalUse: general, diseaseRestrictions: ontologies, populationOriginsAncestry: null,
-      hmbResearch: hmb, methodsResearch: nmds, geneticStudiesOnly: gso, commercialUse: npu,
+      hmbResearch: hmb, methodsResearch: nmds, geneticStudiesOnly: gso, nonProfitUse: npu,
       publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
       geographicalRestrictions: gs
     };
