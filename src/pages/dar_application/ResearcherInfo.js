@@ -58,11 +58,11 @@ export default function ResearcherInfo(props) {
         div({
           datacy: 'researcher-info-profile-submitted',
           isRendered: (completed === false && libraryCardReqSatisfied === false), 
-          className: `${completed === false ? 'rp-error' : 'errored' }`}, [
+          className: `${completed === false && libraryCardReqSatisfied === false ? 'rp-error' : 'errored' }`}, [
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'important',
-            title: span({className: `${completed === false ? 'rp-error' : 'errored' }`},[ 
+            title: span({className: `${completed === false && libraryCardReqSatisfied ? 'rp-error' : 'errored' }`},[ 
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
