@@ -70,15 +70,14 @@ export default function DatasetSubmissionsTable(props) {
   ];
 
   const [terms, setTerms] = useState([]);
+  // const [selectedTerm, setSelectedTerm] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
     console.log("handleClick");
-    console.log("open1",open);
     setOpen(true);
-    console.log("open2",open);
   };
 
   const handleClose = () => {
@@ -86,33 +85,34 @@ export default function DatasetSubmissionsTable(props) {
   };
 
   const removeDataset = async (selectedTerm, terms) => {
-    const termName = selectedTerm.datasetName;
-    console.log("termName", termName);
-    const termId = selectedTerm.datasetId;
-    console.log("termId",termId);
-    let updatedTerm = await DataSet.deleteDataset(termId);
-    const searchableKey = 'termId';
-    const listCopy = cloneDeep(terms);
-    const messageName = termName;
-    try {
-      const targetIndex = findIndex((term) => {
-        return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
-      })(listCopy);
-      listCopy[targetIndex] = updatedTerm;
-      setTerms(listCopy);
-      setOpen(false);
-      Notifications.showSuccess({
-        text: `Removed ${messageName} as a dataset`,
-      });
-    } catch (error) {
-      Notifications.showError({
-        text: `Error removing ${messageName} as a dataset`,
-      });
-    }
+    console.log("removeDataset");
+    // const termName = selectedTerm.datasetName;
+    // console.log("termName", termName);
+    // const termId = selectedTerm.datasetId;
+    // console.log("termId",termId);
+    // let updatedTerm = await DataSet.deleteDataset(termId);
+    // const searchableKey = 'termId';
+    // const listCopy = cloneDeep(terms);
+    // const messageName = termName;
+    // try {
+    //   const targetIndex = findIndex((term) => {
+    //     return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
+    //   })(listCopy);
+    //   listCopy[targetIndex] = updatedTerm;
+    //   setTerms(listCopy);
+    //   setOpen(false);
+    //   Notifications.showSuccess({
+    //     text: `Removed ${messageName} as a dataset`,
+    //   });
+    // } catch (error) {
+    //   Notifications.showError({
+    //     text: `Error removing ${messageName} as a dataset`,
+    //   });
+    // }
   };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
-  const redrawRows = useCallback(() => {
+  const redrawRows = useCallback((open) => {
     const rows = terms.map((term) => {
       const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
       const primaryCodes = term.dataUse?.primary?.map(du => du.code);
@@ -171,13 +171,13 @@ export default function DatasetSubmissionsTable(props) {
       try {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
-        redrawRows();
+        redrawRows(open); // method needs to know about the state change, wouldn't know if it wasn't passed in
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
     };
     init();
-  }, [props, redrawRows]);
+  }, [props, redrawRows, open]); //makes useEffect listen to the open state --> will redraw if open changes
 
   const sortableTable = <SortableTable
     headCells={columns}
