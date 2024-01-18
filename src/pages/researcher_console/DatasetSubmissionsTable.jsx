@@ -72,45 +72,24 @@ export default function DatasetSubmissionsTable(props) {
   const [terms, setTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
-  // const [showConfirmation, setShowConfirmation] = useState(false);
-  // const [selectedTerm, setSelectedTerm] = useState({});
-  // const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
-  // const [confirmationTitle, setConfirmationTitle] = useState('');
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
     console.log("handleClick");
+    console.log("open1",open);
     setOpen(true);
+    console.log("open2",open);
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  // const DeleteDatasetButton = (props) => {
-  //   const { dataset = {} } = props;
-  //   console.log("dataset",dataset)
-  //   const description = `Are you sure you want to delete this dataset: ${dataset.datasetName}?`;
-  //   const title = 'Delete dataset';
-  //   return (
-  //     <Button
-  //       onClick={handleClick}
-  //     >
-  //       <DeleteForeverIcon/>
-  //     </Button>
-  //   );
-  // };
-
   const removeDataset = async (selectedTerm, terms) => {
-    // ??
-    // const termName = isStudy ? selectedTerm.study : selectedTerm.datasetName;
     const termName = selectedTerm.datasetName;
-
-    // const termId = isStudy ? selectedTerm.study.studyId : selectedTerm.datasetId;
+    console.log("termName", termName);
     const termId = selectedTerm.datasetId;
-    console.log(termId);
-    // const { termName, termId } = selectedTerm;
-    // let updatedTerm = isStudy? await DataSet.deleteStudy() : await DataSet.deleteDataset(termId);
+    console.log("termId",termId);
     let updatedTerm = await DataSet.deleteDataset(termId);
     const searchableKey = 'termId';
     const listCopy = cloneDeep(terms);
@@ -122,7 +101,6 @@ export default function DatasetSubmissionsTable(props) {
       listCopy[targetIndex] = updatedTerm;
       setTerms(listCopy);
       setOpen(false);
-      // setShowConfirmation(false);
       Notifications.showSuccess({
         text: `Removed ${messageName} as a dataset`,
       });
@@ -164,18 +142,16 @@ export default function DatasetSubmissionsTable(props) {
             onClick={handleClick}
             to={`#`}
           />
-          <ConfirmationDialog title="Delete dataset" open={open} close={handleClose} description={`Are you sure you want to delete the dataset named '${term.datasetName}'?`} />
+          <ConfirmationDialog 
+            title="Delete dataset" 
+            open={open} 
+            close={handleClose}
+            confirm={() => removeDataset(term, terms)}
+            description={`Are you sure you want to delete the dataset named '${term.datasetName}'?`} 
+            // sx={{ transform: 'scale(1.5)' }}
+          />
         </div>;
       const custodians = join(', ')(term.study?.dataCustodianEmail);
-      // const confirmationModalComponenet = (
-      //   <ConfirmationModal
-      //     showConfirmation={showConfirmation}
-      //     closeConfirmation={() => setShowConfirmation(false)}
-      //     title={confirmationTitle}
-      //     message={confirmationModalMsg}
-      //     header={term.datasetName}
-      //     onConfirm={() =>removeDataset(term, terms)}
-      //   />);
       return {
         datasetIdentifier: term.datasetIdentifier,
         datasetName: term.datasetName,
