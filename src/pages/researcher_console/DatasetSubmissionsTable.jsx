@@ -70,45 +70,50 @@ export default function DatasetSubmissionsTable(props) {
   ];
 
   const [terms, setTerms] = useState([]);
-  // const [selectedTerm, setSelectedTerm] = useState([]);
+  const [selectedTerm, setSelectedTerm] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const handleClick = () => {
+  const handleClick = (term) => {
     console.log("handleClick");
     setOpen(true);
+    setSelectedTerm(term);
+    console.log("selectedTerm",selectedTerm.datasetName);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setSelectedTerm("");
+    // console.log("selectedTerm2",selectedTerm);
   };
 
-  const removeDataset = async (selectedTerm, terms) => {
-    console.log("removeDataset");
-    // const termName = selectedTerm.datasetName;
-    // console.log("termName", termName);
-    // const termId = selectedTerm.datasetId;
-    // console.log("termId",termId);
-    // let updatedTerm = await DataSet.deleteDataset(termId);
-    // const searchableKey = 'termId';
-    // const listCopy = cloneDeep(terms);
-    // const messageName = termName;
-    // try {
-    //   const targetIndex = findIndex((term) => {
-    //     return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
-    //   })(listCopy);
-    //   listCopy[targetIndex] = updatedTerm;
-    //   setTerms(listCopy);
-    //   setOpen(false);
-    //   Notifications.showSuccess({
-    //     text: `Removed ${messageName} as a dataset`,
-    //   });
-    // } catch (error) {
-    //   Notifications.showError({
-    //     text: `Error removing ${messageName} as a dataset`,
-    //   });
-    // }
+  const removeDataset = async () => {
+    // console.log("removeDataset");
+    const termName = selectedTerm.datasetName;
+    console.log("termName", termName);
+    const termId = selectedTerm.datasetId;
+    console.log("termId",termId);
+    let updatedTerm = await DataSet.deleteDataset(termId);
+    const searchableKey = 'termId';
+    const listCopy = cloneDeep(terms);
+    const messageName = termName;
+    try {
+      const targetIndex = findIndex((term) => {
+        return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
+      })(listCopy);
+      listCopy[targetIndex] = updatedTerm;
+      setTerms(listCopy);
+      setOpen(false);
+      setSelectedTerm("");
+      Notifications.showSuccess({
+        text: `Removed ${messageName} as a dataset`,
+      });
+    } catch (error) {
+      Notifications.showError({
+        text: `Error removing ${messageName} as a dataset`,
+      });
+    }
   };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
@@ -137,17 +142,17 @@ export default function DatasetSubmissionsTable(props) {
         <div>
           <Link
             style={{marginLeft: '15px'}}
-            id={`${term.dataSetId}_delete`}
+            id={`${term.datasetId}_delete`}
             className={'glyphicon glyphicon-trash'}
-            onClick={handleClick}
+            onClick={() => handleClick(term)}
             to={`#`}
           />
           <ConfirmationDialog 
             title="Delete dataset" 
             open={open} 
             close={handleClose}
-            confirm={() => removeDataset(term, terms)}
-            description={`Are you sure you want to delete the dataset named '${term.datasetName}'?`} 
+            confirm={() => removeDataset()}
+            description={`Are you sure you want to delete the dataset named '${selectedTerm.datasetName}'?`} 
             // sx={{ transform: 'scale(1.5)' }}
           />
         </div>;
@@ -171,13 +176,15 @@ export default function DatasetSubmissionsTable(props) {
       try {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
-        redrawRows(open); // method needs to know about the state change, wouldn't know if it wasn't passed in
+        console.log("open", open);
+        redrawRows(open);
+        
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
     };
     init();
-  }, [props, redrawRows, open]); //makes useEffect listen to the open state --> will redraw if open changes
+  }, [props, redrawRows, open]); 
 
   const sortableTable = <SortableTable
     headCells={columns}
