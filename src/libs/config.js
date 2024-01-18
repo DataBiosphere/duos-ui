@@ -11,6 +11,10 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
+  getTdrApiUrl: async () => (await getConfig()).tdrApiUrl,
+
+  getTerraUrl: async () => (await getConfig()).terraUrl,
+
   getProfileUrl: async () => (await getConfig()).profileUrl,
 
   getNihUrl: async () => (await getConfig()).nihUrl,
