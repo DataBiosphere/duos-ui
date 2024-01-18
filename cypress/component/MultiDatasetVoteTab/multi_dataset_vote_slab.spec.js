@@ -329,7 +329,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
     cy.get('.table-data').should('not.exist');
-    cy.get('#show-member-vote-dropdown').click();
+    cy.get('#show-member-vote-dropdown').click({force: true});
     const component = cy.get('.table-data');
     component.should('exist');
     component.should('contain', 'test1');
