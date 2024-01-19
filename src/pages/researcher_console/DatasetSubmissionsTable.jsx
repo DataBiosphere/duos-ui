@@ -76,36 +76,31 @@ export default function DatasetSubmissionsTable(props) {
   const [open, setOpen] = useState(false);
 
   const handleClick = (term) => {
-    console.log("handleClick");
     setOpen(true);
     setSelectedTerm(term);
-    console.log("selectedTerm",selectedTerm.datasetName);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setSelectedTerm("");
-    // console.log("selectedTerm2",selectedTerm);
   };
 
-  const removeDataset = async () => {
-    // console.log("removeDataset");
-    const termName = selectedTerm.datasetName;
-    console.log("termName", termName);
-    const termId = selectedTerm.datasetId;
-    console.log("termId",termId);
-    let updatedTerm = await DataSet.deleteDataset(termId);
+  const removeDataset = async (termToDelete) => {
+    const termName = termToDelete.datasetName;
+    const termId = termToDelete.datasetId;
+    let updatedTerm = await DataSet.deleteDataset(termId).then(() => {
+        window.location.reload();
+    });
+
     const searchableKey = 'termId';
     const listCopy = cloneDeep(terms);
     const messageName = termName;
     try {
       const targetIndex = findIndex((term) => {
-        return !isNil(term) && selectedTerm[searchableKey] === term[searchableKey];
+        return !isNil(term) && termToDelete[searchableKey] === term[searchableKey];
       })(listCopy);
       listCopy[targetIndex] = updatedTerm;
       setTerms(listCopy);
       setOpen(false);
-      setSelectedTerm("");
       Notifications.showSuccess({
         text: `Removed ${messageName} as a dataset`,
       });
@@ -117,7 +112,7 @@ export default function DatasetSubmissionsTable(props) {
   };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
-  const redrawRows = useCallback((open) => {
+  const redrawRows = useCallback((open, selectedTerm) => {
     const rows = terms.map((term) => {
       const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
       const primaryCodes = term.dataUse?.primary?.map(du => du.code);
@@ -149,11 +144,10 @@ export default function DatasetSubmissionsTable(props) {
           />
           <ConfirmationDialog 
             title="Delete dataset" 
-            open={open} 
+            openState={open} 
             close={handleClose}
-            confirm={() => removeDataset()}
+            action={() => removeDataset(selectedTerm)}
             description={`Are you sure you want to delete the dataset named '${selectedTerm.datasetName}'?`} 
-            // sx={{ transform: 'scale(1.5)' }}
           />
         </div>;
       const custodians = join(', ')(term.study?.dataCustodianEmail);
@@ -176,15 +170,14 @@ export default function DatasetSubmissionsTable(props) {
       try {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
-        console.log("open", open);
-        redrawRows(open);
+        redrawRows(open,selectedTerm);
         
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
     };
     init();
-  }, [props, redrawRows, open]); 
+  }, [props, redrawRows, open, selectedTerm]); 
 
   const sortableTable = <SortableTable
     headCells={columns}
