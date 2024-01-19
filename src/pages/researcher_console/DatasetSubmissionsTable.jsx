@@ -6,8 +6,6 @@ import SortableTable from '../../components/sortable_table/SortableTable';
 import {cloneDeep, concat, findIndex, join, isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
-import DeleteForeverIcon from '@mui/icons-material/Delete';
-import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import {DataSet} from '../../libs/ajax';
 import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog';
 
