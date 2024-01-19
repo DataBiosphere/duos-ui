@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {DAC} from '../../libs/ajax';
+import {DAC, DataSet} from '../../libs/ajax';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
@@ -22,6 +22,13 @@ export default function DACDatasetApprovalStatus(props) {
     setOpen(false);
   };
 
+  const handleAction = (datasetId) => {
+    setOpen(false);
+    DataSet.deleteDataset(datasetId).then(() => {
+      window.location.reload();
+    });
+  }
+
   const updateApprovalStatus = async (approvalState) => {
     const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, approvalState);
     setDataset(updatedDataset);
@@ -42,7 +49,7 @@ export default function DACDatasetApprovalStatus(props) {
       onClick={handleClick}
       to={`#`}
     />
-    <ConfirmationDialog title="Delete dataset" open={open} close={handleClose} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
+    <ConfirmationDialog title="Delete dataset" openState={open} close={handleClose} action={() => handleAction(dataset.dataSetId)} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
   </div>;
 
   const dacRejected = () => <div style={{color: '#000000', fontWeight: 'bold'}}>

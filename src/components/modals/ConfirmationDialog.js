@@ -7,13 +7,14 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContentText from "@mui/material/DialogContentText";
 
 export const ConfirmationDialog = (props) => {
-    const { title, open, close, description } = props;
+    const { title, openState, close, action, description } = props;
     return (
         <Dialog
-            open={open}
+            open={openState}
             onClose={close}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
+            sx={{ transform: 'scale(1.5)' }}
         >
             <DialogTitle id="alert-dialog-title">
                 {title}
@@ -25,7 +26,7 @@ export const ConfirmationDialog = (props) => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={close} variant="outlined">Cancel</Button>
-                <Button onClick={close} autoFocus color="error" variant="contained">Confirm</Button>
+                <Button onClick={action} autoFocus color="error" variant="contained">Confirm</Button>
             </DialogActions>
         </Dialog>
     );
