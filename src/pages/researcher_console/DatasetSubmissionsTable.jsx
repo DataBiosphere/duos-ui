@@ -169,7 +169,6 @@ export default function DatasetSubmissionsTable(props) {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
         redrawRows(open,selectedTerm);
-        
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
