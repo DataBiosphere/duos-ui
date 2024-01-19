@@ -1,5 +1,5 @@
-import { useState, useEffect, Fragment, useCallback } from 'react';
-import { h } from 'react-hyperscript-helpers';
+import React from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
@@ -191,24 +191,28 @@ export const ManageUsersTable = function ManageUsersTable(props) {
     [pageCount]
   );
 
-  return h(Fragment, {}, [
-    h(SimpleTable, {
-      isLoading,
-      'rowData': visibleUsers,
-      'columnHeaders': columnHeaderData(columns),
-      styles,
-      tableSize: tableSize,
-      'paginationBar': h(PaginationBar, {
-        pageCount,
-        currentPage,
-        tableSize,
-        goToPage,
-        changeTableSize
-      }),
-      sort,
-      onSort: (sort) => {
-        setSort(sort);
-      }
-    }),
-  ]);
+  return (
+    <>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={visibleUsers}
+        columnHeaders={columnHeaderData(columns)}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={
+          <PaginationBar
+            pageCount={pageCount}
+            currentPage={currentPage}
+            tableSize={tableSize}
+            goToPage={goToPage}
+            changeTableSize={changeTableSize}
+          />
+        }
+        sort={sort}
+        onSort={(sort) => {
+          setSort(sort);
+        }}
+      />
+    </>
+  );
 };
