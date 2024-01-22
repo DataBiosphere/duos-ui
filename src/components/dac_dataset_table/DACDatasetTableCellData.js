@@ -77,9 +77,9 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   };
 }
 
-export function statusCellData({dataset, label = 'statusCellData'}) {
+export function statusCellData({dataset, label = 'statusCellData', history}) {
   return {
-    data: <DACDatasetApprovalStatus dataset={dataset}/>,
+    data: <DACDatasetApprovalStatus dataset={dataset} history={history}/>,
     id: `status-cell-data-${dataset.dataSetId}`,
     cellStyle: {width: styles.cellWidths.status},
     label

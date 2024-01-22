@@ -6,8 +6,7 @@ import Button from '@mui/material/Button';
 import ReactTooltip from 'react-tooltip';
 import style from '../../pages/DACDatasets.module.css';
 import { ConfirmationDialog } from '../modals/ConfirmationDialog';
-import IconButton from '@mui/material/IconButton';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Notifications } from '../../libs/utils';
 
 export default function DACDatasetApprovalStatus(props) {
 
@@ -22,11 +21,18 @@ export default function DACDatasetApprovalStatus(props) {
     setOpen(false);
   };
 
-  const handleAction = (datasetId) => {
+  const handleAction = ({dataSetId, name}) => {
     setOpen(false);
-    DataSet.deleteDataset(datasetId).then(() => {
-      window.location.reload();
-    });
+    try {
+      DataSet.deleteDataset(dataSetId).then(() => {
+        Notifications.showSuccess({
+          text: `Deleted dataset '${name}' successfully.`,
+        });
+        props.history.push('/dac_datasets');
+      });
+    } catch {
+      Notifications.showError({text: `Error deleting dataset '${name}'`});
+    }
   }
 
   const updateApprovalStatus = async (approvalState) => {
@@ -42,14 +48,18 @@ export default function DACDatasetApprovalStatus(props) {
       className={'glyphicon glyphicon-pencil'}
       to={dataset.study?.studyId === undefined ? `dataset_registration/${dataset.dataSetId}` : `study_update/${dataset.study.studyId}`}
     />
-    <Link
-      style={{marginLeft: '15px'}}
-      id={`${dataset.dataSetId}_delete`}
-      className={'glyphicon glyphicon-trash'}
-      onClick={handleClick}
-      to={`#`}
-    />
-    <ConfirmationDialog title="Delete dataset" openState={open} close={handleClose} action={() => handleAction(dataset.dataSetId)} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
+    {dataset.deletable &&
+      <>
+        <Link
+          style={{marginLeft: '15px'}}
+          id={`${dataset.dataSetId}_delete`}
+          className={'glyphicon glyphicon-trash'}
+          onClick={handleClick}
+          to={`#`}
+        />
+        <ConfirmationDialog title="Delete dataset" openState={open} close={handleClose} action={() => handleAction(dataset)} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
+      </>
+    }
   </div>;
 
   const dacRejected = () => <div style={{color: '#000000', fontWeight: 'bold'}}>
