@@ -34,6 +34,7 @@ export default function ResearcherInfo(props) {
     showValidationMessages,
     validation,
     formValidationChange,
+    isInvalidForm,
     ariaLevel = 2
   } = props;
 
@@ -50,6 +51,8 @@ export default function ResearcherInfo(props) {
 
   useEffect(() => {
     setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
+    console.log("library cards", isEmpty(get('libraryCards')(researcher)));
+    console.log(completed);
   }, [researcher]);
 
   return (
@@ -57,12 +60,11 @@ export default function ResearcherInfo(props) {
       div({ className: 'dar-step-card' }, [
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === false && libraryCardReqSatisfied === false), 
-          className: `${completed === false || libraryCardReqSatisfied === false ? 'rp-error' : 'errored' }`}, [
+          isRendered: (completed === false && libraryCardReqSatisfied === false)}, [
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'important',
-            title: span({className: `${completed === false && libraryCardReqSatisfied ? 'rp-error' : 'errored' }`},[ 
+            title: span({className: `${libraryCardReqSatisfied === false && showNihValidationError ? 'errored' : 'rp-error' }`},[ 
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
