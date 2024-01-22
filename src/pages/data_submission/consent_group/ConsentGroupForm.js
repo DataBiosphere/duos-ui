@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState } from 'react';
-import { div, h, span, a, button } from 'react-hyperscript-helpers';
 import ConsentGroupSummary from './ConsentGroupSummary';
 import { EditConsentGroup } from './EditConsentGroup';
 import { computeConsentGroupValidationErrors } from './ConsentGroupErrors';
@@ -69,101 +69,100 @@ export const ConsentGroupForm = (props) => {
 
   const [editMode, setEditMode] = useState(consentGroupsState[idx].editMode);
 
-  return div({
-    style: {
-      border: '1px solid #283593',
-      padding: '1rem 2rem 1rem 2rem',
-      borderRadius: '4px',
-      marginBottom: '2rem',
-    },
-    id: idx+'_consentGroupForm'
-  }, [
-    (editMode
-      ? h(EditConsentGroup, {
-        ...props,
-        ...{
-          consentGroup: consentGroup,
-          setConsentGroup: setConsentGroup,
-          disableFields: consentGroupsState[idx].disableFields,
-          nihInstitutionalCertificationFile,
-          setNihInstitutionalCertificationFile: (file) => {
+  return (
+    <div
+      style={{
+        border: '1px solid #283593',
+        padding: '1rem 2rem 1rem 2rem',
+        borderRadius: '4px',
+        marginBottom: '2rem',
+      }}
+      id={idx + '_consentGroupForm'}
+    >
+      {editMode ? (
+        <EditConsentGroup
+          {...props}
+          consentGroup={consentGroup}
+          setConsentGroup={setConsentGroup}
+          disableFields={consentGroupsState[idx].disableFields}
+          nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
+          setNihInstitutionalCertificationFile={(file) => {
             setNihInstitutionalCertificationFile(file);
             updateNihInstitutionalCertificationFile(file);
-          },
-          validation,
-          onValidationChange,
-          dacs
-        },
-      })
-      : h(ConsentGroupSummary, {
-        ...props,
-        ...{consentGroup: consentGroup, id: idx+'_consentGroupSummary', nihInstitutionalCertificationFile},
-      })
-    ),
-    // save, cancel and delete
-    div({
-      style: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: '2rem',
-      }
-    }, [
-      a({
-        isRendered: !studyEditMode || !consentGroupsState[idx].disableFields,
-        id: idx+'_deleteConsentGroup',
-        onClick: () => deleteConsentGroup(),
-        disabled: disableDelete,
-      }, [
-        span({
-          className: 'cm-icon-button glyphicon glyphicon-trash',
-          'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
-        }),
-        span({
-          style: {
-            marginLeft: '1rem',
-          }
-        }, ['Delete this entry']),
-      ]),
-      div({}, [
-        button({
-          isRendered: studyEditMode && editMode && consentGroupsState[idx].disableFields,
-          className: 'study-edit-form-cancel-button f-left btn',
-          type: 'button',
-          onClick: () => setEditMode(false),
-        }, ['Cancel']),
-      ]),
-      div({}, [
-        button({
-          id: idx+'_editConsentGroup',
-          type: 'button',
-          isRendered: !editMode,
-          onClick: () => {
-            setEditMode(true);
-          },
-          className: 'f-right btn-primary common-background',
-        }, ['Edit']),
-
-        button({
-          id: idx+'_saveConsentGroup',
-          type: 'button',
-          isRendered: editMode,
-          onClick: () => {
-            const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames);
-            const valid = isEmpty(errors);
-
-            setValidation(errors);
-
-            if (valid) {
-              saveConsentGroup({ value: consentGroup, valid: true });
-              setEditMode(false);
-            }
-          },
-          className: 'f-right btn-primary common-background',
-        }, ['Save']),
-      ]),
-    ])
-  ]);
+          }}
+          validation={validation}
+          onValidationChange={onValidationChange}
+          dacs={dacs}
+        />
+      ) : (
+        <ConsentGroupSummary
+          {...props}
+          consentGroup={consentGroup}
+          id={idx + '_consentGroupSummary'}
+          nihInstitutionalCertificationFile={nihInstitutionalCertificationFile}
+        />
+      )}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginTop: '2rem',
+        }}
+      >
+        {(!studyEditMode || !consentGroupsState[idx].disableFields) && <a
+          id={idx + '_deleteConsentGroup'}
+          onClick={() => deleteConsentGroup()}
+          disabled={disableDelete}
+        >
+          <span
+            className="cm-icon-button glyphicon glyphicon-trash"
+            aria-hidden="true"
+            data-tip="Delete dataset"
+            data-for="tip_delete"
+          />
+          <span style={{ marginLeft: '1rem' }}>Delete this entry</span>
+        </a>}
+        <div>
+          {studyEditMode && editMode && consentGroupsState[idx].disableFields && <button
+            className="study-edit-form-cancel-button f-left btn"
+            type="button"
+            onClick={() => setEditMode(false)}
+          >
+            Cancel
+          </button>}
+        </div>
+        <div>
+          {!editMode && <button
+            id={idx + '_editConsentGroup'}
+            type="button"
+            onClick={() => {
+              setEditMode(true);
+            }}
+            className="f-right btn-primary common-background"
+          >
+            Edit
+          </button>}
+          {editMode && <button
+            id={idx + '_saveConsentGroup'}
+            type="button"
+            onClick={() => {
+              const errors = computeConsentGroupValidationErrors(consentGroup, datasetNames);
+              const valid = isEmpty(errors);
+              setValidation(errors);
+              if (valid) {
+                saveConsentGroup({ value: consentGroup, valid: true });
+                setEditMode(false);
+              }
+            }}
+            className="f-right btn-primary common-background"
+          >
+            Save
+          </button>}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ConsentGroupForm;
