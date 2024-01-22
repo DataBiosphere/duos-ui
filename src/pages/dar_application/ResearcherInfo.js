@@ -58,11 +58,11 @@ export default function ResearcherInfo(props) {
       div({ className: 'dar-step-card' }, [
         div({
           datacy: 'researcher-info-profile-submitted',
-          isRendered: (completed === false && libraryCardReqSatisfied === false)}, [
+          isRendered: (completed === false || libraryCardReqSatisfied === false)}, [
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
-            type: 'important',
-            title: span({className: `${libraryCardReqSatisfied === false && showNihValidationError ? 'errored' : 'rp-error' }`},[ 
+            type: 'danger',
+            title: span({className:'errored'},[ 
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
