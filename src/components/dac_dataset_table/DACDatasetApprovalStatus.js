@@ -5,10 +5,22 @@ import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
 import ReactTooltip from 'react-tooltip';
 import style from '../../pages/DACDatasets.module.css';
+import { ConfirmationDialog } from '../modals/ConfirmationDialog';
+import IconButton from '@mui/material/IconButton';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 export default function DACDatasetApprovalStatus(props) {
 
   const [dataset, setDataset] = useState(props.dataset);
+  const [open, setOpen] = useState(false);
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const updateApprovalStatus = async (approvalState) => {
     const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, approvalState);
@@ -23,6 +35,14 @@ export default function DACDatasetApprovalStatus(props) {
       className={'glyphicon glyphicon-pencil'}
       to={dataset.study?.studyId === undefined ? `dataset_registration/${dataset.dataSetId}` : `study_update/${dataset.study.studyId}`}
     />
+    <Link
+      style={{marginLeft: '15px'}}
+      id={`${dataset.dataSetId}_delete`}
+      className={'glyphicon glyphicon-trash'}
+      onClick={handleClick}
+      to={`#`}
+    />
+    <ConfirmationDialog title="Delete dataset" open={open} close={handleClose} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
   </div>;
 
   const dacRejected = () => <div style={{color: '#000000', fontWeight: 'bold'}}>
