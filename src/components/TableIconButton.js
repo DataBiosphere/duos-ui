@@ -1,22 +1,21 @@
+import React from 'react';
+import { useEffect } from 'react';
 import { Styles } from '../libs/theme';
-import { h, span } from 'react-hyperscript-helpers';
 import { applyHoverEffects, setDivAttributes, setStyle } from '../libs/utils';
 import { makeStyles } from 'tss-react/mui';
 import { isNil } from 'lodash';
-import {useEffect} from 'react';
 import ReactTooltip from 'react-tooltip';
 
 const useStyles = makeStyles()({
-  'root': {
-    'backgroundColor': 'inherit',
-    'color': 'inherit',
-    'pointerEvents': 'none',
-    'fontSize': 28,
-  }
+  root: {
+    backgroundColor: 'inherit',
+    color: 'inherit',
+    pointerEvents: 'none',
+    fontSize: 28,
+  },
 });
 
 export default function TableIconButton(props) {
-
   useEffect(() => {
     ReactTooltip.rebuild();
   }, []);
@@ -39,7 +38,7 @@ export default function TableIconButton(props) {
     isRendered = true,
     dataTip = '',
     keyProp,
-    disabled = false
+    disabled = false,
   } = props;
   const Icon = props.icon;
   const { classes } = useStyles();
@@ -49,12 +48,10 @@ export default function TableIconButton(props) {
   //NOTE: span wrapper is needed for svg child elements due to flaky behavior onMouseEnter and onMouseLeave
   // https://github.com/facebook/react/issues/4492 --> NOTE: though the issue is from the React repo, the bug is tied to browser specs, NOT React
   return (
-    span(attributes, [
-      h(Icon, {
-        style: appliedStyle,
-        isRendered: isRendered && !isNil(Icon),
-        className: classes.root
-      })
-    ])
+    <span {...attributes}>
+      {isRendered && !isNil(Icon) && (
+        <Icon style={appliedStyle} className={classes.root} />
+      )}
+    </span>
   );
 }
