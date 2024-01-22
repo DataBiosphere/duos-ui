@@ -51,8 +51,6 @@ export default function ResearcherInfo(props) {
 
   useEffect(() => {
     setLibraryCardReqSatisfied(!isEmpty(get('libraryCards')(researcher)));
-    console.log("library cards", isEmpty(get('libraryCards')(researcher)));
-    console.log(completed);
   }, [researcher]);
 
   return (
