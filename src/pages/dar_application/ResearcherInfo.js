@@ -61,7 +61,7 @@ export default function ResearcherInfo(props) {
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'danger',
-            title: span({ className: 'errored' },[ 
+            title: span({ className: 'errored' }, [ 
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
