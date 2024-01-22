@@ -145,7 +145,7 @@ export default function DatasetSubmissionsTable(props) {
             openState={open} 
             close={handleClose}
             action={() => removeDataset(selectedTerm)}
-            description={`Are you sure you want to delete the dataset named '${selectedTerm.datasetName}'?`} 
+            description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`} 
           />
         </div>;
       const custodians = join(', ')(term.study?.dataCustodianEmail);
