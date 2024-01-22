@@ -34,7 +34,6 @@ export default function ResearcherInfo(props) {
     showValidationMessages,
     validation,
     formValidationChange,
-    isInvalidForm,
     ariaLevel = 2
   } = props;
 
