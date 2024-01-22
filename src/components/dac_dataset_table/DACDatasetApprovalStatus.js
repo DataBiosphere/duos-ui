@@ -28,7 +28,7 @@ export default function DACDatasetApprovalStatus(props) {
         Notifications.showSuccess({
           text: `Deleted dataset '${name}' successfully.`,
         });
-        props.history.push('/dac_datasets');
+        props.history.push('/chair_console');
       });
     } catch {
       Notifications.showError({text: `Error deleting dataset '${name}'`});
