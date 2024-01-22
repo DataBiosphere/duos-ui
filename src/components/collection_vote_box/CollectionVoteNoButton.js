@@ -1,10 +1,10 @@
-import {h, span} from 'react-hyperscript-helpers';
+import React from 'react';
 import CollectionVoteButton from './CollectionVoteButton';
-import {CancelOutlined} from '@mui/icons-material';
-import {votingColors} from '../../pages/dar_collection_review/MultiDatasetVotingTab';
+import { CancelOutlined } from '@mui/icons-material';
+import { votingColors } from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 export default function CollectionVoteNoButton(props) {
-  const {onClick, disabled, isSelected} = props;
+  const { onClick, disabled, isSelected } = props;
 
   const styles = {
     label: {
@@ -19,18 +19,22 @@ export default function CollectionVoteNoButton(props) {
   };
 
   const Label = () => {
-    return span({style: styles.label}, [
-      h(CancelOutlined, {style: styles.icon}),
-      'No'
-    ]);
+    return (
+      <span style={styles.label}>
+        <CancelOutlined style={styles.icon} />
+        No
+      </span>
+    );
   };
 
-  return h(CollectionVoteButton, {
-    datacy: 'no-collection-vote-button',
-    label: h(Label),
-    onClick: () => onClick(),
-    baseColor: votingColors.no,
-    disabled,
-    isSelected
-  });
+  return (
+    <CollectionVoteButton
+      datacy="no-collection-vote-button"
+      label={<Label />}
+      onClick={() => onClick()}
+      baseColor={votingColors.no}
+      disabled={disabled}
+      isSelected={isSelected}
+    />
+  );
 }
