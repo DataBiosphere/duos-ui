@@ -120,8 +120,7 @@ export default function DatasetSubmissionsTable(props) {
             Edit
           </Button>
         </div>;
-      const deleteButton = (status === 'Accepted') ?
-        <div/> :
+      const deleteButton = (status !== 'Accepted' && term.deletable) ?
         <div>
           <Link
             style={{marginLeft: '15px'}}
@@ -137,7 +136,8 @@ export default function DatasetSubmissionsTable(props) {
             action={() => removeDataset(selectedTerm)}
             description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`} 
           />
-        </div>;
+        </div> :
+        <div/>;
       const custodians = join(', ')(term.study?.dataCustodianEmail);
       return {
         datasetIdentifier: term.datasetIdentifier,
