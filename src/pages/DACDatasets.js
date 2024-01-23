@@ -103,6 +103,7 @@ export default function DACDatasets(props) {
       ]}
       isLoading={isLoading}
       consoleType={consoleTypes.CHAIR}
+      history={history}
     />
   </div>;
 
