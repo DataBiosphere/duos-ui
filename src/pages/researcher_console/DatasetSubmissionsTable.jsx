@@ -85,26 +85,16 @@ export default function DatasetSubmissionsTable(props) {
   const removeDataset = async (termToDelete) => {
     const termName = termToDelete.datasetName;
     const termId = termToDelete.datasetId;
-    let updatedTerm = await DataSet.deleteDataset(termId).then(() => {
-        window.location.reload();
-    });
-
-    const searchableKey = 'termId';
-    const listCopy = cloneDeep(terms);
-    const messageName = termName;
+    setOpen(false);
     try {
-      const targetIndex = findIndex((term) => {
-        return !isNil(term) && termToDelete[searchableKey] === term[searchableKey];
-      })(listCopy);
-      listCopy[targetIndex] = updatedTerm;
-      setTerms(listCopy);
-      setOpen(false);
-      Notifications.showSuccess({
-        text: `Removed ${messageName} as a dataset`,
-      });
+      DataSet.deleteDataset(termId).then(() => {
+        Notifications.showSuccess({
+          text: `Removed dataset '${termName}' successfully.`,
+        });
+        props.history.push('/datalibrary');});
     } catch (error) {
       Notifications.showError({
-        text: `Error removing ${messageName} as a dataset`,
+        text: `Error removing ${termName} as a dataset`,
       });
     }
   };
