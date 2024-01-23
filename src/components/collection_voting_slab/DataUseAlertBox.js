@@ -1,5 +1,5 @@
-import {div, span} from 'react-hyperscript-helpers';
-import {isEmpty, filter, keys, flatMap, map} from 'lodash/fp';
+import React from 'react';
+import {isEmpty, map} from 'lodash/fp';
 
 const styles = {
   box: {
@@ -26,25 +26,32 @@ const styles = {
 };
 
 const dataUseDescriptions = (translatedDataUse) => {
-  return flatMap(key => {
+  return Object.keys(translatedDataUse).flatMap(key => {
     const dataUses = translatedDataUse[key];
     return map.convert({cap: false})((dataUse, index) => {
       const uniqKey = key + '-' + dataUse.code + '-' + index;
-      return div({ key: uniqKey }, [dataUse.description]);
+      return (
+        <div key={uniqKey}>
+          {dataUse.description}
+        </div>
+      );
     })(manuallyReviewedDataUses(dataUses));
-  })(keys(translatedDataUse));
+  });
 };
 
 const manuallyReviewedDataUses = (dataUses) => {
-  return filter(dataUse => dataUse.manualReview)(dataUses);
+  return dataUses.filter((dataUse) => dataUse.manualReview);
 };
 
 export default function DataUseAlertBox(props) {
   const {translatedDataUse} = props;
   const descriptions = dataUseDescriptions(translatedDataUse);
 
-  return div({datacy: 'alert-box', style: styles.box, isRendered: !isEmpty(descriptions)}, [
-    span({style: styles.exclamationPoint}, ['!']),
-    div({style: styles.text}, [descriptions])
-  ]);
+  return (
+    /* eslint-disable react/no-unknown-property */
+    !isEmpty(descriptions) && <div datacy="alert-box" style={styles.box}>
+      <span style={styles.exclamationPoint}>!</span>
+      <div style={styles.text}>{descriptions}</div>
+    </div>
+  );
 }
