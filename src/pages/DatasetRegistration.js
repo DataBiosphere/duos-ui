@@ -39,6 +39,7 @@ class DatasetRegistration extends Component {
         ethics: false,
         geographic: false,
         moratorium: false,
+        commercialUse: false,
         nonProfit: false,
         hmb: false,
         npoa: false,
@@ -182,6 +183,7 @@ class DatasetRegistration extends Component {
     let ethics = dataUse.ethicsApprovalRequired;
     let geographic = dataUse.geographicalRestrictions;
     let moratorium = dataUse.publicationMoratorium;
+    let commercialUse = dataUse.commercialUse;
     let nonProfit = dataUse.nonProfitUse;
     let hmb = dataUse.hmbResearch;
     // if the dataset's POA value is set to false, we need to check the NPOA (or NOT POA) option
@@ -202,6 +204,7 @@ class DatasetRegistration extends Component {
       prev.formData.ethics = ethics;
       prev.formData.geographic = geographic;
       prev.formData.moratorium = moratorium;
+      prev.formData.commercialUse = commercialUse;
       prev.formData.nonProfit = nonProfit;
       prev.formData.hmb = hmb;
       prev.formData.npoa = npoa;
@@ -633,6 +636,9 @@ class DatasetRegistration extends Component {
     if (data.npoa) {
       result.populationOriginsAncestry = false;
     }
+    if (data.commercialUse) {
+      result.commercialUse = data.commercialUse;
+    }
     if (data.nonProfit) {
       result.nonProfitUse = data.nonProfit;
     }
@@ -688,6 +694,7 @@ class DatasetRegistration extends Component {
       secondaryOther = false,
       secondaryOtherText = '',
       genetic = false,
+      commercialUse = false,
       nonProfit = false,
       publication = false,
       collaboration = false,
