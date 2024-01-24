@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { div, form, input, label, textarea, hh, h, select, span, option, section, button, p } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, hh, h, select, span, option, section, button, p, a } from 'react-hyperscript-helpers';
 import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { Notifications, isEmailAddress } from '../../libs/utils';
@@ -264,6 +264,20 @@ export const SupportRequestModal = hh(
                 outline: '0',
               },
             }, [
+              div({className: 'default-color', style: { fontStyle: 'italic', fontSize: '13px' }}, [
+                  p(['Having issues accessing data you were already approved to use?',
+                  div({style: { fontStyle: 'normal'}}, [
+                    'Please contact the dataset\'s Data Custodian listed in the DUOS ',
+                    a({ href: '/datalibrary' }, 'Data Library'),'.'
+                  ])])
+                ]),
+              div({className: 'default-color', style: { fontStyle: 'italic', fontSize: '13px' }}, [
+                p(['Want to ask the data access committee(s) about your request\'s expected turnaround time?',
+                div({style: { fontStyle: 'normal'}}, [
+                  'Please contact the dataset\'s Data Access Committee (DAC) listed in the DUOS ',
+                  a({ href: '/datalibrary' }, 'Data Library'),'.'
+                ])])
+              ]),
               form({
                 className: 'form-horizontal css-form',
                 name: 'zendeskTicketForm',
