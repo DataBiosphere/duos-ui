@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useState} from 'react';
-import {button} from 'react-hyperscript-helpers';
-import {votingColors} from '../../pages/dar_collection_review/MultiDatasetVotingTab';
+import React from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { votingColors } from '../../pages/dar_collection_review/MultiDatasetVotingTab';
 
 const styles = {
   baseStyle: {
@@ -41,11 +41,16 @@ export default function CollectionVoteButton(props) {
     });
   };
 
-  return button({
-    datacy,
-    style: Object.assign({}, styles.baseStyle, additionalStyle),
-    onClick: () => !disabled && onClick(),
-    onMouseEnter: () => !disabled && selectedButtonStyle(),
-    onMouseLeave: () => !disabled && !isSelected && defaultButtonStyle(),
-  }, [label]);
+  return (
+    <button
+      /* eslint-disable react/no-unknown-property */
+      datacy={datacy}
+      style={{ ...styles.baseStyle, ...additionalStyle }}
+      onClick={() => !disabled && onClick()}
+      onMouseEnter={() => !disabled && selectedButtonStyle()}
+      onMouseLeave={() => !disabled && !isSelected && defaultButtonStyle()}
+    >
+      {label}
+    </button>
+  );
 }

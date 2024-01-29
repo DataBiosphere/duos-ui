@@ -1,4 +1,4 @@
-import {div, h, h2} from 'react-hyperscript-helpers';
+import React from 'react';
 import {FormField, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import { isNil, toLower } from 'lodash/fp';
 
@@ -41,71 +41,72 @@ export default function NihAnvilUse(props) {
     onValidationChange,
   } = props;
 
-  return h(div, {
-    className: 'data-submitter-section',
-  }, [
-    h2('NIH and AnVIL use'),
-    h(FormField, {
-      id: 'nihAnvilUse',
-      title: 'Will you or did you submit data to the NIH?',
-      type: FormFieldTypes.RADIOGROUP,
-      options: [
-        {text: YES_NHGRI_YES_PHS_ID, name: 'yes_nhgri_yes_phs_id'},
-        {text: YES_NHGRI_NO_PHS_ID, name: 'yes_nhgri_no_phs_id'},
-        {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
-        {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
-      ],
-      defaultValue: studyEditMode ? radioSelectionToLabels(formData?.nihAnvilUse) : undefined,
-      validators: [FormValidators.REQUIRED],
-      onChange: (config) => {
-        const value = nihAnvilUseLabels[config.value];
-        onChange({key: config.key, value: value, isValid: config.isValid});
-        studyEditMode ? formData.nihAnvilUse = config.value : undefined;
-      },
-      validation: validation.nihAnvilUse,
-      onValidationChange,
-    }),
+  return (
+    <div className="data-submitter-section">
+      <h2>NIH and AnVIL use</h2>
+      <FormField
+        id="nihAnvilUse"
+        title="Will you or did you submit data to the NIH?"
+        type={FormFieldTypes.RADIOGROUP}
+        options={[
+          {text: YES_NHGRI_YES_PHS_ID, name: 'yes_nhgri_yes_phs_id'},
+          {text: YES_NHGRI_NO_PHS_ID, name: 'yes_nhgri_no_phs_id'},
+          {text: NO_NHGRI_YES_ANVIL, name: 'no_nhgri_yes_anvil'},
+          {text: NO_NHGRI_NO_ANVIL, name: 'no_nhgri_no_anvil'},
+        ]}
+        defaultValue={studyEditMode ? radioSelectionToLabels(formData?.nihAnvilUse) : undefined}
+        validators={[FormValidators.REQUIRED]}
+        onChange={(config) => {
+          const value = nihAnvilUseLabels[config.value];
+          onChange({key: config.key, value: value, isValid: config.isValid});
+          studyEditMode ? formData.nihAnvilUse = config.value : undefined;
+        }}
+        validation={validation.nihAnvilUse}
+        onValidationChange={onValidationChange}
+      />
 
-    div({ isRendered: formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID }, [
-      h(FormField, {
-        id: 'dbGaPPhsID',
-        title: 'dbGaP phs ID',
-        placeholder: 'Firstname Lastname',
-        validators: studyEditMode ? undefined : [FormValidators.REQUIRED],
-        defaultValue: formData.dbGaPPhsID,
-        onChange,
-        validation: validation.dbGaPPhsID,
-        onValidationChange,
-      }),
-      h(FormField, {
-        id: 'dbGaPStudyRegistrationName',
-        title: 'dbGaP Study Registration Name',
-        placeholder: 'Name',
-        defaultValue: formData.dbGaPStudyRegistrationName,
-        onChange,
-        validation: validation.dbGaPStudyRegistrationName,
-        onValidationChange,
-
-      }),
-      h(FormField, {
-        id: 'embargoReleaseDate',
-        title: 'Embargo Release Date',
-        placeholder: 'YYYY-MM-DD',
-        validators: [FormValidators.DATE],
-        defaultValue: formData.embargoReleaseDate,
-        onChange,
-        validation: validation.embargoReleaseDate,
-        onValidationChange,
-      }),
-      h(FormField, {
-        id: 'sequencingCenter',
-        title: 'Sequencing Center',
-        placeholder: 'Name',
-        defaultValue: formData.sequencingCenter,
-        onChange,
-        validation: validation.sequencingCenter,
-        onValidationChange,
-      }),
-    ])
-  ]);
+      {formData.nihAnvilUse === YES_NHGRI_YES_PHS_ID && (
+        <>
+          <FormField
+            id="dbGaPPhsID"
+            title="dbGaP phs ID"
+            placeholder="Firstname Lastname"
+            validators={studyEditMode ? undefined : [FormValidators.REQUIRED]}
+            defaultValue={formData.dbGaPPhsID}
+            onChange={onChange}
+            validation={validation.dbGaPPhsID}
+            onValidationChange={onValidationChange}
+          />
+          <FormField
+            id="dbGaPStudyRegistrationName"
+            title="dbGaP Study Registration Name"
+            placeholder="Name"
+            defaultValue={formData.dbGaPStudyRegistrationName}
+            onChange={onChange}
+            validation={validation.dbGaPStudyRegistrationName}
+            onValidationChange={onValidationChange}
+          />
+          <FormField
+            id="embargoReleaseDate"
+            title="Embargo Release Date"
+            placeholder="YYYY-MM-DD"
+            validators={[FormValidators.DATE]}
+            defaultValue={formData.embargoReleaseDate}
+            onChange={onChange}
+            validation={validation.embargoReleaseDate}
+            onValidationChange={onValidationChange}
+          />
+          <FormField
+            id="sequencingCenter"
+            title="Sequencing Center"
+            placeholder="Name"
+            defaultValue={formData.sequencingCenter}
+            onChange={onChange}
+            validation={validation.sequencingCenter}
+            onValidationChange={onValidationChange}
+          />
+        </>
+      )}
+    </div>
+  );
 }

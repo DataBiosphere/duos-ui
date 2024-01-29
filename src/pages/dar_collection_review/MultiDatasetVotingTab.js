@@ -1,7 +1,7 @@
-import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab';
-import {div, h} from 'react-hyperscript-helpers';
-import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
+import React from 'react';
 import {useEffect, useState} from 'react';
+import MultiDatasetVoteSlab from '../../components/collection_voting_slab/MultiDatasetVoteSlab';
+import ResearchProposalVoteSlab from '../../components/collection_voting_slab/ResearchProposalVoteSlab';
 import {find, get, filter, flow, map, isNil, isEmpty} from 'lodash/fp';
 import {User} from '../../libs/ajax';
 import {Alert} from '../../components/Alert';
@@ -60,20 +60,20 @@ export default function MultiDatasetVotingTab(props) {
 
   const DatasetVoteSlabs = () => {
     const isApprovalDisabled = dataAccessApprovalDisabled();
-    return map(bucket => {
-      return h(MultiDatasetVoteSlab, {
-        title: bucket.label,
-        bucket,
-        dacDatasetIds,
-        isChair,
-        isApprovalDisabled,
-        readOnly,
-        key: bucket.key,
-        adminPage,
-        updateFinalVote,
-        isLoading
-      });
-    })(dataBuckets);
+    return dataBuckets.map((bucket) => (
+      <MultiDatasetVoteSlab
+        title={bucket.label}
+        bucket={bucket}
+        dacDatasetIds={dacDatasetIds}
+        isChair={isChair}
+        isApprovalDisabled={isApprovalDisabled}
+        readOnly={readOnly}
+        key={bucket.key}
+        adminPage={adminPage}
+        updateFinalVote={updateFinalVote}
+        isLoading={isLoading}
+      />
+    ));
   };
 
   const dataAccessApprovalDisabled = () => {
@@ -85,27 +85,30 @@ export default function MultiDatasetVotingTab(props) {
     return isChair && researcherMissingLibraryCards;
   };
 
-  return div({style: styles.baseStyle}, [
-    div({style: styles.title}, ['Research Use Statement']),
-    Alert({
-      type: 'danger',
-      title: missingLibraryCardMessage,
-      id: 'missing_lc',
-      isRendered: dataAccessApprovalDisabled() && !readOnly
-    }),
-    h(ResearchProposalVoteSlab, {
-      updateFinalVote,
-      darInfo,
-      bucket: rpBucket,
-      key: 'rp-vote',
-      isChair,
-      isLoading,
-      readOnly,
-      adminPage,
-    }),
-    div({style: styles.title}, ['Datasets Requested by Data Use']),
-    div({style: styles.slabs}, [
-      DatasetVoteSlabs()
-    ])
-  ]);
+  return (
+    <div style={styles.baseStyle}>
+      <div style={styles.title}>Research Use Statement</div>
+      {dataAccessApprovalDisabled() && !readOnly && (
+        <Alert
+          type="danger"
+          title={missingLibraryCardMessage}
+          id="missing_lc"
+        />
+      )}
+      <ResearchProposalVoteSlab
+        updateFinalVote={updateFinalVote}
+        darInfo={darInfo}
+        bucket={rpBucket}
+        key="rp-vote"
+        isChair={isChair}
+        isLoading={isLoading}
+        readOnly={readOnly}
+        adminPage={adminPage}
+      />
+      <div style={styles.title}>Datasets Requested by Data Use</div>
+      <div style={styles.slabs}>
+        <DatasetVoteSlabs />
+      </div>
+    </div>
+  );
 }

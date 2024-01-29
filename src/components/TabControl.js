@@ -1,5 +1,4 @@
-import { div, h } from 'react-hyperscript-helpers';
-import { useMemo } from 'react';
+import React from 'react';
 import SelectableText from './SelectableText';
 
 const defaultTabContainerStyle = {
@@ -8,28 +7,30 @@ const defaultTabContainerStyle = {
   border: '0px',
 };
 
-const tabTemplates = ({labels, selectedTab, setSelectedTab, isLoading, styleOverride = {}, isDisabled}) => {
+const tabTemplates = ({ labels, selectedTab, setSelectedTab, isLoading, styleOverride = {}, isDisabled }) => {
   return labels.map((label) =>
-    !isLoading ?
-      h(SelectableText, {
-        label,
-        key: `${label}-button`,
-        fontSize: '1.8rem',
-        componentType: label,
-        setSelected: setSelectedTab,
-        selectedType: selectedTab,
-        styleOverride,
-        isDisabled
-      }) :
-      div({
-        className: 'text-placeholder',
-        key: `${label}-placeholder`,
-        style: {
+    !isLoading ? (
+      <SelectableText
+        label={label}
+        key={`${label}-button`}
+        fontSize="1.8rem"
+        componentType={label}
+        setSelected={setSelectedTab}
+        selectedType={selectedTab}
+        styleOverride={styleOverride}
+        isDisabled={isDisabled}
+      />
+    ) : (
+      <div
+        className="text-placeholder"
+        key={`${label}-placeholder`}
+        style={{
           width: '23rem',
           height: '5rem',
-          marginRight: '2rem'
-        }
-      })
+          marginRight: '2rem',
+        }}
+      />
+    )
   );
 };
 
@@ -40,17 +41,14 @@ export default function TabControl(props) {
   //  3) Style for hover (if you don't want to change styles on hover just simply inherit )
   const { labels, selectedTab, setSelectedTab, isLoading = false, styleOverride = {}, isDisabled } = props;
 
-  const tabContainerStyle = useMemo(() => {
+  const tabContainerStyle = React.useMemo(() => {
     const containerOverride = styleOverride.tabContainer;
     return containerOverride || defaultTabContainerStyle;
   }, [styleOverride.tabContainer]);
 
   return (
-    div({
-      style: tabContainerStyle,
-      className: 'tab-list',
-    }, [
-      tabTemplates({labels, selectedTab, setSelectedTab, isLoading, styleOverride, isDisabled})
-    ])
+    <div style={tabContainerStyle} className="tab-list">
+      {tabTemplates({ labels, selectedTab, setSelectedTab, isLoading, styleOverride, isDisabled })}
+    </div>
   );
 }

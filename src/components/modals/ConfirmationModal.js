@@ -1,5 +1,4 @@
 import React from 'react';
-import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import CloseIconComponent from '../CloseIconComponent';
 import './ConfirmationModal.css';
@@ -43,22 +42,24 @@ const ConfirmationModal = (props) => {
     <PrimaryButton variant={'contained'} className={'confirmation-modal-primary-button'} onClick={onConfirm}>Confirm</PrimaryButton>
   </Stack>;
 
-  return h(Modal, {
-    isOpen: showConfirmation,
-    onRequestClose: closeFn,
-    shouldCloseOnEsc: true,
-    shouldCloseOnOverlayClick: true,
-    className: 'confirmation-modal',
-    style: { content: styleOverride }
-  }, [
-    div({}, [
-      h(CloseIconComponent, {closeFn}),
-      div({className: 'confirmation-modal-header'}, [header]),
-      div({className: 'confirmation-modal-title'}, [title]),
-      div({className: 'confirmation-modal-message'}, [message]),
-      div({className: 'confirmation-modal-actions'}, [actionButtons])
-    ])
-  ]);
+  return (
+    <Modal
+      isOpen={showConfirmation}
+      onRequestClose={closeFn}
+      shouldCloseOnEsc={true}
+      shouldCloseOnOverlayClick={true}
+      className="confirmation-modal"
+      style={{ content: styleOverride }}
+    >
+      <div>
+        <CloseIconComponent closeFn={closeFn} />
+        <div className="confirmation-modal-header">{header}</div>
+        <div className="confirmation-modal-title">{title}</div>
+        <div className="confirmation-modal-message">{message}</div>
+        <div className="confirmation-modal-actions">{actionButtons}</div>
+      </div>
+    </Modal>
+  );
 };
 
 export default ConfirmationModal;

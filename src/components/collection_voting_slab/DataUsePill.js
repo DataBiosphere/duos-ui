@@ -1,4 +1,4 @@
-import {div, h3, span} from 'react-hyperscript-helpers';
+import React from 'react';
 import {isNil} from 'lodash';
 import { ControlledAccessType } from '../../libs/dataUseTranslation';
 
@@ -31,25 +31,34 @@ const styles = {
   }
 };
 
+export const DataUsePill = (props) => {
+  const { dataUse, key } = props;
 
-export function DataUsePill(props) {
-  const {dataUse, key} = props;
+  return (
+    <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${key}`} style={styles.baseStyle}>
+      <span style={styles.code}>{!isNil(dataUse) ? [dataUse.code] : []}</span>
+      <span style={styles.description}>{!isNil(dataUse) ? [dataUse.description] : []}</span>
+    </div>
+  );
+};
 
-  return div({key: `data_use_pill_${dataUse.type}_${dataUse.code}_${key}`, style: styles.baseStyle}, [
-    span({ style: styles.code }, !isNil(dataUse) ? [dataUse.code] : []),
-    span({ style: styles.description }, !isNil(dataUse) ? [dataUse.description] : [])
-  ]);
-}
-
-export function DataUsePills(dataUses){
+export const DataUsePills = (dataUses) => {
   const permissionsUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.permissions);
   const modifierUses = dataUses.filter(dataUse => dataUse.type === ControlledAccessType.modifiers);
-  return(
-    div([permissionsUses.map((dataUse, idx)=>{return DataUsePill({dataUse, key: `${dataUse.code}-${idx}`});}),
-      div({isRendered: modifierUses.length > 0},[
-        h3({style: styles.subheading}, ControlledAccessType.modifiers),
-        modifierUses.map((dataUse,idx)=>{return DataUsePill({dataUse, key: `${dataUse.code}-${idx}`});})
-      ])
-    ])
+
+  return (
+    <div>
+      {permissionsUses.map((dataUse, idx) => (
+        <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} />
+      ))}
+      {modifierUses.length > 0 && (
+        <div>
+          <h3 style={styles.subheading}>{ControlledAccessType.modifiers}</h3>
+          {modifierUses.map((dataUse, idx) => (
+            <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} />
+          ))}
+        </div>
+      )}
+    </div>
   );
-}
+};
