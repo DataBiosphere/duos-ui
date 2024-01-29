@@ -68,6 +68,7 @@ export const SearchSelect = (props) => {
         <ul>
           {filteredList.map(item => (
             <li
+              key={item.key}
               className={
                 item.key === currentSelection
                   ? 'dropdown-item select-dropdown-item active'
