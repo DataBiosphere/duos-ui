@@ -4,6 +4,7 @@
   "tag": "",
   "apiUrl": "",
   "ontologyApiUrl": "",
+  "terraUrl": "",
   "tdrApiUrl": "",
   "clientId": "",
   "errorApiKey": "",
