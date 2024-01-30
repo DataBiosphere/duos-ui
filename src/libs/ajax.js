@@ -778,7 +778,7 @@ export const TerraDataRepo = {
         const finalResult = await axios.get(resultsUrl, Config.authOpts());
         // Add the URL to link to
         finalResult.data.terraImportLink =
-        `${await Config.getTerraUrl()}/#import-data?url=${window.location.origin}&snapshotId=${finalResult.data.snapshot.id}&format=tdrexport&snapshotName=${finalResult.data.snapshot.name}&tdrmanifest=${encodeURIComponent(finalResult.data.format.parquet.manifest)}&tdrSyncPermissions=false`;
+        `${await Config.getTerraUrl()}/#import-data?url=${await Config.getTdrApiUrl()}&snapshotId=${finalResult.data.snapshot.id}&format=tdrexport&snapshotName=${finalResult.data.snapshot.name}&tdrmanifest=${encodeURIComponent(finalResult.data.format.parquet.manifest)}&tdrSyncPermissions=false`;
         return finalResult.data;
       } else if (res.data.job_status === 'failed') {
         return reportError(url, res.data.status_code);
