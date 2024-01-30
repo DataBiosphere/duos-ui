@@ -9,6 +9,7 @@ import DatasetExportButton from './DatasetExportButton';
 import { DAR, TerraDataRepo } from '../../libs/ajax';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
+import { Notifications } from '../../libs/utils';
 
 const studyTableHeader = [
   'Study Name',
@@ -28,7 +29,7 @@ const datasetTableHeader = [
   'Participants',
   'Data Location',
   'DAC',
-  'Use in Terra',
+  'Export to Terra',
 ];
 
 export const DatasetSearchTable = (props) => {
@@ -101,23 +102,27 @@ export const DatasetSearchTable = (props) => {
     setSelected(newSelected);
   };
 
+  const getExportableDatasets = async (event, data) => {
+      setTdrApiUrl(await Config.getTdrApiUrl());
+      // Note the dataset id is the first column in subrows.
+      // If columns are ever reordereable, this will need to be updated to be not hardcoded to look for the first column.
+      const datasetIds = data.subtable.rows.map((row) => row.data[0].value);
+      const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIds);
+      if (snapshots.filteredTotal > 0) {
+        const datasetIdToSnapshot = _.chain(snapshots.items)
+          // Ignore any snapshots that a user does not have export (steward or reader) to
+          .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+          .groupBy('duosId')
+          .value();
+        setExportableDatasets(datasetIdToSnapshot);
+      }
+  };
+
   const expandHandler = async (event, data) => {
-    // This method adds the export to Terra button to the subtable rows that have an associated TDR snapshot that the user
-    // has access to.
-
-    setTdrApiUrl(await Config.getTdrApiUrl());
-
-    // Note the dataset id is the first column in subrows.
-    // If columns are ever reordereable, this will need to be updated to be not hardcoded to look for the first column.
-    const datasetIds = data.subtable.rows.map((row) => row.data[0].value);
-    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIds);
-    if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = _.chain(snapshots.items)
-        // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-        .groupBy('duosId')
-        .value();
-      setExportableDatasets(datasetIdToSnapshot);
+    try {
+      getExportableDatasets(event, data);
+    } catch {
+      Notifications.showError({ text: 'Unable to retrieve exportable datasets from Terra' });
     }
   };
 
