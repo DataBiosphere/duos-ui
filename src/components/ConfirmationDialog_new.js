@@ -1,5 +1,4 @@
-import { mergeAll } from 'lodash/fp';
-import { a, div, h, h2 } from 'react-hyperscript-helpers';
+import React from 'react';
 import Modal from 'react-modal';
 import { Alert } from './Alert';
 import CloseIconComponent from './CloseIconComponent';
@@ -33,48 +32,46 @@ export const ConfirmationDialog = (props) => {
   const { disableOkBtn = false, disableNoBtn = false, alertMessage, alertTitle } = props;
 
   return (
-    h(Modal, {
-      isOpen: props.showModal,
-      onAfterOpen: props.afterOpenModal,
-      onRequestClose: props.onRequestClose,
-      style: mergeAll([customStyles, props.style]),
-      contentLabel: 'Modal'
-    }, [
-      div({ className: 'dialog-header' }, [
-        h(CloseIconComponent, {closeFn: props.action.handler(false)}),
-        h2({ id: 'lbl_dialogTitle', className: 'dialog-title ' }, [props.title]),
-      ]),
+    <Modal
+      isOpen={props.showModal}
+      onAfterOpen={props.afterOpenModal}
+      onRequestClose={props.onRequestClose}
+      style={{ ...customStyles, ...props.style }}
+      contentLabel="Modal"
+    >
+      <div className="dialog-header">
+        <CloseIconComponent closeFn={props.action.handler(false)} />
+        <h2 id="lbl_dialogTitle" className="dialog-title">{props.title}</h2>
+      </div>
 
-      div({ id: 'lbl_dialogContent', className: 'dialog-content' }, [
-        props.children,
-        div({ isRendered: alertTitle !== undefined, className: 'dialog-alert' }, [
-          Alert({ id: 'dialog', type: 'danger', title: alertTitle, description: alertMessage })
-        ])
-      ]),
+      <div id="lbl_dialogContent" className="dialog-content">
+        {props.children}
+        {alertTitle !== undefined && (
+          <div className="dialog-alert">
+            <Alert id="dialog" type="danger" title={alertTitle} description={alertMessage} />
+          </div>
+        )}
+      </div>
 
-
-      div({ className: 'flex flex-row', style: {
-        justifyContent: 'flex-end',
-        marginTop: '20px',
-      }, }, [
-        a({
-          id: 'btn_save',
-          className: 'button button-white',
-          style: {
-            marginRight: '2rem',
-          },
-          onClick: props.action.handler(false),
-          disabled: disableNoBtn
-        }, ['No']),
-        a({
-          id: 'btn_submit',
-          className: 'button button-blue',
-          onClick: props.action.handler(true),
-          disabled: disableOkBtn
-        }, [
-          props.action.label
-        ]),
-      ])
-    ])
+      <div className="flex flex-row" style={{ justifyContent: 'flex-end', marginTop: '20px' }}>
+        <a
+          id="btn_save"
+          className="button button-white"
+          style={{ marginRight: '2rem' }}
+          onClick={props.action.handler(false)}
+          disabled={disableNoBtn}
+        >
+          No
+        </a>
+        <a
+          id="btn_submit"
+          className="button button-blue"
+          onClick={props.action.handler(true)}
+          disabled={disableOkBtn}
+        >
+          {props.action.label}
+        </a>
+      </div>
+    </Modal>
   );
 };

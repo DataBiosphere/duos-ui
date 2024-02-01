@@ -1,14 +1,39 @@
 import React, {useState} from 'react';
-import {DAC} from '../../libs/ajax';
+import {DAC, DataSet} from '../../libs/ajax';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
 import ReactTooltip from 'react-tooltip';
 import style from '../../pages/DACDatasets.module.css';
+import { ConfirmationDialog } from '../modals/ConfirmationDialog';
+import { Notifications } from '../../libs/utils';
 
 export default function DACDatasetApprovalStatus(props) {
 
   const [dataset, setDataset] = useState(props.dataset);
+  const [open, setOpen] = useState(false);
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleAction = ({dataSetId, name}) => {
+    setOpen(false);
+    try {
+      DataSet.deleteDataset(dataSetId).then(() => {
+        Notifications.showSuccess({
+          text: `Deleted dataset '${name}' successfully.`,
+        });
+        props.history.push('/chair_console');
+      });
+    } catch {
+      Notifications.showError({text: `Error deleting dataset '${name}'`});
+    }
+  }
 
   const updateApprovalStatus = async (approvalState) => {
     const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, approvalState);
@@ -23,6 +48,18 @@ export default function DACDatasetApprovalStatus(props) {
       className={'glyphicon glyphicon-pencil'}
       to={dataset.study?.studyId === undefined ? `dataset_registration/${dataset.dataSetId}` : `study_update/${dataset.study.studyId}`}
     />
+    {dataset.deletable &&
+      <>
+        <Link
+          style={{marginLeft: '15px'}}
+          id={`${dataset.dataSetId}_delete`}
+          className={'glyphicon glyphicon-trash'}
+          onClick={handleClick}
+          to={`#`}
+        />
+        <ConfirmationDialog title="Delete dataset" openState={open} close={handleClose} action={() => handleAction(dataset)} description={`Are you sure you want to delete the dataset named '${dataset.name}'?`} />
+      </>
+    }
   </div>;
 
   const dacRejected = () => <div style={{color: '#000000', fontWeight: 'bold'}}>

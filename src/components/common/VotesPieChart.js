@@ -1,21 +1,21 @@
+import React from 'react';
 import { Chart } from 'react-google-charts';
-import { h, div } from 'react-hyperscript-helpers';
-import { isNil, isEmpty} from 'lodash/fp';
+import { isNil, isEmpty } from 'lodash/fp';
 import { map } from 'lodash';
 import { useMemo } from 'react';
 
 const pieSliceColors = {
-  0: {color: '#1FA371'},
-  1: {color: '#DA000E'},
-  2: {color: '#979797'}
+  0: { color: '#1FA371' },
+  1: { color: '#DA000E' },
+  2: { color: '#979797' }
 };
 
 const processVotes = (votes) => {
   const headerData = ['Vote', 'Total Votes'];
   const decisionMap = {
-    'Yes' : 0,
+    'Yes': 0,
     'No': 0,
-    'Not Yet Voted' : 0
+    'Not Yet Voted': 0
   };
 
   votes.forEach((v) => {
@@ -46,16 +46,22 @@ export default function VotesPieChart(props) {
     slices: pieSliceColors,
   };
 
-  if(isEmpty(votes)) {
-    return div({style, className: `${keyString}-pie-chart-no-data`}, [`No data for ${keyString}`]);
+  if (isEmpty(votes)) {
+    return (
+      <div style={style} className={`${keyString}-pie-chart-no-data`}>
+        No data for {keyString}
+      </div>
+    );
   }
-  return div({ style: { ...style, ...styleOverride }}, [
-    h(Chart, {
-      chartType: 'PieChart',
-      data: processedVotes,
-      options: options,
-      width,
-      height
-    })
-  ]);
+  return (
+    <div style={{ ...style, ...styleOverride }}>
+      <Chart
+        chartType="PieChart"
+        data={processedVotes}
+        options={options}
+        width={width}
+        height={height}
+      />
+    </div>
+  );
 }

@@ -1,5 +1,4 @@
-import { Fragment } from 'react';
-import { h, div, span, p } from 'react-hyperscript-helpers';
+import React from 'react';
 
 const styles = {
   header: {
@@ -53,33 +52,33 @@ export default function ReviewHeader(props) {
     isLoading
   } = props;
   return (
-    h(Fragment, {}, [
-      div({className: 'header-container', isRendered: !isLoading, style: { marginBottom: '3rem' }}, [
-        div({className: 'primary-header-row', style: appliedPrimaryHeaderStyle}, [
-          span({style: styles.header}, [`Data Access Request Review${readOnly ? ' (read-only)' : ''}`])
-        ]),
-        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
-          p({}, [darCode]),
-        ]),
-        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
-          p({className: 'collection-project-title', style: styles.projectTitle}, [projectTitle])
-        ]),
-        div({className: 'secondary-header-row', style: appliedSecondaryHeaderStyle}, [
-          p({style: styles.user}, [`${userName}, ${institutionName}`])
-        ]),
-      ]),
-      div({className: 'header-skeleton-loader', isRendered: isLoading}, [
-        div({className: 'primary-header-skeleton', style: appliedPrimaryHeaderStyle}, [
-          div({className: 'text-placeholder', style: { width: '35rem', height: '2.5rem', marginBottom: '0.5rem'}}),
-        ]),
-        div({className: 'secondary-header-skeleton', style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '15rem', height: '4rem', marginBottom: '0.5rem'}}),
-          div({className: 'text-placeholder', style: {width: '40rem', height: '4rem', marginBottom: '0.5rem'}})
-        ]),
-        div({style: styles.containerRow}, [
-          div({className: 'text-placeholder', style: {width: '16rem', height: '3rem', marginBottom: '3.5rem'}})
-        ])
-      ])
-    ])
+    <>
+      {!isLoading && <div className="header-container" style={{ marginBottom: '3rem' }}>
+        <div className="primary-header-row" style={appliedPrimaryHeaderStyle}>
+          <span style={styles.header}>Data Access Request Review{readOnly ? ' (read-only)' : ''}</span>
+        </div>
+        <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
+          <p>{darCode}</p>
+        </div>
+        <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
+          <p className="collection-project-title" style={styles.projectTitle}>{projectTitle}</p>
+        </div>
+        <div className="secondary-header-row" style={appliedSecondaryHeaderStyle}>
+          <p style={styles.user}>{`${userName}, ${institutionName}`}</p>
+        </div>
+      </div>}
+      {isLoading && <div className="header-skeleton-loader">
+        <div className="primary-header-skeleton" style={appliedPrimaryHeaderStyle}>
+          <div className="text-placeholder" style={{ width: '35rem', height: '2.5rem', marginBottom: '0.5rem' }}></div>
+        </div>
+        <div className="secondary-header-skeleton" style={styles.containerRow}>
+          <div className="text-placeholder" style={{ width: '15rem', height: '4rem', marginBottom: '0.5rem' }}></div>
+          <div className="text-placeholder" style={{ width: '40rem', height: '4rem', marginBottom: '0.5rem' }}></div>
+        </div>
+        <div style={styles.containerRow}>
+          <div className="text-placeholder" style={{ width: '16rem', height: '3rem', marginBottom: '3.5rem' }}></div>
+        </div>
+      </div>}
+    </>
   );
 }

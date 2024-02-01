@@ -1,5 +1,4 @@
 import {React} from 'react';
-import { div, h5, p, span, } from 'react-hyperscript-helpers';
 import { formatDate } from '../libs/utils';
 import{ isEmpty, isNil } from 'lodash/fp';
 
@@ -53,23 +52,24 @@ export default function CollectionAlgorithmDecision(props) {
   };
 
   return (
-    div(containerProps, [
-      div({style: {flex: 1, padding: '1%'}}, [
-        h5({id: `collection-${id}-subtitle`, style: {fontFamily: 'Montserrat', fontWeight: 800, fontSize: 17, color: '#333F52'}}, ['DUOS Algorithm Decision']),
-        div({style: {fontSize: '1.5rem'}}, [
-          span({id: `collection-${id}-decision-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Decision:']),
-          span({id: `collection-${id}-decision-value`, style: {fontWeight: 400}}, [getResult(result)])
-        ]),
-        div({style: {fontSize: '1.5rem'}}, [
-          span({id: `collection-${id}-reason-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Reason:']),
-          span({id: `collection-${id}-reason-value`, style: {fontWeight: 400}},
-            [!isEmpty(rationales) ? rationales.map((r, idx) => p({key: idx}, [r])) : 'N/A'])
-        ]),
-        div({style: {fontSize: '1.5rem'}}, [
-          span({id: `collection-${id}-date-label`, style: {paddingRight: '1%', color: '#333F52'}}, ['Date:']),
-          span({id: `collection-${id}-date-value`, style: {fontWeight: 400}}, [!isNil(createDate) ? formatDate(createDate) : 'N/A'])
-        ])
-      ])
-    ])
+    <div {...containerProps}>
+      <div style={{flex: 1, padding: '1%'}}>
+        <h5 id={`collection-${id}-subtitle`} style={{fontFamily: 'Montserrat', fontWeight: 800, fontSize: 17, color: '#333F52'}}>DUOS Algorithm Decision</h5>
+        <div style={{fontSize: '1.5rem'}}>
+          <span id={`collection-${id}-decision-label`} style={{paddingRight: '1%', color: '#333F52'}}>Decision:</span>
+          <span id={`collection-${id}-decision-value`} style={{fontWeight: 400}}>{getResult(result)}</span>
+        </div>
+        <div style={{fontSize: '1.5rem'}}>
+          <span id={`collection-${id}-reason-label`} style={{paddingRight: '1%', color: '#333F52'}}>Reason:</span>
+          <span id={`collection-${id}-reason-value`} style={{fontWeight: 400}}>
+            {!isEmpty(rationales) ? rationales.map((r, idx) => <p key={idx}>{r}</p>) : 'N/A'}
+          </span>
+        </div>
+        <div style={{fontSize: '1.5rem'}}>
+          <span id={`collection-${id}-date-label`} style={{paddingRight: '1%', color: '#333F52'}}>Date:</span>
+          <span id={`collection-${id}-date-value`} style={{fontWeight: 400}}>{!isNil(createDate) ? formatDate(createDate) : 'N/A'}</span>
+        </div>
+      </div>
+    </div>
   );
 }

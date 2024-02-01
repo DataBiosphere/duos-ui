@@ -81,13 +81,13 @@ const columnHeaderData = (columns = defaultColumns) => {
 };
 
 const processDatasetRowData = ({
-  datasets, columns = defaultColumns, consoleType=''
+  datasets, columns = defaultColumns, consoleType='', history
 }) => {
   if(!isNil(datasets)) {
     return datasets.map((dataset) => {
       return columns.map((col) => {
         return columnHeaderConfig[col].cellDataFn({
-          dataset, consoleType
+          dataset, consoleType, history
         });
       });
     });
@@ -117,7 +117,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
   const [pageCount, setPageCount] = useState(1);
   const [sort, setSort] = useState(getInitialSort(props.columns));
   const [tableSize, setTableSize] = useState(10);
-  const { datasets, columns, isLoading, consoleType } = props;
+  const { datasets, columns, isLoading, consoleType, history } = props;
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
@@ -129,7 +129,7 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
     recalculateVisibleTable({
       tableSize,
       pageCount,
-      filteredList: processDatasetRowData({datasets, columns, consoleType}),
+      filteredList: processDatasetRowData({datasets, columns, consoleType, history}),
       currentPage,
       setPageCount,
       setCurrentPage,

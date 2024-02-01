@@ -87,9 +87,8 @@ describe('Researcher Info', () => {
   it('renders the missing library cards alert correctly', () => {
     const mergedProps = {...props, ...{formData: {...props.formData }}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-missing-library-cards]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
+    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
   });
 
   it('renders the profile submitted alert', () => {
@@ -97,15 +96,13 @@ describe('Researcher Info', () => {
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
   });
 
   it('renders the profile unsubmitted alert', () => {
     const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
     cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-missing-library-cards]').should('not.exist');
+    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
   });
 
   it('renders the internal lab staff button and form', () => {

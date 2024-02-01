@@ -1,5 +1,5 @@
+import React from 'react';
 import { CollaboratorSummary } from './CollaboratorSummary';
-import { div, h } from 'react-hyperscript-helpers';
 import CollaboratorForm from './CollaboratorForm';
 
 export const CollaboratorRow = (props) => {
@@ -7,22 +7,26 @@ export const CollaboratorRow = (props) => {
     index,
     validation,
     onCollaboratorValidationChange,
+    collaborator,
+    editMode,
   } = props;
 
-  return div({id: index+'_collaboratorForm'}, [
-    h(CollaboratorForm, {
-      ...props,
-      collaborator: props.collaborator, index: index,
-      isRendered: props.editMode === true,
-      validation,
-      onCollaboratorValidationChange
-    }),
-    h(CollaboratorSummary, {
-      ...props,
-      collaborator: props.collaborator, index: index,
-      isRendered: !props.editMode
-    })
-  ]);
+  return (
+    <div id={index + '_collaboratorForm'}>
+      {editMode === true && <CollaboratorForm
+        {...props}
+        collaborator={collaborator}
+        index={index}
+        validation={validation}
+        onCollaboratorValidationChange={onCollaboratorValidationChange}
+      />}
+      {!editMode && <CollaboratorSummary
+        {...props}
+        collaborator={collaborator}
+        index={index}
+      />}
+    </div>
+  );
 };
 
 export default CollaboratorRow;

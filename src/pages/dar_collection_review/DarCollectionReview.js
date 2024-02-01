@@ -1,5 +1,5 @@
+import React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import { div, h } from 'react-hyperscript-helpers';
 import {Notifications} from '../../libs/utils';
 import { User } from '../../libs/ajax';
 import TabControl from '../../components/TabControl';
@@ -13,6 +13,7 @@ import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
 import { Collections } from '../../libs/ajax';
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication';
+
 const tabContainerColor = 'rgb(115,154,164)';
 
 const tabStyleOverride = {
@@ -148,88 +149,78 @@ export default function DarCollectionReview(props) {
     }
   }, [selectedTab, init]);
 
-  return div({ className: 'collection-review-page' }, [
-    div(
-      {
-        className: 'review-page-header',
-        style: { width: '90%', margin: '0 auto 3% auto' }
-      },
-      [
-        h(ReviewHeader, {
-          darCode: collection.darCode || '- -',
-          projectTitle: darInfo.projectTitle || '- -',
-          userName: researcherProfile.displayName || '- -',
-          institutionName: get('institution.name')(researcherProfile) || '- -',
-          isLoading,
-          readOnly: readOnly || adminPage
-        })
-      ]
-    ),
-    div({className: 'review-page-body', style: { padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor },},
-      [
-        h(TabControl, {
-          labels: Object.values(tabs),
-          selectedTab,
-          setSelectedTab,
-          isLoading,
-          styleOverride: tabStyleOverride,
-          isDisabled: isLoading || subcomponentLoading
-        }),
-        h(ApplicationInformation, {
-          isRendered: selectedTab === tabs.applicationInformation,
-          institution: get('institution.name')(researcherProfile),
-          researcher: researcherProfile.displayName,
-          email: researcherProfile.email,
-          nonTechSummary: darInfo.nonTechRus,
-          isLoading: subcomponentLoading,
-          collection: collection,
-          dataUseBuckets: dataUseBuckets,
-          externalCollaborators: darInfo.externalCollaborators,
-          internalCollaborators: darInfo.internalCollaborators,
-          signingOfficial: darInfo.signingOfficial,
-          itDirector: darInfo.itDirector,
-          signingOfficialEmail: darInfo.signingOfficial, //todo
-          itDirectorEmail: darInfo.itDirector, //todo
-          internalLabStaff: darInfo.labCollaborators,
-          anvilStorage: darInfo.anvilUse,
-          localComputing: darInfo.localUse,
-          cloudComputing: darInfo.cloudUse,
-          cloudProvider: darInfo.cloudProvider,
-          cloudProviderDescription: darInfo.cloudProviderDescription,
-          rus: darInfo.rus,
-          referenceId: referenceIdForDocuments,
-          irbDocumentLocation: darInfo.irbDocumentLocation,
-          collaborationLetterLocation: darInfo.collaborationLetterLocation,
-          irbDocumentName: darInfo.irbDocumentName,
-          collaborationLetterName: darInfo.collaborationLetterName
-        }),
-        h(DataAccessRequestApplication, {
-          isRendered: selectedTab === tabs.fullDAR,
-          readOnlyMode: true,
-          researcherProfile: researcherProfile,
-          ...props
-        }),
-        h(MultiDatasetVotingTab, {
-          isRendered: !adminPage && selectedTab === tabs.memberVote,
-          darInfo,
-          collection,
-          buckets: dataUseBuckets,
-          isChair: false,
-          readOnly,
-          isLoading: isLoading || subcomponentLoading
-        }),
-        h(MultiDatasetVotingTab, {
-          isRendered: selectedTab === tabs.chairVote,
-          darInfo,
-          collection,
-          buckets: dataUseBuckets,
-          isChair: true,
-          isLoading: isLoading || subcomponentLoading,
-          adminPage,
-          readOnly,
-          updateFinalVote: updateFinalVoteFn
-        }),
-      ]
-    ),
-  ]);
+  return (
+    <div className="collection-review-page">
+      <div className="review-page-header" style={{ width: '90%', margin: '0 auto 3% auto' }}>
+        <ReviewHeader
+          darCode={collection.darCode || '- -'}
+          projectTitle={darInfo.projectTitle || '- -'}
+          userName={researcherProfile.displayName || '- -'}
+          institutionName={get('institution.name')(researcherProfile) || '- -'}
+          isLoading={isLoading}
+          readOnly={readOnly || adminPage}
+        />
+      </div>
+      <div className="review-page-body" style={{ padding: '1% 0% 0% 5.1%', backgroundColor: tabContainerColor }}>
+        <TabControl
+          labels={Object.values(tabs)}
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          isLoading={isLoading}
+          styleOverride={tabStyleOverride}
+          isDisabled={isLoading || subcomponentLoading}
+        />
+        {selectedTab === tabs.applicationInformation && <ApplicationInformation
+          institution={get('institution.name')(researcherProfile)}
+          researcher={researcherProfile.displayName}
+          email={researcherProfile.email}
+          nonTechSummary={darInfo.nonTechRus}
+          isLoading={subcomponentLoading}
+          collection={collection}
+          dataUseBuckets={dataUseBuckets}
+          externalCollaborators={darInfo.externalCollaborators}
+          internalCollaborators={darInfo.internalCollaborators}
+          signingOfficial={darInfo.signingOfficial}
+          itDirector={darInfo.itDirector}
+          signingOfficialEmail={darInfo.signingOfficial} //todo
+          itDirectorEmail={darInfo.itDirector} //todo
+          internalLabStaff={darInfo.labCollaborators}
+          anvilStorage={darInfo.anvilUse}
+          localComputing={darInfo.localUse}
+          cloudComputing={darInfo.cloudUse}
+          cloudProvider={darInfo.cloudProvider}
+          cloudProviderDescription={darInfo.cloudProviderDescription}
+          rus={darInfo.rus}
+          referenceId={referenceIdForDocuments}
+          irbDocumentLocation={darInfo.irbDocumentLocation}
+          collaborationLetterLocation={darInfo.collaborationLetterLocation}
+          irbDocumentName={darInfo.irbDocumentName}
+          collaborationLetterName={darInfo.collaborationLetterName}
+        />}
+        {selectedTab === tabs.fullDAR && <DataAccessRequestApplication
+          readOnlyMode={true}
+          researcherProfile={researcherProfile}
+          {...props}
+        />}
+        {!adminPage && selectedTab === tabs.memberVote && <MultiDatasetVotingTab
+          darInfo={darInfo}
+          collection={collection}
+          buckets={dataUseBuckets}
+          isChair={false}
+          readOnly={readOnly}
+          isLoading={isLoading || subcomponentLoading}
+        />}
+        {selectedTab === tabs.chairVote && <MultiDatasetVotingTab
+          darInfo={darInfo}
+          collection={collection}
+          buckets={dataUseBuckets}
+          isChair={true}
+          isLoading={isLoading || subcomponentLoading}
+          adminPage={adminPage}
+          readOnly={readOnly}
+          updateFinalVote={updateFinalVoteFn}
+        />}
+      </div>
+    </div>
+  );
 }

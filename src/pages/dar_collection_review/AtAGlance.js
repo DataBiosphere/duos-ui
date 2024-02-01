@@ -1,4 +1,3 @@
-import {div, h} from 'react-hyperscript-helpers';
 import {isNil} from 'lodash/fp';
 import {useState} from 'react';
 import SimpleTable from '../../components/SimpleTable';
@@ -121,29 +120,27 @@ export default function AtAGlance(props) {
   };
 
   return (
-    div({},
-      [
-        div({className: 'at-a-glance-subheader', style: styles.title},
-          ['At A Glance']),
-        h(SimpleTable, {
-          isLoading: false,
-          // todo: one row per data use bucket
-          // rowData: processAtAGlanceData(collection, dataUseBuckets),
-          rowData: [
-            [
-              {
-                data: 'Cell Data',
-                id: 1,
-                style: styles,
-                label: 'Cell Data',
-              },
-            ],
+    <div>
+      <div className="at-a-glance-subheader" style={styles.title}>
+        At A Glance
+      </div>
+      <SimpleTable
+        isLoading={false}
+        rowData={[
+          [
+            {
+              data: 'Cell Data',
+              id: 1,
+              style: styles,
+              label: 'Cell Data',
+            },
           ],
-          columnHeaders: columnHeaderData(),
-          styles: styles,
-          tableSize: 1,
-          paginationBar: null,
-        }),
-      ])
+        ]}
+        columnHeaders={columnHeaderData()}
+        styles={styles}
+        tableSize={1}
+        paginationBar={null}
+      />
+    </div>
   );
 }

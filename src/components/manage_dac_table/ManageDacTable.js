@@ -1,5 +1,5 @@
-import {Fragment, useState, useEffect, useCallback} from 'react';
-import { h } from 'react-hyperscript-helpers';
+import React from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import ReactTooltip from 'react-tooltip';
 import {DAC} from '../../libs/ajax';
 import {filter, isNil} from 'lodash/fp';
@@ -154,28 +154,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     setSelectedDatasets
   } = props;
 
-  useEffect(() => {
-    recalculateVisibleTable({
-      tableSize,
-      pageCount,
-      filteredList: processDacRowData({
-        dacs,
-        viewDatasets,
-        viewMembers,
-        editDac,
-        deleteDac,
-        userRole,
-        columns
-      }),
-      currentPage,
-      setPageCount: (c) => setPageCount(c),
-      setCurrentPage: (p) => setCurrentPage(p),
-      setVisibleList: (l) => setVisibleDacs(l),
-      sort
-    });
-  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers]);
-
-
   const editDac = useCallback((selectedDac) => {
     setShowDacModal(true);
     setSelectedDac(selectedDac);
@@ -201,6 +179,27 @@ export const ManageDacTable = function ManageDacTable(props) {
     setSelectedDatasets(approvedDatasets);
   }, [setShowDatasetsModal, setSelectedDac, setSelectedDatasets]);
 
+  useEffect(() => {
+    recalculateVisibleTable({
+      tableSize,
+      pageCount,
+      filteredList: processDacRowData({
+        dacs,
+        viewDatasets,
+        viewMembers,
+        editDac,
+        deleteDac,
+        userRole,
+        columns
+      }),
+      currentPage,
+      setPageCount: (c) => setPageCount(c),
+      setCurrentPage: (p) => setCurrentPage(p),
+      setVisibleList: (l) => setVisibleDacs(l),
+      sort
+    });
+  }, [dacs, tableSize, pageCount, userRole, currentPage, sort, deleteDac, editDac, viewDatasets, viewMembers]);
+
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
       setTableSize(value);
@@ -217,32 +216,36 @@ export const ManageDacTable = function ManageDacTable(props) {
   );
 
 
-  return h(Fragment, {}, [
-    h(SimpleTable, {
-      isLoading,
-      'rowData': visibleDacs,
-      'columnHeaders': columnHeaderData(columns),
-      styles,
-      tableSize: tableSize,
-      'paginationBar': h(PaginationBar, {
-        pageCount,
-        currentPage,
-        tableSize,
-        goToPage,
-        changeTableSize
-      }),
-      sort,
-      onSort: (sort) => {
-        setSort(sort);
-      }
-    }),
-    h(ReactTooltip, {
-      place: 'left',
-      effect: 'solid',
-      multiline: true,
-      className: 'tooltip-wrapper'
-    })
-  ]);
+  return (
+    <>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={visibleDacs}
+        columnHeaders={columnHeaderData(columns)}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={
+          <PaginationBar
+            pageCount={pageCount}
+            currentPage={currentPage}
+            tableSize={tableSize}
+            goToPage={goToPage}
+            changeTableSize={changeTableSize}
+          />
+        }
+        sort={sort}
+        onSort={(sort) => {
+          setSort(sort);
+        }}
+      />
+      <ReactTooltip
+        place="left"
+        effect="solid"
+        multiline={true}
+        className="tooltip-wrapper"
+      />
+    </>
+  );
 };
 
 export default ManageDacTable;
