@@ -89,7 +89,7 @@ describe('Data Access Request - Validation', () => {
   describe('With Library Cards', () => {
     beforeEach(() => {
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
-      cy.stub(DataSet, 'searchDatasets').returns(Promise.resolve(datasets));
+      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
       cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
       cy.stub(Storage, 'getCurrentUser').returns(user);
       cy.stub(User, 'getMe').returns(user);
@@ -248,7 +248,7 @@ describe('Data Access Request - Validation', () => {
   describe('Without Library Cards', () => {
     beforeEach(() => {
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
-      cy.stub(DataSet, 'searchDatasets').returns(Promise.resolve(datasets));
+      cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
       cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));
       cy.stub(Storage, 'getCurrentUser').returns(userNoLibraryCard);
       cy.stub(User, 'getMe').returns(userNoLibraryCard);
