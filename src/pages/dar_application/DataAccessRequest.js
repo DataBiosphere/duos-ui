@@ -297,52 +297,56 @@ export default function DataAccessRequest(props) {
           onChange={onChange}
         />
 
-        <FormFieldTitle
-          id={'dataUseAcknowledgements'}
-          key={'dataUseAcknowledgements'}
-          title={'2.5 Data Use Acknowledgements'}
-          description={includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : ''}
-          isRendered={needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets)}
-        />
+        {(needsGsoAcknowledgement(datasets) || needsDsAcknowledgement(dataUseTranslations) || needsPubAcknowledgement(datasets)) &&
+            <FormFieldTitle
+              id={'dataUseAcknowledgements'}
+              key={'dataUseAcknowledgements'}
+              title={'2.5 Data Use Acknowledgements'}
+              description={includeInstructions ? 'Please confirm listed acknowledgements and/or document requirements below:' : ''}
+            />
+        }
 
-        <FormField
-          id={'gsoAcknowledgement'}
-          key={'gsoAcknowledgement'}
-          disabled={readOnlyMode}
-          type={FormFieldTypes.CHECKBOX}
-          isRendered={needsGsoAcknowledgement(datasets)}
-          toggleText={'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.'}
-          defaultValue={formData.gsoAcknowledgement}
-          onChange={onChange}
-          validation={validation.gsoAcknowledgement}
-          onValidationChange={onValidationChange}
-        />
+        {needsGsoAcknowledgement(datasets) &&
+            <FormField
+              id={'gsoAcknowledgement'}
+              key={'gsoAcknowledgement'}
+              disabled={readOnlyMode}
+              type={FormFieldTypes.CHECKBOX}
+              toggleText={'I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition.'}
+              defaultValue={formData.gsoAcknowledgement}
+              onChange={onChange}
+              validation={validation.gsoAcknowledgement}
+              onValidationChange={onValidationChange}
+            />
+        }
 
-        <FormField
-          id={'pubAcknowledgement'}
-          key={'pubAcknowledgement'}
-          disabled={readOnlyMode}
-          isRendered={needsPubAcknowledgement(datasets)}
-          type={FormFieldTypes.CHECKBOX}
-          toggleText={'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'}
-          defaultValue={formData.pubAcknowledgement}
-          validation={validation.pubAcknowledgement}
-          onValidationChange={onValidationChange}
-          onChange={onChange}
-        />
+        {needsPubAcknowledgement(datasets) &&
+            <FormField
+              id={'pubAcknowledgement'}
+              key={'pubAcknowledgement'}
+              disabled={readOnlyMode}
+              type={FormFieldTypes.CHECKBOX}
+              toggleText={'I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'}
+              defaultValue={formData.pubAcknowledgement}
+              validation={validation.pubAcknowledgement}
+              onValidationChange={onValidationChange}
+              onChange={onChange}
+            />
+        }
 
-        <FormField
-          id={'dsAcknowledgement'}
-          key={'dsAcknowledgement'}
-          disabled={readOnlyMode}
-          isRendered={needsDsAcknowledgement(dataUseTranslations)}
-          type={FormFieldTypes.CHECKBOX}
-          toggleText={'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum'}
-          defaultValue={formData.dsAcknowledgement}
-          validation={validation.dsAcknowledgement}
-          onValidationChange={onValidationChange}
-          onChange={onChange}
-        />
+        {needsDsAcknowledgement(dataUseTranslations) &&
+            <FormField
+              id={'dsAcknowledgement'}
+              key={'dsAcknowledgement'}
+              disabled={readOnlyMode}
+              type={FormFieldTypes.CHECKBOX}
+              toggleText={'I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with DUL are considered a violation of the Data Use Certification agreement and any additional terms descried in the addendum'}
+              defaultValue={formData.dsAcknowledgement}
+              validation={validation.dsAcknowledgement}
+              onValidationChange={onValidationChange}
+              onChange={onChange}
+            />
+        }
 
         {needsIrbApprovalDocument(datasets) &&
                     <FormFieldTitle
