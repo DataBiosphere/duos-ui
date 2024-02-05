@@ -261,7 +261,8 @@ const DataAccessRequestApplication = (props) => {
       const { dars, datasets } = collection;
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
-      formData.datasetIds = map(ds => get(['dataSetId', 'id'])(ds))(datasets);
+      // This is a collection, so we need to get the datasets and dataSetIds from the collection
+      formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
