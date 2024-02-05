@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { Button, Link } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import { DAR } from '../../libs/ajax';
 import DatasetFilterList from './DatasetFilterList';
 import { Box } from '@mui/material';
+import SearchBar from '../SearchBar';
+import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../../libs/utils';
 
 const studyTableHeader = [
   'Study Name',
@@ -34,6 +36,7 @@ export const DatasetSearchTable = (props) => {
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
+  const searchRef = useRef('');
 
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -101,6 +104,13 @@ export const DatasetSearchTable = (props) => {
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
+
+  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
+    searchTerms,
+    datasets,
+    getSearchFilterFunctions().datasetTerms,
+    setFiltered
+  ), [datasets]);
 
   useEffect(() => {
     if (isEmpty(filtered)) {
@@ -195,6 +205,11 @@ export const DatasetSearchTable = (props) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+      <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}/>
+      </Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
         <Box sx={{ width: '14%', padding: '0 1em' }}>
           <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />
