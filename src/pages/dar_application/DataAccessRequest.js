@@ -38,7 +38,7 @@ const autocompleteOntologies = (query, callback) => {
 };
 
 const searchDatasets = (query, callback, currentDatasets) => {
-  const currentDatasetIds = currentDatasets.map((ds) => ds.id || ds.datasetId);
+  const currentDatasetIds = currentDatasets.map((ds) => ds.id || ds.dataSetId);
 
   DataSet.autocompleteDatasets(query).then(items => {
     let options = items.filter((ds) => !currentDatasetIds.includes(ds.id)).map(function (item) {
@@ -54,8 +54,9 @@ const formatSearchDataset = (ds) => {
     value: ds.id || ds.datasetId,
     dataset: ds,
     displayText: ds.identifier || ds.datasetIdentifier,
-    label: <span><span
-      style={{fontWeight: 'bold'}}>{ds.identifier || ds.datasetIdentifier}</span> | {ds.name}</span>
+    label: <span>
+      <span style={{fontWeight: 'bold'}}>{ds.identifier || ds.datasetIdentifier}</span> | {ds.name || ds.datasetName}
+    </span>
   };
 };
 
@@ -134,8 +135,9 @@ export default function DataAccessRequest(props) {
           description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
           defaultValue={datasets?.map((ds) => formatSearchDataset(ds))}
           selectConfig={{
-            // return string value of dataset
-            // for accessibility / html keys
+            // return custom html for displaying dataset options
+            formatOptionLabel: (opt) => opt.label,
+            // return string value of dataset for accessibility / html keys
             getOptionLabel: (opt) => opt.displayText,
           }}
           loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
