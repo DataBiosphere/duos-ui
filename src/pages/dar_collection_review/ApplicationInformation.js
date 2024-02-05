@@ -72,9 +72,11 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
 
 const generateLinkContents = (key, id, type, text, fileName, location) => {
   return (
-    <div id={key}>
-      {(location && fileName) &&
+    <div>
+      {(id && location && fileName) &&
+      <div id={key}>
         <DownloadLink label={text} onDownload={() => {DAR.downloadDARDocument(id, type, fileName);}} />
+      </div>
       }
     </div>
   );};
