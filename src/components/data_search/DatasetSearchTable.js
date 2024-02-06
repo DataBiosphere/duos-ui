@@ -175,7 +175,7 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.url ? <Link href={dataset.url}>{dataset.dataLocation}</Link> : dataset.dataLocation,
                   },
                   {
-                    value: dataset.dac?.dacName,
+                    value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
                   },
                 ],
               };
