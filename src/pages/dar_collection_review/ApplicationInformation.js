@@ -57,14 +57,14 @@ const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
   labelSpanIndex++;
   return (
     <div className='flex-row-element' style={styles.flexRowElement} id={`${key}-flex-row-element`}>
-      {!isLoading ?
-        <>
-          <label id={`${key}-label`} key={`${key}-label`} style={styles.label}>{labelValue}</label>
-          <span id={`${key}-span`} key={`${key}-span`} style={styles.value}>{spanValue}</span>
-        </> :
+      {isLoading ?
         <>
           <div className='text-placeholder' key={`${labelSpanIndex}-label-placeholder`} id={`${labelSpanIndex}-label-placeholder`} style={{width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}></div>
           <div className='text-placeholder' key={`${labelSpanIndex}-text-placeholder`} id={`${labelSpanIndex}-text-placeholder`} style={{width: '70%', height: '3.2rem'}}></div>
+        </> :
+        <>
+          <label id={`${key}-label`} key={`${key}-label`} style={styles.label}>{labelValue}</label>
+          <span id={`${key}-span`} key={`${key}-span`} style={styles.value}>{spanValue}</span>
         </>
       }
     </div>
@@ -74,9 +74,9 @@ const generateLinkContents = (key, id, type, text, fileName, location) => {
   return (
     <div>
       {(id && location && fileName) &&
-      <div id={key}>
-        <DownloadLink label={text} onDownload={() => {DAR.downloadDARDocument(id, type, fileName);}} />
-      </div>
+        <div id={key}>
+          <DownloadLink label={text} onDownload={() => {DAR.downloadDARDocument(id, type, fileName);}} />
+        </div>
       }
     </div>
   );};
@@ -182,27 +182,27 @@ export default function ApplicationInformation(props) {
           {generateLabelSpanContents('Institution', 'institution', institution, isLoading)}
         </div>
       </div>
-      {!isLoading ?
-        <div className="non-technical-summary-subheader" style={styles.subheader}>Non-Technical Summary</div> :
+      {isLoading ?
         <div className="text-placeholder" key="non-technical-summary-title-placeholder"
-          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div>
+          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div> :
+        <div className="non-technical-summary-subheader" style={styles.subheader}>Non-Technical Summary</div>
       }
       <div className="non-technical-summary-container">
-        {!isLoading ?
-          <div className="non-technical-summary-textbox" style={styles.textBox}>{nonTechSummary}</div> :
+        {isLoading ?
           <div className="text-placeholder" key="non-technical-summary-placeholder"
-            style={{height: '18rem', width: '100%'}}></div>
+            style={{height: '18rem', width: '100%'}}></div> :
+          <div className="non-technical-summary-textbox" style={styles.textBox}>{nonTechSummary}</div>
         }
       </div>
-      {!isLoading ?
-        <div className="rus-subheader" style={styles.subheader}>Research Use Statement</div> :
+      {isLoading ?
         <div className="text-placeholder" key="rus-title-placeholder"
-          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div>
+          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div> :
+        <div className="rus-subheader" style={styles.subheader}>Research Use Statement</div>
       }
       <div className="rus-container">
-        {!isLoading ?
-          <div className="rus-textbox" style={styles.textBox}>{rus}</div> :
-          <div className="text-placeholder" key="rus-placeholder" style={{height: '18rem', width: '100%'}}></div>
+        {isLoading ?
+          <div className="text-placeholder" key="rus-placeholder" style={{height: '18rem', width: '100%'}}></div> :
+          <div className="rus-textbox" style={styles.textBox}>{rus}</div>
         }
       </div>
       <div className="collaborator-details-container" style={{margin: '3rem 0'}}>
@@ -220,11 +220,11 @@ export default function ApplicationInformation(props) {
         {dynamicRowGeneration(2, cloudUseLabels, isLoading, cloudComputing)}
         {cloudComputing ?
           <div className="cloud-provider-description-container">
-            {!isLoading ?
-              <div className="cloud-provider-description-textbox"
-                style={styles.textBox}>{cloudProviderDescription}</div> :
+            {isLoading ?
               <div className="text-placeholder" key="cloud-provider-description-placeholder"
-                style={{height: '18rem', width: '100%'}}></div>
+                style={{height: '18rem', width: '100%'}}></div> :
+              <div className="cloud-provider-description-textbox"
+                style={styles.textBox}>{cloudProviderDescription}</div>
             }
           </div> : ''
         }
