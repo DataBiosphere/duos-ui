@@ -80,6 +80,7 @@ export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const user = Storage.getCurrentUser();
 
   const isSigningOfficial = user.isSigningOfficial;
@@ -193,26 +194,30 @@ export const DatasetSearch = (props) => {
   const key = query === undefined ? '/datalibrary' : toLower(query);
   const version = versions[key] === undefined ? versions['/custom'] : versions[key];
   const isInstitutionQuery = key === 'myinstitution';
+  const fullQuery = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
+  const institutionSet = institutionId === undefined && isInstitutionQuery;
 
   useEffect(() => {
     const init = async () => {
-      if (institutionId === undefined && isInstitutionQuery) {
-        Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
-        props.history.push('/profile');
-        return;
-      }
-      try {
-        const query = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
-        await DataSet.searchDatasetIndex(query).then((datasets) => {
-          setDatasets(datasets);
-          setLoading(false);
-        });
-      } catch (error) {
-        Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+      if (!loaded) {
+        if (institutionSet) {
+          Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
+          props.history.push('/profile');
+          return;
+        }
+        try {
+          await DataSet.searchDatasetIndex(fullQuery).then((datasets) => {
+            setDatasets(datasets);
+            setLoading(false);
+          });
+        } catch (error) {
+          Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+        }
+        setLoaded(true);
       }
     };
     init();
-  }, [institutionId, isInstitutionQuery, isSigningOfficial, props.history, version.query]);
+  }, [institutionSet, fullQuery, props.history]);
 
   return (
     loading ?
