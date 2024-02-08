@@ -8,7 +8,7 @@ import { DAR } from '../../libs/ajax';
 import DatasetFilterList from './DatasetFilterList';
 import { Box } from '@mui/material';
 import SearchBar from '../SearchBar';
-import { getSearchFilterFunctions, Notifications, searchOnFilteredList } from '../../libs/utils';
+import { getSearchFilterFunctions, searchOnFilteredList } from '../../libs/utils';
 
 const studyTableHeader = [
   'Study Name',
