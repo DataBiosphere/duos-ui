@@ -203,7 +203,7 @@ export const DatasetSearch = (props) => {
       if (!loaded) {
         if (institutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
-          //props.history.push('/profile');
+          props.history.push('/profile');
           return;
         }
         try {
@@ -218,7 +218,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, [loaded, institutionSet, fullQuery]);
+  }, [loaded, institutionSet, fullQuery, props.history]);
   return (
     loading ?
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
