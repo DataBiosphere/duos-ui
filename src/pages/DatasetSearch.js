@@ -80,7 +80,6 @@ export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loaded, setLoaded] = useState(false);
   const user = Storage.getCurrentUser();
 
   const isSigningOfficial = user.isSigningOfficial;
@@ -196,12 +195,12 @@ export const DatasetSearch = (props) => {
   const isInstitutionQuery = key === 'myinstitution';
 
   const fullQuery = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
-  const institutionSet = institutionId === undefined && isInstitutionQuery;
+  const isInstitutionSet = institutionId === undefined && isInstitutionQuery;
 
   useEffect(() => {
     const init = async () => {
-      if (!loaded) {
-        if (institutionSet) {
+      if (loading) {
+        if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
           props.history.push('/profile');
           return;
@@ -214,11 +213,11 @@ export const DatasetSearch = (props) => {
         } catch (error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
         }
-        setLoaded(true);
       }
     };
     init();
-  }, [loaded, institutionSet, fullQuery, props.history]);
+  }, [loading, isInstitutionSet, fullQuery, props.history]);
+
   return (
     loading ?
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
