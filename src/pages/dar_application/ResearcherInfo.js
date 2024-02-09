@@ -86,7 +86,7 @@ export default function ResearcherInfo(props) {
           h3('1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')),
           !readOnlyMode && span({ className: `${showNihValidationError ? 'errored' : 'default-color'}`, isRendered: formData.checkCollaborator !== true }, [
             'Please authenticate with ',
-            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed.'
+            a({ target: '_blank', href: 'https://www.era.nih.gov/register-accounts/create-and-edit-an-account.htm' }, ['eRA Commons']), ' in order to proceed.'
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
