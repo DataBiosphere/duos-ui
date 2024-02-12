@@ -41,8 +41,21 @@ const searchDatasets = (query, callback, currentDatasets) => {
   const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
 
   DataSet.autocompleteDatasets(query).then(items => {
-    const mappedDatasets = items.map((ds) => { return {dataSetId: ds.id, datasetIdentifier: ds.identifier, name: ds.name}; });
-    let options = mappedDatasets.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
+    const processedDatasets = items.map((ds) => {
+      // We are working with two different dataset representations, a legacy dataset object and
+      // a simplified auto-complete dataset object. We need to standardize the keys to ensure
+      // legacy functionality is maintained.
+      return {
+        id: ds.id || ds.dataSetId || ds.datasetId,
+        datasetId: ds.id || ds.dataSetId || ds.datasetId,
+        dataSetId: ds.id || ds.dataSetId || ds.datasetId,
+        identifier: ds.identifier || ds.datasetIdentifier,
+        datasetIdentifier: ds.identifier || ds.datasetIdentifier,
+        datasetName: ds.name || ds.datasetName,
+        name: ds.name || ds.datasetName
+      };
+    });
+    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
