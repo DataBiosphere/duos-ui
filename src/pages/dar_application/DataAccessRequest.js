@@ -38,10 +38,11 @@ const autocompleteOntologies = (query, callback) => {
 };
 
 const searchDatasets = (query, callback, currentDatasets) => {
-  const currentDatasetIds = currentDatasets.map((ds) => ds.id || ds.dataSetId);
+  const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
 
   DataSet.autocompleteDatasets(query).then(items => {
-    let options = items.filter((ds) => !currentDatasetIds.includes(ds.id)).map(function (item) {
+    const mappedDatasets = items.map((ds) => { return {dataSetId: ds.id, datasetIdentifier: ds.identifier, name: ds.name}; });
+    let options = mappedDatasets.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -50,12 +51,12 @@ const searchDatasets = (query, callback, currentDatasets) => {
 
 const formatSearchDataset = (ds) => {
   return {
-    key: ds.id || ds.datasetId,
-    value: ds.id || ds.datasetId,
+    key: ds.dataSetId,
+    value: ds.dataSetId,
     dataset: ds,
-    displayText: ds.identifier || ds.datasetIdentifier,
+    displayText: ds.datasetIdentifier,
     label: <span>
-      <span style={{fontWeight: 'bold'}}>{ds.identifier || ds.datasetIdentifier}</span> | {ds.name || ds.datasetName}
+      <span style={{fontWeight: 'bold'}}>{ds.datasetIdentifier}</span> | {ds.name}
     </span>
   };
 };
@@ -144,7 +145,7 @@ export default function DataAccessRequest(props) {
           placeholder={'Dataset Name, Sample Collection ID, or PI'}
           onChange={async ({key, value}) => {
             const datasets = value.map((val) => val.dataset);
-            const datasetIds = datasets?.map((ds) => ds.id || ds.dataSetId);
+            const datasetIds = datasets?.map((ds) => ds.dataSetId);
             const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
             onChange({key, value: datasetIds});
             setDatasets(fullDatasets);
