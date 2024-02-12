@@ -52,7 +52,8 @@ const searchDatasets = (query, callback, currentDatasets) => {
         identifier: ds.identifier || ds.datasetIdentifier,
         datasetIdentifier: ds.identifier || ds.datasetIdentifier,
         datasetName: ds.name || ds.datasetName,
-        name: ds.name || ds.datasetName
+        name: ds.name || ds.datasetName,
+        ... ds
       };
     });
     let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
