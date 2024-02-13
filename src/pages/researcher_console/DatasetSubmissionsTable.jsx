@@ -3,8 +3,11 @@ import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import {concat, isNil, join} from 'lodash/fp';
+import {cloneDeep, concat, findIndex, join, isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
+import { Link } from 'react-router-dom';
+import {DataSet} from '../../libs/ajax';
+import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog';
 
 
 export default function DatasetSubmissionsTable(props) {
@@ -65,11 +68,39 @@ export default function DatasetSubmissionsTable(props) {
   ];
 
   const [terms, setTerms] = useState([]);
+  const [selectedTerm, setSelectedTerm] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [rows, setRows] = useState([]);
+  const [open, setOpen] = useState(false);
+
+  const handleClick = (term) => {
+    setOpen(true);
+    setSelectedTerm(term);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const removeDataset = async (termToDelete) => {
+    const termName = termToDelete.datasetName;
+    const termId = termToDelete.datasetId;
+    setOpen(false);
+    try {
+      DataSet.deleteDataset(termId).then(() => {
+        Notifications.showSuccess({
+          text: `Removed dataset '${termName}' successfully.`,
+        });
+        props.history.push('/datalibrary');});
+    } catch (error) {
+      Notifications.showError({
+        text: `Error removing ${termName} as a dataset`,
+      });
+    }
+  };
 
   // Datasets can be filtered from the parent component and redrawn frequently.
-  const redrawRows = useCallback(() => {
+  const redrawRows = useCallback((open, selectedTerm) => {
     const rows = terms.map((term) => {
       const status = isNil(term.dacApproval) ? 'Pending' : (term.dacApproval ? 'Accepted' : 'Rejected');
       const primaryCodes = term.dataUse?.primary?.map(du => du.code);
@@ -89,6 +120,24 @@ export default function DatasetSubmissionsTable(props) {
             Edit
           </Button>
         </div>;
+      const deleteButton = (status !== 'Accepted' && term.deletable) ?
+        <div>
+          <Link
+            style={{marginLeft: '15px'}}
+            id={`${term.datasetId}_delete`}
+            className={'glyphicon glyphicon-trash'}
+            onClick={() => handleClick(term)}
+            to={`#`}
+          />
+          <ConfirmationDialog 
+            title="Delete dataset" 
+            openState={open} 
+            close={handleClose}
+            action={() => removeDataset(selectedTerm)}
+            description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`} 
+          />
+        </div> :
+        <div/>;
       const custodians = join(', ')(term.study?.dataCustodianEmail);
       return {
         datasetIdentifier: term.datasetIdentifier,
@@ -98,7 +147,7 @@ export default function DatasetSubmissionsTable(props) {
         dac: term.dac?.dacName,
         dataUse: join(', ')(concat(primaryCodes)(secondaryCodes)),
         status: status,
-        actions: editButton
+        actions: editButton, deleteButton
       };
     });
     setRows(rows);
@@ -109,13 +158,13 @@ export default function DatasetSubmissionsTable(props) {
       try {
         setTerms(props.terms);
         setIsLoading(props.isLoading);
-        redrawRows();
+        redrawRows(open,selectedTerm);
       } catch (error) {
         Notifications.showError({text: 'Error: Unable to retrieve datasets from server'});
       }
     };
     init();
-  }, [props, redrawRows]);
+  }, [props, redrawRows, open, selectedTerm]); 
 
   const sortableTable = <SortableTable
     headCells={columns}
