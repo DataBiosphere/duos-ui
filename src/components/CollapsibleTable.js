@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
@@ -27,7 +29,7 @@ const table = {
       value: 'Header 1',
     },
     {
-      value: 'Header 2',
+      value: () => 'Header 2',
     },
     {
       value: 'Header 3',
@@ -154,14 +156,49 @@ const TruncatedTableCell = styled(StyledTableCell)(() => ({
   },
 }));
 
+const renderValue = (data) => {
+  if (_.isEmpty(data)) {
+    return null;
+  }
+  if (_.isFunction(data.value)) {
+    return data.value();
+  }
+  return data.value;
+};
+
 const CollapsibleRow = (props) => {
-  const { row, row: { subtable: { rows: subrows } }, selected, selectHandler } = props;
+  const { row, row: { subtable: { rows: subrows } }, selected, selectHandler, expandHandler, collapseHandler } = props;
 
   const [open, setOpen] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const allSelected = subrows.every((row) => isSelected(row.id));
   const someSelected = subrows.some((row) => isSelected(row.id));
+
+  const openHandler = async (event, data) => {
+    if (_.isFunction(expandHandler)) {
+      await expandHandler(event, data);
+    }
+    setOpen(true);
+  };
+
+  const closeHandler = async (event, data) => {
+    if (_.isFunction(collapseHandler)) {
+      await collapseHandler(event, data);
+    }
+    setOpen(false);
+  };
+
+  const toggleHandler = async (event, data) => {
+    setToggling(true);
+    if (open) {
+      await closeHandler(event, data);
+    } else {
+      await openHandler(event, data);
+    }
+    setToggling(false);
+  };
 
   return (
     <React.Fragment>
@@ -179,9 +216,11 @@ const CollapsibleRow = (props) => {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={(event) => toggleHandler(event, row)}
+            disabled={toggling}
           >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {toggling && <CircularProgress size={14} />}
+            {!toggling ? (open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />) : null}
           </IconButton>
         </StyledTableCell>
         {row.data.map((cell, i) => {
@@ -199,7 +238,7 @@ const CollapsibleRow = (props) => {
                   <SubtableRow>
                     <StyledTableCell component="th" />
                     {row.subtable.headers.map((header, i) => (
-                      <StyledTableCell key={i}>{header.value}</StyledTableCell>
+                      <StyledTableCell key={i}>{renderValue(header)}</StyledTableCell>
                     ))}
                   </SubtableRow>
                 </TableHead>
@@ -230,7 +269,7 @@ const CollapsibleRow = (props) => {
 };
 
 export const CollapsibleTable = (props) => {
-  const { data, summary, selected, selectHandler } = props;
+  const { data, summary, selected, selectHandler, expandHandler } = props;
 
   const [allSelected, setAllSelected] = useState(false);
   const [someSelected, setSomeSelected] = useState(false);
@@ -262,15 +301,15 @@ export const CollapsibleTable = (props) => {
               />
             </HeaderCell>
             <HeaderCell component="th" />
-            {data.headers.map((header) => (
-              <HeaderCell key={header.value} component="th">{header.value}</HeaderCell>
+            {data.headers.map((header, i) => (
+              <HeaderCell key={i} component="th">{renderValue(header)}</HeaderCell>
             ))}
           </TableRow>
         </TableHead>
         {/* main table rows */}
         <TableBody>
           {data.rows.map((row) => (
-            <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} />
+            <CollapsibleRow key={row.id} row={row} selected={selected} selectHandler={selectHandler} expandHandler={expandHandler} />
           ))}
         </TableBody>
       </Table>
@@ -323,7 +362,7 @@ const TableCellRenderer = ({ cell }) => {
           disableRestoreFocus
         >
           <Typography sx={{ p: 1, fontFamily: 'Montserrat', fontSize: '14px', maxWidth: '80rem' }}>
-            {cell.value}
+            {renderValue(cell)}
           </Typography>
         </Popover>
       </StyledTableCell>
@@ -332,25 +371,25 @@ const TableCellRenderer = ({ cell }) => {
 
   if (cell?.truncate && cell?.increaseWidth) {
     return <TruncatedTableCell style={{ maxWidth: '30ch' }}>
-      {cell.value}
+      {renderValue(cell)}
     </TruncatedTableCell>;
   }
 
   if (cell?.truncate) {
     return <TruncatedTableCell>
-      {cell.value}
+      {renderValue(cell)}
     </TruncatedTableCell>;
   }
 
   if (cell?.increaseWidth) {
     return <StyledTableCell style={{ width: '37ch' }}>
-      {cell.value}
+      {renderValue(cell)}
     </StyledTableCell>;
   }
 
   // Default case:
   return <StyledTableCell>
-    {cell.value}
+    {renderValue(cell)}
   </StyledTableCell>;
 };
 
@@ -358,13 +397,13 @@ const SubtableCellRenderer = ({ cell }) => {
 
   if (cell?.increaseWidth) {
     return <StyledTableCell style={{ width: '15ch' }}>
-      {cell.value}
+      {renderValue(cell)}
     </StyledTableCell>;
   }
 
   // Default case:
   return <StyledTableCell>
-    {cell.value}
+    {renderValue(cell)}
   </StyledTableCell>;
 
 };

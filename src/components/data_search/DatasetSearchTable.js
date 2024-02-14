@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { Button, Link } from '@mui/material';
+import _ from 'lodash';
+import { Box, Button, Link } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
-import { DAR } from '../../libs/ajax';
+import DatasetExportButton from './DatasetExportButton';
+import { DAR, TerraDataRepo } from '../../libs/ajax';
+import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
-import { Box } from '@mui/material';
+import { Notifications } from '../../libs/utils';
 
 const studyTableHeader = [
   'Study Name',
@@ -26,6 +29,7 @@ const datasetTableHeader = [
   'Participants',
   'Data Location',
   'DAC',
+  'Export to Terra',
 ];
 
 export const DatasetSearchTable = (props) => {
@@ -34,6 +38,8 @@ export const DatasetSearchTable = (props) => {
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
+  const [exportableDatasets, setExportableDatasets] = useState({}); // datasetId -> snapshot
+  const [tdrApiUrl, setTdrApiUrl] = useState('');
 
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -94,6 +100,34 @@ export const DatasetSearchTable = (props) => {
     }
 
     setSelected(newSelected);
+  };
+
+  const getExportableDatasets = async (event, data) => {
+      setTdrApiUrl(await Config.getTdrApiUrl());
+      // Note the dataset id is the first column in subrows.
+      // If columns are ever reordereable, this will need to be updated to be not hardcoded to look for the first column.
+      const datasetIds = data.subtable.rows.map((row) => row.data[0].value);
+      const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIds);
+      if (snapshots.filteredTotal > 0) {
+        const datasetIdToSnapshot = _.chain(snapshots.items)
+          // Ignore any snapshots that a user does not have export (steward or reader) to
+          .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+          .groupBy('duosId')
+          .value();
+        setExportableDatasets(datasetIdToSnapshot);
+      }
+  };
+
+  const expandHandler = async (event, data) => {
+    try {
+      getExportableDatasets(event, data);
+    } catch {
+      Notifications.showError({ text: 'Unable to retrieve exportable datasets from Terra' });
+    }
+  };
+
+  const collapseHandler = () => {
+    setExportableDatasets({});
   };
 
   const applyForAccess = async () => {
@@ -172,10 +206,34 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value: dataset.url ? <Link href={dataset.url}>{dataset.dataLocation}</Link> : dataset.dataLocation,
+                    value: () => {
+                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
+                      if (exportableSnapshots.length === 0) {
+                        return dataset.dataLocation;
+                      }
+                      return exportableSnapshots.map((snapshot, i) =>
+                        <Link
+                          key={`${i}`}
+                          href={`${tdrApiUrl}/snapshots/${snapshot.id}`}
+                          target="_blank"
+                        >
+                          {snapshot.name}
+                        </Link>);
+                    }
                   },
                   {
                     value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
+                  },
+                  {
+                    value: () => {
+                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
+                      return exportableSnapshots
+                        .map((snapshot, i) =>
+                          <DatasetExportButton
+                            key={`${i}`}
+                            snapshot={snapshot}
+                            title={`Export snapshot ${snapshot.name}`} />);
+                    }
                   },
                 ],
               };
@@ -186,7 +244,7 @@ export const DatasetSearchTable = (props) => {
     };
 
     setTableData(table);
-  }, [filtered]);
+  }, [filtered, exportableDatasets, tdrApiUrl]);
 
   useEffect(() => {
     setFiltered(datasets);
@@ -206,7 +264,14 @@ export const DatasetSearchTable = (props) => {
                 <h1>No datasets registered for this library.</h1>
               </Box>
               :
-              <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
+              <CollapsibleTable
+                data={tableData}
+                selected={selected}
+                selectHandler={selectHandler}
+                expandHandler={expandHandler}
+                collapseHandler={collapseHandler}
+                summary='faceted study search table'
+              />
           }
         </Box>
       </Box>
