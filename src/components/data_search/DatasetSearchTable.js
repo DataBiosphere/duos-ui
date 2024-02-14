@@ -9,6 +9,7 @@ import DatasetFilterList from './DatasetFilterList';
 import { Box } from '@mui/material';
 import SearchBar from '../SearchBar';
 import { getSearchFilterFunctions, searchOnFilteredList } from '../../libs/utils';
+import { Styles } from '../../libs/theme';
 
 const studyTableHeader = [
   'Study Name',
@@ -40,7 +41,7 @@ export const DatasetSearchTable = (props) => {
 
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
-  const filterHandler = (event, data, filter) => {
+  const filterHandler = (event, data, filter, searchTerm) => {
     var newFilters = [];
     if (!isFiltered(filter)) {
       newFilters = filters.concat(filter);
@@ -69,7 +70,15 @@ export const DatasetSearchTable = (props) => {
         return false;
       });
     }
-    setFiltered(newFiltered);
+    console.log('searchTerm: ' + searchTerm);
+    console.log('filters: ', newFilters)
+    if (searchTerm) {
+      const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered);
+      // console.log("Filtered:", newFiltered.filter(value => searchFiltered.includes(value)))
+      setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
+    } else {
+      setFiltered(newFiltered);
+    }
   };
 
   const selectHandler = (event, data, selector) => {
@@ -104,13 +113,6 @@ export const DatasetSearchTable = (props) => {
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
-
-  const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
-    searchTerms,
-    datasets,
-    getSearchFilterFunctions().datasetTerms,
-    setFiltered
-  ), [datasets]);
 
   useEffect(() => {
     if (isEmpty(filtered)) {
@@ -205,19 +207,38 @@ export const DatasetSearchTable = (props) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
-      <Box sx={{ paddingTop: '2em', paddingLeft: '2em' }}>
-        <SearchBar
-          handleSearchChange={handleSearchChange}
-          searchRef={searchRef}/>
+      <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
+        <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+          <input
+            data-cy="search-bar"
+            type="text"
+            placeholder="Enter search terms"
+            style={{
+              width: '100%',
+              border: '1px solid #cecece',
+              backgroundColor: '#f3f6f7',
+              borderRadius: '5px',
+              height: '4rem',
+              paddingLeft: '2%',
+              fontFamily: 'Montserrat',
+              fontSize: '1.5rem'
+            }}
+            onChange={() => filterHandler(null, datasets, [], searchRef.current.value)}
+            ref={searchRef}
+          />
+          <div/>
+        </div>
       </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row', paddingTop: '2em' }}>
-        <Box sx={{ width: '14%', padding: '0 1em' }}>
-          <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} />
+      <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
+        <Box sx={{width: '14%', padding: '0 1em'}}>
+          <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
         </Box>
-        <Box sx={{ width: '85%', padding: '0 1em' }}>
+        <Box sx={{width: '85%', padding: '0 1em'}}>
           {
             isEmpty(datasets) ?
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <h1>No datasets registered for this library.</h1>
               </Box>
               :
