@@ -305,7 +305,7 @@ export const FormInputSelect = (config) => {
         setFormValue(selected);
       }
       else {
-      // object result
+        // object result
         onFormInputChange(config, selected);
       }
     },
