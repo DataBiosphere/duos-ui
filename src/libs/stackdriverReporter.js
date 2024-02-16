@@ -42,7 +42,7 @@ export const StackdriverReporter = {
     const user = Storage.getCurrentUser();
     const formattedMsg = await StackdriverReporter.format(msg);
     errorHandler.setUser(ld.get(user, 'email', 'anonymous'));
-    errorHandler.report(formattedMsg);
+    errorHandler.report(formattedMsg ? formattedMsg : 'There was an error in reporting this message.');
   },
 
   format: async (msg) => {
