@@ -344,26 +344,25 @@ export const FormInputRadioGroup = (config) => {
     formValue, options, validation
   } = config;
 
-  return (
-    <div className={`radio-group ${orientation} ${!isValid(validation) ? 'errored' : ''}`} id={id}>
-      {options.map((option, idx) => {
-        const optionId = (!isNil(option.id) ? option.id : option.name);
-        return (
-          <div key={idx} className='radio-button-container'>
-            <RadioButton
-              id={`${id}_${optionId}`}
-              name={`${id}_${optionId}`}
-              defaultChecked={!isNil(formValue) && formValue === option.name}
-              onClick={() => onFormInputChange(config, option.name)}
-              style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
-              description={option.text}
-              disabled={disabled}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );};
+  return <div className={`radio-group ${orientation} ${!isValid(validation) ? 'errored' : ''}`} id={id}>
+    {options.map((option, idx) => {
+      const optionId = (!isNil(option.id) ? option.id : option.name);
+      return (
+        <div key={idx} className='radio-button-container'>
+          <RadioButton
+            id={`${id}_${optionId}`}
+            name={`${id}_${optionId}`}
+            defaultChecked={!isNil(formValue) && formValue === option.name}
+            onClick={() => onFormInputChange(config, option.name)}
+            style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
+            description={option.text}
+            disabled={disabled}
+          />
+        </div>
+      );
+    })}
+  </div>;
+};
 
 export const FormInputYesNoRadioGroup = (config) => {
   const {
@@ -372,34 +371,32 @@ export const FormInputYesNoRadioGroup = (config) => {
     formValue, validation
   } = config;
 
-  return (
-    <div>
-      <div className={`radio-group ${orientation} ${!isValid(validation) ? 'errored' : ''}`} id={id}>
-        <div className='radio-button-container'>
-          <RadioButton
-            id={`${id}_yes`}
-            name={`${id}_yes`}
-            defaultChecked={!isNil(formValue) && formValue === true}
-            onClick={() => onFormInputChange(config, true)}
-            style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
-            description='Yes'
-            disabled={disabled}
-          />
-        </div>
-        <div className='radio-button-container'>
-          <RadioButton
-            id={`${id}_no`}
-            name={`${id}_no`}
-            defaultChecked={!isNil(formValue) && formValue === false}
-            onClick={() => onFormInputChange(config, false)}
-            style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
-            description='No'
-            disabled={disabled}
-          />
-        </div>
+  return <div>
+    <div className={`radio-group ${orientation} ${!isValid(validation) ? 'errored' : ''}`} id={id}>
+      <div className='radio-button-container'>
+        <RadioButton
+          id={`${id}_yes`}
+          name={`${id}_yes`}
+          defaultChecked={!isNil(formValue) && formValue === true}
+          onClick={() => onFormInputChange(config, true)}
+          style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
+          description='Yes'
+          disabled={disabled}
+        />
+      </div>
+      <div className='radio-button-container'>
+        <RadioButton
+          id={`${id}_no`}
+          name={`${id}_no`}
+          defaultChecked={!isNil(formValue) && formValue === false}
+          onClick={() => onFormInputChange(config, false)}
+          style={{ fontFamily: 'Montserrat', fontSize: '14px' }}
+          description='No'
+          disabled={disabled}
+        />
       </div>
     </div>
-  );
+  </div>;
 };
 
 export const FormInputRadioButton = (config) => {
