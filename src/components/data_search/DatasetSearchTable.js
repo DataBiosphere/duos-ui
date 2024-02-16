@@ -42,13 +42,34 @@ const studyTableHeader = () => [
 ];
 
 const datasetTableHeader = [
-  'DUOS ID',
-  'Data Use',
-  'Data Types',
-  'Participants',
-  'Data Location',
-  'DAC',
-  'Export to Terra',
+  {
+    accessorKey: 'duosId',
+    header: 'DUOS ID',
+  },
+  {
+    accessorKey: 'dataUse',
+    header: 'Data Use',
+  },
+  {
+    accessorKey: 'dataTypes',
+    header: 'Data Types',
+  },
+  {
+    accessorKey: 'participants',
+    header: 'Participants',
+  },
+  {
+    accessorKey: 'dataLocation',
+    header: 'Data Location',
+  },
+  {
+    accessorKey: 'dacName',
+    header: 'DAC',
+  },
+  {
+    accessorKey: 'exportToTerra',
+    header: 'Export to Terra',
+  },
 ];
 
 export const DatasetSearchTable = (props) => {
@@ -75,6 +96,7 @@ export const DatasetSearchTable = (props) => {
             participants: dataset.participantCount,
             dataLocation: dataset.url ? <Link href={dataset.url}>{dataset.dataLocation}</Link> : dataset.dataLocation,
             dacName: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
+            exportToTerra: 'test',
           }
         }),
         participants: isNaN(participantCount) ? undefined : participantCount,
@@ -99,7 +121,7 @@ export const DatasetSearchTable = (props) => {
                 <h1>No datasets registered for this library.</h1>
               </Box>
               :
-              <DatasetTableMaterial columns={columns} data={tableData} />
+              <DatasetTableMaterial columns={columns} subColumns={datasetTableHeader} data={tableData} />
           }
         </Box>
       </Box>
