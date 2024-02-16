@@ -1,5 +1,4 @@
 import React from 'react';
-import { h, div, label, input, span, button, textarea } from 'react-hyperscript-helpers';
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 import Select from 'react-select';
@@ -59,10 +58,11 @@ const onFormInputChange = (config, value) => {
 };
 
 const errorMessages = (validation) => {
-  return !isValid(validation) && div({ className: `error-message fadein`}, [
-    span({ className: 'glyphicon glyphicon-play' }),
-    ...validation.failed.map((err) => div([validationMessage(err)])),
-  ]);
+  return !isValid(validation) &&
+  <div className="error-message fadein">
+    <span className="glyphicon glyphicon-play" />
+    {validation.failed.map((err, idx) => <div key={'error_message_'+idx}>{validationMessage(err)}</div>)}
+  </div>;
 };
 
 //---------------------------------------------
