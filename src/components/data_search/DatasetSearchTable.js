@@ -10,6 +10,8 @@ import { Box } from '@mui/material';
 import SearchBar from '../SearchBar';
 import { getSearchFilterFunctions, searchOnFilteredList } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
+import {capitalize, cloneDeep, concat, each, every, filter, find, first, flatten, flow, forEach as lodashFPForEach, get, getOr, includes, isNil, join, map, toLower, uniq} from 'lodash/fp';
+
 
 const studyTableHeader = [
   'Study Name',
@@ -41,6 +43,40 @@ export const DatasetSearchTable = (props) => {
 
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
+  const datasetFilter = (term, datasetTerm) => {
+    const loweredTerm = toLower(term);
+    console.log('loweredTerm: ', loweredTerm);
+    // Approval status
+    const status = !isNil(datasetTerm.dacApproval)
+      ? datasetTerm.dacApproval
+        ? 'accepted'
+        : 'rejected'
+      : 'pending';
+    const primaryCodes = datasetTerm.dataUse?.primary.map(du => du.code);
+    const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code);
+    const codes = join(', ')(concat(primaryCodes)(secondaryCodes));
+    const dataTypes = join(', ')(datasetTerm.study?.dataTypes);
+    const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
+    // console.log('datasetTerm.datasetName: ', datasetTerm.datasetName);
+    return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
+      includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
+      includes(loweredTerm, toLower(datasetTerm.dac?.dacName)) ||
+      includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail)) ||
+      includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
+      includes(loweredTerm, toLower(codes)) ||
+      includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||
+      includes(loweredTerm, toLower(datasetTerm.url)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.description)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail)) ||
+      includes(loweredTerm, toLower(dataTypes)) ||
+      includes(loweredTerm, toLower(custodians)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.phenotype)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.piName)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.species)) ||
+      includes(loweredTerm, toLower(datasetTerm.study?.studyName)) ||
+      includes(loweredTerm, toLower(status));
+  };
+
   const filterHandler = (event, data, filter, searchTerm) => {
     var newFilters = [];
     if (!isFiltered(filter)) {
@@ -55,6 +91,15 @@ export const DatasetSearchTable = (props) => {
       newFiltered = data;
     } else {
       newFiltered = data.filter((dataset) => {
+        if (newFilters.includes('search') && searchTerm !== '' && datasetFilter(searchTerm, dataset)) {
+          // console.log("searchTerm", searchTerm);
+          // console.log("dataset", dataset);
+          // console.log("result", getSearchFilterFunctions().datasetTerms(searchTerm, dataset));
+          // console.log("newFiltered", newFiltered);
+          // if (getSearchFilterFunctions().datasetTerms(searchTerm, dataset)) {
+          return true;
+          // }
+        }
         // TODO: remove extra checks when openAccess property is deprecated
         if (newFilters.includes('open') && (dataset.openAccess || dataset.accessManagement === 'open')) {
           return true;
@@ -67,18 +112,24 @@ export const DatasetSearchTable = (props) => {
         if (newFilters.includes('external') && dataset.accessManagement === 'external') {
           return true;
         }
+        // console.log("TEST :", getSearchFilterFunctions().datasetTerms(searchTerm, [dataset]))
+        // add 'search' filter here; if the search box isn't empty & the filter is 'search' &  getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered)ISH, return true 
         return false;
       });
     }
-    console.log('searchTerm: ' + searchTerm);
-    console.log('filters: ', newFilters)
-    if (searchTerm) {
-      const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered);
-      // console.log("Filtered:", newFiltered.filter(value => searchFiltered.includes(value)))
-      setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
-    } else {
-      setFiltered(newFiltered);
-    }
+
+    // const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered);
+    // setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
+    // console.log('searchTerm: ' + searchTerm);
+    // console.log('filters: ', newFilters)
+    // if (searchTerm) {
+    //   const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered) ;
+    //   console.log("Filtered:", newFiltered.filter(value => searchFiltered.includes(value)))
+    //   setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
+    // } else {
+    //   setFiltered(newFiltered);
+    // }
+    setFiltered(newFiltered);
   };
 
   const selectHandler = (event, data, selector) => {
@@ -223,7 +274,7 @@ export const DatasetSearchTable = (props) => {
               fontFamily: 'Montserrat',
               fontSize: '1.5rem'
             }}
-            onChange={() => filterHandler(null, datasets, [], searchRef.current.value)}
+            onChange={() => filterHandler(null, datasets, 'search', searchRef.current.value)}
             ref={searchRef}
           />
           <div/>
