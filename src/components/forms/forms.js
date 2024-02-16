@@ -229,8 +229,8 @@ export const FormFieldTitle = (props) => {
         {required && '*'}
       </label>
     }
-    {helpText && <span style={{ fontStyle: 'italic', padding: 7 }}>{helpText}</span>}
-    {description && <div style={{ marginBottom: 15 }}>{description}</div>}
+    {helpText && <span key={`help-text-span-${formId}`} style={{ fontStyle: 'italic', padding: 7 }}>{helpText}</span>}
+    {description && <div key={`help-text-description-span-${formId}`} style={{ marginBottom: 15 }}>{description}</div>}
   </div>;
 };
 
@@ -278,6 +278,8 @@ export const FormField = (config) => {
 
   return <div key={`formControl_${id}`} style={style} className={`formField-container formField-${id}`}>
     <FormFieldTitle
+      key={`form-field-title-${id}`}
+      id={`form-field-title-${id}`}
       title={title}
       hideTitle={hideTitle}
       description={description}
