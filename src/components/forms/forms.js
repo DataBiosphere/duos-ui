@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { h, div, label, span, button } from 'react-hyperscript-helpers';
 import { cloneDeep, isFunction, isNil, isArray } from 'lodash/fp';
 import {
   validateFormProps,
@@ -218,19 +218,20 @@ export const FormFieldTitle = (props) => {
     validation,
   } = props;
 
-  return div({}, [
-    title && !hideTitle && label({
-      id: `lbl_${formId}`,
-      className: `control-label ${isValid(validation) ? '' : 'errored'}`,
-      htmlFor: `${formId}`,
-      'aria-level': ariaLevel
-    }, [
-      title,
-      required && '*'
-    ]),
-    helpText && span({ style: { fontStyle: 'italic', padding: 7 } }, helpText),
-    description && div({ style: { marginBottom: 15 } }, description),
-  ]);
+  return <div>
+    {title && !hideTitle &&
+      <label
+        id={`lbl_${formId}`}
+        className={`control-label ${isValid(validation) ? '' : 'errored'}`}
+        htmlFor={`${formId}`}
+        aria-level={ariaLevel}>
+        {title}
+        {required && '*'}
+      </label>
+    }
+    {helpText && <span style={{ fontStyle: 'italic', padding: 7 }}>{helpText}</span>}
+    {description && <div style={{ marginBottom: 15 }}>{description}</div>}
+  </div>;
 };
 
 export const FormField = (config) => {
@@ -275,24 +276,26 @@ export const FormField = (config) => {
     setInternalValidationState(newValidation);
   }, [name, id, setInternalValidationState, onValidationChange]);
 
-  return div({
-    key: `formControl_${id}`,
-    style,
-    className: `formField-container formField-${id}`
-  }, [
-    h(FormFieldTitle, {
-      title, hideTitle, description, helpText,
-      required, formId: id, ariaLevel,
-      validation: getValidation()
-    }),
-    h(type.component, {
-      ...config,
-      validation: getValidation(),
-      setValidation: (newValidation) => updateValidation(newValidation),
-      formValue, setFormValue,
-      required
-    })
-  ]);
+  return <div key={`formControl_${id}`} style={style} className={`formField-container formField-${id}`}>
+    <FormFieldTitle
+      title={title}
+      hideTitle={hideTitle}
+      description={description}
+      helpText={helpText}
+      required={required}
+      formId={id}
+      ariaLevel={ariaLevel}
+      validation={getValidation()}
+    />
+    <type.component
+      {...config}
+      validation={getValidation()}
+      setValidation={(newValidation) => updateValidation(newValidation)}
+      formValue={formValue}
+      setFormValue={setFormValue}
+      required={required}
+    />
+  </div>;
 };
 
 /*
@@ -313,85 +316,86 @@ export const FormTable = (config) => {
 
   const key = getKey(config);
 
-  return div({ id, className: `formField-table formField-${id}` }, [
-    // generate columns
-    div({ className: 'formTable-row formTable-cols' }, formFields.map(({ validators, title }) => {
-      const required = (validators || []).includes(FormValidators.REQUIRED);
-      return label({ className: 'control-label', id: `${id}-${title}` }, [
-        title,
-        required && '*'
-      ]);
-    })),
-    // generate form rows
-    formValue?.map((formRow, i) => {
-      return div({ className: 'formTable-row formTable-data-row', key: `formtable-${id}-${i}` }, [
-        ...formFields.map(formCol => {
-          return h(FormField, {
-            ...formCol,
-            id: `${id}-${i}-${formCol.id}`,
-            hideTitle: true, ariaDescribedby: `${id}-${formCol.title}`,
-            defaultValue: formValue[i][getKey(formCol)],
-            validation: !isNil(validation) && isArray(validation) ? validation.at(i)?.[getKey(formCol)] : undefined,
-            onChange: ({ value }) => {
+  return <div id={id} className={`formField-table formField-${id}`}>
+    {/* generate columns */}
+    <div className="formTable-row formTable-cols">
+      {formFields.map(({ validators, title }) => {
+        const required = (validators || []).includes(FormValidators.REQUIRED);
+        return (
+          <label className="control-label" key={`${id}-${title}`} id={`${id}-${title}`}>
+            {title}
+            {required && '*'}
+          </label>
+        );
+      })}
+    </div>
+    {/* generate form rows */}
+    {formValue?.map((formRow, i) => (
+      <div className="formTable-row formTable-data-row" key={`formtable-${id}-${i}`}>
+        {formFields.map(formCol => (
+          <FormField
+            {...formCol}
+            key={`${id}-${i}-${formCol.id}`}
+            id={`${id}-${i}-${formCol.id}`}
+            hideTitle={true}
+            ariaDescribedby={`${id}-${formCol.title}`}
+            defaultValue={formValue[i][getKey(formCol)]}
+            validation={!isNil(validation) && isArray(validation) ? validation.at(i)?.[getKey(formCol)] : undefined}
+            onChange={({ value }) => {
               const formValueClone = cloneDeep(formValue);
               formValueClone[i][getKey(formCol)] = value;
               setFormValue(formValueClone);
               onChange({key: key, value: formValueClone, isValid: true });
-            },
-            onValidationChange: ({ validation }) => {
+            }}
+            onValidationChange={({ validation }) => {
               if (isNil(onValidationChange)) {
                 return;
               }
               onValidationChange({ key: [getKey(config), i, getKey(formCol)], validation: validation });
-            }
-          });
-        }),
-        h(button, {
-          id: `delete-table-row-${id}-${i}`,
-          key: `delete-table-row-${id}-${i}`,
-          className: 'btn-formTable-delete btn-xs',
-          type: 'button',
-          disabled: disabled || formValue.length <= minLength,
-          onClick: () => {
+            }}
+          />
+        ))}
+        <button
+          id={`delete-table-row-${id}-${i}`}
+          key={`delete-table-row-${id}-${i}`}
+          className="btn-formTable-delete btn-xs"
+          type="button"
+          disabled={disabled || formValue.length <= minLength}
+          onClick={() => {
             const formValueClone = cloneDeep(formValue);
-
             formValueClone.splice(i, 1);
             setFormValue(formValueClone);
             onChange({ key: key, value: formValueClone, isValid: true });
-
             if (!isNil(validation) && !isNil(onValidationChange)) {
               const validationClone = cloneDeep(validation);
               validationClone.splice(i, 1);
               onValidationChange({ key: getKey(config), validation: validationClone });
-
             }
-          }
-        }, [
-          span({ className: 'glyphicon glyphicon-remove' })
-        ])
-      ]);
-    }),
-    // add new row to table button
-    div({
-      style: { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },
-      isRendered: enableAddingRow
-    }, [
-      h(button, {
-        id: `add-new-table-row-${id}`,
-        key: `add-new-table-row-${id}`,
-        className: 'pill form-btn btn-xs',
-        type: 'button',
-        onClick: () => {
-          const formValueClone = cloneDeep(formValue);
-          formValueClone.push({});
-          setFormValue(formValueClone);
-          onChange({key: key, value: formValueClone, isValid: true });
-        },
-        style: { marginTop: 10 }
-      }, [
-        (addRowLabel || 'Add New'),
-        span({ className: 'glyphicon glyphicon-plus', style: { marginLeft: '8px' } })
-      ])
-    ])
-  ]);
+          }}>
+          <span className="glyphicon glyphicon-remove" />
+        </button>
+      </div>
+    ))}
+    {/* add new row to table button */}
+    {enableAddingRow && (
+      <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 }}>
+        <button
+          id={`add-new-table-row-${id}`}
+          key={`add-new-table-row-${id}`}
+          className="pill form-btn btn-xs"
+          type="button"
+          onClick={() => {
+            const formValueClone = cloneDeep(formValue);
+            formValueClone.push({});
+            setFormValue(formValueClone);
+            onChange({key: key, value: formValueClone, isValid: true });
+          }}
+          style={{ marginTop: 10 }}
+        >
+          {addRowLabel || 'Add New'}
+          <span className="glyphicon glyphicon-plus" style={{ marginLeft: '8px' }} />
+        </button>
+      </div>
+    )}
+  </div>;
 };
