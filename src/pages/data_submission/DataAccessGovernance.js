@@ -144,7 +144,7 @@ export const DataAccessGovernance = (props) => {
           otherSecondary: dataUse.secondaryOther,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
-          numberOfParticipants: extract('Number Of Participants', dataset),
+          numberOfParticipants: extract('# of participants', dataset),
           fileTypes: extractFileTypes('File Types', dataset),
           dataAccessCommitteeId: dac?.dacId,
         },
