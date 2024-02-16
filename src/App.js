@@ -21,7 +21,7 @@ function App() {
   let location = useLocation();
 
   const trackPageView = (location) => {
-    ReactGA.send({ hitType: 'pageview', page: location.pathname });
+    ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
   };
 
   useEffect(() => {
