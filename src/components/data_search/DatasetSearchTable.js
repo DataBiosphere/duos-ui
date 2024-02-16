@@ -99,7 +99,9 @@ export const DatasetSearchTable = (props) => {
           // if (getSearchFilterFunctions().datasetTerms(searchTerm, dataset)) {
           return true;
           // }
-        }
+        } 
+        return false;
+      }).filter((dataset) => {
         // TODO: remove extra checks when openAccess property is deprecated
         if (newFilters.includes('open') && (dataset.openAccess || dataset.accessManagement === 'open')) {
           return true;
