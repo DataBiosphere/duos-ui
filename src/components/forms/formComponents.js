@@ -196,7 +196,7 @@ export const FormInputMultiText = (config) => {
         }}
         onClick={() => pushValue(document.getElementById(id))}
       >
-        <span
+       !disabled && <span
           className="glyphicon glyphicon-plus"
           aria-label="Add"
           style={{ margin: '0 8px' }}
