@@ -215,7 +215,7 @@ export const FormInputMultiText = (config) => {
           onClick={() => removePill(i)}
         >
           {val}
-          <span
+          !disabled && <span
             className="glyphicon glyphicon-remove"
             style={{ marginLeft: '8px' }}
           />
