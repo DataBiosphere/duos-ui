@@ -103,7 +103,7 @@ export default function DatasetSubmissions(props) {
     marginTop: 10
   };
 
-  const addDatasetButton = (currentUser.libraryCards?.length > 0)
+  const addDatasetButton = (currentUser.isDataSubmitter)
     ? <button style={addDatasetButtonStyle}>
       <AddCircleOutlineIcon/><Link to={'/data_submission_form'} style={{marginLeft: 5}}>Add Dataset</Link>
     </button>
