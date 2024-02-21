@@ -238,7 +238,7 @@ export default function ResearcherInfo(props) {
               disabled: readOnlyMode,
               type: FormFieldTypes.RADIOGROUP,
               title: '1.8 Cloud Use Statement',
-              description: [span([
+              description: [span({key: 'anvil-use-description'},[
                 'Will you perform all of your data storage and analysis for this project on the ',
                 a({
                   rel: 'noopener noreferrer',
