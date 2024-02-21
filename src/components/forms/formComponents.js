@@ -196,11 +196,11 @@ export const FormInputMultiText = (config) => {
         }}
         onClick={() => pushValue(document.getElementById(id))}
       >
-       !disabled && <span
+        {!disabled && <span
           className="glyphicon glyphicon-plus"
           aria-label="Add"
-          style={{ margin: '0 8px' }}
-        />
+          style={{margin: '0 8px'}}
+        />}
       </button>
     </div>
     {errorMessages(inputValidation)}
@@ -215,10 +215,10 @@ export const FormInputMultiText = (config) => {
           onClick={() => removePill(i)}
         >
           {val}
-          !disabled && <span
+          {!disabled && <span
             className="glyphicon glyphicon-remove"
-            style={{ marginLeft: '8px' }}
-          />
+            style={{marginLeft: '8px'}}
+          />}
         </button>
       ))}
     </div>
