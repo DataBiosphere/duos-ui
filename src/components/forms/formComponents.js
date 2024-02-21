@@ -263,78 +263,79 @@ export const FormInputSelect = (config) => {
     selectConfig = {}
   } = config;
 
-  const component =
-    (isCreatable
-      ? (isAsync ? AsyncCreatable : Creatable)
-      : (isAsync ? AsyncSelect : Select));
-
   // must be specified if async, since we can't guess the
   // array type until after querying.
   const optionsAreString = config.optionsAreString || (!isNil(selectOptions) && isString(selectOptions[0]));
   const normalizedOptions = (!isNil(selectOptions) ? normalizeSelectOptions(selectOptions, optionsAreString) : undefined);
 
-  return React.createElement(component, {
-    key: id,
-    id,
-    isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
-    isMulti,
-    required,
-    isDisabled: disabled,
-    placeholder: placeholder || `Search for ${title}...`,
-    className: `form-select ${!isValid(validation) ? 'errored' : ''}`,
-    onChange: (selected) => {
-      if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
-        const newSelection = selected[selected.length - 1];
+  {
+    const Component = isCreatable
+      ? (isAsync ? AsyncCreatable : Creatable)
+      : (isAsync ? AsyncSelect : Select);
+    return (
+      <Component
+        key={id}
+        id={id}
+        isClearable={true} //ensures that selections can be cleared from dropdown, adds an 'x' within input box
+        isMulti={isMulti}
+        required={required}
+        isDisabled={disabled}
+        placeholder={placeholder || `Search for ${title}...`}
+        className={`form-select ${!isValid(validation) ? 'errored' : ''}`}
+        onChange={(selected) => {
+          if (isMulti && selected.length > 0 && !isNil(exclusiveValues)) {
+            const newSelection = selected[selected.length - 1];
 
-        if (exclusiveValues.includes(newSelection.displayText)) {
-          selected.splice(0, selected.length - 1);
-        } else if (exclusiveValues.includes(selected[0].displayText)) {
-          selected.splice(0, 1);
-        }
-      }
+            if (exclusiveValues.includes(newSelection.displayText)) {
+              selected.splice(0, selected.length - 1);
+            } else if (exclusiveValues.includes(selected[0].displayText)) {
+              selected.splice(0, 1);
+            }
+          }
 
-      if (optionsAreString) {
-        if (isMulti) {
-          // string result, multiple options
-          onFormInputChange(config, selected?.map((o) => o.displayText));
-          setFormValue(selected);
-          return;
-        }
-        // string result, only one option
-        onFormInputChange(config, selected?.displayText);
-        setFormValue(selected);
-      }
-      else {
-        // object result
-        onFormInputChange(config, selected);
-      }
-    },
-    onMenuOpen: () => setValidation({ valid: true }),
-    onMenuClose: () => {
-      if (required && !formValue) {
-        setValidation({ valid: false, failed: ['required'] });
-      }
-    },
-    getOptionLabel: (option) => option.displayText,
-    getNewOptionData: (inputValue) => {
-      return { key: inputValue, displayText: inputValue };
-    },
-    getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-      if(isNil(option) || isEmpty(option.displayText)) {
-        return null;
-      }
-      return optionsAreString ? option.displayText : option;
-    },
-    options: normalizedOptions,
-    loadOptions: (query, callback) => {
-      loadOptions(query, (options) => {
-        callback(normalizeSelectOptions(options, optionsAreString));
-      });
-    },
-    value: normalizeSelectFormValue(formValue),
-    ...selectConfig,
-    'aria-describedby': ariaDescribedby
-  });
+          if (optionsAreString) {
+            if (isMulti) {
+              onFormInputChange(config, selected?.map((o) => o.displayText));
+              setFormValue(selected);
+              return;
+            }
+            // string result, only one option
+            onFormInputChange(config, selected?.displayText);
+            setFormValue(selected);
+          }
+          else {
+            // object result
+            onFormInputChange(config, selected);
+          }
+        }}
+        onMenuOpen={() => setValidation({ valid: true })}
+        onMenuClose={() => {
+          if (required && !formValue) {
+            setValidation({ valid: false, failed: ['required'] });
+          }
+        }}
+        getOptionLabel={(option) => option.displayText}
+        getNewOptionData={(inputValue) => {
+          return { key: inputValue, displayText: inputValue };
+        }}
+        getOptionValue={(option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
+          if(isNil(option) || isEmpty(option.displayText)) {
+            return null;
+          }
+          return optionsAreString ? option.displayText : option;
+        }}
+        options={normalizedOptions}
+        loadOptions={(query, callback) => {
+          loadOptions(query, (options) => {
+            callback(normalizeSelectOptions(options, optionsAreString));
+          });
+        }}
+        value={normalizeSelectFormValue(formValue)}
+        {...selectConfig}
+        aria-describedby={ariaDescribedby}
+      />
+    );
+  }
 };
 
 export const FormInputRadioGroup = (config) => {
