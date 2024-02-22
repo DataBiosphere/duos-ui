@@ -4,13 +4,12 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
-import { DAR } from '../../libs/ajax';
+import { DAR, DataSet } from '../../libs/ajax';
 import DatasetFilterList from './DatasetFilterList';
 import { Box } from '@mui/material';
-import SearchBar from '../SearchBar';
-import { getSearchFilterFunctions, searchOnFilteredList } from '../../libs/utils';
+import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import {capitalize, cloneDeep, concat, each, every, filter, find, first, flatten, flow, forEach as lodashFPForEach, get, getOr, includes, isNil, join, map, toLower, uniq} from 'lodash/fp';
+import isEqual from 'lodash/isEqual';
 
 
 const studyTableHeader = [
@@ -40,99 +39,121 @@ export const DatasetSearchTable = (props) => {
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
   const searchRef = useRef('');
-
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
-  const datasetFilter = (term, datasetTerm) => {
-    const loweredTerm = toLower(term);
-    console.log('loweredTerm: ', loweredTerm);
-    // Approval status
-    const status = !isNil(datasetTerm.dacApproval)
-      ? datasetTerm.dacApproval
-        ? 'accepted'
-        : 'rejected'
-      : 'pending';
-    const primaryCodes = datasetTerm.dataUse?.primary.map(du => du.code);
-    const secondaryCodes = datasetTerm.dataUse?.secondary.map(du => du.code);
-    const codes = join(', ')(concat(primaryCodes)(secondaryCodes));
-    const dataTypes = join(', ')(datasetTerm.study?.dataTypes);
-    const custodians = join(', ')(datasetTerm.study?.dataCustodianEmail);
-    // console.log('datasetTerm.datasetName: ', datasetTerm.datasetName);
-    return includes(loweredTerm, toLower(datasetTerm.datasetName)) ||
-      includes(loweredTerm, toLower(datasetTerm.datasetIdentifier)) ||
-      includes(loweredTerm, toLower(datasetTerm.dac?.dacName)) ||
-      includes(loweredTerm, toLower(datasetTerm.dac?.dacEmail)) ||
-      includes(loweredTerm, toLower(datasetTerm.dataLocation)) ||
-      includes(loweredTerm, toLower(codes)) ||
-      includes(loweredTerm, toLower(datasetTerm.createUserDisplayName)) ||
-      includes(loweredTerm, toLower(datasetTerm.url)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.description)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.dataSubmitterEmail)) ||
-      includes(loweredTerm, toLower(dataTypes)) ||
-      includes(loweredTerm, toLower(custodians)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.phenotype)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.piName)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.species)) ||
-      includes(loweredTerm, toLower(datasetTerm.study?.studyName)) ||
-      includes(loweredTerm, toLower(status));
+  const assembleFullQuery = (searchTerm, filters) => {
+    const queryChunks = [
+      {
+        'match': {
+          '_type': 'dataset'
+        }
+      },
+      {
+        'exists': {
+          'field': 'study'
+        }
+      }
+    ];
+  
+    // do not apply search modifier if there is no searchTerm
+    if (searchTerm !== '') {
+      const searchModifier = [
+        {
+          "multi_match": {
+              "query": searchTerm,
+              "fields": [
+                  "datasetName",
+                  "dataLocation",
+                  "study.description",
+                  "study.studyName",
+                  "study.species",
+                  "study.piName",
+                  "study.dataCustodianEmail",
+                  "study.dataTypes",
+                  "dataUse.primary.code",
+                  "dataUse.secondary.code",
+                  "dac.dacName",
+                  "datasetIdentifier"
+              ]
+          }
+      }
+      ];
+      queryChunks.push(...searchModifier);
+    }
+
+    var filterQuery = {};
+    if (filters.length > 0) {
+      const shouldTerms = [];
+    
+      filters.forEach(term => {
+        shouldTerms.push({
+          "term": {
+            "accessManagement": term
+          }
+        });
+      });
+    
+      if (shouldTerms.length > 0) {
+        filterQuery = [
+          {
+            "bool": {
+              "should": shouldTerms
+            }
+          }
+        ];
+      }
+    }
+    
+    // do not add filter subquery if no filters are applied
+    if (filters.length > 0) {
+      return {
+        'from': 0,
+        'size': 10000,
+        'query': {
+          'bool': {
+            'must': queryChunks,
+            'filter': filterQuery
+          }
+        }
+      };
+    } else {
+      return {
+        'from': 0,
+        'size': 10000,
+        'query': {
+          'bool': {
+            'must': queryChunks
+          }
+        }
+      };
+    }
   };
 
   const filterHandler = (event, data, filter, searchTerm) => {
     var newFilters = [];
-    if (!isFiltered(filter)) {
+    if (!isFiltered(filter) && filter !== '') {
       newFilters = filters.concat(filter);
     } else {
       newFilters = filters.filter((f) => f !== filter);
     }
     setFilters(newFilters);
 
-    var newFiltered = [];
-    if (newFilters.length === 0) {
-      newFiltered = data;
-    } else {
-      newFiltered = data.filter((dataset) => {
-        if (newFilters.includes('search') && searchTerm !== '' && datasetFilter(searchTerm, dataset)) {
-          // console.log("searchTerm", searchTerm);
-          // console.log("dataset", dataset);
-          // console.log("result", getSearchFilterFunctions().datasetTerms(searchTerm, dataset));
-          // console.log("newFiltered", newFiltered);
-          // if (getSearchFilterFunctions().datasetTerms(searchTerm, dataset)) {
-          return true;
-          // }
-        } 
-        return false;
-      }).filter((dataset) => {
-        // TODO: remove extra checks when openAccess property is deprecated
-        if (newFilters.includes('open') && (dataset.openAccess || dataset.accessManagement === 'open')) {
-          return true;
-        }
-        if (newFilters.includes('controlled') && (
-          (!dataset.openAccess && dataset.accessManagement === undefined) || (dataset.openAccess === undefined && dataset.accessManagement === 'controlled')
-        )) {
-          return true;
-        }
-        if (newFilters.includes('external') && dataset.accessManagement === 'external') {
-          return true;
-        }
-        // console.log("TEST :", getSearchFilterFunctions().datasetTerms(searchTerm, [dataset]))
-        // add 'search' filter here; if the search box isn't empty & the filter is 'search' &  getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered)ISH, return true 
-        return false;
-      });
-    }
-
-    // const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered);
-    // setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
-    // console.log('searchTerm: ' + searchTerm);
-    // console.log('filters: ', newFilters)
-    // if (searchTerm) {
-    //   const searchFiltered = getSearchFilterFunctions().datasetTerms(searchTerm, newFiltered) ;
-    //   console.log("Filtered:", newFiltered.filter(value => searchFiltered.includes(value)))
-    //   setFiltered(newFiltered.filter(value => searchFiltered.includes(value)));
-    // } else {
-    //   setFiltered(newFiltered);
-    // }
-    setFiltered(newFiltered);
+    const fullQuery = assembleFullQuery(searchTerm, newFilters);
+    // console.log("fullQuery", fullQuery);
+    const search = async () => {
+      try {
+        await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+          // console.log("intersection", datasets.filter(value => filteredDatasets.some(item => isEqual(item, value))));
+          setFiltered(datasets.filter(value => filteredDatasets.some(item => isEqual(item, value))));
+        });
+      } catch (error) {
+        Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+      }
+    };
+    search();
   };
+  
+
 
   const selectHandler = (event, data, selector) => {
     let idsToModify = [];
@@ -276,7 +297,7 @@ export const DatasetSearchTable = (props) => {
               fontFamily: 'Montserrat',
               fontSize: '1.5rem'
             }}
-            onChange={() => filterHandler(null, datasets, 'search', searchRef.current.value)}
+            onChange={() => filterHandler(null, datasets, '', searchRef.current.value)}
             ref={searchRef}
           />
           <div/>
@@ -293,6 +314,13 @@ export const DatasetSearchTable = (props) => {
                 display: 'flex',
                 flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                 <h1>No datasets registered for this library.</h1>
+              </Box>
+              :
+              isEmpty(filtered) ?
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                <h1>There are no datasets that fit these criteria.</h1>
               </Box>
               :
               <CollapsibleTable data={tableData} selected={selected} selectHandler={selectHandler} summary='faceted study search table' />
