@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import { Institution } from '../../libs/ajax';
+import { Institution, User } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
@@ -12,12 +12,14 @@ import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import ControlledAccessGrants from './ControlledAccessGrants';
 import ga4ghLogo from '../../images/ga4gh-logo.png';
 import userProfileIcon from '../../images/user-profile.png';
+import {cloneDeep} from 'lodash/fp';
 
 export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
   const [userProps, setUserProps] = useState({});
   const [institutions, setInstitutions] = useState([]);
+  const [name, setName] = useState('')
 
   const [profile, setProfile] = useState({
     profileName: '',
@@ -27,10 +29,26 @@ export default function UserProfile(props) {
 
   const [notificationData, setNotificationData] = useState({});
 
+  const onChange = ({key, value}) => {
+    console.log('key', key);
+    console.log('value', value);
+    setName(value);
+    let newUser = cloneDeep(user);
+    newUser.displayName = value;
+
+    User.update(newUser,newUser.userId).then(() => {
+      Notifications.showSuccess({ text: 'Name updated successfully!' });
+    }, () => {
+      Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
+    });
+  };
+
+
   useEffect(() => {
     const init = async () => {
       try {
         const user = Storage.getCurrentUser();
+        console.log('user', user);
         setUser(user);
         setUserProps(getPropertyValuesFromUser(user));
         setProfile({
@@ -38,6 +56,9 @@ export default function UserProfile(props) {
           email: user.email,
           id: user.userId
         });
+        setName(user.displayName)
+        console.log('name', name);
+        console.log('profile', profile);
         const institutions = await Institution.list();
         setInstitutions(institutions);
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
@@ -127,8 +148,8 @@ export default function UserProfile(props) {
     <FormField
       type={FormFieldTypes.TEXT}
       id='profileName'
-      defaultValue={profile.profileName}
-      disabled={true}
+      defaultValue={name}
+      onChange={onChange}
     />
     <div style={{ marginTop: '10px' }} />
     <FormField
