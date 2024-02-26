@@ -10,8 +10,9 @@ import DatasetSubmissionsTable from './DatasetSubmissionsTable';
 import {Storage} from '../../libs/storage';
 import styles from './DatasetTerms.module.css';
 
-export default function DatasetSubmissions() {
+export default function DatasetSubmissions(props) {
 
+  const {history} = props;
   const [terms, setTerms] = useState([]);
   const [filteredTerms, setFilteredTerms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,7 +103,7 @@ export default function DatasetSubmissions() {
     marginTop: 10
   };
 
-  const addDatasetButton = (currentUser.libraryCards?.length > 0)
+  const addDatasetButton = (currentUser.isDataSubmitter)
     ? <button style={addDatasetButtonStyle}>
       <AddCircleOutlineIcon/><Link to={'/data_submission_form'} style={{marginLeft: 5}}>Add Dataset</Link>
     </button>
@@ -142,7 +143,7 @@ export default function DatasetSubmissions() {
         </div>
       </div>
       <div className={styles['term-table-container']}>
-        <DatasetSubmissionsTable terms={filteredTerms} isLoading={isLoading}/>
+        <DatasetSubmissionsTable terms={filteredTerms} isLoading={isLoading} history={history}/>
       </div>
     </div>
   );

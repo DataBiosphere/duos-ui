@@ -32,11 +32,12 @@ const ApplicationTabs = [
 ];
 
 const fetchAllDatasets = async (dsIds) => {
-  if (isEmpty(dsIds)) {
+  const filteredDatasetIds = dsIds.filter((id) => !isNil(id) && Number.isInteger(id) && id > 0);
+  if (isEmpty(filteredDatasetIds)) {
     return [];
   }
   // filter just for safety
-  return DataSet.getDatasetsByIds(dsIds);//.filter((id) => !isNil(id) && isNumber(id)));
+  return DataSet.getDatasetsByIds(filteredDatasetIds);
 };
 
 const validationFailed = (validation) => {
@@ -260,6 +261,7 @@ const DataAccessRequestApplication = (props) => {
       const { dars, datasets } = collection;
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
+      // This is a collection, so we need to get the datasets and dataSetIds from the collection
       formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
     }
     else if (!isNil(dataRequestId)) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReactGA from 'react-ga';
+import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
 import './App.css';
 import {Config} from './libs/config';
@@ -21,7 +21,7 @@ function App() {
   let location = useLocation();
 
   const trackPageView = (location) => {
-    ReactGA.pageview(location.pathname + location.search);
+    ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
   };
 
   useEffect(() => {

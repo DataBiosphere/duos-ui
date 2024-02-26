@@ -1,5 +1,5 @@
-import { div, label, span } from 'react-hyperscript-helpers';
-import {chunk, filter, isEmpty, isNil} from 'lodash/fp';
+import React from 'react';
+import {chunk, filter, isEmpty} from 'lodash/fp';
 import { DAR } from '../../libs/ajax';
 import { DownloadLink } from '../../components/DownloadLink';
 
@@ -52,26 +52,34 @@ const styles = {
   }
 };
 
+let labelSpanIndex = 0;
 const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
-  return div(
-    {className: 'flex-row-element', style: styles.flexRowElement, id: `${key}-flex-row-element`},
-    !isLoading ? [
-      label({ id: `${key}-label`, key: `${key}-label`, style: styles.label}, [labelValue]),
-      span({ id: `${key}-span`, key: `${key}-span`, style: styles.value }, [spanValue]),
-    ] : [
-      div({className: 'text-placeholder', key:`${label}-label-placeholder`, id: `${label}-label-placeholder`, style: {width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}),
-      div({className: 'text-placeholder', key:`${label}-text-placeholder`, id: `${label}-label-placeholder`, style: {width: '70%', height: '3.2rem'}}),
-    ]
-  );
-};
+  labelSpanIndex++;
+  return (
+    <div className='flex-row-element' style={styles.flexRowElement} id={`${key}-flex-row-element`}>
+      {isLoading ?
+        <>
+          <div className='text-placeholder' key={`${labelSpanIndex}-label-placeholder`} id={`${labelSpanIndex}-label-placeholder`} style={{width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}></div>
+          <div className='text-placeholder' key={`${labelSpanIndex}-text-placeholder`} id={`${labelSpanIndex}-text-placeholder`} style={{width: '70%', height: '3.2rem'}}></div>
+        </> :
+        <>
+          <label id={`${key}-label`} key={`${key}-label`} style={styles.label}>{labelValue}</label>
+          <span id={`${key}-span`} key={`${key}-span`} style={styles.value}>{spanValue}</span>
+        </>
+      }
+    </div>
+  );};
 
 const generateLinkContents = (key, id, type, text, fileName, location) => {
-  return div(
-    {id: key, isRendered: !isNil(location) && !isNil(id)},
-    [
-      DownloadLink({label: text, onDownload: ()=>{DAR.downloadDARDocument(id, type, fileName);}})
-    ]);
-};
+  return (
+    <div>
+      {(id && location && fileName) &&
+        <div id={key}>
+          <DownloadLink label={text} onDownload={() => {DAR.downloadDARDocument(id, type, fileName);}} />
+        </div>
+      }
+    </div>
+  );};
 
 // function to generate application details content
 const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, cloudComputing) => {
@@ -99,7 +107,11 @@ const dynamicRowGeneration = (rowElementMaxCount, appDetailLabels, loading, clou
   // use a map function to generate a new array that wraps each chunk in the row style
   // template that you can then plug into the component's return statement
   const output = chunkedArr.map((chunk, index) => {
-    return div({className: 'information-row', key: `information-row-${index}`, style: styles.applicantInfoRow}, chunk);
+    return (
+      <div className="information-row" key={`information-row-${index}`} style={styles.applicantInfoRow}>
+        {chunk}
+      </div>
+    );
   });
 
   return output;
@@ -135,8 +147,16 @@ export default function ApplicationInformation(props) {
     collaborators.map(collaborator => collaborator.name).join(', ');
 
   const collaboratorLabels = [
-    {value: processCollaborators(externalCollaborators), title: 'External Collaborators', key: 'external-collaborators'},
-    {value: processCollaborators(internalCollaborators), title: 'Internal Collaborators', key: 'internal-collaborators'},
+    {
+      value: processCollaborators(externalCollaborators),
+      title: 'External Collaborators',
+      key: 'external-collaborators'
+    },
+    {
+      value: processCollaborators(internalCollaborators),
+      title: 'Internal Collaborators',
+      key: 'internal-collaborators'
+    },
     {value: processCollaborators(internalLabStaff), title: 'Internal Lab Staff', key: 'internal-lab-staff'},
   ];
 
@@ -153,61 +173,66 @@ export default function ApplicationInformation(props) {
   ];
 
   return (
-    div({className: 'application-information-page', style: {padding: '2% 3%', backgroundColor: 'white'}}, [
-      div({className: 'applicant-information-container', style: { margin: '0 0 2.5rem 0'}}, [
-        div({className: 'applicant-information-subheader', style: styles.title}, ['Applicant Information']),
-        div({className: 'information-row', style: styles.row}, [
-          generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading),
-          generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading),
-          generateLabelSpanContents('Institution', 'institution', institution, isLoading)
-        ])
-      ]),
-      !isLoading ? div({className: 'non-technical-summary-subheader', style: styles.subheader}, ['Non-Technical Summary'])
-        : div({className: 'text-placeholder', key: 'non-technical-summary-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
-      div({className: 'non-technical-summary-container'}, [
-        !isLoading ? div({className: 'non-technical-summary-textbox', style: styles.textBox}, [nonTechSummary])
-          : div({className: 'text-placeholder', key: 'non-technical-summary-placeholder', style: { height: '18rem',
-            width: '100%',
-          }})
-      ]),
-
-      !isLoading ? div({className: 'rus-subheader', style: styles.subheader}, ['Research Use Statement'])
-        : div({className: 'text-placeholder', key: 'rus-title-placeholder', style: {height: '4rem', width: '20%', marginBottom: '2rem'}}),
-      div({className: 'rus-container'}, [
-        !isLoading ? div({className: 'rus-textbox', style: styles.textBox}, [rus])
-          : div({className: 'text-placeholder', key: 'rus-placeholder', style: { height: '18rem',
-            width: '100%',
-          }})
-      ]),
-
-      div({className: 'collaborator-details-container', style: { margin: '3rem 0'}}, [
-        div({className: 'collaborator-details-subheader', style: styles.subheader,
-          isRendered: !(isEmpty(internalCollaborators) && isEmpty(externalCollaborators) && isEmpty(internalLabStaff))}, ['Collaborators']),
-        dynamicRowGeneration(2, collaboratorLabels, isLoading)
-      ]),
-
-      div({className: 'institution-details-container', style: { margin: '3rem 0'}}, [
-        div({className: 'institution-details-subheader', style: styles.subheader}, ['Institution']),
-        dynamicRowGeneration(2, institutionLabels, isLoading)
-      ]),
-
-      div({className: 'cloud-use-details-container', style: { margin: '3rem 0'}}, [
-        div({className: 'cloud-use-details-subheader', style: styles.subheader}, ['Cloud Use']),
-        dynamicRowGeneration(2, cloudUseLabels, isLoading, cloudComputing),
-        (cloudComputing) ?
-          div({className: 'cloud-provider-description-container'}, [
-            !isLoading ? div({className: 'cloud-provider-description-textbox', style: styles.textBox}, [cloudProviderDescription])
-              : div({className: 'text-placeholder', key: 'cloud-provider-description-placeholder', style: { height: '18rem',
-                width: '100%',
-              }})
-          ])  : ''
-      ]),
-
-      div({className: 'document-link-container', style: { margin: '1rem 0'}}, [
-        generateLinkContents('irb-doc',referenceId, 'irbDocument', 'Download IRB Protocol', irbDocumentName, irbDocumentLocation),
-        generateLinkContents('collab-letter', referenceId, 'collaborationDocument', 'Download Collaboration Letter', collaborationLetterName, collaborationLetterLocation)
-      ])
-    ])
+    <div className="application-information-page" style={{padding: '2% 3%', backgroundColor: 'white'}}>
+      <div className="applicant-information-container" style={{margin: '0 0 2.5rem 0'}}>
+        <div className="applicant-information-subheader" style={styles.title}>Applicant Information</div>
+        <div className="information-row" style={styles.row}>
+          {generateLabelSpanContents('Researcher', 'researcher', researcher, isLoading)}
+          {generateLabelSpanContents('Researcher Email', 'researcher-email', email, isLoading)}
+          {generateLabelSpanContents('Institution', 'institution', institution, isLoading)}
+        </div>
+      </div>
+      {isLoading ?
+        <div className="text-placeholder" key="non-technical-summary-title-placeholder"
+          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div> :
+        <div className="non-technical-summary-subheader" style={styles.subheader}>Non-Technical Summary</div>
+      }
+      <div className="non-technical-summary-container">
+        {isLoading ?
+          <div className="text-placeholder" key="non-technical-summary-placeholder"
+            style={{height: '18rem', width: '100%'}}></div> :
+          <div className="non-technical-summary-textbox" style={styles.textBox}>{nonTechSummary}</div>
+        }
+      </div>
+      {isLoading ?
+        <div className="text-placeholder" key="rus-title-placeholder"
+          style={{height: '4rem', width: '20%', marginBottom: '2rem'}}></div> :
+        <div className="rus-subheader" style={styles.subheader}>Research Use Statement</div>
+      }
+      <div className="rus-container">
+        {isLoading ?
+          <div className="text-placeholder" key="rus-placeholder" style={{height: '18rem', width: '100%'}}></div> :
+          <div className="rus-textbox" style={styles.textBox}>{rus}</div>
+        }
+      </div>
+      <div className="collaborator-details-container" style={{margin: '3rem 0'}}>
+        {!(isEmpty(internalCollaborators) && isEmpty(externalCollaborators) && isEmpty(internalLabStaff)) &&
+            <div className="collaborator-details-subheader" style={styles.subheader}>Collaborators</div>
+        }
+        {dynamicRowGeneration(2, collaboratorLabels, isLoading)}
+      </div>
+      <div className="institution-details-container" style={{margin: '3rem 0'}}>
+        <div className="institution-details-subheader" style={styles.subheader}>Institution</div>
+        {dynamicRowGeneration(2, institutionLabels, isLoading)}
+      </div>
+      <div className="cloud-use-details-container" style={{margin: '3rem 0'}}>
+        <div className="cloud-use-details-subheader" style={styles.subheader}>Cloud Use</div>
+        {dynamicRowGeneration(2, cloudUseLabels, isLoading, cloudComputing)}
+        {cloudComputing ?
+          <div className="cloud-provider-description-container">
+            {isLoading ?
+              <div className="text-placeholder" key="cloud-provider-description-placeholder"
+                style={{height: '18rem', width: '100%'}}></div> :
+              <div className="cloud-provider-description-textbox"
+                style={styles.textBox}>{cloudProviderDescription}</div>
+            }
+          </div> : ''
+        }
+      </div>
+      <div className="document-link-container" style={{margin: '1rem 0'}}>
+        {generateLinkContents('irb-doc', referenceId, 'irbDocument', 'Download IRB Protocol', irbDocumentName, irbDocumentLocation)}
+        {generateLinkContents('collab-letter', referenceId, 'collaborationDocument', 'Download Collaboration Letter', collaborationLetterName, collaborationLetterLocation)}
+      </div>
+    </div>
   );
 }
-
