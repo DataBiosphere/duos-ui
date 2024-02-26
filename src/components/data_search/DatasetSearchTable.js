@@ -61,6 +61,7 @@ export const DatasetSearchTable = (props) => {
         {
           "multi_match": {
               "query": searchTerm,
+              "type":"phrase_prefix",
               "fields": [
                   "datasetName",
                   "dataLocation",
