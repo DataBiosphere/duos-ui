@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect, Fragment } from 'react';
-import { a, div, h2, h3, h } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import SimpleTable from '../../components/SimpleTable';
 import './dar_application.css';
@@ -150,32 +150,36 @@ export default function DucAddendum(props) {
         ];
       });
 
-      return [
-        h(Fragment, {}, [
-          h(SimpleTable, {
-            isLoading: isLoading,
-            columnHeaders: columnHeaderData(headerConfig),
-            rowData: [],
-            styles: headerStyles
-          }),
-        ]),
-        h(Fragment, {}, [
-          h(SimpleTable, {
-            isLoading: false,
-            columnHeaders: columnHeaderData(columnConfig),
-            rowData: datasetData,
-            styles: columnStyles
-          }),
-        ]),
-      ];
+      return (
+        <>
+          <Fragment>
+            <SimpleTable
+              isLoading={isLoading}
+              columnHeaders={columnHeaderData(headerConfig)}
+              rowData={[]}
+              styles={headerStyles}
+            />
+          </Fragment>
+          <Fragment>
+            <SimpleTable
+              isLoading={false}
+              columnHeaders={columnHeaderData(columnConfig)}
+              rowData={datasetData}
+              styles={columnStyles}
+            />
+          </Fragment>
+        </>
+      );
     });
 
-    tableChunks.push(div({
-      style: {
-        borderTop: '1px solid black',
-        borderWidth: '1px 0 0 0',
-      },
-    }, []));
+    tableChunks.push(
+      <div
+        style={{
+          borderTop: '1px solid black',
+          borderWidth: '1px 0 0 0',
+        }}
+      />
+    );
 
     const fullTable = flatten(tableChunks);
     setDucAddendumTable(fullTable);
@@ -186,27 +190,16 @@ export default function DucAddendum(props) {
   }, [buildDucAddendumTable]);
 
   return (
-    div({
-      className: 'dar-step-card'
-    }, [
-      h2({}, ['Addendum']),
-      h3({ style: { marginBottom: '2rem' } }, ['Please review the datasets you requested grouped by their data use terms below, and click "Submit" below to send your data access request to the DAC(s).']),
+    <div className="dar-step-card">
+      <h2>Addendum</h2>
+      <h3 style={{ marginBottom: '2rem' }}>Please review the datasets you requested grouped by their data use terms below, and click &quot;Submit&quot; below to send your data access request to the DAC(s).</h3>
 
-      div({ className: 'table-container' }, ducAddendumTable),
+      <div className="table-container">{ducAddendumTable}</div>
 
-      div({ className: 'flex flex-row', style: { justifyContent: 'flex-start', paddingTop: '4rem' }, }, [
-        a({
-          id: 'btn_openSubmitModal', onClick: () => doSubmit(),
-          className: 'button button-blue',
-          style: {
-            marginRight: '2rem',
-          }
-        }, ['Submit']),
-        a({
-          id: 'btn_save', onClick: () => save(),
-          className: 'button button-white',
-        }, ['Save']),
-      ]),
-    ])
+      <div className="flex flex-row" style={{ justifyContent: 'flex-start', paddingTop: '4rem' }}>
+        <a id="btn_openSubmitModal" onClick={() => doSubmit()} className="button button-blue" style={{ marginRight: '2rem' }}>Submit</a>
+        <a id="btn_save" onClick={() => save()} className="button button-white">Save</a>
+      </div>
+    </div>
   );
 }
