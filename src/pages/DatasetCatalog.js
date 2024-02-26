@@ -773,7 +773,6 @@ export default function DatasetCatalog(props) {
           isRendered: showTranslatedDULModal,
           showModal: showTranslatedDULModal,
           dataUse: dataUse,
-          onOKRequest: () => setShowTranslatedDULModal(false),
           onCloseRequest: () => setShowTranslatedDULModal(false)
         }),
 
