@@ -31,8 +31,6 @@ export default function UserProfile(props) {
   const [notificationData, setNotificationData] = useState({});
 
   const updateRef = ({key, value}) => {
-    console.log('key', key);
-    console.log('value', value);
     setName(value);
     let newUser = cloneDeep(user);
     newUser.displayName = value;
