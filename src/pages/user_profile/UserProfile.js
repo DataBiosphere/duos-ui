@@ -52,7 +52,6 @@ export default function UserProfile(props) {
     const init = async () => {
       try {
         const user = Storage.getCurrentUser();
-        console.log('user', user);
         setUser(user);
         setUserProps(getPropertyValuesFromUser(user));
         setProfile({
@@ -61,8 +60,6 @@ export default function UserProfile(props) {
           id: user.userId
         });
         setName(user.displayName)
-        console.log('name', name);
-        console.log('profile', profile);
         const institutions = await Institution.list();
         setInstitutions(institutions);
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
