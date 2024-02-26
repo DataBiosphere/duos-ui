@@ -189,6 +189,11 @@ export const DatasetSearchTable = (props) => {
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
+  const clearSearchRef = () => {
+    searchRef.current.value = '';
+    filterHandler(null, datasets, '', '');
+  }
+
   useEffect(() => {
     if (isEmpty(filtered)) {
       return;
@@ -302,6 +307,11 @@ export const DatasetSearchTable = (props) => {
             ref={searchRef}
           />
           <div/>
+          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em' }}>
+            <Button variant="contained" onClick={clearSearchRef}>
+                Clear Search
+            </Button>
+          </Box>
         </div>
       </Box>
       <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
