@@ -140,11 +140,9 @@ export const DatasetSearchTable = (props) => {
     setFilters(newFilters);
 
     const fullQuery = assembleFullQuery(searchTerm, newFilters);
-    // console.log("fullQuery", fullQuery);
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          // console.log("intersection", datasets.filter(value => filteredDatasets.some(item => isEqual(item, value))));
           setFiltered(datasets.filter(value => filteredDatasets.some(item => isEqual(item, value))));
         });
       } catch (error) {
