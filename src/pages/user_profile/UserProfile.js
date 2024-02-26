@@ -13,6 +13,7 @@ import ControlledAccessGrants from './ControlledAccessGrants';
 import ga4ghLogo from '../../images/ga4gh-logo.png';
 import userProfileIcon from '../../images/user-profile.png';
 import {cloneDeep} from 'lodash/fp';
+import {setUserRoleStatuses} from '../../libs/utils';
 
 export default function UserProfile(props) {
 
@@ -29,19 +30,24 @@ export default function UserProfile(props) {
 
   const [notificationData, setNotificationData] = useState({});
 
-  const onChange = ({key, value}) => {
+  const updateRef = ({key, value}) => {
     console.log('key', key);
     console.log('value', value);
     setName(value);
     let newUser = cloneDeep(user);
     newUser.displayName = value;
+    setUser(newUser);
+  };
 
-    User.update(newUser,newUser.userId).then(() => {
+  const updateName = () => {
+    User.update(user,user.userId).then(() => {
       Notifications.showSuccess({ text: 'Name updated successfully!' });
     }, () => {
       Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
     });
-  };
+
+    setUserRoleStatuses(user, Storage);
+  }
 
 
   useEffect(() => {
@@ -145,12 +151,25 @@ export default function UserProfile(props) {
     >
       Full Name
     </h1>
-    <FormField
-      type={FormFieldTypes.TEXT}
-      id='profileName'
-      defaultValue={name}
-      onChange={onChange}
-    />
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <FormField
+        type={FormFieldTypes.TEXT}
+        id='profileName'
+        defaultValue={name}
+        onChange={updateRef}
+        style={{ width: '90%', marginTop: '10px', 
+      }}
+      />
+      <button
+        className='f-right btn-primary common-background'
+        onClick={updateName}
+        style={{
+          marginTop: '10px'
+        }}
+      >
+        Save
+      </button>
+    </div>
     <div style={{ marginTop: '10px' }} />
     <FormField
       type={FormFieldTypes.TEXT}
