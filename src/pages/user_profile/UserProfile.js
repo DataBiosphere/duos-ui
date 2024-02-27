@@ -20,7 +20,8 @@ export default function UserProfile(props) {
   const [user, setUser] = useState({});
   const [userProps, setUserProps] = useState({});
   const [institutions, setInstitutions] = useState([]);
-  const [name, setName] = useState('')
+  const [name, setName] = useState('');
+  const [updatedUser, setUpdatedUser] = useState({});
 
   const [profile, setProfile] = useState({
     profileName: '',
@@ -34,18 +35,21 @@ export default function UserProfile(props) {
     setName(value);
     let newUser = cloneDeep(user);
     newUser.displayName = value;
-    setUser(newUser);
+    setUpdatedUser(newUser);
   };
 
   const updateName = () => {
-    User.update(user,user.userId).then(() => {
-      Notifications.showSuccess({ text: 'Name updated successfully!' });
-    }, () => {
-      Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
-    });
-
-    setUserRoleStatuses(user, Storage);
-  }
+    if (updatedUser.displayName) {
+      User.update(updatedUser, updatedUser.userId).then((response) => {
+        setUserRoleStatuses(response, Storage);
+        Notifications.showSuccess({ text: 'Name updated successfully!' });
+      }, () => {
+        Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
+      });
+    } else {
+      Notifications.showInformation({ text: 'There are no changes to save.' });
+    }
+  };
 
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export default function UserProfile(props) {
           email: user.email,
           id: user.userId
         });
-        setName(user.displayName)
+        setName(user.displayName);
         const institutions = await Institution.list();
         setInstitutions(institutions);
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
@@ -152,7 +156,7 @@ export default function UserProfile(props) {
         id='profileName'
         defaultValue={name}
         onChange={updateRef}
-        style={{ width: '90%', marginTop: '10px', 
+        style={{ width: '90%', marginTop: '10px',
       }}
       />
       <button
