@@ -193,7 +193,7 @@ export const DatasetSearchTable = (props) => {
                 id: 'dataset-' + dataset.datasetId,
                 data: [
                   {
-                    value: dataset.datasetIdentifier,
+                    value: <Link key={`dataset.datasetId`} href={`/dataset_statistics/${dataset.datasetId}`}>{dataset.datasetIdentifier}</Link>,
                     increaseWidth: true,
                   },
                   {
