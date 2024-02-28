@@ -104,7 +104,7 @@ export const DatasetSearchTable = (props) => {
 
   const getExportableDatasets = async (event, data) => {
     setTdrApiUrl(await Config.getTdrApiUrl());
-    // Note the dataset identifier is in each subrow.
+    // Note the dataset identifier is in each sub-table row.
     const datasetIdentifiers = data.subtable.rows.map((row) => row.datasetIdentifier);
     const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
     if (snapshots.filteredTotal > 0) {
