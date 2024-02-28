@@ -288,10 +288,9 @@ export default function DataAccessRequest(props) {
                       key={'otherText'}
                       disabled={readOnlyMode}
                       title={<h4>If none of the above, please describe the primary purpose of your research:</h4>}
-                      orientation={'horizontal'}
                       placeholder={'Please specify...'}
-                      defaultValue={formData.other}
-                      validation={validation.other}
+                      defaultValue={formData.otherText}
+                      validation={validation.otherText}
                       onValidationChange={onValidationChange}
                       onChange={primaryChange}/>
         }
