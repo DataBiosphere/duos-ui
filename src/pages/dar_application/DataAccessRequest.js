@@ -375,7 +375,7 @@ export default function DataAccessRequest(props) {
         {needsIrbApprovalDocument(datasets) &&
                     <FormFieldTitle
                       key={'irbApprovalDocument'}
-                      description={includeInstructions ? 'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.' : ''}
+                      description={'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.'}
                     />
         }
         {needsIrbApprovalDocument(datasets) &&
