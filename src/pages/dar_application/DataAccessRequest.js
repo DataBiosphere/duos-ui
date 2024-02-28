@@ -227,27 +227,26 @@ export default function DataAccessRequest(props) {
         />
 
         {formData.diseases === true &&
-                    <div style={{marginTop: '2.0rem', marginBottom: '1.0rem'}}></div>
+                    <div style={{marginTop: '2.0rem', marginBottom: '1.0rem'}}>
+                      <FormField
+                        id={'ontologies'}
+                        key={'ontologies'}
+                        type={FormFieldTypes.SELECT}
+                        disabled={readOnlyMode}
+                        isMulti={true}
+                        isCreatable={false}
+                        isAsync={true}
+                        optionsAreString={false}
+                        loadOptions={autocompleteOntologies}
+                        validators={[FormValidators.REQUIRED]}
+                        placeholder={'Please enter one or more diseases'}
+                        defaultValue={formData.ontologies.map(formatOntologyForSelect)}
+                        validation={validation.ontologies}
+                        onValidationChange={onValidationChange}
+                        onChange={({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)})}
+                      />
+                    </div>
         }
-
-        {formData.diseases === true &&
-                    <FormField
-                      id={'ontologies'}
-                      key={'ontologies'}
-                      type={FormFieldTypes.SELECT}
-                      disabled={readOnlyMode}
-                      isMulti={true}
-                      isCreatable={false}
-                      isAsync={true}
-                      optionsAreString={false}
-                      loadOptions={autocompleteOntologies}
-                      validators={[FormValidators.REQUIRED]}
-                      placeholder={'Please enter one or more diseases'}
-                      defaultValue={formData.ontologies.map(formatOntologyForSelect)}
-                      validation={validation.ontologies}
-                      onValidationChange={onValidationChange}
-                      onChange={({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)})}
-                    />}
 
         {formData.diseases === false &&
                     <FormField
