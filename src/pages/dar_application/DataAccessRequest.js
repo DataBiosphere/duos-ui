@@ -221,7 +221,7 @@ export default function DataAccessRequest(props) {
                     <div style={{marginTop: '2.0rem', marginBottom: '1.0rem'}}></div>
         }
 
-        {formData.diseases === false &&
+        {formData.diseases === true &&
                     <FormField
                       id={'ontologies'}
                       key={'ontologies'}
