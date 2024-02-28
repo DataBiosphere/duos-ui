@@ -33,8 +33,6 @@ export default function UserProfile(props) {
 
   const updateRef = ({key, value}) => {
     setName(value);
-    // let newUser = cloneDeep(user);
-    // newUser.displayName = value;
     setUpdatedName(value);
   };
 
