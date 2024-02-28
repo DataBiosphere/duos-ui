@@ -193,7 +193,16 @@ export default function DataAccessRequest(props) {
           type={FormFieldTypes.TEXTAREA}
           title={'2.3 Research Use Statement (RUS)'}
           validators={[FormValidators.REQUIRED]}
-          description={includeInstructions ? 'A RUS is a brief description of the applicant\'s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public. Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at' : ''}
+          description={
+            <>
+              <p>
+                A RUS is a brief description of the applicant&quote;s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.
+                <span>
+                   Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
+                </span>
+              </p>
+            </>
+          }
           placeholder={'Please limit your RUS to 2200 characters.'}
           rows={6}
           maxLength={2200}
@@ -218,27 +227,26 @@ export default function DataAccessRequest(props) {
         />
 
         {formData.diseases === true &&
-                    <div style={{marginTop: '2.0rem', marginBottom: '1.0rem'}}></div>
+                    <div style={{marginTop: '2.0rem', marginBottom: '1.0rem'}}>
+                      <FormField
+                        id={'ontologies'}
+                        key={'ontologies'}
+                        type={FormFieldTypes.SELECT}
+                        disabled={readOnlyMode}
+                        isMulti={true}
+                        isCreatable={false}
+                        isAsync={true}
+                        optionsAreString={false}
+                        loadOptions={autocompleteOntologies}
+                        validators={[FormValidators.REQUIRED]}
+                        placeholder={'Please enter one or more diseases'}
+                        defaultValue={formData.ontologies.map(formatOntologyForSelect)}
+                        validation={validation.ontologies}
+                        onValidationChange={onValidationChange}
+                        onChange={({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)})}
+                      />
+                    </div>
         }
-
-        {formData.diseases === true &&
-                    <FormField
-                      id={'ontologies'}
-                      key={'ontologies'}
-                      type={FormFieldTypes.SELECT}
-                      disabled={readOnlyMode}
-                      isMulti={true}
-                      isCreatable={false}
-                      isAsync={true}
-                      optionsAreString={false}
-                      loadOptions={autocompleteOntologies}
-                      validators={[FormValidators.REQUIRED]}
-                      placeholder={'Please enter one or more diseases'}
-                      defaultValue={formData.ontologies.map(formatOntologyForSelect)}
-                      validation={validation.ontologies}
-                      onValidationChange={onValidationChange}
-                      onChange={({key, value}) => onChange({key, value: value.map(formatOntologyForFormData)})}
-                    />}
 
         {formData.diseases === false &&
                     <FormField
@@ -288,12 +296,11 @@ export default function DataAccessRequest(props) {
                       key={'otherText'}
                       disabled={readOnlyMode}
                       title={<h4>If none of the above, please describe the primary purpose of your research:</h4>}
-                      orientation={'horizontal'}
                       placeholder={'Please specify...'}
-                      defaultValue={formData.other}
-                      validation={validation.other}
+                      defaultValue={formData.otherText}
+                      validation={validation.otherText}
                       onValidationChange={onValidationChange}
-                      onChange={primaryChange}/>
+                      onChange={onChange}/>
         }
 
         <FormField
@@ -368,7 +375,7 @@ export default function DataAccessRequest(props) {
         {needsIrbApprovalDocument(datasets) &&
                     <FormFieldTitle
                       key={'irbApprovalDocument'}
-                      description={includeInstructions ? 'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.' : ''}
+                      description={'One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. When IRB approval is required and Expedited of Full Review is required, it must be completed annually. Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.'}
                     />
         }
         {needsIrbApprovalDocument(datasets) &&
