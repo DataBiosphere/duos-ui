@@ -300,7 +300,7 @@ export default function DataAccessRequest(props) {
                       defaultValue={formData.otherText}
                       validation={validation.otherText}
                       onValidationChange={onValidationChange}
-                      onChange={primaryChange}/>
+                      onChange={onChange}/>
         }
 
         <FormField
