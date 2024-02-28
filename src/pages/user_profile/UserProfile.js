@@ -21,7 +21,7 @@ export default function UserProfile(props) {
   const [userProps, setUserProps] = useState({});
   const [institutions, setInstitutions] = useState([]);
   const [name, setName] = useState('');
-  const [updatedUser, setUpdatedUser] = useState({});
+  const [updatedName, setUpdatedName] = useState('');
 
   const [profile, setProfile] = useState({
     profileName: '',
@@ -33,14 +33,18 @@ export default function UserProfile(props) {
 
   const updateRef = ({key, value}) => {
     setName(value);
-    let newUser = cloneDeep(user);
-    newUser.displayName = value;
-    setUpdatedUser(newUser);
+    // let newUser = cloneDeep(user);
+    // newUser.displayName = value;
+    setUpdatedName(value);
   };
 
   const updateName = () => {
-    if (updatedUser.displayName) {
-      User.update(updatedUser, updatedUser.userId).then((response) => {
+    if (updatedName) {
+      const payload = {
+        displayName: updatedName
+      };
+
+      User.updateSelf(payload).then((response) => {
         setUserRoleStatuses(response, Storage);
         Notifications.showSuccess({ text: 'Name updated successfully!' });
       }, () => {
