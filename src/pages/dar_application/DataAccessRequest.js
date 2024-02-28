@@ -193,7 +193,16 @@ export default function DataAccessRequest(props) {
           type={FormFieldTypes.TEXTAREA}
           title={'2.3 Research Use Statement (RUS)'}
           validators={[FormValidators.REQUIRED]}
-          description={includeInstructions ? 'A RUS is a brief description of the applicant\'s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public. Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at' : ''}
+          description={
+            <>
+              <p>
+                A RUS is a brief description of the applicant&quote;s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.
+                <span>
+                   Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
+                </span>
+              </p>
+            </>
+          }
           placeholder={'Please limit your RUS to 2200 characters.'}
           rows={6}
           maxLength={2200}
