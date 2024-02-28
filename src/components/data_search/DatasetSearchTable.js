@@ -103,19 +103,18 @@ export const DatasetSearchTable = (props) => {
   };
 
   const getExportableDatasets = async (event, data) => {
-      setTdrApiUrl(await Config.getTdrApiUrl());
-      // Note the dataset id is the first column in subrows.
-      // If columns are ever reordereable, this will need to be updated to be not hardcoded to look for the first column.
-      const datasetIds = data.subtable.rows.map((row) => row.data[0].value);
-      const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIds);
-      if (snapshots.filteredTotal > 0) {
-        const datasetIdToSnapshot = _.chain(snapshots.items)
-          // Ignore any snapshots that a user does not have export (steward or reader) to
-          .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-          .groupBy('duosId')
-          .value();
-        setExportableDatasets(datasetIdToSnapshot);
-      }
+    setTdrApiUrl(await Config.getTdrApiUrl());
+    // Note the dataset identifier is in each subrow.
+    const datasetIdentifiers = data.subtable.rows.map((row) => row.datasetIdentifier);
+    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
+    if (snapshots.filteredTotal > 0) {
+      const datasetIdToSnapshot = _.chain(snapshots.items)
+      // Ignore any snapshots that a user does not have export (steward or reader) to
+        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+        .groupBy('duosId')
+        .value();
+      setExportableDatasets(datasetIdToSnapshot);
+    }
   };
 
   const expandHandler = async (event, data) => {
@@ -191,6 +190,7 @@ export const DatasetSearchTable = (props) => {
             rows: entry.map((dataset) => {
               return {
                 id: 'dataset-' + dataset.datasetId,
+                datasetIdentifier: dataset.datasetIdentifier,
                 data: [
                   {
                     value: <Link key={`dataset.datasetId`} href={`/dataset_statistics/${dataset.datasetId}`}>{dataset.datasetIdentifier}</Link>,
