@@ -1,10 +1,10 @@
-import {li, ul, span} from 'react-hyperscript-helpers';
+import React from 'react';
 import { BaseModal } from '../BaseModal';
 import { useState, useEffect } from 'react';
 import isEmpty from 'lodash/fp/isEmpty';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
 
-const MODAL_ID = 'translatedDul';
+const MODAL_ID = 'translatedDulModal';
 
 const listStyle = {
   listStyle: 'none'
@@ -13,53 +13,56 @@ const listStyle = {
 //NOTE: li partial can be used in components that only need the list
 async function GenerateUseRestrictionStatements(dataUse) {
   if (!dataUse || isEmpty(dataUse)) {
-    return [li({
-      className: 'translated restriction',
-      key: 'restriction-none'
-    }, ['None'])];
+    return (
+      <li key="restriction-none" className="translated-restriction">
+        None
+      </li>
+    );
   }
   const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
   return translations.map((restriction) => {
-    return li({
-      className: 'translated-restriction',
-      key: `${restriction.code}-statement`,
-    }, [span({ style: { fontWeight: 'bold' } }, [restriction.code, ': ']), restriction.description]);
+    return (
+      <li key={`${restriction.code}-statement`} className="translated-restriction">
+        <span style={{fontWeight: 'bold'}}>{restriction.code}: </span>
+        {restriction.description}
+      </li>
+    );
   });
 }
 
 export default function TranslatedDulModal(props) {
-  const OKHandler = () => {
-    props.onOKRequest(MODAL_ID);
-  };
+  const { showModal, onCloseRequest, dataUse } = props;
+
+  const [translatedDulList, setTranslatedDulList] = useState([]);
 
   const closeHandler = () => {
-    props.onCloseRequest(MODAL_ID);
+    onCloseRequest(MODAL_ID);
   };
 
-  const [translatedDULList, setTranslatedDULList] = useState(GenerateUseRestrictionStatements(props.dataUse || []));
-
   useEffect(() => {
-    const getTranslatedDULList = async() => {
-      const list = await GenerateUseRestrictionStatements(props.dataUse || []);
-      setTranslatedDULList(list);
+    const getTranslatedDulList = async () => {
+      const dulList = await GenerateUseRestrictionStatements(dataUse || []);
+      setTranslatedDulList(dulList);
     };
 
-    getTranslatedDULList();
-  }, [props.dataUse]);
+    getTranslatedDulList();
+  }, [dataUse]);
 
   return (
     BaseModal({
-      id: 'translatedDulModal',
-      showModal: props.showModal,
+      id: MODAL_ID,
+      showModal: showModal,
       onRequestClose: closeHandler,
       color: 'dataset',
       type: 'informative',
       iconSize: 'none',
       title: 'Data Use Terms',
-      action: { label: 'Close', handler: OKHandler }
+      action: { label: 'Close', handler: closeHandler }
     },
     [
-      ul({style: listStyle, id: 'txt_translatedRestrictions', className: 'row no-margin translated-restriction'}, translatedDULList),
+      <ul key='dulUnorderedList' style={listStyle} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
+        {translatedDulList}
+      </ul>
     ])
   );
 }

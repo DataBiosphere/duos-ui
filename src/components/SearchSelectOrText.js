@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
 import {isEqual} from 'lodash';
 import {find} from 'lodash/fp';
 
@@ -68,57 +68,53 @@ export const SearchSelectOrText = (props) => {
 
 
   return (
-    div({ className: 'dropdown select-dropdown', id, name: label }, [
-      a({
-        className: `btn select-btn btn-secondary dropdown-toggle ${errored ? 'errored' : ''}`,
-        role: 'button',
-        id: 'dropdownMenuLink',
-        'data-toggle': 'dropdown',
-        'aria-haspopup': true,
-        'aria-expanded': false,
-        onClick: onOpen,
-        disabled
-      }, [
-        div({
-          style: { width: '100%' }
-        }, [
-          span([currentDisplay]),
-          span({ className: 'caret select-caret caret-margin', style: { right: '2%' } })
-        ])
-      ]),
-      div({
-        className: 'dropdown-menu select-dropdown-menu',
-        onBlur: () => {
-          selectManual(searchTerms.current.value);
-          onBlur && onBlur();
-        }
-      }, [
-        input({
-          type: 'text',
-          placeholder: searchPlaceholder ? searchPlaceholder : 'Search...',
-          className: 'search-bar',
-          onChange:() => handleSearch(searchTerms),
-          onKeyDown: (e) => {
-            if (e.key == 'Enter') {
+    <div className="dropdown select-dropdown" id={id} name={label}>
+      <a
+        className={`btn select-btn btn-secondary dropdown-toggle ${errored ? 'errored' : ''}`}
+        role="button"
+        id="dropdownMenuLink"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+        onClick={onOpen}
+        disabled={disabled}
+      >
+        <div style={{ width: '100%' }}>
+          <span>{currentDisplay}</span>
+          <span className="caret select-caret caret-margin" style={{ right: '2%' }} />
+        </div>
+      </a>
+      <div className="dropdown-menu select-dropdown-menu" onBlur={() => {
+        selectManual(searchTerms.current.value);
+        onBlur && onBlur();
+      }}>
+        <input
+          type="text"
+          placeholder={searchPlaceholder ? searchPlaceholder : 'Search...'}
+          className="search-bar"
+          onChange={() => handleSearch(searchTerms)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
               selectManual(searchTerms.current.value);
             }
-          },
-          ref: searchTerms
-        }),
-        div({
-          className: 'dropdown-divider'
-        }),
-        ul({ style: { paddingLeft: 0 } }, filteredList.map(item => {
-          return li({
-            className: item.key === currentSelection
-              ? 'dropdown-item select-dropdown-item active'
-              : 'dropdown-item select-dropdown-item',
-            onMouseUp: () => {
-              select(item.key);
-            },
-          }, [item.displayText]);
-        }))
-      ])
-    ])
+          }}
+          ref={searchTerms}
+        />
+        <div className="dropdown-divider" />
+        <ul style={{ paddingLeft: 0 }}>
+          {filteredList.map(item => (
+            <li
+              className={item.key === currentSelection ? 'dropdown-item select-dropdown-item active' : 'dropdown-item select-dropdown-item'}
+              onMouseUp={() => {
+                select(item.key);
+              }}
+              key={item.key}
+            >
+              {item.displayText}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 };

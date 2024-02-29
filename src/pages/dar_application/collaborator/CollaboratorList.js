@@ -1,7 +1,7 @@
+import React from 'react';
 import CollaboratorForm from './CollaboratorForm';
 import CollaboratorRow from './CollaboratorRow';
 import { useState, useEffect} from 'react';
-import { button, div, h } from 'react-hyperscript-helpers';
 import './collaborator.css';
 import { isNil } from 'lodash';
 
@@ -68,59 +68,62 @@ export default function CollaboratorList(props) {
     setDeleteBoolArray((new Array(props.collaborators.length).fill(false)));
   }, [props.collaborators, props.deleteBoolArray]);
 
-  const ListItems = div({className: 'form-group row no-margin'}, [
-    collaborators
-      .map((collaborator, index) => {
-        return h(CollaboratorRow, {
-          index: index,
-          saveCollaborator: (newCollaborator) => saveCollaborator(index, newCollaborator),
-          deleteCollaborator: () => deleteCollaborator(index),
-          updateEditState: (bool) => updateEditState(index, bool),
-          toggleDeleteBool: (bool) => toggleDeleteBool(index, bool),
-          collaborator,
-          collaboratorLabel,
-          showApproval,
-          editMode: editState[index],
-          key: collaborator?.uuid,
-          validation: !isNil(validation) ? validation[index] || {} : {},
-          onCollaboratorValidationChange,
-          deleteMode: deleteBoolArray[index]
-        });
-      })
-  ]);
+  const ListItems = (
+    <div className="form-group row no-margin">
+      {collaborators.map((collaborator, index) => (
+        <CollaboratorRow
+          index={index}
+          saveCollaborator={(newCollaborator) => saveCollaborator(index, newCollaborator)}
+          deleteCollaborator={() => deleteCollaborator(index)}
+          updateEditState={(bool) => updateEditState(index, bool)}
+          toggleDeleteBool={(bool) => toggleDeleteBool(index, bool)}
+          collaborator={collaborator}
+          collaboratorLabel={collaboratorLabel}
+          showApproval={showApproval}
+          editMode={editState[index]}
+          key={collaborator?.uuid}
+          validation={!isNil(validation) ? validation[index] || {} : {}}
+          onCollaboratorValidationChange={onCollaboratorValidationChange}
+          deleteMode={deleteBoolArray[index]}
+        />
+      ))}
+    </div>
+  );
 
   return (
-    div({className: 'collaborator-list-component'}, [
-      div({className: 'row no-margin'}, [
-        button({
-          id: `add-${collaboratorKey}-btn`,
-          type: 'button', // default button element type inside a form is "submit".
-          className: 'button button-white',
-          style: {
+    <div className="collaborator-list-component">
+      <div className="row no-margin">
+        {!showNewForm && <button
+          id={`add-${collaboratorKey}-btn`}
+          type="button" // default button element type inside a form is "submit".
+          className="button button-white"
+          style={{
             marginTop: 25,
             marginBottom: 5,
             ...(props.disabled ? { cursor: 'not-allowed' } : {}),
-          },
-          onClick: () => {
+          }}
+          onClick={() => {
             !props.disabled && setShowNewForm(true);
-          },
-          isRendered: !showNewForm,
-          disabled: props.disabled,
-        }, [`Add ${collaboratorLabel}`]),
-        h(CollaboratorForm, {
-          index: collaborators.length,
-          collaboratorKey,
-          saveCollaborator: (newCollaborator) => saveCollaborator(collaborators.length, newCollaborator),
-          updateEditState: (bool) => setShowNewForm(bool),
-          isRendered: showNewForm,
-          collaboratorLabel,
-          showApproval,
-          editMode: true,
-          validation: !isNil(validation) ? validation[collaborators.length] || {} : {},
-          onCollaboratorValidationChange,
-        }),
-      ]),
-      ListItems
-    ])
+          }}
+          disabled={props.disabled}
+        >
+          Add {collaboratorLabel}
+        </button>}
+        {showNewForm && (
+          <CollaboratorForm
+            index={collaborators.length}
+            collaboratorKey={collaboratorKey}
+            saveCollaborator={(newCollaborator) => saveCollaborator(collaborators.length, newCollaborator)}
+            updateEditState={(bool) => setShowNewForm(bool)}
+            collaboratorLabel={collaboratorLabel}
+            showApproval={showApproval}
+            editMode={true}
+            validation={!isNil(validation) ? validation[collaborators.length] || {} : {}}
+            onCollaboratorValidationChange={onCollaboratorValidationChange}
+          />
+        )}
+      </div>
+      {ListItems}
+    </div>
   );
 }
