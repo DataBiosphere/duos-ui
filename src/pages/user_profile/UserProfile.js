@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import { Institution } from '../../libs/ajax';
+import { Institution, User } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
@@ -12,12 +12,16 @@ import AcceptedAcknowledgements from './AcceptedAcknowledgements';
 import ControlledAccessGrants from './ControlledAccessGrants';
 import ga4ghLogo from '../../images/ga4gh-logo.png';
 import userProfileIcon from '../../images/user-profile.png';
+import {cloneDeep} from 'lodash/fp';
+import {setUserRoleStatuses} from '../../libs/utils';
 
 export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
   const [userProps, setUserProps] = useState({});
   const [institutions, setInstitutions] = useState([]);
+  const [name, setName] = useState('');
+  const [updatedName, setUpdatedName] = useState('');
 
   const [profile, setProfile] = useState({
     profileName: '',
@@ -26,6 +30,29 @@ export default function UserProfile(props) {
   });
 
   const [notificationData, setNotificationData] = useState({});
+
+  const updateRef = ({key, value}) => {
+    setName(value);
+    setUpdatedName(value);
+  };
+
+  const updateName = () => {
+    if (updatedName) {
+      const payload = {
+        displayName: updatedName
+      };
+
+      User.updateSelf(payload).then((response) => {
+        setUserRoleStatuses(response, Storage);
+        Notifications.showSuccess({ text: 'Name updated successfully!' });
+      }, () => {
+        Notifications.showError({ text: 'Some errors occurred, the user\'s name was not updated.' });
+      });
+    } else {
+      Notifications.showInformation({ text: 'There are no changes to save.' });
+    }
+  };
+
 
   useEffect(() => {
     const init = async () => {
@@ -38,6 +65,7 @@ export default function UserProfile(props) {
           email: user.email,
           id: user.userId
         });
+        setName(user.displayName);
         const institutions = await Institution.list();
         setInstitutions(institutions);
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
@@ -124,12 +152,25 @@ export default function UserProfile(props) {
     >
       Full Name
     </h1>
-    <FormField
-      type={FormFieldTypes.TEXT}
-      id='profileName'
-      defaultValue={profile.profileName}
-      disabled={true}
-    />
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <FormField
+        type={FormFieldTypes.TEXT}
+        id='profileName'
+        defaultValue={name}
+        onChange={updateRef}
+        style={{ width: '90%', marginTop: '10px',
+      }}
+      />
+      <button
+        className='f-right btn-primary common-background'
+        onClick={updateName}
+        style={{
+          marginTop: '10px'
+        }}
+      >
+        Save
+      </button>
+    </div>
     <div style={{ marginTop: '10px' }} />
     <FormField
       type={FormFieldTypes.TEXT}
