@@ -130,23 +130,23 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
   }
 
 
-
-
-  if(isNil(formData.anvilUse)) {
+  if (isNil(formData.anvilUse)) {
     errors.anvilUse = requiredError;
   } else {
-    if(!formData.anvilUse && !formData.localUse && !formData.cloudUse) {
+    if (!formData.anvilUse && !formData.localUse && !formData.cloudUse) {
       errors.dataStorageAndAnalysis = requiredError; // one of them must be selected, this makes the whole section red until selected.
     }
-
-    if(formData.cloudUse && (isStringEmpty(formData.cloudProvider))){
-      errors.cloudProvider = requiredError;
-    }
-    if(formData.cloudUse && (isStringEmpty(formData.cloudProviderType))){
-      errors.cloudProviderType = requiredError;
-    }
-    if(formData.cloudUse && (isStringEmpty(formData.cloudProviderDescription))){
-      errors.cloudProviderDescription = requiredError;
+    // Cloud use sub-conditions only apply when Cloud Use Statement (section 1.8) selection is "No"
+    if (!formData.anvilUse) {
+      if (formData.cloudUse && (isStringEmpty(formData.cloudProvider))) {
+        errors.cloudProvider = requiredError;
+      }
+      if (formData.cloudUse && (isStringEmpty(formData.cloudProviderType))) {
+        errors.cloudProviderType = requiredError;
+      }
+      if (formData.cloudUse && (isStringEmpty(formData.cloudProviderDescription))) {
+        errors.cloudProviderDescription = requiredError;
+      }
     }
   }
 
