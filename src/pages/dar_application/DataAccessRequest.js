@@ -133,7 +133,7 @@ export default function DataAccessRequest(props) {
   };
 
   return (
-  // eslint-disable-next-line react/no-unknown-property
+    // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
         <FormField
@@ -196,7 +196,7 @@ export default function DataAccessRequest(props) {
           description={
             <>
               <p>
-                A RUS is a brief description of the applicant&quote;s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.
+                A RUS is a brief description of the applicant&apos;s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.
                 <span>
                    Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them.
                 </span>
