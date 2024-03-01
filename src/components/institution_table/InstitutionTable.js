@@ -1,32 +1,36 @@
-import { isEmpty, isNil, assign } from 'lodash/fp';
+import React from 'react';
+import { isEmpty, isNil } from 'lodash/fp';
 import { useState, useEffect } from 'react';
-import { div, h, a , span } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import PaginationBar from '../PaginationBar';
 import AddInstitutionModal from '../modals/AddInstitutionModal';
 
-export const tableHeaderTemplate = [
-  div({style: Styles.TABLE.ID_CELL}, ['ID']),
-  div({style: Styles.TABLE.INSTITUTION_CELL}, ['Institution']),
-  div({style: Styles.TABLE.INSTITUTION_CELL}, ['Signing Officials']),
-  div({style: Styles.TABLE.DATA_ID_CELL}, ['Create User']),
-  div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ['Create Date']),
-  div({style: Styles.TABLE.DATA_ID_CELL}, ['Update User']),
-  div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ['Update Date']),
-];
+export const tableHeaderTemplate = (
+  <>
+    <div style={Styles.TABLE.ID_CELL}>ID</div>
+    <div style={Styles.TABLE.INSTITUTION_CELL}>Institution</div>
+    <div style={Styles.TABLE.INSTITUTION_CELL}>Signing Officials</div>
+    <div style={Styles.TABLE.DATA_ID_CELL}>Create User</div>
+    <div style={Styles.TABLE.SUBMISSION_DATE_CELL}>Create Date</div>
+    <div style={Styles.TABLE.DATA_ID_CELL}>Update User</div>
+    <div style={Styles.TABLE.SUBMISSION_DATE_CELL}>Update Date</div>
+  </>
+);
 
 const loadingMarginOverwrite = {margin: '1rem 2%'};
 
-export const tableRowLoadingTemplate = [
-  div({style: assign(Styles.TABLE.ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.INSTITUTION_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.INSTITUTION_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'})
-];
+export const tableRowLoadingTemplate = (
+  <>
+    <div style={{...Styles.TABLE.ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.INSTITUTION_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.INSTITUTION_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.DATA_ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.SUBMISSION_DATE_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.DATA_ID_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+    <div style={{...Styles.TABLE.SUBMISSION_DATE_CELL, ...loadingMarginOverwrite}} className="text-placeholder" />
+  </>
+);
 
 const calcPageCount = (tableSize, filteredList) => {
   if(isEmpty(filteredList)) {
@@ -70,64 +74,52 @@ export default function InstitutionTable(props) {
   };
 
   return (
-    div({className: 'institution-table-component'}, [
-      div({style: Styles.TABLE.CONTAINER}, [
-        div({style: Styles.TABLE.HEADER_ROW}, tableHeaderTemplate),
-        filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
+    <div className='institution-table-component'>
+      <div style={Styles.TABLE.CONTAINER}>
+        <div style={Styles.TABLE.HEADER_ROW}>
+          {tableHeaderTemplate}
+        </div>
+        {filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
           let signingOfficialsList = [];
           if (!isNil(inst.signingOfficials)) {
             inst.signingOfficials.forEach((user) => {
-              signingOfficialsList.push(span({style: {display: 'block'}}, `${user.displayName} (${user.email})`));
+              signingOfficialsList.push(
+                <span style={{display: 'block'}} key={user.userId}>
+                  {user.displayName} ({user.email})
+                </span>
+              );
             });
           }
           const borderStyle = index > 0 ? {borderTop: '1px solid rgba(109,110,112,0.2)'} : {};
-          return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${inst.id}-${index}`}, [
-            div({
-              style: Object.assign({}, Styles.TABLE.ID_CELL),
-            }, [inst.id]),
-            div({
-              style: Object.assign({}, Styles.TABLE.INSTITUTION_CELL)
-            }, [
-              a({ style: {
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis'},
-              onClick: () => { openUpdateModal(inst.id); }
-              }, [inst.name])
-            ]),
-            div({
-              style: Object.assign({}, {...Styles.TABLE.INSTITUTION_CELL, display: 'block'})
-            }, signingOfficialsList),
-            div({
-              style: Object.assign({}, Styles.TABLE.DATA_ID_CELL)
-            }, [inst.createUser ? inst.createUser.displayName : '']),
-            div({
-              style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL)
-            }, [inst.createDate]),
-            div({
-              style: Object.assign({}, Styles.TABLE.DATA_ID_CELL)
-            }, [inst.updateUser ? inst.updateUser.displayName : '']),
-            div({
-              style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL)
-            }, [inst.updateDate]),
-          ]);
-        }),
-        h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize})
-      ]),
-      h(AddInstitutionModal, {
-        isRendered: showUpdateInstitutionModal,
-        showModal: showUpdateInstitutionModal,
-        institutionId: institutionId,
-        closeModal: closeUpdateModal,
-        onOKRequest: onUpdateSave,
-        onCloseRequest: closeUpdateModal
-      }),
-      h(ReactTooltip, {
-        place: 'left',
-        effect: 'solid',
-        multiline: true,
-        className: 'tooltip-wrapper'
-      })
-    ])
+          return (
+            <div style={Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW)} key={`${inst.id}-${index}`}>
+              <div style={Object.assign({}, Styles.TABLE.ID_CELL)}>{inst.id}</div>
+              <div style={Object.assign({}, Styles.TABLE.INSTITUTION_CELL)}>
+                <a style={{overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis'}} onClick={() => { openUpdateModal(inst.id); }}>{inst.name}</a>
+              </div>
+              <div style={Object.assign({}, {...Styles.TABLE.INSTITUTION_CELL, display: 'block'})}>{signingOfficialsList}</div>
+              <div style={Object.assign({}, Styles.TABLE.DATA_ID_CELL)}>{inst.createUser ? inst.createUser.displayName : ''}</div>
+              <div style={Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL)}>{inst.createDate}</div>
+              <div style={Object.assign({}, Styles.TABLE.DATA_ID_CELL)}>{inst.updateUser ? inst.updateUser.displayName : ''}</div>
+              <div style={Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL)}>{inst.updateDate}</div>
+            </div>
+          );
+        })}
+        <PaginationBar pageCount={pageCount} currentPage={currentPage} tableSize={tableSize} goToPage={goToPage} changeTableSize={changeTableSize} />
+      </div>
+      {showUpdateInstitutionModal && <AddInstitutionModal
+        showModal={showUpdateInstitutionModal}
+        institutionId={institutionId}
+        closeModal={closeUpdateModal}
+        onOKRequest={onUpdateSave}
+        onCloseRequest={closeUpdateModal}
+      />}
+      <ReactTooltip
+        place='left'
+        effect='solid'
+        multiline={true}
+        className='tooltip-wrapper'
+      />
+    </div>
   );
 }

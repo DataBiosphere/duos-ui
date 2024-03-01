@@ -30,7 +30,7 @@ export default function TableSkeletonLoader(props) {
       template.push(rowTemplate);
       start++;
     }
-    template.push(<div style={Styles.TABLE.FOOTER} />);
+    template.push(<div key='row-loader-footer' style={Styles.TABLE.FOOTER} />);
 
     return template;
   };
