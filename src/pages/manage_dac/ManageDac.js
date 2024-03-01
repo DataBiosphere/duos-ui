@@ -1,6 +1,6 @@
+import React from 'react';
 import ManageDacTable from '../../components/manage_dac_table/ManageDacTable';
 import {useState, useEffect, useCallback} from 'react';
-import {div, h, img, a, span} from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import {DAC} from '../../libs/ajax';
@@ -116,98 +116,82 @@ export const ManageDac = function ManageDac() {
     setSelectedDatasets([]);
   };
 
-  return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
-      div(
-        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
-        [
-          div({ style: Styles.ICON_CONTAINER }, [
-            img({
-              id: 'lock-icon',
-              src: lockIcon,
-              style: Styles.HEADER_IMG,
-            }),
-          ]),
-          div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: {
-              fontFamily: 'Montserrat',
-              fontWeight: 600,
-              fontSize: '2.8rem'
-            } }, [
-              `Manage Data Access Committee`,
-            ]),
-            div(
-              {
-                style: {
-                  fontFamily: 'Montserrat',
-                  fontSize: '1.6rem'
-                },
-              },
-              ['Create and manage Data Access Commitee']
-            ),
-          ]),
-        ]
-      ),
-      div({className: 'right-header-section'}, [
-        a({
-          id: 'btn_addDAC',
-          className: 'col-md-12 btn-primary btn-add common-background',
-          style: {
-            marginTop: '30%',
-            display: 'flex'
-          },
-          onClick: addDac
-        }, [
-          span({}, ['Add DAC'])
-        ])
-      ])
-
-    ]),
-    h(ManageDacTable, {
-      isLoading,
-      dacs,
-      userRole,
-      setShowDacModal,
-      setShowDatasetsModal,
-      setShowMembersModal,
-      setShowConfirmationModal,
-      setIsEditMode,
-      setSelectedDac,
-      setSelectedDatasets
-    }),
-    h(ConfirmationModal, {
-      showConfirmation: showConfirmationModal,
-      closeConfirmation: closeConfirmation,
-      title: 'Delete DAC?',
-      message: 'Are you sure you want to delete this Data Access Committee?',
-      header: selectedDac.name,
-      onConfirm: () => handleDeleteDac(),
-    }),
-    DacMembersModal({
-      isRendered: showMembersModal,
-      showModal: showMembersModal,
-      onOKRequest: closeViewMembersModal,
-      onCloseRequest: closeViewMembersModal,
-      dac: selectedDac
-    }),
-    DacDatasetsModal({
-      isRendered: showDatasetsModal,
-      showModal: showDatasetsModal,
-      onOKRequest: closeViewDatasetsModal,
-      onCloseRequest: closeViewDatasetsModal,
-      dac: selectedDac,
-      datasets: selectedDatasets
-    }),
-    AddDacModal({
-      isRendered: showDacModal,
-      showModal: showDacModal,
-      isEditMode: isEditMode,
-      onOKRequest: okAddDacModal,
-      onCloseRequest: closeAddDacModal,
-      dac: selectedDac,
-      userRole: userRole
-    }),
-  ]);
+  return (
+    <div style={Styles.PAGE}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
+        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+          <div style={Styles.ICON_CONTAINER}>
+            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>
+              Manage Data Access Committee
+            </div>
+            <div style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}>
+              Create and manage Data Access Committee
+            </div>
+          </div>
+        </div>
+        <div className="right-header-section">
+          <a
+            id="btn_addDAC"
+            className="col-md-12 btn-primary btn-add common-background"
+            style={{ marginTop: '30%', display: 'flex' }}
+            onClick={addDac}
+          >
+            <span>Add DAC</span>
+          </a>
+        </div>
+      </div>
+      <ManageDacTable
+        isLoading={isLoading}
+        dacs={dacs}
+        userRole={userRole}
+        setShowDacModal={setShowDacModal}
+        setShowDatasetsModal={setShowDatasetsModal}
+        setShowMembersModal={setShowMembersModal}
+        setShowConfirmationModal={setShowConfirmationModal}
+        setIsEditMode={setIsEditMode}
+        setSelectedDac={setSelectedDac}
+        setSelectedDatasets={setSelectedDatasets}
+      />
+      <ConfirmationModal
+        showConfirmation={showConfirmationModal}
+        closeConfirmation={closeConfirmation}
+        title="Delete DAC?"
+        message="Are you sure you want to delete this Data Access Committee?"
+        header={selectedDac.name}
+        onConfirm={handleDeleteDac}
+      />
+      {showMembersModal && (
+        <DacMembersModal
+          showModal={showMembersModal}
+          onOKRequest={closeViewMembersModal}
+          onCloseRequest={closeViewMembersModal}
+          dac={selectedDac}
+        />
+      )}
+      {showDatasetsModal && (
+        <DacDatasetsModal
+          showModal={showDatasetsModal}
+          onOKRequest={closeViewDatasetsModal}
+          onCloseRequest={closeViewDatasetsModal}
+          dac={selectedDac}
+          datasets={selectedDatasets}
+        />
+      )}
+      {showDacModal && (
+        <AddDacModal
+          showModal={showDacModal}
+          isEditMode={isEditMode}
+          onOKRequest={okAddDacModal}
+          onCloseRequest={closeAddDacModal}
+          dac={selectedDac}
+          userRole={userRole}
+        />
+      )}
+    </div>
+  );
 };
 
 export default ManageDac;
