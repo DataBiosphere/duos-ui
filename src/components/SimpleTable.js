@@ -140,7 +140,7 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = <ColumnRow key="column-row-container" columnHeaders={columnHeaders} baseStyle={baseStyle} columnStyle={columnStyle} sort={sort} onSort={onSort} />;
-  const tableTemplate = [ columnRow, <DataRows rowData={rowData} baseStyle={baseStyle} columnHeaders={columnHeaders} rowWrapper={rowWrapper} key="table-data-rows" /> ];
+  const tableTemplate = [columnRow, <DataRows rowData={rowData} baseStyle={baseStyle} columnHeaders={columnHeaders} rowWrapper={rowWrapper} key="table-data-rows" />];
   const output = isLoading ? <TableLoading /> : tableTemplate;
   return (
     <div>
