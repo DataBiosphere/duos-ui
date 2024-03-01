@@ -102,12 +102,12 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
           //if there is no onClick function, render as simple cell
           } else if (isNil(onClick)) {
             output = (
-              <SimpleTextCell text={data} style={appliedStyle} key={`filtered-list-${id}-${label}`} cellIndex={cellIndex} />
+              <SimpleTextCell text={data} style={appliedStyle} key={`filtered-list-simple-${id}-${label}-${cellIndex}`} />
             );
           } else {
             //otherwise render as on click cell
             output = (
-              <OnClickTextCell text={data} style={appliedStyle} onClick={() => onClick(index)} key={`filtered-list-${id}-${label}`} cellIndex={cellIndex} />
+              <OnClickTextCell text={data} style={appliedStyle} onClick={() => onClick(index)} key={`filtered-list-click-${id}-${label}-${cellIndex}`} />
             );
           }
           return output;
