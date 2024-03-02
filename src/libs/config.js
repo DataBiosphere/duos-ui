@@ -15,8 +15,6 @@ export const Config = {
 
   getTerraUrl: async () => (await getConfig()).terraUrl,
 
-  getProfileUrl: async () => (await getConfig()).profileUrl,
-
   getNihUrl: async () => (await getConfig()).nihUrl,
 
   getGoogleClientId: async () => (await getConfig()).clientId,
