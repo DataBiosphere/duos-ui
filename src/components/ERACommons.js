@@ -28,7 +28,6 @@ export default function ERACommons(props) {
     };
     fetchData();
     // Note that we do not want props.location as a dependency here since it does not change after render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onMouseEnter = () => {
