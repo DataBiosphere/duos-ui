@@ -600,13 +600,6 @@ export const Votes = {
 
 export const AuthenticateNIH = {
 
-  verifyNihToken: async (token) => {
-    const url = `${await Config.getProfileUrl()}/shibboleth-token`;
-    const payload = fp.get('nih-username-token')(token);
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: payload }]));
-    return await res.json();
-  },
-
   saveNihUsr: async (decodedData) => {
     const url = `${await getApiUrl()}/api/nih`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
