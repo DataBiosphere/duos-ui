@@ -606,30 +606,11 @@ export const AuthenticateNIH = {
     return await res.json();
   },
 
-  eliminateAccount: async () => {
+  deleteAccountLinkage: async () => {
     const url = `${await getApiUrl()}/api/nih`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
-
-  expirationCount(expDate) {
-    let result = -1;
-    if (expDate !== null && expDate !== undefined) {
-      var currentDate = new Date().getTime();
-      var millisecondsPerDay = 24 * 60 * 60 * 1000;
-      var count = (AuthenticateNIH.treatAsUTC(parseInt(expDate, 10)) - AuthenticateNIH.treatAsUTC(currentDate)) / millisecondsPerDay;
-      if (count > 0) {
-        result = Math.round(count);
-      }
-    }
-    return result;
-  },
-
-  treatAsUTC(date) {
-    var result = new Date(date);
-    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
-    return result;
-  }
 
 };
 
