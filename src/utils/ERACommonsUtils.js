@@ -21,7 +21,7 @@ export const decodeNihToken = async (token) => {
     // We want the JSON components, so introduce a delimiter to split on
     const splittableBufferString = bufferString.replaceAll('}', '}|');
     const parts = splittableBufferString.split('|');
-    // Something is wrong - we should have at least 2 parts
+    // Something is wrong if we don't have at least 2 parts
     if (parts.length < 2) {
       return null;
     }
