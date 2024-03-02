@@ -55,7 +55,9 @@ export default function ERACommons(props) {
           () => getUserInfo(),
           () => setNihError(true)
         );
-        document.getElementById('era-commons-id').scrollIntoView();
+        document.getElementById('era-commons-id').scrollIntoView(
+          {block: 'start', inline: 'nearest', behavior: 'smooth'}
+        );
       },
       () => setNihError(true)
     );
