@@ -129,8 +129,8 @@ export default function ERACommons(props) {
   return (
     <div id={'era-commons-id'} className={props.className} style={{ minHeight: 65, ...props.style }}>
       {props.header && <label className="control-label">
-        <span>NIH eRA Commons ID
-          {isNil(props.required) || props.required === true ? '*' : ''}
+        <span data-cy="era-commons-header">NIH eRA Commons ID
+          {isNil(props.required) || props.required === true ? <span data-cy="era-commons-required">*</span> : ''}
         </span>
       </label>}
       {(!isAuthorized || expirationCount < 0) && (!props.readOnly &&
