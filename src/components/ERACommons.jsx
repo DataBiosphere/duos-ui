@@ -39,27 +39,21 @@ export default function ERACommons(props) {
 
   const saveNIHAuthentication = async (searchArg) => {
     const rawToken = qs.parse(searchArg);
-    await decodeNihToken(rawToken).then(
-      (decodedToken) => {
-        if (isNil(decodedToken)) {
-          setNihError(true);
-          return;
-        }
-        // We need to rewrite the payload to match the expected format in Consent.
-        const nihPayload = {
-          'linkedNihUsername': `${decodedToken.eraCommonsUsername}`,
-          'linkExpireTime': `${decodedToken.exp}`,
-          'status': true
-        };
-        AuthenticateNIH.saveNihUsr(nihPayload).then(
-          () => getUserInfo(),
-          () => setNihError(true)
-        );
-        document.getElementById('era-commons-id').scrollIntoView(
-          {block: 'start', inline: 'nearest', behavior: 'smooth'}
-        );
-      },
-      () => setNihError(true)
+    const decodedToken = await decodeNihToken(rawToken);
+    if (isNil(decodedToken)) {
+      setNihError(true);
+      return;
+    }
+    // We need to rewrite the payload to match the expected format in Consent.
+    const nihPayload = {
+      'linkedNihUsername': `${decodedToken.eraCommonsUsername}`,
+      'linkExpireTime': `${decodedToken.exp}`,
+      'status': true
+    };
+    const updatedUser = await AuthenticateNIH.saveNihUsr(nihPayload);
+    setResearcherProfile(updatedUser);
+    document.getElementById('era-commons-id').scrollIntoView(
+      {block: 'start', inline: 'nearest', behavior: 'smooth'}
     );
   };
 
@@ -134,15 +128,21 @@ export default function ERACommons(props) {
         </span>
       </label>}
       {(!isAuthorized || expirationCount < 0) && (!props.readOnly &&
-    <a style={buttonStyle} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={redirectToNihLogin} target="_blank">
-      <div style={logoStyle} />
-      <span style={{ verticalAlign: '50%' }}>Authenticate your account</span>
-    </a>
+        <a
+          data-cy="era-commons-authenticate-link"
+          style={buttonStyle}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+          onClick={redirectToNihLogin}
+          target="_blank">
+          <div style={logoStyle} />
+          <span style={{ verticalAlign: '50%' }}>Authenticate your account</span>
+        </a>
       )}
       {nihError && <span className="cancel-color required-field-error-span">{nihErrorMessage}</span>}
       {isAuthorized && <div>
         {expirationCount >= 0 && <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
-          <div style={{ float: 'left', fontWeight: 500, display: 'inline', paddingTop: 5 }}>{eraCommonsId}</div>
+          <div data-cy="era-commons-id-value" style={{ float: 'left', fontWeight: 500, display: 'inline', paddingTop: 5 }}>{eraCommonsId}</div>
           {!props.readOnly && <button style={{ float: 'left', margin: '2px 0 0 10px' }} type="button" onClick={deleteNihAccount} className="close">
             <span className="glyphicon glyphicon-remove-circle" data-tip="Clear account" data-for="tip_clearNihAccount" />
           </button>}

@@ -2,10 +2,12 @@
 
 import ERACommons from '../../../src/components/ERACommons.jsx';
 import {decodeNihToken} from '../../../src/utils/ERACommonsUtils';
-import {User} from '../../../src/libs/ajax';
+import {AuthenticateNIH, User} from '../../../src/libs/ajax';
 import {mount} from 'cypress/react';
 import React from 'react';
+import {Buffer} from 'buffer';
 
+// Example token from https://broad-shibboleth-prod.appspot.com/dev/login?return-url=%2Fexample-return%3Ftoken%3D%3Ctoken%3E
 const encodedToken =
 `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ
 lcmFDb21tb25zVXNlcm5hbWUiOiJ0ZXN0aW5nIiw
@@ -27,6 +29,17 @@ const researcher = {
   'email': 'test@email.com'
 };
 
+const buildToken = (username, iat, exp) => {
+  const part1 = `{"alg":"RS256","typ":"JWT"}`;
+  const part2 = {
+    eraCommonsUsername: username,
+    iat: iat,
+    exp: exp
+  };
+  const part3 = '...';
+  return Buffer.from(`${part1}${JSON.stringify(part2)}${part3}`).toString('base64');
+};
+
 describe('ERA Commons Utility', function () {
   it('decodeNihToken works with a valid base64 encoded token', async function () {
     const token = {'nih-username-token': encodedToken};
@@ -44,14 +57,14 @@ describe('ERA Commons Utility', function () {
 });
 
 describe('ERA Commons Component', function () {
-  it('renders the ERA Commons component with header and required', function () {
+  it('renders an empty ERA Commons component with header and required', function () {
     cy.stub(User, 'getMe').returns(researcher);
+    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(researcher);
     mount(<ERACommons
-      isAuthorized={true}
+      isAuthorized={false}
       className={''}
       destination={''}
       header={true} // Triggers the NIH eRA Commons header
-      location={{search: encodedToken}}
       onNihStatusUpdate={() => {}}
       readOnly={false}
       required={true} // Triggers the required flag on the NIH eRA Commons ID
@@ -60,5 +73,38 @@ describe('ERA Commons Component', function () {
     cy.get('#era-commons-id').should('exist');
     cy.get('[data-cy=era-commons-header').should('exist');
     cy.get('[data-cy=era-commons-required').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link').should('exist');
+    cy.get('.required-field-error-span').should('not.exist');
+  });
+
+  it('renders a populated ERA Commons component after having authenticated with NIH', function () {
+    researcher.eraCommonsId = 'testing';
+    const iat = new Date().getTime();
+    const exp = iat + (30 * 24 * 60 * 60 * 1000); // iat + 30 days
+    // This simulates that we've saved the NIH properties for the researcher
+    researcher.researcherProperties = [
+      {propertyKey:'eraAuthorized', propertyValue: true},
+      {propertyKey:'eraExpiration', propertyValue: exp}
+    ];
+    researcher.eraCommonsId = 'testing';
+    cy.stub(User, 'getMe').returns(researcher);
+    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(researcher);
+    mount(<ERACommons
+      isAuthorized={true}
+      className={''}
+      destination={''}
+      location={{search: `?nih-username-token=${buildToken('testing', iat, exp)}`}}
+      header={true}
+      onNihStatusUpdate={() => {}}
+      readOnly={false}
+      required={true}
+      style={{}}
+    />);
+    cy.get('#era-commons-id').should('exist');
+    cy.get('[data-cy=era-commons-header').should('exist');
+    cy.get('[data-cy=era-commons-required').should('exist');
+    cy.get('[data-cy=era-commons-authenticate-link').should('not.exist');
+    cy.get('[data-cy=era-commons-id-value').should('exist');
+    cy.get('.required-field-error-span').should('not.exist');
   });
 });
