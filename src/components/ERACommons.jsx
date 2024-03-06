@@ -20,18 +20,31 @@ export default function ERACommons(props) {
   const getUserInfo = async () => {
     const response = await User.getMe();
     const propsData = response.researcherProperties;
-    const authProp = find({'propertyKey':'eraAuthorized'})(propsData);
-    const expProp = find({'propertyKey':'eraExpiration'})(propsData);
+    setCommonResearcherPropertyState(propsData, response.eraCommonsId);
+  };
+
+  /**
+   * This function sets the common ERA Commons properties used in state. The user we are setting properties for
+   * can either be a provided researcher object or the current authenticated user.
+   * @param properties List of user properties to read from.
+   * @param eraCommonsId The user's eRA Commons ID
+   */
+  const setCommonResearcherPropertyState = (properties, eraCommonsId) => {
+    const authProp = find({'propertyKey':'eraAuthorized'})(properties);
+    const expProp = find({'propertyKey':'eraExpiration'})(properties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
     const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
     const nihValid = isAuthorized && expirationCount > 0;
-    const eraCommonsId = response.eraCommonsId;
     props.onNihStatusUpdate(nihValid);
     setAuthorized(isAuthorized);
     setExpirationCount(expirationCount);
     setEraCommonsId(isNil(eraCommonsId) ? '' : eraCommonsId);
   };
 
+  /**
+   * This useEffect is intended to run once after a user has been redirected back to the current page from a
+   * successful NIH authentication.
+   */
   useEffect(() => {
     const init = async () => {
       // If we have a token to verify, save it before getting user info
@@ -43,21 +56,16 @@ export default function ERACommons(props) {
     // Note that we do not want props.location as a dependency here since it does not change after render.
   }, []);
 
+  /**
+   * This useEffect is intended to populate state from either the provided researcher object or the current user.
+   */
   useEffect(() => {
     const fetchData = async () => {
       // In the read-only case, we are provided a researcher object and do not need to query for the current user
       if (props.readOnly && props.researcherProfile) {
         setResearcherProfile(props.researcherProfile);
         const propsData = researcherProfile.properties;
-        const authProp = find({'propertyKey':'eraAuthorized'})(propsData);
-        const expProp = find({'propertyKey':'eraExpiration'})(propsData);
-        const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-        const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
-        const nihValid = isAuthorized && expirationCount > 0;
-        props.onNihStatusUpdate(nihValid);
-        setAuthorized(isAuthorized);
-        setExpirationCount(expirationCount);
-        setEraCommonsId(researcherProfile.eraCommonsId);
+        setCommonResearcherPropertyState(propsData, researcherProfile.eraCommonsId);
       } else {
         await getUserInfo();
       }
