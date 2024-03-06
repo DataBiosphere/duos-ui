@@ -206,6 +206,9 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
+                    value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
+                  },
+                  {
                     value: () => {
                       const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
                       if (exportableSnapshots.length === 0) {
@@ -217,12 +220,9 @@ export const DatasetSearchTable = (props) => {
                           href={`${tdrApiUrl}/snapshots/${snapshot.id}`}
                           target="_blank"
                         >
-                          {snapshot.name}
+                          {snapshot.name}{'\n'}
                         </Link>);
                     }
-                  },
-                  {
-                    value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
                   },
                   {
                     value: () => {

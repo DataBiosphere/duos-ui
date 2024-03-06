@@ -42,7 +42,7 @@ export const DatasetExportButton = (props) => {
 
   if (exportStatus === 'ready') {
     return (
-      <Link href={exportResult.terraImportLink} target="_blank" rel="noopener noreferrer" title={title} aria-label={title}>Terra</Link>
+      <Link href={exportResult.terraImportLink} target="_blank" rel="noopener noreferrer" title={title} aria-label={title}>Export</Link>
     );
   }
 
