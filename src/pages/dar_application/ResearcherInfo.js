@@ -61,7 +61,7 @@ export default function ResearcherInfo(props) {
           !readOnlyMode && Alert({
             id: 'profileSubmitted',
             type: 'danger',
-            title: span({ className: 'errored' }, [ 
+            title: span({ className: 'errored' }, [
               `You must submit `, profileLink, ` and obtain a `, libraryCardLink,
               ` from your Signing official before you can submit a Data Access Request.`
             ])
@@ -90,7 +90,7 @@ export default function ResearcherInfo(props) {
           ]),
           div({ className: 'flex-row', style: { justifyContent: 'flex-start', alignItems: 'flex-start' } }, [
             h4({ style: { marginRight: 30, marginTop: 30 } }, '1.2.1'),
-            ERACommons({
+            h(ERACommons, {
               destination: eRACommonsDestination,
               researcherProfile: researcher,
               onNihStatusUpdate: onNihStatusUpdate,
