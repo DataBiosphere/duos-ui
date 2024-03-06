@@ -1,4 +1,4 @@
-import {a, div, h, span} from 'react-hyperscript-helpers';
+import React from 'react';
 import {useEffect, useState} from 'react';
 import {isNil, filter, includes, map} from 'lodash/fp';
 
@@ -71,27 +71,33 @@ export default function DatasetsRequestedPanel(props) {
   };
 
   const SectionHeading = () => {
-    return div({style: styles.heading}, [
-      'Datasets Requested',
-      span({
-        style: styles.datasetCount,
-        isRendered: !isLoading,
-        datacy: 'dataset-count'
-      }, [`(${datasetCount})`])
-    ]);
+    return (
+      <div style={styles.heading}>
+        Datasets Requested
+        {!isLoading && <span style={styles.datasetCount} data-cy="dataset-count">
+          ({datasetCount})
+        </span>}
+      </div>
+    );
   };
 
   const DatasetList = () => {
     const datasetRows = map(dataset => {
-      return div({style: {display: 'flex'}, key: dataset.dataSetId, className: 'dataset-list-item'}, [
-        div({style: {width: '12.5%'}}, [datasetId(dataset)]),
-        div({style: {width: '75%'}}, [datasetName(dataset)])
-      ]);
+      return (
+        <div style={{display: 'flex'}} key={dataset.dataSetId} className="dataset-list-item">
+          <div style={{width: '12.5%'}}>{datasetId(dataset)}</div>
+          <div style={{width: '75%'}}>{datasetName(dataset)}</div>
+        </div>
+      );
     })(visibleDatasets);
 
-    return isLoading
-      ? div({className: 'text-placeholder', style: styles.skeletonLoader})
-      : div({style: styles.datasetList, datacy: 'dataset-list'}, [datasetRows]);
+    return isLoading ? (
+      <div className="text-placeholder" style={styles.skeletonLoader} />
+    ) : (
+      <div style={styles.datasetList} data-cy="dataset-list">
+        {datasetRows}
+      </div>
+    );
   };
 
   const datasetId = (dataset) => {
@@ -108,12 +114,17 @@ export default function DatasetsRequestedPanel(props) {
       `- View ${hiddenDatasetCount} less` :
       `+ View ${hiddenDatasetCount} more`;
 
-    return a({
-      datacy: 'collapse-expand-link',
-      style: styles.link,
-      onClick: expanded ? collapseDatasetList : expandDatasetList,
-      isRendered: hiddenDatasetCount > 0
-    }, [linkMessage]);
+    return (
+      <>
+        {hiddenDatasetCount > 0 && <a
+          data-cy="collapse-expand-link"
+          style={styles.link}
+          onClick={expanded ? collapseDatasetList : expandDatasetList}
+        >
+          {linkMessage}
+        </a>}
+      </>
+    );
   };
 
   const expandDatasetList = () => {
@@ -126,9 +137,11 @@ export default function DatasetsRequestedPanel(props) {
     setVisibleDatasets(filteredDatasets.slice(0, collapsedDatasetCapacity));
   };
 
-  return div({style: styles.baseStyle}, [
-    h(SectionHeading),
-    h(DatasetList),
-    h(CollapseExpandLink)
-  ]);
+  return (
+    <div style={styles.baseStyle}>
+      <SectionHeading />
+      <DatasetList />
+      <CollapseExpandLink />
+    </div>
+  );
 }

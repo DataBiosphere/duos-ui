@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import {div, form, label, input } from 'react-hyperscript-helpers';
 import { Alert } from '../Alert';
 import { Institution } from '../../libs/ajax';
 import { BaseModal } from '../BaseModal';
@@ -105,44 +105,57 @@ const AddInstitutionModal = (props) => {
     onOKRequest(result);
   };
 
-  return BaseModal({
-    id: 'addInstitutionModal',
-    showModal: showModal,
-    disableOkBtn: !validForm,
-    onRequestClose: closeHandler,
-    imgSrc: mode === 'Add' ? addInstitutionIcon : editInstitutionIcon,
-    color: 'common',
-    title: mode === 'Add' ? 'Add Institution' : 'Edit Institution',
-    description: mode === 'Add' ? 'Add a new Institution in the system' : 'Edit an Institution in the system',
-    action: { label: mode === 'Add' ? 'Add' : 'Save', handler: OKHandler }
-  },
-  [
-    form({ isRendered: !isLoading, className: 'form-horizontal css-form', name: 'userForm', encType: 'multipart/form-data', onChange: formChange }, [
-      div({ className: 'form-group first-form-group' }, [
-        label({ id: 'lbl_institution_name', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Institution Name']),
-        div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-          input({
-            type: 'text',
-            name: 'name',
-            id: 'txt_name',
-            className: 'form-control col-lg-12',
-            placeholder: 'Institution name',
-            required: true,
-            autoFocus: true,
-            value: institutionName,
-            onChange: changeHandler('name'),
-            ref: nameRef
-          })
-        ]),
-        div({ isRendered: institutionNameValid === false && submitted === true }, [
-          Alert({
-            id: 'institutionNameInvalid', type: 'danger', title: 'Field required!',
-            description: 'Please provide a name for the institution.'
-          })
-        ])
-      ]),
-    ])
-  ]);
+  return (
+    <BaseModal
+      id="addInstitutionModal"
+      showModal={showModal}
+      disableOkBtn={!validForm}
+      onRequestClose={closeHandler}
+      imgSrc={mode === 'Add' ? addInstitutionIcon : editInstitutionIcon}
+      color="common"
+      title={mode === 'Add' ? 'Add Institution' : 'Edit Institution'}
+      description={mode === 'Add' ? 'Add a new Institution in the system' : 'Edit an Institution in the system'}
+      action={{ label: mode === 'Add' ? 'Add' : 'Save', handler: OKHandler }}
+    >
+      {!isLoading && <form
+        className="form-horizontal css-form"
+        name="userForm"
+        encType="multipart/form-data"
+        onChange={formChange}
+      >
+        <div className="form-group first-form-group">
+          <label
+            id="lbl_institution_name"
+            className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+          >
+            Institution Name
+          </label>
+          <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+            <input
+              type="text"
+              name="name"
+              id="txt_name"
+              className="form-control col-lg-12"
+              placeholder="Institution name"
+              required={true}
+              autoFocus={true}
+              value={institutionName}
+              onChange={changeHandler('name')}
+              ref={nameRef}
+            />
+          </div>
+          {institutionNameValid === false && submitted === true && (
+            <Alert
+              id="institutionNameInvalid"
+              type="danger"
+              title="Field required!"
+              description="Please provide a name for the institution."
+            />
+          )}
+        </div>
+      </form>}
+    </BaseModal>
+  );
 };
 
 export default AddInstitutionModal;

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { input } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
@@ -28,12 +27,12 @@ export class SearchBox extends Component {
 
   render() {
     return (
-      input({
-        type: 'text',
-        placeholder: 'Enter search terms',
-        onChange: this.changeHandler,
-        ref: this.myRef,
-        style: {
+      <input
+        type="text"
+        placeholder="Enter search terms"
+        onChange={this.changeHandler}
+        ref={this.myRef}
+        style={{
           width: '100%',
           border: '1px solid #cecece',
           backgroundColor: '#f3f6f7',
@@ -41,8 +40,8 @@ export class SearchBox extends Component {
           height: '4rem',
           paddingLeft: '2%',
           fontFamily: 'Montserrat'
-        }
-      })
+        }}
+      />
     );
   }
 }

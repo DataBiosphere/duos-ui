@@ -1,4 +1,3 @@
-import {mergeAll} from 'lodash/fp';
 import React from 'react';
 import {Route, Switch} from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
@@ -21,7 +20,7 @@ import SigningOfficialDarRequests from './pages/signing_official_console/Signing
 import SigningOfficialDataSubmitters from './pages/signing_official_console/SigningOfficialDataSubmitters';
 import Translator from './pages/Translator';
 import NIHPilotInfo from './pages/NIHPilotInfo';
-import {Status} from './pages/Status';
+import Status from './pages/Status';
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import ConsentTextGenerator from './pages/ConsentTextGenerator';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
@@ -49,7 +48,7 @@ const Routes = (props) => (
   <Switch>
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
-    <Route exact path="/status" render={(routeProps) => Status(mergeAll([routeProps, props]))} />
+    <Route exact path="/status" render={(routeProps) => <Status {...routeProps} {...props} />} />
     <Route exact path="/liveness" component={HealthCheck} />
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>

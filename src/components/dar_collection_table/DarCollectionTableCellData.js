@@ -1,6 +1,6 @@
+import React from 'react';
 import {includes, isEmpty, isNil, toLower, uniq} from 'lodash/fp';
 import {formatDate} from '../../libs/utils';
-import {h, div} from 'react-hyperscript-helpers';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import {styles} from './DarCollectionTable';
 import Actions from './Actions';
@@ -34,7 +34,7 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
 
   switch (consoleType) {
     case consoleTypes.ADMIN:
-      darCodeData = h(DarCollectionAdminReviewLink, { darCollectionId, darCode });
+      darCodeData = <DarCollectionAdminReviewLink darCollectionId={darCollectionId} darCode={darCode} />;
       break;
     case consoleTypes.CHAIR:
     case consoleTypes.MEMBER:
@@ -45,23 +45,21 @@ export function darCodeCellData({darCode = '- -', darCollectionId, collectionIsE
       darCodeData = darCode;
   }
 
+  const ExpandComponent = collectionIsExpanded ? ExpandLess : ExpandMore;
+
   return {
-    data: div({
-      style: {
-        display: 'flex',
-        alignItems: 'center',
-      }
-    }, [
-      h((collectionIsExpanded ? ExpandLess : ExpandMore), {
-        id: `${darCollectionId}_dropdown`,
-        className: `sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`,
-        isRendered: toLower(status) !== 'draft',
-        onClick: () => {
-          updateCollectionIsExpanded(!collectionIsExpanded);
-        },
-      }),
-      darCodeData,
-    ]),
+    data: (
+      <div style={{display: 'flex', alignItems: 'center'}}>
+        {toLower(status) !== 'draft' && <ExpandComponent
+          id={`${darCollectionId}_dropdown`}
+          className={`sort-icon dar-expand-dropdown-arrow ${collectionIsExpanded ? 'sort-icon-up' : 'sort-icon-down'}`}
+          onClick={() => {
+            updateCollectionIsExpanded(!collectionIsExpanded);
+          }}
+        />}
+        {darCodeData}
+      </div>
+    ),
     value: darCode,
     id: darCollectionId,
     style: {
@@ -80,7 +78,7 @@ const dacLinkToCollection = (darCode, status  = '', darCollectionId) => {
     `/dar_collection/${darCollectionId}` :
     `/dar_vote_review/${darCollectionId}`;
 
-  return h(Link, { to: path }, [darCode]);
+  return <Link to={path}>{darCode}</Link>;
 };
 
 export function DacCellData({dacNames, darCollectionId, label = 'dacNames'}) {
@@ -165,12 +163,16 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
 export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
   let actionComponent;
 
-  actionComponent = h(Actions, {
-    collection, consoleType,
-    showConfirmationModal, goToVote,
-    reviewCollection, resumeCollection,
-    actions, status
-  });
+  actionComponent = <Actions
+    collection={collection}
+    consoleType={consoleType}
+    showConfirmationModal={showConfirmationModal}
+    goToVote={goToVote}
+    reviewCollection={reviewCollection}
+    resumeCollection={resumeCollection}
+    actions={actions}
+    status={status}
+  />;
 
   return {
     isComponent: true,

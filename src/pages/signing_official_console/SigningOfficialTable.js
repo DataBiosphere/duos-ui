@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
+import React from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import { a, h, div } from 'react-hyperscript-helpers';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import SimpleButton from '../../components/SimpleButton';
@@ -63,22 +63,24 @@ const DeactivateLibraryCardButton = (props) => {
   const {card = {}, showConfirmationModal} = props;
   const message = 'Are you sure you want to deactivate this library card?';
   const title = 'Deactivate Library Card';
-  return h(SimpleButton, {
-    keyProp: `deactivate-card-${card.id}`,
-    label: 'Deactivate',
-    baseColor: Theme.palette.error,
-    hoverStyle: {
-      backgroundColor: 'rgb(194, 38,11)',
-      color: 'white'
-    },
-    additionalStyle: {
-      padding: '2.25% 5%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
-      fontFamily: 'Montserrat'
-    },
-    onClick: () => showConfirmationModal({card, message, title, confirmType: confirmModalType.delete})
-  });
+  return (
+    <SimpleButton
+      keyProp={`deactivate-card-${card.id}`}
+      label="Deactivate"
+      baseColor={Theme.palette.error}
+      hoverStyle={{
+        backgroundColor: 'rgb(194, 38,11)',
+        color: 'white'
+      }}
+      additionalStyle={{
+        padding: '2.25% 5%',
+        fontSize: '1.45rem',
+        fontWeight: 600,
+        fontFamily: 'Montserrat'
+      }}
+      onClick={() => showConfirmationModal({card, message, title, confirmType: confirmModalType.delete})}
+    />
+  );
 };
 
 const IssueLibraryCardButton = (props) => {
@@ -86,24 +88,29 @@ const IssueLibraryCardButton = (props) => {
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
   const {card, showConfirmationModal} = props;
-  const message = div({}, [
-    // LCA Terms Download
-    LibraryCardAgreementTermsDownload,
-    'Are you sure you want to issue this library card?']);
+  const message = (
+    <div>
+      {/* LCA Terms Download */}
+      <LibraryCardAgreementTermsDownload />
+      {'Are you sure you want to issue this library card?'}
+    </div>
+  );
   const title = 'Issue Library Card';
-  return h(SimpleButton, {
-    keyProp: `issue-card-${card.userEmail}`,
-    label: 'Issue',
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2.25% 5%',
-      fontSize: '1.45rem',
-      fontWeight: 600,
-      fontFamily: 'Montserrat'
-    },
-    onClick: () => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue }),
-  });
+  return (
+    <SimpleButton
+      keyProp={`issue-card-${card.userEmail}`}
+      label="Issue"
+      baseColor={Theme.palette.secondary}
+      additionalStyle={{
+        width: '30%',
+        padding: '2.25% 5%',
+        fontSize: '1.45rem',
+        fontWeight: 600,
+        fontFamily: 'Montserrat'
+      }}
+      onClick={() => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue })}
+    />
+  );
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
@@ -135,15 +142,16 @@ const LibraryCardCell = ({
     isComponent: true,
     id,
     label: 'lc-button',
-    data: div(
-      {
-        style: {
+    data: (
+      <div
+        style={{
           display: 'flex',
           justifyContent: 'left',
-        },
-        key: `lc-action-cell-${id}`,
-      },
-      [button]
+        }}
+        key={`lc-action-cell-${id}`}
+      >
+        {button}
+      </div>
     ),
   };
 };
@@ -269,13 +277,15 @@ export default function SigningOfficialTable(props) {
     }
   }, []);
 
-  const paginationBar = h(PaginationBar, {
-    pageCount,
-    currentPage,
-    tableSize,
-    goToPage,
-    changeTableSize
-  });
+  const paginationBar = (
+    <PaginationBar
+      pageCount={pageCount}
+      currentPage={currentPage}
+      tableSize={tableSize}
+      goToPage={goToPage}
+      changeTableSize={changeTableSize}
+    />
+  );
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
@@ -370,91 +380,87 @@ export default function SigningOfficialTable(props) {
 
   const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
 
-  return h(Fragment, {}, [
-    div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' } }, [
-      div({ style: Styles.LEFT_HEADER_SECTION }, [
-        div({ style: { ...Styles.HEADER_CONTAINER , marginRight: '-7%' }}, [
-          div({ style: { ...Styles.SUB_HEADER,
-            marginTop: '0',
-            fontFamily: 'Montserrat',
-            fontWeight: 600,
-            fontSize: '2.8rem'}
-          }, [
-            'My Institution\'s Researchers',]),
-          div({
-            style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
+        <div style={Styles.LEFT_HEADER_SECTION}>
+          <div style={{ ...Styles.HEADER_CONTAINER, marginRight: '-7%' }}>
+            <div style={{ ...Styles.SUB_HEADER,
+              marginTop: '0',
+              fontFamily: 'Montserrat',
+              fontWeight: 600,
+              fontSize: '2.8rem'}}>
+              My Institution&apos;s Researchers
+            </div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
-            }),
-          },[
-            'Issue or Remove Library Card privileges to allow researchers to submit DARs.',
-            a({
-              rel: 'noopener noreferrer',
-              href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
-              target: '_blank',
-              id: 'so-console-info-link',
-              style: { verticalAlign: 'super' }},
-            ['i']),
-          ]),
-          div({
-            style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+            })}>
+              Issue or Remove Library Card privileges to allow researchers to submit DARs.
+              <a
+                rel="noopener noreferrer"
+                href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide"
+                target="_blank"
+                id="so-console-info-link"
+                style={{ verticalAlign: 'super' }}>
+                i
+              </a>
+            </div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
-            }),
-          },[
-            'Issuing Library Card privileges is done in accordance with the ', a({target: '_blank', href: BroadLibraryCardAgreementLink}, ['Broad']), ' and ', a({target: '_blank', href: NhgriLibraryCardAgreementLink}, ['NHGRI']), ' Library Card Agreements.',
-          ]),
-        ]),
-      ]),
-      h(SearchBar, { handleSearchChange, searchRef, style: {marginLeft: '25%'}}),
-      div({style: { marginLeft: 15 }}, [
-        h(SimpleButton, {
-          onClick: () => showModalOnClick(),
-          baseColor: Theme.palette.secondary,
-          label: 'Add Library Card',
-          additionalStyle: {
-            width: '22rem',
-            height: '4rem',
-            padding: '4% 10%',
-            fontWeight: '600'
-          }
-        }),
-      ])
-    ]),
-    h(SimpleTable, {
-      isLoading,
-      rowData: processResearcherRowData(visibleResearchers),
-      columnHeaders: columnHeaderData,
-      styles,
-      tableSize,
-      paginationBar,
-    }),
-    h(LibraryCardFormModal, {
-      showModal,
-      createOnClick: (card) => issueLibraryCard(card, researchers),
-      closeModal: () => setShowModal(false),
-      card: selectedCard,
-      users: filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers),
-      institutions: [], //pass in empty array to force modal to hide institution dropdown
-      modalType: 'add',
-      lcaContent: lcaContent
-    }),
-    h(ConfirmationModal, {
-      showConfirmation,
-      closeConfirmation: () => setShowConfirmation(false),
-      title: confirmationTitle,
-      // The issue modal requires a larger view than normal
-      styleOverride: confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
-      message:
-        confirmType === confirmModalType.delete
-          ? div({}, [confirmationModalMsg])
+            })}>
+              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>NHGRI</a> Library Card Agreements.
+            </div>
+          </div>
+        </div>
+        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} style={{ marginLeft: '25%' }} />
+        <div style={{ marginLeft: 15 }}>
+          <SimpleButton
+            onClick={() => showModalOnClick()}
+            baseColor={Theme.palette.secondary}
+            label="Add Library Card"
+            additionalStyle={{
+              width: '22rem',
+              height: '4rem',
+              padding: '4% 10%',
+              fontWeight: '600' }}
+          />
+        </div>
+      </div>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={processResearcherRowData(visibleResearchers)}
+        columnHeaders={columnHeaderData}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={paginationBar}
+      />
+      <LibraryCardFormModal
+        showModal={showModal}
+        createOnClick={(card) => issueLibraryCard(card, researchers)}
+        closeModal={() => setShowModal(false)}
+        card={selectedCard}
+        users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
+        institutions={[]} //pass in empty array to force modal to hide institution dropdown
+        modalType="add"
+        lcaContent={lcaContent} />
+      <ConfirmationModal
+        showConfirmation={showConfirmation}
+        closeConfirmation={() => setShowConfirmation(false)}
+        title={confirmationTitle}
+        // The issue modal requires a larger view than normal
+        styleOverride={confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {}}
+        message={confirmType === confirmModalType.delete
+          ? <div>{confirmationModalMsg}</div>
           // Library Card Agreement Text
-          : div({}, [lcaContent, confirmationModalMsg]),
-      header: `${selectedCard.userName || selectedCard.userEmail} - ${
-        !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
-      }`,
-      onConfirm: () =>
-        confirmType === confirmModalType.delete
-          ? deactivateLibraryCard(selectedCard, researchers)
-          : issueLibraryCard(selectedCard, researchers)
-    }),
-  ]);
+          : <div>{lcaContent}{confirmationModalMsg}</div>}
+        header={`${selectedCard.userName || selectedCard.userEmail} - ${
+          !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
+        }`}
+        onConfirm={() =>
+          confirmType === confirmModalType.delete
+            ? deactivateLibraryCard(selectedCard, researchers)
+            : issueLibraryCard(selectedCard, researchers)}
+      />
+    </>
+  );
 }

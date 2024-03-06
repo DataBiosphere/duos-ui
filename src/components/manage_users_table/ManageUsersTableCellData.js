@@ -1,5 +1,5 @@
+import React from 'react';
 import {isNil, isEmpty, map, sortedUniq} from 'lodash';
-import {h, div} from 'react-hyperscript-helpers';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
@@ -8,25 +8,27 @@ import voca from 'voca';
 export function usernameCellData({displayName, userId, label= 'user-name'}) {
   return {
     // clicking on username lets you edit user
-    data: div({}, [
-      h(Link, {
-        to: `/admin_edit_user/${userId}`,
-        'data-for': `tip_${userId}_edit`,
-        'data-tip': `Edit ${displayName}`
-      }, [
-        displayName
-      ]),
-      h(ReactTooltip, {
-        id: `tip_${userId}_edit`,
-        place: 'right',
-        effect: 'solid',
-        multiline: true,
-        className: 'tooltip-wrapper'
-      })
-    ]),
+    data: (
+      <div>
+        <Link
+          to={`/admin_edit_user/${userId}`}
+          data-for={`tip_${userId}_edit`}
+          data-tip={`Edit ${displayName}`}
+        >
+          {displayName}
+        </Link>
+        <ReactTooltip
+          id={`tip_${userId}_edit`}
+          place="right"
+          effect="solid"
+          multiline={true}
+          className="tooltip-wrapper"
+        />
+      </div>
+    ),
     value: displayName,
     id: userId,
-    style : {
+    style: {
       color: '#354052',
       fontSize: styles.fontSize.username,
       paddingRight: '2%'

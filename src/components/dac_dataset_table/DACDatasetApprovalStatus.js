@@ -33,7 +33,7 @@ export default function DACDatasetApprovalStatus(props) {
     } catch {
       Notifications.showError({text: `Error deleting dataset '${name}'`});
     }
-  }
+  };
 
   const updateApprovalStatus = async (approvalState) => {
     const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, approvalState);
