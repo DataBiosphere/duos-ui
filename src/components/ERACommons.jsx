@@ -71,7 +71,7 @@ export default function ERACommons(props) {
       }
     };
     fetchData();
-  }, [getUserInfo, props]);
+  }, []);
 
   const onMouseEnter = () => {
     setHovered(true);
@@ -94,8 +94,9 @@ export default function ERACommons(props) {
       'linkExpireTime': `${decodedToken.exp}`,
       'status': true
     };
-    const updatedUser = await AuthenticateNIH.saveNihUsr(nihPayload);
-    setResearcherProfile(updatedUser);
+    const updatedUserProps = await AuthenticateNIH.saveNihUsr(nihPayload);
+    setResearcherProfile(updatedUserProps);
+    setCommonResearcherPropertyState(updatedUserProps, decodedToken.eraCommonsUsername);
     document.getElementById('era-commons-id').scrollIntoView(
       {block: 'start', inline: 'nearest', behavior: 'smooth'}
     );
