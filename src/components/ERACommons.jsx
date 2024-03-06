@@ -17,17 +17,53 @@ export default function ERACommons(props) {
   const [hovered, setHovered] = useState(false);
   const [researcherProfile, setResearcherProfile] = useState({});
 
+  const getUserInfo = async () => {
+    const response = await User.getMe();
+    const propsData = response.researcherProperties;
+    const authProp = find({'propertyKey':'eraAuthorized'})(propsData);
+    const expProp = find({'propertyKey':'eraExpiration'})(propsData);
+    const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+    const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
+    const nihValid = isAuthorized && expirationCount > 0;
+    const eraCommonsId = response.eraCommonsId;
+    props.onNihStatusUpdate(nihValid);
+    setAuthorized(isAuthorized);
+    setExpirationCount(expirationCount);
+    setEraCommonsId(isNil(eraCommonsId) ? '' : eraCommonsId);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
+    const init = async () => {
       // If we have a token to verify, save it before getting user info
       if (props.location !== undefined && props.location.search !== '') {
         await saveNIHAuthentication(props.location.search);
       }
-      await getUserInfo();
     };
-    fetchData();
+    init();
     // Note that we do not want props.location as a dependency here since it does not change after render.
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // In the read-only case, we are provided a researcher object and do not need to query for the current user
+      if (props.readOnly && props.researcherProfile) {
+        setResearcherProfile(props.researcherProfile);
+        const propsData = researcherProfile.properties;
+        const authProp = find({'propertyKey':'eraAuthorized'})(propsData);
+        const expProp = find({'propertyKey':'eraExpiration'})(propsData);
+        const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+        const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
+        const nihValid = isAuthorized && expirationCount > 0;
+        props.onNihStatusUpdate(nihValid);
+        setAuthorized(isAuthorized);
+        setExpirationCount(expirationCount);
+        setEraCommonsId(researcherProfile.eraCommonsId);
+      } else {
+        await getUserInfo();
+      }
+    };
+    fetchData();
+  }, [getUserInfo, props]);
 
   const onMouseEnter = () => {
     setHovered(true);
@@ -55,21 +91,6 @@ export default function ERACommons(props) {
     document.getElementById('era-commons-id').scrollIntoView(
       {block: 'start', inline: 'nearest', behavior: 'smooth'}
     );
-  };
-
-  const getUserInfo = async () => {
-    const response = props.readOnly ? researcherProfile : await User.getMe();
-    const propsData = response.researcherProperties;
-    const authProp = find({'propertyKey':'eraAuthorized'})(propsData);
-    const expProp = find({'propertyKey':'eraExpiration'})(propsData);
-    const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-    const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
-    const nihValid = isAuthorized && expirationCount > 0;
-    const eraCommonsId = response.eraCommonsId;
-    props.onNihStatusUpdate(nihValid);
-    setAuthorized(isAuthorized);
-    setExpirationCount(expirationCount);
-    setEraCommonsId(isNil(eraCommonsId) ? '' : eraCommonsId);
   };
 
   const redirectToNihLogin = async () => {
