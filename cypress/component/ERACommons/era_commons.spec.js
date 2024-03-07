@@ -59,7 +59,6 @@ describe('ERA Commons Utility', function () {
 describe('ERA Commons Component', function () {
   it('renders an empty ERA Commons component with header and required', function () {
     cy.stub(User, 'getMe').returns(researcher);
-    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(researcher);
     mount(<ERACommons
       isAuthorized={false}
       className={''}
@@ -78,17 +77,17 @@ describe('ERA Commons Component', function () {
   });
 
   it('renders a populated ERA Commons component after having authenticated with NIH', function () {
-    researcher.eraCommonsId = 'testing';
+    const clonedResearcher = JSON.parse(JSON.stringify(researcher));
+    clonedResearcher.eraCommonsId = 'testing';
     const iat = new Date().getTime();
     const exp = iat + (30 * 24 * 60 * 60 * 1000); // iat + 30 days
-    // This simulates that we've saved the NIH properties for the researcher
-    researcher.researcherProperties = [
+    clonedResearcher.researcherProperties = [
       {propertyKey:'eraAuthorized', propertyValue: true},
       {propertyKey:'eraExpiration', propertyValue: exp}
     ];
-    researcher.eraCommonsId = 'testing';
-    cy.stub(User, 'getMe').returns(researcher);
-    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(researcher);
+    cy.stub(User, 'getMe').returns(clonedResearcher);
+    // The saveNihUsr function only returns the user's properties, not the entire user object
+    cy.stub(AuthenticateNIH, 'saveNihUsr').returns(clonedResearcher.researcherProperties);
     mount(<ERACommons
       isAuthorized={true}
       className={''}
