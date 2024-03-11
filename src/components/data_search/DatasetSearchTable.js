@@ -148,7 +148,8 @@ export const DatasetSearchTable = (props) => {
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          setFiltered(datasets.filter(value => filteredDatasets.some(item => isEqual(item, value))));
+          var newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+          setFiltered(newFiltered);
         });
       } catch (error) {
         Notifications.showError({ text: 'Failed to load Elasticsearch index' });
@@ -362,8 +363,8 @@ export const DatasetSearchTable = (props) => {
             ref={searchRef}
           />
           <div/>
-          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em' }}>
-            <Button variant="contained" onClick={clearSearchRef}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
+            <Button variant="contained" onClick={clearSearchRef} sx={{ width: '100px' }}>
                 Clear Search
             </Button>
           </Box>
@@ -374,37 +375,36 @@ export const DatasetSearchTable = (props) => {
           <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
         </Box>
         <Box sx={{width: '85%', padding: '0 1em'}}>
-          {
-            isEmpty(datasets) ?
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <h1>No datasets registered for this library.</h1>
-              </Box>
-              :
-              isEmpty(filtered) ?
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <h1>There are no datasets that fit these criteria.</h1>
-              </Box>
-              :
-              isEmpty(filtered) ?
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <h1>There are no datasets that fit these criteria.</h1>
-              </Box>
-              :
-              <CollapsibleTable
-                data={tableData}
-                selected={selected}
-                selectHandler={selectHandler}
-                expandHandler={expandHandler}
-                collapseHandler={collapseHandler}
-                summary='faceted study search table'
-              />
-          }
+          {(() => {
+            if (isEmpty(datasets)) {
+              return (
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    <h1>No datasets registered for this library.</h1>
+                </Box>
+              );
+            } else if (isEmpty(filtered)) {
+              return (
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    <h1>There are no datasets that fit these criteria.</h1>
+                </Box>
+              );
+            } else {
+              return (
+                <CollapsibleTable
+                  data={tableData}
+                  selected={selected}
+                  selectHandler={selectHandler}
+                  expandHandler={expandHandler}
+                  collapseHandler={collapseHandler}
+                  summary='faceted study search table'
+                />
+              );
+            }
+          })()}
         </Box>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
