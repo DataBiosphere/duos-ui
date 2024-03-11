@@ -81,10 +81,6 @@ gcloud auth login
 gcloud auth application-default login
 gcloud auth configure-docker
 
-# ensure that git-secrets patterns are installed
-git clone https://github.com/broadinstitute/dsp-appsec-gitsecrets-client.git
-./dsp-appsec-gitsecrets-client/gitsecrets.sh
-
 # install the appropriate version of nodejs and its dependencies
 NODE_VERSION=$(curl -L https://raw.githubusercontent.com/DataBiosphere/duos-ui/develop/Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}')
 volta setup && volta install ${NODE_VERSION}
