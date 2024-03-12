@@ -6,8 +6,8 @@ import {filter, isNil} from 'lodash/fp';
 import {Styles} from '../../libs/theme';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import cellData from './ManageDacTableCellData';
-import SimpleTable from '../../components/SimpleTable';
-import PaginationBar from '../../components/PaginationBar';
+import SimpleTable from '../SimpleTable';
+import PaginationBar from '../PaginationBar';
 
 
 export const styles = {

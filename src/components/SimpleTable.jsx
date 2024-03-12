@@ -3,7 +3,7 @@ import { isNil } from 'lodash/fp';
 import { Styles } from '../libs/theme';
 import ReactTooltip from 'react-tooltip';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
-import { SpinnerComponent } from '../components/SpinnerComponent';
+import { SpinnerComponent } from './SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
 
 // Renders spinning circle while table loading

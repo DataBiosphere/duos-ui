@@ -1,7 +1,7 @@
 import React from 'react';
 import {isNil, isEmpty} from 'lodash/fp';
 import {styles} from './ManageDacTable';
-import TableIconButton from '../../components/TableIconButton';
+import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
 import {Delete, Edit} from '@mui/icons-material';
 
