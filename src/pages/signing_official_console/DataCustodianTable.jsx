@@ -1,6 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Styles, Theme } from '../../libs/theme';
-import {h, div, img} from 'react-hyperscript-helpers';
 import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -58,36 +57,52 @@ const RemoveDataCustodianButton = (props) => {
   const { researcher = {}, showConfirmationModal } = props;
   const message = 'Are you sure you want to remove this Data Submitter?';
   const title = 'Remove Data Submitter';
-  return h(SimpleButton, {
-    keyProp: `remove-custodian-${researcher.id}`,
-    label: 'Remove',
-    baseColor: Theme.palette.error,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () =>
-      showConfirmationModal({ researcher, message, title, confirmType: confirmModalType.delete }),
-  });
+  return (
+    <SimpleButton
+      key={`remove-custodian-${researcher.id}`}
+      label="Remove"
+      baseColor={Theme.palette.error}
+      additionalStyle={{
+        width: '30%',
+        padding: '2%',
+        fontSize: '1.45rem',
+      }}
+      onClick={() =>
+        showConfirmationModal({
+          researcher,
+          message,
+          title,
+          confirmType: confirmModalType.delete,
+        })
+      }
+    />
+  );
 };
 
 const IssueDataCustodianButton = (props) => {
   const { researcher, showConfirmationModal } = props;
   const message = 'Are you sure you want to make this person a Data Submitter?';
   const title = 'Issue Data Submitter';
-  return h(SimpleButton, {
-    keyProp: `issue-card-${researcher.userEmail}`,
-    label: 'Issue',
-    baseColor: Theme.palette.secondary,
-    additionalStyle: {
-      width: '30%',
-      padding: '2%',
-      fontSize: '1.45rem',
-    },
-    onClick: () =>
-      showConfirmationModal({ researcher, message, title, confirmType: confirmModalType.issue }),
-  });
+  return (
+    <SimpleButton
+      key={`issue-card-${researcher.userEmail}`}
+      label="Issue"
+      baseColor={Theme.palette.secondary}
+      additionalStyle={{
+        width: '30%',
+        padding: '2%',
+        fontSize: '1.45rem',
+      }}
+      onClick={() =>
+        showConfirmationModal({
+          researcher,
+          message,
+          title,
+          confirmType: confirmModalType.issue,
+        })
+      }
+    />
+  );
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
@@ -110,15 +125,16 @@ const SubmitterCell = ({
     isComponent: true,
     id,
     label: 'lc-button',
-    data: div(
-      {
-        style: {
+    data: (
+      <div
+        style={{
           display: 'flex',
           justifyContent: 'left',
-        },
-        key: `lc-action-cell-${id}`,
-      },
-      [button]
+        }}
+        key={`lc-action-cell-${id}`}
+      >
+        {button}
+      </div>
     ),
   };
 };
@@ -240,18 +256,17 @@ export default function DataCustodianTable(props) {
   );
 
   const changeTableSize = useCallback((value) => {
-    if (value > 0 && !isNaN(parseInt(value))) {
+    if (value > 0 && !Number.isNaN(parseInt(value))) {
       setTableSize(value);
     }
   }, []);
 
-  const paginationBar = h(PaginationBar, {
-    pageCount,
-    currentPage,
-    tableSize,
-    goToPage,
-    changeTableSize,
-  });
+  const paginationBar = (
+    <PaginationBar pageCount={pageCount}
+      currentPage={currentPage}
+      tableSize={tableSize}
+      goToPage={goToPage} changeTableSize= {changeTableSize }/>
+  );
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map((researcher) => {
@@ -285,9 +300,9 @@ export default function DataCustodianTable(props) {
     let messageName;
     const {userId, displayName} = selectedResearcher;
     try {
-      let updatedResearcher = await User.addRoleToUser(userId, 8);
+      const updatedResearcher = await User.addRoleToUser(userId, 8);
       const listCopy = cloneDeep(researchers);
-      let targetIndex = findIndex(
+      const targetIndex = findIndex(
         (researcher) => userId === researcher.userId
       )(listCopy);
       if (targetIndex === -1) {
@@ -316,7 +331,7 @@ export default function DataCustodianTable(props) {
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
     const { displayName, email, userId } = selectedResearcher;
-    let updatedResearcher = await User.deleteRoleFromUser(userId, 8);
+    const updatedResearcher = await User.deleteRoleFromUser(userId, 8);
     const searchableKey = !isNil(userId) ? 'userId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
@@ -346,80 +361,118 @@ export default function DataCustodianTable(props) {
 
   const dpaContent = ScrollableMarkdownContainer({markdown: DpaMarkdown});
 
-  return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' } }, [
-      div({ className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION }, [
-        div({ style: { ...Styles.ICON_CONTAINER } }, [
-          img({
-            id: 'user-icon',
-            src: userIcon,
-            style: Styles.HEADER_IMG,
-          }),
-        ]),
-        div({ style: Styles.HEADER_CONTAINER }, [
-          div({ style: {
-            fontFamily: 'Montserrat',
-            fontWeight: 600,
-            fontSize: '2.8rem'
-          } }, [
-            'My Institution’s Data Submitters',
-          ]),
-          div(
-            {
-              style: {
+  return (
+    <div style={Styles.PAGE}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          width: '112%',
+          marginLeft: '-6%',
+          padding: '0 2.5%',
+        }}
+      >
+        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+          <div style={{ ...Styles.ICON_CONTAINER }}>
+            <img
+              alt="user icon"
+              id="user-icon"
+              src={userIcon}
+              style={Styles.HEADER_IMG}
+            />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div
+              style={{
                 fontFamily: 'Montserrat',
-                fontSize: '1.6rem'
-              },
-            },
-            [
-              'Issue or remove Data Submitter privileges.',
-            ]
-          ),
-        ]),
-      ]),
-      h(SearchBar, { handleSearchChange, searchRef }),
-      div({style: { marginLeft: 20, marginTop: 50, display: 'flex', justifyContent: 'space-between' }}, [
-        h(SimpleButton, {
-          onClick: () => showModalOnClick(),
-          baseColor: Theme.palette.secondary,
-          label: 'Add New Data Submitter',
-          additionalStyle: {
-            width: '26rem',
-            padding: '4% 1%',
-            fontWeight: '600'
-          }
-        }),
-      ])
-    ]),
-    h(SimpleTable, {
-      isLoading,
-      rowData: processResearcherRowData(visibleResearchers),
-      columnHeaders: columnHeaderData,
-      styles,
-      tableSize,
-      paginationBar,
-    }),
-    h(DataCustodianFormModal, {
-      showModal,
-      createOnClick: (researcher) => issueCustodian(researcher, researchers),
-      closeModal: () => setShowModal(false),
-      researcher: selectedResearcher,
-      users: unregisteredResearchers,
-      dpaContent
-    }),
-    h(ConfirmationModal, {
-      showConfirmation,
-      closeConfirmation: () => setShowConfirmation(false),
-      title: confirmationTitle,
-      styleOverride: confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {},
-      message: confirmType === confirmModalType.issue ? div([dpaContent, confirmationModalMsg]) : confirmationModalMsg,
-      header: `${selectedResearcher.displayName || selectedResearcher.email} - ${
-        !isNil(selectedResearcher.institution) ? selectedResearcher.institution.name : ''
-      }`,
-      onConfirm: () =>
-        confirmType === confirmModalType.issue
-          ? issueCustodian(selectedResearcher, researchers)
-          : removeDataCustodian(selectedResearcher, researchers),
-    }),
-  ]);
+                fontWeight: 600,
+                fontSize: '2.8rem',
+              }}
+            >
+              My Institution’s Data Submitters
+            </div>
+            <div
+              style={{
+                fontFamily: 'Montserrat',
+                fontSize: '1.6rem',
+              }}
+            >
+              Issue or remove Data Submitter privileges.
+            </div>
+          </div>
+        </div>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}
+        />
+        <div
+          style={{
+            marginLeft: 20,
+            marginTop: 50,
+            display: 'flex',
+            justifyContent: 'space-between',
+          }}
+        >
+          <SimpleButton
+            onClick={() => showModalOnClick()}
+            baseColor={Theme.palette.secondary}
+            label="Add New Data Submitter"
+            additionalStyle={{
+              width: '26rem',
+              padding: '4% 1%',
+              fontWeight: '600',
+            }}
+          />
+        </div>
+      </div>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={processResearcherRowData(visibleResearchers)}
+        columnHeaders={columnHeaderData}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={paginationBar}
+      />
+      <DataCustodianFormModal
+        showModal={showModal}
+        createOnClick={(researcher) => issueCustodian(researcher, researchers)}
+        closeModal={() => setShowModal(false)}
+        researcher={selectedResearcher}
+        users={unregisteredResearchers}
+        dpaContent={dpaContent}
+      />
+      <ConfirmationModal
+        showConfirmation={showConfirmation}
+        closeConfirmation={() => setShowConfirmation(false)}
+        title={confirmationTitle}
+        styleOverride={
+          confirmType === confirmModalType.issue
+            ? { minWidth: '725px', minHeight: '475px' }
+            : {}
+        }
+        message={
+          confirmType === confirmModalType.issue ? (
+            <div>
+              {dpaContent}
+              {confirmationModalMsg}
+            </div>
+          ) : (
+            confirmationModalMsg
+          )
+        }
+        header={`${
+          selectedResearcher.displayName || selectedResearcher.email
+        } - ${
+          !isNil(selectedResearcher.institution)
+            ? selectedResearcher.institution.name
+            : ''
+        }`}
+        onConfirm={() =>
+          confirmType === confirmModalType.issue
+            ? issueCustodian(selectedResearcher, researchers)
+            : removeDataCustodian(selectedResearcher, researchers)
+        }
+      />
+    </div>
+  );
 }
