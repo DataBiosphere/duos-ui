@@ -3,7 +3,6 @@ import {Fragment, useEffect, useState, useCallback } from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
-// import {ConnectDatasetModal} from '../components/modals/ConnectDatasetModal';
 import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import {PageHeading} from '../components/PageHeading';
 import {PaginatorBar} from '../components/PaginatorBar';
@@ -778,13 +777,6 @@ export default function DatasetCatalog(props) {
 
         h(ReactTooltip, {
           id: 'tip_delete',
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_connect',
           place: 'right',
           effect: 'solid',
           multiline: true,
