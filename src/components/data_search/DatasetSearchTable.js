@@ -313,7 +313,7 @@ export const DatasetSearchTable = (props) => {
                     }
                   },
                   {
-                    value: dataset.accessManagement==='external' ? 'External to DuOS': dataset.accessManagement==='open'? 'Open Access':dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
+                    value: dataset.accessManagement==='external' ? 'External to DUOS': dataset.accessManagement==='open'? 'Open Access':dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
                   },
                   {
                     value: () => {
