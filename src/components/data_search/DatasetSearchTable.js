@@ -278,6 +278,7 @@ export const DatasetSearchTable = (props) => {
           subtable: {
             headers: datasetTableHeader.map((header) => ({ value: header })),
             rows: entry.map((dataset) => {
+              console.log("Dataset", dataset)
               return {
                 id: 'dataset-' + dataset.datasetId,
                 datasetIdentifier: dataset.datasetIdentifier,
@@ -296,9 +297,6 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
-                  },
-                  {
                     value: () => {
                       const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
                       if (exportableSnapshots.length === 0) {
@@ -313,6 +311,9 @@ export const DatasetSearchTable = (props) => {
                           {snapshot.name}{'\n'}
                         </Link>);
                     }
+                  },
+                  {
+                    value: dataset.accessManagement==='external' ? 'External to DuOS': dataset.accessManagement==='open'? 'Open Access':dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
                   },
                   {
                     value: () => {
