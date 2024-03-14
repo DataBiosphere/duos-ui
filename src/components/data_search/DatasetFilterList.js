@@ -10,7 +10,7 @@ import { Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
 
 export const DatasetFilterList = (props) => {
-  const { datasets, filters, filterHandler } = props;
+  const { datasets, filters, filterHandler, searchRef } = props;
 
   const accessManagementFilters = ['Controlled', 'Open', 'External'];
 
@@ -31,7 +31,7 @@ export const DatasetFilterList = (props) => {
             const filter = filterName.toLowerCase();
             return (
               <ListItem disablePadding key={filter}>
-                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, filter)}>
+                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, filter, searchRef.current.value)}>
                   <ListItemIcon>
                     <Checkbox checked={isFiltered(filter)} />
                   </ListItemIcon>

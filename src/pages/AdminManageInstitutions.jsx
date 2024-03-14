@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState, useEffect } from 'react';
-import { div, h, img, a, span } from 'react-hyperscript-helpers';
 import { Institution } from '../libs/ajax';
 import { Styles} from '../libs/theme';
 import { Notifications } from '../libs/utils';
@@ -83,60 +83,54 @@ export default function AdminManageInstitutions(props) {
   };
 
   return (
-    div({style: Styles.PAGE}, [
-      div({ style: {display: 'flex', justifyContent: 'space-between'}}, [
-        div({className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION}, [
-          div({style: Styles.ICON_CONTAINER}, [
-            img({
-              id: 'lock-icon',
-              src: manageInstitutionsIcon,
-              style: Styles.HEADER_IMG
-            })
-          ]),
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ['Manage Institutions']),
-            div({style: Styles.SMALL}, ['Select and manage Institutions'])
-          ]),
-        ]),
-        h(SearchBar, {handleSearchChange, currentPage,
-          style: {
-            width: '60%',
-            margin: '0 3% 0 0',
-          },
-          button: div([
-            a({
-              id: 'btn_addInstitution',
-              className: 'btn-primary btn-add common-background',
-              style: {
-                marginTop: '30%',
-                display: 'block',
-                lineHeight: 0.6,
-              },
-              onClick: addInstitution
-            }, [
-              span({}, ['Add Institution']),
-            ]),
-          ]),
-        })
-      ]),
-      h(InstitutionTable, {
-        filteredList,
-        history: props.history,
-        currentPage,
-        setCurrentPage,
-        tableSize,
-        setTableSize,
-        isRendered: !isLoading,
-        onUpdateSave: modalSave
-      }),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate}),
-      h(AddInstitutionModal, {
-        isRendered: showAddInstitutionModal,
-        showModal: showAddInstitutionModal,
-        closeModal: closeAddInstitutionModal,
-        onOKRequest: modalSave,
-        onCloseRequest: closeAddInstitutionModal
-      }),
-    ])
+    <div style={Styles.PAGE}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+          <div style={Styles.ICON_CONTAINER}>
+            <img id="lock-icon" src={manageInstitutionsIcon} style={Styles.HEADER_IMG} />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div style={Styles.TITLE}>Manage Institutions</div>
+            <div style={Styles.SMALL}>Select and manage Institutions</div>
+          </div>
+        </div>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          currentPage={currentPage}
+          style={{ width: '60%', margin: '0 3% 0 0' }}
+          button={
+            <div>
+              <a
+                id="btn_addInstitution"
+                className="btn-primary btn-add common-background"
+                style={{ marginTop: '30%', display: 'block', lineHeight: 0.6 }}
+                onClick={addInstitution}
+              >
+                <span>Add Institution</span>
+              </a>
+            </div>
+          }
+        />
+      </div>
+      {!isLoading && <InstitutionTable
+        filteredList={filteredList}
+        history={props.history}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        tableSize={tableSize}
+        setTableSize={setTableSize}
+        onUpdateSave={modalSave}
+      />}
+      {isLoading && <DarTableSkeletonLoader
+        tableHeaderTemplate={tableHeaderTemplate}
+        tableRowLoadingTemplate={tableRowLoadingTemplate}
+      />}
+      {showAddInstitutionModal && <AddInstitutionModal
+        showModal={showAddInstitutionModal}
+        closeModal={closeAddInstitutionModal}
+        onOKRequest={modalSave}
+        onCloseRequest={closeAddInstitutionModal}
+      />}
+    </div>
   );
 }

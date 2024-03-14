@@ -9,6 +9,7 @@ import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
 import nhgriIcon from '../images/nhgri-logo-color.svg';
 import anvilIcon from '../images/anvil-logo.svg';
+import hcaIcon from '../images/human-cell-atlas-logo.png';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
@@ -167,6 +168,15 @@ export const DatasetSearch = (props) => {
       },
       icon: anvilIcon,
       title: 'AnVIL Data Library',
+    },
+    'hca': {
+      query: {
+        'match_phrase': {
+          'study.description': 'hca dcp'
+        }
+      },
+      icon: hcaIcon,
+      title: 'Human Cell Atlas Data Library',
     },
     '/custom': {
       query: {
