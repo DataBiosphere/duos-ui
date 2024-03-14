@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Info from '@mui/icons-material/Info';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -20,6 +21,7 @@ import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgr
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
+
 
 //Styles specific to this table
 const styles = {
@@ -402,7 +404,7 @@ export default function SigningOfficialTable(props) {
                 target="_blank"
                 id="so-console-info-link"
                 style={{ verticalAlign: 'super' }}>
-                i
+                <Info fontSize='large' />
               </a>
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
