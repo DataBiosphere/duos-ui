@@ -49,7 +49,7 @@ describe('ERA Commons Utility', function () {
     expect(decoded.iat).to.equal(1709561276);
     expect(decoded.exp).to.equal(1709564876);
   });
-  it ('decodeNihToken returns null if the token is invalid', async function () {
+  it('decodeNihToken returns null if the token is invalid', async function () {
     const token = {'nih-username-token': 'invalid'};
     const decoded = await decodeNihToken(token);
     expect(decoded).to.equal(null);
