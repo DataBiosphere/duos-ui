@@ -41,28 +41,32 @@ export default function ERACommons(props) {
     setEraCommonsId(isNil(eraCommonsId) ? '' : eraCommonsId);
   };
 
-  /**
-   * This useEffect is intended to run once after a user has been redirected back to the current page from a
-   * successful NIH authentication.
-   */
-  useEffect(() => {
-    const init = async () => {
-      // If we have a token to verify, save it before getting user info
-      if (props.location !== undefined && props.location.search !== '') {
-        await saveNIHAuthentication(props.location.search);
-      }
-    };
-    init();
-    // Note that we do not want props.location as a dependency here since it does not change after render.
-  }, []);
+  // /**
+  //  * This useEffect is intended to run once after a user has been redirected back to the current page from a
+  //  * successful NIH authentication.
+  //  */
+  // useEffect(() => {
+  //   const init = async () => {
+  //     // If we have a token to verify, save it before getting user info
+  //     if (props.location !== undefined && props.location.search !== '') {
+  //       await saveNIHAuthentication(props.location.search);
+  //     }
+  //   };
+  //   init();
+  //   // Note that we do not want props.location as a dependency here since it does not change after render.
+  // }, []);
 
   /**
    * This useEffect is intended to populate state from either the provided researcher object or the current user.
    */
   useEffect(() => {
     const fetchData = async () => {
-      // In the read-only case, we are provided a researcher object and do not need to query for the current user
-      if (props.readOnly && props.researcherProfile) {
+      // If we have a token to verify, save it before getting user info
+      if (props.location !== undefined && props.location.search !== '') {
+        await saveNIHAuthentication(props.location.search);
+      } else if (props.readOnly && props.researcherProfile) {
+        // In the read-only case, we are provided a researcher object and do not need to query for the current user.
+        // We should never be in this state without a provided researcher profile object.
         setResearcherProfile(props.researcherProfile);
         const propsData = researcherProfile.properties;
         setCommonResearcherPropertyState(propsData, researcherProfile.eraCommonsId);
