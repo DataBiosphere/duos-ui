@@ -297,6 +297,19 @@ export const DatasetSearchTable = (props) => {
                   },
                   {
                     value: () => {
+                      let accessType;
+                      if (dataset.accessManagement === 'external') {
+                        accessType = 'External to DUOS';
+                      } else if (dataset.accessManagement === 'open') {
+                        accessType = 'Open Access';
+                      } else {
+                        accessType = dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
+                      }
+                      return accessType;
+                    },
+                  },
+                  {
+                    value: () => {
                       const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
                       if (exportableSnapshots.length === 0) {
                         return dataset.dataLocation;
@@ -310,9 +323,6 @@ export const DatasetSearchTable = (props) => {
                           {snapshot.name}{'\n'}
                         </Link>);
                     }
-                  },
-                  {
-                    value: dataset.accessManagement==='external' ? 'External to DUOS': dataset.accessManagement==='open'? 'Open Access':dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
                   },
                   {
                     value: () => {
