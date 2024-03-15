@@ -3,7 +3,6 @@ import {Fragment, useEffect, useState, useCallback } from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
-import {ConnectDatasetModal} from '../components/modals/ConnectDatasetModal';
 import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import {PageHeading} from '../components/PageHeading';
 import {PaginatorBar} from '../components/PaginatorBar';
@@ -77,7 +76,6 @@ export default function DatasetCatalog(props) {
   const [selectedDatasetId, setSelectedDatasetId] = useState();
 
   // Modal States
-  const [showConnectDataset, setShowConnectDataset] = useState(false);
   const [showDatasetDelete, setShowDatasetDelete] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
@@ -216,11 +214,6 @@ export default function DatasetCatalog(props) {
     const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
     props.history.push({ pathname: '/dar_application/' + referenceId });
-  };
-
-  const openConnectDataset = (dataset) => {
-    setShowConnectDataset(true);
-    setSelectedDataset(dataset);
   };
 
   const openTranslatedDUL = (dataUse) => {
@@ -613,18 +606,6 @@ export default function DatasetCatalog(props) {
                                 className: `cm-icon-button glyphicon glyphicon-pencil caret-margin ${color}-color`, 'aria-hidden': 'true',
                                 'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
                               })
-                            ]),
-
-                            a({
-                              isRendered: currentUser.isAdmin,
-                              id: trIndex + '_btnConnect', name: 'btn_connect',
-                              onClick: () => openConnectDataset(dataset),
-                            }, [
-                              span({
-                                className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
-                                  (dataset.isAssociatedToDataOwners ? `${color}-color` : 'default-color'), 'aria-hidden': 'true',
-                                'data-tip': 'Connect with Data Owner', 'data-for': 'tip_connect'
-                              })
                             ])
                           ])
                         ]),
@@ -794,22 +775,8 @@ export default function DatasetCatalog(props) {
           action: { label: 'Yes', handler: () => dialogHandlerEdit }
         }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?'])]),
 
-        ConnectDatasetModal({
-          isRendered: showConnectDataset,
-          showModal: showConnectDataset,
-          onOKRequest: () => setShowConnectDataset(false),
-          onCloseRequest: () => setShowConnectDataset(false),
-          dataset: selectedDataset,
-        }),
         h(ReactTooltip, {
           id: 'tip_delete',
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_connect',
           place: 'right',
           effect: 'solid',
           multiline: true,
