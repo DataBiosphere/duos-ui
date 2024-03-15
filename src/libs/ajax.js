@@ -368,28 +368,6 @@ export const Study = {
 
 };
 
-export const DatasetAssociation = {
-
-  createDatasetAssociations: async (objectId, usersIdList) => {
-    const url = `${await getApiUrl()}/api/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList), { method: 'POST' }]));
-    return await res.json();
-  },
-
-  getAssociatedAndToAssociateUsers: async (objectId) => {
-    const url = `${await getApiUrl()}/api/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  updateDatasetAssociations: async (objectId, usersIdList) => {
-    const url = `${await getApiUrl()}/api/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList), { method: 'PUT' }]));
-    return res.json();
-  }
-
-};
-
 export const Email = {
   sendReminderEmail: async (voteId) => {
     const url = `${await getApiUrl()}/api/emailNotifier/reminderMessage/${voteId}`;
