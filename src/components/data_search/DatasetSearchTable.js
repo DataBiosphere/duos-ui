@@ -296,7 +296,7 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value:() => {
+                    value: () => {
                       let accessType;
                       if (dataset.accessManagement === 'external') {
                         accessType = 'External to DUOS';
