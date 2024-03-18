@@ -30,8 +30,8 @@ const datasetTableHeader = [
   'Data Use',
   'Data Types',
   'Participants',
+  'Access Type',
   'Data Location',
-  'DAC',
   'Export to Terra',
 ];
 
@@ -296,7 +296,17 @@ export const DatasetSearchTable = (props) => {
                     value: dataset.participantCount,
                   },
                   {
-                    value: dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName,
+                    value: () => {
+                      let accessType;
+                      if (dataset.accessManagement === 'external') {
+                        accessType = 'External to DUOS';
+                      } else if (dataset.accessManagement === 'open') {
+                        accessType = 'Open Access';
+                      } else {
+                        accessType = dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
+                      }
+                      return accessType;
+                    }
                   },
                   {
                     value: () => {
