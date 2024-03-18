@@ -21,10 +21,10 @@ export default function DataUseAgreements(props) {
       <h2>Data Use Agreements</h2>
 
       <div className="form-group">
-        <h3>DUOS Library Card Data Access Agreement and Attestation</h3>
+        <h3>DUOS Code of Conduct</h3>
 
         <p className="data-use-paragraph">
-          Under the National Institutes of Health (NIH) Genomic Data Sharing Policy, the Genomic Data User Code of Conduct sets forth principles for responsible management and use of large-scale genomic data and associated phenotypic data accessed through controlled access to NIH-designated data repositories (e.g., the database of Genotypes and Phenotypes (dbGaP), repositories established as NIH Trusted Partners). Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:
+          Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:
         </p>
 
         <ol className="data-use-list">
