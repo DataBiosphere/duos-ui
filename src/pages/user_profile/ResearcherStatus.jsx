@@ -100,15 +100,10 @@ export default function ResearcherStatus(props) {
     ) : (
       <div>
         <p>No Library Card Found</p>
-        <button
-          className='f-left btn-primary common-background'
-          onClick={goToRequestRole}
-          style={{
-            marginTop: '10px',
-            marginBottom: '50px'
-          }} >
-          Request a Library Card
-        </button>
+        <p style={{
+          marginTop: '10px',
+          marginBottom:'50px'
+        }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional Signing Official must register in DUOS, request and receive Signing Official permissions, and issue you a Library Card.</p>
       </div>
     )}
   </div>;
