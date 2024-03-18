@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {get, merge} from 'lodash';
 import {find, getOr, isNil} from 'lodash/fp';
-import * as qs from 'query-string';
+import queryString from 'query-string';
 import {AuthenticateNIH, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import eraIcon from '../images/era-commons-logo.png';
@@ -72,7 +72,7 @@ export default function ERACommons(props) {
   };
 
   const saveNIHAuthentication = async (searchArg) => {
-    const rawToken = qs.parse(searchArg);
+    const rawToken = queryString.parse(searchArg);
     const decodedToken = await decodeNihToken(rawToken);
     if (isNil(decodedToken)) {
       setNihError(true);
@@ -94,7 +94,7 @@ export default function ERACommons(props) {
 
   const redirectToNihLogin = async () => {
     const destination = window.location.origin + '/' + props.destination + '?nih-username-token=<token>';
-    const nihUrl = `${ await Config.getNihUrl() }?${qs.stringify({ 'return-url': destination })}`;
+    const nihUrl = `${ await Config.getNihUrl() }?${queryString.stringify({ 'return-url': destination })}`;
     window.location.href = nihUrl;
   };
 
