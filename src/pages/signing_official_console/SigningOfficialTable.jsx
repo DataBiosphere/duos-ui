@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Info } from '@mui/icons-material';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -402,7 +403,7 @@ export default function SigningOfficialTable(props) {
                 target="_blank"
                 id="so-console-info-link"
                 style={{ verticalAlign: 'super' }}>
-                i
+                <Info fontSize='large'/>
               </a>
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
