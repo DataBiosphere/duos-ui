@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import ResearcherInfo from './ResearcherInfo';
 import DataUseAgreements from './DataUseAgreements';
 import DataAccessRequest from './DataAccessRequest';
