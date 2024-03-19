@@ -8,7 +8,6 @@ import { FormField, FormFieldTypes } from '../../components/forms/forms';
 export default function SupportRequestsPage(props) {
 
   const profile = props.location.state?.data || undefined;
-
   const headerStyle = {
     fontWeight: 'bold',
     color: '#333F52',
@@ -37,19 +36,6 @@ export default function SupportRequestsPage(props) {
       checkSOPermissions: false,
       checkJoinDac: false,
       extraRequest: undefined
-    };
-  }
-  else if (props.isRequestLCPage) {
-    possibleSupportRequests = [
-      {
-        key: 'requestNewLC',
-        label: 'Request a new library card',
-        isDefaultOption: true,
-      }
-    ];
-    hasSupportRequestsCond = true;
-    supportRequestsCond = {
-      requestNewLC: true,
     };
   }
   else {
@@ -140,7 +126,7 @@ export default function SupportRequestsPage(props) {
         fontWeight: '600',
         marginTop: 10
       }}>
-      {props.isRequestRolePage ? 'Request a New Role' : (props.isRequestLCPage ? 'Request Library Card' : '')}
+      {props.isRequestRolePage ? 'Request a New Role'  : ''}
     </p>
     <div
       style={{

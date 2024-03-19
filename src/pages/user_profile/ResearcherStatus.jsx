@@ -11,20 +11,13 @@ export default function ResearcherStatus(props) {
   const {
     user,
     pageProps,
-    profile
   } = props;
 
   const [issuedOn, setIssuedOn] = useState('');
   const [issuedBy, setIssuedBy] = useState('');
   const [hasCard, setHasCard] = useState(true);
 
-  const goToRequestRole = () => {
-    pageProps.history.push({
-      pathname: '/request_lc',
-      state: { data: profile }
-    });
-  };
-
+  
   useEffect(() => {
     const init = async () => {
       try {
