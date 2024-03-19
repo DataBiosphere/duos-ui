@@ -9,6 +9,7 @@ import mgbIcon from '../images/mass-general-brigham-logo.svg';
 import elwaziIcon from '../images/elwazi-logo-color.svg';
 import nhgriIcon from '../images/nhgri-logo-color.svg';
 import anvilIcon from '../images/anvil-logo.svg';
+import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
@@ -177,6 +178,11 @@ export const DatasetSearch = (props) => {
       },
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
+    },
+    'terra': {
+      query: null,
+      icon: terraIcon,
+      title: 'Terra Data Library',
     },
     '/custom': {
       query: {
