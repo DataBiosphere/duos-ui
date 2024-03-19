@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState } from 'react';
 import { Support } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
