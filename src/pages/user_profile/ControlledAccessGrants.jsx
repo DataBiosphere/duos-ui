@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import SortableTable from '../../components/sortable_table/SortableTable';
 import { User } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
