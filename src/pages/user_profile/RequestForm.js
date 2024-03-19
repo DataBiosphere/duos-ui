@@ -23,10 +23,6 @@ export default function SupportRequestsPage(props) {
   if (props.isRequestRolePage) {
     possibleSupportRequests = [
       {
-        key: 'checkRegisterDataset',
-        label: 'Register a dataset'
-      },
-      {
         key: 'checkSOPermissions',
         label: `I am a Signing Official and I want to issue permissions to my institution's users`
       },
@@ -37,8 +33,6 @@ export default function SupportRequestsPage(props) {
     ];
     hasSupportRequestsCond = false;
     supportRequestsCond = {
-      checkRegisterDataset: false,
-      checkRequestDataAccess: false,
       checkSOPermissions: false,
       checkJoinDac: false,
       extraRequest: undefined
@@ -168,16 +162,6 @@ export default function SupportRequestsPage(props) {
           id={supportRequest.key}
           onChange={handleSupportRequestsChange} />;
       })}
-      {supportRequests.checkRequestDataAccess && (
-        <div
-          style={{
-            border: '1px solid purple',
-            color: 'purple',
-            padding: '10px'
-          }}>
-          Before you can submit a data access request, your Signing Official must register and issue you a Library Card in DUOS
-        </div>
-      )}
       <div style={{ margin: '15px 0 10px' }}>
         Is there anything else you would like to request?
       </div>
