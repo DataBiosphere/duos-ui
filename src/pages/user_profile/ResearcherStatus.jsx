@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import ERACommons from '../../components/ERACommons';
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax';
