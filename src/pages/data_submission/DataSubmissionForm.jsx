@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {validateForm} from './RegistrationValidation';
 import {cloneDeep, isNil} from 'lodash/fp';
 import {DataSet, Institution, Study} from '../../libs/ajax';

@@ -1,4 +1,5 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
