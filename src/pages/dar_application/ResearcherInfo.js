@@ -175,11 +175,7 @@ export default function ResearcherInfo(props) {
             laboratory) who assists with the PI's research project involving controlled-access data 
             subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting 
             PI's institution and work at the same location/campus as the PI. Internal Collaborators 
-            must be at the PI or equivalent level and are required to have a Library Card in order 
-            to access data through this request. Internal Collaborators will have Data 
-            Downloader/Approver status so that they may add their own relevant Internal Lab Staff. 
-            Internal Collaborators will not be required to submit an independent DAR to collaborate 
-            on this project.`
+            must be at the PI or equivalent level and are required to have a Library Card and submit their own data access request.`
           ),
           h(CollaboratorList, {
             formFieldChange,
