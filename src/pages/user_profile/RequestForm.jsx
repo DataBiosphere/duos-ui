@@ -16,7 +16,7 @@ export default function SupportRequestsPage(props) {
     marginBottom: '1rem'
   };
 
-  var possibleSupportRequests = [
+  const possibleSupportRequests = [
     {
       key: 'checkRegisterDataset',
       label: 'Register a dataset'
@@ -30,8 +30,8 @@ export default function SupportRequestsPage(props) {
       label: 'I am looking to join a DAC'
     }
   ];
-  var hasSupportRequestsCond = false;
-  var supportRequestsCond = {
+  const hasSupportRequestsCond = false;
+  const supportRequestsCond = {
     checkRegisterDataset: false,
     checkRequestDataAccess: false,
     checkSOPermissions: false,
