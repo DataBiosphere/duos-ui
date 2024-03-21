@@ -16,33 +16,28 @@ export default function SupportRequestsPage(props) {
     marginBottom: '1rem'
   };
 
-  var possibleSupportRequests;
-  var hasSupportRequestsCond;
-  var supportRequestsCond;
-
-  if (props.isRequestRolePage) {
-    possibleSupportRequests = [
-      {
-        key: 'checkSOPermissions',
-        label: `I am a Signing Official and I want to issue permissions to my institution's users`
-      },
-      {
-        key: 'checkJoinDac',
-        label: 'I am looking to join a DAC'
-      }
-    ];
-    hasSupportRequestsCond = false;
-    supportRequestsCond = {
-      checkSOPermissions: false,
-      checkJoinDac: false,
-      extraRequest: undefined
-    };
-  }
-  else {
-    possibleSupportRequests = [];
-    hasSupportRequestsCond = false;
-    supportRequestsCond = {};
-  }
+  var possibleSupportRequests = [
+    {
+      key: 'checkRegisterDataset',
+      label: 'Register a dataset'
+    },
+    {
+      key: 'checkSOPermissions',
+      label: `I am a Signing Official and I want to issue permissions to my institution's users`
+    },
+    {
+      key: 'checkJoinDac',
+      label: 'I am looking to join a DAC'
+    }
+  ];
+  var hasSupportRequestsCond = false;
+  var supportRequestsCond = {
+    checkRegisterDataset: false,
+    checkRequestDataAccess: false,
+    checkSOPermissions: false,
+    checkJoinDac: false,
+    extraRequest: undefined
+  };
 
   const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond);
   const [supportRequests, setSupportRequests] = useState(supportRequestsCond);
@@ -65,7 +60,6 @@ export default function SupportRequestsPage(props) {
       await sendSupportRequests();
     }
   };
-
 
   const processSupportRequests =
     () => {
@@ -126,7 +120,7 @@ export default function SupportRequestsPage(props) {
         fontWeight: '600',
         marginTop: 10
       }}>
-      {props.isRequestRolePage ? 'Request a New Role'  : ''}
+      Request a New Role
     </p>
     <div
       style={{
