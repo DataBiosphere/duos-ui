@@ -9,7 +9,7 @@ export const DacUsers = (props) => {
   const [state, setState] = useState({
     dac: props.dac,
     removeButton: props.removeButton,
-    removeHandler: props.removeButton ? props.removeHandler : () => { },
+    removeHandler: props.removeButton ? props.removeHandler : () => {},
     removedIds: []
   });
 
