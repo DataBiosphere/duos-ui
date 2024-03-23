@@ -1,9 +1,8 @@
-import { Component } from 'react';
-import { button, div, h, hh } from 'react-hyperscript-helpers';
+import React from 'react';
 import Modal from 'react-modal';
 import './BaseModal.css';
-import { PageSubHeading } from '../components/PageSubHeading';
-import CloseIconComponent from '../components/CloseIconComponent';
+import { PageSubHeading } from './PageSubHeading';
+import CloseIconComponent from './CloseIconComponent';
 
 const customStyles = {
   overlay: {
@@ -33,37 +32,56 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export const BaseModal = hh(class BaseModal extends Component {
+export const BaseModal = (props) => {
+  const { disableOkBtn = false } = props;
+  return (
+    <div>
+      <Modal
+        isOpen={props.showModal}
+        onAfterOpen={props.afterOpen}
+        onRequestClose={props.onRequestClose}
+        style={customStyles}
+        contentLabel='Modal'
+      >
+        <div className='modal-header'>
+          <CloseIconComponent
+            closeFn={props.onRequestClose}
+          />
+          <PageSubHeading
+            id={props.id}
+            imgSrc={props.imgSrc}
+            color={props.color}
+            iconSize={props.iconSize}
+            title={props.title}
+            description={props.description}
+          />
+        </div>
+        <div className='modal-content'>
+          {props.children}
+        </div>
 
-  render() {
-
-    const { disableOkBtn = false } = this.props;
-
-    return (
-      div({}, [
-        h(Modal, {
-          isOpen: this.props.showModal,
-          onAfterOpen: this.props.afterOpen,
-          onRequestClose: this.props.onRequestClose,
-          style: customStyles,
-          contentLabel: 'Modal'
-        }, [
-          div({ className: 'modal-header' }, [
-            h(CloseIconComponent, {closeFn: this.props.onRequestClose}),
-            PageSubHeading({ id: this.props.id, imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
-          ]),
-
-          div({ className: 'modal-content' }, [
-            this.props.children
-          ]),
-
-          div({ className: 'modal-footer' }, [
-            button({ id: 'btn_action', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ' + this.props.color + '-background',
-              onClick: this.props.action.handler, disabled: disableOkBtn }, [this.props.action.label]),
-            button({ isRendered: this.props.type !== 'informative', id: 'btn_cancel', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background', onClick: this.props.onRequestClose }, ['Cancel']),
-          ]),
-        ])
-      ])
-    );
-  }
-});
+        <div className='modal-footer'>
+          <button
+            id='btn_action'
+            className={`col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ${props.color}-background`}
+            onClick={props.action.handler}
+            disabled={disableOkBtn}
+          >
+            {props.label}
+          </button>
+          {
+            props.type !== 'informative' && (
+              <button
+                id='btn-cancel'
+                className='col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background'
+                onClick={props.onRequestClose}
+              >
+                Cancel
+              </button>
+            )
+          }
+        </div>
+      </Modal>
+    </div>
+  );
+};
