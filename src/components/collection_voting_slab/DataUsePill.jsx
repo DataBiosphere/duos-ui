@@ -32,10 +32,10 @@ const styles = {
 };
 
 export const DataUsePill = (props) => {
-  const { dataUse, key } = props;
+  const { dataUse, index } = props;
 
   return (
-    <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${key}`} style={styles.baseStyle}>
+    <div key={`data_use_pill_${dataUse.type}_${dataUse.code}_${index}`} style={styles.baseStyle}>
       <span style={styles.code}>{!isNil(dataUse) ? [dataUse.code] : []}</span>
       <span style={styles.description}>{!isNil(dataUse) ? [dataUse.description] : []}</span>
     </div>
@@ -49,13 +49,13 @@ export const DataUsePills = (dataUses) => {
   return (
     <div>
       {permissionsUses.map((dataUse, idx) => (
-        <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} />
+        <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
       ))}
       {modifierUses.length > 0 && (
         <div>
           <h3 style={styles.subheading}>{ControlledAccessType.modifiers}</h3>
           {modifierUses.map((dataUse, idx) => (
-            <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} />
+            <DataUsePill dataUse={dataUse} key={`${dataUse.code}-${idx}`} index={idx} />
           ))}
         </div>
       )}
