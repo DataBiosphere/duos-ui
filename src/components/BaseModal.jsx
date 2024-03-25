@@ -67,7 +67,7 @@ export const BaseModal = (props) => {
             onClick={props.action.handler}
             disabled={disableOkBtn}
           >
-            {props.label}
+            {props.action.label}
           </button>
           {
             props.type !== 'informative' && (

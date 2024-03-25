@@ -26,16 +26,15 @@ export const AddUserModal = (props) => {
   const emailRef = useRef();
 
   useEffect(() => {
-    if (props.showModal) {
-      let r1 = nameRef.current;
-      let r2 = emailRef.current;
-      if (r1 && r2) {
-        setState((prev) => ({
-          ...prev,
-          displayNameValid: r1.validity.valid,
-          emailValid: r2.validity.valid
-        }));
-      }
+    if (!props.showModal) return;
+    let r1 = nameRef.current;
+    let r2 = emailRef.current;
+    if (r1 && r2) {
+      setState((prev) => ({
+        ...prev,
+        displayNameValid: r1.validity.valid,
+        emailValid: r2.validity.valid
+      }));
     }
   }, [props.showModal]);
 
@@ -194,20 +193,18 @@ export const AddUserModal = (props) => {
         <div className='form-group'>
           {
             isAdmin() && (
-              <div className='form-group'>
-                <div className='col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4' style={{ 'paddingLeft': '30px' }}>
-                  <div className='checkbox'>
-                    <input
-                      id='chk_emailPreference'
-                      type='checkbox'
-                      className='checkbox-inline user-checkbox'
-                      // If email preference is TRUE  -> disable checkbox is not checked
-                      // If email preference is FALSE -> disable checkbox is checked
-                      checked={!state.emailPreference}
-                      onChange={emailPreferenceChanged}
-                    />
-                    <label htmlFor='chk_emailPreference' className='regular-checkbox rp-choice-questions bold'>Disable Admin email notifications</label>
-                  </div>
+              <div className='col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4' style={{ 'paddingLeft': '30px' }}>
+                <div className='checkbox'>
+                  <input
+                    id='chk_emailPreference'
+                    type='checkbox'
+                    className='checkbox-inline user-checkbox'
+                    // If email preference is TRUE  -> disable checkbox is not checked
+                    // If email preference is FALSE -> disable checkbox is checked
+                    checked={!state.emailPreference}
+                    onChange={emailPreferenceChanged}
+                  />
+                  <label htmlFor='chk_emailPreference' className='regular-checkbox rp-choice-questions bold'>Disable Admin email notifications</label>
                 </div>
               </div>
             )
@@ -216,12 +213,14 @@ export const AddUserModal = (props) => {
       </form>
       {
         state.emailValid === false && state.submitted === true && (
-          <Alert
-            id='emailUsed'
-            type='danger'
-            title='Conflicts to resolve!'
-            description='There is a user already registered with this google account.'
-          />
+          <div>
+            <Alert
+              id='emailUsed'
+              type='danger'
+              title='Conflicts to resolve!'
+              description='There is a user already registered with this google account.'
+            />
+          </div>
         )
       }
       {
