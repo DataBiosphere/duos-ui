@@ -8,7 +8,6 @@ import { FormField, FormFieldTypes } from '../../components/forms/forms';
 export default function SupportRequestsPage(props) {
 
   const profile = props.location.state?.data || undefined;
-
   const headerStyle = {
     fontWeight: 'bold',
     color: '#333F52',
@@ -17,46 +16,28 @@ export default function SupportRequestsPage(props) {
     marginBottom: '1rem'
   };
 
-  var possibleSupportRequests;
-  var hasSupportRequestsCond;
-  var supportRequestsCond;
-
-  if (props.isRequestRolePage) {
-    possibleSupportRequests = [
-      {
-        key: 'checkSOPermissions',
-        label: `I am a Signing Official and I want to issue permissions to my institution's users`
-      },
-      {
-        key: 'checkJoinDac',
-        label: 'I am looking to join a DAC'
-      }
-    ];
-    hasSupportRequestsCond = false;
-    supportRequestsCond = {
-      checkSOPermissions: false,
-      checkJoinDac: false,
-      extraRequest: undefined
-    };
-  }
-  else if (props.isRequestLCPage) {
-    possibleSupportRequests = [
-      {
-        key: 'requestNewLC',
-        label: 'Request a new library card',
-        isDefaultOption: true,
-      }
-    ];
-    hasSupportRequestsCond = true;
-    supportRequestsCond = {
-      requestNewLC: true,
-    };
-  }
-  else {
-    possibleSupportRequests = [];
-    hasSupportRequestsCond = false;
-    supportRequestsCond = {};
-  }
+  const possibleSupportRequests = [
+    {
+      key: 'checkRegisterDataset',
+      label: 'Register a dataset'
+    },
+    {
+      key: 'checkSOPermissions',
+      label: `I am a Signing Official and I want to issue permissions to my institution's users`
+    },
+    {
+      key: 'checkJoinDac',
+      label: 'I am looking to join a DAC'
+    }
+  ];
+  const hasSupportRequestsCond = false;
+  const supportRequestsCond = {
+    checkRegisterDataset: false,
+    checkRequestDataAccess: false,
+    checkSOPermissions: false,
+    checkJoinDac: false,
+    extraRequest: undefined
+  };
 
   const [hasSupportRequests, setHasSupportRequests] = useState(hasSupportRequestsCond);
   const [supportRequests, setSupportRequests] = useState(supportRequestsCond);
@@ -79,7 +60,6 @@ export default function SupportRequestsPage(props) {
       await sendSupportRequests();
     }
   };
-
 
   const processSupportRequests =
     () => {
@@ -140,7 +120,7 @@ export default function SupportRequestsPage(props) {
         fontWeight: '600',
         marginTop: 10
       }}>
-      {props.isRequestRolePage ? 'Request a New Role' : (props.isRequestLCPage ? 'Request Library Card' : '')}
+      Request a New Role
     </p>
     <div
       style={{
