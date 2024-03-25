@@ -56,7 +56,7 @@ let labelSpanIndex = 0;
 const generateLabelSpanContents = (labelValue, key,  spanValue, isLoading) => {
   labelSpanIndex++;
   return (
-    <div className='flex-row-element' style={styles.flexRowElement} id={`${key}-flex-row-element`}>
+    <div className='flex-row-element' style={styles.flexRowElement} id={`${key}-flex-row-element`} key={key}>
       {isLoading ?
         <>
           <div className='text-placeholder' key={`${labelSpanIndex}-label-placeholder`} id={`${labelSpanIndex}-label-placeholder`} style={{width: '30%', height: '2.4rem', marginBottom: '1.5rem'}}></div>
