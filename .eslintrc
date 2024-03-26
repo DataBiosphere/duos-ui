@@ -51,6 +51,14 @@
     "@babel/implicit-arrow-linebreak": "off",
     "@babel/array-bracket-newline": "off",
     "@babel/brace-style": "off",
-    "@babel/semi": "warn"
-  }
+    "@babel/semi": "warn",
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
 }
