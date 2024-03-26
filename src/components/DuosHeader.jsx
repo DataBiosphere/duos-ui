@@ -422,6 +422,7 @@ const DuosHeader = (props) => {
 
   const tabs = headerTabsConfig.filter((data) => data.isRendered(currentUser));
 
+  // returns true if the current page the app is on is a part of this tab
   const isValidTab = (tab) => {
     if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
       return true;
@@ -447,6 +448,7 @@ const DuosHeader = (props) => {
     initialTab = tabs.findIndex(isValidTab);
   }
 
+  // populate initialSubTab
   if (initialTab !== -1) {
     if (tabs[initialTab].link === location.pathname) {
       initialSubTab = 0;
@@ -461,6 +463,7 @@ const DuosHeader = (props) => {
     <nav className="navbar-duos" role="navigation">
       <Hidden mdDown={true}>
         <div className="row no-margin" style={{ width: '100%' }}>
+          {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             goToLink={goToLink}
             makeNotifications={makeNotifications}
@@ -482,7 +485,7 @@ const DuosHeader = (props) => {
         </div>
       </Hidden>
       {
-        //NOTE: old navbar style is heavily dependent on css styles with element specific styles
+      //NOTE: old navbar style is heavily dependent on css styles with element specific styles
       //Hard to make that navbar flexible with material-ui's syntax
       //For now I will use material-ui's hidden element to selectively render the two different navbars
       //I'll look into rewriting the large navbar on a later PR
