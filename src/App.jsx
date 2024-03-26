@@ -59,6 +59,13 @@ function App() {
   });
 
   useEffect(() => {
+    const initAuth = async () => {
+
+    };
+    initAuth();
+  },[]);
+
+  useEffect(() => {
     const setUserIsLogged = async () => {
       const isLogged = await Storage.userIsLogged();
       setIsLoggedIn(isLogged);

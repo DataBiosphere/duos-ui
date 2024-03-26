@@ -10,9 +10,20 @@ import './index.css';
 import App from './App';
 import { unregister } from './registerServiceWorker';
 import { BrowserRouter } from 'react-router-dom';
+import { OidcBroker } from './libs/oidcBroker';
+import { AuthProvider } from 'react-oidc-context';
 
 unregister();
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<BrowserRouter><App /></BrowserRouter>);
+OidcBroker.initializeAuth().then(() => {
+  const container = document.getElementById('root');
+  const root = createRoot(container);
+  root.render(
+    <BrowserRouter>
+      <AuthProvider {...OidcBroker.getOidcUserManagerSettings()}>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>);
+});
+
+
