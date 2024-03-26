@@ -49,20 +49,19 @@ export default function TranslatedDulModal(props) {
   }, [dataUse]);
 
   return (
-    BaseModal({
-      id: MODAL_ID,
-      showModal: showModal,
-      onRequestClose: closeHandler,
-      color: 'dataset',
-      type: 'informative',
-      iconSize: 'none',
-      title: 'Data Use Terms',
-      action: { label: 'Close', handler: closeHandler }
-    },
-    [
+    <BaseModal
+      id={MODAL_ID}
+      showModal={showModal}
+      onRequestClose={closeHandler}
+      color='dataset'
+      type='informative'
+      iconSize='none'
+      title='Data Use Terms'
+      action={{ label: 'Close', handler: closeHandler }}
+    >
       <ul key='dulUnorderedList' style={listStyle} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
         {translatedDulList}
       </ul>
-    ])
+    </BaseModal>
   );
 }
