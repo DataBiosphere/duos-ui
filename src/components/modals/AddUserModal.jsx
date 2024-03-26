@@ -76,6 +76,8 @@ export const AddUserModal = (props) => {
   };
 
   const emailPreferenceChanged = (e) => {
+    // disable notifications checkbox is not checked: -> Set email preference TRUE
+    // disable notifications checkbox is checked:     -> Set email preference FALSE
     const checkState = e.target.checked;
     setState({
       ...state,
