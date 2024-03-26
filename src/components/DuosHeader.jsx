@@ -304,6 +304,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
+  const { location, classes } = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -421,8 +422,6 @@ const DuosHeader = (props) => {
 
   const tabs = headerTabsConfig.filter((data) => data.isRendered(currentUser));
 
-  const { location, classes } = props;
-
   const isValidTab = (tab) => {
     if (tab.link === location.pathname || location.pathname.includes(tab.search)) {
       return true;
@@ -442,7 +441,6 @@ const DuosHeader = (props) => {
   // to the current page by clicking on a tab from the nav bar.
 
   // populate initialTab based on state (if valid) or by manually searching through all tabs.
-
   if (location?.state?.selectedMenuTab && tabs.length > location.state.selectedMenuTab && isValidTab(tabs[location.state.selectedMenuTab])) {
     initialTab = location.state.selectedMenuTab;
   } else {
@@ -510,7 +508,8 @@ const DuosHeader = (props) => {
           >
             <NavigationTabsComponent
               goToLink={goToLink}
-              makeNotifications={() => {}} // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+              // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
+              makeNotifications={() => {}} 
               duosLogoImage={duosLogoImage}
               DuosLogo={DuosLogo}
               navbarDuosIcon={navbarDuosIcon}
