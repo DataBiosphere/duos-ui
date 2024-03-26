@@ -87,6 +87,8 @@ export const AddUserModal = (props) => {
 
   const adminChanged = (e) => {
     const checkState = e.target.checked;
+    // True? add admin role to state.updatedRoles
+    // False? remove admin role from state.updatedRoles
     let newRoles = [researcherRole];
     if (checkState) {
       newRoles = _.concat(state.updatedRoles, adminRole);
