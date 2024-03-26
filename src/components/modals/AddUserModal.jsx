@@ -44,7 +44,7 @@ export const AddUserModal = (props) => {
       ...state,
       submitted: true
     });
-    const validForm = state.displayNameValid && state.emailNameValid;
+    const validForm = state.displayNameValid && state.emailValid;
     if (!validForm) return;
 
     const user = {
@@ -152,7 +152,7 @@ export const AddUserModal = (props) => {
               placeholder='User name'
               required={true}
               value={displayName}
-              autoFocus
+              autoFocus={true}
               onChange={handleChange}
               ref={nameRef}
             />
