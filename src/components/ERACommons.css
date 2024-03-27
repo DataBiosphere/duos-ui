@@ -50,7 +50,6 @@
 .era-fadein {
     -webkit-animation: fadein .6s;
     -moz-animation: fadein .6s;
-    -ms-animation: fadein .6s;
     -o-animation: fadein .6s;
     animation: fadein .6s;
 }
@@ -63,4 +62,51 @@
     margin-bottom: 1rem;
     transition: color .3s ease-in-out;
     text-align: left;
+}
+
+.era-cancel-color {
+    color: #D13B07 !important;
+}
+
+.era-required-field-error-span {
+    font-weight: normal;
+    line-height: 25px;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.era-commons-id-value {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    color: #333;
+    font-size: 14px;
+    line-height: 1.42857143;
+    box-sizing: border-box;
+    min-height: 35px;
+}
+
+.era-delete-icon {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    box-sizing: border-box;
+    font: inherit;
+    overflow: visible;
+    text-transform: none;
+    color: #000;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: .2;
+    text-shadow: 0 1px 0 #fff;
+    appearance: none;
+    background: 0 0;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+    margin: 2px 0 0 10px;
+}
+
+.era-expiration-value {
+    font-style: italic;
+    display: block;
 }

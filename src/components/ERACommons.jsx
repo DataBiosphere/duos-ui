@@ -7,6 +7,7 @@ import {AuthenticateNIH, User} from '../libs/ajax';
 import {Config} from '../libs/config';
 import './Animations.css';
 import {decodeNihToken, extractEraAuthenticationState} from '../../src/utils/ERACommonsUtils';
+import ReactTooltip from 'react-tooltip';
 
 export default function ERACommons(props) {
 
@@ -107,32 +108,40 @@ export default function ERACommons(props) {
 
   return (
     <div id={'era-commons-id'} style={{ minHeight: 65 }}>
-      {header && <label className="era-control-label">
-        <span data-cy="era-commons-header">NIH eRA Commons ID
-          {required ? <span data-cy="era-commons-required">*</span> : ''}
+      {header && <label className='era-control-label'>
+        <span data-cy='era-commons-header'>NIH eRA Commons ID
+          {required ? <span data-cy='era-commons-required'>*</span> : ''}
         </span>
       </label>}
       {(!isAuthorized || expirationCount < 0) && (!readOnly &&
           <a
-            data-cy="era-commons-authenticate-link"
+            data-cy='era-commons-authenticate-link'
             className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
             onClick={redirectToNihLogin}
-            target="_blank">
+            target='_blank'>
             <div className={'era-logo-style'}/>
             <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
           </a>
       )}
-      {nihError && <span className="cancel-color required-field-error-span">{nihErrorMessage}</span>}
+      {nihError && <span className='era-cancel-color era-required-field-error-span'>{nihErrorMessage}</span>}
       {isAuthorized && <div>
-        {expirationCount >= 0 && <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding">
-          <div data-cy="era-commons-id-value" style={{ float: 'left', fontWeight: 500, display: 'inline', paddingTop: 5 }}>{eraCommonsId}</div>
-          {!readOnly && <button style={{ float: 'left', margin: '2px 0 0 10px' }} type="button" onClick={deleteNihAccount} className="close">
-            <span className="glyphicon glyphicon-remove-circle" data-tip="Clear account" data-for="tip_clearNihAccount" />
-          </button>}
+        {expirationCount >= 0 && <div className='era-commons-id-value'>
+          <span data-cy='era-commons-id-value'>{eraCommonsId}</span>
+          {!readOnly &&
+              <button className='era-delete-icon' type='button' onClick={deleteNihAccount}>
+                <span className='glyphicon glyphicon-remove-circle' data-tip='Clear account' data-for='tip_clear_era_commons_link' />
+              </button>
+          }
+          {!readOnly &&
+              <ReactTooltip
+                place={'right'}
+                effect={'solid'}
+                id={`tip_clear_era_commons_link`}>Clear eRA Commons Account Link</ReactTooltip>
+          }
         </div>}
-        <div style={{ marginTop: 8, fontStyle: 'italic', display: 'block' }} className="col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding">
-          {expirationCount >= 0 && <div className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
-          {expirationCount < 0 && <div className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
+        <div className='era-expiration-value'>
+          {expirationCount >= 0 && <div className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
+          {expirationCount < 0 && <div className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
         </div>
       </div>}
     </div>
