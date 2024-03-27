@@ -1,0 +1,66 @@
+.era-logo-style {
+    height: 27px;
+    width: 38px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(../images/era-commons-logo.png);
+    display: inline-block;
+}
+
+.era-button-state:hover {
+    box-shadow: 1px 1px 3px #00609f;
+}
+
+.era-button-state {
+    height: 34px;
+    width: 210px;
+    display: block;
+    border: 1px solid #d3d3d3;
+    padding: 3px;
+    text-align: center;
+    margin-top: 3px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 1px 1px 3px #999999;
+    cursor: pointer;
+    color: #999;
+    font-weight: 500;
+    font-size: .8em;
+    transition: all .2s ease;
+}
+
+.era-button-state-error {
+    height: 34px;
+    width: 210px;
+    display: block;
+    border: 1px solid #d3d3d3;
+    padding: 3px;
+    text-align: center;
+    margin-top: 3px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 1px 1px 3px #999999;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: .8em;
+    transition: all .2s ease;
+    color: #D13B07;
+}
+
+.era-fadein {
+    -webkit-animation: fadein .6s;
+    -moz-animation: fadein .6s;
+    -ms-animation: fadein .6s;
+    -o-animation: fadein .6s;
+    animation: fadein .6s;
+}
+
+.era-control-label {
+    font-weight: bold;
+    color: #333F52;
+    font-size: 16px;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    transition: color .3s ease-in-out;
+    text-align: left;
+}
