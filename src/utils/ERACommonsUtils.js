@@ -1,4 +1,5 @@
 import {Buffer} from 'buffer';
+import {find, getOr, isNil} from 'lodash/fp';
 
 /**
  * This function is used to verify the raw NIH token and return the decoded data.
@@ -58,4 +59,22 @@ export const treatAsUTC = (date) => {
   let result = new Date(date);
   result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
   return result;
+};
+
+/**
+ * This function generates a summation of common ERA Commons values from a user's properties.
+ *
+ * @param properties List of user properties to read from.
+ */
+export const extractEraAuthenticationState = (properties) => {
+  const authProp = find({'propertyKey':'eraAuthorized'})(properties);
+  const expProp = find({'propertyKey':'eraExpiration'})(properties);
+  const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+  const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
+  const nihValid = isAuthorized && expirationCount > 0;
+  return {
+    isAuthorized,
+    expirationCount,
+    nihValid
+  };
 };
