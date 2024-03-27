@@ -624,7 +624,7 @@ export default function DatasetCatalog(props) {
                           style: tableBody
                         }, [
                           a({
-                            href: `/dataset_statistics/${dataset.dataSetId}`,
+                            href: `/dataset/${dataset.datasetIdentifier}`,
                           }, dataset.name)
                         ]),
 
