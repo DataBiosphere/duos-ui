@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Metrics } from '../libs/ajax';
+import { DataSet, Metrics } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 import { Styles, Theme } from '../libs/theme';
 import { get, find } from 'lodash';
@@ -9,15 +9,25 @@ import { formatDate } from '../libs/utils';
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 
+const extractIdentifier = (params) => {
+  let datasetIdentifier = params.datasetIdentifier;
+  if (params.duosId) {
+    datasetIdentifier = "DUOS-" + params.duosId;
+  }
+  return datasetIdentifier.toUpperCase();
+}
+
 export default function DatasetStatistics(props) {
-  const datasetId = props.match.params.datasetId;
+  const datasetIdentifier = extractIdentifier(props.match.params);
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setData(datasetId);
-  }, [datasetId]);
+    DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
+      setData(dataset.dataSetId);
+    });
+  }, [datasetIdentifier]);
 
   const setData = async (datasetId) => {
     try {
