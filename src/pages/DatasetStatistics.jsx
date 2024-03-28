@@ -26,6 +26,8 @@ export default function DatasetStatistics(props) {
   useEffect(() => {
     DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
       setData(dataset.dataSetId);
+    }).catch(() => {
+      Notifications.showError({ text: 'Error: Unable to retrieve dataset from server' });
     });
   }, [datasetIdentifier]);
 
