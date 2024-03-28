@@ -22,7 +22,7 @@ export const AdminEditUser = (props) => {
     updatedRoles: [researcherRole],
     emailPreference: false,
     institutionOptions: [],
-    institutionId:null
+    institutionId: null
   });
 
   const nameRef = useRef();
@@ -31,20 +31,22 @@ export const AdminEditUser = (props) => {
     const fetchData = async () => {
       const user = await User.getById(props.match.params.userId);
       const institutionList = await Institution.list();
-      const institutionOptions = institutionList.map(institution => ({
-        key: institution.id,
-        displayText: institution.name
-      }));
+      const institutionOptions = institutionList.map((institution) => {
+        return {
+          key: institution.id,
+          displayText: institution.name
+        };
+      });
       const currentRoles = _.map(user.roles, (ur) => {
         return {'roleId': ur.roleId, 'name': ur.name};
       });
-      const rolesToUpdate = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
+      const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
       setState((prev) => ({
         ...prev,
         displayName: user.displayName,
         email: user.email,
         user: user,
-        updatedRoles: rolesToUpdate,
+        updatedRoles: updatedRoles,
         emailPreference: user.emailPreference,
         institutionOptions:institutionOptions,
         institutionId: user.institutionId,
@@ -61,7 +63,7 @@ export const AdminEditUser = (props) => {
       return;
     }
     const userId = state.user.userId;
-    const updatedUser = {
+    let user = {
       userId: userId,
       displayName: state.displayName,
       emailPreference: state.emailPreference,
@@ -69,7 +71,7 @@ export const AdminEditUser = (props) => {
     };
 
     try {
-      await User.update(updatedUser, userId);
+      await User.update(user, userId);
       await updateRolesIfDifferent(userId, state.updatedRoles);
       props.history.push('/admin_manage_users');
     } catch (error) {
@@ -105,7 +107,7 @@ export const AdminEditUser = (props) => {
     const checkState = e.target.checked;
     setState({
       ...state,
-      emailPreference: checkState
+      emailPreference: !checkState
     });
   };
 
@@ -158,7 +160,6 @@ export const AdminEditUser = (props) => {
           />
         </div>
         <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
-
           <form className='form-horizontal css-form' name='userForm' encType='multipart/form-data'>
             <div className='form-group first-form-group'>
               <label id='lbl_name' className='col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'>Name</label>
@@ -227,7 +228,7 @@ export const AdminEditUser = (props) => {
                       readOnly={true}
                       className='checkbox-inline user-checkbox'
                     />
-                    <label id='lbl_researcher' className='regular-checkbox rp-choice-questions'>Researcher</label>
+                    <label id='lbl_researcher' className='regular-checkbox rp-choice-questions' htmlFor='chk_researcher'>Researcher</label>
                   </div>
                 </div>
               </div>
@@ -245,7 +246,7 @@ export const AdminEditUser = (props) => {
                     className='checkbox-inline user-checkbox'
                     onChange={(e) => roleStatusChanged(e, signingOfficialRole)}
                   />
-                  <label id='lbl_signing_official' className='regular-checkbox rp-choice-questions'>Signing Official</label>
+                  <label id='lbl_signing_official' className='regular-checkbox rp-choice-questions' htmlFor='chk_signing_official'>Signing Official</label>
                 </div>
               </div>
             </div>
@@ -260,13 +261,14 @@ export const AdminEditUser = (props) => {
                     className='checkbox-inline user-checkbox'
                     onChange={(e) => roleStatusChanged(e, adminRole)}
                   />
-                  <label id='lbl_admin' className='regular-checkbox rp-choice-questions'>Admin</label>
+                  <label id='lbl_admin' className='regular-checkbox rp-choice-questions' htmlFor='chk_admin'>Admin</label>
                 </div>
               </div>
             </div>
-            {
-              userHasRole(adminRole) && (
-                <div className='form-group'>
+
+            <div className='form-group'>
+              {
+                userHasRole(adminRole) && (
                   <div
                     className='col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4'
                     style={{ paddingLeft: '30px' }}
@@ -284,28 +286,27 @@ export const AdminEditUser = (props) => {
                       <label htmlFor='chk_emailPreference' className='regular-checkbox rp-choice-questions bold'>Disable Admin email notifications</label>
                     </div>
                   </div>
+                )
+              }
+              <div className='col-lg-12 col-xs-12 inline-block'>
+                <div style={{ marginLeft: '40px' }}>
+                  <button
+                    id='btn_save'
+                    onClick={() => props.history.push('/admin_manage_users')}
+                    className='f-left btn-primary btn-back'
+                  >
+                   Back
+                  </button>
                 </div>
-              )
-            }
-
-            <div className='col-lg-12 col-xs-12 inline-block'>
-              <div style={{ marginLeft: '40px' }}>
                 <button
                   id='btn_save'
-                  onClick={() => props.history.push('/admin_manage_users')}
-                  className='f-left btn-primary btn-back'
+                  onClick={OKHandler}
+                  className='f-right btn-primary common-background'
+                  disabled={!displayNameValid}
                 >
-                   Back
+                  Save
                 </button>
               </div>
-              <button
-                id='btn_save'
-                onClick={OKHandler}
-                className='f-right btn-primary common-background'
-                disabled={!displayNameValid}
-              >
-                  Save
-              </button>
             </div>
           </form>
         </div>
