@@ -159,14 +159,18 @@ const NavigationTabsComponent = (props) => {
       {makeNotifications()}
       <ul className="navbar-main">
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-          <Link
-            isRendered={orientation === 'horizontal'}
-            id="link_logo"
-            to="/home"
-            className="navbar-brand"
-          >
-            <img style={duosLogoImage} src={DuosLogo} alt="DUOS Logo" />
-          </Link>
+          {
+            orientation === 'horizonal' && (
+              <Link
+                isRendered={orientation === 'horizontal'}
+                id="link_logo"
+                to="/home"
+                className="navbar-brand"
+              >
+                <img style={duosLogoImage} src={DuosLogo} alt="DUOS Logo" />
+              </Link>
+            )
+          }
           {
             isLogged && (
               <Box className="duos-navigation-box">
@@ -222,6 +226,7 @@ const NavigationTabsComponent = (props) => {
             )
           };
         </div>
+        {/* Navbar right side */}
         {isLogged && (
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
@@ -251,6 +256,7 @@ const NavigationTabsComponent = (props) => {
         )}
       </ul>
 
+      {/* Sub Tabs */}
       {tabs[selectedMenuTab]?.children && (
         <Box className="duos-navigation-box navbar-sub">
           <Tabs
@@ -262,6 +268,7 @@ const NavigationTabsComponent = (props) => {
             onChange={onSubtabChange}
           >
             {tabs[selectedMenuTab].children.map((tab, tabIndex) => {
+              // Default to displaying the sub tab if no render function exists for it
               const isRendered = (!isFunction(tab.isRendered) || isNil(tab.isRendered())) ? true : tab.isRendered();
               const isRenderedForUser = (!isFunction(tab.isRenderedForUser) || isNil(tab.isRenderedForUser(currentUser))) ? true : tab.isRenderedForUser(currentUser);
               return (isRendered && isRenderedForUser) ? (
@@ -333,8 +340,6 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-    // Assuming `onSignOut` is a prop function passed down
-    // from the parent component
     props.onSignOut();
   };
 
