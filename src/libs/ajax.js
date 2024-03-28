@@ -359,8 +359,8 @@ export const DataSet = {
 
   getDatasetByDatasetIdentifier: async datasetIdentifier => {
     const url = `${await getApiUrl()}/api/tdr/${datasetIdentifier}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   }
 };
 
