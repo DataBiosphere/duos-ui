@@ -162,7 +162,6 @@ const NavigationTabsComponent = (props) => {
           {
             orientation === 'horizonal' && (
               <Link
-                isRendered={orientation === 'horizontal'}
                 id="link_logo"
                 to="/home"
                 className="navbar-brand"
