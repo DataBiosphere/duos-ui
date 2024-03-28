@@ -22,6 +22,9 @@ export default function ERACommons(props) {
   const [eraCommonsId, setEraCommonsId] = useState('');
   const [nihError, setNihError] = useState(false);
 
+  /**
+   * This call back wrapper prevents the need to pass the props object to use-effects.
+   */
   const nihStatusUpdate = useCallback((val) => {
     props.onNihStatusUpdate(val);
   }, [props]);
