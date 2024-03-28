@@ -1,5 +1,5 @@
-import React, {useEffect, useCallback, useState} from 'react';
-import {get, isEmpty} from 'lodash';
+import React, {useEffect, useState} from 'react';
+import {get} from 'lodash';
 import {isNil} from 'lodash/fp';
 import queryString from 'query-string';
 import './ERACommons.css';
@@ -11,23 +11,12 @@ import ReactTooltip from 'react-tooltip';
 
 export default function ERACommons(props) {
 
-  const [header] = useState(props.header || false);
-  const [required] = useState(props.required || false);
-  const [destination] = useState(props.destination || '');
-  const [researcherProfile] = useState(props.researcherProfile || {});
-  const [readOnly] = useState(props.readOnly || false);
+  const {onNihStatusUpdate, header = false, required = false, destination = '', researcherProfile = undefined, readOnly = false} = props;
   const [search, setSearch] = useState(props.location?.search || '');
   const [isAuthorized, setAuthorized] = useState(false);
   const [expirationCount, setExpirationCount] = useState(0);
   const [eraCommonsId, setEraCommonsId] = useState('');
   const [nihError, setNihError] = useState(false);
-
-  /**
-   * This call back wrapper prevents the need to pass the props object to use-effects.
-   */
-  const nihStatusUpdate = useCallback((val) => {
-    props.onNihStatusUpdate(val);
-  }, [props]);
 
   /**
    * This hook is called only when the user is redirected back to the original page after authenticating with NIH.
@@ -53,25 +42,25 @@ export default function ERACommons(props) {
         setAuthorized(eraAuthState.isAuthorized);
         setExpirationCount(eraAuthState.expirationCount);
         setEraCommonsId(decodedToken.eraCommonsUsername);
-        nihStatusUpdate(eraAuthState.nihValid);
+        onNihStatusUpdate(eraAuthState.nihValid);
         document.getElementById('era-commons-id').scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
       }
     };
     initEraAuthSuccess();
-  }, [nihStatusUpdate, search]);
+  }, [onNihStatusUpdate, search]);
 
   /**
    * This will populate state from either the provided researcher object or the current user.
    */
   useEffect(() => {
     const initResearcherProfile = async () => {
-      if (readOnly && !isEmpty(researcherProfile)) {
+      if (readOnly && researcherProfile) {
         // In the read-only case, we are provided a researcher object and do not need to query for the current user.
         const eraAuthState = extractEraAuthenticationState(researcherProfile.properties);
         setAuthorized(eraAuthState.isAuthorized);
         setExpirationCount(eraAuthState.expirationCount);
         setEraCommonsId(researcherProfile.eraCommonsId);
-        nihStatusUpdate(eraAuthState.nihValid);
+        onNihStatusUpdate(eraAuthState.nihValid);
       } else {
         // In the non-read-only state, we are querying for the current user's properties.
         const response = await User.getMe();
@@ -79,11 +68,11 @@ export default function ERACommons(props) {
         setAuthorized(eraAuthState.isAuthorized);
         setExpirationCount(eraAuthState.expirationCount);
         setEraCommonsId(response.eraCommonsId);
-        nihStatusUpdate(eraAuthState.nihValid);
+        onNihStatusUpdate(eraAuthState.nihValid);
       }
     };
     initResearcherProfile();
-  }, [readOnly, researcherProfile, nihStatusUpdate]);
+  }, [readOnly, researcherProfile, onNihStatusUpdate]);
 
   const redirectToNihLogin = async () => {
     const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>';
@@ -98,7 +87,7 @@ export default function ERACommons(props) {
       setAuthorized(eraAuthState.isAuthorized);
       setExpirationCount(eraAuthState.expirationCount);
       setEraCommonsId(researcherProfile.eraCommonsId);
-      nihStatusUpdate(eraAuthState.nihValid);
+      onNihStatusUpdate(eraAuthState.nihValid);
       setSearch('');
     } else {
       setNihError(true);
