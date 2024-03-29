@@ -54,15 +54,17 @@ export default function ERACommons(props) {
    */
   useEffect(() => {
     const initResearcherProfile = async () => {
-      if (readOnly && researcherProfile) {
-        // In the read-only case, we are provided a researcher object and do not need to query for the current user.
-        const eraAuthState = extractEraAuthenticationState(researcherProfile.properties);
+      if (researcherProfile) {
+        // In the case we are provided a researcher object and do not need to query for the current user. The
+        // researcher object will have the properties we need, but it turns out that the properties are named
+        // differently from the calling parent components.
+        const eraAuthState = extractEraAuthenticationState(researcherProfile.researcherProperties || researcherProfile.properties);
         setAuthorized(eraAuthState.isAuthorized);
         setExpirationCount(eraAuthState.expirationCount);
         setEraCommonsId(researcherProfile.eraCommonsId);
         onNihStatusUpdate(eraAuthState.nihValid);
       } else {
-        // In the non-read-only state, we are querying for the current user's properties.
+        // In the non-researcher-provided-case, we need to query for the current user's properties.
         const response = await User.getMe();
         const eraAuthState = extractEraAuthenticationState(response.researcherProperties);
         setAuthorized(eraAuthState.isAuthorized);
@@ -72,7 +74,7 @@ export default function ERACommons(props) {
       }
     };
     initResearcherProfile();
-  }, [readOnly, researcherProfile, onNihStatusUpdate]);
+  }, [researcherProfile, onNihStatusUpdate]);
 
   const redirectToNihLogin = async () => {
     const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>';
