@@ -55,7 +55,7 @@ export default function ERACommons(props) {
   useEffect(() => {
     const initResearcherProfile = async () => {
       if (researcherProfile) {
-        // In the case we are provided a researcher object and do not need to query for the current user. The
+        // In the case we are provided a researcher object, we do not need to query for the current user. The
         // researcher object will have the properties we need, but it turns out that the properties are named
         // differently from the calling parent components.
         const eraAuthState = extractEraAuthenticationState(researcherProfile.researcherProperties || researcherProfile.properties);
