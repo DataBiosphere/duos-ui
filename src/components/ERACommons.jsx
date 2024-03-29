@@ -38,10 +38,10 @@ export default function ERACommons(props) {
           'status': true
         };
         const newUserProps = await AuthenticateNIH.saveNihUsr(nihPayload);
-        const eraAuthState = extractEraAuthenticationState(newUserProps);
+        const eraAuthState = extractEraAuthenticationState({properties: newUserProps, eraCommonsId: decodedToken.eraCommonsUsername});
         setAuthorized(eraAuthState.isAuthorized);
         setExpirationCount(eraAuthState.expirationCount);
-        setEraCommonsId(decodedToken.eraCommonsUsername);
+        setEraCommonsId(eraAuthState.eraCommonsId);
         onNihStatusUpdate(eraAuthState.nihValid);
         document.getElementById('era-commons-id').scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
       }
@@ -54,24 +54,13 @@ export default function ERACommons(props) {
    */
   useEffect(() => {
     const initResearcherProfile = async () => {
-      if (researcherProfile) {
-        // In the case we are provided a researcher object, we do not need to query for the current user. The
-        // researcher object will have the properties we need, but it turns out that the properties are named
-        // differently from the calling parent components.
-        const eraAuthState = extractEraAuthenticationState(researcherProfile.researcherProperties || researcherProfile.properties);
-        setAuthorized(eraAuthState.isAuthorized);
-        setExpirationCount(eraAuthState.expirationCount);
-        setEraCommonsId(researcherProfile.eraCommonsId);
-        onNihStatusUpdate(eraAuthState.nihValid);
-      } else {
-        // In the non-researcher-provided-case, we need to query for the current user's properties.
-        const response = await User.getMe();
-        const eraAuthState = extractEraAuthenticationState(response.researcherProperties);
-        setAuthorized(eraAuthState.isAuthorized);
-        setExpirationCount(eraAuthState.expirationCount);
-        setEraCommonsId(response.eraCommonsId);
-        onNihStatusUpdate(eraAuthState.nihValid);
-      }
+      // In the case we are provided a researcherProfile object, we do not need to query for the current user.
+      const user = (researcherProfile) ? researcherProfile : await User.getMe();
+      const eraAuthState = extractEraAuthenticationState(user);
+      setAuthorized(eraAuthState.isAuthorized);
+      setExpirationCount(eraAuthState.expirationCount);
+      setEraCommonsId(eraAuthState.eraCommonsId);
+      onNihStatusUpdate(eraAuthState.nihValid);
     };
     initResearcherProfile();
   }, [researcherProfile, onNihStatusUpdate]);

@@ -62,11 +62,13 @@ export const treatAsUTC = (date) => {
 };
 
 /**
- * This function generates a summation of common ERA Commons values from a user's properties.
+ * This function generates a summation of common ERA Commons values from a user object
  *
- * @param properties List of user properties to read from.
+ * @param user The user to derive era authentication state from
  */
-export const extractEraAuthenticationState = (properties) => {
+export const extractEraAuthenticationState = (user) => {
+  // The user object, confusingly, sometimes has a list of `properties` and sometimes has a list of `researcherProperties`.
+  const properties = user.properties || user.researcherProperties;
   const authProp = find({'propertyKey':'eraAuthorized'})(properties);
   const expProp = find({'propertyKey':'eraExpiration'})(properties);
   const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
@@ -75,6 +77,7 @@ export const extractEraAuthenticationState = (properties) => {
   return {
     isAuthorized,
     expirationCount,
-    nihValid
+    nihValid,
+    eraCommonsId: user.eraCommonsId
   };
 };
