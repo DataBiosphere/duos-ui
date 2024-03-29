@@ -356,6 +356,12 @@ export const DataSet = {
     const url = `${await getApiUrl()}/api/dataset/study/${studyId}`;
     return await axios.put(url, studyObject, Config.multiPartOpts());
   },
+
+  getDatasetByDatasetIdentifier: async datasetIdentifier => {
+    const url = `${await getApiUrl()}/api/tdr/${datasetIdentifier}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  }
 };
 
 export const Study = {
