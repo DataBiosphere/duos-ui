@@ -1,7 +1,7 @@
 import * as React from 'react';
 import _ from 'lodash';
 import { Box, Button, Link } from '@mui/material';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { groupBy, isEmpty } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
@@ -59,30 +59,30 @@ export const DatasetSearchTable = (props) => {
         }
       }
     ];
-  
+
     // do not apply search modifier if there is no searchTerm
     if (searchTerm !== '') {
       const searchModifier = [
         {
-          "multi_match": {
-              "query": searchTerm,
-              "type":"phrase_prefix",
-              "fields": [
-                  "datasetName",
-                  "dataLocation",
-                  "study.description",
-                  "study.studyName",
-                  "study.species",
-                  "study.piName",
-                  "study.dataCustodianEmail",
-                  "study.dataTypes",
-                  "dataUse.primary.code",
-                  "dataUse.secondary.code",
-                  "dac.dacName",
-                  "datasetIdentifier"
-              ]
+          'multi_match': {
+            'query': searchTerm,
+            'type':'phrase_prefix',
+            'fields': [
+              'datasetName',
+              'dataLocation',
+              'study.description',
+              'study.studyName',
+              'study.species',
+              'study.piName',
+              'study.dataCustodianEmail',
+              'study.dataTypes',
+              'dataUse.primary.code',
+              'dataUse.secondary.code',
+              'dac.dacName',
+              'datasetIdentifier'
+            ]
           }
-      }
+        }
       ];
       queryChunks.push(...searchModifier);
     }
@@ -90,26 +90,26 @@ export const DatasetSearchTable = (props) => {
     var filterQuery = {};
     if (filters.length > 0) {
       const shouldTerms = [];
-    
+
       filters.forEach(term => {
         shouldTerms.push({
-          "term": {
-            "accessManagement": term
+          'term': {
+            'accessManagement': term
           }
         });
       });
-    
+
       if (shouldTerms.length > 0) {
         filterQuery = [
           {
-            "bool": {
-              "should": shouldTerms
+            'bool': {
+              'should': shouldTerms
             }
           }
         ];
       }
     }
-    
+
     // do not add filter subquery if no filters are applied
     if (filters.length > 0) {
       return {
@@ -157,7 +157,7 @@ export const DatasetSearchTable = (props) => {
     };
     search();
   };
-  
+
 
 
   const selectHandler = (event, data, selector) => {
@@ -223,7 +223,7 @@ export const DatasetSearchTable = (props) => {
   const clearSearchRef = () => {
     searchRef.current.value = '';
     filterHandler(null, datasets, '', '');
-  }
+  };
 
   useEffect(() => {
     if (isEmpty(filtered)) {
@@ -389,17 +389,17 @@ export const DatasetSearchTable = (props) => {
             if (isEmpty(datasets)) {
               return (
                 <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <h1>No datasets registered for this library.</h1>
+                  display: 'flex',
+                  flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <h1>No datasets registered for this library.</h1>
                 </Box>
               );
             } else if (isEmpty(filtered)) {
               return (
                 <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <h1>There are no datasets that fit these criteria.</h1>
+                  display: 'flex',
+                  flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <h1>There are no datasets that fit these criteria.</h1>
                 </Box>
               );
             } else {
