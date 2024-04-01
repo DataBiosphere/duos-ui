@@ -119,7 +119,7 @@ export const DatasetUpdate = (props) => {
         description: extract('Description'),
         dbGap: extract('dbGAP'),
         dataDepositor: extract('Data Depositor'),
-        principalInvestigator: extract('Principal Investigator(PI)'),
+        principalInvestigator: dataset?.study?.piName,
       },
       dataUse: await normalizeDataUse(dataset?.dataUse),
       dac: { ...dac, dacs }

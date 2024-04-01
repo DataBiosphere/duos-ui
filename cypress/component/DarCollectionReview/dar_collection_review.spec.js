@@ -541,18 +541,18 @@ const dar = {
           'propertyTypeAsString': 'string',
           'propertyValueAsString': 'data_depositor@example.com'
         },
-        {
-          'propertyId': null,
-          'dataSetId': 13,
-          'propertyKey': null,
-          'propertyName': 'Principal Investigator(PI)',
-          'propertyValue': 'Lisa Simpson, Betty White',
-          'createDate': null,
-          'schemaProperty': null,
-          'propertyType': 'String',
-          'propertyTypeAsString': 'string',
-          'propertyValueAsString': 'Lisa Simpson, Betty White'
-        },
+        // {
+        //   'propertyId': null,
+        //   'dataSetId': 13,
+        //   'propertyKey': null,
+        //   'propertyName': 'Principal Investigator(PI)',
+        //   'propertyValue': 'Lisa Simpson, Betty White',
+        //   'createDate': null,
+        //   'schemaProperty': null,
+        //   'propertyType': 'String',
+        //   'propertyTypeAsString': 'string',
+        //   'propertyValueAsString': 'Lisa Simpson, Betty White'
+        // },
         {
           'propertyId': null,
           'dataSetId': 13,
@@ -590,7 +590,10 @@ const dar = {
           'propertyValueAsString': 'https://...'
         }
       ],
-      'dacApproval': true
+      'dacApproval': true,
+      'study': {
+        'piName': 'Lisa Simpson, Betty White'
+      }
     }
   ]
 };

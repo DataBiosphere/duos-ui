@@ -98,13 +98,7 @@ export default function DatasetStatistics(props) {
               <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Principal Investigator: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {get(
-                    find(dataset?.properties, (p) => {
-                      return p.propertyName === 'Principal Investigator(PI)';
-                    }),
-                    'propertyValue',
-                    ''
-                  )}
+                  {dataset?.study?.piName || ''}
                 </div>
               </div>
               <div style={{ display: 'flex' }}>
