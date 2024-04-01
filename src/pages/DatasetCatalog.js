@@ -105,7 +105,7 @@ export default function DatasetCatalog(props) {
       row['Dataset ID'] = row.datasetIdentifier;
       row['Data Access Committee'] = findDacName(localDacs, row);
       row['Disease Studied'] = findPropertyValue(row, 'Phenotype/Indication');
-      row['Principal Investigator (PI)'] = row.study?.piName || '';
+      row['Principal Investigator (PI)'] = row.study?.piName || findPropertyValue(row, 'Principal Investigator(PI)');
       row['# of Participants'] = findPropertyValue(row, '# of participants');
       row['Data Custodian'] = findPropertyValue(row, 'Data Depositor');
       return row;

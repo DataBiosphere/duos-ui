@@ -12,10 +12,10 @@ const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 const extractIdentifier = (params) => {
   let datasetIdentifier = params.datasetIdentifier;
   if (params.duosId) {
-    datasetIdentifier = "DUOS-" + params.duosId;
+    datasetIdentifier = 'DUOS-' + params.duosId;
   }
   return datasetIdentifier.toUpperCase();
-}
+};
 
 export default function DatasetStatistics(props) {
   const datasetIdentifier = extractIdentifier(props.match.params);
@@ -98,7 +98,13 @@ export default function DatasetStatistics(props) {
               <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Principal Investigator: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {dataset?.study?.piName || ''}
+                  {dataset?.study?.piName || get(
+                    find(dataset?.properties, (p) => {
+                      return p.propertyName === 'Principal Investigator(PI)';
+                    }),
+                    'propertyValue',
+                    ''
+                  )}
                 </div>
               </div>
               <div style={{ display: 'flex' }}>

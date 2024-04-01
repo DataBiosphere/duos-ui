@@ -38,12 +38,6 @@ const sampleDataset = {
       'propertyValue': '2',
       'propertyType': 'String'
     },
-    // {
-    //   'dataSetId': 1408,
-    //   'propertyName': 'Principal Investigator(PI)',
-    //   'propertyValue': 'Magnum PI',
-    //   'propertyType': 'String'
-    // },
     {
       'dataSetId': 1408,
       'propertyName': 'Description',
