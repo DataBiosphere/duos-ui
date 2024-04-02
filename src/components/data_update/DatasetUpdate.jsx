@@ -5,6 +5,7 @@ import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
 import { DAC, DAR, DataSet } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 
+// TODO: Deprecated - remove this component when all datasets have been converted to studies
 export const DatasetUpdate = (props) => {
   const { dataset, history } = props;
 
@@ -119,7 +120,7 @@ export const DatasetUpdate = (props) => {
         description: extract('Description'),
         dbGap: extract('dbGAP'),
         dataDepositor: extract('Data Depositor'),
-        principalInvestigator: extract('Principal Investigator(PI)'),
+        principalInvestigator: dataset?.study?.piName || extract('Principal Investigator(PI)'),
       },
       dataUse: await normalizeDataUse(dataset?.dataUse),
       dac: { ...dac, dacs }

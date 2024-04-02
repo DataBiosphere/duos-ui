@@ -545,18 +545,6 @@ const dar = {
           'propertyId': null,
           'dataSetId': 13,
           'propertyKey': null,
-          'propertyName': 'Principal Investigator(PI)',
-          'propertyValue': 'Lisa Simpson, Betty White',
-          'createDate': null,
-          'schemaProperty': null,
-          'propertyType': 'String',
-          'propertyTypeAsString': 'string',
-          'propertyValueAsString': 'Lisa Simpson, Betty White'
-        },
-        {
-          'propertyId': null,
-          'dataSetId': 13,
-          'propertyKey': null,
           'propertyName': 'Species',
           'propertyValue': 'Human',
           'createDate': null,
@@ -590,7 +578,10 @@ const dar = {
           'propertyValueAsString': 'https://...'
         }
       ],
-      'dacApproval': true
+      'dacApproval': true,
+      'study': {
+        'piName': 'Lisa Simpson, Betty White'
+      }
     }
   ]
 };

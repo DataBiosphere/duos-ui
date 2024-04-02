@@ -516,7 +516,7 @@ const DuosHeader = (props) => {
             <NavigationTabsComponent
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
-              makeNotifications={() => {}} 
+              makeNotifications={() => {}}
               duosLogoImage={duosLogoImage}
               DuosLogo={DuosLogo}
               navbarDuosIcon={navbarDuosIcon}
