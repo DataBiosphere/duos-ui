@@ -13,7 +13,7 @@ import ReactTooltip from 'react-tooltip';
 import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
-import { AuthContextProps, useAuth } from 'react-oidc-context';
+import { useAuth } from 'react-oidc-context';
 
 interface SignInButtonProps {
   customStyle: CSS.Properties | undefined;
@@ -210,6 +210,9 @@ export const SignInButton = (props: SignInButtonProps) => {
               className={'btn-primary'}
               style={customStyle}
               onClick={() => {
+                if (authInstance.user) {
+                  console.log(JSON.stringify(authInstance.user));
+                }
                 //pop works but it does not go to the correct location
                 authInstance.signinPopup();
                 //GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
