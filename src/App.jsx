@@ -13,13 +13,14 @@ import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
 import {GoogleIS} from './libs/googleIS';
+import { useAuth } from 'react-oidc-context';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [env, setEnv] = useState('');
   let history = useHistory();
   let location = useLocation();
-
+  const auth = useAuth();
   const trackPageView = (location) => {
     ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
   };
@@ -59,8 +60,10 @@ function App() {
   });
 
   useEffect(() => {
+    
     const initAuth = async () => {
-
+      
+      auth.signoutSilent();
     };
     initAuth();
   },[]);
