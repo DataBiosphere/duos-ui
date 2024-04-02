@@ -1,5 +1,5 @@
 import { UserManagerSettings, WebStorageStateStore } from "oidc-client-ts";
-import { Config } from "./config";
+import { Config } from "../config";
 import axios from 'axios'; // TODO: move this to ajax
 
 interface OAuthConfig {
@@ -11,7 +11,10 @@ let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;
 
 const generateOidcUserManagerSettings = async (config: OAuthConfig): Promise<UserManagerSettings> => {
-    const metadata = {
+  console.log(`${await Config.getApiUrl()}/oauth2/authorize`);
+  console.log(`${await Config.getApiUrl()}/oauth2/token`);
+  console.log(`${config.authorityEndpoint}`);
+  const metadata = {
       authorization_endpoint: `${await Config.getApiUrl()}/oauth2/authorize`,
       token_endpoint: `${await Config.getApiUrl()}/oauth2/token`,
     };

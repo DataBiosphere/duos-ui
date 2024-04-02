@@ -13,12 +13,13 @@ import ReactTooltip from 'react-tooltip';
 import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
+import { AuthContextProps, useAuth } from 'react-oidc-context';
 
 export const SignIn = (props) => {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState({});
   const { onSignIn, history, customStyle } = props;
-
+  const authInstance = useAuth();
   useEffect(() => {
     // Using `isSubscribed` resolves the
     // "To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function." warning
@@ -86,7 +87,10 @@ export const SignIn = (props) => {
 
   const shouldRedirectTo = (page) => page !== '/' && page !== '/home';
 
-  const attemptSignInCheckToSAndRedirect = async (redirectTo, shouldRedirect) => {
+  const attemptSignInCheckToSAndRedirect = async (
+    redirectTo,
+    shouldRedirect
+  ) => {
     await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     Metrics.identify(Storage.getAnonymousId());
     Metrics.syncProfile();
@@ -108,7 +112,9 @@ export const SignIn = (props) => {
     Metrics.identify(Storage.getAnonymousId());
     Metrics.syncProfile();
     Metrics.captureEvent(eventList.userRegister);
-    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
+    history.push(
+      `/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`
+    );
   };
 
   const handleErrors = async (error, redirectTo, shouldRedirect) => {
@@ -116,13 +122,21 @@ export const SignIn = (props) => {
 
     switch (status) {
       case 400:
-        setErrorDisplay({ show: true, title: 'Error', msg: JSON.stringify(error) });
+        setErrorDisplay({
+          show: true,
+          title: 'Error',
+          msg: JSON.stringify(error),
+        });
         break;
       case 409:
         handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
-        setErrorDisplay({ show: true, title: 'Error', msg: 'Unexpected error, please try again' });
+        setErrorDisplay({
+          show: true,
+          title: 'Error',
+          msg: 'Unexpected error, please try again',
+        });
         break;
     }
   };
@@ -152,37 +166,56 @@ export const SignIn = (props) => {
     }
   };
 
+  // add sign in popup here
   const spinnerOrSignInButton = () => {
-    return clientId === ''
-      ? Spinner
-      : <div style={{ display: 'flex' }}>
-        {isNil(customStyle)
-          ? GoogleIS.signInButton(clientId, onSuccess, onFailure)
-          : <button className={'btn-primary'} style={customStyle} onClick={() => {
-            GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
-          }}>
-            Submit a Data Access Request
-          </button>}
-        {isNil(customStyle) &&
+    return clientId === '' ? (
+      Spinner
+    ) : (
+      <div style={{ display: 'flex' }}>
+        {
+          // eslint-disable-next-line no-constant-condition
+          false /*isNil(customStyle)*/ ? (
+            GoogleIS.signInButton(clientId, onSuccess, onFailure)
+          ) : (
+            <button
+              className={'btn-primary'}
+              style={customStyle}
+              onClick={() => {
+                //pop works but it does not go to the correct location
+                authInstance.signinPopup();
+                //GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
+              }}
+            >
+              Submit a Data Access Request
+            </button>
+          )
+        }
+        {isNil(customStyle) && (
           <a
-            className='navbar-duos-icon-help'
+            className="navbar-duos-icon-help"
             style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
-            href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
+            href="https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email"
             data-for="tip_google-help"
             data-tip="No Google help? Click here!"
           />
-        }
-        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
-      </div>;
+        )}
+        <ReactTooltip
+          id="tip_google-help"
+          place="top"
+          effect="solid"
+          multiline={true}
+          className="tooltip-wrapper"
+        />
+      </div>
+    );
   };
 
   return (
     <div>
-      {isEmpty(errorDisplay)
-        ? <div>
-          {spinnerOrSignInButton()}
-        </div>
-        : <div className="dialog-alert">
+      {isEmpty(errorDisplay) ? (
+        <div>{spinnerOrSignInButton()}</div>
+      ) : (
+        <div className="dialog-alert">
           <Alert
             id="dialog"
             type="danger"
@@ -190,7 +223,7 @@ export const SignIn = (props) => {
             description={errorDisplay.description}
           />
         </div>
-      }
+      )}
     </div>
   );
 };
