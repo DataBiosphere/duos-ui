@@ -64,7 +64,7 @@ const sampleDataset = {
     },
     {
       'dataSetId': 1408,
-      'propertyName': 'dbGAP',
+      'propertyName': 'url',
       'propertyValue': 'http://...',
       'propertyType': 'String'
     },

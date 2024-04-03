@@ -134,7 +134,7 @@ class DatasetRegistration extends Component {
     let phenotype = fp.find({propertyName: 'Phenotype/Indication'})(dataset.properties);
     let nrParticipants = fp.find({propertyName: '# of participants'})(dataset.properties);
     let description = fp.find({propertyName: 'Description'})(dataset.properties);
-    let datasetRepoUrl = fp.find({propertyName: 'dbGAP'})(dataset.properties);
+    let datasetRepoUrl = fp.find({propertyName: 'url'})(dataset.properties);
     let researcher = fp.find({propertyName: 'Data Depositor'})(dataset.properties);
     let pi = fp.find({propertyName: 'Principal Investigator(PI)'})(dataset.properties);
     let dac = fp.find({dacId: dataset.dacId})(this.state.dacList);
@@ -554,7 +554,7 @@ class DatasetRegistration extends Component {
       properties.push({'propertyName': 'Description', 'propertyValue': formData.description});
     }
     if (formData.datasetRepoUrl) {
-      properties.push({'propertyName': 'dbGAP', 'propertyValue': formData.datasetRepoUrl});
+      properties.push({'propertyName': 'url', 'propertyValue': formData.datasetRepoUrl});
     }
     if (formData.researcher) {
       properties.push({'propertyName': 'Data Depositor', 'propertyValue': formData.researcher});
