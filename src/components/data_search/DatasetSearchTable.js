@@ -303,7 +303,7 @@ export const DatasetSearchTable = (props) => {
                       const mergedDataUse = compact(concat(primaryDataUse, secondaryDataUse)).join(', ');
                       return <a
                         id={`${index}_linkTranslatedDul`}
-    name="link_translatedDul"
+                        name="link_translatedDul"
                         onClick={()=>openTranslatedDUL(dataUse)}
                       >{mergedDataUse}</a>;
                     }
