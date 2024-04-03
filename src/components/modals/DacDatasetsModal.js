@@ -99,7 +99,7 @@ const DacDatasetsModal = (props) => {
                 <td key={'6_' + dataset.datasetIdentifier}
                   className={'table-items cell-size'}>{getPropertyValue(dataset.properties, 'Phenotype/Indication', '---')}</td>
                 <td key={'7_' + dataset.datasetIdentifier}
-                  className={'table-items cell-size'}>{getPropertyValue(dataset.properties, 'Principal Investigator(PI)', '---')}</td>
+                  className={'table-items cell-size'}>{dataset?.study?.piName || getPropertyValue(dataset.properties, 'Principal Investigator(PI)', '---')}</td>
                 <td key={'8_' + dataset.datasetIdentifier}
                   className={'table-items cell-size'}>{getPropertyValue(dataset.properties, '# of participants', '---')}</td>
                 <td key={'9_' + dataset.datasetIdentifier}

@@ -17,6 +17,7 @@ import addDatasetIcon from '../images/icon_dataset_add.png';
 import { searchOntologies } from '../libs/utils';
 import { OntologyService } from '../libs/ontologyService';
 
+// TODO: Deprecated - remove this component when all datasets have been converted to studies
 class DatasetRegistration extends Component {
 
   constructor(props) {

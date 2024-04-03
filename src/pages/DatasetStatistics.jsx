@@ -1,27 +1,35 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { DataSet, Metrics } from '../libs/ajax';
+import { DataSet, Metrics, DAR } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 import { Styles, Theme } from '../libs/theme';
 import { get, find } from 'lodash';
 import { ReadMore } from '../components/ReadMore';
 import { formatDate } from '../libs/utils';
+import { Button } from '@mui/material';
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 
 const extractIdentifier = (params) => {
   let datasetIdentifier = params.datasetIdentifier;
   if (params.duosId) {
-    datasetIdentifier = "DUOS-" + params.duosId;
+    datasetIdentifier = 'DUOS-' + params.duosId;
   }
   return datasetIdentifier.toUpperCase();
-}
+};
 
 export default function DatasetStatistics(props) {
   const datasetIdentifier = extractIdentifier(props.match.params);
+  const history = props.history;
+  const [datasetId, setDatasetId] = useState();
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
   const [isLoading, setIsLoading] = useState(true);
+
+  const applyForAccess = async () => {
+    const darDraft = await DAR.postDarDraft({ datasetId: [ datasetId ]  });
+    history.push(`/dar_application/${darDraft.referenceId}`);
+  };
 
   useEffect(() => {
     DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
@@ -35,6 +43,7 @@ export default function DatasetStatistics(props) {
     try {
       setIsLoading(true);
       const metrics = await Metrics.getDatasetStats(datasetId);
+      setDatasetId(datasetId);
       setDataset(metrics.dataset);
       setDars(metrics.dars);
       setIsLoading(false);
@@ -65,6 +74,11 @@ export default function DatasetStatistics(props) {
                   ''
                 )}
               </div>
+            </div>
+            <div style={{ paddingTop: '20px', paddingLeft: '30px' }}>
+              <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+                Apply for Access
+              </Button>
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Dataset Information</div>
@@ -98,7 +112,7 @@ export default function DatasetStatistics(props) {
               <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Principal Investigator: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {get(
+                  {dataset?.study?.piName || get(
                     find(dataset?.properties, (p) => {
                       return p.propertyName === 'Principal Investigator(PI)';
                     }),
