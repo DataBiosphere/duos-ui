@@ -8,8 +8,8 @@ import ReportIcon from '@mui/icons-material/Report';
 import style from './Notification.module.css';
 
 export const Notification = (props) => {
-  const {notificationData, key} = props;
-  let notificationDiv = <div key={key} style={{display: 'none'}}/>;
+  const {notificationData, index=1} = props;
+  let notificationDiv = <div key={index} style={{display: 'none'}}/>;
 
   if (!isEmpty(notificationData)) {
     const iconStyle = {
@@ -40,7 +40,7 @@ export const Notification = (props) => {
     // eslint-disable-next-line react/no-children-prop
     const content = <ReactMarkdown children={notificationData.message} className={style['underlined']}/>;
     notificationDiv = <div
-      key={key}
+      key={index}
       className={'row no-margin alert alert-' + notificationData.level}>
       <div style={{float: 'left'}}>{icon}</div>
       <div>{content}</div>
