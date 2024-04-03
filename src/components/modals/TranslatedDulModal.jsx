@@ -19,8 +19,8 @@ async function GenerateUseRestrictionStatements(dataUse) {
       </li>
     );
   }
-  const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
-  return translations.map((restriction) => {
+
+  return dataUse.map((restriction) => {
     return (
       <li key={`${restriction.code}-statement`} className="translated-restriction">
         <span style={{fontWeight: 'bold'}}>{restriction.code}: </span>
@@ -32,7 +32,6 @@ async function GenerateUseRestrictionStatements(dataUse) {
 
 export default function TranslatedDulModal(props) {
   const { showModal, onCloseRequest, dataUse } = props;
-
   const [translatedDulList, setTranslatedDulList] = useState([]);
 
   const closeHandler = () => {
