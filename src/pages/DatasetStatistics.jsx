@@ -10,24 +10,15 @@ import { Button } from '@mui/material';
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 
-const extractIdentifier = (params) => {
-  let datasetIdentifier = params.datasetIdentifier;
-  if (params.duosId) {
-    datasetIdentifier = 'DUOS-' + params.duosId;
-  }
-  return datasetIdentifier.toUpperCase();
-};
-
 export default function DatasetStatistics(props) {
-  const datasetIdentifier = extractIdentifier(props.match.params);
-  const history = props.history;
+  const { history, match: { params: { datasetIdentifier }} } = props;
   const [datasetId, setDatasetId] = useState();
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   const applyForAccess = async () => {
-    const darDraft = await DAR.postDarDraft({ datasetId: [ datasetId ]  });
+    const darDraft = await DAR.postDarDraft({ datasetId: [datasetId]  });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
