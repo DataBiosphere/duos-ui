@@ -178,7 +178,7 @@ export const convertLabelToKey = (label = '') => {
 };
 
 export const setUserRoleStatuses = (user, Storage) => {
-  const currentUserRoles = user.roles.map(roles => roles.name);
+  const currentUserRoles = (user.roles) ? user.roles.map(roles => roles.name) : [];
   user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
   user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
   user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;

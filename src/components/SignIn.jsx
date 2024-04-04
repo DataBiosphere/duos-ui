@@ -11,6 +11,7 @@ import { Spinner } from './Spinner';
 import ReactTooltip from 'react-tooltip';
 import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
+import { StackdriverReporter } from '../libs/stackdriverReporter';
 
 export const SignIn = (props) => {
   const [clientId, setClientId] = useState('');
@@ -40,6 +41,9 @@ export const SignIn = (props) => {
   const checkToSAndRedirect = async (redirectPath) => {
     // Check if the user has accepted ToS yet or not:
     const user = await User.getMe();
+    if (!user.roles) {
+      await StackdriverReporter.report('roles not found for user: ' + user.email);
+    }
     setUserRoleStatuses(user, Storage);
     await onSignIn();
     const userStatus = await ToS.getStatus();

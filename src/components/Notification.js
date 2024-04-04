@@ -8,7 +8,7 @@ import ReportIcon from '@mui/icons-material/Report';
 import style from './Notification.module.css';
 
 export const Notification = (props) => {
-  const {notificationData, index} = props;
+  const {notificationData, index=1} = props;
   let notificationDiv = <div key={index} style={{display: 'none'}}/>;
 
   if (!isEmpty(notificationData)) {

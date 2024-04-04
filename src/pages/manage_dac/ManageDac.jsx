@@ -37,7 +37,7 @@ export const ManageDac = function ManageDac() {
   const reloadUserRole = useCallback(async () => {
     setIsLoading(true);
     const currentUser = Storage.getCurrentUser();
-    const roles = currentUser.roles.map(r => r.name);
+    const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : [];
     const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
     let dacIDs = filter({name: CHAIR})(currentUser.roles);
     dacIDs = map('dacId')(dacIDs);
