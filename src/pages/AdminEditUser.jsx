@@ -24,37 +24,52 @@ export const AdminEditUser = (props) => {
     institutionOptions: [],
     institutionId: null
   });
+  const [fetchingComplete, setFetchingComplete] = useState(false);
 
   const nameRef = useRef();
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await User.getById(props.match.params.userId);
-      const institutionList = await Institution.list();
-      const institutionOptions = institutionList.map((institution) => {
-        return {
-          key: institution.id,
-          displayText: institution.name
-        };
-      });
-      const currentRoles = _.map(user.roles, (ur) => {
-        return {'roleId': ur.roleId, 'name': ur.name};
-      });
-      const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
-      setState((prev) => ({
-        ...prev,
-        displayName: user.displayName,
-        email: user.email,
-        user: user,
-        updatedRoles: updatedRoles,
-        emailPreference: user.emailPreference,
-        institutionOptions:institutionOptions,
-        institutionId: user.institutionId,
-        displayNameValid: nameRef.current.validity.valid
-      }));
+      try {
+        const user = await User.getById(props.match.params.userId);
+        const institutionList = await Institution.list();
+        const institutionOptions = institutionList.map((institution) => {
+          return {
+            key: institution.id,
+            displayText: institution.name
+          };
+        });
+        const currentRoles = _.map(user.roles, (ur) => {
+          return {'roleId': ur.roleId, 'name': ur.name};
+        });
+        const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
+        setState((prev) => ({
+          ...prev,
+          displayName: user.displayName,
+          email: user.email,
+          user: user,
+          updatedRoles: updatedRoles,
+          emailPreference: user.emailPreference,
+          institutionOptions:institutionOptions,
+          institutionId: user.institutionId,
+        }));
+        setFetchingComplete(true);
+      }
+      catch(e) {
+        Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
+      }
     };
     fetchData();
   }, [props.match.params.userId]);
+
+  useEffect(() => {
+    if (fetchingComplete) {
+      setState((prev) => ({
+        ...prev,
+        displayNameValid: nameRef.current.validity.valid
+      }));
+    }
+  }, [fetchingComplete]);
 
   const OKHandler = async (event) => {
     event.preventDefault();
