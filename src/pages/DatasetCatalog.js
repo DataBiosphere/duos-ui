@@ -100,7 +100,7 @@ export default function DatasetCatalog(props) {
       row.checked = false;
       row.ix = index;
       row.dbGapLink =
-        getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
+        getOr('')('propertyValue')(find({propertyName: 'url'})(row.properties));
       // Extracting these fields to make sorting easier
       row['Dataset ID'] = row.datasetIdentifier;
       row['Data Access Committee'] = findDacName(localDacs, row);

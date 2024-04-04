@@ -88,7 +88,7 @@ export const DatasetUpdate = (props) => {
         asProperty('Phenotype/Indication', formData.properties.phenotype),
         asProperty('# of participants', formData.properties.nrParticipants),
         asProperty('Description', formData.properties.description),
-        asProperty('dbGAP', formData.properties.dbGap),
+        asProperty('URL', formData.properties.url),
         asProperty('Data Depositor', formData.properties.dataDepositor),
         asProperty('Principal Investigator(PI)', formData.properties.principalInvestigator),
       ]
@@ -118,7 +118,7 @@ export const DatasetUpdate = (props) => {
         phenotype: extract('Phenotype/Indication'),
         nrParticipants: extract('# of participants'),
         description: extract('Description'),
-        dbGap: extract('dbGAP'),
+        url: extract('url'),
         dataDepositor: extract('Data Depositor'),
         principalInvestigator: dataset?.study?.piName || extract('Principal Investigator(PI)'),
       },
@@ -173,12 +173,12 @@ export const DatasetUpdate = (props) => {
         }}
       />
       <FormField
-        id="dbGap"
+        id="url"
         title="Dataset Repository URL"
         validators={[FormValidators.REQUIRED]}
-        defaultValue={formData.properties.dbGap}
+        defaultValue={formData.properties.url}
         onChange={({ value }) => {
-          formData.properties.dbGap = value;
+          formData.properties.url = value;
         }}
       />
       <FormField

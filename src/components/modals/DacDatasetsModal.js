@@ -34,7 +34,7 @@ const DacDatasetsModal = (props) => {
   };
 
   const getDbGapLinkValue = (properties) => {
-    const href = getPropertyValue(properties, 'dbGAP', '');
+    const href = getPropertyValue(properties, 'url', '');
     return href.length > 0 ?
       <a href={href} target={'_blank'} className={'enabled'} rel="noreferrer">Link</a> :
       <span className={'disabled'}>---</span>;
@@ -72,7 +72,7 @@ const DacDatasetsModal = (props) => {
           <tr key={'dac_datasets_table_head_row'}>
             <th key={'1'} className={'table-titles dataset-color cell-size'}>Dataset Id</th>
             <th key={'2'} className={'table-titles dataset-color cell-size'}>Dataset Name</th>
-            <th key={'3'} className={'table-titles dataset-color cell-size'}>dbGap</th>
+            <th key={'3'} className={'table-titles dataset-color cell-size'}>URL</th>
             <th key={'4'} className={'table-titles dataset-color cell-size'}>Structured Data Use Limitations</th>
             <th key={'5'} className={'table-titles dataset-color cell-size'}>Data Type</th>
             <th key={'6'} className={'table-titles dataset-color cell-size'}>Phenotype/Indication</th>

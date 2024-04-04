@@ -569,7 +569,7 @@ const dar = {
           'propertyId': null,
           'dataSetId': 13,
           'propertyKey': null,
-          'propertyName': 'dbGAP',
+          'propertyName': 'url',
           'propertyValue': 'https://...',
           'createDate': null,
           'schemaProperty': null,
