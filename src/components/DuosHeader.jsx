@@ -365,7 +365,7 @@ const DuosHeader = (props) => {
   };
 
   const makeNotifications = () => {
-    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} />);
+    return state.notificationData.map((d, index) => <Notification notificationData={d} key={index} divKey={index} />);
   };
 
   const toggleDrawer = (boolVal) => {
