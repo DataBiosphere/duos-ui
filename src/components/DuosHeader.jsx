@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
 import {isFunction, isNil} from 'lodash/fp';
+import SignIn from './SignIn';
 
 const styles = {
   drawerPaper: {
@@ -142,7 +143,7 @@ const NavigationTabsComponent = (props) => {
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
-    currentUser, signOut, isLogged,
+    currentUser, signIn, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
     onSubtabChange
@@ -226,7 +227,16 @@ const NavigationTabsComponent = (props) => {
             )
           };
         </div>
-        {/* Navbar right side */}
+        {/* Navbar right side */
+        // when logged in, need log in button
+        }
+        {!isLogged && (
+          <div
+            style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
+          >
+            <SignIn onSignIn={signIn} customStyle={{ whiteSpace: 'nowrap',  }}></SignIn>
+          </div>
+        )}
         {isLogged && (
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
@@ -311,7 +321,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const { location, classes } = props;
+  const { location, classes, onSignIn } = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -381,12 +391,8 @@ const DuosHeader = (props) => {
     toggleDrawer(false);
   };
 
-  let isLogged = Storage.userIsLogged();
-  let currentUser = {};
-
-  if (isLogged) {
-    currentUser = Storage.getCurrentUser();
-  }
+  const isLogged = Storage.userIsLogged();
+  const currentUser = isLogged ? Storage.getCurrentUser() : {};
 
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard;
   const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />;
@@ -478,6 +484,7 @@ const DuosHeader = (props) => {
             navbarDuosText={navbarDuosText}
             currentUser={currentUser}
             isLogged={isLogged}
+            signIn={onSignIn}
             signOut={signOut}
             contactUsButton={contactUsButton}
             supportrequestModal={supportModal}
@@ -524,6 +531,7 @@ const DuosHeader = (props) => {
               navbarDuosText={navbarDuosText}
               currentUser={currentUser}
               isLogged={isLogged}
+              signIn={onSignIn}
               signOut={signOut}
               contactUsButton={contactUsButton}
               supportrequestModal={supportModal}
