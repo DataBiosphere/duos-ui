@@ -1,11 +1,26 @@
-import { UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
+import { IdTokenClaims, User, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
 import { Config } from '../config';
 import axios from 'axios'; // TODO: move this to ajax
+
+// Our config for b2C claims are defined here: https://github.com/broadinstitute/terraform-ap-deployments/tree/master/azure/b2c/policies
+// The standard b2C claims are defined here: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-token-claims-reference
+export interface B2cIdTokenClaims extends IdTokenClaims {
+  email_verified?: boolean;
+  idp?: string;
+  idp_access_token?: string;
+  tid?: string;
+  ver?: string;
+}
+
+export interface OidcUser extends User {
+  profile: B2cIdTokenClaims;
+}
 
 interface OAuthConfig {
   clientId: string;
   authorityEndpoint: string;
 }
+
 
 let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;

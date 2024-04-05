@@ -12,7 +12,7 @@ import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
-import {GoogleIS} from './libs/googleIS';
+import {GoogleIS} from './libs/auth/googleIS';
 import { useAuth } from 'react-oidc-context';
 
 function App() {
@@ -60,9 +60,9 @@ function App() {
   });
 
   useEffect(() => {
-    
+
     const initAuth = async () => {
-      
+
       auth.signoutSilent();
     };
     initAuth();
@@ -76,6 +76,7 @@ function App() {
     setUserIsLogged();
   });
 
+  //TODO:  Move these to auth.ts
   const signOut = async () => {
     const clientId = await Config.getGoogleClientId();
     await GoogleIS.revokeAccessToken(clientId);
@@ -83,6 +84,7 @@ function App() {
     await Storage.clearStorage();
     await setIsLoggedIn(false);
   };
+
 
   const signIn = async () => {
     await Storage.setUserIsLogged(true);
@@ -93,7 +95,7 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignOut={signOut} />
+          <DuosHeader onSignOut={signOut} onSignIn={signIn} />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
           <Routes onSignOut={signOut} onSignIn={signIn} isLogged={isLoggedIn} env={env} />
         </div>

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {Storage} from './storage';
+import Auth from './auth/auth';
 
 export const Config = {
 
@@ -42,7 +42,7 @@ export const Config = {
     }
   },
 
-  authOpts: (token = Token.getToken()) => ({
+  authOpts: (token = Auth.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
@@ -50,7 +50,7 @@ export const Config = {
     },
   }),
 
-  multiPartOpts: (token = Token.getToken()) => ({
+  multiPartOpts: (token = Auth.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'multipart/form-data',
@@ -65,7 +65,7 @@ export const Config = {
     },
   }),
 
-  fileOpts: (token = Token.getToken()) => ({
+  fileOpts: (token = Auth.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
@@ -82,20 +82,12 @@ export const Config = {
     headers: {'Content-Type': 'application/binary'}
   }),
 
-  fileBody: (token = Token.getToken()) => ({
+  fileBody: (token = Auth.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: '*/*',
     },
   }),
-};
-
-const Token = {
-  getToken: () => {
-    return Storage.getGoogleData() !== null ?
-      Storage.getGoogleData().accessToken :
-      'token';
-  },
 };
 
 const loadConfig = _.memoize(async () => {

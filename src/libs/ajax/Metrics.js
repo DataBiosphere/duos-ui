@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { getDefaultProperties } from '@databiosphere/bard-client';
 
+import Auth from '../auth/auth';
 import { Storage } from '../storage';
 import { getBardApiUrl } from '../ajax';
 
@@ -42,11 +43,11 @@ const captureEventFn = async (event, details = {}, signal) => {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/event`,
     data: body,
-    headers: isRegistered ? { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` } : undefined,
+    headers: isRegistered ? { Authorization: `Bearer ${Auth.getToken()}` } : undefined,
     signal,
   };
 
-  return axios(config);
+  return axios(config).catch(() => { });
 };
 
 /**
@@ -59,7 +60,7 @@ const syncProfile = async (signal) => {
   const config = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/syncProfile`,
-    headers: { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` },
+    headers: { Authorization: `Bearer ${Auth.getToken()}` },
     signal,
   };
 
@@ -80,7 +81,7 @@ const identify = async (anonId, signal) => {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/identify`,
     data: body,
-    headers: { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` },
+    headers: { Authorization: `Bearer ${Auth.getToken()}` },
     signal,
   };
 
