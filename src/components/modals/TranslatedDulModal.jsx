@@ -1,8 +1,8 @@
 import React from 'react';
-import { BaseModal } from '../BaseModal';
+import { UpdatedBaseModal } from '../UpdatedBaseModal';
 import { useState, useEffect } from 'react';
 import isEmpty from 'lodash/fp/isEmpty';
-import {DataUseTranslation} from '../../libs/dataUseTranslation';
+
 
 const MODAL_ID = 'translatedDulModal';
 
@@ -48,7 +48,7 @@ export default function TranslatedDulModal(props) {
   }, [dataUse]);
 
   return (
-    <BaseModal
+    <UpdatedBaseModal
       id={MODAL_ID}
       showModal={showModal}
       onRequestClose={closeHandler}
@@ -61,6 +61,6 @@ export default function TranslatedDulModal(props) {
       <ul key='dulUnorderedList' style={listStyle} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
         {translatedDulList}
       </ul>
-    </BaseModal>
+    </UpdatedBaseModal>
   );
 }
