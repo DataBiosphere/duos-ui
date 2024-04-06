@@ -35,7 +35,7 @@ export default function TranslatedDulModal(props) {
   const [translatedDulList, setTranslatedDulList] = useState([]);
 
   const closeHandler = () => {
-    onCloseRequest(MODAL_ID);
+    onCloseRequest();
   };
 
   useEffect(() => {
