@@ -3,7 +3,6 @@ name: cypress integration tests
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Log Actor
         run: echo "${{ github.actor }}"

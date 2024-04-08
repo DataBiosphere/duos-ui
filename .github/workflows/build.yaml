@@ -45,15 +45,12 @@ jobs:
     - name: Log Github Actor
       run: echo "${{ github.actor }}"
     - name: Auth to GCR
-      if: github.actor != 'dependabot[bot]'
       uses: 'google-github-actions/auth@v1'
       with:
         credentials_json: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
     - name: Auth Docker for GCR
-      if: github.actor != 'dependabot[bot]'
       run: gcloud auth configure-docker --quiet
     - name: Push Image to GCR
-      if: github.actor != 'dependabot[bot]'
       run: |
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
