@@ -78,7 +78,7 @@ export default function DatasetStatistics(props) {
               <div style={{ ...Styles.MINOR_HEADER, paddingLeft: '10px' }}>Dataset Description:</div>
               {LINE}
               <div style={{ fontSize: Theme.font.size.small, padding: '1rem' }}>
-                {extract('Dataset Description') || dataset?.description || dataset?.study?.description }
+                {extract('Dataset Description') || dataset?.description || dataset?.study?.description || 'N/A' }
               </div>
             </div>
             <div>
