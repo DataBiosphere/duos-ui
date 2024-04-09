@@ -1,9 +1,9 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { DataSet, Metrics, DAR } from '../libs/ajax';
 import { Notifications } from '../libs/utils';
 import { Styles, Theme } from '../libs/theme';
-import { get, find } from 'lodash';
+import { find } from 'lodash/fp';
 import { ReadMore } from '../components/ReadMore';
 import { formatDate } from '../libs/utils';
 import { Button } from '@mui/material';
@@ -30,12 +30,18 @@ export default function DatasetStatistics(props) {
     });
   }, [datasetIdentifier]);
 
+  const extract = useCallback((propertyName) => {
+    const property = find({ propertyName })(dataset.properties);
+    return property?.propertyValue;
+  }, [dataset]);
+
   const setData = async (datasetId) => {
     try {
       setIsLoading(true);
       const metrics = await Metrics.getDatasetStats(datasetId);
+      const dataset = await DataSet.getDataSetsByDatasetId(datasetId);
       setDatasetId(datasetId);
-      setDataset(metrics.dataset);
+      setDataset(dataset);
       setDars(metrics.dars);
       setIsLoading(false);
     } catch (error) {
@@ -57,13 +63,7 @@ export default function DatasetStatistics(props) {
             <div style={Styles.MEDIUM_ROW}>
               <div style={{ fontWeight: '500', marginRight: '5px' }}>Dataset Name: </div>
               <div>
-                {get(
-                  find(dataset?.properties, (p) => {
-                    return p.propertyName === 'Dataset Name';
-                  }),
-                  'propertyValue',
-                  ''
-                )}
+                {extract('Dataset Name') || dataset?.name}
               </div>
             </div>
             <div style={{ paddingTop: '20px', paddingLeft: '30px' }}>
@@ -78,52 +78,28 @@ export default function DatasetStatistics(props) {
               <div style={{ ...Styles.MINOR_HEADER, paddingLeft: '10px' }}>Dataset Description:</div>
               {LINE}
               <div style={{ fontSize: Theme.font.size.small, padding: '1rem' }}>
-                {get(
-                  find(dataset?.properties, (p) => {
-                    return p.propertyName === 'Description';
-                  }),
-                  'propertyValue',
-                  ''
-                )}
+                {extract('Dataset Description') || dataset?.description || dataset?.study?.description || 'N/A' }
               </div>
             </div>
             <div>
               <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Number of Participants: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {get(
-                    find(dataset?.properties, (p) => {
-                      return p.propertyName === '# of participants';
-                    }),
-                    'propertyValue',
-                    ''
-                  )}
+                  {extract('# of participants')}
                 </div>
               </div>
-              <div style={{ display: 'flex' }}>
+              {(extract('Principal Investigator(PI)') || dataset?.study?.piName) && <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Principal Investigator: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {dataset?.study?.piName || get(
-                    find(dataset?.properties, (p) => {
-                      return p.propertyName === 'Principal Investigator(PI)';
-                    }),
-                    'propertyValue',
-                    ''
-                  )}
+                  {extract('Principal Investigator(PI)') || dataset?.study?.piName}
                 </div>
-              </div>
-              <div style={{ display: 'flex' }}>
+              </div>}
+              {(extract('Data Depositor') || dataset?.createUser?.displayName) && <div style={{ display: 'flex' }}>
                 <div style={Styles.SMALL_BOLD}>Data Custodian: </div>
                 <div style={Styles.SMALL_BOLD}>
-                  {get(
-                    find(dataset?.properties, (p) => {
-                      return p.propertyName === 'Data Depositor';
-                    }),
-                    'propertyValue',
-                    ''
-                  )}
+                  {extract('Data Depositor') || dataset?.createUser?.displayName}
                 </div>
-              </div>
+              </div>}
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
