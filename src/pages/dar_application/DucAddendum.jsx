@@ -151,8 +151,8 @@ export default function DucAddendum(props) {
       });
 
       return (
-        <>
-          <Fragment>
+        <Fragment key='duc-addendum-bucket'>
+          <Fragment key='duc-addendum-column-headers'>
             <SimpleTable
               isLoading={isLoading}
               columnHeaders={columnHeaderData(headerConfig)}
@@ -160,7 +160,7 @@ export default function DucAddendum(props) {
               styles={headerStyles}
             />
           </Fragment>
-          <Fragment>
+          <Fragment key='duc-addendum-table-data'>
             <SimpleTable
               isLoading={false}
               columnHeaders={columnHeaderData(columnConfig)}
@@ -168,12 +168,13 @@ export default function DucAddendum(props) {
               styles={columnStyles}
             />
           </Fragment>
-        </>
+        </Fragment>
       );
     });
 
     tableChunks.push(
       <div
+        key='duc-addendum-table-divider'
         style={{
           borderTop: '1px solid black',
           borderWidth: '1px 0 0 0',
