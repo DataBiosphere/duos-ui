@@ -159,7 +159,8 @@ export default function DatasetCatalog(props) {
             return (useCustomFilter ? dacFilter(row) : true);
           })
           .slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize));
-      await Promise.all(results.map(async(dataset) => {
+      await Promise.all(results.map(async (dataset) => {
+       
         if (isNil(dataset.codeList)) {
           if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
             dataset.codeList = 'None';
@@ -216,8 +217,9 @@ export default function DatasetCatalog(props) {
     props.history.push({ pathname: '/dar_application/' + referenceId });
   };
 
-  const openTranslatedDUL = (dataUse) => {
-    setDataUse(dataUse);
+  const openTranslatedDUL = async (dataUse) => {
+    const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+    setDataUse(translations);
     setShowTranslatedDULModal(true);
   };
 
