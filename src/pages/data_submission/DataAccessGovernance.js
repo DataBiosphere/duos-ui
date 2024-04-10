@@ -140,7 +140,7 @@ export const DataAccessGovernance = (props) => {
           irb: dataUse.ethicsApprovalRequired,
           gs: dataUse.geographicalRestrictions,
           mor: dataUse.publicationMoratorium,
-          npu: dataUse.commercialUse,
+          npu: dataUse.nonProfitUse,
           otherSecondary: dataUse.secondaryOther,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),
