@@ -45,7 +45,7 @@ export const StackdriverReporter = {
     try {
       await errorHandler.report(formattedMsg);
     } catch (error) {
-      //
+      // swallow error to avoid user visible errors
     }
   },
 
