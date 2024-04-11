@@ -353,11 +353,9 @@ const createRpVoteStructureFromBuckets = (buckets) => {
 
 /**
  * Constrain the equality check to a limited number of fields. These
- * fields are the ones that are used in algorithm decisions and are what
+ * fields are the ones that are used in the v4 algorithm decisions and are what
  * determine whether it falls into a Data Use bucket. We limit the fields
- * because there are quite a few that have no impact on decision-making.
- * Fields like recontactMay and recontactMust, and others, are not relevant
- * to DAC decisions.
+ * because there are several captured values that have no impact on decision-making.
  *
  * @public
  * @param a Data Use
@@ -365,32 +363,32 @@ const createRpVoteStructureFromBuckets = (buckets) => {
  * @returns {boolean}
  */
 export const isEqualDataUse = (a, b) => {
-  const fields = ['addiction',
-    'aggregateResearch',
-    'collaboratorRequired',
-    'controlSetOption',
-    'ethicsApprovalRequired',
-    'gender',
-    'geneticStudiesOnly',
-    'geographicalRestrictions',
-    'illegalBehavior',
-    'manualReview',
+  const fields = [
+    'generalUse',
+    'hmbResearch',
+    'diseaseRestrictions',
+    'populationOriginsAncestry',
     'methodsResearch',
-    'nonBiomedical',
+    'nonProfitUse',
     'other',
-    'otherRestrictions',
-    'pediatric',
-    'psychologicalTraits',
-    'publicationResults',
     'secondaryOther',
+    'ethicsApprovalRequired',
+    'collaboratorRequired',
+    'geographicalRestrictions',
+    'geneticStudiesOnly',
+    'publicationResults',
+    'publicationMoratorium',
+    'controls',
+    'gender',
+    'pediatric',
+    'population',
+    'illegalBehavior',
     'sexualDiseases',
     'stigmatizeDiseases',
     'vulnerablePopulations',
-    'commercialUse',
-    'diseaseRestrictions',
-    'generalUse',
-    'hmbResearch',
-    'populationOriginsAncestry'];
+    'psychologicalTraits',
+    'notHealth'
+  ];
   const aCopy = pick(fields)(a);
   const bCopy = pick(fields)(b);
   return isEqual(aCopy)(bCopy);
