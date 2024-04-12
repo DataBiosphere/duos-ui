@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { isNil, isString, isEmpty } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormTable, FormValidators, FormFieldTitle } from '../../../components/forms/forms';
-import { DAR } from '../../../libs/ajax';
+import { DAR } from '../../../libs/ajax/DAR';
 import { cloneDeep } from 'lodash';
 
 export const selectedPrimaryGroup = (consentGroup) => {

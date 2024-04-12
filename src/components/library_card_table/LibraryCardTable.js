@@ -10,7 +10,7 @@ import SearchBar from '../SearchBar';
 import SimpleTable from '../SimpleTable';
 import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
-import { LibraryCard } from '../../libs/ajax';
+import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import {Delete, Update} from '@mui/icons-material';
 import TableIconButton from '../TableIconButton';

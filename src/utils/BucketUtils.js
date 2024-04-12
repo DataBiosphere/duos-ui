@@ -19,7 +19,7 @@ import {
   uniq,
   values
 } from 'lodash/fp';
-import {Match} from '../libs/ajax';
+import { Match } from '../libs/ajax/Match';
 import {translateDataUseRestrictionsFromDataUseArray} from '../libs/dataUseTranslation';
 import {processVotesForBucket} from './DarCollectionUtils';
 import {processMatchData} from './VoteUtils';

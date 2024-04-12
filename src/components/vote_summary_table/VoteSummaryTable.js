@@ -4,7 +4,7 @@ import {Styles} from '../../libs/theme';
 import {isNil, isEmpty} from 'lodash/fp';
 import {useEffect, useState} from 'react';
 import {sortVisibleTable} from '../../libs/utils';
-import { Email } from '../../libs/ajax';
+import { Email } from '../../libs/ajax/Email';
 import { Notifications } from '../../libs/utils';
 
 const styles = {

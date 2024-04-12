@@ -2,7 +2,8 @@ import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC, DAR } from '../../libs/ajax';
+import { DAR } from '../../libs/ajax/DAR';
+import { DAC } from '../../libs/ajax/DAC';
 
 import './ds_common.css';
 

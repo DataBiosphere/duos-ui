@@ -1,7 +1,7 @@
 import React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import TabControl from '../../components/TabControl';
 import ReviewHeader from './ReviewHeader';
 import ApplicationInformation from './ApplicationInformation';
@@ -11,7 +11,7 @@ import {binCollectionToBuckets} from '../../utils/BucketUtils';
 import { Navigation } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
-import { Collections } from '../../libs/ajax';
+import { Collections } from '../../libs/ajax/Collections';
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication';
 
 const tabContainerColor = 'rgb(115,154,164)';

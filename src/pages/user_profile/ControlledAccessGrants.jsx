@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { Notifications } from '../../libs/utils';
 
 const headCells = [

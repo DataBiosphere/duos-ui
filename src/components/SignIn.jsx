@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { Alert } from './Alert';
-import { ToS, User } from '../libs/ajax';
-import { Metrics } from '../libs/metrics';
+import { ToS } from '../libs/ajax/ToS';
+import { User } from '../libs/ajax/User';
+import { Metrics } from '../libs/ajax/Metrics';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';

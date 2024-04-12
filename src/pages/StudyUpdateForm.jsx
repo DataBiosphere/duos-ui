@@ -10,7 +10,9 @@ import NihAnvilUse from './data_submission/NihAnvilUse';
 import NIHAdministrativeInformation from './data_submission/NIHAdministrativeInformation';
 import NIHDataManagement from './data_submission/NIHDataManagement';
 import DataAccessGovernance from './data_submission/DataAccessGovernance';
-import { DataSet, User, Institution } from '../libs/ajax';
+import { Institution } from '../libs/ajax/Institution';
+import { User } from '../libs/ajax/User';
+import { DataSet } from '../libs/ajax/DataSet';
 import {Storage} from '../libs/storage';
 import { set } from 'lodash';
 

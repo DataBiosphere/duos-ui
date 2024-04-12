@@ -2,7 +2,7 @@ import React, {useCallback} from 'react';
 import { useEffect, useState } from 'react';
 import ERACommons from '../../components/ERACommons';
 import { Notifications } from '../../libs/utils';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { isNil } from 'lodash';
 import LibraryCard from './LibraryCard';
 

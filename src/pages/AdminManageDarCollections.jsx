@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import SearchBar from '../components/SearchBar';
-import { Collections } from '../libs/ajax';
+import { Collections } from '../libs/ajax/Collections';
 import { Notifications, searchOnFilteredList, getSearchFilterFunctions, USER_ROLES } from '../libs/utils';
 import { Styles } from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';

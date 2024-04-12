@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { isEmpty } from 'lodash/fp';
 
 import { Notifications } from '../../libs/utils';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { FormFieldTypes, FormField, FormValidators } from '../../components/forms/forms';
 import initialFormData from './NIHDataManagement';
 

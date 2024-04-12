@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {useState, useEffect, useRef} from 'react';
-import {Institution, User} from '../libs/ajax';
+import { Institution } from '../libs/ajax/Institution';
+import { User } from '../libs/ajax/User';
 import {Notifications, USER_ROLES} from '../libs/utils';
 import {ResearcherReview} from '../components/ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';

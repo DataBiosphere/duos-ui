@@ -1,6 +1,11 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import {DAC, User, Institution, Schema, Study, DataSet} from '../../../src/libs/ajax';
+import { DAC } from '../../../src/libs/ajax/DAC';
+import { DataSet } from '../../../src/libs/ajax/DataSet';
+import { Institution } from '../../../src/libs/ajax/Institution';
+import { Schema } from '../../../src/libs/ajax/Schema';
+import { Study } from '../../../src/libs/ajax/Study';
+import { User } from '../../../src/libs/ajax/User';
 import DataSubmissionForm from '../../../src/pages/data_submission/DataSubmissionForm';
 import { mount } from 'cypress/react';
 

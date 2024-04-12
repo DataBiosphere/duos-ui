@@ -2,7 +2,7 @@ import {filter, find, flow, getOr, isEmpty, isNil, map} from 'lodash/fp';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {Storage} from '../libs/storage';
 import {USER_ROLES} from '../libs/utils';
-import {DAC} from '../libs/ajax';
+import { DAC } from '../libs/ajax/DAC';
 
 export const DatasetService = {
 

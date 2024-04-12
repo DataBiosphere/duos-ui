@@ -2,7 +2,9 @@
 import { React } from 'react';
 import { mount } from 'cypress/react18';
 import DarCollectionReview from '../../../src/pages/dar_collection_review/DarCollectionReview';
-import { Collections, User, Match } from '../../../src/libs/ajax';
+import { Collections } from '../../../src/libs/ajax/Collections';
+import { Match } from '../../../src/libs/ajax/Match';
+import { User } from '../../../src/libs/ajax/User';
 import { Storage } from '../../../src/libs/storage';
 import { Navigation } from '../../../src/libs/utils';
 import { OntologyService } from '../../../src/libs/ontologyService';

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Institution, User } from '../../libs/ajax';
+import { Institution } from '../../libs/ajax/Institution';
+import { User } from '../../libs/ajax/User';
 import { find, isNil, isNumber } from 'lodash';
 import { Notifications, setUserRoleStatuses } from '../../libs/utils';
 import { Storage } from '../../libs/storage';

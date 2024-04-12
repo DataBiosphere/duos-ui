@@ -1,6 +1,8 @@
 import React from 'react';
 import { useCallback, useState, useEffect } from 'react';
-import { DataSet, Metrics, DAR } from '../libs/ajax';
+import { DatasetMetrics } from '../libs/ajax/DatasetMetrics';
+import { DataSet } from '../libs/ajax/DataSet';
+import { DAR } from '../libs/ajax/DAR';
 import { Notifications } from '../libs/utils';
 import { Styles, Theme } from '../libs/theme';
 import { find } from 'lodash/fp';
@@ -38,7 +40,7 @@ export default function DatasetStatistics(props) {
   const setData = async (datasetId) => {
     try {
       setIsLoading(true);
-      const metrics = await Metrics.getDatasetStats(datasetId);
+      const metrics = await DatasetMetrics.getDatasetStats(datasetId);
       const dataset = await DataSet.getDataSetsByDatasetId(datasetId);
       setDatasetId(datasetId);
       setDataset(dataset);

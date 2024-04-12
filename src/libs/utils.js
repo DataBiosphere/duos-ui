@@ -2,7 +2,7 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import {forEach as lodashForEach, isArray, map as lodashMap} from 'lodash';
-import {DAR} from './ajax';
+import { DAR } from './ajax/DAR';
 import {Theme} from './theme';
 import {capitalize, cloneDeep, concat, each, every, filter, find, first, flatten, flow, forEach as lodashFPForEach, get, getOr, includes, isEmpty, isNil, join, map, toLower, uniq} from 'lodash/fp';
 import {headerTabsConfig} from '../components/DuosHeader';

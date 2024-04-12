@@ -1,6 +1,6 @@
 import {flow, isEmpty, map, filter, find, forEach, flatMap, toLower, sortBy, isNil, includes, concat, findIndex, cloneDeep, groupBy, flatten} from 'lodash/fp';
 import { formatDate, Notifications } from '../libs/utils';
-import { Collections } from '../libs/ajax';
+import { Collections } from '../libs/ajax/Collections';
 
 export const rpVoteKey = 'RUS Vote';
 

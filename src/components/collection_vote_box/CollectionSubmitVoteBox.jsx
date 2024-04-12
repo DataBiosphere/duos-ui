@@ -3,7 +3,7 @@ import {isEmpty, isNil, map, every} from 'lodash/fp';
 import CollectionVoteYesButton from './CollectionVoteYesButton';
 import CollectionVoteNoButton from './CollectionVoteNoButton';
 import {Notifications} from '../../libs/utils';
-import {Votes} from '../../libs/ajax';
+import { Votes } from '../../libs/ajax/Votes';
 
 const styles = {
   baseStyle: {

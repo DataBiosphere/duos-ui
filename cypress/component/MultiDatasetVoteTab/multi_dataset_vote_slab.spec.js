@@ -3,7 +3,7 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import MultiDatasetVoteSlab from '../../../src/components/collection_voting_slab/MultiDatasetVoteSlab';
 import {Storage} from '../../../src/libs/storage';
-import {Votes} from '../../../src/libs/ajax';
+import { Votes } from '../../../src/libs/ajax/Votes';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 

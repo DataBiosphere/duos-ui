@@ -1,5 +1,6 @@
 import React from 'react';
-import {DataSet, DAR} from '../../libs/ajax';
+import { DataSet } from '../../libs/ajax/DataSet';
+import { DAR } from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
 import {
   needsDsAcknowledgement,
