@@ -1,6 +1,6 @@
-import { IdTokenClaims, User, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
+import { IdTokenClaims, OidcMetadata, User, UserManager, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
 import { Config } from '../config';
-import axios from 'axios'; // TODO: move this to ajax
+import { OAuth2, OAuthConfig } from '../ajax/OAuth2';
 
 // Our config for b2C claims are defined here: https://github.com/broadinstitute/terraform-ap-deployments/tree/master/azure/b2c/policies
 // The standard b2C claims are defined here: https://learn.microsoft.com/en-us/azure/active-directory/develop/id-token-claims-reference
@@ -16,11 +16,7 @@ export interface OidcUser extends User {
   profile: B2cIdTokenClaims;
 }
 
-interface OAuthConfig {
-  clientId: string;
-  authorityEndpoint: string;
-}
-
+type OidcUserManager = UserManager;
 
 let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;
@@ -28,7 +24,7 @@ let userManagerSettings: UserManagerSettings | null = null;
 const generateOidcUserManagerSettings = async (
   config: OAuthConfig
 ): Promise<UserManagerSettings> => {
-  const metadata = {
+  const metadata: Partial<OidcMetadata> = {
     authorization_endpoint: `${await Config.getApiUrl()}/oauth2/authorize`,
     token_endpoint: `${await Config.getApiUrl()}/oauth2/token`,
   };
@@ -52,15 +48,16 @@ const generateOidcUserManagerSettings = async (
 };
 
 export const OidcBroker = {
-  initializeAuth: async (): Promise<void> => {
-    // TODO: Move request to an AJAX call
-    const configUrl = `${await Config.getApiUrl()}/oauth2/configuration`;
-    const res: OAuthConfig = (await axios.get(configUrl)).data;
-    config = res;
+  initialize: async (): Promise<void> => {
+    config = await OAuth2.getConfig();
     const ums: UserManagerSettings = await generateOidcUserManagerSettings(
       config
     );
     userManagerSettings = ums;
   },
   getOidcUserManagerSettings: (): UserManagerSettings => userManagerSettings!,
+  getOidcUser: async (): Promise<OidcUser | null> => {
+    const userManager: OidcUserManager = new UserManager(OidcBroker.getOidcUserManagerSettings());
+    return await userManager.getUser();
+  }
 };
