@@ -90,7 +90,7 @@ const sampleDataset = {
         'studyId': 17,
         'key': 'dataCustodianEmail',
         'type': 'Json',
-        "value": []
+        'value': []
       }
     ],
   },

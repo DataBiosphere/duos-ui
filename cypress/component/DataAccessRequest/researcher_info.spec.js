@@ -2,7 +2,8 @@
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import ResearcherInfo from '../../../src/pages/dar_application/ResearcherInfo.js';
-import {User} from '../../../src/libs/ajax';
+import { User } from '../../../src/libs/ajax/User';
+
 import {BrowserRouter} from 'react-router-dom';
 
 const props = {

@@ -2,7 +2,7 @@
 import React from 'react';
 import CollectionSubmitVoteBox from '../../../src/components/collection_vote_box/CollectionSubmitVoteBox';
 import { mount } from 'cypress/react';
-import {Votes} from '../../../src/libs/ajax';
+import { Votes } from '../../../src/libs/ajax/Votes';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 
 const votesMatch = [

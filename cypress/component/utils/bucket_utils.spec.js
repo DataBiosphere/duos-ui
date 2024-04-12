@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import {binCollectionToBuckets, isEqualDataUse, shouldAbstain} from '../../../src/utils/BucketUtils';
 import {filter, find, forEach, isEmpty, isUndefined} from 'lodash/fp';
-import {Match} from '../../../src/libs/ajax';
+import { Match } from '../../../src/libs/ajax/Match';
 
 const dar_collection = {
   'darCollectionId': 1,

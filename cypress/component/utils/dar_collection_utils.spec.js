@@ -11,7 +11,7 @@ import {
   updateFinalVote,
   rpVoteKey
 } from '../../../src/utils/DarCollectionUtils';
-import {Collections} from '../../../src/libs/ajax';
+import { Collections } from '../../../src/libs/ajax/Collections';
 import {formatDate, Notifications, USER_ROLES} from '../../../src/libs/utils';
 import {forEach, includes, concat} from 'lodash/fp';
 
