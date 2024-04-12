@@ -265,18 +265,18 @@ export const SupportRequestModal = hh(
               },
             }, [
               div({className: 'default-color', style: { fontStyle: 'italic', fontSize: '13px' }}, [
-                p(['Having issues accessing data you were already approved to use?',
+                  p(['Having issues accessing data you were already approved to use?',
                   div({style: { fontStyle: 'normal'}}, [
                     'Please contact the dataset\'s Data Custodian listed in the DUOS ',
                     a({ href: '/datalibrary' }, 'Data Library'),'.'
                   ])])
-              ]),
+                ]),
               div({className: 'default-color', style: { fontStyle: 'italic', fontSize: '13px' }}, [
                 p(['Want to ask the data access committee(s) about your requests\' expected turnaround time?',
-                  div({style: { fontStyle: 'normal'}}, [
-                    'Please contact the dataset\'s Data Access Committee (DAC) listed in the DUOS ',
-                    a({ href: '/datalibrary' }, 'Data Library'),'.'
-                  ])])
+                div({style: { fontStyle: 'normal'}}, [
+                  'Please contact the dataset\'s Data Access Committee (DAC) listed in the DUOS ',
+                  a({ href: '/datalibrary' }, 'Data Library'),'.'
+                ])])
               ]),
               form({
                 className: 'form-horizontal css-form',
@@ -413,4 +413,3 @@ export const SupportRequestModal = hh(
       );
     }
   });
-
