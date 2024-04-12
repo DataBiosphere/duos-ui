@@ -14,7 +14,7 @@ import {
   searchOnFilteredList,
   hasDataSubmitterRole
 } from '../../libs/utils';
-import {User} from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import DataCustodianFormModal from '../../components/modals/DataCustodianFormModal';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';

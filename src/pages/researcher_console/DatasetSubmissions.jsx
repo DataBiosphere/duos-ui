@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../../libs/utils';
 import SearchBar from '../../components/SearchBar';
-import {DataSet} from '../../libs/ajax';
+import { DataSet } from '../../libs/ajax/DataSet';
 import DatasetSubmissionsTable from './DatasetSubmissionsTable';
 import {Storage} from '../../libs/storage';
 import styles from './DatasetTerms.module.css';

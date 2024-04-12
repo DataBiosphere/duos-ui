@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { Notifications } from '../libs/utils';
-import { DataSet } from '../libs/ajax';
+import { DataSet } from '../libs/ajax/DataSet';
 import DatasetSearchTable from '../components/data_search/DatasetSearchTable';
 import broadIcon from '../logo.svg';
 import duosIcon from '../images/duos-network-logo.svg';

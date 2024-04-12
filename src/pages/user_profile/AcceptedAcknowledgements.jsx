@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { Notifications } from '../../libs/utils';
 
 const Acknowledgment = ({ value }) =>

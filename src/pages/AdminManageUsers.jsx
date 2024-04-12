@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { User } from '../libs/ajax';
+import { User } from '../libs/ajax/User';
 import manageUsersIcon from '../images/icon_manage_users.png';
 import { USER_ROLES } from '../libs/utils';
 import { isNil } from 'lodash/fp';

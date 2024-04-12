@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { getDefaultProperties } from '@databiosphere/bard-client';
 
-import { Storage } from './storage';
-import { getBardApiUrl } from './ajax';
+import { Storage } from '../storage';
+import { getBardApiUrl } from '../ajax';
 
 export const Metrics = {
   captureEvent: (event, details, signal) => captureEventFn(event, details, signal).catch(() => { }),

@@ -15,7 +15,7 @@ import {
 } from '../../libs/utils';
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
-import { LibraryCard } from '../../libs/ajax';
+import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';

@@ -7,7 +7,9 @@ import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import {PageHeading} from '../components/PageHeading';
 import {PaginatorBar} from '../components/PaginatorBar';
 import {SearchBox} from '../components/SearchBox';
-import {DAC, DAR, DataSet} from '../libs/ajax';
+import { DataSet } from '../libs/ajax/DataSet';
+import { DAR } from '../libs/ajax/DAR';
+import { DAC } from '../libs/ajax/DAC';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
@@ -160,7 +162,7 @@ export default function DatasetCatalog(props) {
           })
           .slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize));
       await Promise.all(results.map(async (dataset) => {
-       
+
         if (isNil(dataset.codeList)) {
           if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
             dataset.codeList = 'None';

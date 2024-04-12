@@ -1,7 +1,8 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Institution, User } from '../libs/ajax';
-import { LibraryCard } from '../libs/ajax';
+import { Institution } from '../libs/ajax/Institution';
+import { User } from '../libs/ajax/User';
+import { LibraryCard } from '../libs/ajax/LibraryCard';
 import { Notifications, USER_ROLES } from '../libs/utils';
 import LibraryCardTable from '../components/library_card_table/LibraryCardTable';
 

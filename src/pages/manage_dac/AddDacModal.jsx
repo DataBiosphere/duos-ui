@@ -1,7 +1,7 @@
 import * as ld from 'lodash';
 import React, { useState } from 'react';
 import AsyncSelect from 'react-select/async';
-import { DAC } from '../../libs/ajax';
+import { DAC } from '../../libs/ajax/DAC';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';

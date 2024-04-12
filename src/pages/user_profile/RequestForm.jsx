@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Support } from '../../libs/ajax';
+import { Support } from '../../libs/ajax/Support';
 import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';

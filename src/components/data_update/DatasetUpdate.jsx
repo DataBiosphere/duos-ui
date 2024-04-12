@@ -2,7 +2,9 @@ import React from 'react';
 import { useCallback, useState, useEffect } from 'react';
 import { find, isNil } from 'lodash/fp';
 import { FormFieldTypes, FormField, FormValidators } from '../forms/forms';
-import { DAC, DAR, DataSet } from '../../libs/ajax';
+import { DataSet } from '../../libs/ajax/DataSet';
+import { DAR } from '../../libs/ajax/DAR';
+import { DAC } from '../../libs/ajax/DAC';
 import { Notifications } from '../../libs/utils';
 
 // TODO: Deprecated - remove this component when all datasets have been converted to studies
