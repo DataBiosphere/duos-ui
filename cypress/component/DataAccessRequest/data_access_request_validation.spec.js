@@ -3,7 +3,7 @@ import {React} from 'react';
 import {mount} from 'cypress/react';
 import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication';
 import { MemoryRouter } from 'react-router-dom';
-import { DAR } from '../../../src/libs/ajax/DAC';
+import { DAR } from '../../../src/libs/ajax/DAR';
 import { DataSet } from '../../../src/libs/ajax/DataSet';
 import { User } from '../../../src/libs/ajax/User';
 import { Storage } from '../../../src/libs/storage.js';

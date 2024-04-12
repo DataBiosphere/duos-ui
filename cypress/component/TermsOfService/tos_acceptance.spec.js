@@ -3,7 +3,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import TermsOfServiceAcceptance from '../../../src/pages/TermsOfServiceAcceptance';
-import {ToS} from '../../../src/libs/ajax';
+import { ToS } from '../../../src/libs/ajax/ToS';
 import {Storage} from '../../../src/libs/storage';
 import {Navigation} from '../../../src/libs/utils';
 
