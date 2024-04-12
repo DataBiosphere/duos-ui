@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCallback, useState, useEffect } from 'react';
-import { DatasetMetrics } from '../libs/ajax/DatasetMetrics.';
+import { DatasetMetrics } from '../libs/ajax/DatasetMetrics';
 import { DataSet } from '../libs/ajax/DataSet';
 import { DAR } from '../libs/ajax/DAR';
 import { Notifications } from '../libs/utils';
