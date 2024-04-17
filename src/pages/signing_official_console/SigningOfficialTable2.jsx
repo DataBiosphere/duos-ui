@@ -15,7 +15,7 @@ import {
 } from '../../libs/utils';
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
-import { LibraryCard } from '../../libs/ajax';
+import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
@@ -207,7 +207,7 @@ const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
   return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
 };
 
-export default function SigningOfficialTable(props) {
+export default function SigningOfficialTable2(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
   const [tableSize, setTableSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -221,6 +221,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
+  const [daas, setDaas] = useState(props.daas || []);
   const { signingOfficial, isLoading } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -270,6 +271,17 @@ export default function SigningOfficialTable(props) {
       setVisibleList: setVisibleResearchers
     });
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
+
+  useEffect(() => {
+    const init = async() => {
+      try{
+        setDaas(props.daas);
+      } catch(error) {
+        Notifications.showError({text: 'Failed to get Data Access Agreements'});
+      }
+    };
+    init();
+  }, [daas]);
 
   const goToPage = useCallback((value) => {
     if (value >= 1 && value <= pageCount) {
