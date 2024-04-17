@@ -10,6 +10,10 @@ updates:
       - "@DataBiosphere/DUOS"
     commit-message:
       prefix: "[DUOS-1740-actions]"
+    groups:
+      action-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
