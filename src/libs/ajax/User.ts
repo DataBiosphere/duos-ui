@@ -4,26 +4,55 @@ import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
 
+export type UserRoleName = 
+  'Admin' | 'Chairperson' | 'Member' | 'Researcher' | 
+  'Alumni' | 'SigningOfficial' | 'DataSubmitter' | 'All';
+
+export interface UserRole {
+  roleId: number, 
+  name: UserRoleName,
+  userId: number, 
+  userRoleId: number, 
+}
+
+export interface DuosUser {
+  createDate: Date,
+  displayName: string,
+  email: string,
+  emailPreference: boolean,
+  isAdmin: boolean,
+  isAlumni: boolean,
+  isChairPerson: boolean,
+  isDataSubmitter: boolean,
+  isMember: boolean,
+  isResearcher: boolean,
+  isSigningOfficial: boolean,
+  roles: UserRole[],
+  userId: number,
+}
 
 export const User = {
-  getMe: async () => {
+  getMe: async (): Promise<DuosUser> => {
     const url = `${await getApiUrl()}/api/user/me`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
 
+  // @ts-ignore
   getById: async (id) => {
     const url = `${await getApiUrl()}/api/user/${id}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
 
+  // @ts-ignore
   list: async (roleName) => {
     const url = `${await getApiUrl()}/api/user/role/${roleName}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
+  // @ts-ignore
   create: async (user) => {
     const url = `${await getApiUrl()}/api/dacuser`;
     try {
@@ -36,6 +65,7 @@ export const User = {
     }
   },
 
+  // @ts-ignore
   updateSelf: async (payload) => {
     const url = `${await getApiUrl()}/api/user`;
     // We should not be updating the user's create date, associated institution, or library cards
@@ -49,6 +79,7 @@ export const User = {
     }
   },
 
+  // @ts-ignore
   update: async (user, userId) => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards
@@ -86,12 +117,14 @@ export const User = {
     return res.data;
   },
 
+  // @ts-ignore
   addRoleToUser: async (userId, roleId) => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
     return res.json();
   },
 
+  // @ts-ignore
   deleteRoleFromUser: async (userId, roleId) => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
@@ -107,6 +140,7 @@ export const User = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
+  // @ts-ignore
   acceptAcknowledgments: async (...keys) => {
     if (keys.length === 0) {
       return {};

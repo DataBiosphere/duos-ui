@@ -349,6 +349,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
+
     props.onSignOut();
   };
 
@@ -391,8 +392,9 @@ const DuosHeader = (props) => {
   };
 
   const isLogged = Storage.userIsLogged();
+  //console.log('is logged:', isLogged);
   const currentUser = isLogged ? Storage.getCurrentUser() : {};
-
+  //console.log('currentUser', currentUser);
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard;
   const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />;
   const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>;

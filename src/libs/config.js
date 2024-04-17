@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Auth from './auth/auth';
+import { Auth } from './auth/auth';
 
 export const Config = {
 

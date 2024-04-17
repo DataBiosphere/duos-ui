@@ -21,7 +21,6 @@ import SigningOfficialDataSubmitters from './pages/signing_official_console/Sign
 import Translator from './pages/Translator';
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import Status from './pages/Status';
-import BackgroundSignIn from './pages/BackgroundSignIn';
 import ConsentTextGenerator from './pages/ConsentTextGenerator';
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
@@ -50,12 +49,6 @@ const Routes = (props) => (
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => <Status {...routeProps} {...props} />} />
     <Route exact path="/liveness" component={HealthCheck} />
-    <Route exact path="/backgroundsignin" render={
-      (routeProps) =>
-        checkEnv(envGroups.NON_STAGING)
-          ? <BackgroundSignIn {...routeProps} />
-          : <NotFound />
-    } />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
     <Route path="/privacy" component={PrivacyPolicy} />

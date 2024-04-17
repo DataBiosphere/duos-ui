@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { Storage } from '../libs/storage';
+import { Auth } from '../libs/auth/auth';
 import { TosService } from '../libs/tosService';
 import SimpleButton from '../components/SimpleButton';
 
@@ -22,8 +23,7 @@ export default function TermsOfService(props) {
     await TosService.rejectTos();
 
     // log user out and send them back home.
-    await Storage.setUserIsLogged(false);
-    await Storage.clearStorage();
+    await Auth.signOut();
     history.push('/');
   };
 

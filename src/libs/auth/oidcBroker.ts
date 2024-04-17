@@ -1,4 +1,4 @@
-import { IdTokenClaims, OidcMetadata, User, UserManager, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
+import { IdTokenClaims, OidcMetadata, SigninPopupArgs, SigninSilentArgs, User, UserManager, UserManagerSettings, WebStorageStateStore } from 'oidc-client-ts';
 import { Config } from '../config';
 import { OAuth2, OAuthConfig } from '../ajax/OAuth2';
 
@@ -20,6 +20,7 @@ type OidcUserManager = UserManager;
 
 let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;
+let userManager: UserManager | null = null;
 
 const generateOidcUserManagerSettings = async (
   config: OAuthConfig
@@ -54,10 +55,39 @@ export const OidcBroker = {
       config
     );
     userManagerSettings = ums;
+    userManager = new UserManager(userManagerSettings);
   },
-  getOidcUserManagerSettings: (): UserManagerSettings => userManagerSettings!,
-  getOidcUser: async (): Promise<OidcUser | null> => {
-    const userManager: OidcUserManager = new UserManager(OidcBroker.getOidcUserManagerSettings());
+  getUserManager: (): UserManager => {
+    if (userManager === null) {
+      throw new Error('Cannot retrieve userManager before OidcBroker is initialized');
+    }
+    return userManager;
+  },
+  getUserManagerSettings: (): UserManagerSettings => {
+    if (userManagerSettings === null) {
+      throw new Error('Cannot retrieve userManagerSettings before OidcBroker is initialized');
+    }
+    return userManagerSettings;
+  },
+  getUser: async (): Promise<OidcUser | null> => {
+    const userManager: OidcUserManager = new UserManager(OidcBroker.getUserManagerSettings());
     return await userManager.getUser();
-  }
+  },
+  getUserSync: (): OidcUser | null => {
+    const settings: UserManagerSettings =
+      OidcBroker.getUserManagerSettings();
+    const oidcStorage: string | null = localStorage.getItem(
+      `oidc.user:${settings.authority}:${settings.client_id}`
+    );
+    return oidcStorage !== null ? User.fromStorageString(oidcStorage) : null;
+  },
+  
+  signIn: async (popup: boolean, args?: SigninPopupArgs | SigninSilentArgs): Promise<User | null> => {
+    const um: UserManager = OidcBroker.getUserManager();
+    return popup ? await um.signinPopup(args) : await um.signinSilent(args);
+  },
+  
+  signOut: async (): Promise<void> => {
+    await OidcBroker.getUserManager().removeUser();
+  } 
 };

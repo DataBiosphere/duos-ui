@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { Alert } from './Alert';
 import { ToS } from '../libs/ajax/ToS';
-import { User } from '../libs/ajax/User';
+import { DuosUser, User } from '../libs/ajax/User';
 import { Metrics } from '../libs/ajax/Metrics';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
-import Auth from '../libs/auth/auth';
+import { Auth } from '../libs/auth/auth';
 import eventList from '../libs/events';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
-import { useAuth } from 'react-oidc-context';
 import CSS from 'csstype';
 import { useHistory } from 'react-router';
 import { OidcUser } from 'src/libs/auth/oidcBroker';
@@ -35,14 +34,13 @@ interface HttpError extends Error {
 export const SignIn = (props: SignInProps) => {
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay | JSX.Element>({});
   const { onSignIn, customStyle } = props;
-  const authInstance = useAuth();
   const history = useHistory();
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
-    const user = await User.getMe();
+    const user: DuosUser = await User.getMe();
     if (!user.roles) {
       await StackdriverReporter.report('roles not found for user: ' + user.email);
     }
@@ -169,7 +167,7 @@ export const SignIn = (props: SignInProps) => {
       className={'btn-secondary'}
       style={customStyle}
       onClick={() => {
-        Auth.signIn(authInstance, true, onSuccess, onFailure);
+        Auth.signIn(true, onSuccess, onFailure);
       }}
     >
       Sign In

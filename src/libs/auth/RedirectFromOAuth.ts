@@ -4,7 +4,7 @@ import { OidcBroker } from './oidcBroker';
 
 const RedirectFromOAuth = (): JSX.Element => {
   const userManager: UserManager = new UserManager(
-    OidcBroker.getOidcUserManagerSettings()
+    OidcBroker.getUserManagerSettings()
   );
   const url = window.location.href;
   const isSilent = window.location.pathname.startsWith(
@@ -14,14 +14,7 @@ const RedirectFromOAuth = (): JSX.Element => {
   if (isSilent) {
     userManager.signinSilentCallback(url);
   } else {
-    userManager
-      .signinPopupCallback(url).then(function () {
-        console.log('signin popup callback response success');
-      })
-      .catch(function (err: unknown) {
-        console.error(err);
-        console.log(err);
-      });
+    userManager.signinPopupCallback(url);
   }
   return Spinner;
 };

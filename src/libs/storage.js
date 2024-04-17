@@ -3,7 +3,6 @@ import { v4 as uuid } from 'uuid';
 
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
-const GoogleUser = 'Gapi'; // Google user info, including token
 const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 const anonymousId = 'anonymousId';
@@ -48,14 +47,6 @@ export const Storage = {
     }
     userSettings[id][key] = value;
     sessionStorage.setItem(UserSettings, JSON.stringify(userSettings));
-  },
-
-  setGoogleData: data => {
-    sessionStorage.setItem(GoogleUser, JSON.stringify(data));
-  },
-
-  getGoogleData: () => {
-    return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem(GoogleUser)) : null;
   },
 
   userIsLogged: () => {
