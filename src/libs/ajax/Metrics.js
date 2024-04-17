@@ -64,7 +64,7 @@ const syncProfile = async (signal) => {
     signal,
   };
 
-  return axios(config);
+  return axios(config).catch(() => { });
 };
 
 /**
@@ -83,7 +83,7 @@ const identify = async (anonId, signal) => {
     headers: { Authorization: `Bearer ${Auth.getToken()}` },
     signal,
   };
-  return axios(config);
+  return axios(config).catch(() => { });
 };
 
 

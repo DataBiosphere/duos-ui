@@ -227,9 +227,7 @@ const NavigationTabsComponent = (props) => {
             )
           };
         </div>
-        {/* Navbar right side */
-        // when logged in, need log in button
-        }
+        {/* Navbar right side */}
         {!isLogged && (
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
@@ -393,9 +391,8 @@ const DuosHeader = (props) => {
   };
 
   const isLogged = Storage.userIsLogged();
-  //console.log('is logged:', isLogged);
   const currentUser = isLogged ? Storage.getCurrentUser() : {};
-  //console.log('currentUser', currentUser);
+
   const contactUsSource = state.hover ? contactUsHover : contactUsStandard;
   const contactUsIcon = isLogged ? '' : <img src={contactUsSource} style={{ display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline' }} />;
   const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>;

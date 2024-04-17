@@ -5,7 +5,6 @@ import 'jquery/src/jquery';
 import 'bootstrap/dist/js/bootstrap.min';
 
 import './index.css';
-import { OidcBroker } from './libs/auth/oidcBroker';
 import { unregister } from './registerServiceWorker';
 import { Auth } from './libs/auth/auth';
 
