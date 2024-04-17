@@ -161,7 +161,7 @@ export const SignIn = (props: SignInProps) => {
   };
 
 
-  //TODO: Add spinner aftr registering/logging in
+  //TODO: Add spinner from signInPopup till registering/logging in resolves
   const signInButton = (): JSX.Element => {
     return (<button
       className={'btn-secondary'}
