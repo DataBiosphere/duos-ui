@@ -3,6 +3,7 @@ import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
 import './App.css';
 import {Config} from './libs/config';
+import { Auth } from './libs/auth/auth';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory, useLocation} from 'react-router-dom';
@@ -10,17 +11,16 @@ import loadingImage from './images/loading-indicator.svg';
 
 import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
-import {Storage} from './libs/storage';
+
 import Routes from './Routes';
-import {GoogleIS} from './libs/auth/googleIS';
-import { useAuth } from 'react-oidc-context';
+import { Storage } from './libs/storage';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(Storage.userIsLogged());
   const [env, setEnv] = useState('');
-  let history = useHistory();
-  let location = useLocation();
-  const auth = useAuth();
+  const history = useHistory();
+  const location = useLocation();
+
   const trackPageView = (location) => {
     ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
   };
@@ -60,15 +60,6 @@ function App() {
   });
 
   useEffect(() => {
-
-    const initAuth = async () => {
-
-      auth.signoutSilent();
-    };
-    initAuth();
-  },[]);
-
-  useEffect(() => {
     const setUserIsLogged = async () => {
       const isLogged = await Storage.userIsLogged();
       setIsLoggedIn(isLogged);
@@ -76,28 +67,13 @@ function App() {
     setUserIsLogged();
   });
 
-  //TODO:  Move these to auth.ts
-  const signOut = async () => {
-    const clientId = await Config.getGoogleClientId();
-    await GoogleIS.revokeAccessToken(clientId);
-    await Storage.setUserIsLogged(false);
-    await Storage.clearStorage();
-    await setIsLoggedIn(false);
-  };
-
-
-  const signIn = async () => {
-    await Storage.setUserIsLogged(true);
-    await setIsLoggedIn(true);
-  };
-
   return (
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignOut={signOut} onSignIn={signIn} />
+          <DuosHeader onSignOut={() => Auth.signOut()} onSignIn={() => Auth.signIn(true)} />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes onSignOut={signOut} onSignIn={signIn} isLogged={isLoggedIn} env={env} />
+          <Routes onSignOut={() => Auth.signOut()} onSignIn={() => Auth.signIn(true)} isLogged={isLoggedIn} env={env} />
         </div>
       </div>
       <DuosFooter />

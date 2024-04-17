@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getDefaultProperties } from '@databiosphere/bard-client';
 
-import Auth from '../auth/auth';
+import { Auth } from '../auth/auth';
 import { Storage } from '../storage';
 import { getBardApiUrl } from '../ajax';
 
@@ -47,7 +47,7 @@ const captureEventFn = async (event, details = {}, signal) => {
     signal,
   };
 
-  return axios(config).catch(() => { });
+  return axios(config);
 };
 
 /**
@@ -64,7 +64,7 @@ const syncProfile = async (signal) => {
     signal,
   };
 
-  return axios(config).catch(() => { });
+  return axios(config);
 };
 
 /**
@@ -76,7 +76,6 @@ const syncProfile = async (signal) => {
  */
 const identify = async (anonId, signal) => {
   const body = { anonId };
-
   const config = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/identify`,
@@ -84,8 +83,7 @@ const identify = async (anonId, signal) => {
     headers: { Authorization: `Bearer ${Auth.getToken()}` },
     signal,
   };
-
-  return axios(config).catch(() => { });
+  return axios(config);
 };
 
 

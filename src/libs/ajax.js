@@ -1,4 +1,5 @@
 import {getOr, isNil} from 'lodash/fp';
+import {Auth} from './auth/auth';
 import {Config} from './config';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
@@ -10,6 +11,7 @@ import axios from 'axios';
 //return responses with statuses in the 200s and reject the rest
 const redirectOnLogout = () => {
   Storage.clearStorage();
+  Auth.signOut();
   window.location.href = `/home?redirectTo=${window.location.pathname}`;
 };
 
