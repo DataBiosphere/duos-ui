@@ -203,7 +203,7 @@ export const consentTranslations = {
     description: 'Use is limited to genetic studies only',
     type: ControlledAccessType.modifiers,
   },
-  commercialUse: {
+  nonProfitUse: {
     code: 'NPU',
     description: 'Use is limited to non-profit and non-commercial research',
     type: ControlledAccessType.modifiers,
@@ -250,14 +250,6 @@ const getOntologyName = async(urls) => {
 export const processRestrictionStatements = async (key, dataUse) => {
   let resp;
   let value = dataUse[key];
-  /*
-    Due to language used with Data Use Limitations, the description for 'commercialUse' describes non-profit status
-    whereas the actual value represent for-profit status. As such, commercialUse value must be inverted when processing statement
-    in order to accurately reflect description
-  */
-  if (key === 'commercialUse' && !isNil(value)) {
-    value = !value;
-  }
   if (!isNil(value) && value) {
     if (key === 'diseaseRestrictions') {
       //condition for datasets that have ontology labels contained within the dataUse object

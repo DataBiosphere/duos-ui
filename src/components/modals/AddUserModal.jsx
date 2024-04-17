@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React, { Fragment, useState, useRef, useEffect } from 'react';
-import { User } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';

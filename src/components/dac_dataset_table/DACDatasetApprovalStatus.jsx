@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {DAC, DataSet} from '../../libs/ajax';
+import { DataSet } from '../../libs/ajax/DataSet';
+import { DAC } from '../../libs/ajax/DAC';
 import {Link} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';

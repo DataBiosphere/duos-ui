@@ -2,7 +2,7 @@ import * as React from 'react';
 import { CircularProgress, IconButton, Link } from '@mui/material';
 import { useState } from 'react';
 import IosShareIcon from '@mui/icons-material/IosShare';
-import { TerraDataRepo } from '../../libs/ajax';
+import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 
 export const DatasetExportButton = (props) => {
   const { snapshot, title } = props;

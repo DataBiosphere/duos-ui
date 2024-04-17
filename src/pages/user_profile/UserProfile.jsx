@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import { Institution, User } from '../../libs/ajax';
+import { Institution } from '../../libs/ajax/Institution';
+import { User } from '../../libs/ajax/User';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
 import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
@@ -159,7 +160,7 @@ export default function UserProfile(props) {
         defaultValue={name}
         onChange={updateRef}
         style={{ width: '90%', marginTop: '10px',
-      }}
+        }}
       />
       <button
         className='f-right btn-primary common-background'

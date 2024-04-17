@@ -2,7 +2,8 @@
 
 import ERACommons from '../../../src/components/ERACommons.jsx';
 import {decodeNihToken} from '../../../src/utils/ERACommonsUtils';
-import {AuthenticateNIH, User} from '../../../src/libs/ajax';
+import { AuthenticateNIH } from '../../../src/libs/ajax/AuthenticateNIH';
+import { User } from '../../../src/libs/ajax/User';
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Buffer} from 'buffer';

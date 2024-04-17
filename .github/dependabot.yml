@@ -1,5 +1,15 @@
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
+    target-branch: develop
+    reviewers:
+      - "@DataBiosphere/DUOS"
+    commit-message:
+      prefix: "[DUOS-1740-dependabot]"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:

@@ -2,7 +2,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import { cloneDeep } from 'lodash/fp';
-import { User } from '../../../src/libs/ajax';
+import { User } from '../../../src/libs/ajax/User';
 import DataSubmissionStudyInformation from '../../../src/pages/data_submission/ds_study_information';
 
 let propCopy;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Institution } from '../libs/ajax';
+import { Institution } from '../libs/ajax/Institution';
 import { Styles} from '../libs/theme';
 import { Notifications } from '../libs/utils';
 import manageInstitutionsIcon from '../images/icon_manage_dac.png';

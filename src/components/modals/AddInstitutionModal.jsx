@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { Alert } from '../Alert';
-import { Institution } from '../../libs/ajax';
+import { Institution } from '../../libs/ajax/Institution';
 import { BaseModal } from '../BaseModal';
 import addInstitutionIcon from '../../images/icon_add_dac.png';
 import editInstitutionIcon from '../../images/icon_edit_dac.png';

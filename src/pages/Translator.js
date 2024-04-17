@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { div, img, h1, h2, h3, form, textarea, button, label, ul, li, a, span } from 'react-hyperscript-helpers';
 import { cloneDeep, groupBy, isNil } from 'lodash/fp';
-import { Translate } from '../libs/ajax';
+import { Translate } from '../libs/ajax/Translate';
 import homeHeaderBackground from '../images/home_header_background.png';
 import { Spinner } from '../components/Spinner';
 

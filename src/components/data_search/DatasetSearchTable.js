@@ -2,16 +2,19 @@ import * as React from 'react';
 import _ from 'lodash';
 import { Box, Button, Link } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
-import { groupBy, isEmpty } from 'lodash';
+import { groupBy, isEmpty, concat, compact, map } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import DatasetExportButton from './DatasetExportButton';
-import { DAR, TerraDataRepo, DataSet } from '../../libs/ajax';
+import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
+import { DataSet } from '../../libs/ajax/DataSet';
+import { DAR } from '../../libs/ajax/DAR';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
+import TranslatedDulModal from '../modals/TranslatedDulModal';
 
 
 const studyTableHeader = [
@@ -43,6 +46,8 @@ export const DatasetSearchTable = (props) => {
   const [selected, setSelected] = useState([]);
   const [exportableDatasets, setExportableDatasets] = useState({}); // datasetId -> snapshot
   const [tdrApiUrl, setTdrApiUrl] = useState('');
+  const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
+  const [dataUse, setDataUse] = useState();
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -225,6 +230,12 @@ export const DatasetSearchTable = (props) => {
     filterHandler(null, datasets, '', '');
   };
 
+  const openTranslatedDUL = (dataUse) => {
+    const mergedPrimaryAndSecondary = concat(dataUse.primary, dataUse.secondary);
+    setDataUse(mergedPrimaryAndSecondary);
+    setShowTranslatedDULModal(true);
+  };
+
   useEffect(() => {
     if (isEmpty(filtered)) {
       return;
@@ -234,7 +245,7 @@ export const DatasetSearchTable = (props) => {
     const table = {
       id: 'study-table',
       headers: studyTableHeader.map((header) => ({ value: header })),
-      rows: Object.values(studies).map((entry) => {
+      rows: Object.values(studies).map((entry, index) => {
         const sum = entry.reduce((acc, dataset) => {
           return acc + dataset.participantCount;
         }, 0);
@@ -287,7 +298,17 @@ export const DatasetSearchTable = (props) => {
                     increaseWidth: true,
                   },
                   {
-                    value: dataset.dataUse?.primary.map((use) => use.code).join(', ')
+                    value: () => {
+                      const dataUse = dataset.dataUse;
+                      const primaryDataUse = map(dataUse?.primary, 'code').join(', ');
+                      const secondaryDataUse = map(dataUse?.secondary, 'code').join(', ');
+                      const mergedDataUse = compact(concat(primaryDataUse, secondaryDataUse)).join(', ');
+                      return <a
+                        id={`${index}_linkTranslatedDul`}
+                        name="link_translatedDul"
+                        onClick={()=>openTranslatedDUL(dataUse)}
+                      >{mergedDataUse}</a>;
+                    }
                   },
                   {
                     value: dataset.dataTypes,
@@ -351,81 +372,91 @@ export const DatasetSearchTable = (props) => {
   }, [datasets]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
-      <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
-        <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
-          <input
-            data-cy="search-bar"
-            type="text"
-            placeholder="Enter search terms"
-            style={{
-              width: '100%',
-              border: '1px solid #cecece',
-              backgroundColor: '#f3f6f7',
-              borderRadius: '5px',
-              height: '4rem',
-              paddingLeft: '2%',
-              fontFamily: 'Montserrat',
-              fontSize: '1.5rem'
-            }}
-            onChange={() => filterHandler(null, datasets, '', searchRef.current.value)}
-            ref={searchRef}
-          />
-          <div/>
-          <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-            <Button variant="contained" onClick={clearSearchRef} sx={{ width: '100px' }}>
+    <>
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
+        <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
+          <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+            <input
+              data-cy="search-bar"
+              type="text"
+              placeholder="Enter search terms"
+              style={{
+                width: '100%',
+                border: '1px solid #cecece',
+                backgroundColor: '#f3f6f7',
+                borderRadius: '5px',
+                height: '4rem',
+                paddingLeft: '2%',
+                fontFamily: 'Montserrat',
+                fontSize: '1.5rem'
+              }}
+              onChange={() => filterHandler(null, datasets, '', searchRef.current.value)}
+              ref={searchRef}
+            />
+            <div/>
+            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
+              <Button variant="contained" onClick={clearSearchRef} sx={{ width: '100px' }}>
                 Clear Search
-            </Button>
+              </Button>
+            </Box>
+          </div>
+        </Box>
+        <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
+          <Box sx={{width: '14%', padding: '0 1em'}}>
+            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
           </Box>
-        </div>
-      </Box>
-      <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
-        <Box sx={{width: '14%', padding: '0 1em'}}>
-          <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
+          <Box sx={{width: '85%', padding: '0 1em'}}>
+            {(() => {
+              if (isEmpty(datasets)) {
+                return (
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    <h1>No datasets registered for this library.</h1>
+                  </Box>
+                );
+              } else if (isEmpty(filtered)) {
+                return (
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    <h1>There are no datasets that fit these criteria.</h1>
+                  </Box>
+                );
+              } else {
+                return (
+                  <CollapsibleTable
+                    data={tableData}
+                    selected={selected}
+                    selectHandler={selectHandler}
+                    expandHandler={expandHandler}
+                    collapseHandler={collapseHandler}
+                    summary='faceted study search table'
+                  />
+                );
+              }
+            })()}
+          </Box>
         </Box>
-        <Box sx={{width: '85%', padding: '0 1em'}}>
-          {(() => {
-            if (isEmpty(datasets)) {
-              return (
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                  <h1>No datasets registered for this library.</h1>
-                </Box>
-              );
-            } else if (isEmpty(filtered)) {
-              return (
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                  <h1>There are no datasets that fit these criteria.</h1>
-                </Box>
-              );
-            } else {
-              return (
-                <CollapsibleTable
-                  data={tableData}
-                  selected={selected}
-                  selectHandler={selectHandler}
-                  expandHandler={expandHandler}
-                  collapseHandler={collapseHandler}
-                  summary='faceted study search table'
-                />
-              );
-            }
-          })()}
-        </Box>
-      </Box>
-      <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
-        {
-          !isEmpty(datasets) &&
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
+          {
+            !isEmpty(datasets) &&
           <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
           </Button>
-        }
+          }
+        </Box>
       </Box>
-    </Box>
+      {
+        showTranslatedDULModal &&
+        <TranslatedDulModal
+          showModal={showTranslatedDULModal}
+          dataUse={dataUse}
+          onCloseRequest={()=>setShowTranslatedDULModal(false)}
+        />
+      }
+    </>
   );
 };
 

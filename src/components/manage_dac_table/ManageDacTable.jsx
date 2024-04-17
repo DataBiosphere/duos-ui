@@ -1,7 +1,7 @@
 import React from 'react';
 import {useState, useEffect, useCallback} from 'react';
 import ReactTooltip from 'react-tooltip';
-import {DAC} from '../../libs/ajax';
+import { DAC } from '../../libs/ajax/DAC';
 import {filter, isNil} from 'lodash/fp';
 import {Styles} from '../../libs/theme';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';

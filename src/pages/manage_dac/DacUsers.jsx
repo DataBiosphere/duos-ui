@@ -9,7 +9,7 @@ export const DacUsers = (props) => {
   const [state, setState] = useState({
     dac: props.dac,
     removeButton: props.removeButton,
-    removeHandler: props.removeButton ? props.removeHandler : () => {},
+    removeHandler: props.removeButton ? props.removeHandler : () => { },
     removedIds: []
   });
 
@@ -17,12 +17,12 @@ export const DacUsers = (props) => {
     if (state.removedIds.includes(userId)) {
       setState(prev => ({
         ...prev,
-        removeIds: ld.difference(prev.removeIds,[userId])
+        removedIds: ld.difference(prev.removedIds, [userId])
       }));
     } else {
       setState(prev => ({
         ...prev,
-        removeIds: ld.union(prev.removeIds, [userId])
+        removedIds: ld.union(prev.removedIds, [userId])
       }));
     }
     state.removeHandler(dacId, userId, role);
@@ -47,7 +47,10 @@ export const DacUsers = (props) => {
           <div style={buttonPadding} className={columnClass()}>
             <button
               style={{ display: 'inline' }}
-              onClick={() => onRemove(state.dac.dacId, u.userId, role)}
+              onClick={(e) => {
+                e.preventDefault();
+                onRemove(state.dac.dacId, u.userId, role);
+              }}
               className="btn cell-button cancel-color"
             >
               {buttonMessage}
@@ -71,4 +74,4 @@ export const DacUsers = (props) => {
       {ld.flatMap(state.dac.members, (u) => makeRow(u, MEMBER))}
     </div>
   );
-}
+};

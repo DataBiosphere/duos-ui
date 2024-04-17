@@ -1,6 +1,6 @@
 import React from 'react';
 import {chunk, filter, isEmpty} from 'lodash/fp';
-import { DAR } from '../../libs/ajax';
+import { DAR } from '../../libs/ajax/DAR';
 import { DownloadLink } from '../../components/DownloadLink';
 
 const styles = {

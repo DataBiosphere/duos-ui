@@ -2,7 +2,8 @@ import ConsentGroupForm from './consent_group/ConsentGroupForm';
 import { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
 import { div, h, h2, a, span } from 'react-hyperscript-helpers';
-import { DAC, DAR } from '../../libs/ajax';
+import { DAR } from '../../libs/ajax/DAR';
+import { DAC } from '../../libs/ajax/DAC';
 
 import './ds_common.css';
 
@@ -140,7 +141,7 @@ export const DataAccessGovernance = (props) => {
           irb: dataUse.ethicsApprovalRequired,
           gs: dataUse.geographicalRestrictions,
           mor: dataUse.publicationMoratorium,
-          npu: dataUse.commercialUse,
+          npu: dataUse.nonProfitUse,
           otherSecondary: dataUse.secondaryOther,
           url: extract('URL', dataset),
           dataLocation: extract('Data Location', dataset),

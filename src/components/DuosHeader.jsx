@@ -161,7 +161,7 @@ const NavigationTabsComponent = (props) => {
       <ul className="navbar-main">
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           {
-            orientation === 'horizonal' && (
+            orientation === 'horizontal' && (
               <Link
                 id="link_logo"
                 to="/home"

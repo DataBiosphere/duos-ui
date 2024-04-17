@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from '../libs/ajax';
+import { User } from '../libs/ajax/User';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import { useState, useEffect } from 'react';

@@ -3,10 +3,10 @@ import {useCallback, useEffect, useState} from 'react';
 import {Notifications} from '../../libs/utils';
 import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
-import {cloneDeep, concat, findIndex, join, isNil} from 'lodash/fp';
+import { concat, join, isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
-import {DataSet} from '../../libs/ajax';
+import { DataSet } from '../../libs/ajax/DataSet';
 import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog';
 
 
@@ -129,12 +129,12 @@ export default function DatasetSubmissionsTable(props) {
             onClick={() => handleClick(term)}
             to={`#`}
           />
-          <ConfirmationDialog 
-            title="Delete dataset" 
-            openState={open} 
+          <ConfirmationDialog
+            title="Delete dataset"
+            openState={open}
             close={handleClose}
             action={() => removeDataset(selectedTerm)}
-            description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`} 
+            description={`Are you sure you want to delete the dataset '${selectedTerm.datasetIdentifier}'?`}
           />
         </div> :
         <div/>;
@@ -164,7 +164,7 @@ export default function DatasetSubmissionsTable(props) {
       }
     };
     init();
-  }, [props, redrawRows, open, selectedTerm]); 
+  }, [props, redrawRows, open, selectedTerm]);
 
   const sortableTable = <SortableTable
     headCells={columns}

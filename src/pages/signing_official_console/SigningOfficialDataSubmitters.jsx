@@ -2,7 +2,7 @@ import React from 'react';
 import {useState, useEffect} from 'react';
 import {Notifications} from '../../libs/utils';
 import {Styles} from '../../libs/theme';
-import {User} from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
 import DataCustodianTable from './DataCustodianTable';
 

@@ -1,4 +1,4 @@
-import {User} from './ajax';
+import { User } from './ajax/User';
 import {Storage} from '../libs/storage';
 
 export const Acknowledgments = {

@@ -3,7 +3,7 @@ import {useState, useEffect} from 'react';
 import {Notifications} from '../../libs/utils';
 import {Styles} from '../../libs/theme';
 import SigningOfficialTable from './SigningOfficialTable';
-import {User} from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
 
 export default function SigningOfficialResearchers() {
@@ -38,4 +38,4 @@ export default function SigningOfficialResearchers() {
       </div>
     </div>
   );
-};
+}

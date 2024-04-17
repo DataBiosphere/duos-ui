@@ -7,7 +7,8 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DataSet} from '../libs/ajax';
+import { DataSet } from '../libs/ajax/DataSet';
+import { DAC } from '../libs/ajax/DAC';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
@@ -183,7 +184,7 @@ class DatasetRegistration extends Component {
     let ethics = dataUse.ethicsApprovalRequired;
     let geographic = dataUse.geographicalRestrictions;
     let moratorium = dataUse.publicationMoratorium;
-    let nonProfit = fp.isNil(dataUse.commercialUse) ? false : !dataUse.commercialUse;
+    let nonProfit = dataUse.nonProfitUse;
     let hmb = dataUse.hmbResearch;
     // if the dataset's POA value is set to false, we need to check the NPOA (or NOT POA) option
     // if the dataset's POA value is set to true, leave this unchecked
@@ -635,7 +636,7 @@ class DatasetRegistration extends Component {
       result.populationOriginsAncestry = false;
     }
     if (data.nonProfit) {
-      result.commercialUse = !data.nonProfit;
+      result.nonProfitUse = data.nonProfit;
     }
     if (data.hmb) {
       result.hmbResearch = data.hmb;

@@ -5,7 +5,7 @@ import { Notifications } from '../libs/utils';
 import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
 import DatasetUpdate from '../components/data_update/DatasetUpdate';
-import { DataSet } from '../libs/ajax';
+import { DataSet } from '../libs/ajax/DataSet';
 
 export const DatasetUpdateForm = (props) => {
   const { history } = props;

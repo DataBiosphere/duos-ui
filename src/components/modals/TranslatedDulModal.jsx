@@ -1,13 +1,15 @@
 import React from 'react';
-import { BaseModal } from '../BaseModal';
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
 import isEmpty from 'lodash/fp/isEmpty';
-import {DataUseTranslation} from '../../libs/dataUseTranslation';
-
-const MODAL_ID = 'translatedDulModal';
 
 const listStyle = {
-  listStyle: 'none'
+  listStyle: 'none',
+  padding: '0',
+  fontSize:'1rem'
 };
 
 //NOTE: li partial can be used in components that only need the list
@@ -19,8 +21,8 @@ async function GenerateUseRestrictionStatements(dataUse) {
       </li>
     );
   }
-  const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
-  return translations.map((restriction) => {
+
+  return dataUse.map((restriction) => {
     return (
       <li key={`${restriction.code}-statement`} className="translated-restriction">
         <span style={{fontWeight: 'bold'}}>{restriction.code}: </span>
@@ -32,11 +34,10 @@ async function GenerateUseRestrictionStatements(dataUse) {
 
 export default function TranslatedDulModal(props) {
   const { showModal, onCloseRequest, dataUse } = props;
-
   const [translatedDulList, setTranslatedDulList] = useState([]);
 
   const closeHandler = () => {
-    onCloseRequest(MODAL_ID);
+    onCloseRequest();
   };
 
   useEffect(() => {
@@ -49,19 +50,36 @@ export default function TranslatedDulModal(props) {
   }, [dataUse]);
 
   return (
-    <BaseModal
-      id={MODAL_ID}
-      showModal={showModal}
-      onRequestClose={closeHandler}
-      color='dataset'
-      type='informative'
-      iconSize='none'
-      title='Data Use Terms'
-      action={{ label: 'Close', handler: closeHandler }}
+    <Dialog
+      open={showModal}
+      onClose={closeHandler}
+      aria-labelledby='Data Use Terms'
+      aria-describedby='Dialog Description'
+      sx={{ transform: 'scale(1.5)' }}
     >
-      <ul key='dulUnorderedList' style={listStyle} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
-        {translatedDulList}
-      </ul>
-    </BaseModal>
+      <DialogTitle id='dialog-title'>
+        <span style={{ color: '#1976d2' }}>Data Use Terms</span>
+        <IconButton
+          aria-label="close"
+          onClick={closeHandler}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent id='dialog-content'>
+        <ul key='dulUnorderedList' style={listStyle} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
+          {translatedDulList}
+        </ul>
+      </DialogContent>
+      <DialogActions id='dialog-footer'>
+        <Button onClick={closeHandler} variant='outlined'>Close</Button>
+      </DialogActions>
+    </Dialog>
   );
 }

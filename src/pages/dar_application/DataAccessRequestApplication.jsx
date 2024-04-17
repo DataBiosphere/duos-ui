@@ -12,7 +12,10 @@ import {
 import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
 import { Notification } from '../../components/Notification';
 import { PageHeading } from '../../components/PageHeading';
-import { Collections, DAR, User, DataSet } from '../../libs/ajax';
+import { User } from '../../libs/ajax/User';
+import { DataSet } from '../../libs/ajax/DataSet';
+import { DAR } from '../../libs/ajax/DAR';
+import { Collections } from '../../libs/ajax/Collections';
 import { NotificationService } from '../../libs/notificationService';
 import { Storage } from '../../libs/storage';
 import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } from 'lodash/fp';

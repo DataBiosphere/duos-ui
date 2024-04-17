@@ -7,7 +7,9 @@ import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import {PageHeading} from '../components/PageHeading';
 import {PaginatorBar} from '../components/PaginatorBar';
 import {SearchBox} from '../components/SearchBox';
-import {DAC, DAR, DataSet} from '../libs/ajax';
+import { DataSet } from '../libs/ajax/DataSet';
+import { DAR } from '../libs/ajax/DAR';
+import { DAC } from '../libs/ajax/DAC';
 import {Storage} from '../libs/storage';
 import {Theme} from '../libs/theme';
 import {getBooleanFromEventHtmlDataValue, USER_ROLES} from '../libs/utils';
@@ -159,7 +161,8 @@ export default function DatasetCatalog(props) {
             return (useCustomFilter ? dacFilter(row) : true);
           })
           .slice((theCurrentPage - 1) * pageSize, theCurrentPage * pageSize));
-      await Promise.all(results.map(async(dataset) => {
+      await Promise.all(results.map(async (dataset) => {
+
         if (isNil(dataset.codeList)) {
           if (!dataset.dataUse || isEmpty(dataset.dataUse)) {
             dataset.codeList = 'None';
@@ -216,8 +219,9 @@ export default function DatasetCatalog(props) {
     props.history.push({ pathname: '/dar_application/' + referenceId });
   };
 
-  const openTranslatedDUL = (dataUse) => {
-    setDataUse(dataUse);
+  const openTranslatedDUL = async (dataUse) => {
+    const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+    setDataUse(translations);
     setShowTranslatedDULModal(true);
   };
 

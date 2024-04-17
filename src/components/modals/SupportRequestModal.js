@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { div, form, input, label, textarea, hh, h, select, span, option, section, button, p, a } from 'react-hyperscript-helpers';
-import { Support} from '../../libs/ajax';
+import { Support } from '../../libs/ajax/Support';
 import { Storage } from '../../libs/storage';
 import { Notifications, isEmailAddress } from '../../libs/utils';
 import { PageSubHeading } from '../PageSubHeading';
@@ -413,4 +413,3 @@ export const SupportRequestModal = hh(
       );
     }
   });
-
