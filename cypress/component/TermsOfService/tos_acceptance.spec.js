@@ -3,6 +3,7 @@
 import React from 'react';
 import { mount } from 'cypress/react';
 import TermsOfServiceAcceptance from '../../../src/pages/TermsOfServiceAcceptance';
+import { OidcBroker } from '../../../src/libs/auth/oidcBroker';
 import { ToS } from '../../../src/libs/ajax/ToS';
 import {Storage} from '../../../src/libs/storage';
 import {Navigation} from '../../../src/libs/utils';
@@ -17,6 +18,8 @@ describe('Terms of Service Acceptance Page', function () {
     cy.viewport(600, 300);
     cy.stub(ToS, 'getDUOSText').returns(text);
     cy.stub(ToS, 'acceptToS').returns(true);
+    cy.stub(OidcBroker, 'signIn').returns({});
+    cy.stub(OidcBroker, 'signOut');
     cy.stub(Storage, 'getCurrentUser').returns({});
     cy.stub(Navigation, 'back').returns(true);
     const setUserIsLoggedSpy = cy.spy(Storage, 'setUserIsLogged');

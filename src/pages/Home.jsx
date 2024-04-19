@@ -4,7 +4,6 @@ import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
 import { Link } from 'react-router-dom';
-import { Storage } from '../libs/storage';
 
 const Home = (props) => {
   const homeTitle = {
@@ -76,14 +75,6 @@ const Home = (props) => {
     fontWeight: 500,
     textAlign: 'center',
     display: 'block'
-  };
-
-  const signInPositionStyle = {
-    padding: '1em 1em 0 0',
-    alignItems: 'center',
-    position: 'absolute',
-    top: '0',
-    right: '1rem',
   };
 
   return (
