@@ -18,7 +18,8 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
 import {isFunction, isNil} from 'lodash/fp';
-import SignIn from './SignIn';
+import SignInButton from './SignInButton';
+import { Auth } from '../libs/auth/auth';
 
 const styles = {
   drawerPaper: {
@@ -142,7 +143,7 @@ const NavigationTabsComponent = (props) => {
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
-    currentUser, signIn, signOut, isLogged,
+    currentUser, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
     onSubtabChange
@@ -231,7 +232,7 @@ const NavigationTabsComponent = (props) => {
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
           >
-            <SignIn onSignIn={signIn} customStyle={{ whiteSpace: 'nowrap',  }}></SignIn>
+            <SignInButton customStyle={{ whiteSpace: 'nowrap',  }}></SignInButton>
           </div>
         )}
         {isLogged && (
@@ -318,7 +319,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const { location, classes, onSignIn } = props;
+  const { location, classes } = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -347,8 +348,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-
-    props.onSignOut();
+    Auth.signOut();
   };
 
   const supportRequestModal = () => {
@@ -482,7 +482,6 @@ const DuosHeader = (props) => {
             navbarDuosText={navbarDuosText}
             currentUser={currentUser}
             isLogged={isLogged}
-            signIn={onSignIn}
             signOut={signOut}
             contactUsButton={contactUsButton}
             supportrequestModal={supportModal}
@@ -529,7 +528,6 @@ const DuosHeader = (props) => {
               navbarDuosText={navbarDuosText}
               currentUser={currentUser}
               isLogged={isLogged}
-              signIn={onSignIn}
               signOut={signOut}
               contactUsButton={contactUsButton}
               supportrequestModal={supportModal}

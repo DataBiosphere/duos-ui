@@ -6,7 +6,7 @@ import { DuosUser, User } from '../libs/ajax/User';
 import { Metrics } from '../libs/ajax/Metrics';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
-import loadingIndicator from '../images/loading-indicator.svg';
+import loadingImage from '../images/loading-indicator.svg';
 import { Auth } from '../libs/auth/auth';
 import eventList from '../libs/events';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
@@ -14,26 +14,24 @@ import CSS from 'csstype';
 import { useHistory } from 'react-router';
 import { OidcUser } from 'src/libs/auth/oidcBroker';
 
-interface SignInProps {
-  history: any;
+interface SignInButtonProps {
   customStyle: CSS.Properties | undefined;
-  onSignIn: any;
 }
 
-interface ErrorDisplay  {
-  title?: string,
-  description?: string, 
-  show?: boolean,
-  msg?: string,
+interface ErrorInfo {
+  title?: string;
+  description?: string;
 }
 
 interface HttpError extends Error {
-  status?: number
+  status?: number;
 }
 
-export const SignIn = (props: SignInProps) => {
-  const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay | JSX.Element>({});
-  const { onSignIn, customStyle } = props;
+export const SignInButton = (props: SignInButtonProps) => {
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showError, setShowError] = useState<boolean>(false);
+  const { customStyle } = props;
   const history = useHistory();
 
   // Utility function called in the normal success case and in the undocumented 409 case
@@ -42,14 +40,15 @@ export const SignIn = (props: SignInProps) => {
     // Check if the user has accepted ToS yet or not:
     const user: DuosUser = await User.getMe();
     if (!user.roles) {
-      await StackdriverReporter.report('roles not found for user: ' + user.email);
+      await StackdriverReporter.report(
+        'roles not found for user: ' + user.email
+      );
     }
     setUserRoleStatuses(user, Storage);
-    await onSignIn();
     const userStatus = await ToS.getStatus();
     const { tosAccepted } = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
-      await Storage.setUserIsLogged(false);
+      Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
       } else {
@@ -80,11 +79,12 @@ export const SignIn = (props: SignInProps) => {
     return queryParams.get('redirectTo') || window.location.pathname;
   };
 
-  const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home';
+  const shouldRedirectTo = (page: string): boolean =>
+    page !== '/' && page !== '/home';
 
   const attemptSignInCheckToSAndRedirect = async (
     redirectTo: string,
-    shouldRedirect: boolean,
+    shouldRedirect: boolean
   ) => {
     await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     Metrics.identify(Storage.getAnonymousId());
@@ -92,7 +92,10 @@ export const SignIn = (props: SignInProps) => {
     Metrics.captureEvent(eventList.userSignIn);
   };
 
-  const handleRegistration = async (redirectTo: string, shouldRedirect: boolean) => {
+  const handleRegistration = async (
+    redirectTo: string,
+    shouldRedirect: boolean
+  ) => {
     try {
       await registerAndRedirectNewUser(redirectTo, shouldRedirect);
     } catch (error: unknown) {
@@ -100,10 +103,12 @@ export const SignIn = (props: SignInProps) => {
     }
   };
 
-  const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
+  const registerAndRedirectNewUser = async (
+    redirectTo: string,
+    shouldRedirect: boolean
+  ) => {
     const registeredUser = await User.registerUser();
-    setUserRoleStatuses(registeredUser, Storage)
-    await onSignIn();
+    setUserRoleStatuses(registeredUser, Storage);
     Metrics.identify(Storage.getAnonymousId());
     Metrics.syncProfile();
     Metrics.captureEvent(eventList.userRegister);
@@ -112,31 +117,38 @@ export const SignIn = (props: SignInProps) => {
     );
   };
 
-  const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
+  const handleErrors = async (
+    error: HttpError,
+    redirectTo: string,
+    shouldRedirect: boolean
+  ) => {
     const status = error.status;
 
     switch (status) {
       case 400:
-        setErrorDisplay({
-          show: true,
+        setShowError(true);
+        setErrorInfo({
           title: 'Error',
-          msg: JSON.stringify(error),
+          description: JSON.stringify(error),
         });
         break;
       case 409:
         handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
-        setErrorDisplay({
-          show: true,
+        setShowError(true);
+        setErrorInfo({
           title: 'Error',
-          msg: 'Unexpected error, please try again',
+          description: 'Unexpected error, please try again',
         });
         break;
     }
   };
 
-  const handleConflictError = async (redirectTo:string, shouldRedirect: boolean) => {
+  const handleConflictError = async (
+    redirectTo: string,
+    shouldRedirect: boolean
+  ) => {
     try {
       await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     } catch (error) {
@@ -144,52 +156,57 @@ export const SignIn = (props: SignInProps) => {
     }
   };
 
-  const onFailure = (response: any) => {
+  const onFailure = (error: Error) => {
     Storage.clearStorage();
-    if (response.error === 'popup_closed_by_user') {
-      setErrorDisplay( <span>
-          Sign-in cancelled ...
-          <img height="20px" src={loadingIndicator} />
-        </span>
-    );
-      setTimeout(() => {
-        setErrorDisplay({});
-      }, 2000);
-    } else {
-      setErrorDisplay({ title: response.error, description: response.details });
+    setIsLoading(false);
+    if (!error.message.includes('Popup closed by user')) {
+      setShowError(true);
+      setErrorInfo({
+        title: 'Error',
+        description: error.message,
+      });
     }
   };
 
+  const loadingIndicator = (): JSX.Element => {
+    return (
+      <span>
+        <img height='20px' src={loadingImage} />
+      </span>
+    );
+  };
 
-  //TODO: Add spinner from signInPopup till registering/logging in resolves
   const signInButton = (): JSX.Element => {
-    return (<button
-      className={'btn-secondary'}
-      style={customStyle}
-      onClick={() => {
-        Auth.signIn(true, onSuccess, onFailure);
-      }}
-    >
-      Sign In
-    </button>)
-  }
+    return (
+      <button
+        className={'btn-secondary'}
+        style={customStyle}
+        onClick={async () => {
+          setIsLoading(true);
+          await Auth.signIn(true, onSuccess, onFailure);
+          setIsLoading(false);
+        }}
+        disabled={isLoading}
+      >
+        {isLoading ? loadingIndicator() : 'Sign In'}
+      </button>
+    );
+  };
 
-  return (
-    <div>
-      {isEmpty(errorDisplay) ? (
-        <div>{signInButton()}</div>
-      ) : (
-        <div className="dialog-alert">
-          <Alert
-            id="dialog"
-            type="danger"
-            title={(errorDisplay as ErrorDisplay).title}
-            description={(errorDisplay as ErrorDisplay).description}
-          />
-        </div>
-      )}
-    </div>
-  );
+  const errorAlert = (errorInfo: ErrorInfo): JSX.Element => {
+    return (
+      <div className='dialog-alert'>
+        <Alert
+          id='dialog'
+          type='danger'
+          title={errorInfo.title}
+          description={errorInfo.description}
+        />
+      </div>
+    );
+  };
+
+  return <div>{!showError ? signInButton() : errorAlert(errorInfo)}</div>;
 };
 
-export default SignIn;
+export default SignInButton;

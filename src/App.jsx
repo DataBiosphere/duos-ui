@@ -71,9 +71,9 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignOut={() => Auth.signOut()} onSignIn={() => Auth.signIn(true)} />
+          <DuosHeader />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes onSignOut={() => Auth.signOut()} onSignIn={() => Auth.signIn(true)} isLogged={isLoggedIn} env={env} />
+          <Routes isLogged={isLoggedIn} env={env} />
         </div>
       </div>
       <DuosFooter />

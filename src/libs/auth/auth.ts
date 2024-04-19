@@ -59,8 +59,8 @@ export const Auth = {
   },
 
   signOut: async () => {
-    Storage.setUserIsLogged(false);
     Storage.clearStorage();
+    Storage.setUserIsLogged(false);
     await OidcBroker.signOut();
   },
 };
