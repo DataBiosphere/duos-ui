@@ -46,11 +46,11 @@ const styles = {
 };
 
 //column header format for table
-const columnHeaderFormat = {
+let columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
   name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
   libraryCard: {label: 'Library Card', cellStyle: {width: styles.cellWidths.libraryCard}},
-  role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
+  role: {label: 'Role', cellStyle: {width: styles.cellWidths.role}},
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 };
 
@@ -157,6 +157,51 @@ const LibraryCardCell = ({
   };
 };
 
+const DAACell = ({
+  dac, 
+  researcher,
+  institutionId
+}) => {
+  const id = researcher.userId || researcher.email;
+  // const card = !isEmpty(researcher.libraryCards)
+  //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
+  //   : null;
+  // const daasOnCard = card.daaIds;
+  // console.log(daa.file.fileName);
+  // console.log(card);
+  // confirmed getting the appropraite n
+  // // console.log(researcher.displayName, daasOnCard);
+  // for (var daa in daasOnCard) {
+  //   console.log(daa.daaId);
+  // }
+  // get daa ids from researcher's library card
+  // get daa by id & then get name!
+  // const checkbox = !isNil(card)
+  //   ? DeactivateLibraryCardButton({
+  //     card,
+  //     showConfirmationModal,
+  //   })
+  //   : IssueLibraryCardButton({
+  //     card: {
+  //       userId: researcher.userId,
+  //       userEmail: researcher.email,
+  //       institutionId: institutionId
+  //     },
+
+  //   });
+
+  return {
+    isComponent: true,
+    id,
+    label: 'lc-button',
+    data: (
+      <div>
+       hi
+      </div>
+    ),
+  };
+};
+
 const roleCell = (roles, id) => {
 
   const roleString = flow(
@@ -171,15 +216,6 @@ const roleCell = (roles, id) => {
     id,
     style: {},
     label: 'user-role'
-  };
-};
-
-const emailCell = (email, id) => {
-  return {
-    data: email || '- -',
-    id,
-    style: {},
-    label: 'user-email'
   };
 };
 
@@ -221,7 +257,8 @@ export default function SigningOfficialTable2(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  const [daas, setDaas] = useState(props.daas || []);
+  const [daas, setDaas] = useState(props.daas);
+  const [dacs, setDacs] = useState(props.dacs);
   const { signingOfficial, isLoading } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -242,17 +279,53 @@ export default function SigningOfficialTable2(props) {
     setConfirmType(confirmType);
   };
 
+  const addColumns = () => {
+    let columnWidth = props.dacs.length > 0 ? 60 / props.dacs.length : 0;
+
+    // console.log('columnWidth',columnWidth);
+    // console.log(props.dacs);
+
+    // for (var dac in dacs) {
+    //   console.log(dac);
+    // }
+    
+    columnHeaderFormat = {
+      ...columnHeaderFormat,
+      ...dacs.reduce((acc, dac) => {
+        acc[dac.name] = { label: dac.name, cellStyle: { width: `${columnWidth}%` } };
+        return acc;
+      }, {}),
+    };
+
+    // console.log("columnHeaderFormat",columnHeaderFormat);
+
+    const dacColumns = props.dacs.map((dac) => dac.name);
+    // console.log(daaColumns);
+    
+    columnHeaderData = [
+      ...columnHeaderData,
+      ...dacColumns.map((column) => columnHeaderFormat[column]),
+    ];
+
+    // console.log(columnHeaderData);
+
+    // email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
+  };
+
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
       try{
         setResearchers(props.researchers);
+        setDaas(props.daas);
+        setDacs(props.dacs);
       } catch(error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };
     init();
-  }, [props.researchers]);
+    // addColumns();
+  }, [props.researchers, props.daas, props.dacs]);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -275,13 +348,14 @@ export default function SigningOfficialTable2(props) {
   useEffect(() => {
     const init = async() => {
       try{
-        setDaas(props.daas);
+        // setDaas(props.daas);
+        addColumns();
       } catch(error) {
-        Notifications.showError({text: 'Failed to get Data Access Agreements'});
+        Notifications.showError({text: '!!!'});
       }
     };
     init();
-  }, [daas]);
+  }, []);
 
   const goToPage = useCallback((value) => {
     if (value >= 1 && value <= pageCount) {
@@ -311,23 +385,21 @@ export default function SigningOfficialTable2(props) {
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
-      return [
+      const toReturn = [
         displayNameCell(displayName, email, id),
-        LibraryCardCell({
-          researcher,
-          showConfirmationModal,
-          institutionId: signingOfficial.institutionId
-        }),
         roleCell(roles, id),
-        // activeDarCountCell(count, id)
+        ...dacs.map(dac => DAACell(dac)) // this isn't working for some reason
       ];
+
+      console.log("toreturn", toReturn);
+      return toReturn;
     });
   };
 
-  const columnHeaderData = [
+  let columnHeaderData = [
     columnHeaderFormat.name,
-    columnHeaderFormat.libraryCard,
     columnHeaderFormat.role,
+    // columnHeaderFormat.libraryCard
     // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ];
 
@@ -411,25 +483,34 @@ export default function SigningOfficialTable2(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issue or Remove Library Card privileges to allow researchers to submit DARs.
-              <a
+              Issue, Update, or Deactivate for User&apos;s ability to request access to datasets, by agreeing to
+              {/* <a
                 rel="noopener noreferrer"
                 href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide"
                 target="_blank"
                 id="so-console-info-link"
                 style={{ verticalAlign: 'super' }}>
                 <Info fontSize='large'/>
-              </a>
+              </a> */}
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>NHGRI</a> Library Card Agreements.
+              Data Access Committee&apos;s (DAC&apos;s) Data Access Agreements (DAAs) in the table below.
+            </div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+              fontSize: '16px',
+            })}>
+              Issuing a checkmark in a cell for a researcher denotes your approval of that researcher   
+            </div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+              fontSize: '16px',
+            })}>
+              to request data from the listed DAC, according to its linked DAA.
             </div>
           </div>
         </div>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} style={{ marginLeft: '25%' }} />
-        <div style={{ marginLeft: 15 }}>
+        {/* <div style={{ marginLeft: 15 }}>
           <SimpleButton
             onClick={() => showModalOnClick()}
             baseColor={Theme.palette.secondary}
@@ -440,7 +521,8 @@ export default function SigningOfficialTable2(props) {
               padding: '4% 10%',
               fontWeight: '600' }}
           />
-        </div>
+        </div> */}
+        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef}/>
       </div>
       <SimpleTable
         isLoading={isLoading}
