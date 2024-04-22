@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Info } from '@mui/icons-material';
+import { Checkbox } from '@mui/material';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -158,11 +159,29 @@ const LibraryCardCell = ({
 };
 
 const DAACell = ({
-  dac, 
+  rowDac, 
   researcher,
-  institutionId
+  institutionId,
+  daas
 }) => {
   const id = researcher && (researcher.userId || researcher.email);
+  const libraryCards = researcher && researcher.libraryCards;
+  const card = libraryCards && libraryCards.find(card => card.institutionId === institutionId);
+  const daaIds = researcher && card && card.daaIds;
+  const filteredDaas = daaIds && daas.filter(daa => daaIds.includes(daa.daaId));
+  const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
+  console.log('hasDacId', hasDacId);
+  // const card = !isEmpty(researcher.libraryCards)
+  //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
+  //   : null;
+  // const daasOnCard = card && card.daaIds;
+  // const hasDacId = daasOnCard && daasOnCard.some(daaId => daas.some(daa => daa.dacId === daaId));
+
+  // access libary cards on researcher
+  // check if the library card has daa id 
+  // find the daa & finding linked dacs in the dacId list
+  // does this user's library card have the daa associated with this dac that is passed on?
+
   // const card = !isEmpty(researcher.libraryCards)
   //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
   //   : null;
@@ -196,7 +215,7 @@ const DAACell = ({
     label: 'lc-button',
     data: (
       <div>
-       hi
+        <Checkbox checked={hasDacId}/>
       </div>
     ),
   };
@@ -380,7 +399,7 @@ export default function SigningOfficialTable2(props) {
       const toReturn = [
         displayNameCell(displayName, email, id),
         roleCell(roles, id),
-        ...dacs.map(dac => DAACell(dac)) // this isn't working for some reason
+        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas)) // this isn't working for some reason
       ];
       // console.log("toreturn", toReturn);
       return toReturn;
