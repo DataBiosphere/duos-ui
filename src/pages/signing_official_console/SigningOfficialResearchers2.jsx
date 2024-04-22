@@ -11,8 +11,8 @@ import SigningOfficialTable2 from './SigningOfficialTable2';
 export default function SigningOfficialResearchers2() {
   const [signingOfficial, setSigningOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
-  const [daas, setDaas] = useState({});
-  const [dacs, setDacs] = useState({});
+  const [daas, setDaas] = useState([]);
+  const [dacs, setDacs] = useState([]);
 
   //states to be added and used for manage researcher component
   const [isLoading, setIsLoading] = useState(true);

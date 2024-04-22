@@ -162,7 +162,7 @@ const DAACell = ({
   researcher,
   institutionId
 }) => {
-  const id = researcher.userId || researcher.email;
+  const id = researcher && (researcher.userId || researcher.email);
   // const card = !isEmpty(researcher.libraryCards)
   //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
   //   : null;
@@ -257,9 +257,11 @@ export default function SigningOfficialTable2(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  const [daas, setDaas] = useState(props.daas);
-  const [dacs, setDacs] = useState(props.dacs);
-  const { signingOfficial, isLoading } = props;
+  // const [daas, setDaas] = useState(props.daas);
+  // const [dacs, setDacs] = useState(props.dacs);
+  const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name,
+    columnHeaderFormat.role]);
+  const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms) => {
@@ -279,53 +281,43 @@ export default function SigningOfficialTable2(props) {
     setConfirmType(confirmType);
   };
 
-  const addColumns = () => {
-    let columnWidth = props.dacs.length > 0 ? 60 / props.dacs.length : 0;
-
-    // console.log('columnWidth',columnWidth);
-    // console.log(props.dacs);
-
-    // for (var dac in dacs) {
-    //   console.log(dac);
-    // }
-    
-    columnHeaderFormat = {
-      ...columnHeaderFormat,
-      ...dacs.reduce((acc, dac) => {
-        acc[dac.name] = { label: dac.name, cellStyle: { width: `${columnWidth}%` } };
-        return acc;
-      }, {}),
-    };
-
-    // console.log("columnHeaderFormat",columnHeaderFormat);
-
-    const dacColumns = props.dacs.map((dac) => dac.name);
-    // console.log(daaColumns);
-    
-    columnHeaderData = [
-      ...columnHeaderData,
-      ...dacColumns.map((column) => columnHeaderFormat[column]),
-    ];
-
-    // console.log(columnHeaderData);
-
-    // email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
-  };
-
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
       try{
         setResearchers(props.researchers);
-        setDaas(props.daas);
-        setDacs(props.dacs);
       } catch(error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };
     init();
     // addColumns();
-  }, [props.researchers, props.daas, props.dacs]);
+  }, [props.researchers]);
+
+  useEffect(() => {
+    const generateColumnData = () => {
+      const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
+
+      columnHeaderFormat = {
+        ...columnHeaderFormat,
+        ...dacs.reduce((acc, dac) => {
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` } };
+          return acc;
+        }, {}),
+      };
+
+      const dacColumns = dacs.map((dac) => dac.name);
+
+      const newColumnHeaderData = [
+        ...columnHeaderData,
+        ...dacColumns.map((column) => columnHeaderFormat[column]),
+      ];
+
+      setColumnHeaderData(newColumnHeaderData);
+    };
+    // console.log(dacs);
+    generateColumnData();
+  }, [dacs]);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -345,17 +337,17 @@ export default function SigningOfficialTable2(props) {
     });
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
 
-  useEffect(() => {
-    const init = async() => {
-      try{
-        // setDaas(props.daas);
-        addColumns();
-      } catch(error) {
-        Notifications.showError({text: '!!!'});
-      }
-    };
-    init();
-  }, []);
+  // useEffect(() => {
+  //   const init = async() => {
+  //     try{
+  //       // setDaas(props.daas);
+  //       addColumns();
+  //     } catch(error) {
+  //       Notifications.showError({text: '!!!'});
+  //     }
+  //   };
+  //   init();
+  // }, []);
 
   const goToPage = useCallback((value) => {
     if (value >= 1 && value <= pageCount) {
@@ -390,18 +382,17 @@ export default function SigningOfficialTable2(props) {
         roleCell(roles, id),
         ...dacs.map(dac => DAACell(dac)) // this isn't working for some reason
       ];
-
-      console.log("toreturn", toReturn);
+      // console.log("toreturn", toReturn);
       return toReturn;
     });
   };
 
-  let columnHeaderData = [
-    columnHeaderFormat.name,
-    columnHeaderFormat.role,
-    // columnHeaderFormat.libraryCard
-    // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
-  ];
+  // let columnHeaderData = [
+  //   columnHeaderFormat.name,
+  //   columnHeaderFormat.role,
+  //   // columnHeaderFormat.libraryCard
+  //   // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
+  // ];
 
   const showModalOnClick = () => {
     setSelectedCard({institutionId: signingOfficial.institutionId});
