@@ -5,7 +5,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
 import { Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
 
@@ -18,10 +17,6 @@ export const DatasetFilterList = (props) => {
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
-      <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
-        Filters
-      </Typography>
-      <Divider />
       <Typography variant="h6" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }} marginTop="1em">
         Access Type
       </Typography>

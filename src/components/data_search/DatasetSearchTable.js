@@ -11,6 +11,8 @@ import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
+import DataUseFilterList from './DataUseFilterList';
+import FilterModal from './FilterModal';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
@@ -41,6 +43,8 @@ const datasetTableHeader = [
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [filters, setFilters] = useState([]);
+  const [dataUseFilters, setDataUseFilters] = useState([]);
+  const [secondaryUseFilters, setSecondaryUseFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
@@ -48,10 +52,12 @@ export const DatasetSearchTable = (props) => {
   const [tdrApiUrl, setTdrApiUrl] = useState('');
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
   const [dataUse, setDataUse] = useState();
+  const [researchPurposeModal, setResearchPurposeModal] = useState(false);
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
+  const isDataUseFiltered = (filter) => dataUseFilters.indexOf(filter) > -1;
 
-  const assembleFullQuery = (searchTerm, filters) => {
+  const assembleFullQuery = (searchTerm, accessFilters, dataUseFilters, secondaryUseFilters) => {
     const queryChunks = [
       {
         'match': {
@@ -64,81 +70,82 @@ export const DatasetSearchTable = (props) => {
         }
       }
     ];
-
-    // do not apply search modifier if there is no searchTerm
+    // Add search term if provided
     if (searchTerm !== '') {
-      const searchModifier = [
-        {
-          'multi_match': {
-            'query': searchTerm,
-            'type':'phrase_prefix',
-            'fields': [
-              'datasetName',
-              'dataLocation',
-              'study.description',
-              'study.studyName',
-              'study.species',
-              'study.piName',
-              'study.dataCustodianEmail',
-              'study.dataTypes',
-              'dataUse.primary.code',
-              'dataUse.secondary.code',
-              'dac.dacName',
-              'datasetIdentifier'
-            ]
-          }
+      const searchModifier = {
+        'multi_match': {
+          'query': searchTerm,
+          'type': 'phrase_prefix',
+          'fields': [
+            'datasetName',
+            'dataLocation',
+            'study.description',
+            'study.studyName',
+            'study.species',
+            'study.piName',
+            'study.dataCustodianEmail',
+            'study.dataTypes',
+            'dataUse.primary.code',
+            'dataUse.secondary.code',
+            'dac.dacName',
+            'datasetIdentifier'
+          ]
         }
-      ];
-      queryChunks.push(...searchModifier);
+      };
+      queryChunks.push(searchModifier);
     }
 
-    var filterQuery = {};
-    if (filters.length > 0) {
-      const shouldTerms = [];
-
-      filters.forEach(term => {
-        shouldTerms.push({
-          'term': {
-            'accessManagement': term
-          }
-        });
-      });
-
-      if (shouldTerms.length > 0) {
-        filterQuery = [
-          {
-            'bool': {
-              'should': shouldTerms
+    // Add access filters if provided
+    if (accessFilters.length > 0) {
+      const accessFilterQuery = {
+        'bool': {
+          'should': accessFilters.map(term => ({
+            'term': {
+              'accessManagement': term
             }
-          }
-        ];
-      }
+          }))
+        }
+      };
+      queryChunks.push(accessFilterQuery);
     }
 
-    // do not add filter subquery if no filters are applied
-    if (filters.length > 0) {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks,
-            'filter': filterQuery
-          }
+    // Add data use filters if provided
+    if (dataUseFilters.length > 0) {
+      const dataUseFilterQuery = {
+        'multi_match': {
+          'query': dataUseFilters.join(','),
+          'fields': [
+            'dataUse.primary.code'
+          ]
         }
       };
-    } else {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks
-          }
-        }
-      };
+      queryChunks.push(dataUseFilterQuery);
     }
+
+    // Add secondary use filters if provided
+    if (secondaryUseFilters.length > 0) {
+      const secondaryUseFilterQuery = {
+        'multi_match': {
+          'query': 'NCTRL',
+          'fields': [
+            'dataUse.secondary.code'
+          ]
+        }
+      };
+      queryChunks.push(secondaryUseFilterQuery);
+    }
+
+    return {
+      'from': 0,
+      'size': 10000,
+      'query': {
+        'bool': {
+          'must': queryChunks
+        }
+      }
+    };
   };
+
 
   const filterHandler = (event, data, filter, searchTerm) => {
     var newFilters = [];
@@ -149,7 +156,7 @@ export const DatasetSearchTable = (props) => {
     }
     setFilters(newFilters);
 
-    const fullQuery = assembleFullQuery(searchTerm, newFilters);
+    const fullQuery = assembleFullQuery(searchTerm, newFilters, dataUseFilters, secondaryUseFilters);
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
@@ -163,7 +170,46 @@ export const DatasetSearchTable = (props) => {
     search();
   };
 
+  const dataUseFilterHandler = async (event, data, filter, searchTerm) => {
+    let newFilters = [];
+    if (!isDataUseFiltered(filter) && filter !== '') {
+      newFilters = dataUseFilters.concat(filter);
+    } else {
+      newFilters = dataUseFilters.filter((f) => f !== filter);
+    }
 
+    if (newFilters.length > 0) {
+      setDataUseFilters(newFilters);
+      const fullQuery = assembleFullQuery(searchTerm, filters, newFilters, secondaryUseFilters);
+      try {
+        await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+          const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+          setFiltered(newFiltered);
+        });
+      }
+      catch (error) {
+        Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+      }
+    }
+  };
+
+  const secondaryDataUseFilterHandler = async (secondaryFilters, searchTerm) => {
+    setSecondaryUseFilters(secondaryFilters);
+    const fullQuery = assembleFullQuery(searchTerm, filters, dataUseFilters, secondaryFilters);
+    try {
+      await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+        setFiltered(newFiltered);
+      });
+    }
+    catch (error) {
+      Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+    }
+  };
+
+  const handleResearchPurposeModal = () => {
+    setResearchPurposeModal(!researchPurposeModal);
+  };
 
   const selectHandler = (event, data, selector) => {
     let idsToModify = [];
@@ -403,8 +449,14 @@ export const DatasetSearchTable = (props) => {
           </div>
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
-          <Box sx={{width: '14%', padding: '0 1em'}}>
+          <Box sx={{ width: '14%', padding: '0 1em' }}>
+            <FilterModal open={researchPurposeModal}
+              secondaryUseFilters={secondaryUseFilters}
+              toggleModal={handleResearchPurposeModal}
+              filterHandler={secondaryDataUseFilterHandler} searchRef={searchRef} 
+            />
             <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
+            <DataUseFilterList datasets={datasets} dataUseFilters={dataUseFilters} filterHandler={dataUseFilterHandler} searchRef={searchRef} />
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
