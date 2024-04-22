@@ -126,7 +126,7 @@ export const DatasetSearchTable = (props) => {
     if (secondaryUseFilters.length > 0) {
       const secondaryUseFilterQuery = {
         'multi_match': {
-          'query': 'NCTRL',
+          'query': secondaryUseFilters.join(','),
           'fields': [
             'dataUse.secondary.code'
           ]
