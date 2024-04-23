@@ -589,7 +589,6 @@ describe('BucketUtils', () => {
       {'generalUse': true, 'manualReview': true},
       {'generalUse': true, 'nonBiomedical': true},
       {'generalUse': true, 'other': 'true'},
-      {'generalUse': true, 'otherRestrictions': true},
       {'generalUse': true, 'pediatric': true},
       {'generalUse': true, 'psychologicalTraits': true},
       {'generalUse': true, 'publicationResults': true},
