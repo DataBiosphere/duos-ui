@@ -1,6 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
-import { Box, Button, Link } from '@mui/material';
+import { Box, Button, Link, Typography } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { groupBy, isEmpty, concat, compact, map } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
@@ -177,19 +177,16 @@ export const DatasetSearchTable = (props) => {
     } else {
       newFilters = dataUseFilters.filter((f) => f !== filter);
     }
-
-    if (newFilters.length > 0) {
-      setDataUseFilters(newFilters);
-      const fullQuery = assembleFullQuery(searchTerm, filters, newFilters, secondaryUseFilters);
-      try {
-        await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
-          setFiltered(newFiltered);
-        });
-      }
-      catch (error) {
-        Notifications.showError({ text: 'Failed to load Elasticsearch index' });
-      }
+    setDataUseFilters(newFilters);
+    const fullQuery = assembleFullQuery(searchTerm, filters, newFilters, secondaryUseFilters);
+    try {
+      await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+        setFiltered(newFiltered);
+      });
+    }
+    catch (error) {
+      Notifications.showError({ text: 'Failed to load Elasticsearch index' });
     }
   };
 
@@ -446,6 +443,11 @@ export const DatasetSearchTable = (props) => {
                 Clear Search
               </Button>
             </Box>
+            <div style={{ whiteSpace: 'nowrap', display: 'inline-block' }}>
+              <Typography variant="h1" sx={{ color: '#333', fontSize: '1.5rem', fontFamily:'Montserrat', marginLeft:'1em' }}>
+                {filtered.length > 0 && `${filtered.length} datasets found`}
+              </Typography>
+            </div>
           </div>
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
@@ -453,7 +455,7 @@ export const DatasetSearchTable = (props) => {
             <FilterModal open={researchPurposeModal}
               secondaryUseFilters={secondaryUseFilters}
               toggleModal={handleResearchPurposeModal}
-              filterHandler={secondaryDataUseFilterHandler} searchRef={searchRef} 
+              filterHandler={secondaryDataUseFilterHandler} searchRef={searchRef}
             />
             <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
             <DataUseFilterList datasets={datasets} dataUseFilters={dataUseFilters} filterHandler={dataUseFilterHandler} searchRef={searchRef} />

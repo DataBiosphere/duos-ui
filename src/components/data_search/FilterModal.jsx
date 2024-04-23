@@ -16,15 +16,19 @@ import {
   Divider
 } from '@mui/material';
 
-const FilterModal = (props) => {
-  const { open, toggleModal, filterHandler, searchRef, secondaryUseFilters } = props;
-  const [state, setState] = React.useState({
+const getInitialState = () => {
+  return {
     NMDS: false,
     NCTRL: false,
     NAGR: false,
     NCU: false,
     POA: false
-  });
+  };
+};
+
+const FilterModal = (props) => {
+  const { open, toggleModal, filterHandler, searchRef, secondaryUseFilters } = props;
+  const [state, setState] = React.useState(getInitialState);
 
   const handleChange = (event) => {
     setState({
@@ -33,7 +37,8 @@ const FilterModal = (props) => {
     });
   };
 
-  const handleClickOpen = () => {
+  const handleClickOpen = (e) => {
+    e.preventDefault();
     toggleModal();
   };
 
@@ -80,36 +85,40 @@ const FilterModal = (props) => {
   return (
     <React.Fragment>
       <Box sx={{ bgcolor: 'background.paper' }} style={{ marginBottom: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Button
+        <div style={{ display: 'flex', alignItems:'baseline', marginBottom:'0.5rem', justifyContent:'space-between' }}>
+          <a href=''
             style={{
+              textDecoration: 'none',
               fontFamily: 'Montserrat',
-              fontSize: '1.15rem',
-              padding: '0.25em'
+              fontSize: '1.25rem',
+              fontWeight:'600'
             }}
-            size='large'
-            variant="link" onClick={handleClickOpen}>
-            Filter by Research Purpose
-          </Button>
-          <Button
-            size='small'
+            onClick={handleClickOpen}
+          >
+           Filter by Research Purpose
+          </a>
+          <a
+            href='#'
             style={{
+              textDecoration: 'none',
               fontFamily: 'Montserrat',
-              fontSize: '1rem',
-              padding: '0.15em'
-            }}
-            variant='outlined'
-            onClick={() => {
-              filterHandler([], searchRef.current.value);
-            }}
-          >Clear</Button>
+              fontSize:'1.15rem'
+          }}
+            onClick={(e) => {
+            e.preventDefault();
+            setState(getInitialState);
+            filterHandler([], searchRef.current.value);
+          }}
+          >
+            Clear
+          </a>
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
+        <div>
           {secondaryUseFilters.map((filter) => {
             const label = controlComponents[filter].chipLabel;
             return (
-              <Chip style={{ fontSize: '1rem' }} key='filter' size='small' color='primary' label={label} />
+              <Chip style={{ fontSize: '1rem', margin:'0.1rem'}} key='filter' size='small' color='primary' label={label} />
             );
           })}
         </div>
