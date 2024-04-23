@@ -980,6 +980,17 @@ describe('BucketUtils', () => {
     // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
     expect(buckets.length).to.eq(4);
     expect(buckets[0].isRP).to.eq(true);
+    expect(buckets[1].isRP).to.eq(undefined);
+    // HMB + Other
+    expect(buckets[1].dataUse.hmbResearch).to.eq(true);
+    expect(buckets[1].dataUse.other).to.not.be.empty;
+    // General Use
+    expect(buckets[2].isRP).to.eq(undefined);
+    expect(buckets[2].dataUse.generalUse).to.eq(true);
+    // HMB
+    expect(buckets[3].isRP).to.eq(undefined);
+    expect(buckets[3].dataUse.hmbResearch).to.eq(true);
+    expect(buckets[3].dataUse.other).to.eq(undefined);
   });
 
 });
