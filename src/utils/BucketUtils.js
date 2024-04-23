@@ -272,10 +272,9 @@ const processV3Abstain = (matchResults) => {
  * @returns boolean
  */
 const isOther = (dataUse) => {
-  const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
   const primaryOther = !isEmpty(getOr('')('other')(dataUse));
   const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
-  return otherRestrictions || primaryOther || secondaryOther;
+  return primaryOther || secondaryOther;
 };
 
 /**
