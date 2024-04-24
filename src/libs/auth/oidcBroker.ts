@@ -88,6 +88,8 @@ export const OidcBroker = {
   },
   
   signOut: async (): Promise<void> => {
-    await OidcBroker.getUserManager().removeUser();
+    const um: UserManager = OidcBroker.getUserManager();
+    await um.removeUser();
+    await um.clearStaleState();
   } 
 };
