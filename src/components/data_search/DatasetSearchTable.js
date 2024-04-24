@@ -1,6 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
-import { Box, Button, Link, Typography } from '@mui/material';
+import { Box, Button, Link } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { groupBy, isEmpty, concat, compact, map } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
@@ -11,8 +11,7 @@ import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
-import DataUseFilterList from './DataUseFilterList';
-import FilterModal from './FilterModal';
+;import FilterModal from './FilterModal';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
@@ -44,7 +43,6 @@ export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [dataUseFilters, setDataUseFilters] = useState([]);
-  const [secondaryUseFilters, setSecondaryUseFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
@@ -55,9 +53,8 @@ export const DatasetSearchTable = (props) => {
   const [researchPurposeModal, setResearchPurposeModal] = useState(false);
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
-  const isDataUseFiltered = (filter) => dataUseFilters.indexOf(filter) > -1;
 
-  const assembleFullQuery = (searchTerm, accessFilters, dataUseFilters, secondaryUseFilters) => {
+  const assembleFullQuery = (searchTerm, accessFilters, dataUseFilters) => {
     const queryChunks = [
       {
         'match': {
@@ -122,19 +119,6 @@ export const DatasetSearchTable = (props) => {
       queryChunks.push(dataUseFilterQuery);
     }
 
-    // Add secondary use filters if provided
-    if (secondaryUseFilters.length > 0) {
-      const secondaryUseFilterQuery = {
-        'multi_match': {
-          'query': secondaryUseFilters.join(','),
-          'fields': [
-            'dataUse.secondary.code'
-          ]
-        }
-      };
-      queryChunks.push(secondaryUseFilterQuery);
-    }
-
     return {
       'from': 0,
       'size': 10000,
@@ -156,7 +140,7 @@ export const DatasetSearchTable = (props) => {
     }
     setFilters(newFilters);
 
-    const fullQuery = assembleFullQuery(searchTerm, newFilters, dataUseFilters, secondaryUseFilters);
+    const fullQuery = assembleFullQuery(searchTerm, newFilters, dataUseFilters);
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
@@ -170,15 +154,9 @@ export const DatasetSearchTable = (props) => {
     search();
   };
 
-  const dataUseFilterHandler = async (event, data, filter, searchTerm) => {
-    let newFilters = [];
-    if (!isDataUseFiltered(filter) && filter !== '') {
-      newFilters = dataUseFilters.concat(filter);
-    } else {
-      newFilters = dataUseFilters.filter((f) => f !== filter);
-    }
-    setDataUseFilters(newFilters);
-    const fullQuery = assembleFullQuery(searchTerm, filters, newFilters, secondaryUseFilters);
+  const dataUseFilterHandler = async (dataUseFilters, searchTerm) => {
+    setDataUseFilters(dataUseFilters);
+    const fullQuery = assembleFullQuery(searchTerm, filters, dataUseFilters);
     try {
       await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
         const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
@@ -190,19 +168,11 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const secondaryDataUseFilterHandler = async (secondaryFilters, searchTerm) => {
-    setSecondaryUseFilters(secondaryFilters);
-    const fullQuery = assembleFullQuery(searchTerm, filters, dataUseFilters, secondaryFilters);
-    try {
-      await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
-        setFiltered(newFiltered);
-      });
-    }
-    catch (error) {
-      Notifications.showError({ text: 'Failed to load Elasticsearch index' });
-    }
+  const filterDataUseHandler = (filter) => {
+    const newFiltered = dataUseFilters.filter((filterValue) => filterValue !== filter);
+    setDataUseFilters(newFiltered);
   };
+
 
   const handleResearchPurposeModal = () => {
     setResearchPurposeModal(!researchPurposeModal);
@@ -443,22 +413,17 @@ export const DatasetSearchTable = (props) => {
                 Clear Search
               </Button>
             </Box>
-            <div style={{ whiteSpace: 'nowrap', display: 'inline-block' }}>
-              <Typography variant="h1" sx={{ color: '#333', fontSize: '1.5rem', fontFamily:'Montserrat', marginLeft:'1em' }}>
-                {filtered.length > 0 && `${filtered.length} datasets found`}
-              </Typography>
-            </div>
           </div>
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{ width: '14%', padding: '0 1em' }}>
             <FilterModal open={researchPurposeModal}
-              secondaryUseFilters={secondaryUseFilters}
+              dataUseFilters={dataUseFilters}
               toggleModal={handleResearchPurposeModal}
-              filterHandler={secondaryDataUseFilterHandler} searchRef={searchRef}
+              filterHandler={dataUseFilterHandler} searchRef={searchRef}
+              filterDataUseHandler={filterDataUseHandler}
             />
             <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
-            <DataUseFilterList datasets={datasets} dataUseFilters={dataUseFilters} filterHandler={dataUseFilterHandler} searchRef={searchRef} />
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {

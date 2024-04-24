@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 import React from 'react';
 import {
   Button,
@@ -13,8 +12,11 @@ import {
   Checkbox,
   Chip,
   Box,
-  Divider
+  Divider,
+  Autocomplete,
+  TextField
 } from '@mui/material';
+import { DAR } from '../../libs/ajax/DAR';
 
 const getInitialState = () => {
   return {
@@ -27,8 +29,25 @@ const getInitialState = () => {
 };
 
 const FilterModal = (props) => {
-  const { open, toggleModal, filterHandler, searchRef, secondaryUseFilters } = props;
+  const { open, toggleModal, filterHandler, searchRef, dataUseFilters, filterDataUseHandler } = props;
   const [state, setState] = React.useState(getInitialState);
+  const [options, setOptions] = React.useState([]);
+
+  const formatOntologyForSelect = (ontology) => {
+    return {
+      id: ontology.id,
+      label: ontology.label,
+      item: ontology,
+    };
+  };
+
+  const autocompleteOntologies = (query) => {
+    return DAR.getAutoCompleteOT(query).then(
+      items => {
+        const options = items.map(formatOntologyForSelect);
+        return options;
+      });
+  };
 
   const handleChange = (event) => {
     setState({
@@ -47,39 +66,59 @@ const FilterModal = (props) => {
   };
 
   const controlComponents = {
-    NMDS: {
-      label: 'Methods development/Validation study',
-      chipLabel: 'METHODS'
+    GRU: {
+      label: 'Is the primary purpose of this research to investigate a specific disease(s)?',
+      chipLabel: 'GRU'
     },
-    NCTRL: {
-      label: 'Control Set',
-      chipLabel: 'CONTROL'
-    },
-    NAGR: {
-      label: 'Aggregate analysis to understand variation in the general population',
-      chipLabel: 'AGGREGATES'
+    HMB: {
+      label: 'Is the primary purpose health/medical/biomedical research in nature?',
+      chipLabel: 'HMB'
     },
     POA: {
-      label: 'Study population origins or ancestry',
-      chipLabel: 'POA'
+      label: 'Is the primary purpose of this research regarding population origins or ancestry?',
+      chipLabel: 'NPOA'
     },
-    NCU: {
-      label: 'Commercial purpose/by a commercial entity',
+    NMDS: {
+      label: 'Is the primary purpose of this research to develop or validate new methods for analyzing/intepreting data?',
       chipLabel: 'COMMERCIAL'
     }
   };
 
   const renderFormControl = (name, label, chipLabel) => (
-    <FormControlLabel
-      key={label}
-      control={<Checkbox checked={state[name]} onChange={handleChange} name={name} />}
-      label={
-        <>
-          <span key={label} style={{ marginRight: '1rem' }}>{label}</span>
-          <Chip style={{ padding: '0.15em' }} size='small' label={chipLabel} color='primary' />
-        </>
+    <React.Fragment key={label}>
+      <FormControlLabel
+        control={<Checkbox checked={state[name]} onChange={handleChange} name={name} />}
+        label={
+          <>
+            <span style={{ marginRight: '1rem' }}>{label}</span>
+            <Chip style={{ padding: '0.15em' }} size='small' label={chipLabel} color='primary' />
+          </>
+        }
+      />
+
+      {
+        state.GRU === true && name === 'GRU' && <Autocomplete
+          key={chipLabel}
+          id="ontologies"
+          multiple
+          disableClearable
+          options={options}
+          onInputChange={(event, newInputValue) => {
+            if (newInputValue) {
+              autocompleteOntologies(newInputValue).then((newOptions) => {
+                setOptions(newOptions);
+              });
+            }
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Please enter one or more diseases"
+            />
+          )}
+        />
       }
-    />
+    </React.Fragment>
   );
 
   return (
@@ -95,30 +134,17 @@ const FilterModal = (props) => {
             }}
             onClick={handleClickOpen}
           >
-           Filter by Research Purpose
-          </a>
-          <a
-            href='#'
-            style={{
-              textDecoration: 'none',
-              fontFamily: 'Montserrat',
-              fontSize:'1.15rem'
-          }}
-            onClick={(e) => {
-            e.preventDefault();
-            setState(getInitialState);
-            filterHandler([], searchRef.current.value);
-          }}
-          >
-            Clear
+           Filter Data approved for my research
           </a>
         </div>
 
         <div>
-          {secondaryUseFilters.map((filter) => {
+          {dataUseFilters.map((filter) => {
             const label = controlComponents[filter].chipLabel;
             return (
-              <Chip style={{ fontSize: '1rem', margin:'0.1rem'}} key='filter' size='small' color='primary' label={label} />
+              <Chip
+                onDelete={()=>filterDataUseHandler(filter)}
+                style={{ fontSize: '1rem', margin: '0.1rem' }} key={filter} size='small' color='primary' label={label} />
             );
           })}
         </div>
@@ -140,10 +166,10 @@ const FilterModal = (props) => {
           'transform': 'scale(1.5)'
         }}
       >
-        <DialogTitle>Filter By Research Purpose</DialogTitle>
+        <DialogTitle>Filter data approved for my research</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Describe your proposed research using the GA4GH Data Use Ontology terms below
+             Describe your proposed research using the GA4GH Data Use Ontology terms below
           </DialogContentText>
           <FormControl
             required
