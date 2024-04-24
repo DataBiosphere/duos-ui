@@ -589,7 +589,6 @@ describe('BucketUtils', () => {
       {'generalUse': true, 'manualReview': true},
       {'generalUse': true, 'nonBiomedical': true},
       {'generalUse': true, 'other': 'true'},
-      {'generalUse': true, 'otherRestrictions': true},
       {'generalUse': true, 'pediatric': true},
       {'generalUse': true, 'psychologicalTraits': true},
       {'generalUse': true, 'publicationResults': true},
@@ -602,4 +601,396 @@ describe('BucketUtils', () => {
       expect(shouldAbstain(d)).to.eq(true);
     })(dataUses);
   });
+
+  it('correctly buckets data uses when there are similar data use entries', async () => {
+    cy.stub(Match, 'findMatchBatch').returns(match_results);
+    const collection = {
+      'darCollectionId': 1,
+      'darCode': 'DAR-001',
+      'dars': {
+        'dar-reference-id-1': {
+          'id': 1,
+          'referenceId': 'dar-reference-id-1',
+          'collectionId': 1,
+          'elections': {
+            '1': {
+              'electionId': 1,
+              'electionType': 'DataAccess',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 1,
+              'votes': {
+                '1': {
+                  'voteId': 1,
+                  'userId': 1,
+                  'electionId': 1,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '2': {
+                  'voteId': 2,
+                  'userId': 1,
+                  'electionId': 1,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '3': {
+                  'voteId': 3,
+                  'userId': 1,
+                  'electionId': 1,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '2': {
+              'electionId': 2,
+              'electionType': 'RP',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 1,
+              'votes': {
+                '4': {
+                  'voteId': 4,
+                  'userId': 1,
+                  'electionId': 2,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '5': {
+                  'voteId': 5,
+                  'userId': 1,
+                  'electionId': 2,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '6': {
+                  'voteId': 6,
+                  'userId': 1,
+                  'electionId': 2,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '3': {
+              'electionId': 3,
+              'electionType': 'DataAccess',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 2,
+              'votes': {
+                '11': {
+                  'voteId': 11,
+                  'userId': 1,
+                  'electionId': 3,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '22': {
+                  'voteId': 22,
+                  'userId': 1,
+                  'electionId': 3,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '33': {
+                  'voteId': 33,
+                  'userId': 1,
+                  'electionId': 3,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '4': {
+              'electionId': 4,
+              'electionType': 'RP',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 2,
+              'votes': {
+                '44': {
+                  'voteId': 44,
+                  'userId': 1,
+                  'electionId': 4,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '55': {
+                  'voteId': 55,
+                  'userId': 1,
+                  'electionId': 4,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '66': {
+                  'voteId': 66,
+                  'userId': 1,
+                  'electionId': 4,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '5': {
+              'electionId': 5,
+              'electionType': 'DataAccess',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 3,
+              'votes': {
+                '111': {
+                  'voteId': 111,
+                  'userId': 1,
+                  'electionId': 3,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '222': {
+                  'voteId': 222,
+                  'userId': 1,
+                  'electionId': 5,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '333': {
+                  'voteId': 333,
+                  'userId': 1,
+                  'electionId': 5,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '6': {
+              'electionId': 6,
+              'electionType': 'RP',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 3,
+              'votes': {
+                '444': {
+                  'voteId': 444,
+                  'userId': 1,
+                  'electionId': 6,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '555': {
+                  'voteId': 555,
+                  'userId': 1,
+                  'electionId': 6,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '666': {
+                  'voteId': 666,
+                  'userId': 1,
+                  'electionId': 6,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '7': {
+              'electionId': 7,
+              'electionType': 'DataAccess',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 4,
+              'votes': {
+                '1111': {
+                  'voteId': 1111,
+                  'userId': 1,
+                  'electionId': 7,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '2222': {
+                  'voteId': 2222,
+                  'userId': 1,
+                  'electionId': 7,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '3333': {
+                  'voteId': 3333,
+                  'userId': 1,
+                  'electionId': 7,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '8': {
+              'electionId': 8,
+              'electionType': 'RP',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 4,
+              'votes': {
+                '4444': {
+                  'voteId': 4444,
+                  'userId': 1,
+                  'electionId': 8,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '5555': {
+                  'voteId': 5555,
+                  'userId': 1,
+                  'electionId': 8,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '6666': {
+                  'voteId': 6666,
+                  'userId': 1,
+                  'electionId': 8,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '9': {
+              'electionId': 9,
+              'electionType': 'DataAccess',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 5,
+              'votes': {
+                '11111': {
+                  'voteId': 11111,
+                  'userId': 1,
+                  'electionId': 9,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '22222': {
+                  'voteId': 22222,
+                  'userId': 1,
+                  'electionId': 9,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '33333': {
+                  'voteId': 33333,
+                  'userId': 1,
+                  'electionId': 9,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            },
+            '10': {
+              'electionId': 10,
+              'electionType': 'RP',
+              'referenceId': 'dar-reference-id-1',
+              'dataSetId': 5,
+              'votes': {
+                '44444': {
+                  'voteId': 44444,
+                  'userId': 1,
+                  'electionId': 10,
+                  'rationale': '',
+                  'type': 'Chairperson',
+                  'displayName': 'User 1'
+                },
+                '55555': {
+                  'voteId': 55555,
+                  'userId': 1,
+                  'electionId': 10,
+                  'rationale': '',
+                  'type': 'DAC',
+                  'displayName': 'User 1'
+                },
+                '66666': {
+                  'voteId': 66666,
+                  'userId': 1,
+                  'electionId': 10,
+                  'rationale': '',
+                  'type': 'Final',
+                  'displayName': 'User 1'
+                }
+              }
+            }
+          },
+          'datasetIds': [1, 2, 3, 4, 5]
+        }
+      },
+      'datasets': [
+        {
+          'dataSetId': 1,
+          'datasetName': 'ds 1',
+          'datasetIdentifier': 'DUOS-000001',
+          'dataUse': {'hmbResearch': true, 'other': 'Samples and information may not be sold for profit.'},
+          'dacId': 1
+        },
+        {
+          'dataSetId': 2,
+          'datasetName': 'ds 2',
+          'datasetIdentifier': 'DUOS-000002',
+          'dataUse': {'generalUse': true},
+          'dacId': 2
+        },
+        {
+          'dataSetId': 3,
+          'datasetName': 'ds 3',
+          'datasetIdentifier': 'DUOS-000003',
+          'dataUse': {'hmbResearch': true},
+          'dacId': 3
+        },
+        {
+          'dataSetId': 4,
+          'datasetName': 'ds 4',
+          'datasetIdentifier': 'DUOS-000004',
+          'dataUse': {'generalUse': true},
+          'dacId': 4
+        },
+        {
+          'dataSetId': 5,
+          'datasetName': 'ds 5',
+          'datasetIdentifier': 'DUOS-000005',
+          'dataUse': {'hmbResearch': true},
+          'dacId': 5
+        }
+      ],
+    };
+    const buckets = await binCollectionToBuckets(collection);
+    expect(buckets).to.not.be.empty;
+    // The provided dar collection should have 1 RP bucket and 3 Data Use buckets
+    expect(buckets.length).to.eq(4);
+    expect(buckets[0].isRP).to.eq(true);
+    // HMB + Other
+    expect(buckets[1].isRP).to.eq(undefined);
+    expect(buckets[1].dataUse.hmbResearch).to.eq(true);
+    expect(buckets[1].dataUse.other).to.not.be.empty;
+    // General Use
+    expect(buckets[2].isRP).to.eq(undefined);
+    expect(buckets[2].dataUse.generalUse).to.eq(true);
+    // HMB
+    expect(buckets[3].isRP).to.eq(undefined);
+    expect(buckets[3].dataUse.hmbResearch).to.eq(true);
+    expect(buckets[3].dataUse.other).to.eq(undefined);
+  });
+
 });
