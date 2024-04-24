@@ -12,7 +12,7 @@ const load = async (): Promise<void> => {
   unregister();
   await Auth.initialize();
   window.location.pathname.startsWith('/redirect-from-oauth')
-    ? import('./libs/auth/oauth-redirect-loader')
+    ? import('./libs/auth/RedirectFromOAuth')
     : import('./appLoader');
 };
 

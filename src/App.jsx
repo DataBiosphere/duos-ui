@@ -3,7 +3,6 @@ import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
 import './App.css';
 import {Config} from './libs/config';
-import { Auth } from './libs/auth/auth';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory, useLocation} from 'react-router-dom';
