@@ -9,7 +9,11 @@ updates:
     reviewers:
       - "@DataBiosphere/DUOS"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-actions]"
+    groups:
+      action-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -22,7 +26,7 @@ updates:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-npm]"
     groups:
       npm-dependencies:
         patterns:
@@ -39,7 +43,7 @@ updates:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-docker]"
     groups:
       docker-dependencies:
         patterns:

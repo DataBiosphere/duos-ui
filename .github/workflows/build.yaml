@@ -57,17 +57,6 @@ jobs:
       run: |
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
-    - name: Notify Slack
-      # only notify for develop branch build
-      if: github.event_name == 'push'
-      uses: broadinstitute/action-slack@v3.8.0
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        status: ${{ job.status }}
-        channel: "#duos-notifications"
-        fields: repo,commit,author,action,eventName,ref,workflow,job,took
   report-to-sherlock:
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [tag-build-push]

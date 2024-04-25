@@ -42,9 +42,7 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 }
 
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
-  // Newer datasets have a list of data custodian emails.
-  // Older datasets may or may not have a data depositor
-  const displayValue = firstNonEmptyPropertyValue(dataset, ['Data Custodian Email', 'Data Depositor', 'dataCustodianEmail']);
+  const displayValue = firstNonEmptyPropertyValue(dataset, ['dataCustodianEmail']);
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
