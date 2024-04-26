@@ -6,8 +6,6 @@ updates:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
     target-branch: develop
-    reviewers:
-      - "@DataBiosphere/DUOS"
     commit-message:
       prefix: "[DUOS-1740-actions]"
     groups:
@@ -20,8 +18,6 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "npm"
@@ -37,8 +33,6 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "docker"
