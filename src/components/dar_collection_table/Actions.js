@@ -1,4 +1,4 @@
-import { div, h } from 'react-hyperscript-helpers';
+import React from 'react';
 import TableIconButton from '../TableIconButton';
 import { Styles, Theme } from '../../libs/theme';
 import { Block, Delete } from '@mui/icons-material';
@@ -50,7 +50,6 @@ export default function Actions(props) {
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
     label: includes(toLower(status), ['complete', 'canceled']) ? 'Re-Open' : 'Open',
-    isRendered: actions.includes('Open'),
     onClick: () => showConfirmationModal(collection, 'open'),
     baseColor: duosBlue,
     hoverStyle: {
@@ -68,7 +67,6 @@ export default function Actions(props) {
 
   const cancelButtonAttributes = {
     keyProp: `${consoleType}-cancel-${uniqueId}`,
-    isRendered: actions.includes('Cancel'),
     onClick: () => showConfirmationModal(collection, 'cancel'),
     style: baseCancelButtonStyle,
     hoverStyle: hoverCancelButtonStyle,
@@ -79,7 +77,6 @@ export default function Actions(props) {
   const voteButtonAttributes = {
     keyProp: `${consoleType}-vote-${uniqueId}`,
     label: 'Vote',
-    isRendered: actions.includes('Vote'),
     onClick: () => goToVote(collectionId),
     baseColor: duosBlue,
     hoverStyle: {
@@ -99,7 +96,6 @@ export default function Actions(props) {
   const updateButtonAttributes = {
     keyProp: `${consoleType}-update-${collectionId}`,
     label: 'Update',
-    isRendered: actions.includes('Update'),
     onClick: () => goToVote(collectionId),
     baseColor: 'white',
     hoverStyle: {
@@ -119,7 +115,6 @@ export default function Actions(props) {
   const reviewButtonAttributes = {
     keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
-    isRendered: actions.includes('Review'),
     onClick: () => redirectToDARApplication(collectionId, history),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
@@ -139,7 +134,6 @@ export default function Actions(props) {
   const deleteButtonAttributes = {
     keyProp: `${consoleType}-delete-${uniqueId}`,
     label: 'Delete',
-    isRendered: actions.includes('Delete'),
     onClick: () => showConfirmationModal(collection, 'delete'),
     dataTip: 'Delete Collection Draft',
     style: baseCancelButtonStyle,
@@ -150,7 +144,6 @@ export default function Actions(props) {
 
   const resumeButtonAttributes = {
     keyProp: `${consoleType}-resume-${uniqueId}`,
-    isRendered: actions.includes('Resume'),
     onClick: () => resumeDARApplication(collection.referenceIds[0], history),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
@@ -176,33 +169,29 @@ export default function Actions(props) {
       marginRight: 5
     },
     hoverStyle: hoverPrimaryButtonStyle,
-    isRendered: actions.includes('Revise'),
     onClick: () => showConfirmationModal(collection, 'revise'),
   };
 
-  return div(
-    {
-      className: `${consoleType}-actions`,
-      key: `${consoleType}-actions-${collectionId}`,
-      id: `${consoleType}-actions-${collectionId}`,
-      style: {
+  return (
+    <div
+      className={`${consoleType}-actions`}
+      key={`${consoleType}-actions-${collectionId}`}
+      id={`${consoleType}-actions-${collectionId}`}
+      style={{
         display: 'flex',
         padding: '10px 5px',
         justifyContent: 'flex-start',
         alignItems: 'center',
-      },
-    },
-    [
-      h(SimpleButton, openButtonAttributes),
-      h(SimpleButton, voteButtonAttributes),
-      h(SimpleButton, updateButtonAttributes),
-
-      h(SimpleButton, reviseButtonAttributes),
-      h(SimpleButton, resumeButtonAttributes),
-      h(SimpleButton, reviewButtonAttributes),
-
-      h(TableIconButton, deleteButtonAttributes),
-      h(TableIconButton, cancelButtonAttributes),
-    ]
+      }}
+    >
+      {actions.includes('Open') && <SimpleButton {...openButtonAttributes} />}
+      {actions.includes('Vote') && <SimpleButton {...voteButtonAttributes} />}
+      {actions.includes('Update') && <SimpleButton {...updateButtonAttributes} />}
+      {actions.includes('Revise') && <SimpleButton {...reviseButtonAttributes} />}
+      {actions.includes('Resume') && <SimpleButton {...resumeButtonAttributes} />}
+      {actions.includes('Review') && <SimpleButton {...reviewButtonAttributes} />}
+      {actions.includes('Delete') && <TableIconButton {...deleteButtonAttributes} />}
+      {actions.includes('Cancel') && <TableIconButton {...cancelButtonAttributes} />}
+    </div>
   );
 }
