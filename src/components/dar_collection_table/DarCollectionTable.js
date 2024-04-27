@@ -1,5 +1,4 @@
-import { useState, useEffect, Fragment, useCallback } from 'react';
-import { h, div } from 'react-hyperscript-helpers';
+import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import {isNil} from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
@@ -298,53 +297,57 @@ export const DarCollectionTable = function DarCollectionTable(props) {
     const darCollectionId = rowData[0].id;
 
     if (collectionIsExpanded(darCollectionId)) {
-      return div({key:`expanded-${darCollectionId}`}, [
-        renderedRow,
-        div({
-          style: {
-            width: '80%',
-            margin: 'auto',
-          }
-        }, [
-          h(DarDatasetTable, {
-            summary: collectionsSummaryMap[darCollectionId],
-            collection: fetchDarCollection(darCollectionId),
-            isLoading: isNil(darCollectionCache[darCollectionId]),
-            isUnfilteredView
-          }),
-        ])
-
-      ]);
+      return (
+        <div key={`expanded-${darCollectionId}`}>
+          {renderedRow}
+          <div
+            style={{
+              width: '80%',
+              margin: 'auto',
+            }}
+          >
+            <DarDatasetTable
+              summary={collectionsSummaryMap[darCollectionId]}
+              collection={fetchDarCollection(darCollectionId)}
+              isLoading={isNil(darCollectionCache[darCollectionId])}
+              isUnfilteredView={isUnfilteredView}
+            />
+          </div>
+        </div>
+      );
     }
-
     return renderedRow;
   }, [darCollectionCache, fetchDarCollection, collectionIsExpanded, isUnfilteredView]);
 
-  return h(Fragment, {}, [
-    h(SimpleTable, {
-      isLoading,
-      rowData: visibleCollection,
-      columnHeaders: columnHeaderData(columns),
-      styles,
-      tableSize: tableSize,
-      paginationBar: h(PaginationBar, {
-        pageCount,
-        currentPage,
-        tableSize,
-        goToPage,
-        changeTableSize,
-      }),
-      rowWrapper: showDatasetDropdownWrapper,
-      sort,
-      onSort: (sort) => {
-        Storage.setCurrentUserSettings(storageDarCollectionSort, {
-          field: columns[sort.colIndex],
-          dir: sort.dir
-        });
-        setSort(sort);
-      }
-    }),
-    /*
+  return (
+    <Fragment>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={visibleCollection}
+        columnHeaders={columnHeaderData(columns)}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={
+          <PaginationBar
+            pageCount={pageCount}
+            currentPage={currentPage}
+            tableSize={tableSize}
+            goToPage={goToPage}
+            changeTableSize={changeTableSize}
+          />
+        }
+        rowWrapper={showDatasetDropdownWrapper}
+        sort={sort}
+        onSort={(sort) => {
+          Storage.setCurrentUserSettings(storageDarCollectionSort, {
+            field: columns[sort.colIndex],
+            dir: sort.dir
+          });
+          setSort(sort);
+        }}
+      />
+      {
+        /*
       Modal needs to be more flexible
       Should take in an operation type, use that to determine message on modal
       Operations: Open, Cancel, Revise
@@ -353,19 +356,21 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         - Need to change message based on operation
         - Need to change prop function based on operation
         - showConfirmationModal
-          - Can be take in an extra op argument, assign that as a state variable
-          - Modal function can be defined via useCallback, recomputed if op state variable changes
-          - Above can also be applied for modal message (expect use useMemo instead of useCallback)
+        - Can be take in an extra op argument, assign that as a state variable
+        - Modal function can be defined via useCallback, recomputed if op state variable changes
+        - Above can also be applied for modal message (expect use useMemo instead of useCallback)
     */
-    h(CollectionConfirmationModal, {
-      collection: selectedCollection,
-      showConfirmation,
-      setShowConfirmation,
-      cancelCollection,
-      reviseCollection,
-      openCollection,
-      deleteDraft,
-      consoleAction
-    })
-  ]);
+      }
+      <CollectionConfirmationModal
+        collection={selectedCollection}
+        showConfirmation={showConfirmation}
+        setShowConfirmation={setShowConfirmation}
+        cancelCollection={cancelCollection}
+        reviseCollection={reviseCollection}
+        openCollection={openCollection}
+        deleteDraft={deleteDraft}
+        consoleAction={consoleAction}
+      />
+    </Fragment>
+  );
 };
