@@ -1,6 +1,4 @@
-import { mergeAll } from 'lodash/fp';
-import { Component } from 'react';
-import { button, div, h, h2, hh } from 'react-hyperscript-helpers';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import { Alert } from './Alert';
 import CloseIconComponent from '../components/CloseIconComponent';
@@ -31,51 +29,66 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export const ConfirmationDialog = hh(class ConfirmationDialog extends Component {
+export const ConfirmationDialog = (props) => { 
+  const [alertMessage, setLocalAlertMessage] = useState(undefined);
+  const [alertTitle, setLocalAlertTitle] = useState(undefined);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      alertMessage: undefined,
-      alertTitle: undefined
-    };
-  }
+  useEffect(() => {
+    setLocalAlertMessage(props.alertMessage);
+    setLocalAlertTitle(props.alertTitle);
+  }, [props.alertMessage, props.alertTitle]);
+  const { disableOkBtn = false, disableNoBtn = false } = props;
 
-  static getDerivedStateFromProps(nextProps) {
-    return {
-      alertMessage: nextProps.alertMessage,
-      alertTitle: nextProps.alertTitle
-    };
-  }
+  return (
+    <Modal
+      isOpen={props.showModal}
+      onAfterOpen={props.afterOpenModal}
+      onRequestClose={props.onRequestClose}
+      contentLabel="Modal"
+      style={{
+        ...customStyles,
+        ...props.style
+      }}
+    >
+      <div className="dialog-header">
+        <CloseIconComponent closeFn={props.action.handler(false)} />
+        <h2 id="lbl_dialogTitle" className={`dialog-title ${props.color}-color`}>{props.title}</h2>
+      </div>
 
-  render() {
-    const { disableOkBtn = false, disableNoBtn = false } = this.props;
+      <div id="lbl_dialogContent" className="dialog-content">
+        {props.children}
+        {alertTitle !== undefined && (
+          <div className="dialog-alert">
+            <Alert id="dialog" type="danger" title={alertTitle} description={alertMessage} />
+          </div>
+        )}
+      </div>
 
-    return (
-      h(Modal, {
-        isOpen: this.props.showModal,
-        onAfterOpen: this.props.afterOpenModal,
-        onRequestClose: this.props.onRequestClose,
-        style: mergeAll([customStyles, this.props.style]),
-        contentLabel: 'Modal'
-      }, [
-        div({ className: 'dialog-header' }, [
-          h(CloseIconComponent, {closeFn: this.props.action.handler(false)}),
-          h2({ id: 'lbl_dialogTitle', className: 'dialog-title ' + this.props.color + '-color' }, [this.props.title]),
-        ]),
+      <div className="dialog-footer row no-margin">
+        {
+          props.type !== 'informative' && (
+            <button
+              data-value={false}
+              id='btn_cancel'
+              className={`col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background ${props.type !== 'informative' ? '' : 'hidden'}`}
+              onClick={props.action.handler(false)}
+              disabled={disableNoBtn}
+            >
+             No
+            </button>
+          )
+        }
+        <button
+          data-value={true}
+          id='btn_action'
+          className={`col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ${props.color}-background ${props.type === 'informative' ? 'f-right' : ''}`}
+          onClick={props.action.handler(true)}
+          disabled={disableOkBtn}
+        >
+          {props.action.label}
+        </button>
+      </div>
+    </Modal>
+  );
+};
 
-        div({ id: 'lbl_dialogContent', className: 'dialog-content' }, [
-          this.props.children,
-          div({ isRendered: this.state.alertTitle !== undefined, className: 'dialog-alert' }, [
-            Alert({ id: 'dialog', type: 'danger', title: this.state.alertTitle, description: this.state.alertMessage })
-          ])
-        ]),
-
-        div({ className: 'dialog-footer row no-margin' }, [
-          button({ 'data-value': false, isRendered: this.props.type !== 'informative', id: 'btn_cancel', className: 'col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background', onClick: this.props.action.handler(false), disabled: disableNoBtn }, ['No']),
-          button({ 'data-value': true, id: 'btn_action', className: 'col-lg-3 col-md-3 col-sm-4 col-xs-6 btn ' + this.props.color + '-background ' + (this.props.type === 'informative' ? 'f-right' : ''), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
-        ])
-      ])
-    );
-  }
-});

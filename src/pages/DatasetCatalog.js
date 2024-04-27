@@ -1,6 +1,5 @@
 import {filter, find, flow, getOr, includes, isEmpty, isNil, isNull, map, isFunction} from 'lodash/fp';
-import {Fragment, useEffect, useState, useCallback } from 'react';
-import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr, img} from 'react-hyperscript-helpers';
+import React, {Fragment, useEffect, useState, useCallback } from 'react';
 import ReactTooltip from 'react-tooltip';
 import {ConfirmationDialog} from '../components/ConfirmationDialog';
 import TranslatedDulModal from '../components/modals/TranslatedDulModal';
@@ -74,7 +73,6 @@ export default function DatasetCatalog(props) {
   const [errorTitle, setErrorTitle] = useState();
   const [pageSize, setPageSize] = useState(10);
   const [searchDulText, setSearchDulText] = useState();
-  const [selectedDataset, setSelectedDataset] = useState();
   const [selectedDatasetId, setSelectedDatasetId] = useState();
 
   // Modal States
@@ -364,35 +362,49 @@ export default function DatasetCatalog(props) {
   const getLinkDisplay = (dataSet, trIndex) => {
     try {
       const url = new URL(dataSet.dbGapLink);
-      return a({
-        id: trIndex + '_linkdbGap',
-        name: 'link_dbGap',
-        href: url,
-        target: '_blank',
-        className: 'enabled'
-      }, ['Link']);
+      return (
+        <a
+          id={`${trIndex}_linkdbGap`}
+          name="link_dbGap"
+          href={url}
+          target="_blank"
+          className="enabled"
+          rel='noreferrer'
+        >
+          Link
+        </a>
+      );
     } catch (e) {
-      return span({}, ['--']);
+      return <span>--</span>;
     }
   };
 
-  const getSortDisplay = ({field, label}) => {
-    return div({
-      className: 'cell-sort',
-      style: { transform: 'translateY(1rem)' },
-      onClick: () => {
-        let newSort = sort.field === field
-          ? { field, dir: sort.dir * -1 }
-          : { field, dir: 1 };
-        applyDatasetSort(newSort, datasetList);
-      }
-    }, [
-      label ? label : field,
-      div({className: 'sort-container'}, [
-        h(ArrowDropUp, { className: `sort-icon sort-icon-up ${sort.field === field && sort.dir === -1 ? 'active' : ''}` }),
-        h(ArrowDropDown, { className: `sort-icon sort-icon-down ${sort.field === field && sort.dir === 1? 'active': ''}` })
-      ])
-    ]);
+  const getSortDisplay = ({ field, label }) => {
+    return (
+      <div
+        className="cell-sort"
+        style={{ transform: 'translateY(1rem)' }}
+        onClick={() => {
+          let newSort =
+            sort.field === field
+              ? { field, dir: sort.dir * -1 }
+              : { field, dir: 1 };
+          applyDatasetSort(newSort, datasetList);
+        }}
+      >
+        {label ? label : field}
+        <div className="sort-container">
+          <ArrowDropUp
+            className={`sort-icon sort-icon-up ${sort.field === field && sort.dir === -1 ? 'active' : ''
+            }`}
+          />
+          <ArrowDropDown
+            className={`sort-icon sort-icon-down ${sort.field === field && sort.dir === 1 ? 'active' : ''
+            }`}
+          />
+        </div>
+      </div>
+    );
   };
 
   const isEditDatasetEnabled = (dataset) => {
@@ -419,380 +431,347 @@ export default function DatasetCatalog(props) {
   };
 
   return (
-    h(Fragment, {}, [
-      div({ className: 'container container-wide' }, [
-
-        div({ className: 'row no-margin' }, [
-          div({
-            className: ' no-padding',
-            style: {
-              display: 'flex',
-              alignItems: 'center',
+    <Fragment>
+      <div className="container container-wide">
+        <div className="row no-margin">
+          <div className="no-padding" style={{ display: 'flex', alignItems: 'center' }}>
+            <PageHeading
+              id="datasetCatalog"
+              imgSrc={isCustomDacDatasetPage ? undefined : DuosLogo}
+              iconSize={isCustomDacDatasetPage ? 'none' : 'large'}
+              color={color}
+              title={!isCustomDacDatasetPage ? 'All DUOS Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`}
+              description="Search and select datasets registered in DUOS. Click 'Apply for Access' to request access"
+            />
+            {isCustomDacDatasetPage && (
+              <div style={{ width: '100%' }}>
+                <img
+                  src={customDacDatasetPage?.icon}
+                  style={{ float: 'right' }}
+                />
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper" style={{ display: 'flex' }}>
+              <SearchBox id="datasetCatalog" searchHandler={handleSearchDul} pageHandler={handlePageChange} color="dataset" />
+              {isCustomDacDatasetPage && (
+                <div className={style['checkbox']} style={{ marginLeft: '10px', width: '50%' }}>
+                  <input
+                    checked={useCustomFilter}
+                    type="checkbox"
+                    //select-all="true"
+                    className={style['checkbox-inline']}
+                    id="chk_filterDacId"
+                    onChange={() => {
+                      setUseCustomFilter(!useCustomFilter);
+                      setCurrentPageOnlySelected(1);
+                      setCurrentPageAllDatasets(1);
+                    }}
+                  />
+                  <label className={style['regular-checkbox']} htmlFor="chk_filterDacId">
+                    {`Filter to only ${customDacDatasetPage?.dacName} data`}
+                  </label>
+                </div>
+              )}
+            </div>
+            {
+              (currentUser.isAdmin || currentUser.isChairPerson) && (
+                <button
+                  id="btn_addDataset"
+                  disabled={!currentUser.isAdmin && !currentUser.isChairPerson}
+                  onClick={() => props.history.push('data_submission_form')}
+                  className={`f-right btn-primary ${color}-background search-wrapper`}
+                  data-tip="Add a new Dataset"
+                  data-for="tip_addDataset"
+                >
+                  Add Dataset
+                  <span className="glyphicon glyphicon-plus-sign" style={{ marginLeft: '5px' }} aria-hidden="true" />
+                </button>
+              )
             }
-          }, [
-            PageHeading({
-              id: 'datasetCatalog',
-              imgSrc: isCustomDacDatasetPage ? undefined : DuosLogo,
-              iconSize: isCustomDacDatasetPage ? 'none' : 'large',
-              color: color,
-              title: (!isCustomDacDatasetPage ? 'All DUOS Catalog' : `${customDacDatasetPage.dacName} Dataset Catalog`),
-              description: 'Search and select datasets registered in DUOS. Click \'Apply for Access\' to request access'
-            }),
-            div({
-              isRendered: isCustomDacDatasetPage,
-              style: {
-                width: '100%'
-              }
-            }, [
-              img({
-                isRendered: isCustomDacDatasetPage,
-                src: customDacDatasetPage?.icon,
-                style: {
-                  float: 'right',
-                }
-              })
-            ])
-          ]),
-          div({}, [
-            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper', style: { display: 'flex' } }, [
-              h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' }),
-              div({
-                className: style['checkbox'],
-                isRendered: isCustomDacDatasetPage,
-                style: {
-                  marginLeft: '10px',
-                  width: '50%'
-                }
-              }, [
-                input({
-                  checked: useCustomFilter,
-                  type: 'checkbox',
-                  'select-all': 'true',
-                  className: style['checkbox-inline'],
-                  id: 'chk_filterDacId',
-                  onChange: () => {
-                    setUseCustomFilter(!useCustomFilter);
-                    setCurrentPageOnlySelected(1);
-                    setCurrentPageAllDatasets(1);
-                  },
-                }),
-                label({ className: style['regular-checkbox'], htmlFor: 'chk_filterDacId' }, [`Filter to only ${customDacDatasetPage?.dacName} data`]),
-              ]),
-            ]),
-
-            button({
-              id: 'btn_addDataset',
-              isRendered: (currentUser.isAdmin || currentUser.isChairPerson),
-              onClick: () => props.history.push('data_submission_form'),
-              className: `f-right btn-primary ${color}-background search-wrapper`,
-              'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
-            }, ['Add Dataset',
-              span({ className: 'glyphicon glyphicon-plus-sign', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
-            ])
-          ]),
-        ]),
-
-        div({style: Theme.lightTable}, [
-          form({ className: 'pos-relative' }, [
-            div({
-              className: `${style['checkbox']} ${style['display-inline-block']}`,
-              style: {
-                marginLeft: '28px',
-                marginBottom: '0px',
-              }
-            }, [
-              input({
-                checked: allOnPageSelected(),
-                type: 'checkbox',
-                'select-all': 'true',
-                className: 'checkbox-inline',
-                id: 'chk_selectAll',
-                onChange: selectAllOnPage
-              }),
-              label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, ['Select All Visible']),
-            ]),
-            // vertical line
-            div({
-              className: style['display-inline-block'],
-              style: {
-                top: '4px',
-                position: 'absolute',
-              }
-            }, [
-              div({
-                style: {
-                  borderLeft: '1px solid rgb(204, 204, 204)',
-                  height: '15px'
-                }
-              }, []),
-            ]),
-
-            div({
-              className: `${style['checkbox']} ${style['display-inline-block']}`,
-              style: {
-                marginLeft: '18px',
-                marginBottom: '0px',
-              }
-            }, [
-              input({
-                type: 'checkbox',
-                id: 'chk_onlySelected',
-                checked: filterToOnlySelected,
-                onChange: () => {
+          </div>
+        </div>
+        <div style={Theme.lightTable}>
+          <form className="pos-relative">
+            <div className={`${style['checkbox']} ${style['display-inline-block']}`} style={{ marginLeft: '28px', marginBottom: '0px' }}>
+              <input
+                checked={allOnPageSelected()}
+                type="checkbox"
+                //select-all="true"
+                className="checkbox-inline"
+                id="chk_selectAll"
+                onChange={selectAllOnPage}
+              />
+              <label className="regular-checkbox" htmlFor="chk_selectAll">
+                Select All Visible
+              </label>
+            </div>
+            <div className={style['display-inline-block']} style={{ top: '4px', position: 'absolute' }}>
+              <div style={{ borderLeft: '1px solid rgb(204, 204, 204)', height: '15px' }} />
+            </div>
+            <div className={`${style['checkbox']} ${style['display-inline-block']}`} style={{ marginLeft: '18px', marginBottom: '0px' }}>
+              <input
+                type="checkbox"
+                id="chk_onlySelected"
+                checked={filterToOnlySelected}
+                onChange={() => {
                   setFilterToOnlySelected(!filterToOnlySelected);
-                }
-              }),
-              label({ id: 'lbl_onlySelected', className: style['regular-checkbox'], htmlFor: 'chk_onlySelected' },
-                [`Show ${numDatasetsSelected} Dataset${(numDatasetsSelected != 1?'s':'')} Selected`])
-            ]),
-          ]),
-
-          div({ className: currentUser.isAdmin ? style['table-scroll-admin'] : style['table-scroll'] }, [
-            table({ className: 'table' }, [
-              thead({}, [
-                tr({}, [
-                  th(),
-                  th({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson), className: style['cell-size'], style: { minWidth: '14rem' }}, ['Actions']),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Dataset Name' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Access Committee' })]),
-                  th({ className: style['cell-size'] }, ['Data Source']),
-                  th({ className: style['cell-size'] }, ['Data Use Terms']),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Type' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Disease Studied' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Principal Investigator (PI)' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: '# of Participants' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Description' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Species' })]),
-                  th({ className: style['cell-size'] }, [getSortDisplay({ field: 'Data Custodian' })]),
-                ])
-              ]),
-
-              tbody({ isRendered: !isNil(visibleDatasets()) && !isEmpty(visibleDatasets()) }, [
-                datasetsOnPage
-                  .map((dataset, trIndex) => {
-                    return h(Fragment, { key: trIndex }, [
-                      tr({}, [
-                        td({ className: style['first-child'], width: '60px' }, [
-                          div({ className: style['checkbox'], isRendered: !isNil(dataset.dacId)}, [
-                            input({
-                              type: 'checkbox',
-                              id: trIndex + '_chkSelect',
-                              name: 'chk_select',
-                              checked: dataset.checked,
-                              onChange: checkSingleRow(dataset)
-                            }),
-                            label({
-                              className: style['regular-checkbox'],
-                              // Apply additional styling for inactive datasets
-                              style: unapprovedStyle(dataset),
-                              htmlFor: trIndex + '_chkSelect' })
-                          ])
-                        ]),
-
-                        td({ isRendered: (currentUser.isAdmin || currentUser.isChairPerson) }, [
-                          div({ className: style['dataset-actions'] }, [
-                            a({
-                              id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataset.dataSetId),
-                              disabled: (!dataset.deletable || !isEditDatasetEnabled(dataset))
-                            }, [
-                              span({
-                                className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataset.deletable ? 'default-color' : ''),
-                                'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
-                              })
-                            ]),
-
-                            a({
-                              id: trIndex + '_btnEdit', name: 'btn_edit', onClick: openEdit(dataset.dataSetId),
-                              disabled: !isEditDatasetEnabled(dataset)
-                            }, [
-                              span({
-                                className: `cm-icon-button glyphicon glyphicon-pencil caret-margin ${color}-color`, 'aria-hidden': 'true',
-                                'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
-                              })
-                            ])
-                          ])
-                        ]),
-
-                        td({
-                          id: dataset.datasetIdentifier + '_dataset', name: 'datasetIdentifier',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['Dataset ID']
-                        ]),
-
-                        td({
-                          id: trIndex + '_datasetName', name: 'datasetName',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ? style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          a({
-                            href: `/dataset/${dataset.datasetIdentifier}`,
-                          }, dataset.name)
-                        ]),
-
-                        td({
-                          id: trIndex + '_dac', name: 'dac',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['Data Access Committee']
-                        ]),
-
-                        td({
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          getLinkDisplay(dataset, trIndex)
-                        ]),
-
-                        td({
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          a({
-                            id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
-                            onClick: () => openTranslatedDUL(dataset.dataUse),
-                            className: (!isVisible(dataset) ?  style['dataset-disabled'] : 'enabled')
-                          }, dataset.codeList)
-                        ]),
-
-                        td({
-                          id: trIndex + '_dataType', name: 'dataType',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          findPropertyValue(dataset, 'Data Type')
-                        ]),
-
-                        td({
-                          id: trIndex + '_phenotype', name: 'phenotype',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['Disease Studied']
-                        ]),
-
-                        td({
-                          id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['Principal Investigator (PI)']
-                        ]),
-
-                        td({
-                          id: trIndex + '_participants', name: 'participants',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['# of Participants']
-                        ]),
-
-                        td({
-                          id: trIndex + '_description', name: 'description',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          findPropertyValue(dataset, 'Description')
-                        ]),
-
-                        td({
-                          id: trIndex + '_species', name: 'species',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          findPropertyValue(dataset, 'Species')
-                        ]),
-
-                        td({
-                          id: trIndex + '_depositor', name: 'depositor',
-                          className: `${style['cell-size']} ` + (!isVisible(dataset) ?  style['dataset-disabled'] : ''),
-                          style: tableBody
-                        }, [
-                          dataset['Data Custodian']
-                        ]),
-
-                      ])
-                    ]);
-                  })
-              ])
-            ])
-          ]),
-          div({ style: { 'margin': '0 20px 15px 20px' } }, [
-            PaginatorBar({
-              total: visibleDatasets().filter(searchTable(searchDulText)).length,
-              limit: pageSize,
-              currentPage: currentPage(),
-              onPageChange: handlePageChange,
-              changeHandler: handleSizeChange,
-            })
-          ])
-        ]),
-
-        div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-          button({
-            id: 'btn_downloadSelection',
-            isRendered: (currentUser.isAdmin || currentUser.isChairPerson || currentUser.isMember || currentUser.isSigningOfficial),
-            download: '',
-            disabled: selectedDatasets.length === 0,
-            onClick: download,
-            className: `col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary ${color}-background`
-          }, [
-            'Download Dataset List',
-            span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
-          ]),
-        ]),
-        div({ className: 'f-right' }, [
-          button({
-            id: 'btn_applyAccess',
-            isRendered: currentUser.isResearcher,
-            disabled: (selectedDatasets.length === 0),
-            onClick: () => exportToRequest(),
-            className: `btn-primary ${color}-background search-wrapper`,
-            'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess',
-            style: { marginBottom: '30%'}
-          }, ['Apply for Access'])
-        ]),
-        h(TranslatedDulModal,{
-          isRendered: showTranslatedDULModal,
-          showModal: showTranslatedDULModal,
-          dataUse: dataUse,
-          onCloseRequest: () => setShowTranslatedDULModal(false)
-        }),
-
-        ConfirmationDialog({
-          title: 'Delete Dataset Confirmation?',
-          color: 'cancel',
-          showModal: showDatasetDelete,
-          alertMessage: errorMessage,
-          alertTitle: errorTitle,
-          action: { label: 'Yes', handler: () => dialogHandlerDelete }
-        }, [div({ className: 'dialog-description' }, ['Are you sure you want to delete this Dataset?']),]),
-
-        ConfirmationDialog({
-          title: 'Edit Dataset Confirmation?',
-          color: 'dataset',
-          alertMessage: errorMessage,
-          alertTitle: errorTitle,
-          showModal: showDatasetEdit,
-          action: { label: 'Yes', handler: () => dialogHandlerEdit }
-        }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?'])]),
-
-        h(ReactTooltip, {
-          id: 'tip_delete',
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: 'tip_requestAccess',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        })
-      ])
-    ])
+                }}
+              />
+              <label id="lbl_onlySelected" className={style['regular-checkbox']} htmlFor="chk_onlySelected">
+                {`Show ${numDatasetsSelected} Dataset${numDatasetsSelected !== 1 ? 's' : ''} Selected`}
+              </label>
+            </div>
+          </form>
+          <div className={currentUser.isAdmin ? style['table-scroll-admin'] : style['table-scroll']}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th />
+                  {currentUser.isAdmin || currentUser.isChairPerson && (
+                    <th className={style['cell-size']} style={{ minWidth: '14rem' }}>Actions</th>
+                  )}
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Dataset Name' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Data Access Committee' })}</th>
+                  <th className={style['cell-size']}>Data Source</th>
+                  <th className={style['cell-size']}>Data Use Terms</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Data Type' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Disease Studied' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Principal Investigator (PI)' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: '# of Participants' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Description' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Species' })}</th>
+                  <th className={style['cell-size']}>{getSortDisplay({ field: 'Data Custodian' })}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!isNil(visibleDatasets()) && !isEmpty(visibleDatasets()) && datasetsOnPage.map((dataset, trIndex) => (
+                  <Fragment key={trIndex}>
+                    <tr>
+                      <td className={style['first-child']} width="60px">
+                        <div className={style['checkbox']}>
+                          {!isNil(dataset.dacId) && (
+                            <>
+                              <input
+                                type="checkbox"
+                                id={`${trIndex}_chkSelect`}
+                                name="chk_select"
+                                checked={dataset.checked}
+                                onChange={checkSingleRow(dataset)}
+                              />
+                              <label
+                                className={style['regular-checkbox']}
+                                style={unapprovedStyle(dataset)}
+                                htmlFor={`${trIndex}_chkSelect`}
+                              />
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      {(currentUser.isAdmin || currentUser.isChairPerson) && (
+                        <td>
+                          <div className={style['dataset-actions']}>
+                            <a
+                              id={`${trIndex}_btnDelete`}
+                              name="btn_delete"
+                              onClick={openDelete(dataset.dataSetId)}
+                              disabled={!dataset.deletable || !isEditDatasetEnabled(dataset)}
+                            >
+                              <span
+                                className={`cm-icon-button glyphicon glyphicon-trash caret-margin ${dataset.deletable ? 'default-color' : ''}`}
+                                aria-hidden="true"
+                                data-tip="Delete dataset"
+                                data-for="tip_delete"
+                              />
+                            </a>
+                            <a
+                              id={`${trIndex}_btnEdit`}
+                              name="btn_edit"
+                              onClick={openEdit(dataset.dataSetId)}
+                              disabled={!isEditDatasetEnabled(dataset)}
+                            >
+                              <span
+                                className={`cm-icon-button glyphicon glyphicon-pencil caret-margin ${color}-color`}
+                                aria-hidden="true"
+                                data-tip="Edit dataset"
+                                data-for="tip_edit"
+                              />
+                            </a>
+                          </div>
+                        </td>
+                      )}
+                      <td
+                        id={`${dataset.datasetIdentifier}_dataset`}
+                        name="datasetIdentifier"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['Dataset ID']}
+                      </td>
+                      <td
+                        id={`${trIndex}_datasetName`}
+                        name="datasetName"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        <a href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.name}</a>
+                      </td>
+                      <td
+                        id={`${trIndex}_dac`}
+                        name="dac"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['Data Access Committee']}
+                      </td>
+                      <td className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`} style={tableBody}>
+                        {getLinkDisplay(dataset, trIndex)}
+                      </td>
+                      <td className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`} style={tableBody}>
+                        <a
+                          id={`${trIndex}_linkTranslatedDul`}
+                          name="link_translatedDul"
+                          onClick={() => openTranslatedDUL(dataset.dataUse)}
+                          className={!isVisible(dataset) ? style['dataset-disabled'] : 'enabled'}
+                        >
+                          {dataset.codeList}
+                        </a>
+                      </td>
+                      <td
+                        id={`${trIndex}_dataType`}
+                        name="dataType"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {findPropertyValue(dataset, 'Data Type')}
+                      </td>
+                      <td
+                        id={`${trIndex}_phenotype`}
+                        name="phenotype"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['Disease Studied']}
+                      </td>
+                      <td
+                        id={`${trIndex}_pi`}
+                        name="pi"
+                        className={`cell-size ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['Principal Investigator (PI)']}
+                      </td>
+                      <td
+                        id={`${trIndex}_participants`}
+                        name="participants"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['# of Participants']}
+                      </td>
+                      <td
+                        id={`${trIndex}_description`}
+                        name="description"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {findPropertyValue(dataset, 'Description')}
+                      </td>
+                      <td
+                        id={`${trIndex}_species`}
+                        name="species"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {findPropertyValue(dataset, 'Species')}
+                      </td>
+                      <td
+                        id={`${trIndex}_depositor`}
+                        name="depositor"
+                        className={`${style['cell-size']} ${!isVisible(dataset) ? style['dataset-disabled'] : ''}`}
+                        style={tableBody}
+                      >
+                        {dataset['Data Custodian']}
+                      </td>
+                    </tr>
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ margin: '0 20px 15px 20px' }}>
+            <PaginatorBar
+              total={visibleDatasets().filter(searchTable(searchDulText)).length}
+              limit={pageSize}
+              currentPage={currentPage()}
+              onPageChange={handlePageChange}
+              changeHandler={handleSizeChange}
+            />
+          </div>
+        </div>
+        <div className="col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding">
+          { (currentUser.isAdmin || currentUser.isChairPerson || currentUser.isMember || currentUser.isSigningOfficial) && (
+            <button
+              id="btn_downloadSelection"
+              disabled={selectedDatasets.length === 0}
+              onClick={download}
+              className={`col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary ${color}-background`}
+            >
+               Download Dataset List
+              <span className="glyphicon glyphicon-download" style={{ marginLeft: '5px' }} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+        <div className="f-right">
+          {currentUser.isResearcher && (
+            <div className="f-right">
+              <button
+                id="btn_applyAccess"
+                disabled={selectedDatasets.length === 0}
+                onClick={() => exportToRequest()}
+                className={`btn-primary ${color}-background search-wrapper`}
+                data-tip="Request Access for selected Datasets"
+                data-for="tip_requestAccess"
+                style={{ marginBottom: '30%' }}
+              >
+               Apply for Access
+              </button>
+            </div>
+          )}
+        </div>
+        {showTranslatedDULModal && (
+          <TranslatedDulModal
+            isRendered={showTranslatedDULModal}
+            showModal={showTranslatedDULModal}
+            dataUse={dataUse}
+            onCloseRequest={() => setShowTranslatedDULModal(false)}
+          />
+        )}
+        <ConfirmationDialog
+          title="Delete Dataset Confirmation?"
+          color="cancel"
+          showModal={showDatasetDelete}
+          alertMessage={errorMessage}
+          alertTitle={errorTitle}
+          action={{ label: 'Yes', handler: () => dialogHandlerDelete }}
+        >
+          <div className="dialog-description">Are you sure you want to delete this Dataset?</div>
+        </ConfirmationDialog>
+        <ConfirmationDialog
+          title="Edit Dataset Confirmation?"
+          color="dataset"
+          alertMessage={errorMessage}
+          alertTitle={errorTitle}
+          showModal={showDatasetEdit}
+          action={{ label: 'Yes', handler: () => dialogHandlerEdit }}
+        >
+          <div className="dialog-description">Are you sure you want to edit this Dataset?</div>
+        </ConfirmationDialog>
+        <ReactTooltip id="tip_delete" place="right" effect="solid" multiline className="tooltip-wrapper" />
+        <ReactTooltip id="tip_requestAccess" effect="solid" multiline className="tooltip-wrapper" />
+      </div>
+    </Fragment>
   );
 }
