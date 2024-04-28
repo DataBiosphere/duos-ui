@@ -356,9 +356,9 @@ export const DarCollectionTable = function DarCollectionTable(props) {
         - Need to change message based on operation
         - Need to change prop function based on operation
         - showConfirmationModal
-        - Can be take in an extra op argument, assign that as a state variable
-        - Modal function can be defined via useCallback, recomputed if op state variable changes
-        - Above can also be applied for modal message (expect use useMemo instead of useCallback)
+         - Can be take in an extra op argument, assign that as a state variable
+         - Modal function can be defined via useCallback, recomputed if op state variable changes
+         - Above can also be applied for modal message (expect use useMemo instead of useCallback)
     */
       }
       <CollectionConfirmationModal
