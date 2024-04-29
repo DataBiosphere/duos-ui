@@ -127,19 +127,19 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
     try {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.createDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Gave access to ${specificDac.name} to user: ${researcher.displayName}`});
+      Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
       // history.push(`/signing_official_console/researchers2`);
     } catch(error) {
-      Notifications.showError({text: `Error issuing access to ${specificDac.name} to user: ${researcher.displayName}`});
+      Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   } else {
     try {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Removed access to ${specificDac.name} to user: ${researcher.displayName}`});
+      Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
       // history.push(`/signing_official_console/researchers2`);
     } catch(error) {
-      Notifications.showError({text: `Error removing access to ${specificDac.name} to user: ${researcher.displayName}`});
+      Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   }
 }
@@ -239,23 +239,27 @@ const roleCell = (roles, id) => {
   };
 };
 
-const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, actionsTitle) => {
+const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, actionsTitle, option1, option2, download) => {
   return (
-    <ul className="dropdown-menu" role="menu" style={{ padding: '20px', marginLeft:'240px'}}>
+    <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
     <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
       <strong>{actionsTitle}</strong>
     </th>
     <form>
+      {download && 
+      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+        <a href={download}>Download agreement</a>
+      </li>}
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
           <input type="radio" name="agreementAction" value="apply" checked={applyAllDaa} onChange={handleApplyAllDaaChange}/>
-          &nbsp;&nbsp;Apply all agreements to this user
+          &nbsp;&nbsp;{option1}
         </label>
       </li>
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
           <input type="radio" name="agreementAction" value="remove" checked={removeAllDaa} onChange={handleRemoveAllDaaChange}/>
-          &nbsp;&nbsp;Remove all agreements from this user
+          &nbsp;&nbsp;{option2}
         </label>
       </li>
     </form>
@@ -312,7 +316,7 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
               <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
             </div>
           </a>
-          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions')}
+          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
         </li>
         {/* <div>{displayName || 'Invite sent, pending registration'}</div>
         <div><a href={`mailto:${email}`}>{email || '- -'}</a></div> */}
@@ -363,13 +367,13 @@ export default function SigningOfficialTable2(props) {
     );
   }, [researchers]);
 
-  const showConfirmationModal = ({card, message, title, confirmType}) => {
-    setSelectedCard(card);
-    setShowConfirmation(true);
-    setConfirmationModalMsg(message);
-    setConfirmationTitle(title);
-    setConfirmType(confirmType);
-  };
+  // const showConfirmationModal = ({card, message, title, confirmType}) => {
+  //   setSelectedCard(card);
+  //   setShowConfirmation(true);
+  //   setConfirmationModalMsg(message);
+  //   setConfirmationTitle(title);
+  //   setConfirmType(confirmType);
+  // };
 
   const handleApplyAllDaaChange = (event) => {
     setApplyAllDaa(event.target.checked);
@@ -398,7 +402,7 @@ export default function SigningOfficialTable2(props) {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
 
       const handleApplyAllDaa = async (id, dacName) => {
-        const userList = { "users": researchers.map(researcher => researcher.userId) };
+        const userList = { "users": props.researchers.map(researcher => researcher.userId) };
         console.log(userList);
         if (applyAllDaa) {
           try {
@@ -417,11 +421,22 @@ export default function SigningOfficialTable2(props) {
         }
       }
 
+      const downloadLink = async (id) => {
+        const link = await DAA.getDaaFileById(id);
+        console.log(link);
+        return link;
+        // return (
+        //   <a href={link}>Download agreement</a>
+        // );
+      }
+
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
-          const id = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId))?.daaId
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa(id, dac.name), `${dac.name} Actions`)};
+          const id = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId))?.daaId;
+          const download = downloadLink(id);
+          //download link & then pass it into dropdown?!?!
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', download)};
           return acc;
         }, {}),
       };
@@ -669,7 +684,7 @@ export default function SigningOfficialTable2(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issuing a checkmark in a cell for a researcher denotes your approval of that researcher   
+              Issuing a checkmark in a cell for a researcher denotes your approval of that researcher
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
@@ -700,7 +715,7 @@ export default function SigningOfficialTable2(props) {
         tableSize={tableSize}
         paginationBar={paginationBar}
       />
-      <LibraryCardFormModal
+      {/* <LibraryCardFormModal
         showModal={showModal}
         createOnClick={(card) => issueLibraryCard(card, researchers)}
         closeModal={() => setShowModal(false)}
@@ -723,7 +738,7 @@ export default function SigningOfficialTable2(props) {
           confirmType === confirmModalType.delete
             ? removeDaaLcAssociation(selectedCard, researchers)
             : addDaaLcAssociation(selectedCard, researchers)}
-      />
+      /> */}
     </>
   );
 }

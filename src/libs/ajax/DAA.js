@@ -51,5 +51,11 @@ export const DAA = {
     const url = `${await getApiUrl()}/api/daa/bulk/user/${userId}`;
     const res = await axios.delete(url, { ...Config.authOpts(), data: daaList });
     return res.data;
-  }
+  }, 
+
+  getDaaFileById: async (daaId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}/file`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
 };
