@@ -138,7 +138,7 @@ const DeleteRecordButton = (props) => {
       dataTip='Delete Library Card'
       isRendered={true}
       onClick={onClick}
-      icon={<Delete />}
+      icon={Delete}
       style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
       hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
     />
@@ -163,7 +163,7 @@ const UpdateRecordButton = (props) => {
       dataTip='Update Library Card'
       isRendered={true}
       onClick={onClick}
-      icon={<Update />}
+      icon={Update}
       style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
       hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
     />
@@ -378,7 +378,7 @@ export default function LibraryCardTable(props) {
         </div>
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} style={{width: '100%', margin: '0 3% 0 0'}}>
           <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', width: '300px'}}>
-            <a id='btn_addLibraryCard' className='btn-primary btn-add common-background' style={{marginTop: '30%', display: 'flex'}} onClick={() => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard)}><span>Add Library Card</span></a>
+            <button id='btn_addLibraryCard' className='btn-primary btn-add common-background' style={{marginTop: '30%', display: 'flex'}} onClick={() => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard)}><span>Add Library Card</span></button>
           </div>
         </SearchBar>
       </div>
