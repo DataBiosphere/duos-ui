@@ -529,7 +529,7 @@ export default function DatasetCatalog(props) {
               <thead>
                 <tr>
                   <th />
-                  {currentUser.isAdmin || currentUser.isChairPerson && (
+                  {(currentUser.isAdmin || currentUser.isChairPerson) && (
                     <th className={style['cell-size']} style={{ minWidth: '14rem' }}>Actions</th>
                   )}
                   <th className={style['cell-size']}>{getSortDisplay({ field: 'datasetIdentifier', label: 'Dataset ID' })}</th>
