@@ -18,7 +18,7 @@ export default function SigningOfficialResearchers2() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const init = async() => {
+    const init = async () => {
       try {
         setIsLoading(true);
         const soUser = await User.getMe();
@@ -26,13 +26,23 @@ export default function SigningOfficialResearchers2() {
         const daaList = await DAA.getDaas();
         const dacList = await DAC.list();
 
-        setResearchers(researcherList);
+        // the construction of this list is currently a work-around because our endpoint in the backend
+        // does not currently populate the DAA IDs on the each researcher's libary card
+        const researcherObjectList = await Promise.all(
+          researcherList.map(async (researcher) => {
+            return await User.getById(researcher.userId);
+          })
+        );
+
+        setResearchers(researcherObjectList);
         setSigningOfficial(soUser);
         setDaas(daaList);
         setDacs(dacList);
         setIsLoading(false);
-      } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
+      } catch (error) {
+        Notifications.showError({
+          text: 'Error: Unable to retrieve current user from server',
+        });
         setIsLoading(false);
       }
     };

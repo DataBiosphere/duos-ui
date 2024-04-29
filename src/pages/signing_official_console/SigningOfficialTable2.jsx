@@ -17,11 +17,14 @@ import {
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax/LibraryCard';
+import { DAA } from '../../libs/ajax/DAA';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
+import Button from '@mui/material/Button';
+import { title } from 'process';
 
 //Styles specific to this table
 const styles = {
@@ -37,6 +40,8 @@ const styles = {
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
+    backgroundColor: '#e2e8f4',
+    fontSize: '1.25rem'
   }),
   cellWidths: {
     email: '25%',
@@ -49,7 +54,7 @@ const styles = {
 //column header format for table
 let columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
-  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
+  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}, sortable: true},
   libraryCard: {label: 'Library Card', cellStyle: {width: styles.cellWidths.libraryCard}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.role}},
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
@@ -117,6 +122,28 @@ const IssueLibraryCardButton = (props) => {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
+const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
+  if (!checked) {
+    try {
+      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
+      await DAA.createDaaLcLink(daaId, researcher.userId);
+      Notifications.showSuccess({text: `Gave access to ${specificDac.name} to user: ${researcher.displayName}`});
+      // history.push(`/signing_official_console/researchers2`);
+    } catch(error) {
+      Notifications.showError({text: `Error issuing access to ${specificDac.name} to user: ${researcher.displayName}`});
+    }
+  } else {
+    try {
+      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
+      await DAA.deleteDaaLcLink(daaId, researcher.userId);
+      Notifications.showSuccess({text: `Removed access to ${specificDac.name} to user: ${researcher.displayName}`});
+      // history.push(`/signing_official_console/researchers2`);
+    } catch(error) {
+      Notifications.showError({text: `Error removing access to ${specificDac.name} to user: ${researcher.displayName}`});
+    }
+  }
+}
+
 const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
@@ -158,56 +185,29 @@ const LibraryCardCell = ({
   };
 };
 
-const DAACell = ({
+const DAACell = (
   rowDac, 
   researcher,
   institutionId,
   daas
-}) => {
+) => {
   const id = researcher && (researcher.userId || researcher.email);
+  // const actualResearcher = await User.getById(researcher.userId);
   const libraryCards = researcher && researcher.libraryCards;
+  // console.log('libraryCards', libraryCards);
   const card = libraryCards && libraryCards.find(card => card.institutionId === institutionId);
   const daaIds = researcher && card && card.daaIds;
+  // console.log('daaIds', daaIds);
   const filteredDaas = daaIds && daas.filter(daa => daaIds.includes(daa.daaId));
   const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
-  console.log('hasDacId', hasDacId);
-  // const card = !isEmpty(researcher.libraryCards)
-  //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
-  //   : null;
-  // const daasOnCard = card && card.daaIds;
-  // const hasDacId = daasOnCard && daasOnCard.some(daaId => daas.some(daa => daa.dacId === daaId));
-
-  // access libary cards on researcher
-  // check if the library card has daa id 
-  // find the daa & finding linked dacs in the dacId list
-  // does this user's library card have the daa associated with this dac that is passed on?
-
-  // const card = !isEmpty(researcher.libraryCards)
-  //   ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
-  //   : null;
-  // const daasOnCard = card.daaIds;
-  // console.log(daa.file.fileName);
-  // console.log(card);
-  // confirmed getting the appropraite n
-  // // console.log(researcher.displayName, daasOnCard);
-  // for (var daa in daasOnCard) {
-  //   console.log(daa.daaId);
+  // console.log(researcher.displayName);
+  // if (researcher.displayName === 'Aarohi Nadkarni') {
+  //   console.log('libraryCards', libraryCards);
+  //   console.log('hasDacId', hasDacId);
   // }
-  // get daa ids from researcher's library card
-  // get daa by id & then get name!
-  // const checkbox = !isNil(card)
-  //   ? DeactivateLibraryCardButton({
-  //     card,
-  //     showConfirmationModal,
-  //   })
-  //   : IssueLibraryCardButton({
-  //     card: {
-  //       userId: researcher.userId,
-  //       userEmail: researcher.email,
-  //       institutionId: institutionId
-  //     },
-
-  //   });
+  // const message = hasDacId ? `Are you sure you want to remove ${researcher.displayName}'s approval for ${rowDac.name}'s datasets? ` : `Are you sure you want to approve ${researcher.displayName} for ${rowDac.name}'s datasets?`;
+  // const title = hasDacId ? `Remove ${researcher.displayName}'s access` : `Approve ${researcher.displayName}'s access`;
+  // const confirmDaaType = hasDacId ? confirmModalType.delete : confirmModalType.issue;
 
   return {
     isComponent: true,
@@ -215,7 +215,8 @@ const DAACell = ({
     label: 'lc-button',
     data: (
       <div>
-        <Checkbox checked={hasDacId}/>
+        {/* <Checkbox checked={hasDacId}/>  */}
+        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId)}/> 
       </div>
     ),
   };
@@ -238,12 +239,83 @@ const roleCell = (roles, id) => {
   };
 };
 
-const displayNameCell = (displayName, email, id) => {
+const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, actionsTitle) => {
+  return (
+    <ul className="dropdown-menu" role="menu" style={{ padding: '20px', marginLeft:'240px'}}>
+    <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
+      <strong>{actionsTitle}</strong>
+    </th>
+    <form>
+      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+        <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+          <input type="radio" name="agreementAction" value="apply" checked={applyAllDaa} onChange={handleApplyAllDaaChange}/>
+          &nbsp;&nbsp;Apply all agreements to this user
+        </label>
+      </li>
+      <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+          <input type="radio" name="agreementAction" value="remove" checked={removeAllDaa} onChange={handleRemoveAllDaaChange}/>
+          &nbsp;&nbsp;Remove all agreements from this user
+        </label>
+      </li>
+    </form>
+    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+      <Button style={{
+        fontSize: '15px',
+        fontWeight: 'normal',
+        border: '1px solid #0948B7',
+        borderRadius: '5px',
+        height: '40px',
+        marginRight: '1em',
+        cursor: 'pointer',
+        color: '#0948B7',
+        padding: '10px 20px'
+      }} onClick={handleApplyAllDaa}>Apply</Button>
+    </li>
+  </ul>
+  );
+}
+
+const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa) => {
+  // const [applyAllDaa, setApplyAllDaa] = useState(false);
+  // let applyAllDaa = false;
+  // let removeAllDaa = false;
+  const handleApplyAllDaa = async () => {
+    const daaList = { "daaList": daas.map(daa => daa.daaId) };
+    console.log(daaList);
+    console.log(id);
+    if (applyAllDaa) {
+      try {
+        await DAA.bulkAddDaasToUser(id, daaList);
+        Notifications.showSuccess({text: `Gave access to all DACs to user: ${displayName}`});
+      } catch(error) {
+        Notifications.showError({text: `Error issuing access to all DAC's to user: ${displayName}`});
+      }
+    } else if (removeAllDaa) {
+      try {
+        await DAA.bulkRemoveDaasFromUser(id, daaList);
+        Notifications.showSuccess({text: `Removed access for all DACs from user: ${displayName}`});
+      } catch(error) {
+        Notifications.showError({text: `Error removing access for all DAC's from user: ${displayName}`});
+      }
+    }
+  }
+
   return {
     data: (
       <>
-        <div>{displayName || 'Invite sent, pending registration'}</div>
-        <div><a href={`mailto:${email}`}>{email || '- -'}</a></div>
+        <li className="dropdown" style={{ listStyleType: 'none' }}>
+          <a role="button" data-toggle="dropdown">
+            <div id="dacUser" style={{ color: 'black' }}>
+              {displayName || 'Invite sent, pending registration'}
+              <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
+              <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
+            </div>
+          </a>
+          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions')}
+        </li>
+        {/* <div>{displayName || 'Invite sent, pending registration'}</div>
+        <div><a href={`mailto:${email}`}>{email || '- -'}</a></div> */}
       </>
     ),
     id,
@@ -276,10 +348,9 @@ export default function SigningOfficialTable2(props) {
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState(confirmModalType.delete);
-  // const [daas, setDaas] = useState(props.daas);
-  // const [dacs, setDacs] = useState(props.dacs);
-  const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name,
-    columnHeaderFormat.role]);
+  const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
+  const [applyAllDaa, setApplyAllDaa] = useState(false);
+  const [removeAllDaa, setRemoveAllDaa] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -300,6 +371,16 @@ export default function SigningOfficialTable2(props) {
     setConfirmType(confirmType);
   };
 
+  const handleApplyAllDaaChange = (event) => {
+    setApplyAllDaa(event.target.checked);
+    setRemoveAllDaa(!event.target.checked);
+  };
+
+  const handleRemoveAllDaaChange = (event) => {
+    setRemoveAllDaa(event.target.checked);
+    setApplyAllDaa(!event.target.checked);
+  };
+
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
@@ -310,17 +391,37 @@ export default function SigningOfficialTable2(props) {
       }
     };
     init();
-    // addColumns();
   }, [props.researchers]);
 
   useEffect(() => {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
 
+      const handleApplyAllDaa = async (id, dacName) => {
+        const userList = { "users": researchers.map(researcher => researcher.userId) };
+        console.log(userList);
+        if (applyAllDaa) {
+          try {
+            await DAA.bulkAddUsersToDaa(id, userList);
+            Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
+          } catch(error) {
+            Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
+          }
+        } else if (removeAllDaa) {
+          try {
+            await DAA.bulkRemoveUsersFromDaa(id, userList);
+            Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
+          } catch(error) {
+            Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
+          }
+        }
+      }
+
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` } };
+          const id = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId))?.daaId
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa(id, dac.name), `${dac.name} Actions`)};
           return acc;
         }, {}),
       };
@@ -334,7 +435,6 @@ export default function SigningOfficialTable2(props) {
 
       setColumnHeaderData(newColumnHeaderData);
     };
-    // console.log(dacs);
     generateColumnData();
   }, [dacs]);
 
@@ -396,22 +496,12 @@ export default function SigningOfficialTable2(props) {
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
-      const toReturn = [
-        displayNameCell(displayName, email, id),
-        roleCell(roles, id),
-        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas)) // this isn't working for some reason
+      return [
+        displayNameCell(displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa),
+        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas))
       ];
-      // console.log("toreturn", toReturn);
-      return toReturn;
     });
   };
-
-  // let columnHeaderData = [
-  //   columnHeaderFormat.name,
-  //   columnHeaderFormat.role,
-  //   // columnHeaderFormat.libraryCard
-  //   // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
-  // ];
 
   const showModalOnClick = () => {
     setSelectedCard({institutionId: signingOfficial.institutionId});
@@ -441,6 +531,74 @@ export default function SigningOfficialTable2(props) {
         messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
+        messageName = userName;
+      }
+      setResearchers(listCopy);
+      setShowConfirmation(false);
+      setShowModal(false);
+      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
+    } catch(error) {
+      Notifications.showError({text: `Error issuing library card to ${messageName}`});
+    }
+  };
+
+  const addDaaLcAssociation = async (selectedCard, researchers) => {
+    let messageName;
+    try {
+      const listCopy = cloneDeep(researchers);
+      const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
+      const {userEmail, userName, userId} = newDaaLcAssociatoin;
+      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
+      if(targetIndex === -1) { //if card is not found, push new user to top of list
+        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
+        const attributes = {
+          email: userEmail,
+          displayName: userName,
+          libraryCards: [newDaaLcAssociatoin],
+          roles: [],
+        };
+        if(!isNil(targetUnregisteredResearcher)) {
+          attributes.roles = targetUnregisteredResearcher.roles;
+        }
+        listCopy.unshift(attributes);
+        messageName = userEmail;
+      } else {
+        listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
+        messageName = userName;
+      }
+      setResearchers(listCopy);
+      setShowConfirmation(false);
+      setShowModal(false);
+      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
+    } catch(error) {
+      Notifications.showError({text: `Error issuing library card to ${messageName}`});
+    }
+  };
+
+  const removeDaaLcAssociation = async (selectedDac, researchers) => {
+    let messageName;
+    try {
+      const listCopy = cloneDeep(researchers);
+      const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
+      const {userEmail, userName, userId} = newDaaLcAssociatoin;
+      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
+      if(targetIndex === -1) { //if card is not found, push new user to top of list
+        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
+        const attributes = {
+          email: userEmail,
+          displayName: userName,
+          libraryCards: [newDaaLcAssociatoin],
+          roles: [],
+        };
+        if(!isNil(targetUnregisteredResearcher)) {
+          attributes.roles = targetUnregisteredResearcher.roles;
+        }
+        listCopy.unshift(attributes);
+        messageName = userEmail;
+      } else {
+        listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
         messageName = userName;
       }
       setResearchers(listCopy);
@@ -556,18 +714,15 @@ export default function SigningOfficialTable2(props) {
         closeConfirmation={() => setShowConfirmation(false)}
         title={confirmationTitle}
         // The issue modal requires a larger view than normal
-        styleOverride={confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {}}
-        message={confirmType === confirmModalType.delete
-          ? <div>{confirmationModalMsg}</div>
-          // Library Card Agreement Text
-          : <div>{lcaContent}{confirmationModalMsg}</div>}
+        // styleOverride={confirmType === confirmModalType.issue ? { minWidth: '725px', minHeight: '475px' } : {}}
+        message={<div>{confirmationModalMsg}</div>}
         header={`${selectedCard.userName || selectedCard.userEmail} - ${
           !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
         }`}
         onConfirm={() =>
           confirmType === confirmModalType.delete
-            ? deactivateLibraryCard(selectedCard, researchers)
-            : issueLibraryCard(selectedCard, researchers)}
+            ? removeDaaLcAssociation(selectedCard, researchers)
+            : addDaaLcAssociation(selectedCard, researchers)}
       />
     </>
   );
