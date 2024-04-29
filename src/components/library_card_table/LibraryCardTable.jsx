@@ -376,11 +376,45 @@ export default function LibraryCardTable(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}>Select and manage Library Cards</div>
           </div>
         </div>
-        <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef} style={{width: '100%', margin: '0 3% 0 0'}}>
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', width: '300px'}}>
-            <button id='btn_addLibraryCard' className='btn-primary btn-add common-background' style={{marginTop: '30%', display: 'flex'}} onClick={() => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard)}><span>Add Library Card</span></button>
-          </div>
-        </SearchBar>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}
+          style={{
+            width: '100%',
+            margin: '0 3% 0 0',
+          }}
+          button={
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                width: '300px'
+              }}
+            >
+              <a
+                id="btn_addLibraryCard"
+                className="btn-primary btn-add common-background"
+                style={{
+                  marginTop: '30%',
+                  display: 'flex',
+                }}
+                onClick={() =>
+                  showModalOnClick(
+                    {},
+                    'add',
+                    setModalType,
+                    setShowModal,
+                    setCurrentCard
+                  )
+                }
+              >
+                <span>Add Library Card</span>
+              </a>
+            </div>
+          }
+        />
       </div>
       <SimpleTable
         isLoading={isLoading}
