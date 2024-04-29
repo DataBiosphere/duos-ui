@@ -52,5 +52,35 @@
     "@babel/array-bracket-newline": "off",
     "@babel/brace-style": "off",
     "@babel/semi": "warn"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "plugins": [
+        "@typescript-eslint",
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": ["./tsconfig.json"],
+      },
+      "rules": {
+        "no-undef": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "vars": "all",
+            "args": "all",
+            "argsIgnorePattern": "_|^_|^props",
+            "destructuredArrayIgnorePattern": "_|^_",
+            "ignoreRestSiblings": true
+          }
+        ]
+      },
+      "extends": [
+        "eslint:recommended", 
+        "plugin:react/recommended", 
+        "plugin:@typescript-eslint/eslint-recommended"
+      ]
+    }
+  ]
 }

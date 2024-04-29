@@ -15,7 +15,8 @@
     "target": "es2022",
     "useUnknownInCatchVariables": true,
     "paths": {
-      "@/*": ["src/*"]
+      "src/*": ["./src/*"],
+      "@/*": ["./*"],
     }
   },
   "include": [

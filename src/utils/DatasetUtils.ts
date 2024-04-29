@@ -1,6 +1,6 @@
 export const firstNonEmptyPropertyValue = (dataset: any, propertyNames: string[]): string => {
     for (const propertyName of propertyNames) {
-        let propertyValue: string[] = [];
+        const propertyValue: string[] = [];
         if ('study' in dataset && 'properties' in dataset.study) {
             const property = dataset.study.properties.find((property: any) => property.key === propertyName);
             const value = property?.value;

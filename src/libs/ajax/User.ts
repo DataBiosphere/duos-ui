@@ -69,7 +69,7 @@ export const User = {
   update: async (user: UpdateDuosUserRequestV2, userId: number): Promise<UpdateDuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards
-    let filteredUser = flow(
+    const filteredUser = flow(
       cloneDeep,
       unset('updatedUser.createDate'),
       unset('updatedUser.institution'),
