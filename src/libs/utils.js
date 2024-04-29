@@ -177,6 +177,13 @@ export const convertLabelToKey = (label = '') => {
   return label.split(/[\s,]+/).join('-');
 };
 
+/**
+ * Sets the user's role status.
+ * Converts a DuosUserResponse into a DuosUser.
+ * @param {DuosUserResponse} user
+ * @param {*} Storage
+ * @returns converted DuosUser
+ */
 export const setUserRoleStatuses = (user, Storage) => {
   const currentUserRoles = (user.roles) ? user.roles.map(roles => roles.name) : [];
   user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
