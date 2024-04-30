@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import fileDownload from 'js-file-download';
 import { getApiUrl, fetchOk } from '../ajax';
 import { Config } from '../config';
 import axios from 'axios';
@@ -53,9 +54,15 @@ export const DAA = {
     return res.data;
   }, 
 
-  getDaaFileById: async (daaId) => {
+  getDaaFileById: async (daaId, daaFileName) => {
+    const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' });
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream'
+    });
     const url = `${await getApiUrl()}/api/daa/${daaId}/file`;
-    const res = await axios.get(url, Config.authOpts());
-    return res.data;
+    axios.get(url, authOpts).then((response) => {
+      fileDownload(response.data, daaFileName);
+    });
   },
 };

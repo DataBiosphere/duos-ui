@@ -8,6 +8,7 @@ import SimpleTable from '../../components/SimpleTable';
 import SimpleButton from '../../components/SimpleButton';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
+import { DownloadLink } from '../../components/DownloadLink';
 import {
   Notifications,
   recalculateVisibleTable,
@@ -239,7 +240,8 @@ const roleCell = (roles, id) => {
   };
 };
 
-const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, actionsTitle, option1, option2, download) => {
+const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download) => {
+  const name = download ? 'users' : 'daa';
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
     <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
@@ -248,17 +250,18 @@ const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemo
     <form>
       {download && 
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <a href={download}>Download agreement</a>
+        <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
+        {/* <a href={download}>Download agreement</a> */}
       </li>}
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-          <input type="radio" name="agreementAction" value="apply" checked={applyAllDaa} onChange={handleApplyAllDaaChange}/>
+          <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
           &nbsp;&nbsp;{option1}
         </label>
       </li>
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-          <input type="radio" name="agreementAction" value="remove" checked={removeAllDaa} onChange={handleRemoveAllDaaChange}/>
+          <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
           &nbsp;&nbsp;{option2}
         </label>
       </li>
@@ -274,7 +277,7 @@ const dropdown = (applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemo
         cursor: 'pointer',
         color: '#0948B7',
         padding: '10px 20px'
-      }} onClick={handleApplyAllDaa}>Apply</Button>
+      }} onClick={handleApplyAll}>Apply</Button>
     </li>
   </ul>
   );
@@ -355,6 +358,8 @@ export default function SigningOfficialTable2(props) {
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const [applyAllDaa, setApplyAllDaa] = useState(false);
   const [removeAllDaa, setRemoveAllDaa] = useState(false);
+  const [applyAllUser, setApplyAllUser] = useState(false);
+  const [removeAllUser, setRemoveAllUser] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -385,6 +390,16 @@ export default function SigningOfficialTable2(props) {
     setApplyAllDaa(!event.target.checked);
   };
 
+  const handleApplyAllUserChange = (event) => {
+    setApplyAllUser(event.target.checked);
+    setRemoveAllUser(!event.target.checked);
+  };
+
+  const handleRemoveAllUserChange = (event) => {
+    setRemoveAllUser(event.target.checked);
+    setApplyAllUser(!event.target.checked);
+  };
+
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
@@ -401,17 +416,17 @@ export default function SigningOfficialTable2(props) {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
 
-      const handleApplyAllDaa = async (id, dacName) => {
+      const handleApplyAllUser = async (id, dacName) => {
         const userList = { "users": props.researchers.map(researcher => researcher.userId) };
         console.log(userList);
-        if (applyAllDaa) {
+        if (applyAllUser) {
           try {
             await DAA.bulkAddUsersToDaa(id, userList);
             Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
           } catch(error) {
             Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
           }
-        } else if (removeAllDaa) {
+        } else if (removeAllUser) {
           try {
             await DAA.bulkRemoveUsersFromDaa(id, userList);
             Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
@@ -422,9 +437,9 @@ export default function SigningOfficialTable2(props) {
       }
 
       const downloadLink = async (id) => {
-        const link = await DAA.getDaaFileById(id);
-        console.log(link);
-        return link;
+        DAA.getDaaFileById(id);
+        // console.log(link);
+        // return link;
         // return (
         //   <a href={link}>Download agreement</a>
         // );
@@ -433,10 +448,13 @@ export default function SigningOfficialTable2(props) {
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
-          const id = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId))?.daaId;
-          const download = downloadLink(id);
+          const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
+          const id = daa.daaId;
+          const fileName = daa.file.fileName;
+          console.log(fileName);
+          // const download = downloadLink(id);
           //download link & then pass it into dropdown?!?!
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', download)};
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})};
           return acc;
         }, {}),
       };
