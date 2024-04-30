@@ -1,11 +1,9 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Info } from '@mui/icons-material';
 import { Checkbox } from '@mui/material';
 import { Styles, Theme } from '../../libs/theme';
 import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
-import SimpleButton from '../../components/SimpleButton';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
 import { DownloadLink } from '../../components/DownloadLink';
@@ -15,15 +13,7 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList
 } from '../../libs/utils';
-import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
-import ConfirmationModal from '../../components/modals/ConfirmationModal';
-import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import { DAA } from '../../libs/ajax/DAA';
-import LcaMarkdown from '../../assets/LCA.md';
-import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
-import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 import Button from '@mui/material/Button';
 import { title } from 'process';
 
@@ -62,64 +52,64 @@ let columnHeaderFormat = {
 };
 
 // Used to determine which modal type to use for either issuing or deleting a Library Card.
-export const confirmModalType = {
-  issue: 'issue',
-  delete: 'delete'
-};
+// export const confirmModalType = {
+//   issue: 'issue',
+//   delete: 'delete'
+// };
 
-const DeactivateLibraryCardButton = (props) => {
-  const {card = {}, showConfirmationModal} = props;
-  const message = 'Are you sure you want to deactivate this library card?';
-  const title = 'Deactivate Library Card';
-  return (
-    <SimpleButton
-      keyProp={`deactivate-card-${card.id}`}
-      label="Deactivate"
-      baseColor={Theme.palette.error}
-      hoverStyle={{
-        backgroundColor: 'rgb(194, 38,11)',
-        color: 'white'
-      }}
-      additionalStyle={{
-        padding: '2.25% 5%',
-        fontSize: '1.45rem',
-        fontWeight: 600,
-        fontFamily: 'Montserrat'
-      }}
-      onClick={() => showConfirmationModal({card, message, title, confirmType: confirmModalType.delete})}
-    />
-  );
-};
+// const DeactivateLibraryCardButton = (props) => {
+//   const {card = {}, showConfirmationModal} = props;
+//   const message = 'Are you sure you want to deactivate this library card?';
+//   const title = 'Deactivate Library Card';
+//   return (
+//     <SimpleButton
+//       keyProp={`deactivate-card-${card.id}`}
+//       label="Deactivate"
+//       baseColor={Theme.palette.error}
+//       hoverStyle={{
+//         backgroundColor: 'rgb(194, 38,11)',
+//         color: 'white'
+//       }}
+//       additionalStyle={{
+//         padding: '2.25% 5%',
+//         fontSize: '1.45rem',
+//         fontWeight: 600,
+//         fontFamily: 'Montserrat'
+//       }}
+//       onClick={() => showConfirmationModal({card, message, title, confirmType: confirmModalType.delete})}
+//     />
+//   );
+// };
 
-const IssueLibraryCardButton = (props) => {
-  //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
-  //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
-  //institution id should be determined from the logged in SO account on the back-end
-  const {card, showConfirmationModal} = props;
-  const message = (
-    <div>
-      {/* LCA Terms Download */}
-      <LibraryCardAgreementTermsDownload />
-      {'Are you sure you want to issue this library card?'}
-    </div>
-  );
-  const title = 'Issue Library Card';
-  return (
-    <SimpleButton
-      keyProp={`issue-card-${card.userEmail}`}
-      label="Issue"
-      baseColor={Theme.palette.secondary}
-      additionalStyle={{
-        width: '30%',
-        padding: '2.25% 5%',
-        fontSize: '1.45rem',
-        fontWeight: 600,
-        fontFamily: 'Montserrat'
-      }}
-      onClick={() => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue })}
-    />
-  );
-};
+// const IssueLibraryCardButton = (props) => {
+//   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
+//   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
+//   //institution id should be determined from the logged in SO account on the back-end
+//   const {card, showConfirmationModal} = props;
+//   const message = (
+//     <div>
+//       {/* LCA Terms Download */}
+//       <LibraryCardAgreementTermsDownload />
+//       {'Are you sure you want to issue this library card?'}
+//     </div>
+//   );
+//   const title = 'Issue Library Card';
+//   return (
+//     <SimpleButton
+//       keyProp={`issue-card-${card.userEmail}`}
+//       label="Issue"
+//       baseColor={Theme.palette.secondary}
+//       additionalStyle={{
+//         width: '30%',
+//         padding: '2.25% 5%',
+//         fontSize: '1.45rem',
+//         fontWeight: 600,
+//         fontFamily: 'Montserrat'
+//       }}
+//       onClick={() => showConfirmationModal({ card, message, title, confirmType: confirmModalType.issue })}
+//     />
+//   );
+// };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
@@ -129,7 +119,7 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.createDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
-      // history.push(`/signing_official_console/researchers2`);
+      // history.push(`/signing_official_console/researchers`);
     } catch(error) {
       Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
@@ -138,53 +128,53 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-      // history.push(`/signing_official_console/researchers2`);
+      // history.push(`/signing_official_console/researchers`);
     } catch(error) {
       Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   }
 }
 
-const LibraryCardCell = ({
-  researcher,
-  showConfirmationModal,
-  institutionId
-}) => {
-  const id = researcher.userId || researcher.email;
-  const card = !isEmpty(researcher.libraryCards)
-    ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
-    : null;
-  const button = !isNil(card)
-    ? DeactivateLibraryCardButton({
-      card,
-      showConfirmationModal,
-    })
-    : IssueLibraryCardButton({
-      card: {
-        userId: researcher.userId,
-        userEmail: researcher.email,
-        institutionId: institutionId
-      },
-      showConfirmationModal
-    });
+// const LibraryCardCell = ({
+//   researcher,
+//   showConfirmationModal,
+//   institutionId
+// }) => {
+//   const id = researcher.userId || researcher.email;
+//   const card = !isEmpty(researcher.libraryCards)
+//     ? find((card) => card.institutionId === institutionId)(researcher.libraryCards)
+//     : null;
+//   const button = !isNil(card)
+//     ? DeactivateLibraryCardButton({
+//       card,
+//       showConfirmationModal,
+//     })
+//     : IssueLibraryCardButton({
+//       card: {
+//         userId: researcher.userId,
+//         userEmail: researcher.email,
+//         institutionId: institutionId
+//       },
+//       showConfirmationModal
+//     });
 
-  return {
-    isComponent: true,
-    id,
-    label: 'lc-button',
-    data: (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'left',
-        }}
-        key={`lc-action-cell-${id}`}
-      >
-        {button}
-      </div>
-    ),
-  };
-};
+//   return {
+//     isComponent: true,
+//     id,
+//     label: 'lc-button',
+//     data: (
+//       <div
+//         style={{
+//           display: 'flex',
+//           justifyContent: 'left',
+//         }}
+//         key={`lc-action-cell-${id}`}
+//       >
+//         {button}
+//       </div>
+//     ),
+//   };
+// };
 
 const DAACell = (
   rowDac, 
@@ -223,24 +213,26 @@ const DAACell = (
   };
 };
 
-const roleCell = (roles, id) => {
+// const roleCell = (roles, id) => {
 
-  const roleString = flow(
-    map((role) => role.name),
-    sortBy((name) => name),
-    sortedUniq,
-    join(', ')
-  )(roles);
+//   const roleString = flow(
+//     map((role) => role.name),
+//     sortBy((name) => name),
+//     sortedUniq,
+//     join(', ')
+//   )(roles);
 
-  return {
-    data: roleString || '- -',
-    id,
-    style: {},
-    label: 'user-role'
-  };
-};
+//   return {
+//     data: roleString || '- -',
+//     id,
+//     style: {},
+//     label: 'user-role'
+//   };
+// };
 
-const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download) => {
+// {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
+// dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})
+const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
   const name = download ? 'users' : 'daa';
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
@@ -277,7 +269,7 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
         cursor: 'pointer',
         color: '#0948B7',
         padding: '10px 20px'
-      }} onClick={handleApplyAll}>Apply</Button>
+      }} onClick={() => handleApplyAll(moreData.id, moreData.name)}>Apply</Button>
     </li>
   </ul>
   );
@@ -287,7 +279,7 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
   // const [applyAllDaa, setApplyAllDaa] = useState(false);
   // let applyAllDaa = false;
   // let removeAllDaa = false;
-  const handleApplyAllDaa = async () => {
+  const handleApplyAllDaa = async (x, y) => {
     const daaList = { "daaList": daas.map(daa => daa.daaId) };
     console.log(daaList);
     console.log(id);
@@ -319,7 +311,7 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
               <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
             </div>
           </a>
-          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
+          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false, false)}
         </li>
         {/* <div>{displayName || 'Invite sent, pending registration'}</div>
         <div><a href={`mailto:${email}`}>{email || '- -'}</a></div> */}
@@ -327,19 +319,19 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
     ),
     id,
     style: {},
-    label: 'display-name'
+    label: 'display-names'
   };
 };
 
 
-const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
-  const cards = researcher.libraryCards;
-  if (isEmpty(cards)) {
-    return true;
-  }
+// const onlyResearchersWithoutCardFilter = (institutionId) => (researcher) => {
+//   const cards = researcher.libraryCards;
+//   if (isEmpty(cards)) {
+//     return true;
+//   }
 
-  return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
-};
+//   return isNil(find((card) => card.institutionId === institutionId)(researcher.libraryCards));
+// };
 
 export default function SigningOfficialTable2(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
@@ -349,12 +341,12 @@ export default function SigningOfficialTable2(props) {
   const [filteredResearchers, setFilteredResearchers] = useState([]);
   const [visibleResearchers, setVisibleResearchers] = useState([]);
   const [selectedCard, setSelectedCard] = useState({});
-  const [showModal, setShowModal] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
+  // const [showConfirmation, setShowConfirmation] = useState(false);
   const searchRef = useRef('');
-  const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
-  const [confirmationTitle, setConfirmationTitle] = useState('');
-  const [confirmType, setConfirmType] = useState(confirmModalType.delete);
+  // const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
+  // const [confirmationTitle, setConfirmationTitle] = useState('');
+  // const [confirmType, setConfirmType] = useState(confirmModalType.delete);
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const [applyAllDaa, setApplyAllDaa] = useState(false);
   const [removeAllDaa, setRemoveAllDaa] = useState(false);
@@ -421,8 +413,13 @@ export default function SigningOfficialTable2(props) {
         console.log(userList);
         if (applyAllUser) {
           try {
-            await DAA.bulkAddUsersToDaa(id, userList);
-            Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
+            DAA.bulkAddUsersToDaa(id, userList).then(() => {
+              Notifications.showSuccess({
+                text: `Approved all users access to request from: ${dacName}`,
+              });
+            props.history.push('/signing_official_console/researchers');});
+            // await DAA.bulkAddUsersToDaa(id, userList);
+            // Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
           } catch(error) {
             Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
           }
@@ -454,7 +451,7 @@ export default function SigningOfficialTable2(props) {
           console.log(fileName);
           // const download = downloadLink(id);
           //download link & then pass it into dropdown?!?!
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})};
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser, `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName}, {id: id, name: dac})};
           return acc;
         }, {}),
       };
@@ -536,138 +533,138 @@ export default function SigningOfficialTable2(props) {
     });
   };
 
-  const showModalOnClick = () => {
-    setSelectedCard({institutionId: signingOfficial.institutionId});
-    setShowModal(true);
-  };
+  // const showModalOnClick = () => {
+  //   setSelectedCard({institutionId: signingOfficial.institutionId});
+  //   setShowModal(true);
+  // };
 
-  const issueLibraryCard = async (selectedCard, researchers) => {
-    let messageName;
-    try {
-      const listCopy = cloneDeep(researchers);
-      const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
-      const {userEmail, userName, userId} = newLibraryCard;
-      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
-        const attributes = {
-          email: userEmail,
-          displayName: userName,
-          libraryCards: [newLibraryCard],
-          roles: [],
-        };
-        if(!isNil(targetUnregisteredResearcher)) {
-          attributes.roles = targetUnregisteredResearcher.roles;
-        }
-        listCopy.unshift(attributes);
-        messageName = userEmail;
-      } else {
-        listCopy[targetIndex].libraryCards = [newLibraryCard];
-        messageName = userName;
-      }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
-      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: `Error issuing library card to ${messageName}`});
-    }
-  };
+  // const issueLibraryCard = async (selectedCard, researchers) => {
+  //   let messageName;
+  //   try {
+  //     const listCopy = cloneDeep(researchers);
+  //     const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
+  //     const {userEmail, userName, userId} = newLibraryCard;
+  //     let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+  //     //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
+  //     if(targetIndex === -1) { //if card is not found, push new user to top of list
+  //       const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
+  //       const attributes = {
+  //         email: userEmail,
+  //         displayName: userName,
+  //         libraryCards: [newLibraryCard],
+  //         roles: [],
+  //       };
+  //       if(!isNil(targetUnregisteredResearcher)) {
+  //         attributes.roles = targetUnregisteredResearcher.roles;
+  //       }
+  //       listCopy.unshift(attributes);
+  //       messageName = userEmail;
+  //     } else {
+  //       listCopy[targetIndex].libraryCards = [newLibraryCard];
+  //       messageName = userName;
+  //     }
+  //     setResearchers(listCopy);
+  //     setShowConfirmation(false);
+  //     setShowModal(false);
+  //     Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
+  //   } catch(error) {
+  //     Notifications.showError({text: `Error issuing library card to ${messageName}`});
+  //   }
+  // };
 
-  const addDaaLcAssociation = async (selectedCard, researchers) => {
-    let messageName;
-    try {
-      const listCopy = cloneDeep(researchers);
-      const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
-      const {userEmail, userName, userId} = newDaaLcAssociatoin;
-      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
-        const attributes = {
-          email: userEmail,
-          displayName: userName,
-          libraryCards: [newDaaLcAssociatoin],
-          roles: [],
-        };
-        if(!isNil(targetUnregisteredResearcher)) {
-          attributes.roles = targetUnregisteredResearcher.roles;
-        }
-        listCopy.unshift(attributes);
-        messageName = userEmail;
-      } else {
-        listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
-        messageName = userName;
-      }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
-      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: `Error issuing library card to ${messageName}`});
-    }
-  };
+  // const addDaaLcAssociation = async (selectedCard, researchers) => {
+  //   let messageName;
+  //   try {
+  //     const listCopy = cloneDeep(researchers);
+  //     const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
+  //     const {userEmail, userName, userId} = newDaaLcAssociatoin;
+  //     let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+  //     //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
+  //     if(targetIndex === -1) { //if card is not found, push new user to top of list
+  //       const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
+  //       const attributes = {
+  //         email: userEmail,
+  //         displayName: userName,
+  //         libraryCards: [newDaaLcAssociatoin],
+  //         roles: [],
+  //       };
+  //       if(!isNil(targetUnregisteredResearcher)) {
+  //         attributes.roles = targetUnregisteredResearcher.roles;
+  //       }
+  //       listCopy.unshift(attributes);
+  //       messageName = userEmail;
+  //     } else {
+  //       listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
+  //       messageName = userName;
+  //     }
+  //     setResearchers(listCopy);
+  //     setShowConfirmation(false);
+  //     setShowModal(false);
+  //     Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
+  //   } catch(error) {
+  //     Notifications.showError({text: `Error issuing library card to ${messageName}`});
+  //   }
+  // };
 
-  const removeDaaLcAssociation = async (selectedDac, researchers) => {
-    let messageName;
-    try {
-      const listCopy = cloneDeep(researchers);
-      const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
-      const {userEmail, userName, userId} = newDaaLcAssociatoin;
-      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to top of list
-        const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
-        const attributes = {
-          email: userEmail,
-          displayName: userName,
-          libraryCards: [newDaaLcAssociatoin],
-          roles: [],
-        };
-        if(!isNil(targetUnregisteredResearcher)) {
-          attributes.roles = targetUnregisteredResearcher.roles;
-        }
-        listCopy.unshift(attributes);
-        messageName = userEmail;
-      } else {
-        listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
-        messageName = userName;
-      }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      setShowModal(false);
-      Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: `Error issuing library card to ${messageName}`});
-    }
-  };
+  // const removeDaaLcAssociation = async (selectedDac, researchers) => {
+  //   let messageName;
+  //   try {
+  //     const listCopy = cloneDeep(researchers);
+  //     const newDaaLcAssociatoin = await DAA.createDaaLcLink(selectedCard);
+  //     const {userEmail, userName, userId} = newDaaLcAssociatoin;
+  //     let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+  //     //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
+  //     if(targetIndex === -1) { //if card is not found, push new user to top of list
+  //       const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
+  //       const attributes = {
+  //         email: userEmail,
+  //         displayName: userName,
+  //         libraryCards: [newDaaLcAssociatoin],
+  //         roles: [],
+  //       };
+  //       if(!isNil(targetUnregisteredResearcher)) {
+  //         attributes.roles = targetUnregisteredResearcher.roles;
+  //       }
+  //       listCopy.unshift(attributes);
+  //       messageName = userEmail;
+  //     } else {
+  //       listCopy[targetIndex].libraryCards = [newDaaLcAssociatoin];
+  //       messageName = userName;
+  //     }
+  //     setResearchers(listCopy);
+  //     setShowConfirmation(false);
+  //     setShowModal(false);
+  //     Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
+  //   } catch(error) {
+  //     Notifications.showError({text: `Error issuing library card to ${messageName}`});
+  //   }
+  // };
 
-  const deactivateLibraryCard = async (selectedCard, researchers) => {
-    const {id, userName, userEmail, userId} = selectedCard;
-    const listCopy = cloneDeep(researchers);
-    const messageName = userName || userEmail;
-    try {
-      await LibraryCard.deleteLibraryCard(id);
-      const targetIndex = findIndex((researcher) => {
-        const libraryCards = researcher.libraryCards || [];
-        const card = libraryCards[0];
-        return !isNil(card) && id === card.id;
-      })(researchers);
-      if(isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {
-        listCopy.splice(targetIndex, 1);
-      } else {
-        listCopy[targetIndex].libraryCards = [];
-      }
-      setResearchers(listCopy);
-      setShowConfirmation(false);
-      Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
-    } catch(error) {
-      Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
-    }
-  };
+  // const deactivateLibraryCard = async (selectedCard, researchers) => {
+  //   const {id, userName, userEmail, userId} = selectedCard;
+  //   const listCopy = cloneDeep(researchers);
+  //   const messageName = userName || userEmail;
+  //   try {
+  //     await LibraryCard.deleteLibraryCard(id);
+  //     const targetIndex = findIndex((researcher) => {
+  //       const libraryCards = researcher.libraryCards || [];
+  //       const card = libraryCards[0];
+  //       return !isNil(card) && id === card.id;
+  //     })(researchers);
+  //     if(isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {
+  //       listCopy.splice(targetIndex, 1);
+  //     } else {
+  //       listCopy[targetIndex].libraryCards = [];
+  //     }
+  //     setResearchers(listCopy);
+  //     setShowConfirmation(false);
+  //     Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
+  //   } catch(error) {
+  //     Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
+  //   }
+  // };
 
-  const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
+  // const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
 
   return (
     <>
