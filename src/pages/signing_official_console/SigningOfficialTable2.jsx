@@ -1,12 +1,11 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Checkbox } from '@mui/material';
-import { Styles, Theme } from '../../libs/theme';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
+import { Styles } from '../../libs/theme';
+import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
-import { DownloadLink } from '../../components/DownloadLink';
 import {
   Notifications,
   recalculateVisibleTable,
@@ -16,8 +15,6 @@ import {
 import { DAA } from '../../libs/ajax/DAA';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
-import Button from '@mui/material/Button';
-import { title } from 'process';
 
 //Styles specific to this table
 const styles = {
@@ -61,7 +58,6 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked, refre
       await DAA.createDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
-      // history.push(`/signing_official_console/researchers`);
     } catch(error) {
       Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
@@ -71,7 +67,6 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked, refre
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
-      // history.push(`/signing_official_console/researchers`);
     } catch(error) {
       Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
@@ -118,72 +113,7 @@ const DAACell = (
   };
 };
 
-// // {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
-// // dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})
-// const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
-//   const name = download ? 'users' : 'daa';
-//   return (
-//     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-//     <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
-//       <strong>{actionsTitle}</strong>
-//     </th>
-//     <form>
-//       {download && 
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-//         <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
-//       </li>}
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-//         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-//           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
-//           &nbsp;&nbsp;{option1}
-//         </label>
-//       </li>
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-//           <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
-//           &nbsp;&nbsp;{option2}
-//         </label>
-//       </li>
-//     </form>
-//     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//       <Button style={{
-//         fontSize: '15px',
-//         fontWeight: 'normal',
-//         border: '1px solid #0948B7',
-//         borderRadius: '5px',
-//         height: '40px',
-//         marginRight: '1em',
-//         cursor: 'pointer',
-//         color: '#0948B7',
-//         padding: '10px 20px'
-//       }} onClick={() => handleApplyAll(moreData.id, moreData.name)}>Apply</Button>
-//     </li>
-//   </ul>
-//   );
-// }
-
 const displayNameCell = (displayName, email, id) => {
-  // const handleApplyAllDaa = async (x, y) => {
-  //   const daaList = { "daaList": daas.map(daa => daa.daaId) };
-  //   console.log(daaList);
-  //   console.log(id);
-  //   if (applyAllDaa) {
-  //     try {
-  //       await DAA.bulkAddDaasToUser(id, daaList);
-  //       Notifications.showSuccess({text: `Gave access to all DACs to user: ${displayName}`});
-  //     } catch(error) {
-  //       Notifications.showError({text: `Error issuing access to all DAC's to user: ${displayName}`});
-  //     }
-  //   } else if (removeAllDaa) {
-  //     try {
-  //       await DAA.bulkRemoveDaasFromUser(id, daaList);
-  //       Notifications.showSuccess({text: `Removed access for all DACs from user: ${displayName}`});
-  //     } catch(error) {
-  //       Notifications.showError({text: `Error removing access for all DAC's from user: ${displayName}`});
-  //     }
-  //   }
-  // }
-
   return {
     data: (
       <>
@@ -204,18 +134,8 @@ export default function SigningOfficialTable2(props) {
   const [pageCount, setPageCount] = useState(1);
   const [filteredResearchers, setFilteredResearchers] = useState([]);
   const [visibleResearchers, setVisibleResearchers] = useState([]);
-  const [selectedCard, setSelectedCard] = useState({});
-  // const [showModal, setShowModal] = useState(false);
-  // const [showConfirmation, setShowConfirmation] = useState(false);
   const searchRef = useRef('');
-  // const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
-  // const [confirmationTitle, setConfirmationTitle] = useState('');
-  // const [confirmType, setConfirmType] = useState(confirmModalType.delete);
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
-  // const [applyAllDaa, setApplyAllDaa] = useState(false);
-  // const [removeAllDaa, setRemoveAllDaa] = useState(false);
-  // const [applyAllUser, setApplyAllUser] = useState(false);
-  // const [removeAllUser, setRemoveAllUser] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -227,26 +147,6 @@ export default function SigningOfficialTable2(props) {
       setFilteredResearchers
     );
   }, [researchers]);
-
-  // const handleApplyAllDaaChange = (event) => {
-  //   setApplyAllDaa(event.target.checked);
-  //   setRemoveAllDaa(!event.target.checked);
-  // };
-
-  // const handleRemoveAllDaaChange = (event) => {
-  //   setRemoveAllDaa(event.target.checked);
-  //   setApplyAllDaa(!event.target.checked);
-  // };
-
-  // const handleApplyAllUserChange = (event) => {
-  //   setApplyAllUser(event.target.checked);
-  //   setRemoveAllUser(!event.target.checked);
-  // };
-
-  // const handleRemoveAllUserChange = (event) => {
-  //   setRemoveAllUser(event.target.checked);
-  //   setApplyAllUser(!event.target.checked);
-  // };
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -353,14 +253,6 @@ export default function SigningOfficialTable2(props) {
               fontSize: '16px',
             })}>
               Issue, Update, or Deactivate for User&apos;s ability to request access to datasets, by agreeing to
-              {/* <a
-                rel="noopener noreferrer"
-                href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide"
-                target="_blank"
-                id="so-console-info-link"
-                style={{ verticalAlign: 'super' }}>
-                <Info fontSize='large'/>
-              </a> */}
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
@@ -379,18 +271,6 @@ export default function SigningOfficialTable2(props) {
             </div>
           </div>
         </div>
-        {/* <div style={{ marginLeft: 15 }}>
-          <SimpleButton
-            onClick={() => showModalOnClick()}
-            baseColor={Theme.palette.secondary}
-            label="Add Library Card"
-            additionalStyle={{
-              width: '22rem',
-              height: '4rem',
-              padding: '4% 10%',
-              fontWeight: '600' }}
-          />
-        </div> */}
         <SearchBar handleSearchChange={handleSearchChange} searchRef={searchRef}/>
       </div>
       <SimpleTable
