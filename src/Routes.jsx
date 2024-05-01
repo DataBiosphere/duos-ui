@@ -84,7 +84,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    <AuthenticatedRoute path="/signing_official_console/researchers2" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers2, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    {checkEnv(envGroups.DEV) && <AuthenticatedRoute path="/signing_official_console/researchers2" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers2, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
