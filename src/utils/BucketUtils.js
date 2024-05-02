@@ -2,7 +2,6 @@ import {
   any,
   compact,
   filter,
-  findIndex,
   flatMap,
   flow,
   forEach,
@@ -99,7 +98,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
 
     // Step 1.b: Populate translated dataUses
     if (dataset.dataUse) {
-      const index = findIndex(dataset.dataUse)(rawDataUses);
+      const index = rawDataUses.findIndex(du => du === dataset.dataUse);
       if (index >= 0 && !isUndefined(flatTranslatedDataUses[index])) {
         bucket.dataUses = flatTranslatedDataUses[index];
       }
@@ -273,10 +272,9 @@ const processV3Abstain = (matchResults) => {
  * @returns boolean
  */
 const isOther = (dataUse) => {
-  const otherRestrictions = getOr(false)('otherRestrictions')(dataUse);
   const primaryOther = !isEmpty(getOr('')('other')(dataUse));
   const secondaryOther = !isEmpty(getOr('')('secondaryOther')(dataUse));
-  return otherRestrictions || primaryOther || secondaryOther;
+  return primaryOther || secondaryOther;
 };
 
 /**
