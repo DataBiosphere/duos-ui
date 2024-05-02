@@ -1,12 +1,11 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Checkbox } from '@mui/material';
-import { Styles, Theme } from '../../libs/theme';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow, filter } from 'lodash/fp';
+import { Styles } from '../../libs/theme';
+import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
-import { DownloadLink } from '../../components/DownloadLink';
 import {
   Notifications,
   recalculateVisibleTable,
@@ -14,8 +13,9 @@ import {
   searchOnFilteredList
 } from '../../libs/utils';
 import { DAA } from '../../libs/ajax/DAA';
-import Button from '@mui/material/Button';
-import { title } from 'process';
+import {User} from '../../libs/ajax/User';
+import { USER_ROLES } from '../../libs/utils';
+import { Button } from '@mui/material';
 
 //Styles specific to this table
 const styles = {
@@ -52,13 +52,13 @@ let columnHeaderFormat = {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
+const handleClick = async (researcher, specificDac, filteredDaas, checked, refreshResearchers, setResearchers) => {
   if (!checked) {
     try {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.createDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
-      // history.push(`/signing_official_console/researchers`);
+      refreshResearchers(setResearchers);
     } catch(error) {
       Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
@@ -67,18 +67,32 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked) => {
       const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-      // history.push(`/signing_official_console/researchers`);
+      refreshResearchers(setResearchers);
     } catch(error) {
       Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   }
 }
 
+const refreshResearchers = async (setResearchers) => {
+  const researcherList = await User.list(USER_ROLES.signingOfficial);
+  // the construction of this list is currently a work-around because our endpoint in the backend
+  // does not currently populate the DAA IDs on the each researcher's libary card
+  const researcherObjectList = await Promise.all(
+    researcherList.map(async (researcher) => {
+      return await User.getById(researcher.userId);
+    })
+  );
+  setResearchers(researcherObjectList);
+}
+
 const DAACell = (
   rowDac, 
   researcher,
   institutionId,
-  daas
+  daas,
+  refreshResearchers,
+  setResearchers
 ) => {
   const id = researcher && (researcher.userId || researcher.email);
   const libraryCards = researcher && researcher.libraryCards;
@@ -93,7 +107,7 @@ const DAACell = (
     label: 'lc-button',
     data: (
       <div>
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId)}/> 
+        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/> 
       </div>
     ),
   };
@@ -109,11 +123,6 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
       <strong>{actionsTitle}</strong>
     </th>
     <form>
-      {download && 
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
-        {/* <a href={download}>Download agreement</a> */}
-      </li>}
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
@@ -131,37 +140,39 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
       <Button style={{
         fontSize: '15px',
         fontWeight: 'normal',
+        fontFamily: 'Montserrat',
         border: '1px solid #0948B7',
         borderRadius: '5px',
         height: '40px',
         marginRight: '1em',
         cursor: 'pointer',
         color: '#0948B7',
-        padding: '10px 20px'
+        padding: '10px 20px',
+        textTransform: 'none'
       }} onClick={() => handleApplyAll(moreData.id, moreData.name)}>Apply</Button>
     </li>
   </ul>
   );
 }
 
-const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa) => {
-  const handleApplyAllDaa = async (x, y) => {
+const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers) => {
+  const handleApplyAllDaa = async () => {
     const daaList = { "daaList": daas.map(daa => daa.daaId) };
-    console.log(daaList);
-    console.log(id);
     if (applyAllDaa) {
       try {
         await DAA.bulkAddDaasToUser(id, daaList);
-        Notifications.showSuccess({text: `Gave access to all DACs to user: ${displayName}`});
+        Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${displayName}`});
+        refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error issuing access to all DAC's to user: ${displayName}`});
+        Notifications.showError({text: `Error approving access to request data from all DACs to user: ${displayName}`});
       }
     } else if (removeAllDaa) {
       try {
         await DAA.bulkRemoveDaasFromUser(id, daaList);
-        Notifications.showSuccess({text: `Removed access for all DACs from user: ${displayName}`});
+        Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${displayName}`});
+        refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error removing access for all DAC's from user: ${displayName}`});
+        Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${displayName}`});
       }
     }
   }
@@ -222,16 +233,6 @@ export default function SigningOfficialTable2(props) {
     setApplyAllDaa(!event.target.checked);
   };
 
-  const handleApplyAllUserChange = (event) => {
-    setApplyAllUser(event.target.checked);
-    setRemoveAllUser(!event.target.checked);
-  };
-
-  const handleRemoveAllUserChange = (event) => {
-    setRemoveAllUser(event.target.checked);
-    setApplyAllUser(!event.target.checked);
-  };
-
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
@@ -247,33 +248,6 @@ export default function SigningOfficialTable2(props) {
   useEffect(() => {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
-
-      const handleApplyAllUser = async (id, dacName) => {
-        const userList = { "users": props.researchers.map(researcher => researcher.userId) };
-        console.log(userList);
-        if (applyAllUser) {
-          try {
-            DAA.bulkAddUsersToDaa(id, userList).then(() => {
-              Notifications.showSuccess({
-                text: `Approved all users access to request from: ${dacName}`,
-              });
-            props.history.push('/signing_official_console/researchers');});
-          } catch(error) {
-            Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
-          }
-        } else if (removeAllUser) {
-          try {
-            await DAA.bulkRemoveUsersFromDaa(id, userList);
-            Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
-          } catch(error) {
-            Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
-          }
-        }
-      }
-
-      const downloadLink = async (id) => {
-        DAA.getDaaFileById(id);
-      }
 
       columnHeaderFormat = {
         ...columnHeaderFormat,
@@ -346,8 +320,8 @@ export default function SigningOfficialTable2(props) {
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [
-        displayNameCell(displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa),
-        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas))
+        displayNameCell(displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers),
+        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
       ];
     });
   };
