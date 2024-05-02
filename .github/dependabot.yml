@@ -6,23 +6,23 @@ updates:
       # Check for updates to GitHub Actions every week
       interval: "weekly"
     target-branch: develop
-    reviewers:
-      - "@DataBiosphere/DUOS"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-actions]"
+    groups:
+      action-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
     target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-npm]"
     groups:
       npm-dependencies:
         patterns:
@@ -33,13 +33,11 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
     labels:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "[DUOS-1740-dependabot]"
+      prefix: "[DUOS-1740-docker]"
     groups:
       docker-dependencies:
         patterns:

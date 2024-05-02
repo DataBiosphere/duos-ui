@@ -100,7 +100,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/datalibrary/:query" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/datalibrary" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/dataset/:datasetIdentifier" component={DatasetStatistics} props={props} rolesAllowed={[USER_ROLES.all]} />
-    <Redirect from="/DUOS-:duosId" to="/dataset/DUOS-:duosId" />
+    <Redirect from="/DUOS-:duosId" to="/dataset/DUOS-:duosId" props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     {checkEnv(envGroups.NON_PROD) && <AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}

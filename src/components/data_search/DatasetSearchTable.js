@@ -320,9 +320,9 @@ export const DatasetSearchTable = (props) => {
                     value: () => {
                       let accessType;
                       if (dataset.accessManagement === 'external') {
-                        accessType = 'External to DUOS';
+                        accessType = dataset.url ? <Link href={dataset.url}>External to DUOS</Link> : 'External to DUOS';
                       } else if (dataset.accessManagement === 'open') {
-                        accessType = 'Open Access';
+                        accessType = dataset.url ? <Link href={dataset.url}>Open Access</Link> : 'Open Access';
                       } else {
                         accessType = dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
                       }
