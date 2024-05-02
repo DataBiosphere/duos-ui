@@ -209,8 +209,6 @@ export default function SigningOfficialTable2(props) {
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const [applyAllDaa, setApplyAllDaa] = useState(false);
   const [removeAllDaa, setRemoveAllDaa] = useState(false);
-  const [applyAllUser, setApplyAllUser] = useState(false);
-  const [removeAllUser, setRemoveAllUser] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -252,10 +250,6 @@ export default function SigningOfficialTable2(props) {
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
-          const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
-          const id = daa.daaId;
-          const fileName = daa.file.fileName;
-          console.log(fileName);
           acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }};
           return acc;
         }, {}),
