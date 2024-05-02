@@ -52,7 +52,7 @@ const researcherWithLibraryCards = {
 };
 
 const addNewCollaborator = (collaboratorType) => {
-  cy.get(`[dataCy=${collaboratorType}]`)
+  cy.get(`[data-cy=${collaboratorType}]`)
     .find('.collaborator-list-component')
     .find('.row')
     .find('.button').click();
@@ -82,37 +82,37 @@ beforeEach(() => {
 describe('Researcher Info', () => {
   it('renders the researcher info component', () => {
     mount(<WrappedResearcherInfo {...props}/>);
-    cy.get('[dataCy=researcher-info]').should('be.visible');
+    cy.get('[data-cy=researcher-info]').should('be.visible');
   });
 
   it('renders the missing library cards alert correctly', () => {
     const mergedProps = {...props, ...{formData: {...props.formData }}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
+    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist');
+    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
   });
 
   it('renders the profile submitted alert', () => {
     const mergedProps = {...props, ...{completed: true, researcher: researcherWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
-    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('not.exist');
+    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
+    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('not.exist');
   });
 
   it('renders the profile unsubmitted alert', () => {
     const mergedProps = {...props, ...{completed: false, researcher: researcherWithLibraryCards}};
     mount(<WrappedResearcherInfo {...mergedProps}/>);
-    cy.get('[dataCy=researcher-info-profile-unsubmitted]').should('be.visible');
-    cy.get('[dataCy=researcher-info-profile-submitted]').should('be.visible');
+    cy.get('[data-cy=researcher-info-profile-unsubmitted]').should('be.visible');
+    cy.get('[data-cy=researcher-info-profile-submitted]').should('be.visible');
   });
 
   it('renders the internal lab staff button and form', () => {
     mount(<WrappedResearcherInfo {...props}/>);
-    cy.get('[dataCy=internal-lab-staff]')
+    cy.get('[data-cy=internal-lab-staff]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.button').click();
-    cy.get('[dataCy=internal-lab-staff]')
+    cy.get('[data-cy=internal-lab-staff]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('exist');
@@ -120,11 +120,11 @@ describe('Researcher Info', () => {
 
   it('renders the internal collaborator button and form', () => {
     mount(<WrappedResearcherInfo {...props}/>);
-    cy.get('[dataCy=internal-collaborators]')
+    cy.get('[data-cy=internal-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.button').click();
-    cy.get('[dataCy=internal-collaborators]')
+    cy.get('[data-cy=internal-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('exist');
@@ -132,11 +132,11 @@ describe('Researcher Info', () => {
 
   it('renders the external collaborator button and form', () => {
     mount(<WrappedResearcherInfo {...props}/>);
-    cy.get('[dataCy=external-collaborators]')
+    cy.get('[data-cy=external-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.button').click();
-    cy.get('[dataCy=external-collaborators]')
+    cy.get('[data-cy=external-collaborators]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('exist');
@@ -184,7 +184,7 @@ describe('Researcher Info', () => {
     // edit and switch to form view
     cy.get('#0_editCollaborator').click();
     cy.get('#0_summary').should('not.exist');
-    cy.get('[dataCy=internal-lab-staff]')
+    cy.get('[data-cy=internal-lab-staff]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('exist');
@@ -199,7 +199,7 @@ describe('Researcher Info', () => {
     cy.get('#0_deleteMember').click();
     cy.get('.delete-modal-primary-button').click();
     cy.get('#0_summary').should('not.exist');
-    cy.get('[dataCy=internal-lab-staff]')
+    cy.get('[data-cy=internal-lab-staff]')
       .find('.collaborator-list-component')
       .find('.row')
       .find('.form-group').should('not.exist');
