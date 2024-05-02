@@ -44,7 +44,7 @@ const styles = {
 //column header format for table
 let columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
-  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}, sortable: true},
+  name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
   libraryCard: {label: 'Library Card', cellStyle: {width: styles.cellWidths.libraryCard}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.role}},
 };
