@@ -153,7 +153,7 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
         color: '#0948B7',
         padding: '10px 20px',
         textTransform: 'none'
-      }} onClick={() => handleApplyAll}>Apply</Button>
+      }} onClick={() => handleApplyAll()}>Apply</Button>
     </li>
   </ul>
   );
