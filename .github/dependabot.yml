@@ -7,7 +7,7 @@ updates:
       interval: "weekly"
     target-branch: develop
     commit-message:
-      prefix: "[DUOS-1740-actions]"
+      prefix: "[DCJ-308-actions]"
     groups:
       action-dependencies:
         patterns:
@@ -22,7 +22,7 @@ updates:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "[DUOS-1740-npm]"
+      prefix: "[DCJ-308-npm]"
     groups:
       npm-dependencies:
         patterns:
@@ -37,7 +37,7 @@ updates:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "[DUOS-1740-docker]"
+      prefix: "[DCJ-308-docker]"
     groups:
       docker-dependencies:
         patterns:
