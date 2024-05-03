@@ -113,8 +113,6 @@ const DAACell = (
   };
 };
 
-// {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
-// dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})
 const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
   const name = download ? 'users' : 'daa';
   return (
@@ -149,7 +147,7 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
         color: '#0948B7',
         padding: '10px 20px',
         textTransform: 'none'
-      }} onClick={() => handleApplyAll}>Apply</Button>
+      }} onClick={() => handleApplyAll()}>Apply</Button>
     </li>
   </ul>
   );
