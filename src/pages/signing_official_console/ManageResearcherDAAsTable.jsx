@@ -127,7 +127,7 @@ const displayNameCell = (displayName, email, id) => {
   };
 };
 
-export default function SigningOfficialTable2(props) {
+export default function ManageResearcherDAAsTable(props) {
   const [researchers, setResearchers] = useState(props.researchers || []);
   const [tableSize, setTableSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -251,22 +251,11 @@ export default function SigningOfficialTable2(props) {
             </div>
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
+              maxWidth: '60%',
             })}>
               Issue, Update, or Deactivate for User&apos;s ability to request access to datasets, by agreeing to
-            </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
-            })}>
               Data Access Committee&apos;s (DAC&apos;s) Data Access Agreements (DAAs) in the table below.
-            </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
-            })}>
               Issuing a checkmark in a cell for a researcher denotes your approval of that researcher
-            </div>
-            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-              fontSize: '16px',
-            })}>
               to request data from the listed DAC, according to its linked DAA.
             </div>
           </div>
