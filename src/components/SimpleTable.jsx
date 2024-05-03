@@ -45,7 +45,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   return (
     <div style={rowStyle} key="column-row-container" role="row">
       {columnHeaders.map((header, colIndex) => {
-        const { cellStyle, label } = header;
+        const { cellStyle, label, data } = header;
         //style here pertains to styling for individual cells
         //should be used to set dimensions of specific columns
         return (
@@ -68,7 +68,6 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                   <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
                 </div>
               </div>
-<<<<<<< HEAD
              ) : header.data ? (
               <li className="dropdown" style={{ listStyleType: 'none' }}>
                 <div role="button" data-toggle="dropdown">
@@ -80,8 +79,6 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                 {/* <div style={{textTransform:'none'}}> */}
                   {data}
               </li> 
-=======
->>>>>>> an-DUOS-2916-UI-Update-SO-Console-Manage-DAAs-to-user-s-LC
             ) : (
               label
             )}
