@@ -6,6 +6,7 @@ import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
+import { DownloadLink } from '../../components/DownloadLink';
 import {
   Notifications,
   recalculateVisibleTable,
@@ -123,6 +124,10 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
       <strong>{actionsTitle}</strong>
     </th>
     <form>
+      {download && 
+      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+        <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
+      </li>}
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
@@ -140,7 +145,6 @@ const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChan
       <Button style={{
         fontSize: '15px',
         fontWeight: 'normal',
-        fontFamily: 'Montserrat',
         border: '1px solid #0948B7',
         borderRadius: '5px',
         height: '40px',
@@ -209,6 +213,8 @@ export default function SigningOfficialTable2(props) {
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const [applyAllDaa, setApplyAllDaa] = useState(false);
   const [removeAllDaa, setRemoveAllDaa] = useState(false);
+  const [applyAllUser, setApplyAllUser] = useState(false);
+  const [removeAllUser, setRemoveAllUser] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -231,6 +237,16 @@ export default function SigningOfficialTable2(props) {
     setApplyAllDaa(!event.target.checked);
   };
 
+  const handleApplyAllUserChange = (event) => {
+    setApplyAllUser(event.target.checked);
+    setRemoveAllUser(!event.target.checked);
+  };
+
+  const handleRemoveAllUserChange = (event) => {
+    setRemoveAllUser(event.target.checked);
+    setApplyAllUser(!event.target.checked);
+  };
+
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
@@ -247,10 +263,43 @@ export default function SigningOfficialTable2(props) {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
 
+      const handleApplyAllUser = async (id, dacName) => {
+        const userList = { "users": props.researchers.map(researcher => researcher.userId) };
+        console.log(userList);
+        if (applyAllUser) {
+          try {
+            DAA.bulkAddUsersToDaa(id, userList).then(() => {
+              Notifications.showSuccess({
+                text: `Approved all users access to request from: ${dacName}`,
+              });
+            props.history.push('/signing_official_console/researchers');});
+            // await DAA.bulkAddUsersToDaa(id, userList);
+            // Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
+          } catch(error) {
+            Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
+          }
+        } else if (removeAllUser) {
+          try {
+            await DAA.bulkRemoveUsersFromDaa(id, userList);
+            Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
+          } catch(error) {
+            Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
+          }
+        }
+      }
+
+      const downloadLink = async (id) => {
+        DAA.getDaaFileById(id);
+      }
+
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }};
+          const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
+          const id = daa.daaId;
+          const fileName = daa.file.fileName;
+          console.log(fileName);
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser, `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName}, {id: id, name: dac})};
           return acc;
         }, {}),
       };
