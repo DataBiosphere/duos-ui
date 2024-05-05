@@ -9,6 +9,7 @@ export const Models = {
     members: []
   },
   dar: {
+    properties: [],
     researcherProperties: [],
     researcherId: '',
     rus: '',
