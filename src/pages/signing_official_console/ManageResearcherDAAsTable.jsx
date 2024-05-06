@@ -41,7 +41,6 @@ const styles = {
   },
 };
 
-//column header format for table
 let columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
   name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
@@ -71,7 +70,7 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked, refre
       Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   }
-}
+};
 
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
@@ -83,10 +82,10 @@ const refreshResearchers = async (setResearchers) => {
     })
   );
   setResearchers(researcherObjectList);
-}
+};
 
 const DAACell = (
-  rowDac, 
+  rowDac,
   researcher,
   institutionId,
   daas,
@@ -106,12 +105,13 @@ const DAACell = (
     label: 'lc-button',
     data: (
       <div>
-        {/* <Checkbox checked={hasDacId}/>  */}
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/> 
+        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
       </div>
     ),
   };
 };
+
+
 
 const displayNameCell = (displayName, email, id) => {
   return {
@@ -148,7 +148,7 @@ export default function ManageResearcherDAAsTable(props) {
     );
   }, [researchers]);
 
-  //init hook, need to make ajax calls here
+  //init hook
   useEffect(() => {
     const init = async() => {
       try{
@@ -226,7 +226,7 @@ export default function ManageResearcherDAAsTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
+      const {displayName, libraryCards} = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
