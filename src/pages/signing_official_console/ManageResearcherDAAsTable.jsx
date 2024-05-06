@@ -190,7 +190,8 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
     ),
     id,
     style: {},
-    label: 'display-names'
+    label: 'display-names',
+    striped: true
   };
 };
 
