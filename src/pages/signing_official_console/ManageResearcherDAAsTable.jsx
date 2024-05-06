@@ -135,8 +135,20 @@ export default function ManageResearcherDAAsTable(props) {
   const [filteredResearchers, setFilteredResearchers] = useState([]);
   const [visibleResearchers, setVisibleResearchers] = useState([]);
   const searchRef = useRef('');
-  const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const { signingOfficial, isLoading, dacs, daas } = props;
+
+  const headers = (dacs) => {
+    const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
+    columnHeaderFormat = {
+      ...columnHeaderFormat,
+      ...dacs.reduce((acc, dac) => {
+        acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }};
+        return acc;
+      }, {}),
+    };
+    const dacColumns = dacs.map((dac) => dac.name);
+    return [columnHeaderFormat.name, ...dacColumns.map((column) => columnHeaderFormat[column])];
+  };
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = useCallback((searchTerms) => {
@@ -159,30 +171,6 @@ export default function ManageResearcherDAAsTable(props) {
     };
     init();
   }, [props.researchers]);
-
-  useEffect(() => {
-    const generateColumnData = () => {
-      const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
-
-      columnHeaderFormat = {
-        ...columnHeaderFormat,
-        ...dacs.reduce((acc, dac) => {
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }};
-          return acc;
-        }, {}),
-      };
-
-      const dacColumns = dacs.map((dac) => dac.name);
-
-      const newColumnHeaderData = [
-        ...columnHeaderData,
-        ...dacColumns.map((column) => columnHeaderFormat[column]),
-      ];
-
-      setColumnHeaderData(newColumnHeaderData);
-    };
-    generateColumnData();
-  }, [dacs]);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -265,7 +253,7 @@ export default function ManageResearcherDAAsTable(props) {
       <SimpleTable
         isLoading={isLoading}
         rowData={processResearcherRowData(visibleResearchers)}
-        columnHeaders={columnHeaderData}
+        columnHeaders={headers(dacs)}
         styles={styles}
         tableSize={tableSize}
         paginationBar={paginationBar}
