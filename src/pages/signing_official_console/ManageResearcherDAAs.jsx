@@ -6,9 +6,9 @@ import {User} from '../../libs/ajax/User';
 import {DAA} from '../../libs/ajax/DAA';
 import {DAC} from '../../libs/ajax/DAC';
 import { USER_ROLES } from '../../libs/utils';
-import SigningOfficialTable2 from './SigningOfficialTable2';
+import ManageResearcherDAAsTable from './ManageResearcherDAAsTable';
 
-export default function SigningOfficialResearchers2() {
+export default function ManageResearcherDAAs() {
   const [signingOfficial, setSigningOfficial] = useState({});
   const [researchers, setResearchers] = useState([]);
   const [daas, setDaas] = useState([]);
@@ -52,8 +52,8 @@ export default function SigningOfficialResearchers2() {
   return (
     <div style={Styles.PAGE}>
       <div className='signing-official-tabs'>
-        <SigningOfficialTable2 researchers={researchers} signingOfficial={signingOfficial} daas={daas} dacs={dacs} isLoading={isLoading} />
+        <ManageResearcherDAAsTable researchers={researchers} signingOfficial={signingOfficial} daas={daas} dacs={dacs} isLoading={isLoading} />
       </div>
     </div>
   );
-};
+}
