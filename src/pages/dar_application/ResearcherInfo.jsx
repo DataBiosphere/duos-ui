@@ -187,7 +187,7 @@ export default function ResearcherInfo(props) {
           <h3>1.5 Internal Collaborators</h3>
           {includeInstructions && (
             <div>
-              {'Please list Internal Collaborators here. Internal Collaborators are defined as individuals who are not under the direct supervision of the PI (e.g., not a member of the PI\'s laboratory) who assists with the PI\'s research project involving controlled-access data subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting PI\'s institution and work at the same location/campus as the PI. Internal Collaborators must be at the PI or equivalent level and are required to have a Library Card and submit their own data access request.'}
+              Please list Internal Collaborators here. Internal Collaborators are defined as individuals who are not under the direct supervision of the PI (e.g., not a member of the PI&apos;s laboratory) who assists with the PI&apos;s research project involving controlled-access data subject to the NIH GDS Policy. Internal collaborators are employees of the Requesting PI&apos;s institution and work at the same location/campus as the PI. Internal Collaborators must be at the PI or equivalent level and are required to have a Library Card and submit their own data access request.
             </div>
           )}
           <CollaboratorList
@@ -249,9 +249,9 @@ export default function ResearcherInfo(props) {
               title='1.8 Cloud Use Statement'
               description={[
                 <span key='anvil-use-description'>
-                  {'Will you perform all of your data storage and analysis for this project on the '}
-                  <a rel='noopener noreferrer' href='https://anvil.terra.bio/' target='_blank'>AnVIL</a>
-                  {'?'}
+                  Will you perform all of your data storage and analysis for this project on the
+                  <a rel='noopener noreferrer' href='https://anvil.terra.bio/' target='_blank'> AnVIL</a>
+                  ?
                 </span>
               ]}
               options={[
@@ -373,7 +373,7 @@ export default function ResearcherInfo(props) {
           <h3>1.9 External Collaborators</h3>
           {includeInstructions && (
             <div>
-              {'Please list External collaborators here. External Collaborators are individuals who are not employees of the Requesting PI\'s institution or do not work at the same location as the PI. They must be independently approved to access controlled-access data subject to the GDS Policy. While not required to have a Library Card, it is encouraged. External Collaborators must submit an independent DAR approved by their signing Official to collaborate on this project. They can add their Lab Staff via their DAR. Approval of this DAR does not indicate approval of the External Collaborators listed.'}
+              Please list External collaborators here. External Collaborators are individuals who are not employees of the Requesting PI&apos;s institution or do not work at the same location as the PI. They must be independently approved to access controlled-access data subject to the GDS Policy. While not required to have a Library Card, it is encouraged. External Collaborators must submit an independent DAR approved by their signing Official to collaborate on this project. They can add their Lab Staff via their DAR. Approval of this DAR does not indicate approval of the External Collaborators listed.
             </div>
           )}
           <CollaboratorList
