@@ -26,15 +26,15 @@ export default function ManageUsersDropdown(props) {
         Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${moreData.name}`});
         refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData}`});
+        Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData.name}`});
       }
     } else if (removeAll) {
       try {
         await DAA.bulkRemoveDaasFromUser(moreData.id, daaList);
-        Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${moreData}`});
+        Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${moreData.name}`});
         refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData}`});
+        Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData.name}`});
       }
     }
   };

@@ -108,80 +108,13 @@ const DAACell = (
     label: 'lc-button',
     data: (
       <div>
-        {/* <Checkbox checked={hasDacId}/>  */}
         <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
       </div>
     ),
   };
 };
 
-// {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
-// dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})
-// const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
-//   const name = download ? 'users' : 'daa';
-//   return (
-//     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-//     <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
-//       <strong>{actionsTitle}</strong>
-//     </th>
-//     <form>
-//      {download &&
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//         <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
-//       </li>}
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-//           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
-//           &nbsp;&nbsp;{option1}
-//         </label>
-//       </li>
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-//           <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
-//           &nbsp;&nbsp;{option2}
-//         </label>
-//       </li>
-//     </form>
-//     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-//       <Button style={{
-//         fontSize: '15px',
-//         fontWeight: 'normal',
-//         fontFamily: 'Montserrat',
-//         border: '1px solid #0948B7',
-//         borderRadius: '5px',
-//         height: '40px',
-//         marginRight: '1em',
-//         cursor: 'pointer',
-//         color: '#0948B7',
-//         padding: '10px 20px',
-//         textTransform: 'none'
-//       }} onClick={() => handleApplyAll()}>Apply</Button>
-//     </li>
-//   </ul>
-//   );
-// }
-
-const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers) => {
-  // const handleApplyAllDaa = async () => {
-  //   const daaList = { "daaList": daas.map(daa => daa.daaId) };
-  //   if (applyAllDaa) {
-  //     try {
-  //       await DAA.bulkAddDaasToUser(id, daaList);
-  //       Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${displayName}`});
-  //       refreshResearchers(setResearchers);
-  //     } catch(error) {
-  //       Notifications.showError({text: `Error approving access to request data from all DACs to user: ${displayName}`});
-  //     }
-  //   } else if (removeAllDaa) {
-  //     try {
-  //       await DAA.bulkRemoveDaasFromUser(id, daaList);
-  //       Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${displayName}`});
-  //       refreshResearchers(setResearchers);
-  //     } catch(error) {
-  //       Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${displayName}`});
-  //     }
-  //   }
-  // }
+const displayNameCell = (displayName, email, id, daas, setResearchers) => {
   return {
     data: (
       <>
@@ -228,25 +161,6 @@ export default function ManageResearcherDAAsTable(props) {
     );
   }, [researchers]);
 
-  const handleApplyAllDaaChange = (event) => {
-    setApplyAllDaa(event.target.checked);
-    setRemoveAllDaa(!event.target.checked);
-  };
-  const handleRemoveAllDaaChange = (event) => {
-    setRemoveAllDaa(event.target.checked);
-    setApplyAllDaa(!event.target.checked);
-  };
-
-  // const handleApplyAllUserChange = (event) => {
-  //   setApplyAllUser(event.target.checked);
-  //   setRemoveAllUser(!event.target.checked);
-  // };
-
-  // const handleRemoveAllUserChange = (event) => {
-  //   setRemoveAllUser(event.target.checked);
-  //   setApplyAllUser(!event.target.checked);
-  // };
-
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
@@ -262,31 +176,6 @@ export default function ManageResearcherDAAsTable(props) {
   useEffect(() => {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
-
-      // const handleApplyAllUser = async (id, dacName) => {
-      //   const userList = { "users": props.researchers.map(researcher => researcher.userId) };
-      //   console.log(userList);
-      //   if (applyAllUser) {
-      //     try {
-      //       DAA.bulkAddUsersToDaa(id, userList).then(() => {
-      //         Notifications.showSuccess({
-      //           text: `Approved all users access to request from: ${dacName}`,
-      //         });
-      //       props.history.push('/signing_official_console/researchers');});
-      //       // await DAA.bulkAddUsersToDaa(id, userList);
-      //       // Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
-      //     } catch(error) {
-      //       Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
-      //     }
-      //   } else if (removeAllUser) {
-      //     try {
-      //       await DAA.bulkRemoveUsersFromDaa(id, userList);
-      //       Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
-      //     } catch(error) {
-      //       Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
-      //     }
-      //   }
-      // }
 
       columnHeaderFormat = {
         ...columnHeaderFormat,
@@ -358,7 +247,7 @@ export default function ManageResearcherDAAsTable(props) {
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [
-        displayNameCell(displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers),
+        displayNameCell(displayName, email, id, daas, setResearchers),
         ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
       ];
     });
