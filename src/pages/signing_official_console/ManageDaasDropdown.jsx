@@ -19,9 +19,8 @@ export default function ManageDaasDropdown(props) {
     setApplyAll(!event.target.checked);
   };
 
-  const handleApplyAll = async (id, dacName) => {
-    const userList = { "users": researchers.map(researcher => researcher.userId) };
-    console.log(userList);
+  const handleApplyAll = async () => {
+    const userList = { 'users': researchers.map(researcher => researcher.userId) };
     if (applyAll) {
       try {
         await DAA.bulkAddUsersToDaa(moreData.id, userList);
@@ -39,7 +38,7 @@ export default function ManageDaasDropdown(props) {
         Notifications.showError({text: `Error removing all users' approval to request from: ${moreData.name}`});
       }
     }
-  }
+  };
 
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
@@ -47,17 +46,17 @@ export default function ManageDaasDropdown(props) {
         <strong>{actionsTitle}</strong>
       </th>
       <form>
-        <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-          <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+          <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName);}}/>
         </li>
-        <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
             <input type="radio" name="daa" value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
             &nbsp;&nbsp;Apply agreement to all users
           </label>
         </li>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-        <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+          <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
             <input type="radio" name="daa"  value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
             &nbsp;&nbsp;Remove agreement from all users
           </label>
@@ -80,4 +79,4 @@ export default function ManageDaasDropdown(props) {
       </li>
     </ul>
   );
-};
+}

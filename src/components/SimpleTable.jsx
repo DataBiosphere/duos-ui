@@ -68,7 +68,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                   <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
                 </div>
               </div>
-             ) : header.data ? (
+            ) : header.data ? (
               <li className="dropdown" style={{ listStyleType: 'none' }}>
                 <div role="button" data-toggle="dropdown">
                   <div id="dacUser">
@@ -77,8 +77,8 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                   </div>
                 </div>
                 {/* <div style={{textTransform:'none'}}> */}
-                  {data}
-              </li> 
+                {data}
+              </li>
             ) : (
               label
             )}
@@ -94,7 +94,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
   return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
-    if (rowData[index][0].label === "display-names") {
+    if (rowData[index][0].label === 'display-names') {
       baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#e2e8f4';
     }
     const renderedRow = (

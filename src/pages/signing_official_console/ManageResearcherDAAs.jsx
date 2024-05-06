@@ -56,4 +56,4 @@ export default function ManageResearcherDAAs() {
       </div>
     </div>
   );
-};
+}

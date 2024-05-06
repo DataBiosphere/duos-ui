@@ -19,7 +19,7 @@ export default function ManageUsersDropdown(props) {
   };
 
   const handleApplyAll = async () => {
-    const daaList = { "daaList": daas.map(daa => daa.daaId) };
+    const daaList = { 'daaList': daas.map(daa => daa.daaId) };
     if (applyAll) {
       try {
         await DAA.bulkAddDaasToUser(moreData.id, daaList);
@@ -37,42 +37,42 @@ export default function ManageUsersDropdown(props) {
         Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData}`});
       }
     }
-  }
+  };
 
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-    <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
-      <strong>Agreement Actions</strong>
-    </th>
-    <form>
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-          <input type="radio" name="users" value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
-          &nbsp;&nbsp;Apply all agreements to this user
-        </label>
-      </li>
+      <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
+        <strong>Agreement Actions</strong>
+      </th>
+      <form>
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+          <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+            <input type="radio" name="users" value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
+            &nbsp;&nbsp;Apply all agreements to this user
+          </label>
+        </li>
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+          <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+            <input type="radio" name="users" value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
+            &nbsp;&nbsp;Remove all agreements from this user
+          </label>
+        </li>
+      </form>
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-          <input type="radio" name="users" value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
-          &nbsp;&nbsp;Remove all agreements from this user
-        </label>
+        <Button style={{
+          fontSize: '15px',
+          fontWeight: 'normal',
+          fontFamily: 'Montserrat',
+          border: '1px solid #0948B7',
+          borderRadius: '5px',
+          height: '40px',
+          marginRight: '1em',
+          cursor: 'pointer',
+          color: '#0948B7',
+          padding: '10px 20px',
+          textTransform: 'none'
+        }} onClick={() => handleApplyAll()}>Apply</Button>
       </li>
-    </form>
-    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <Button style={{
-        fontSize: '15px',
-        fontWeight: 'normal',
-        fontFamily: 'Montserrat',
-        border: '1px solid #0948B7',
-        borderRadius: '5px',
-        height: '40px',
-        marginRight: '1em',
-        cursor: 'pointer',
-        color: '#0948B7',
-        padding: '10px 20px',
-        textTransform: 'none'
-      }} onClick={() => handleApplyAll()}>Apply</Button>
-    </li>
-  </ul>
+    </ul>
   );
-};
+}

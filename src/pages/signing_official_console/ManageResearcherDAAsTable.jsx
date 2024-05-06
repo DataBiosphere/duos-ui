@@ -6,7 +6,6 @@ import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
 import PaginationBar from '../../components/PaginationBar';
 import SearchBar from '../../components/SearchBar';
-import { DownloadLink } from '../../components/DownloadLink';
 import {
   Notifications,
   recalculateVisibleTable,
@@ -16,7 +15,6 @@ import {
 import { DAA } from '../../libs/ajax/DAA';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
-import { Button } from '@mui/material';
 import ManageUsersDropdown from './ManageUsersDropdown';
 import ManageDaasDropdown from './ManageDaasDropdown';
 
@@ -75,7 +73,7 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked, refre
       Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
     }
   }
-}
+};
 
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
@@ -87,10 +85,10 @@ const refreshResearchers = async (setResearchers) => {
     })
   );
   setResearchers(researcherObjectList);
-}
+};
 
 const DAACell = (
-  rowDac, 
+  rowDac,
   researcher,
   institutionId,
   daas,
@@ -111,7 +109,7 @@ const DAACell = (
     data: (
       <div>
         {/* <Checkbox checked={hasDacId}/>  */}
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/> 
+        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
       </div>
     ),
   };
@@ -127,11 +125,11 @@ const DAACell = (
 //       <strong>{actionsTitle}</strong>
 //     </th>
 //     <form>
-//      {download && 
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+//      {download &&
+//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
 //         <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
 //       </li>}
-//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
 //         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
 //           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
 //           &nbsp;&nbsp;{option1}
@@ -164,26 +162,26 @@ const DAACell = (
 // }
 
 const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers) => {
-  const handleApplyAllDaa = async () => {
-    const daaList = { "daaList": daas.map(daa => daa.daaId) };
-    if (applyAllDaa) {
-      try {
-        await DAA.bulkAddDaasToUser(id, daaList);
-        Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${displayName}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error approving access to request data from all DACs to user: ${displayName}`});
-      }
-    } else if (removeAllDaa) {
-      try {
-        await DAA.bulkRemoveDaasFromUser(id, daaList);
-        Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${displayName}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${displayName}`});
-      }
-    }
-  }
+  // const handleApplyAllDaa = async () => {
+  //   const daaList = { "daaList": daas.map(daa => daa.daaId) };
+  //   if (applyAllDaa) {
+  //     try {
+  //       await DAA.bulkAddDaasToUser(id, daaList);
+  //       Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${displayName}`});
+  //       refreshResearchers(setResearchers);
+  //     } catch(error) {
+  //       Notifications.showError({text: `Error approving access to request data from all DACs to user: ${displayName}`});
+  //     }
+  //   } else if (removeAllDaa) {
+  //     try {
+  //       await DAA.bulkRemoveDaasFromUser(id, daaList);
+  //       Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${displayName}`});
+  //       refreshResearchers(setResearchers);
+  //     } catch(error) {
+  //       Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${displayName}`});
+  //     }
+  //   }
+  // }
   return {
     data: (
       <>
@@ -290,17 +288,12 @@ export default function ManageResearcherDAAsTable(props) {
       //   }
       // }
 
-      const downloadLink = async (id) => {
-        DAA.getDaaFileById(id);
-      }
-
       columnHeaderFormat = {
         ...columnHeaderFormat,
         ...dacs.reduce((acc, dac) => {
           const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
           const id = daa.daaId;
           const fileName = daa.file.fileName;
-          console.log(fileName);
           acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={id, fileName} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
           return acc;
         }, {}),
@@ -360,7 +353,7 @@ export default function ManageResearcherDAAsTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
+      const {displayName, libraryCards} = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
