@@ -76,7 +76,6 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                     <span className="caret caret-margin" style={{color: '#337ab7'}}></span>
                   </div>
                 </div>
-                {/* <div style={{textTransform:'none'}}> */}
                 {data}
               </li>
             ) : (
