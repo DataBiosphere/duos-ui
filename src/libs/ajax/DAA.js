@@ -1,6 +1,5 @@
-import * as fp from 'lodash/fp';
 import fileDownload from 'js-file-download';
-import { getApiUrl, fetchOk } from '../ajax';
+import { getApiUrl } from '../ajax';
 import { Config } from '../config';
 import axios from 'axios';
 
@@ -52,7 +51,7 @@ export const DAA = {
     const url = `${await getApiUrl()}/api/daa/bulk/user/${userId}`;
     const res = await axios.delete(url, { ...Config.authOpts(), data: daaList });
     return res.data;
-  }, 
+  },
 
   getDaaFileById: async (daaId, daaFileName) => {
     const authOpts = Object.assign(Config.authOpts(), { responseType: 'blob' });
