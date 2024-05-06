@@ -52,9 +52,9 @@ let columnHeaderFormat = {
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
 const handleClick = async (researcher, specificDac, filteredDaas, checked, refreshResearchers, setResearchers) => {
+  const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
   if (!checked) {
     try {
-      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.createDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
@@ -63,7 +63,6 @@ const handleClick = async (researcher, specificDac, filteredDaas, checked, refre
     }
   } else {
     try {
-      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
       Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
@@ -112,49 +111,49 @@ const DAACell = (
   };
 };
 
-const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
+const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download) => {
   const name = download ? 'users' : 'daa';
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-    <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
-      <strong>{actionsTitle}</strong>
-    </th>
-    <form>
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-          <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
-          &nbsp;&nbsp;{option1}
-        </label>
-      </li>
+      <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
+        <strong>{actionsTitle}</strong>
+      </th>
+      <form>
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+          <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+            <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
+            &nbsp;&nbsp;{option1}
+          </label>
+        </li>
+        <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+          <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+            <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
+            &nbsp;&nbsp;{option2}
+          </label>
+        </li>
+      </form>
       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-          <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
-          &nbsp;&nbsp;{option2}
-        </label>
+        <Button style={{
+          fontSize: '15px',
+          fontWeight: 'normal',
+          fontFamily: 'Montserrat',
+          border: '1px solid #0948B7',
+          borderRadius: '5px',
+          height: '40px',
+          marginRight: '1em',
+          cursor: 'pointer',
+          color: '#0948B7',
+          padding: '10px 20px',
+          textTransform: 'none'
+        }} onClick={() => handleApplyAll()}>Apply</Button>
       </li>
-    </form>
-    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <Button style={{
-        fontSize: '15px',
-        fontWeight: 'normal',
-        fontFamily: 'Montserrat',
-        border: '1px solid #0948B7',
-        borderRadius: '5px',
-        height: '40px',
-        marginRight: '1em',
-        cursor: 'pointer',
-        color: '#0948B7',
-        padding: '10px 20px',
-        textTransform: 'none'
-      }} onClick={() => handleApplyAll()}>Apply</Button>
-    </li>
-  </ul>
+    </ul>
   );
-}
+};
 
 const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers) => {
   const handleApplyAllDaa = async () => {
-    const daaList = { "daaList": daas.map(daa => daa.daaId) };
+    const daaList = { 'daaList': daas.map(daa => daa.daaId) };
     if (applyAllDaa) {
       try {
         await DAA.bulkAddDaasToUser(id, daaList);
@@ -172,7 +171,7 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
         Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${displayName}`});
       }
     }
-  }
+  };
 
   return {
     data: (
