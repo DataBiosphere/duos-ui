@@ -17,6 +17,8 @@ import { DAA } from '../../libs/ajax/DAA';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
 import { Button } from '@mui/material';
+import ManageUsersDropdown from './ManageUsersDropdown';
+import ManageDaasDropdown from './ManageDaasDropdown';
 
 //Styles specific to this table
 const styles = {
@@ -117,49 +119,49 @@ const DAACell = (
 
 // {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false)}
 // dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser(id, dac.name), `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName})
-const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
-  const name = download ? 'users' : 'daa';
-  return (
-    <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-    <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
-      <strong>{actionsTitle}</strong>
-    </th>
-    <form>
-     {download && 
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
-      </li>}
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
-        <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-          <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
-          &nbsp;&nbsp;{option1}
-        </label>
-      </li>
-      <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-          <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
-          &nbsp;&nbsp;{option2}
-        </label>
-      </li>
-    </form>
-    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-      <Button style={{
-        fontSize: '15px',
-        fontWeight: 'normal',
-        fontFamily: 'Montserrat',
-        border: '1px solid #0948B7',
-        borderRadius: '5px',
-        height: '40px',
-        marginRight: '1em',
-        cursor: 'pointer',
-        color: '#0948B7',
-        padding: '10px 20px',
-        textTransform: 'none'
-      }} onClick={() => handleApplyAll()}>Apply</Button>
-    </li>
-  </ul>
-  );
-}
+// const dropdown = (applyAll, removeAll, handleApplyAllChange, handleRemoveAllChange, handleApplyAll, actionsTitle, option1, option2, download, moreData) => {
+//   const name = download ? 'users' : 'daa';
+//   return (
+//     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
+//     <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
+//       <strong>{actionsTitle}</strong>
+//     </th>
+//     <form>
+//      {download && 
+//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+//         <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName)}}/>
+//       </li>}
+//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}> 
+//         <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+//           <input type="radio" name={name} value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
+//           &nbsp;&nbsp;{option1}
+//         </label>
+//       </li>
+//       <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+//       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+//           <input type="radio" name={name} value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
+//           &nbsp;&nbsp;{option2}
+//         </label>
+//       </li>
+//     </form>
+//     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+//       <Button style={{
+//         fontSize: '15px',
+//         fontWeight: 'normal',
+//         fontFamily: 'Montserrat',
+//         border: '1px solid #0948B7',
+//         borderRadius: '5px',
+//         height: '40px',
+//         marginRight: '1em',
+//         cursor: 'pointer',
+//         color: '#0948B7',
+//         padding: '10px 20px',
+//         textTransform: 'none'
+//       }} onClick={() => handleApplyAll()}>Apply</Button>
+//     </li>
+//   </ul>
+//   );
+// }
 
 const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, handleRemoveAllDaaChange, applyAllDaa, removeAllDaa, setResearchers) => {
   const handleApplyAllDaa = async () => {
@@ -193,7 +195,7 @@ const displayNameCell = (displayName, email, id, daas, handleApplyAllDaaChange, 
               <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
             </div>
           </a>
-          {dropdown(applyAllDaa, removeAllDaa, handleApplyAllDaaChange, handleRemoveAllDaaChange, handleApplyAllDaa, 'Agreement Actions', 'Apply all agreements to this user', 'Remove all agreements from this user', false, false)}
+          <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
         </li>
       </>
     ),
@@ -214,8 +216,8 @@ export default function ManageResearcherDAAsTable(props) {
   const [columnHeaderData, setColumnHeaderData] = useState([columnHeaderFormat.name]);
   const [applyAllDaa, setApplyAllDaa] = useState(false);
   const [removeAllDaa, setRemoveAllDaa] = useState(false);
-  const [applyAllUser, setApplyAllUser] = useState(false);
-  const [removeAllUser, setRemoveAllUser] = useState(false);
+  // const [applyAllUser, setApplyAllUser] = useState(false);
+  // const [removeAllUser, setRemoveAllUser] = useState(false);
   const { signingOfficial, isLoading, dacs, daas } = props;
 
   //Search function for SearchBar component, function defined in utils
@@ -237,15 +239,15 @@ export default function ManageResearcherDAAsTable(props) {
     setApplyAllDaa(!event.target.checked);
   };
 
-  const handleApplyAllUserChange = (event) => {
-    setApplyAllUser(event.target.checked);
-    setRemoveAllUser(!event.target.checked);
-  };
+  // const handleApplyAllUserChange = (event) => {
+  //   setApplyAllUser(event.target.checked);
+  //   setRemoveAllUser(!event.target.checked);
+  // };
 
-  const handleRemoveAllUserChange = (event) => {
-    setRemoveAllUser(event.target.checked);
-    setApplyAllUser(!event.target.checked);
-  };
+  // const handleRemoveAllUserChange = (event) => {
+  //   setRemoveAllUser(event.target.checked);
+  //   setApplyAllUser(!event.target.checked);
+  // };
 
   //init hook, need to make ajax calls here
   useEffect(() => {
@@ -263,30 +265,30 @@ export default function ManageResearcherDAAsTable(props) {
     const generateColumnData = () => {
       const dacColumnWidth = dacs.length > 0 ? 60 / dacs.length : 0;
 
-      const handleApplyAllUser = async (id, dacName) => {
-        const userList = { "users": props.researchers.map(researcher => researcher.userId) };
-        console.log(userList);
-        if (applyAllUser) {
-          try {
-            DAA.bulkAddUsersToDaa(id, userList).then(() => {
-              Notifications.showSuccess({
-                text: `Approved all users access to request from: ${dacName}`,
-              });
-            props.history.push('/signing_official_console/researchers');});
-            // await DAA.bulkAddUsersToDaa(id, userList);
-            // Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
-          } catch(error) {
-            Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
-          }
-        } else if (removeAllUser) {
-          try {
-            await DAA.bulkRemoveUsersFromDaa(id, userList);
-            Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
-          } catch(error) {
-            Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
-          }
-        }
-      }
+      // const handleApplyAllUser = async (id, dacName) => {
+      //   const userList = { "users": props.researchers.map(researcher => researcher.userId) };
+      //   console.log(userList);
+      //   if (applyAllUser) {
+      //     try {
+      //       DAA.bulkAddUsersToDaa(id, userList).then(() => {
+      //         Notifications.showSuccess({
+      //           text: `Approved all users access to request from: ${dacName}`,
+      //         });
+      //       props.history.push('/signing_official_console/researchers');});
+      //       // await DAA.bulkAddUsersToDaa(id, userList);
+      //       // Notifications.showSuccess({text: `Approved all users access to request from: ${dacName}`});
+      //     } catch(error) {
+      //       Notifications.showError({text: `Error approving all users access to request from: ${dacName}`});
+      //     }
+      //   } else if (removeAllUser) {
+      //     try {
+      //       await DAA.bulkRemoveUsersFromDaa(id, userList);
+      //       Notifications.showSuccess({text: `Removed all users' approval to request from: ${dacName}`});
+      //     } catch(error) {
+      //       Notifications.showError({text: `Error removing all users' approval to request from: ${dacName}`});
+      //     }
+      //   }
+      // }
 
       const downloadLink = async (id) => {
         DAA.getDaaFileById(id);
@@ -299,7 +301,7 @@ export default function ManageResearcherDAAsTable(props) {
           const id = daa.daaId;
           const fileName = daa.file.fileName;
           console.log(fileName);
-          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: dropdown(applyAllUser, removeAllUser, handleApplyAllUserChange, handleRemoveAllUserChange, handleApplyAllUser, `${dac.name} Actions`, 'Apply agreement to all users', 'Remove agreement from all users', {id, fileName}, {id: id, name: dac})};
+          acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={id, fileName} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
           return acc;
         }, {}),
       };

@@ -38,7 +38,7 @@ export const DAA = {
 
   bulkRemoveUsersFromDaa: async (daaId, userList) => {
     const url = `${await getApiUrl()}/api/daa/bulk/${daaId}`;
-    const res = await axios.delete(url, userList, Config.authOpts());
+    const res = await axios.delete(url, { ...Config.authOpts(), data: userList });
     return res.data;
   },
 
