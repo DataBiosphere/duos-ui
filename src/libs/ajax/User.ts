@@ -110,7 +110,7 @@ export const User = {
     return res.json();
   },
 
-  getUnassignedUsers: async (): Promise<DuosUserResponse> => {
+  getUnassignedUsers: async (): Promise<DuosUserResponse[]> => {
     const url = `${await getApiUrl()}/api/user/institution/unassigned`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
@@ -158,7 +158,7 @@ export const User = {
     return res.data;
   },
 
-  getApprovedDatasets: async (): Promise<ApprovedDataset> => {
+  getApprovedDatasets: async (): Promise<ApprovedDataset[]> => {
     const url = `${await getApiUrl()}/api/user/me/researcher/datasets`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
