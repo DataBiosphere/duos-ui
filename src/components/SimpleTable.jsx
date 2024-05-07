@@ -93,7 +93,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
   return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
-    if (rowData[index][0].label === 'display-names') {
+    if (rowData[index][0].striped) {
       baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#e2e8f4';
     }
     const renderedRow = (
