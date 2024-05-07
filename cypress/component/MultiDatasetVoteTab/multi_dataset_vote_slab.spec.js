@@ -315,6 +315,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
   });
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function() {
+    // workaround so that notifications don't overlap the clicked buttons and cause an error
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -338,6 +340,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
   });
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function() {
+    // workaround so that notifications don't overlap the clicked buttons and cause an error
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}

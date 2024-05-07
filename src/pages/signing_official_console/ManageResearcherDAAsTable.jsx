@@ -178,7 +178,7 @@ export default function ManageResearcherDAAsTable(props) {
       const id = researcher.userId || email;
       return [
         displayNameCell(displayName, email, id, daas, setResearchers),
-        ...dacs.map((dac) => (DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers)))
+        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
       ];
     });
   };
