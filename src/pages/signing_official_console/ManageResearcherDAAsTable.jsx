@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Checkbox } from '@mui/material';
 import { Styles } from '../../libs/theme';
 import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -12,10 +11,10 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList
 } from '../../libs/utils';
-import { DAA } from '../../libs/ajax/DAA';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
 import ManageUsersDropdown from './ManageUsersDropdown';
+import DAACell from './DAACell';
 
 //Styles specific to this table
 const styles = {
@@ -51,27 +50,6 @@ let columnHeaderFormat = {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const handleClick = async (researcher, specificDac, filteredDaas, checked, refreshResearchers, setResearchers) => {
-  const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
-  if (!checked) {
-    try {
-      await DAA.createDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
-      refreshResearchers(setResearchers);
-    } catch(error) {
-      Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
-    }
-  } else {
-    try {
-      await DAA.deleteDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-      refreshResearchers(setResearchers);
-    } catch(error) {
-      Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-    }
-  }
-};
-
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
   // the construction of this list is currently a work-around because our endpoint in the backend
@@ -82,33 +60,6 @@ const refreshResearchers = async (setResearchers) => {
     })
   );
   setResearchers(researcherObjectList);
-};
-
-const DAACell = (
-  rowDac,
-  researcher,
-  institutionId,
-  daas,
-  refreshResearchers,
-  setResearchers
-) => {
-  const id = researcher && (researcher.userId || researcher.email);
-  const libraryCards = researcher && researcher.libraryCards;
-  const card = libraryCards && libraryCards.find(card => card.institutionId === institutionId);
-  const daaIds = researcher && card && card.daaIds;
-  const filteredDaas = daaIds && daas.filter(daa => daaIds.includes(daa.daaId));
-  const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
-
-  return {
-    isComponent: true,
-    id,
-    label: 'lc-button',
-    data: (
-      <div>
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
-      </div>
-    ),
-  };
 };
 
 const displayNameCell = (displayName, email, id, daas, setResearchers) => {
@@ -227,7 +178,7 @@ export default function ManageResearcherDAAsTable(props) {
       const id = researcher.userId || email;
       return [
         displayNameCell(displayName, email, id, daas, setResearchers),
-        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
+        ...dacs.map((dac) => (DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers)))
       ];
     });
   };
