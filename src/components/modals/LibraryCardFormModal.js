@@ -1,6 +1,5 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {cloneDeep, includes, isEmpty, isNil, isObject} from 'lodash/fp';
-import {div, h, label} from 'react-hyperscript-helpers';
 import {Styles, Theme} from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
@@ -42,41 +41,40 @@ const FormFieldRow = (props) => {
 
   if(!isNil(updateInstitution)) {
     //first template for institution selection
-    template = div({style: {marginBottom: '2%'}}, [
-      label({}, ['Institution']),
-      h(SearchSelect, {
-        id: `${label}-form-field`,
-        name: label || '',
-        onSelection: (selection) => updateInstitution(selection),
-        options: dropdownOptions,
-        placeholder: 'Search for institution...',
-        value: card.institutionId
-      })
-    ]);
+    template = <div style={{ marginBottom: '2%', width:'100%' }}>
+      <label>Institution</label>
+      <SearchSelect
+        id={`insitution-form-field`}
+        name='Institution'
+        onSelection={(selection) => updateInstitution(selection)}
+        options={dropdownOptions}
+        placeholder='Search for institution...'
+        value={card.institutionId}
+      />
+    </div>;
   } else {
     //template here is for new card creation
-    if(modalType === 'add') {
-      template = div({style: {marginBottom: '2%'}}, [
-        label({}, ['Users']),
-        h(Creatable, {
-          key: 'select-user',
-          isClearable: true,
-          onChange: updateUser,
-          createOptionPosition: 'first',
-          onInputChange: (input, {action}) => userListFilter({input, card, setCard, action}),
-          getNewOptionData: (input) => { return {email: input}; },
-          options: dropdownOptions,
-          placeholder: 'Select or type a new user email',
-          isOptionSelected: () => false, //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-          getOptionLabel: (option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email
-        })
-      ]);
+    if (modalType === 'add') {
+      template = <div style={{ marginBottom: '2%', width:'100%' }}>
+        <label>Users</label>
+        <Creatable
+          key='select-user'
+          isClearable={true}
+          onChange={updateUser}
+          createOptionPosition='first'
+          onInputChange={(input, { action }) => userListFilter({ input, card, setCard, action })}
+          getNewOptionData={(input) => { return { email: input }; }}
+          options={dropdownOptions}
+          placeholder='Select or type a new user email'
+          isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+          getOptionLabel={(option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email}
+        />
+      </div>;
     } else {
-      div({}, [card.displayName]);
+      <div>{card.displayName}</div>;
     }
   }
-
-  return div({display: 'flex'}, [template]);
+  return <div style={{ display: 'flex' }}>{template}</div>;
 };
 
 export default function LibraryCardFormModal(props) {
@@ -124,83 +122,68 @@ export default function LibraryCardFormModal(props) {
     return result;
   };
 
-  return h(
-    Modal,
-    {
-      isOpen: showModal,
-      onRequestClose: closeModal,
-      shouldCloseOnOverlayClick: true,
-      style: {
+  return (
+    <Modal
+      isOpen={showModal}
+      onRequestClose={closeModal}
+      shouldCloseOnOverlayClick={true}
+      style={{
         content: { ...Styles.MODAL.CONTENT },
         overlay: {
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
-      },
-    },
-    [
-      div({ style: Styles.MODAL.CONTENT }, [
-        h(CloseIconComponent, { closeFn: closeModal }),
-        div({ style: Styles.MODAL.TITLE_HEADER }, [
-          modalType === 'add' ? 'Add Library Card' : 'Update Library Card',
-        ]),
-        div({ style: { borderBottom: '1px solid #1FB50' } }, []),
-        // Library Card Agreement Text
-        lcaContent,
-        // LCA Terms Download
-        LibraryCardAgreementTermsDownload,
-        //users dropdown
-        h(FormFieldRow, {
-          card,
-          modalType,
-          updateUser,
-          setCard,
-          dropdownOptions: users,
-        }),
-        //institution dropdown
-        h(FormFieldRow, {
-          isRendered: !isNil(institutions) && institutions.length > 1,
-          card,
-          modalType,
-          updateInstitution,
-          dropdownOptions: institutions,
-        }),
-        div(
-          {
-            style: {
-              display: 'flex',
-              justifyContent: 'flex-end',
-            },
-          },
-          [
-            h(SimpleButton, {
-              onClick:
-                modalType === 'add'
-                  ? () => createOnClick(card)
-                  : () => updateOnClick(card),
-              additionalStyle: {
-                margin: '0%',
-                width: '80px',
-                height: '15px',
-                padding: '20px'
-              },
-              baseColor: Theme.palette.secondary,
-              disabled: isConfirmDisabled(modalType, card),
-              label: modalType === 'add' ? 'Add' : 'Update',
-            }),
-            h(SimpleButton, {
-              onClick: closeModal,
-              additionalStyle: {
-                marginLeft: '1%',
-                width: '80px',
-                height: '15px',
-                padding: '20px'
-              },
-              baseColor: Theme.palette.secondary,
-              label: 'Cancel'
-            })
-          ]
-        ),
-      ]),
-    ]
+      }}
+    >
+      <div style={Styles.MODAL.CONTENT}>
+        <CloseIconComponent closeFn={closeModal} />
+        <div style={Styles.MODAL.TITLE_HEADER}>
+          {modalType === 'add' ? 'Add Library Card' : 'Update Library Card'}
+        </div>
+        <div style={{ borderBottom: '1px solid #1FB50' }} />
+        {/* Library Card Agreement Text */}
+        {lcaContent}
+        {/* LCA Terms Download */}
+        {LibraryCardAgreementTermsDownload}
+        {/* users dropdown */}
+        <FormFieldRow
+          card={card}
+          modalType={modalType}
+          updateUser={updateUser}
+          setCard={setCard}
+          dropdownOptions={users}
+        />
+        {/* institution dropdown */}
+        {
+          !isNil(institutions) && institutions.length > 1 && (
+            <FormFieldRow
+              card={card}
+              modalType={modalType}
+              updateInstitution={updateInstitution}
+              dropdownOptions={institutions}
+            />
+          )
+        }
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <SimpleButton
+            onClick={modalType === 'add' ? () => createOnClick(card) : () => updateOnClick(card)}
+            additionalStyle={{ margin: '0%', width: '80px', height: '15px', padding: '20px' }}
+            baseColor={Theme.palette.secondary}
+            disabled={isConfirmDisabled(modalType, card)}
+            label={modalType === 'add' ? 'Add' : 'Update'}
+          />
+          <SimpleButton
+            onClick={closeModal}
+            additionalStyle={{ marginLeft: '1%', width: '80px', height: '15px', padding: '20px' }}
+            baseColor={Theme.palette.secondary}
+            label='Cancel'
+          />
+        </div>
+      </div>
+    </Modal>
   );
 }
