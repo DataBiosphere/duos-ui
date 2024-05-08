@@ -67,13 +67,13 @@ const displayNameCell = (displayName, email, id, daas, setResearchers) => {
     data: (
       <>
         <li className="dropdown" style={{ listStyleType: 'none' }}>
-          <a role="button" data-toggle="dropdown">
+          <div role="button" data-toggle="dropdown">
             <div id="dacUser" style={{ color: 'black' }}>
               {displayName || 'Invite sent, pending registration'}
               <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
               <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
             </div>
-          </a>
+          </div>
           <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
         </li>
       </>
