@@ -38,6 +38,7 @@ const getInitialState = () => {
 
 export const SupportRequestModal = (props) => {
   const [modalState, setModalState] = useState(getInitialState);
+
   const closeHandler = () => {
     Notifications.showInformation({
       text: 'Support request canceled',
@@ -106,7 +107,7 @@ export const SupportRequestModal = (props) => {
           type: 'question',
           subject: '',
           description: '',
-          attachement: ''
+          attachment: ''
         });
         props.onOKRequest('support');
       } else {
@@ -183,6 +184,7 @@ export const SupportRequestModal = (props) => {
   },[]);
 
   useEffect(() => {
+    // eslint-disable-line -- codacy says event listeners are dangerous
     window.addEventListener('resize', handleResize);
 
     return () => {
@@ -240,18 +242,18 @@ export const SupportRequestModal = (props) => {
       >
         <div style={{ width: '100%', padding: '0 15px 5px 15px' }}>
           <button
-            type="button"
+            type='button'
             style={{ position: 'absolute', top: '20px', right: '20px' }}
-            className="close"
+            className='close'
             onClick={closeHandler}
           >
-            <span className="glyphicon glyphicon-remove default-color" />
+            <span className='glyphicon glyphicon-remove default-color' />
           </button>
           <PageSubHeading
-            id="SupportRequestModal"
+            id='SupportRequestModal'
             imgSrc={addHelpIcon}
-            color="common"
-            title="Contact Us"
+            color='common'
+            title='Contact Us'
           />
         </div>
         <div style={{ width: '100%', padding: '10px 15px', outline: '0' }}>
@@ -278,56 +280,56 @@ export const SupportRequestModal = (props) => {
             encType= 'multipart/form-data'
           >
             {!modalState.isLogged && (
-              <div className="form-group first-form-group">
-                <label id="lbl_name" className="common-color">Name *</label>
+              <div className='form-group first-form-group'>
+                <label id='lbl_name' className='common-color'>Name *</label>
                 <input
-                  id="txt_name"
-                  placeholder="What should we call you?"
+                  id='txt_name'
+                  placeholder='What should we call you?'
                   value={modalState.name}
-                  className="form-control col-lg-12"
+                  className='form-control col-lg-12'
                   onChange={nameChangeHandler}
                   required={true}
                 />
               </div>
             )}
 
-            <div className="form-group first-form-group">
-              <label id="lbl_type" className="common-color">Type *</label>
+            <div className='form-group first-form-group'>
+              <label id='lbl_type' className='common-color'>Type *</label>
               <select
-                id="txt_question"
-                className="col-lg-12 select-wrapper form-control"
+                id='txt_question'
+                className='col-lg-12 select-wrapper form-control'
                 value={modalState.type}
                 onChange={typeChangeHandler}
                 required={true}
               >
-                <option value="question">Question</option>
-                <option value="bug">Bug</option>
-                <option value="feature_request">Feature Request</option>
+                <option value='question'>Question</option>
+                <option value='bug'>Bug</option>
+                <option value='feature_request'>Feature Request</option>
               </select>
             </div>
 
-            <div className="form-group first-form-group">
-              <label id="lbl_description" className="common-color">How can we help you {modalState.first_name}? *</label>
+            <div className='form-group first-form-group'>
+              <label id='lbl_description' className='common-color'>How can we help you {modalState.first_name}? *</label>
               <input
-                id="txt_subject"
-                placeholder="Enter a subject"
-                rows="5"
-                className="form-control col-lg-12 vote-input"
+                id='txt_subject'
+                placeholder='Enter a subject'
+                rows='5'
+                className='form-control col-lg-12 vote-input'
                 onChange={subjectChangeHandler}
                 required={true}
               />
               <textarea
-                id="txt_description"
-                placeholder="Enter a description"
-                rows="5"
-                className="form-control col-lg-12 vote-input"
+                id='txt_description'
+                placeholder='Enter a description'
+                rows='5'
+                className='form-control col-lg-12 vote-input'
                 onChange={descriptionChangeHandler}
                 required={true}
               />
             </div>
 
-            <div className="form-group first-form-group">
-              <label id="lbl_attachment" className="common-color">Attachment</label>
+            <div className='form-group first-form-group'>
+              <label id='lbl_attachment' className='common-color'>Attachment</label>
               <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)}>
                 {({ isDragActive, openUploader, getRootProps, getInputProps }) => ( //eslint-disable-line no-unused-vars
                   <section style={{
@@ -374,12 +376,12 @@ export const SupportRequestModal = (props) => {
             </div>
 
             {!modalState.isLogged && (
-              <div className="form-group first-form-group">
-                <label id="lbl_email" className="common-color">Contact email *</label>
+              <div className='form-group first-form-group'>
+                <label id='lbl_email' className='common-color'>Contact email *</label>
                 <input
-                  id="txt_email"
-                  className="form-control col-lg-12 vote-input"
-                  placeholder="Enter a email"
+                  id='txt_email'
+                  className='form-control col-lg-12 vote-input'
+                  placeholder='Enter a email'
                   value={modalState.email}
                   onChange={emailChangeHandler}
                   required={true}
@@ -388,18 +390,18 @@ export const SupportRequestModal = (props) => {
             )}
           </form>
         </div>
-        <div className="modal-footer">
+        <div className='modal-footer'>
           <button
-            id="btn_action"
-            className="btn common-background"
+            id='btn_action'
+            className='btn common-background'
             onClick={OKHandler}
             disabled={disableOkBtn}
           >
             Submit
           </button>
           <button
-            id="btn_cancel"
-            className="btn dismiss-background"
+            id='btn_cancel'
+            className='btn dismiss-background'
             onClick={closeHandler}
           >
             Cancel
