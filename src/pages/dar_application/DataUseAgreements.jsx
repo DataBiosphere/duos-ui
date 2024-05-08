@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {isNil} from 'lodash/fp';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import ModelDucLink from '../../assets/Model_DUC.pdf';
 import { Notifications } from '../../libs/utils';
 import { DAA } from '../../libs/ajax/DAA';
 
