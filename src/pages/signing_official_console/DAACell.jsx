@@ -3,7 +3,8 @@ import { Checkbox } from '@mui/material';
 import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
 
-export default function DAACell(rowDac, researcher, institutionId, daas, refreshResearchers, setResearchers) {
+export default function DAACell(props) {
+  const {rowDac, researcher, institutionId, daas, refreshResearchers, setResearchers} = props;
   const id = researcher && (researcher.userId || researcher.email);
   const libraryCards = researcher && researcher.libraryCards;
   const card = libraryCards && libraryCards.find(card => card.institutionId === institutionId);
@@ -11,23 +12,23 @@ export default function DAACell(rowDac, researcher, institutionId, daas, refresh
   const filteredDaas = daaIds && daas.filter(daa => daaIds.includes(daa.daaId));
   const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
 
-  const handleClick = async (researcher, specificDac, filteredDaas, checked, refreshResearchers, setResearchers) => {
-    const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
-    if (!checked) {
+  const handleClick = async () => {
+    const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId))?.daaId;
+    if (!hasDacId) {
       try {
         await DAA.createDaaLcLink(daaId, researcher.userId);
-        Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
+        Notifications.showSuccess({text: `Approved access to ${rowDac.name} to user: ${researcher.displayName}`});
         refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
+        Notifications.showError({text: `Error approving access to ${rowDac.name} to user: ${researcher.displayName}`});
       }
     } else {
       try {
         await DAA.deleteDaaLcLink(daaId, researcher.userId);
-        Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
+        Notifications.showSuccess({text: `Removed approval of access to ${rowDac.name} to user: ${researcher.displayName}`});
         refreshResearchers(setResearchers);
       } catch(error) {
-        Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
+        Notifications.showError({text: `Error removing approval of access to ${rowDac.name} to user: ${researcher.displayName}`});
       }
     }
   };
@@ -38,7 +39,7 @@ export default function DAACell(rowDac, researcher, institutionId, daas, refresh
     label: 'lc-button',
     data: (
       <div>
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
+        <Checkbox checked={hasDacId} onClick={() => handleClick()}/>
       </div>
     ),
   };

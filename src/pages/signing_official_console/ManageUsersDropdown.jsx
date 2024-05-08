@@ -71,7 +71,8 @@ export default function ManageUsersDropdown(props) {
           color: '#0948B7',
           padding: '10px 20px',
           textTransform: 'none'
-        }} onClick={() => handleApplyAll()}>Apply</Button>
+        }} onClick={() => handleApplyAll()}
+        disabled={!applyAll && !removeAll}>Apply</Button>
       </li>
     </ul>
   );

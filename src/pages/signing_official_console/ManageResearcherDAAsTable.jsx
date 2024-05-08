@@ -172,13 +172,13 @@ export default function ManageResearcherDAAsTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, libraryCards} = researcher;
+      const { displayName, libraryCards } = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [
         displayNameCell(displayName, email, id, daas, setResearchers),
-        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
+        ...dacs.map(dac => DAACell({ rowDac: dac, researcher: researcher, institutionId: signingOfficial.institutionId, daas: daas, refreshResearchers: refreshResearchers,setResearchers: setResearchers })),
       ];
     });
   };
