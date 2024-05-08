@@ -44,7 +44,7 @@ const FormFieldRow = (props) => {
     template = <div style={{ marginBottom: '2%', width:'100%' }}>
       <label>Institution</label>
       <SearchSelect
-        id={'insitution-form-field'}
+        id={'institution-form-field'}
         name='Institution'
         onSelection={(selection) => updateInstitution(selection)}
         options={dropdownOptions}
