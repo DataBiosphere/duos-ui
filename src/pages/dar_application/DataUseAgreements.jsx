@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
+import { Notifications } from '../../libs/utils';
+import { DAA } from '../../libs/ajax/DAA';
 
 import './dar_application.css';
 
@@ -14,7 +15,56 @@ export default function DataUseAgreements(props) {
     darCode,
     isAttested,
     cancelAttest,
+    datasets
   } = props;
+  const [daas, setDaas] = useState([]);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const daaList = await DAA.getDaas();
+        setDaas(daaList);
+      } catch (error) {
+        Notifications.showError({
+          text: 'Error: Unable to retrieve DAAs from server',
+        });
+      }
+    };
+    init();
+  }, []);
+
+  const RequiredDAAs = () => {
+    const daaDivs = datasets.map((dataset) => {
+      const datasetDacId = dataset.dacId;
+      const daa = daas.find((daa) => daa.dacs.some((d) => d.dacId === datasetDacId));
+      const id = daa.daaId;
+      const fileName = daa.file.fileName.split('.')[0];
+      return (
+        <div key={id}>
+          {DAADownload(id, fileName)}
+        </div>
+      );
+    });
+    return (
+      <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+        {daaDivs}
+      </div>
+    );
+  };
+
+  const DAADownload = (id, fileName) => {
+    return (
+      <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+        <div>
+          <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)} className="button button-white" style={{ marginRight: '2rem' }}>
+            <span className="glyphicon glyphicon-download"></span>
+            {' '}
+            {fileName}
+          </a>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="dar-step-card">
@@ -39,23 +89,7 @@ export default function DataUseAgreements(props) {
       </div>
 
       <h3>By submitting this data access request, you agree to all terms in the agreement(s) listed below.</h3>
-
-      <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
-        <div>
-          <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white" style={{ marginRight: '2rem' }}>
-            <span className="glyphicon glyphicon-download"></span>
-            {' '}
-            Broad Library Card Agreement
-          </a>
-        </div>
-        <div>
-          <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink} className="button button-white">
-            <span className="glyphicon glyphicon-download"></span>
-            {' '}
-            NHGRI Library Card Agreement
-          </a>
-        </div>
-      </div>
+      <RequiredDAAs/>
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
         <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>

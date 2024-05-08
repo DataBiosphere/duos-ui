@@ -607,6 +607,7 @@ const DataAccessRequestApplication = (props) => {
               {!props.readOnlyMode ?
                 <div className='step-container'>
                   <DataUseAgreements
+                    datasets={datasets}
                     darCode={formData.darCode}
                     cancelAttest={() => setIsAttested(false)}
                     isAttested={isAttested}
