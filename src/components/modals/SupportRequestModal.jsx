@@ -87,7 +87,7 @@ export const SupportRequestModal = (props) => {
           });
           setModalState({
             ...modalState,
-            validAttachement: false
+            validAttachment: false
           });
         }
         if (modalState.validAttachment) {
