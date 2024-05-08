@@ -356,7 +356,7 @@ export const SupportRequestModal = (props) => {
                       )
                     }
                     {
-                      modalState.attachment.length === 0 && (
+                      modalState.attachment.length !== 0 && (
                         <button
                           style={{
                             background: 'transparent',
