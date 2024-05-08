@@ -5,17 +5,14 @@ import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
 
 export default function ManageDaasDropdown(props) {
-  const [applyAll, setApplyAll] = useState(false);
-  const [removeAll, setRemoveAll] = useState(false);
+  const [applyAll, setApplyAll] = useState(null);
   const {actionsTitle, download, moreData, researchers, refreshResearchers, setResearchers} = props;
 
   const handleApplyAllChange = (event) => {
     setApplyAll(event.target.checked);
-    setRemoveAll(!event.target.checked);
   };
 
   const handleRemoveAllChange = (event) => {
-    setRemoveAll(event.target.checked);
     setApplyAll(!event.target.checked);
   };
 
@@ -29,7 +26,7 @@ export default function ManageDaasDropdown(props) {
       } catch(error) {
         Notifications.showError({text: `Error approving all users access to request from: ${moreData.name}`});
       }
-    } else if (removeAll) {
+    } else if (!applyAll) {
       try {
         await DAA.bulkRemoveUsersFromDaa(moreData.id, userList);
         Notifications.showSuccess({text: `Removed all users' approval to request from: ${moreData.name}`});
@@ -42,22 +39,22 @@ export default function ManageDaasDropdown(props) {
 
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
-      <th id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
+      <div id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
         <strong>{actionsTitle}</strong>
-      </th>
+      </div>
       <form>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName);}}/>
         </li>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-            <input type="radio" name="daa" value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
+            <input type="radio" name="daa" value="apply" checked={applyAll === true} onChange={handleApplyAllChange}/>
             &nbsp;&nbsp;Apply agreement to all users
           </label>
         </li>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-            <input type="radio" name="daa"  value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
+            <input type="radio" name="daa"  value="remove" checked={applyAll === false} onChange={handleRemoveAllChange}/>
             &nbsp;&nbsp;Remove agreement from all users
           </label>
         </li>
