@@ -18,4 +18,4 @@ const load = async () => {
     root.render(<BrowserRouter><App/></BrowserRouter>);
 };
 
-load();
+await load();
