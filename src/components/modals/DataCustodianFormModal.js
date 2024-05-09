@@ -46,7 +46,7 @@ const FormFieldRow = (props) => {
     }
   };
 
-  let template = <div style={{ marginBottom: '2%' }}>
+  let template = <div style={{ marginBottom: '2%', width:'100%' }}>
     <label>Users</label>
     <Creatable
       key='select-user'
