@@ -1,32 +1,28 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      # Check for updates to GitHub Actions every week
-      interval: "weekly"
-    target-branch: develop
-    reviewers:
-      - "@DataBiosphere/DUOS"
-    commit-message:
-      prefix: "[DUOS-1740-actions]"
-    groups:
-      action-dependencies:
-        patterns:
-          - "*"
-  - package-ecosystem: "npm"
+  - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
-    target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
+    target-branch: develop
+    commit-message:
+      prefix: "[DCJ-304-actions]"
+    groups:
+      action-dependencies:
+        patterns:
+          - "*"
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    target-branch: develop
     labels:
       - "dependency"
       - "npm"
     commit-message:
-      prefix: "[DUOS-1740-npm]"
+      prefix: "[DCJ-304-npm]"
     groups:
       npm-dependencies:
         patterns:
@@ -36,14 +32,12 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
-    target-branch: "develop"
-    reviewers:
-      - "@DataBiosphere/DUOS"
+    target-branch: develop
     labels:
       - "dependency"
       - "docker"
     commit-message:
-      prefix: "[DUOS-1740-docker]"
+      prefix: "[DCJ-304-docker]"
     groups:
       docker-dependencies:
         patterns:
