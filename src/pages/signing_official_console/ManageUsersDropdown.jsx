@@ -4,38 +4,43 @@ import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
 
 export default function ManageUsersDropdown(props) {
-  const [applyAll, setApplyAll] = useState(false);
-  const [removeAll, setRemoveAll] = useState(false);
+  const [applyAll, setApplyAll] = useState(null);
   const {daas, refreshResearchers, setResearchers, moreData} = props;
 
   const handleApplyAllChange = (event) => {
     setApplyAll(event.target.checked);
-    setRemoveAll(!event.target.checked);
   };
 
   const handleRemoveAllChange = (event) => {
-    setRemoveAll(event.target.checked);
     setApplyAll(!event.target.checked);
   };
+
+  const addDaasToUser = async (daaList) => {
+    try {
+      await DAA.bulkAddDaasToUser(moreData.id, daaList);
+      Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${moreData.name}`});
+      refreshResearchers(setResearchers);
+    } catch(error) {
+      Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData.name}`});
+    }
+  }
+
+  const removeDaasFromUser = async (daaList) => {
+    try {
+      await DAA.bulkRemoveDaasFromUser(moreData.id, daaList);
+      Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${moreData.name}`});
+      refreshResearchers(setResearchers);
+    } catch(error) {
+      Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData.name}`});
+    }
+  }
 
   const handleApplyAll = async () => {
     const daaList = { 'daaList': daas.map(daa => daa.daaId) };
     if (applyAll) {
-      try {
-        await DAA.bulkAddDaasToUser(moreData.id, daaList);
-        Notifications.showSuccess({text: `Approved access to request data from all DACs to user: ${moreData.name}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData.name}`});
-      }
-    } else if (removeAll) {
-      try {
-        await DAA.bulkRemoveDaasFromUser(moreData.id, daaList);
-        Notifications.showSuccess({text: `Removed approval of access to request data from all DACs from user: ${moreData.name}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData.name}`});
-      }
+      addDaasToUser(daaList);
+    } else {
+      removeDaasFromUser(daaList);
     }
   };
 
@@ -47,13 +52,13 @@ export default function ManageUsersDropdown(props) {
       <form>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-            <input type="radio" name="users" value="apply" checked={applyAll} onChange={handleApplyAllChange}/>
+            <input type="radio" name="users" value="apply" checked={applyAll === true} onChange={handleApplyAllChange}/>
             &nbsp;&nbsp;Apply all agreements to this user
           </label>
         </li>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-            <input type="radio" name="users" value="remove" checked={removeAll} onChange={handleRemoveAllChange}/>
+            <input type="radio" name="users" value="remove" checked={applyAll === false} onChange={handleRemoveAllChange}/>
             &nbsp;&nbsp;Remove all agreements from this user
           </label>
         </li>
@@ -72,7 +77,7 @@ export default function ManageUsersDropdown(props) {
           padding: '10px 20px',
           textTransform: 'none'
         }} onClick={() => handleApplyAll()}
-        disabled={!applyAll && !removeAll}>Apply</Button>
+        disabled={!applyAll && applyAll}>Apply</Button>
       </li>
     </ul>
   );

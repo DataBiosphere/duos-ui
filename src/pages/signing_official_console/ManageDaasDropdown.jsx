@@ -16,24 +16,32 @@ export default function ManageDaasDropdown(props) {
     setApplyAll(!event.target.checked);
   };
 
+  const addUsersToDaa = async (userList) => {
+    try {
+      await DAA.bulkAddUsersToDaa(moreData.id, userList);
+      Notifications.showSuccess({text: `Approved all users access to request from: ${moreData.name}`});
+      refreshResearchers(setResearchers);
+    } catch(error) {
+      Notifications.showError({text: `Error approving all users access to request from: ${moreData.name}`});
+    }
+  }
+
+  const removeUsersFromDaa = async (userList) => {
+    try {
+      await DAA.bulkRemoveUsersFromDaa(moreData.id, userList);
+      Notifications.showSuccess({text: `Removed all users' approval to request from: ${moreData.name}`});
+      refreshResearchers(setResearchers);
+    } catch(error) {
+      Notifications.showError({text: `Error removing all users' approval to request from: ${moreData.name}`});
+    }
+  }
+
   const handleApplyAll = async () => {
     const userList = { 'users': researchers.map(researcher => researcher.userId) };
     if (applyAll) {
-      try {
-        await DAA.bulkAddUsersToDaa(moreData.id, userList);
-        Notifications.showSuccess({text: `Approved all users access to request from: ${moreData.name}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error approving all users access to request from: ${moreData.name}`});
-      }
-    } else if (!applyAll) {
-      try {
-        await DAA.bulkRemoveUsersFromDaa(moreData.id, userList);
-        Notifications.showSuccess({text: `Removed all users' approval to request from: ${moreData.name}`});
-        refreshResearchers(setResearchers);
-      } catch(error) {
-        Notifications.showError({text: `Error removing all users' approval to request from: ${moreData.name}`});
-      }
+      addUsersToDaa(userList);
+    } else {
+      removeUsersFromDaa(userList);
     }
   };
 

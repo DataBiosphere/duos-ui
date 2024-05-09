@@ -50,37 +50,39 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
         //should be used to set dimensions of specific columns
         return (
           <div style={cellStyle} key={`column-row-${label}`} className="column-header">
-            {header.sortable && onSort ? (
-              <div
-                style={Styles.TABLE.HEADER_SORT}
-                key="data_id_cell"
-                className="cell-sort"
-                onClick={() => {
-                  onSort({
-                    colIndex: colIndex,
-                    dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
-                  });
-                }}
-              >
-                {label}
-                <div className="sort-container">
-                  <ArrowDropUp className={`sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}`} />
-                  <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
-                </div>
-              </div>
-            ) : header.data ? (
-              <li className="dropdown" style={{ listStyleType: 'none' }}>
-                <div role="button" data-toggle="dropdown">
-                  <div id="dacUser">
+            {(() => {
+              if (header.sortable && onSort) {
+                  return (<div
+                    style={Styles.TABLE.HEADER_SORT}
+                    key="data_id_cell"
+                    className="cell-sort"
+                    onClick={() => {
+                      onSort({
+                        colIndex: colIndex,
+                        dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
+                      });
+                    }}
+                  >
                     {label}
-                    <span className="caret caret-margin" style={{color: '#337ab7'}}></span>
-                  </div>
-                </div>
-                {data}
-              </li>
-            ) : (
-              label
-            )}
+                    <div className="sort-container">
+                      <ArrowDropUp className={`sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}`} />
+                      <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
+                    </div>
+                  </div>);
+              } else if (header.data) {
+                  return (<li className="dropdown" style={{ listStyleType: 'none' }}>
+                    <div role="button" data-toggle="dropdown">
+                      <div id="dacUser">
+                        {label}
+                        <span className="caret caret-margin" style={{color: '#337ab7'}}></span>
+                      </div>
+                    </div>
+                    {data}
+                  </li>)
+              } else {
+                return (label)
+              }
+            })()}
           </div>
         );
       })}
