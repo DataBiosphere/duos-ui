@@ -20,7 +20,7 @@ export default function DAACell(props) {
     } catch(error) {
       Notifications.showError({text: `Error approving access to ${rowDac.name} to user: ${researcher.displayName}`});
     }
-  }
+  };
 
   const deleteDaaLcLink = async (daaId) => {
     try {
@@ -30,7 +30,7 @@ export default function DAACell(props) {
     } catch(error) {
       Notifications.showError({text: `Error removing approval of access to ${rowDac.name} to user: ${researcher.displayName}`});
     }
-  }
+  };
 
   const handleClick = async () => {
     const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId))?.daaId;

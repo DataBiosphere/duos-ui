@@ -23,7 +23,7 @@ export default function ManageUsersDropdown(props) {
     } catch(error) {
       Notifications.showError({text: `Error approving access to request data from all DACs to user: ${moreData.name}`});
     }
-  }
+  };
 
   const removeDaasFromUser = async (daaList) => {
     try {
@@ -33,7 +33,7 @@ export default function ManageUsersDropdown(props) {
     } catch(error) {
       Notifications.showError({text: `Error removing approval of access to request data from all DACs from user: ${moreData.name}`});
     }
-  }
+  };
 
   const handleApplyAll = async () => {
     const daaList = { 'daaList': daas.map(daa => daa.daaId) };

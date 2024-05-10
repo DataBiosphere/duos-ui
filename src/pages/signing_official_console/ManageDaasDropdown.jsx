@@ -24,7 +24,7 @@ export default function ManageDaasDropdown(props) {
     } catch(error) {
       Notifications.showError({text: `Error approving all users access to request from: ${moreData.name}`});
     }
-  }
+  };
 
   const removeUsersFromDaa = async (userList) => {
     try {
@@ -34,7 +34,7 @@ export default function ManageDaasDropdown(props) {
     } catch(error) {
       Notifications.showError({text: `Error removing all users' approval to request from: ${moreData.name}`});
     }
-  }
+  };
 
   const handleApplyAll = async () => {
     const userList = { 'users': researchers.map(researcher => researcher.userId) };
