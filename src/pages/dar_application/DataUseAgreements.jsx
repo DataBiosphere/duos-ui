@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {isNil} from 'lodash/fp';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import { Notifications } from '../../libs/utils';
 import { DAA } from '../../libs/ajax/DAA';
 
@@ -32,6 +34,7 @@ export default function DataUseAgreements(props) {
   }, []);
 
   const RequiredDAAs = () => {
+    const fileNames = new Set();
     const daaDivs = datasets.map((dataset) => {
       const datasetDacId = dataset.dacId;
       if (!datasetDacId) {
@@ -40,17 +43,42 @@ export default function DataUseAgreements(props) {
       const daa = daas.find((daa) => daa.dacs.some((d) => d.dacId === datasetDacId));
       const id = daa.daaId;
       const fileName = daa.file.fileName.split('.')[0];
+      if (fileNames.has(fileName)) {
+        return <div key={id}></div>;
+      }
+      fileNames.add(fileName);
       return (
         <div key={id}>
           {DAADownload(id, fileName)}
         </div>
       );
     });
-    return (
-      <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
-        {daaDivs}
-      </div>
-    );
+    if (fileNames.size === 0) {
+      return (
+        <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+          <div>
+            <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white" style={{ marginRight: '2rem' }}>
+              <span className="glyphicon glyphicon-download"></span>
+              {' '}
+              Broad Library Card Agreement
+            </a>
+          </div>
+          <div>
+            <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink} className="button button-white">
+              <span className="glyphicon glyphicon-download"></span>
+              {' '}
+              NHGRI Library Card Agreement
+            </a>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+          {daaDivs}
+        </div>
+      );
+    }
   };
 
   const DAADownload = (id, fileName) => {
