@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Checkbox } from '@mui/material';
 import { Styles } from '../../libs/theme';
 import { isEmpty } from 'lodash/fp';
 import SimpleTable from '../../components/SimpleTable';
@@ -12,9 +11,11 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList
 } from '../../libs/utils';
-import { DAA } from '../../libs/ajax/DAA';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
+import ManageUsersDropdown from './ManageUsersDropdown';
+import ManageDaasDropdown from './ManageDaasDropdown';
+import DAACell from './DAACell';
 
 //Styles specific to this table
 const styles = {
@@ -50,28 +51,6 @@ let columnHeaderFormat = {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const handleClick = async (researcher, specificDac, filteredDaas, checked, refreshResearchers, setResearchers) => {
-  if (!checked) {
-    try {
-      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
-      await DAA.createDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Approved access to ${specificDac.name} to user: ${researcher.displayName}`});
-      refreshResearchers(setResearchers);
-    } catch(error) {
-      Notifications.showError({text: `Error approving access to ${specificDac.name} to user: ${researcher.displayName}`});
-    }
-  } else {
-    try {
-      const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
-      await DAA.deleteDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Removed approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-      refreshResearchers(setResearchers);
-    } catch(error) {
-      Notifications.showError({text: `Error removing approval of access to ${specificDac.name} to user: ${researcher.displayName}`});
-    }
-  }
-};
-
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
   // the construction of this list is currently a work-around because our endpoint in the backend
@@ -84,46 +63,26 @@ const refreshResearchers = async (setResearchers) => {
   setResearchers(researcherObjectList);
 };
 
-const DAACell = (
-  rowDac,
-  researcher,
-  institutionId,
-  daas,
-  refreshResearchers,
-  setResearchers
-) => {
-  const id = researcher && (researcher.userId || researcher.email);
-  const libraryCards = researcher && researcher.libraryCards;
-  const card = libraryCards && libraryCards.find(card => card.institutionId === institutionId);
-  const daaIds = researcher && card && card.daaIds;
-  const filteredDaas = daaIds && daas.filter(daa => daaIds.includes(daa.daaId));
-  const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
-
-  return {
-    isComponent: true,
-    id,
-    label: 'lc-button',
-    data: (
-      <div>
-        <Checkbox checked={hasDacId} onClick={() => handleClick(researcher,rowDac, daas, hasDacId, refreshResearchers, setResearchers)}/>
-      </div>
-    ),
-  };
-};
-
-
-
-const displayNameCell = (displayName, email, id) => {
+const displayNameCell = (displayName, email, id, daas, setResearchers) => {
   return {
     data: (
       <>
-        <div>{displayName || 'Invite sent, pending registration'}</div>
-        <div><a href={`mailto:${email}`}>{email || '- -'}</a></div>
+        <li className="dropdown" style={{ listStyleType: 'none' }}>
+          <div role="button" data-toggle="dropdown">
+            <div id="dacUser" style={{ color: 'black' }}>
+              {displayName || 'Invite sent, pending registration'}
+              <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
+              <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
+            </div>
+          </div>
+          <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
+        </li>
       </>
     ),
     id,
     style: {},
-    label: 'display-names'
+    label: 'display-names',
+    striped: true
   };
 };
 
@@ -142,7 +101,10 @@ export default function ManageResearcherDAAsTable(props) {
     columnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
-        acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }};
+        const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
+        const id = daa.daaId;
+        const fileName = daa.file.fileName;
+        acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={{id: id, fileName: fileName}} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
         return acc;
       }, {}),
     };
@@ -214,13 +176,13 @@ export default function ManageResearcherDAAsTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, libraryCards} = researcher;
+      const { displayName, libraryCards } = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.userId || email;
       return [
-        displayNameCell(displayName, email, id),
-        ...dacs.map(dac => DAACell(dac, researcher, signingOfficial.institutionId, daas, refreshResearchers, setResearchers))
+        displayNameCell(displayName, email, id, daas, setResearchers),
+        ...dacs.map(dac => DAACell({ rowDac: dac, researcher: researcher, institutionId: signingOfficial.institutionId, daas: daas, refreshResearchers: refreshResearchers,setResearchers: setResearchers })),
       ];
     });
   };

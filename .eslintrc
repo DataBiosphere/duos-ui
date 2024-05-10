@@ -52,5 +52,13 @@
     "@babel/array-bracket-newline": "off",
     "@babel/brace-style": "off",
     "@babel/semi": "warn"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
 }
