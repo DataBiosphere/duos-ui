@@ -12,32 +12,32 @@ export default function DAACell(props) {
   const filteredDaas = daaIds && daas?.filter(daa => daaIds.includes(daa.daaId));
   const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
 
-  const createDaaLcLink = async (daaId) => {
+  const createDaaLcLink = async (daaId, researcher, dacName) => {
     try {
       await DAA.createDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Approved access to ${rowDac.name} to user: ${researcher.displayName}`});
+      Notifications.showSuccess({text: `Approved access to ${dacName} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
     } catch(error) {
-      Notifications.showError({text: `Error approving access to ${rowDac.name} to user: ${researcher.displayName}`});
+      Notifications.showError({text: `Error approving access to ${dacName} to user: ${researcher.displayName}`});
     }
   };
 
-  const deleteDaaLcLink = async (daaId) => {
+  const deleteDaaLcLink = async (daaId, researcher, dacName) => {
     try {
       await DAA.deleteDaaLcLink(daaId, researcher.userId);
-      Notifications.showSuccess({text: `Removed approval of access to ${rowDac.name} to user: ${researcher.displayName}`});
+      Notifications.showSuccess({text: `Removed approval of access to ${dacName} to user: ${researcher.displayName}`});
       refreshResearchers(setResearchers);
     } catch(error) {
-      Notifications.showError({text: `Error removing approval of access to ${rowDac.name} to user: ${researcher.displayName}`});
+      Notifications.showError({text: `Error removing approval of access to ${dacName} to user: ${researcher.displayName}`});
     }
   };
 
-  const handleClick = async () => {
-    const daaId = filteredDaas.find(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId))?.daaId;
+  const handleClick = async (daas, specificDac, researcher) => {
+    const daaId = daas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
     if (!hasDacId) {
-      createDaaLcLink(daaId);
+      createDaaLcLink(daaId, researcher, specificDac.name);
     } else {
-      deleteDaaLcLink(daaId);
+      deleteDaaLcLink(daaId, researcher, specificDac.name);
     }
   };
 
@@ -47,7 +47,7 @@ export default function DAACell(props) {
     label: 'lc-button',
     data: (
       <div>
-        <Checkbox checked={hasDacId} onClick={() => handleClick()}/>
+        <Checkbox checked={hasDacId} onClick={() => handleClick(daas, rowDac, researcher)}/>
       </div>
     ),
   };
