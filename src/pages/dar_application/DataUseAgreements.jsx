@@ -34,6 +34,9 @@ export default function DataUseAgreements(props) {
   const RequiredDAAs = () => {
     const daaDivs = datasets.map((dataset) => {
       const datasetDacId = dataset.dacId;
+      if (!datasetDacId) {
+        return <div key={dataset.id}></div>;
+      }
       const daa = daas.find((daa) => daa.dacs.some((d) => d.dacId === datasetDacId));
       const id = daa.daaId;
       const fileName = daa.file.fileName.split('.')[0];
