@@ -136,7 +136,7 @@ export const ConsentGroupSummary = (props) => {
       <div id={id} style={{ display: 'flex', justifyContent: 'space-around', margin: '1.5rem 0 1.5rem 0' }}>
         <div style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Consent Group Name</p>
-          <input disabled type="text" className="form-control" value={consentGroup.consentGroupName} />
+          <input disabled={true} type="text" className="form-control" value={consentGroup.consentGroupName} />
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Primary Data Use</p>
           {summarizePrimaryGroup()}
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Secondary Data Use(s)</p>
