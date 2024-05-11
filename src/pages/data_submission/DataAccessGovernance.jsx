@@ -221,7 +221,7 @@ export const DataAccessGovernance = (props) => {
   }, [consentGroupsState, setAllConsentGroupsSaved]);
 
   return (
-    <div className="data-submitter-section">
+    <div className='data-submitter-section'>
       <h2>Data Access Governance</h2>
       <div>
         {consentGroupsState?.map((state, idx) => {
@@ -251,8 +251,8 @@ export const DataAccessGovernance = (props) => {
         })}
 
         {/* add consent group */}
-        <div className="right-header-section" id="add-new-consent-group-btn" style={{ display: 'flex', alignItems: 'flex-end', margin: '2rem 0 2rem 0' }}>
-          <a id="btn_addConsentGroup" className="btn-primary btn-add common-background" onClick={addNewConsentGroup}>
+        <div className='right-header-section' id='add-new-consent-group-btn' style={{ display: 'flex', alignItems: 'flex-end', margin: '2rem 0 2rem 0' }}>
+          <a id='btn_addConsentGroup' className='btn-primary btn-add common-background' onClick={addNewConsentGroup}>
             <span>Add Consent Group</span>
           </a>
         </div>

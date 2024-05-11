@@ -136,7 +136,7 @@ export const ConsentGroupSummary = (props) => {
       <div id={id} style={{ display: 'flex', justifyContent: 'space-around', margin: '1.5rem 0 1.5rem 0' }}>
         <div style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Consent Group Name</p>
-          <input disabled={true} type="text" className="form-control" value={consentGroup.consentGroupName} />
+          <input disabled={true} type='text' className='form-control' value={consentGroup.consentGroupName} />
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Primary Data Use</p>
           {summarizePrimaryGroup()}
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Secondary Data Use(s)</p>
@@ -145,7 +145,7 @@ export const ConsentGroupSummary = (props) => {
         <div style={{ flex: '1 1 100%' }}>
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Data Location</p>
           <p>{consentGroup.dataLocation}</p>
-          <input disabled={true} type="text" className="form-control" value={consentGroup.url} />
+          <input disabled={true} type='text' className='form-control' value={consentGroup.url} />
           <div style={{ marginTop: '2px' }}># of Participants: <span style={{ fontStyle: 'italic' }}>{consentGroup.numberOfParticipants}</span></div>
           <p style={{ fontWeight: 'bold', fontSize: '16px' }}>File Types</p>
           <div>
@@ -162,7 +162,7 @@ export const ConsentGroupSummary = (props) => {
         !isNil(nihInstitutionalCertificationFile) && (
           <div>
             <p style={{ fontWeight: 'bold', fontSize: '16px' }}>NIH Institutional Certification File</p>
-            <input disabled={true} type="text" className="form-control" value={nihInstitutionalCertificationFile?.name} />
+            <input disabled={true} type='text' className='form-control' value={nihInstitutionalCertificationFile?.name} />
           </div>
         )
       }
