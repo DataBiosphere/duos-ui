@@ -1,4 +1,4 @@
-import { div, input, span, p } from 'react-hyperscript-helpers';
+import React from 'react';
 import { isNil, isString, isArray } from 'lodash/fp';
 
 
@@ -85,28 +85,24 @@ export const ConsentGroupSummary = (props) => {
     const value = consentGroup[field];
 
     if (isString(value)) {
-      return div({}, [
-        span({}, [primaryConsentText[field] + ': ']),
-        span({
-          style: {
-            fontStyle: 'italic',
-          }
-        }, [value])
-      ]);
+      return (
+        <div>
+          <span>{primaryConsentText[field]}: </span>
+          <span style={{ fontStyle: 'italic' }}>{value}</span>
+        </div>
+      );
     }
 
     if (isArray(value)) {
-      return div({}, [
-        span({}, [primaryConsentText[field] + ': ']),
-        span({
-          style: {
-            fontStyle: 'italic',
-          }
-        }, [value.join(', ')])
-      ]);
+      return (
+        <div>
+          <span>{primaryConsentText[field]}: </span>
+          <span style={{ fontStyle: 'italic' }}>{value.join(', ')}</span>
+        </div>
+      );
     }
 
-    return p({}, [primaryConsentText[field]]);
+    return <p>{primaryConsentText[field]}</p>;
   };
 
   const summarizeSecondaryGroup = () => {
@@ -122,128 +118,56 @@ export const ConsentGroupSummary = (props) => {
       const text = secondaryConsentText[field];
 
       if (isString(value)) {
-        return div({
-          key: `secondaryGroup_${idx}`,
-          style: {
-            marginBottom: '3px',
-          }
-        },
-        [
-          span({}, [text + ': ']),
-          span({
-            style: {
-              fontStyle: 'italic',
-            },
-          }, [value]),
-        ]);
+        return (
+          <div key={`secondaryGroup_${idx}`} style={{ marginBottom: '3px' }}>
+            <span>{text}: </span>
+            <span style={{ fontStyle: 'italic' }}>{value}</span>
+          </div>
+        );
       }
 
-      return p({
-        key: `secondaryGroup_${idx}`,
-      }, text);
+      return <p key={`secondaryGroup_${idx}`}>{text}</p>;
     });
 
   };
 
-  return div({}, [
-    div({
-      id: id,
-      style: {
-        display: 'flex',
-        justifyContent: 'space-around',
-        margin: '1.5rem 0 1.5rem 0',
+  return (
+    <div>
+      <div id={id} style={{ display: 'flex', justifyContent: 'space-around', margin: '1.5rem 0 1.5rem 0' }}>
+        <div style={{ flex: '1 1 100%', marginRight: '1.5rem' }}>
+          <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Consent Group Name</p>
+          <input disabled type="text" className="form-control" value={consentGroup.consentGroupName} />
+          <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Primary Data Use</p>
+          {summarizePrimaryGroup()}
+          <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Secondary Data Use(s)</p>
+          {summarizeSecondaryGroup()}
+        </div>
+        <div style={{ flex: '1 1 100%' }}>
+          <p style={{ fontWeight: 'bold', fontSize: '16px' }}>Data Location</p>
+          <p>{consentGroup.dataLocation}</p>
+          <input disabled={true} type="text" className="form-control" value={consentGroup.url} />
+          <div style={{ marginTop: '2px' }}># of Participants: <span style={{ fontStyle: 'italic' }}>{consentGroup.numberOfParticipants}</span></div>
+          <p style={{ fontWeight: 'bold', fontSize: '16px' }}>File Types</p>
+          <div>
+            {consentGroup.fileTypes.map((ft, idx) => (
+              <div key={idx} style={{ marginBottom: '20px' }}>
+                <div>File Type: <span style={{ fontStyle: 'italic' }}>{ft.fileType}</span></div>
+                <div>Functional Equivalence: <span style={{ fontStyle: 'italic' }}>{ft.functionalEquivalence}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {
+        !isNil(nihInstitutionalCertificationFile) && (
+          <div>
+            <p style={{ fontWeight: 'bold', fontSize: '16px' }}>NIH Institutional Certification File</p>
+            <input disabled={true} type="text" className="form-control" value={nihInstitutionalCertificationFile?.name} />
+          </div>
+        )
       }
-    }, [
-
-      div({
-        style: {
-          flex: '1 1 100%',
-          marginRight: '1.5rem',
-        }
-      }, [
-        p({
-          style: {
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }
-        }, ['Consent Group Name']),
-        input({
-          disabled: true,
-          type: 'text',
-          className: 'form-control',
-          value: consentGroup.consentGroupName,
-        }),
-        p({
-          style: {
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }
-        }, ['Primary Data Use']),
-        summarizePrimaryGroup(),
-        p({
-          style: {
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }
-        }, 'Secondary Data Use(s)'),
-        summarizeSecondaryGroup(),
-      ]),
-
-      div({
-        style: {
-          flex: '1 1 100%',
-        }
-      }, [
-        p({
-          style: {
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }
-        }, 'Data Location'),
-        p({}, [
-          consentGroup.dataLocation,
-        ]),
-        input({
-          disabled: true,
-          type: 'text',
-          className: 'form-control',
-          value: consentGroup.url,
-        }),
-        div({style: { marginTop: '2px' }}, ['# of Participants: ', span({style: {fontStyle: 'italic'}}, [`${consentGroup.numberOfParticipants}`])]),
-        p({
-          style: {
-            fontWeight: 'bold',
-            fontSize: '16px',
-          }
-        }, ['File Types']),
-        div({}, consentGroup.fileTypes.map((ft, idx) => div({
-          key: idx,
-          style: {
-            marginBottom: '20px',
-          }
-        }, [
-          div({}, ['File Type: ', span({style: {fontStyle: 'italic'}}, [`${ft.fileType}`])]),
-          div({}, ['Functional Equivalence: ', span({style: {fontStyle: 'italic'}}, [`${ft.functionalEquivalence}`])]),
-        ]))),
-      ]),
-    ]),
-    div({
-      isRendered: !isNil(nihInstitutionalCertificationFile),
-    }, [
-      p({
-        style: {
-          fontWeight: 'bold',
-          fontSize: '16px',
-        }
-      }, 'NIH Institutional Certification File'),
-      input({
-        disabled: true,
-        type: 'text',
-        className: 'form-control',
-        value: nihInstitutionalCertificationFile?.name,
-      }),
-    ]),
-  ]);
+    </div>
+  );
 };
 
 export default ConsentGroupSummary;
