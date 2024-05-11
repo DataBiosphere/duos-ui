@@ -296,23 +296,26 @@ export const EditConsentGroup = (props) => {
                   onValidationChange({ key: 'primaryConsent', validation });
                 }}
               />
-              <FormField
-                isRendered={showOtherPrimaryText}
-                id={idx + '_otherPrimaryText'}
-                name='otherPrimary'
-                validators={[FormValidators.REQUIRED]}
-                placeholder='Please specify'
-                disabled={disableFields}
-                defaultValue={otherPrimaryText}
-                onChange={({ key, value, isValid }) => {
-                  setOtherPrimaryText(value);
-                  onChange({ key: key, value: value, isValid: isValid });
-                }}
-                validation={validation.otherPrimary}
-                onValidationChange={({ validation }) => {
-                  onValidationChange({ key: 'otherPrimary', validation });
-                }}
-              />
+              {
+                showOtherPrimaryText && (
+                  <FormField
+                    id={idx + '_otherPrimaryText'}
+                    name='otherPrimary'
+                    validators={[FormValidators.REQUIRED]}
+                    placeholder='Please specify'
+                    disabled={disableFields}
+                    defaultValue={otherPrimaryText}
+                    onChange={({ key, value, isValid }) => {
+                      setOtherPrimaryText(value);
+                      onChange({ key: key, value: value, isValid: isValid });
+                    }}
+                    validation={validation.otherPrimary}
+                    onValidationChange={({ validation }) => {
+                      onValidationChange({ key: 'otherPrimary', validation });
+                    }}
+                  />
+                )
+              }
             </div>
           )
         }
@@ -481,7 +484,6 @@ export const EditConsentGroup = (props) => {
               {
                 showOtherSecondaryText && (
                   <FormField
-                    isRendered={showOtherSecondaryText}
                     id={idx + '_otherSecondaryText'}
                     name='otherSecondary'
                     validators={[FormValidators.REQUIRED]}
