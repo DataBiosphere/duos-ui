@@ -227,7 +227,7 @@ export default function NIHICWebform() {
           description='This integrated GDSP & IC form combines duplicate fields, allows for digital tracking and statistics, and assigns machine-readable GA4GH Data Use Ontology terms to the datasets upon completion!'
         />
       </div>
-      <hr className='section-seperator' />
+      <hr className='section-separator' />
       <form name='form' noValidate={true}>
 
         <div id='form-views'>
@@ -237,7 +237,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>Principal Investigator Name</label>
+                  <label className='control-label rp-title-question common-color'>Principal Investigator Name </label>
                 </div>
                 <div className='col-xs-12 rp-group rp-last-group'>
                   <input
@@ -253,7 +253,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>Principal Investigator Title</label>
+                  <label className='control-label rp-title-question common-color'>Principal Investigator Title </label>
                 </div>
                 <div className='col-xs-12 rp-group rp-last-group'>
                   <input
@@ -269,7 +269,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>Principal Investigator Email</label>
+                  <label className='control-label rp-title-question common-color'>Principal Investigator Email </label>
                 </div>
                 <div className='col-xs-12 rp-group rp-last-group'>
                   <input
@@ -286,7 +286,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>Principal Investigator Institution</label>
+                  <label className='control-label rp-title-question common-color'>Principal Investigator Institution </label>
                 </div>
                 <div className='col-xs-12 rp-group rp-last-group'>
                   <input
@@ -347,7 +347,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>NIH Grant or Contract Number</label>
+                  <label className='control-label rp-title-question common-color'>NIH Grant or Contract Number </label>
                 </div>
                 <div className='col-xs-12 rp-group rp-last-group'>
                   <input
