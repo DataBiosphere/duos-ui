@@ -44,7 +44,7 @@ export default function DataUseAgreements(props) {
       const id = daa.daaId;
       const fileName = daa.file.fileName.split('.')[0];
       if (fileNames.has(fileName)) {
-        return <div key={id}></div>;
+        return <div key={id-dataset.name}></div>;
       }
       fileNames.add(fileName);
       return (
@@ -55,27 +55,15 @@ export default function DataUseAgreements(props) {
     });
     if (fileNames.size === 0) {
       return (
-        <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
-          <div>
-            <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white" style={{ marginRight: '2rem' }}>
-              <span className="glyphicon glyphicon-download"></span>
-              {' '}
-              Broad Library Card Agreement
-            </a>
-          </div>
-          <div>
-            <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink} className="button button-white">
-              <span className="glyphicon glyphicon-download"></span>
-              {' '}
-              NHGRI Library Card Agreement
-            </a>
-          </div>
-        </div>
+        <div></div>
       );
     } else {
       return (
-        <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
-          {daaDivs}
+        <div>
+          <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below,</h3>
+          <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
+            {daaDivs}
+          </div>
         </div>
       );
     }
@@ -117,7 +105,12 @@ export default function DataUseAgreements(props) {
         </ol>
       </div>
 
-      <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below,</h3>
+      {/* {fileNames.size !== 0 && (
+        <>
+          <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below,</h3>
+          <RequiredDAAs/>
+        </>
+      )} */}
       <RequiredDAAs/>
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
