@@ -193,7 +193,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(datasets);
     });
     if (!props.readOnlyMode) {
-      const updatedTabs = [...ApplicationTabs, { name: 'Data Use Agreement' }];
+      const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }];
       setApplicationTabs(updatedTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);

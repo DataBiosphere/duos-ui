@@ -85,7 +85,7 @@ export default function DataUseAgreements(props) {
 
   return (
     <div className="dar-step-card">
-      <h2>Data Use Agreements</h2>
+      <h2>Data Access Agreements (DAA)</h2>
 
       <div className="form-group">
         <h3>DUOS Code of Conduct</h3>
