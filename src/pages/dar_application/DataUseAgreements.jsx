@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {isNil} from 'lodash/fp';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
 import { Notifications } from '../../libs/utils';
 import { DAA } from '../../libs/ajax/DAA';
 
@@ -105,12 +103,6 @@ export default function DataUseAgreements(props) {
         </ol>
       </div>
 
-      {/* {fileNames.size !== 0 && (
-        <>
-          <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below,</h3>
-          <RequiredDAAs/>
-        </>
-      )} */}
       <RequiredDAAs/>
 
       <div className="flex flex-row" style={{ justifyContent: 'around', paddingTop: '4rem' }}>
