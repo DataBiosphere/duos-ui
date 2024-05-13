@@ -226,7 +226,7 @@ export const DataAccessGovernance = (props) => {
       <div>
         {consentGroupsState?.map((state, idx) => {
           if (isNil(state)) {
-            return null;
+            return <div key={state.key}></div>;
           }
           return (
             <div key={state.key}>
