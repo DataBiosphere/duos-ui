@@ -420,11 +420,11 @@ const DatasetRegistration = (props) => {
       }
       prev.disableOkBtn = true;
       setRegistrationState(prev);
-      // If showValidationMessages is true, hide dialog
+
       if (registrationState.showValidationMessages) {
         setRegistrationState({
           ...registrationState,
-          showDialogSubmit: true
+          showDialogSubmit: false
         });
       } else {
         let formData = registrationState.datasetData;
@@ -642,6 +642,7 @@ const DatasetRegistration = (props) => {
     if (formData.principalInvestigator) {
       properties.push({'propertyName': 'Principal Investigator(PI)', 'propertyValue': formData.principalInvestigator});
     }
+    return properties;
   };
 
   const dacOptionsChange = () => {
@@ -654,17 +655,18 @@ const DatasetRegistration = (props) => {
   };
 
   const onDacChange = (option) => {
-    setRegistrationState(prevState => ({
-      ...prevState,
-      selectedDac: fp.isNil(option) ? {}: option.item,
-      datasetData: {
-        ...prevState.datasetData,
-        dac: option.item
-      },
-      disableOkBtn: false,
-      problemSavingRequest: false,
-      problemLoadingUpdateDataset: false
-    }));
+    const prev = { ...registrationState };
+    if (fp.isNil(option)) {
+      prev.selectedDac = {};
+    }
+    else {
+      prev.selectedDac = option.item;
+      prev.datasetData.dac = option.item;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.problemLoadingUpdateDataset = false;
+    }
+    setRegistrationState(prev);
   };
 
   const formatFormData = (data) => {
@@ -763,8 +765,8 @@ const DatasetRegistration = (props) => {
     moratorium = false,
     methods = false,
     generalUse = false,
+    ontologies
   } = registrationState.formData;
-  const { ontologies } = registrationState.formData;
   const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = registrationState;
   const isTypeOfResearchInvalid = isTypeOfResearchInvalidChange();
   const isUpdateDataset = (!fp.isEmpty(registrationState.updateDataset));
@@ -924,7 +926,7 @@ const DatasetRegistration = (props) => {
                       placeholder='http://...'
                       defaultValue={registrationState.datasetData.datasetRepoUrl}
                       onBlur={handleChange}
-                      className={(registrationState.datasetData.datasetRepoUrl === '' && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
+                      className={(fp.isEmpty(registrationState.datasetData.datasetRepoUrl) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.datasetRepoUrl) && showValidationMessages) && (
@@ -954,8 +956,6 @@ const DatasetRegistration = (props) => {
                     )}
                   </div>
                 </div>
-
-                {/* Repeat the above structure for the rest of the fields */}
 
                 <div className='form-group'>
                   <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
@@ -1230,7 +1230,7 @@ const DatasetRegistration = (props) => {
                       </div>
                     </div>
 
-                    {/* Repeat similar structures for other checkboxes */}
+
                     <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                       <div className='checkbox'>
                         <input
@@ -1300,12 +1300,12 @@ const DatasetRegistration = (props) => {
                     </div>
 
                     {
-                      generalUse || npoa && (
+                      (generalUse || npoa) && (
                         <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                           <div className='checkbox'>
                             <input
-                              checked={registrationState.npoa}
-                              onChange={this.handleCheckboxChange}
+                              checked={npoa}
+                              onChange={handleCheckboxChange}
                               id='checkNpoa'
                               type='checkbox'
                               className='checkbox-inline rp-checkbox'
@@ -1399,10 +1399,13 @@ const DatasetRegistration = (props) => {
                 </div>
 
                 <div className='row no-margin'>
-                  <div className={showValidationMessages ? 'rp-alert' : 'hidden'}>
-                    <Alert id='formErrors' type='danger' title='Please, complete all required fields.' />
-                  </div>
-
+                  {
+                    showValidationMessages && (
+                      <div className='rp-alert'>
+                        <Alert id='formErrors' type='danger' title='Please, complete all required fields.' />
+                      </div>
+                    )
+                  }
                   {
                     problemSavingRequest && (
                       <div className='rp-alert'>
