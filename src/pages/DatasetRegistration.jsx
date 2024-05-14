@@ -79,27 +79,26 @@ const DatasetRegistration = (props) => {
   const [registrationState, setRegistrationState] = useState(getInitialState);
 
   const { datasetId } = props.match.params;
+  const { push } = props.history;
+
   const init = useCallback(async () => {
-    let updateDataset = [];
-    // update dataset case
     if (!fp.isNil(datasetId)) {
       const data = await DataSet.getDataSetsByDatasetId(datasetId);
-      updateDataset = data;
       // redirect to blank form if dataset id is invalid or inaccessible
-      if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
+      if (fp.isEmpty(data) || fp.isNil(data.dataSetId)) {
         setRegistrationState(prevState => ({
           ...prevState,
           problemLoadingUpdateDataset: true
         }));
-        props.history.push('/dataset_registration');
+        push('/dataset_registration');
       } else {
         setRegistrationState(prevState => ({
           ...prevState,
-          updateDataset
+          updateDataset:data
         }));
       }
     }
-  }, [datasetId, props.history]);
+  }, [datasetId, push]);
 
   const validateDatasetName = useCallback(async (name) => {
     return DataSet.validateDatasetName(name).then(datasetId => {
@@ -116,7 +115,51 @@ const DatasetRegistration = (props) => {
         }
       }));
     });
-  },[registrationState.updateDataset]);
+  }, [registrationState.updateDataset]);
+
+  const prefillDataUseFields = (dataUse) => {
+    let methods = dataUse.methodsResearch;
+    let genetics = dataUse.geneticStudiesOnly;
+    let publication = dataUse.publicationResults;
+    let collaboration = dataUse.collaboratorRequired;
+    let ethics = dataUse.ethicsApprovalRequired;
+    let geographic = dataUse.geographicalRestrictions;
+    let moratorium = dataUse.publicationMoratorium;
+    let nonProfit = dataUse.nonProfitUse;
+    let hmb = dataUse.hmbResearch;
+    // if the dataset's POA value is set to false, we need to check the NPOA (or NOT POA) option
+    // if the dataset's POA value is set to true, leave this unchecked
+    let npoa = (dataUse.populationOriginsAncestry === false);
+    let diseases = dataUse.diseaseRestrictions;
+    let other = dataUse.otherRestrictions;
+    let primaryOtherText = dataUse.other;
+    let secondaryOther = !fp.isNil(dataUse.secondaryOther);
+    let secondaryOtherText = dataUse.secondaryOther;
+    let generalUse = dataUse.generalUse;
+
+    setRegistrationState(prevState => ({
+      ...prevState,
+      formData: {
+        ...prevState.formData,
+        methods: methods,
+        genetic: genetics,
+        publication: publication,
+        collaboration: collaboration,
+        ethics: ethics,
+        geographic: geographic,
+        moratorium: moratorium,
+        nonProfit: nonProfit,
+        hmb: hmb,
+        npoa: npoa,
+        diseases: diseases,
+        other: other,
+        primaryOtherText: primaryOtherText,
+        secondaryOther: secondaryOther,
+        secondaryOtherText: secondaryOtherText,
+        generalUse: generalUse
+      }
+    }));
+  };
 
 
   const prefillDatasetFields = useCallback((dataset) => {
@@ -130,12 +173,13 @@ const DatasetRegistration = (props) => {
     let datasetRepoUrl = fp.find({ propertyName: 'url' })(dataset.properties);
     let researcher = fp.find({ propertyName: 'Data Depositor' })(dataset.properties);
     let pi = fp.find({ propertyName: 'Principal Investigator(PI)' })(dataset.properties);
-    let dac = fp.find({ dacId: dataset.dacId })(registrationState.dacList);
 
     setRegistrationState(prevState => {
-      let validName = validateDatasetName(registrationState.datasetData.datasetName);
+      let dac = fp.find({ dacId: dataset.dacId })(prevState.dacList);
+      let validName = validateDatasetName(prevState.datasetData.datasetName);
       return {
         ...prevState,
+        selectedDac:dac,
         datasetData: {
           ...prevState.datasetData,
           datasetName: name ? name : '',
@@ -150,7 +194,7 @@ const DatasetRegistration = (props) => {
           principalInvestigator: pi ? pi.propertyValue : '',
           dac: dac,
           isValidName: validName
-        }
+        },
       };
     }
     );
@@ -158,7 +202,7 @@ const DatasetRegistration = (props) => {
     if (!fp.isEmpty(dataset.dataUse)) {
       prefillDataUseFields(dataset.dataUse);
     }
-  },[validateDatasetName, registrationState.datasetData.datasetName]);
+  },[validateDatasetName]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -211,50 +255,8 @@ const DatasetRegistration = (props) => {
     }
   };
 
-  const prefillDataUseFields = (dataUse) => {
-    let methods = dataUse.methodsResearch;
-    let genetics = dataUse.geneticStudiesOnly;
-    let publication = dataUse.publicationResults;
-    let collaboration = dataUse.collaboratorRequired;
-    let ethics = dataUse.ethicsApprovalRequired;
-    let geographic = dataUse.geographicalRestrictions;
-    let moratorium = dataUse.publicationMoratorium;
-    let nonProfit = dataUse.nonProfitUse;
-    let hmb = dataUse.hmbResearch;
-    // if the dataset's POA value is set to false, we need to check the NPOA (or NOT POA) option
-    // if the dataset's POA value is set to true, leave this unchecked
-    let npoa = (dataUse.populationOriginsAncestry === false);
-    let diseases = dataUse.diseaseRestrictions;
-    let other = dataUse.otherRestrictions;
-    let primaryOtherText = dataUse.other;
-    let secondaryOther = !fp.isNil(dataUse.secondaryOther);
-    let secondaryOtherText = dataUse.secondaryOther;
-    let generalUse = dataUse.generalUse;
 
-    setRegistrationState(prevState => ({
-      ...prevState,
-      formData: {
-        ...prevState.formData,
-        methods: methods,
-        genetic: genetics,
-        publication: publication,
-        collaboration: collaboration,
-        ethics: ethics,
-        geographic: geographic,
-        moratorium: moratorium,
-        nonProfit: nonProfit,
-        hmb: hmb,
-        npoa: npoa,
-        diseases: diseases,
-        other: other,
-        primaryOtherText: primaryOtherText,
-        secondaryOther: secondaryOther,
-        secondaryOtherText: secondaryOtherText,
-        generalUse: generalUse
-      }
-    }));
-  };
-
+  // eslint-disable-next-line no-unused-vars
   const handleOpenModal = () => {
     setRegistrationState(prevState => ({
       ...prevState,
@@ -262,6 +264,7 @@ const DatasetRegistration = (props) => {
     }));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleCloseModal = () => {
     setRegistrationState(prevState => ({
       ...prevState,
@@ -348,10 +351,9 @@ const DatasetRegistration = (props) => {
       isValid(formData.nrParticipants) &&
       isValid(formData.description) &&
       isValid(registrationState.selectedDac) &&
-      (!fp.isEmpty(registrationState.updateDataset) || !isTypeOfResearchInvalid())
+      (!fp.isEmpty(registrationState.updateDataset) || !isTypeOfResearchInvalidChange())
     );
   };
-
 
 
   // generates the css classnames based on what's in the dataset name field and if we have tried to submit
@@ -396,8 +398,6 @@ const DatasetRegistration = (props) => {
     return isValid;
   };
 
-
-
   // Function to handle dialog submission
   const dialogHandlerSubmit = (answer) => () => {
     if (answer === true) {
@@ -405,32 +405,21 @@ const DatasetRegistration = (props) => {
       for (let ontology of registrationState.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-      // Update formData and datasetData state
-      setRegistrationState(prevState => {
-        if (ontologies.length > 0) {
-          return {
-            ...prevState, formData: {
-              ...prevState.formData,
-              ontologies
-            }};
-        }
-        return prevState;
-      });
 
-      setRegistrationState(prevState => {
-        const updatedDatasetData = { ...prevState };
-        for (let key in prevState) {
-          if (prevState[key] === '') {
-            updatedDatasetData[key] = undefined;
-          }
+      const prev = { ...registrationState };
+      // Update formData and datasetData state
+
+      if (ontologies.length > 0) {
+        prev.formData.ontologies = ontologies;
+      }
+
+      for (let key in prev.datasetData) {
+        if (prev.datasetData[key] === '') {
+          prev.datasetData[key] = undefined;
         }
-        return updatedDatasetData;
-      });
-      // Set disableOkBtn to true
-      setRegistrationState({
-        ...registrationState,
-        disableOkBtn: true
-      });
+      }
+      prev.disableOkBtn = true;
+      setRegistrationState(prev);
       // If showValidationMessages is true, hide dialog
       if (registrationState.showValidationMessages) {
         setRegistrationState({
@@ -438,8 +427,9 @@ const DatasetRegistration = (props) => {
           showDialogSubmit: true
         });
       } else {
+        let formData = registrationState.datasetData;
         // Handle form submission
-        let ds = formatFormData(registrationState.datasetData);
+        let ds = formatFormData(formData);
         if (fp.isEmpty(registrationState.updateDataset)) {
           DataSet.postDatasetForm(ds).then(() => {
             setRegistrationState({
@@ -579,10 +569,10 @@ const DatasetRegistration = (props) => {
         other: true,
         ontologies: [],
         npoa: false,
-        disableOkBtn: false,
-        problemSavingRequest: false,
-        submissionSuccess: false
-      }
+      },
+      disableOkBtn: false,
+      problemSavingRequest: false,
+      submissionSuccess: false
     }));
   };
 
@@ -595,10 +585,10 @@ const DatasetRegistration = (props) => {
           ...prevState.formData,
           other: true,
           primaryOtherText: value,
-          disableOkBtn: false,
-          problemSavingRequest: false,
-          submissionSuccess: false
-        }
+        },
+        disableOkBtn: false,
+        problemSavingRequest: false,
+        submissionSuccess: false
       })) :
       setRegistrationState(prevState => ({
         ...prevState,
@@ -606,13 +596,14 @@ const DatasetRegistration = (props) => {
           ...prevState.formData,
           secondaryOther: true,
           secondaryOtherText: value,
-          disableOkBtn: false,
-          problemSavingRequest: false,
-          submissionSuccess: false
-        }
+        },
+        disableOkBtn: false,
+        problemSavingRequest: false,
+        submissionSuccess: false
       }));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const back = () => {
     props.history.goBack();
   };
@@ -665,10 +656,10 @@ const DatasetRegistration = (props) => {
   const onDacChange = (option) => {
     setRegistrationState(prevState => ({
       ...prevState,
-      selectedDac: option ? option.item : {},
+      selectedDac: fp.isNil(option) ? {}: option.item,
       datasetData: {
         ...prevState.datasetData,
-        dac: option ? option.item : {},
+        dac: option.item
       },
       disableOkBtn: false,
       problemSavingRequest: false,
@@ -781,7 +772,7 @@ const DatasetRegistration = (props) => {
   const profileUnsubmitted = (
     <span>
       Please make sure{' '}
-      <Link to="/profile" className="hover-color">
+      <Link to='/profile' className='hover-color'>
         Your Profile
       </Link>{' '}
       is updated, as it will be linked to your dataset for future correspondence
@@ -793,18 +784,18 @@ const DatasetRegistration = (props) => {
       <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
         <div className='row no-margin'>
           <Notification notificationData={registrationState.notificationData} />
-          <div className="col-lg-12 col-md-12 col-sm-12">
+          <div className='col-lg-12 col-md-12 col-sm-12'>
             <PageHeading
-              id="requestApplication"
+              id='requestApplication'
               imgSrc={addDatasetIcon}
-              iconSize="medium"
-              color="dataset"
-              title="Dataset Registration"
-              description="This is an easy way to register a dataset in DUOS!"
+              iconSize='medium'
+              color='dataset'
+              title='Dataset Registration'
+              description='This is an easy way to register a dataset in DUOS!'
             />
           </div>
         </div>
-        <hr className="section-separator" />
+        <hr className='section-separator' />
       </div>
 
       <form name='form' noValidate={true}>
@@ -813,31 +804,31 @@ const DatasetRegistration = (props) => {
             <div className='col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12'>
               <fieldset>
                 {registrationState.completed === false && (
-                  <div className="rp-alert">
-                    <Alert id="profileUnsubmitted" type="danger" title={profileUnsubmitted} />
+                  <div className='rp-alert'>
+                    <Alert id='profileUnsubmitted' type='danger' title={profileUnsubmitted} />
                   </div>
                 )}
                 {problemLoadingUpdateDataset && (
-                  <div className="rp-alert">
+                  <div className='rp-alert'>
                     <Alert
-                      id="problemLoadingUpdateDataset"
-                      type="danger"
-                      title="The Dataset you were trying to access either does not exist or you do not have permission to edit it."
+                      id='problemLoadingUpdateDataset'
+                      type='danger'
+                      title='The Dataset you were trying to access either does not exist or you do not have permission to edit it.'
                     />
                   </div>
                 )}
-                <h3 className="rp-form-title dataset-color">1. Dataset Information</h3>
+                <h3 className='rp-form-title dataset-color'>1. Dataset Information</h3>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">1.1 Data Custodian*</label>
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>1.1 Data Custodian*</label>
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <input
-                      type="text"
-                      name="researcher"
-                      id="inputResearcher"
+                      type='text'
+                      name='researcher'
+                      id='inputResearcher'
                       defaultValue={registrationState.datasetData.researcher}
                       onBlur={handleChange}
                       disabled={!isUpdateDataset}
@@ -849,22 +840,22 @@ const DatasetRegistration = (props) => {
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.researcher) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">1.2 Principal Investigator (PI)*</label>
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>1.2 Principal Investigator (PI)*</label>
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <input
-                      type="text"
-                      name="principalInvestigator"
-                      id="inputPrincipalInvestigator"
+                      type='text'
+                      name='principalInvestigator'
+                      id='inputPrincipalInvestigator'
                       defaultValue={registrationState.datasetData.principalInvestigator}
                       onBlur={handleChange}
                       className={
@@ -875,26 +866,26 @@ const DatasetRegistration = (props) => {
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.principalInvestigator) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
                 {/* 1.3 Dataset Name */}
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                       1.3 Dataset Name*
                       <span>Please provide a publicly displayable name for the dataset</span>
                     </label>
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="text"
-                      name="datasetName"
-                      id="inputName"
-                      maxLength="256"
+                      type='text'
+                      name='datasetName'
+                      id='inputName'
+                      maxLength='256'
                       defaultValue={registrationState.datasetData.datasetName}
                       onBlur={handleDatasetNameChange}
                       className={showDatasetNameErrorHighlight(registrationState.datasetData.datasetName, showValidationMessages)}
@@ -906,7 +897,7 @@ const DatasetRegistration = (props) => {
                         showDatasetNameErrorHighlight(registrationState.datasetData.datasetName, showValidationMessages)
                       ) && (
                         <span
-                          className="cancel-color required-field-error-span"
+                          className='cancel-color required-field-error-span'
                         >
                           {registrationState.datasetData.isValidName ? 'Required field' : 'Dataset Name already in use'}
                         </span>
@@ -916,154 +907,154 @@ const DatasetRegistration = (props) => {
                 </div>
 
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                       1.4 Dataset Repository URL* <span>
                        Please provide the URL at which approved requestors can access the data
                       </span>
                     </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="url"
-                      name="datasetRepoUrl"
-                      id="inputRepoUrl"
-                      maxLength="256"
-                      placeholder="http://..."
+                      type='url'
+                      name='datasetRepoUrl'
+                      id='inputRepoUrl'
+                      maxLength='256'
+                      placeholder='http://...'
                       defaultValue={registrationState.datasetData.datasetRepoUrl}
                       onBlur={handleChange}
                       className={(registrationState.datasetData.datasetRepoUrl === '' && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.datasetRepoUrl) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                      1.5 Data Type* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="text"
-                      name="dataType"
-                      id="inputDataType"
-                      maxLength="256"
+                      type='text'
+                      name='dataType'
+                      id='inputDataType'
+                      maxLength='256'
                       defaultValue={registrationState.datasetData.dataType}
                       onBlur={handleChange}
                       className={(fp.isEmpty(registrationState.datasetData.dataType) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.dataType) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
                 {/* Repeat the above structure for the rest of the fields */}
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                      1.6 Species* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="text"
-                      name="species"
-                      id="inputSpecies"
-                      maxLength="256"
+                      type='text'
+                      name='species'
+                      id='inputSpecies'
+                      maxLength='256'
                       defaultValue={registrationState.datasetData.species}
                       onBlur={handleChange}
                       className={(fp.isEmpty(registrationState.datasetData.species) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.species) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                      1.7 Phenotype/Indication* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="text"
-                      name="phenotype"
-                      id="inputPhenotype"
-                      maxLength="256"
+                      type='text'
+                      name='phenotype'
+                      id='inputPhenotype'
+                      maxLength='256'
                       defaultValue={registrationState.datasetData.phenotype}
                       onBlur={handleChange}
                       className={(fp.isEmpty(registrationState.datasetData.phenotype) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required
                     />
                     {(fp.isEmpty(registrationState.datasetData.phenotype) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                       1.8 # of Participants* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="number"
-                      name="nrParticipants"
-                      id="inputParticipants"
-                      maxLength="256"
-                      min="0"
+                      type='number'
+                      name='nrParticipants'
+                      id='inputParticipants'
+                      maxLength='256'
+                      min='0'
                       defaultValue={registrationState.datasetData.nrParticipants}
                       onBlur={handlePositiveIntegerOnly}
                       className={(fp.isEmpty(registrationState.datasetData.nrParticipants) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.nrParticipants) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                        1.9 Dataset Description* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'>
                     <input
-                      type="text"
-                      name="description"
-                      id="inputDescription"
-                      maxLength="256"
+                      type='text'
+                      name='description'
+                      id='inputDescription'
+                      maxLength='256'
                       defaultValue={registrationState.datasetData.description}
                       onBlur={handleChange}
                       className={(fp.isEmpty(registrationState.datasetData.description) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.description) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label className="control-label rp-title-question dataset-color">
+                <div className='form-group'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label className='control-label rp-title-question dataset-color'>
                       1.10 Data Access Committee* </label>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <Select
-                      name="dac"
-                      id="inputDac"
+                      name='dac'
+                      id='inputDac'
                       onChange={(option) => onDacChange(option)}
                       blurInputOnSelect={true}
                       value={fp.filter((dac) => registrationState.selectedDac?.dacId === dac.value, dacOptions)}
@@ -1073,12 +1064,12 @@ const DatasetRegistration = (props) => {
                       isMulti={false}
                       isSearchable={true}
                       options={dacOptions}
-                      placeholder="Select a DAC..."
+                      placeholder='Select a DAC...'
                       className={(fp.isEmpty(registrationState.selectedDac) && showValidationMessages) ? 'required-field-error' : ''}
                       required={true}
                     />
                     {(fp.isEmpty(registrationState.selectedDac) && showValidationMessages) && (
-                      <span className="cancel-color required-field-error-span">Required field</span>
+                      <span className='cancel-color required-field-error-span'>Required field</span>
                     )}
                   </div>
                 </div>
@@ -1086,16 +1077,16 @@ const DatasetRegistration = (props) => {
 
               <h3 className='rp-form-title dataset-color'>2. Data Use Terms</h3>
 
-              <div className="form-group">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                  <label className="control-label rp-title-question dataset-color">
+              <div className='form-group'>
+                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                  <label className='control-label rp-title-question dataset-color'>
                     2.1 Primary Data Use Terms* <span style={{ marginBottom: '1.5rem' }}>
                      Please select one of the following data use permissions for your dataset.
                     </span>
                   </label>
-                  <div style={{ marginLeft: '15px' }} className="row">
+                  <div style={{ marginLeft: '15px' }} className='row'>
                     {
-                      registrationState.isTypeOfResearchInvalid && registrationState.showValidationMessages && (
+                      isTypeOfResearchInvalid && registrationState.showValidationMessages && (
                         <span
                           className='cancel-color required-field-error-span'
                         >
@@ -1107,35 +1098,35 @@ const DatasetRegistration = (props) => {
                     }
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <RadioButton
-                      id="checkGeneral"
-                      name="checkPrimary"
-                      value="general"
+                      id='checkGeneral'
+                      name='checkPrimary'
+                      value='general'
                       defaultChecked={generalUse}
                       onClick={setGeneralUse}
-                      label="General Research Use: "
-                      description="Use is permitted for any research purpose"
+                      label='General Research Use: '
+                      description='Use is permitted for any research purpose'
                       disabled={isUpdateDataset}
                     />
                     <RadioButton
-                      id="checkHmb"
-                      name="checkPrimary"
-                      value="hmb"
+                      id='checkHmb'
+                      name='checkPrimary'
+                      value='hmb'
                       defaultChecked={hmb}
                       onClick={setHmb}
-                      label="Health/Medical/Biomedical Use: "
-                      description="Use is permitted for any health, medical, or biomedical purpose"
+                      label='Health/Medical/Biomedical Use: '
+                      description='Use is permitted for any health, medical, or biomedical purpose'
                       disabled={isUpdateDataset}
                     />
                     <RadioButton
-                      id="checkDisease"
-                      name="checkPrimary"
-                      value="diseases"
+                      id='checkDisease'
+                      name='checkPrimary'
+                      value='diseases'
                       defaultChecked={diseases}
                       onClick={setDiseases}
-                      label="Disease-related studies: "
-                      description="Use is permitted for research on the specified disease"
+                      label='Disease-related studies: '
+                      description='Use is permitted for research on the specified disease'
                       disabled={isUpdateDataset}
                     />
                     <div
@@ -1147,231 +1138,231 @@ const DatasetRegistration = (props) => {
                       }}
                     >
                       <AsyncSelect
-                        id="sel_diseases"
+                        id='sel_diseases'
                         isDisabled={isUpdateDataset || !diseases}
                         isMulti={true}
                         loadOptions={(query, callback) => searchOntologies(query, callback)}
                         onChange={(option) => onOntologiesChange(option)}
                         value={ontologies}
-                        placeholder="Please enter one or more diseases"
-                        classNamePrefix="select"
+                        placeholder='Please enter one or more diseases'
+                        classNamePrefix='select'
                       />
                     </div>
                     <RadioButton
-                      id="checkOther"
-                      name="checkPrimary"
-                      value="other"
+                      id='checkOther'
+                      name='checkPrimary'
+                      value='other'
                       defaultChecked={other}
                       onClick={setOther}
-                      label="Other Use:"
-                      description="Permitted research use is defined as follows: "
+                      label='Other Use:'
+                      description='Permitted research use is defined as follows: '
                       disabled={isUpdateDataset}
                     />
                     <textarea
                       style={{ margin: '1rem 0' }}
-                      className="form-control"
+                      className='form-control'
                       value={primaryOtherText}
                       onChange={(e) => setOtherText(e, 'primary')}
-                      name="primaryOtherText"
-                      id="primaryOtherText"
-                      maxLength="512"
-                      rows="2"
+                      name='primaryOtherText'
+                      id='primaryOtherText'
+                      maxLength='512'
+                      rows='2'
                       required={other}
-                      placeholder="Please specify if selected (max. 512 characters)"
+                      placeholder='Please specify if selected (max. 512 characters)'
                       disabled={isUpdateDataset || !other}
                     />
                   </div>
-                  <div className="form-group">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <label className="control-label rp-title-question dataset-color">
+                  <div className='form-group'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <label className='control-label rp-title-question dataset-color'>
                         2.2 Secondary Data Use Terms
                         <span>Please select all applicable data use parameters.</span>
                       </label>
                     </div>
                   </div>
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <div className="checkbox">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <div className='checkbox'>
                       <input
                         checked={methods}
                         onChange={handleCheckboxChange}
-                        id="checkMethods"
-                        type="checkbox"
-                        className="checkbox-inline rp-checkbox"
-                        name="methods"
+                        id='checkMethods'
+                        type='checkbox'
+                        className='checkbox-inline rp-checkbox'
+                        name='methods'
                         disabled={isUpdateDataset}
                       />
-                      <label className="regular-checkbox rp-choice-questions" htmlFor="checkMethods">
-                        <span className="access-color">No methods development or validation studies (NMDS)</span>
+                      <label className='regular-checkbox rp-choice-questions' htmlFor='checkMethods'>
+                        <span className='access-color'>No methods development or validation studies (NMDS)</span>
                       </label>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={genetic}
                           onChange={handleCheckboxChange}
-                          id="checkGenetic"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="genetic"
+                          id='checkGenetic'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='genetic'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkGenetic">
-                          <span className="access-color">Genetic Studies Only (GSO)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkGenetic'>
+                          <span className='access-color'>Genetic Studies Only (GSO)</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={publication}
                           onChange={handleCheckboxChange}
-                          id="checkPublication"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="publication"
+                          id='checkPublication'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='publication'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkPublication">
-                          <span className="access-color">Publication Required (PUB)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkPublication'>
+                          <span className='access-color'>Publication Required (PUB)</span>
                         </label>
                       </div>
                     </div>
 
                     {/* Repeat similar structures for other checkboxes */}
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={collaboration}
                           onChange={handleCheckboxChange}
-                          id="checkCollaboration"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="collaboration"
+                          id='checkCollaboration'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='collaboration'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkCollaboration">
-                          <span className="access-color">Collaboration Required (COL)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkCollaboration'>
+                          <span className='access-color'>Collaboration Required (COL)</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={ethics}
                           onChange={handleCheckboxChange}
-                          id="checkEthics"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="ethics"
+                          id='checkEthics'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='ethics'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkEthics">
-                          <span className="access-color">Ethics Approval Required (IRB)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkEthics'>
+                          <span className='access-color'>Ethics Approval Required (IRB)</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={geographic}
                           onChange={handleCheckboxChange}
-                          id="checkGeographic"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="geographic"
+                          id='checkGeographic'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='geographic'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkGeographic">
-                          <span className="access-color">Geographic Restriction (GS-)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkGeographic'>
+                          <span className='access-color'>Geographic Restriction (GS-)</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={moratorium}
                           onChange={handleCheckboxChange}
-                          id="checkMoratorium"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="moratorium"
+                          id='checkMoratorium'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='moratorium'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkMoratorium">
-                          <span className="access-color">Publication Moratorium (MOR)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkMoratorium'>
+                          <span className='access-color'>Publication Moratorium (MOR)</span>
                         </label>
                       </div>
                     </div>
 
                     {
                       generalUse || npoa && (
-                        <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                          <div className="checkbox">
+                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                          <div className='checkbox'>
                             <input
                               checked={registrationState.npoa}
                               onChange={this.handleCheckboxChange}
-                              id="checkNpoa"
-                              type="checkbox"
-                              className="checkbox-inline rp-checkbox"
-                              name="npoa"
+                              id='checkNpoa'
+                              type='checkbox'
+                              className='checkbox-inline rp-checkbox'
+                              name='npoa'
                               disabled={isUpdateDataset}
                             />
-                            <label className="regular-checkbox rp-choice-questions" htmlFor="checkNpoa">
-                              <span className="access-color">No Populations Origins or Ancestry Research (NPOA)</span>
+                            <label className='regular-checkbox rp-choice-questions' htmlFor='checkNpoa'>
+                              <span className='access-color'>No Populations Origins or Ancestry Research (NPOA)</span>
                             </label>
                           </div>
                         </div>
                       )
                     }
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={nonProfit}
                           onChange={handleCheckboxChange}
-                          id="checkNonProfit"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="nonProfit"
+                          id='checkNonProfit'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='nonProfit'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkNonProfit">
-                          <span className="access-color">Non-Profit Use Only (NPU)</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkNonProfit'>
+                          <span className='access-color'>Non-Profit Use Only (NPU)</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                      <div className="checkbox">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
                         <input
                           checked={secondaryOther}
                           onChange={handleCheckboxChange}
-                          id="checkSecondaryOther"
-                          type="checkbox"
-                          className="checkbox-inline rp-checkbox"
-                          name="secondaryOther"
+                          id='checkSecondaryOther'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='secondaryOther'
                           disabled={isUpdateDataset}
                         />
-                        <label className="regular-checkbox rp-choice-questions" htmlFor="checkSecondaryOther">
-                          <span className="access-color">Other Secondary Use Terms:</span>
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkSecondaryOther'>
+                          <span className='access-color'>Other Secondary Use Terms:</span>
                         </label>
                       </div>
                     </div>
 
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                       <textarea
                         defaultValue={secondaryOtherText}
                         onBlur={(e) => setOtherText(e, 'secondary')}
-                        name="secondaryOtherText"
-                        id="inputSecondaryOtherText"
-                        className="form-control"
-                        rows="6"
+                        name='secondaryOtherText'
+                        id='inputSecondaryOtherText'
+                        className='form-control'
+                        rows='6'
                         required={false}
-                        placeholder="Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support."
+                        placeholder='Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.'
                         disabled={isUpdateDataset || !secondaryOther}
                       />
                     </div>
@@ -1381,41 +1372,41 @@ const DatasetRegistration = (props) => {
 
               <h3 className='rp-form-title dataset-color'>3. Data Provider Agreement</h3>
 
-              <div className="form-group">
-                <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                  <label className="control-label rp-title-question dataset-color">3.1 DUOS Data Provider Agreement</label>
+              <div className='form-group'>
+                <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+                  <label className='control-label rp-title-question dataset-color'>3.1 DUOS Data Provider Agreement</label>
                 </div>
 
-                <div className="row no-margin">
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
-                    <label style={controlLabelStyle} className="default-color">
+                <div className='row no-margin'>
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                    <label style={controlLabelStyle} className='default-color'>
                      By submitting this Data Provider Agreement, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.
                     </label>
                   </div>
 
-                  <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group">
+                  <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <a
-                      rel="noreferrer"
-                      id="link_downloadAgreement"
+                      rel='noreferrer'
+                      id='link_downloadAgreement'
                       href={DataProviderAgreement}
-                      target="_blank"
-                      className="col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color"
+                      target='_blank'
+                      className='col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                     >
-                      <span className="glyphicon glyphicon-download" />
+                      <span className='glyphicon glyphicon-download' />
                        DUOS Data Provider Agreement
                     </a>
                   </div>
                 </div>
 
-                <div className="row no-margin">
+                <div className='row no-margin'>
                   <div className={showValidationMessages ? 'rp-alert' : 'hidden'}>
-                    <Alert id="formErrors" type="danger" title="Please, complete all required fields." />
+                    <Alert id='formErrors' type='danger' title='Please, complete all required fields.' />
                   </div>
 
                   {
                     problemSavingRequest && (
                       <div className='rp-alert'>
-                        <Alert id="problemSavingRequest" type="danger" title={registrationState.errorMessage} />
+                        <Alert id='problemSavingRequest' type='danger' title={registrationState.errorMessage} />
                       </div>
                     )
                   }
@@ -1424,32 +1415,31 @@ const DatasetRegistration = (props) => {
                     submissionSuccess && (
                       <div className='rp-alert'>
                         <Alert
-                          id="submissionSuccess"
-                          type="info"
+                          id='submissionSuccess'
+                          type='info'
                           title={isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'}
                         />
                       </div>
                     )
                   }
 
-                  <div className="row no-margin">
-                    <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                  <div className='row no-margin'>
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
                       <a
-                        id="btn_submit"
+                        id='btn_submit'
                         onClick={attestAndSave}
-                        className="f-right btn-primary dataset-background bold"
+                        className='f-right btn-primary dataset-background bold'
                       >
                         {isUpdateDataset ? 'Update Dataset' : 'Register in DUOS!'}
                       </a>
-
                       <ConfirmationDialog
-                        title="Dataset Registration Confirmation"
+                        title='Dataset Registration Confirmation'
                         disableOkBtn={registrationState.disableOkBtn}
-                        color="dataset"
+                        color='dataset'
                         showModal={registrationState.showDialogSubmit}
                         action={{ label: 'Yes', handler: dialogHandlerSubmit }}
                       >
-                        <div className="dialog-description">Are you sure you want to submit this Dataset Registration?</div>
+                        <div className='dialog-description'>Are you sure you want to submit this Dataset Registration?</div>
                       </ConfirmationDialog>
                     </div>
                   </div>
