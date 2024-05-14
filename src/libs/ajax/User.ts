@@ -3,9 +3,9 @@ import { cloneDeep, flow, unset } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
-import { DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes';
+import { CreateDuosUserResponse, DuosUserResponse, UpdateDuosUserResponse } from 'src/types/responseTypes';
 import { CreateDuosUserRequest, UpdateDuosUserRequestV1, UpdateDuosUserRequestV2 } from 'src/types/requestTypes';
-import { AcknowledgementMap, ApprovedDataset, DataSet, DuosUser, SimplifiedDuosUser } from 'src/types/model';
+import { AcknowledgementMap, ApprovedDataset, Dataset, DuosUser, SimplifiedDuosUser } from 'src/types/model';
 
 export const User = {
   getMe: async (): Promise<DuosUserResponse> => {
@@ -20,14 +20,13 @@ export const User = {
     return res.data;
   },
 
-  //TODO: Determine what are legal roleNames (swagger says only these two)
   list: async (roleName: 'Admin' | 'SigningOfficial'): Promise<DuosUserResponse[]> => {
     const url = `${await getApiUrl()}/api/user/role/${roleName}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  create: async (request: CreateDuosUserRequest) => {
+  create: async (request: CreateDuosUserRequest): Promise<CreateDuosUserResponse> => {
     const url = `${await getApiUrl()}/api/dacuser`;
     try {
       const res = await fetchOk(
@@ -39,7 +38,7 @@ export const User = {
         ])
       );
       if (res.ok) {
-        return res.json;
+        return res.json();
       }
     } catch (err) {
       return false;
@@ -66,9 +65,13 @@ export const User = {
     }
   },
 
-  update: async (user: UpdateDuosUserRequestV2, userId: number): Promise<UpdateDuosUserResponse> => {
+  update: async (user: UpdateDuosUserRequestV2, userId: number)/*: Promise<UpdateDuosUserResponse>*/ => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards
+    // This below code does not seem to work at all and
+    // does not seem appropriate for this request anyway.
+    // The UpdateDuosUserRequestV2 is not the same shape as a DuosUser
+    // like this flow suggests.
     const filteredUser = flow(
       cloneDeep,
       unset('updatedUser.createDate'),
@@ -116,7 +119,6 @@ export const User = {
     return res.data;
   },
 
-
   addRoleToUser: async (userId: number, roleId: number): Promise<DuosUserResponse> => {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(
@@ -136,7 +138,7 @@ export const User = {
   },
 
 
-  getUserRelevantDatasets: async (): Promise<DataSet[]> => {
+  getUserRelevantDatasets: async (): Promise<Dataset[]> => {
     const url = `${await getApiUrl()}/api/user/me/dac/datasets`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;

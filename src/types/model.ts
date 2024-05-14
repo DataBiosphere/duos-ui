@@ -92,7 +92,7 @@ export interface Institution {
   signingOfficials: SimplifiedDuosUser[];
 }
 
-export interface DataSet {
+export interface Dataset {
   name: string;
   datasetName: string;
   dataSetId: number;
@@ -131,7 +131,7 @@ export interface Study {
   piName: string;
   publicVisibility: boolean;
   datasetIds: number[];
-  datasets: DataSet[];
+  datasets: Dataset[];
   properties: StudyProperty[];
   alternativeDataSharingPlan: FileStorageObject;
   createDate: string; //Date?

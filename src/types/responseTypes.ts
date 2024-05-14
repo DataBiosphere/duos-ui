@@ -12,4 +12,6 @@ export interface DuosUserResponse {
   userStatusInfo: UserStatusInfo;
 }
 
-export type UpdateDuosUserResponse = DuosUserResponse | false | undefined;
+export type CreateDuosUserResponse = DuosUserResponse | false | undefined;
+
+export type UpdateDuosUserResponse = CreateDuosUserResponse;
