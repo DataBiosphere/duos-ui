@@ -58,7 +58,7 @@ export default function DataUseAgreements(props) {
     } else {
       return (
         <div>
-          <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below,</h3>
+          <h3>By submitting this data access request and in accordance with your Institution’s issuance of Library Cards to you for the agreement(s) below.</h3>
           <div className="flex flex-row" style={{ justifyContent: 'flex-start' }}>
             {daaDivs}
           </div>
