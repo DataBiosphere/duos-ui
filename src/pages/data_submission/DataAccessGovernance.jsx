@@ -1,7 +1,6 @@
 import ConsentGroupForm from './consent_group/ConsentGroupForm';
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { isNil, every, cloneDeep, isEmpty, find } from 'lodash/fp';
-import { div, h, h2, a, span } from 'react-hyperscript-helpers';
 import { DAR } from '../../libs/ajax/DAR';
 import { DAC } from '../../libs/ajax/DAC';
 
@@ -221,61 +220,45 @@ export const DataAccessGovernance = (props) => {
     setAllConsentGroupsSaved(consentGroupsState.every((state) => state.editMode === false));
   }, [consentGroupsState, setAllConsentGroupsSaved]);
 
-  return div({
-    className: 'data-submitter-section',
-  }, [
-    h2('Data Access Governance'),
-    div({},
-      [
-        // consent groups
-        consentGroupsState
-          ?.map((state, idx) => {
-            if (isNil(state)) {
-              return div({}, []);
-            }
-
-            return div({ key: state.key },
-              [
-                h(ConsentGroupForm, {
-                  idx: idx,
-                  dacs: dacs,
-                  consentGroupsState,
-                  studyEditMode,
-                  disableDelete: consentGroupsState.length === 1,
-                  saveConsentGroup: (newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid),
-                  deleteConsentGroup: () => deleteConsentGroup(idx),
-                  updateNihInstitutionalCertificationFile: (file) => updateNihInstitutionalCertificationFile(idx, file),
-                  startEditConsentGroup: () => startEditConsentGroup(idx),
-                  validation: validation?.consentGroups?.at(idx) || {},
-                  onValidationChange: (change) => {
-                    onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
-                  },
-                  datasetNames: datasetNames
-                })
-              ]
-            );
-          }),
-
-        // add consent group
-        div({
-          className: 'right-header-section',
-          id: 'add-new-consent-group-btn',
-          style: {
-            display: 'flex',
-            alignItems: 'flex-end',
-            margin: '2rem 0 2rem 0'
+  return (
+    <div className='data-submitter-section'>
+      <h2>Data Access Governance</h2>
+      <div>
+        {consentGroupsState?.map((state, idx) => {
+          if (isNil(state)) {
+            return <div key={state.key}></div>;
           }
-        }, [
-          a({
-            id: 'btn_addConsentGroup',
-            className: 'btn-primary btn-add common-background',
-            onClick: () => addNewConsentGroup(),
-          }, [
-            span({}, ['Add Consent Group'])
-          ])
-        ]),
-      ]),
-  ]);
+          return (
+            <div key={state.key}>
+              <ConsentGroupForm
+                idx={idx}
+                dacs={dacs}
+                consentGroupsState={consentGroupsState}
+                studyEditMode={studyEditMode}
+                disableDelete={consentGroupsState.length === 1}
+                saveConsentGroup={(newGroup) => updateConsentGroup(idx, newGroup.value, newGroup.valid)}
+                deleteConsentGroup={() => deleteConsentGroup(idx)}
+                updateNihInstitutionalCertificationFile={(file) => updateNihInstitutionalCertificationFile(idx, file)}
+                startEditConsentGroup={() => startEditConsentGroup(idx)}
+                validation={validation?.consentGroups?.at(idx) || {}}
+                onValidationChange={(change) => {
+                  onValidationChange({ ...change, ...{ key: `consentGroups[${idx}].` + change.key } });
+                }}
+                datasetNames={datasetNames}
+              />
+            </div>
+          );
+        })}
+
+        {/* add consent group */}
+        <div className='right-header-section' id='add-new-consent-group-btn' style={{ display: 'flex', alignItems: 'flex-end', margin: '2rem 0 2rem 0' }}>
+          <a id='btn_addConsentGroup' className='btn-primary btn-add common-background' onClick={addNewConsentGroup}>
+            <span>Add Consent Group</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default DataAccessGovernance;

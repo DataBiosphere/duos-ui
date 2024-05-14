@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { cloneDeep, isObject, includes, isNil, isEmpty } from 'lodash/fp';
-import { h, div, label } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
@@ -47,28 +46,25 @@ const FormFieldRow = (props) => {
     }
   };
 
-  let template = div({ style: { marginBottom: '2%' } }, [
-    label({}, ['Users']),
-    h(Creatable, {
-      key: 'select-user',
-      isClearable: true,
-      onChange: updateUser,
-      createOptionPosition: 'first',
-      onInputChange: (input, { action }) =>
-        userListFilter({ input, user, setUser, action }),
-      getNewOptionData: (input) => {
-        return { email: input };
-      },
-      options: dropdownOptions,
-      placeholder: 'Select or type a new user email',
-      isOptionSelected: () => false, //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
-      getOptionLabel: (option) =>
-        `${option.displayName || 'New User'} (${
-          option.email || 'No email provided'
-        })` || option.email,
-    }),
-  ]);
-  return div({ display: 'flex' }, [template]);
+  let template = <div style={{ marginBottom: '2%', width:'100%' }}>
+    <label>Users</label>
+    <Creatable
+      key='select-user'
+      isClearable={true}
+      onChange={updateUser}
+      createOptionPosition='first'
+      onInputChange={(input, { action }) => userListFilter({ input, user, setUser, action })}
+      getNewOptionData={(input) => ({ email: input })}
+      options={dropdownOptions}
+      placeholder='Select or type a new user email'
+      isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+      getOptionLabel={(option) =>
+        `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email
+      }
+    />
+  </div>;
+
+  return <div style={{display:'flex'}}>{template}</div>;
 };
 
 export default function DataCustodianFormModal(props) {
@@ -104,65 +100,46 @@ export default function DataCustodianFormModal(props) {
     return isNil(user) || isNil(user.email);
   };
 
-  return h(
-    Modal,
-    {
-      isOpen: showModal,
-      onRequestClose: closeModal,
-      shouldCloseOnOverlayClick: true,
-      style: {
+  return (
+    <Modal
+      isOpen={showModal}
+      onRequestClose={closeModal}
+      shouldCloseOnOverlayClick={true}
+      style={{
         content: { ...Styles.MODAL.CONTENT },
         overlay: {
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
-      },
-    },
-    [
-      div({ style: Styles.MODAL.CONTENT }, [
-        h(CloseIconComponent, { closeFn: closeModal }),
-        div({ style: Styles.MODAL.TITLE_HEADER }, ['Add Data Submitter']),
-        dpaContent,
-        div({ style: { borderBottom: '1px solid #1FB50' } }, []),
-        //users dropdown
-        h(FormFieldRow, {
-          user,
-          updateUser,
-          setUser,
-          dropdownOptions: users,
-        }),
-        div(
-          {
-            style: {
-              display: 'flex',
-              marginLeft: '85%',
-              justifyContent: 'flex-end',
-            },
-          },
-          [
-            h(SimpleButton, {
-              onClick: () => createOnClick(user),
-              additionalStyle: {
-                flex: 1,
-                display: 'inline-block',
-                margin: '5%',
-              },
-              baseColor: Theme.palette.secondary,
-              disabled: isConfirmDisabled(user),
-              label: 'Add'
-            }),
-            h(SimpleButton, {
-              onClick: closeModal,
-              additionalStyle: {
-                flex: 1,
-                display: 'inline-block',
-                margin: '5%',
-              },
-              baseColor: Theme.palette.secondary,
-              label: 'Cancel',
-            }),
-          ]
-        ),
-      ]),
-    ]
+      }}
+    >
+      <div style={Styles.MODAL.CONTENT}>
+        <CloseIconComponent closeFn={closeModal} />
+        <div style={Styles.MODAL.TITLE_HEADER}>Add Data Submitter</div>
+        {dpaContent}
+        <div style={{ borderBottom: '1px solid #1FB50' }}></div>
+        {/* users dropdown */}
+        <FormFieldRow
+          user={user}
+          updateUser={updateUser}
+          setUser={setUser}
+          dropdownOptions={users}
+        />
+        <div style={{ display: 'flex', marginLeft: '85%', justifyContent: 'flex-end' }}>
+          <SimpleButton
+            onClick={() => createOnClick(user)}
+            additionalStyle={{ flex: 1, display: 'inline-block', margin: '5%' }}
+            baseColor={Theme.palette.secondary}
+            disabled={isConfirmDisabled(user)}
+            label='Add'
+          />
+          <SimpleButton
+            onClick={closeModal}
+            additionalStyle={{ flex: 1, display: 'inline-block', margin: '5%' }}
+            baseColor={Theme.palette.secondary}
+            label='Cancel'
+          />
+        </div>
+      </div>
+    </Modal>
   );
 }

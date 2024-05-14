@@ -45,32 +45,44 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   return (
     <div style={rowStyle} key="column-row-container" role="row">
       {columnHeaders.map((header, colIndex) => {
-        const { cellStyle, label } = header;
+        const { cellStyle, label, data } = header;
         //style here pertains to styling for individual cells
         //should be used to set dimensions of specific columns
         return (
           <div style={cellStyle} key={`column-row-${label}`} className="column-header">
-            {header.sortable && onSort ? (
-              <div
-                style={Styles.TABLE.HEADER_SORT}
-                key="data_id_cell"
-                className="cell-sort"
-                onClick={() => {
-                  onSort({
-                    colIndex: colIndex,
-                    dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
-                  });
-                }}
-              >
-                {label}
-                <div className="sort-container">
-                  <ArrowDropUp className={`sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}`} />
-                  <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
-                </div>
-              </div>
-            ) : (
-              label
-            )}
+            {(() => {
+              if (header.sortable && onSort) {
+                return (<div
+                  style={Styles.TABLE.HEADER_SORT}
+                  key="data_id_cell"
+                  className="cell-sort"
+                  onClick={() => {
+                    onSort({
+                      colIndex: colIndex,
+                      dir: sort.colIndex === colIndex ? sort.dir * -1 : 1
+                    });
+                  }}
+                >
+                  {label}
+                  <div className="sort-container">
+                    <ArrowDropUp className={`sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}`} />
+                    <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
+                  </div>
+                </div>);
+              } else if (header.data) {
+                return (<li className="dropdown" style={{ listStyleType: 'none' }}>
+                  <div role="button" data-toggle="dropdown">
+                    <div id="dacUser">
+                      {label}
+                      <span className="caret caret-margin" style={{color: '#337ab7'}}></span>
+                    </div>
+                  </div>
+                  {data}
+                </li>);
+              } else {
+                return (label);
+              }
+            })()}
           </div>
         );
       })}
@@ -83,6 +95,9 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
   return rowData.map((row, index) => {
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
+    if (rowData[index][0].striped) {
+      baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#e2e8f4';
+    }
     const renderedRow = (
       <div style={Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle)} key={`row-data-${mapKey}`} role="row" className={`row-data-${index}`}>
         {row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {

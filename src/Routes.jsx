@@ -16,6 +16,7 @@ import ResearcherConsole from './pages/researcher_console/ResearcherConsole';
 import UserProfile from './pages/user_profile/UserProfile';
 import RequestForm from './pages/user_profile/RequestForm';
 import SigningOfficialResearchers from './pages/signing_official_console/SigningOfficialResearchers';
+import ManageResearcherDAAs from './pages/signing_official_console/ManageResearcherDAAs';
 import SigningOfficialDarRequests from './pages/signing_official_console/SigningOfficialDarRequests';
 import SigningOfficialDataSubmitters from './pages/signing_official_console/SigningOfficialDataSubmitters';
 import Translator from './pages/Translator';
@@ -83,6 +84,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
+    {checkEnv(envGroups.DEV) && <AuthenticatedRoute path="/signing_official_console/researchers_daa_associations" component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
@@ -98,7 +100,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/datalibrary/:query" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/datalibrary" component={DatasetSearch} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/dataset/:datasetIdentifier" component={DatasetStatistics} props={props} rolesAllowed={[USER_ROLES.all]} />
-    <Redirect from="/DUOS-:duosId" to="/dataset/DUOS-:duosId" />
+    <Redirect from="/DUOS-:duosId" to="/dataset/DUOS-:duosId" props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/dac_datasets" component={DACDatasets} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/tos_acceptance" component={TermsOfServiceAcceptance} props={props} rolesAllowed={[USER_ROLES.all]} />
     {checkEnv(envGroups.NON_PROD) && <AuthenticatedRoute path="/translate" component={Translator} props={props} rolesAllowed={[USER_ROLES.researcher]}/>}

@@ -1,6 +1,5 @@
 import moment from 'moment';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { div, h, img, a, span } from 'react-hyperscript-helpers';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
 import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil, omit } from 'lodash/fp';
@@ -87,14 +86,14 @@ const createDateCell = (createDate, id) => {
 
 //Update function name and return if requirements change
 const createActionsCell = (card, setCurrentCard, setShowConfirmation, setShowModal, setModalType) => {
-  const deleteButton = h(DeleteRecordButton, {card, setShowConfirmation, setCurrentCard});
-  const updateButton = h(UpdateRecordButton, {card, setShowModal, setCurrentCard, setModalType});
+  const deleteButton = <DeleteRecordButton card={card} setShowConfirmation={setShowConfirmation} setCurrentCard={setCurrentCard} />;
+  const updateButton = <UpdateRecordButton card={card} setShowModal={setShowModal} setCurrentCard={setCurrentCard} setModalType={setModalType} />;
   return {
     id: card.id,
     style: { width: styles.cellWidths.buttons },
     label: 'action-buttons',
     isComponent: true,
-    data: div({style: {display: 'flex', justifyContent: 'left'}, key: `action-cell-${card.id}`}, [updateButton, deleteButton])
+    data: <div style={{display: 'flex', justifyContent: 'left'}} key={`action-cell-${card.id}`}>{updateButton}{deleteButton}</div>
   };
 };
 
@@ -133,15 +132,17 @@ const DeleteRecordButton = (props) => {
     setCurrentCard(card);
     setShowConfirmation(true);
   };
-  return h(TableIconButton, {
-    keyProp: `show-delete-modal-${card.id}`,
-    dataTip: 'Delete Library Card',
-    isRendered: true,
-    onClick,
-    icon: Delete,
-    style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
-    hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
-  });
+  return (
+    <TableIconButton
+      keyProp={`show-delete-modal-${card.id}`}
+      dataTip='Delete Library Card'
+      isRendered={true}
+      onClick={onClick}
+      icon={Delete}
+      style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
+      hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
+    />
+  );
 };
 
 //onClick function to show target card via modal
@@ -156,15 +157,17 @@ const UpdateRecordButton = (props) => {
   const { card, setShowModal, setCurrentCard, setModalType} = props;
   const onClick = () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard);
 
-  return h(TableIconButton, {
-    keyProp: `show-update-form-${card.id}`,
-    dataTip: 'Update Library Card',
-    isRendered: true,
-    onClick,
-    icon: Update,
-    style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
-    hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
-  });
+  return (
+    <TableIconButton
+      keyProp={`show-update-form-${card.id}`}
+      dataTip='Update Library Card'
+      isRendered={true}
+      onClick={onClick}
+      icon={Update}
+      style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
+      hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
+    />
+  );
 };
 
 export default function LibraryCardTable(props) {
@@ -276,13 +279,7 @@ export default function LibraryCardTable(props) {
   };
 
   //pre-computed PaginationBar component passed into SimpleTable as a prop
-  const paginationBar = h(PaginationBar, {
-    pageCount,
-    currentPage,
-    tableSize,
-    goToPage,
-    changeTableSize,
-  });
+  const paginationBar = <PaginationBar pageCount={pageCount} currentPage={currentPage} tableSize={tableSize} goToPage={goToPage} changeTableSize={changeTableSize} />;
 
   //update function when element in array is updated via modal
   const updateListFn = async (payload) => {
@@ -367,108 +364,86 @@ export default function LibraryCardTable(props) {
   );
 
   //template for render
-  return div({ style: Styles.PAGE }, [
-    div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
-      div(
-        { className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION },
-        [
-          div({ style: Styles.ICON_CONTAINER }, [
-            img({
-              id: 'lock-icon',
-              src: lockIcon,
-              style: Styles.HEADER_IMG,
-            }),
-          ]),
-          div({ style: Styles.HEADER_CONTAINER }, [
-            div({ style: Styles.TITLE }, ['Manage Library Cards']),
-            div(
-              {
-                style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
-                  fontSize: '18px',
-                }),
-              },
-              ['Select and manage Library Cards']
-            ),
-          ]),
-        ]
-      ),
-      h(SearchBar, {
-        handleSearchChange,
-        searchRef,
-        style: {
-          width: '100%',
-          margin: '0 3% 0 0',
-        },
-        button: div({
-          style: {
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-            width: '300px'
+  return (
+    <div style={Styles.PAGE}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
+          <div style={Styles.ICON_CONTAINER}>
+            <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} />
+          </div>
+          <div style={Styles.HEADER_CONTAINER}>
+            <div style={Styles.TITLE}>Manage Library Cards</div>
+            <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}>Select and manage Library Cards</div>
+          </div>
+        </div>
+        <SearchBar
+          handleSearchChange={handleSearchChange}
+          searchRef={searchRef}
+          style={{
+            width: '100%',
+            margin: '0 3% 0 0',
+          }}
+          button={
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                justifyContent: 'center',
+                width: '300px'
+              }}
+            >
+              <a
+                id="btn_addLibraryCard"
+                className="btn-primary btn-add common-background"
+                style={{
+                  marginTop: '30%',
+                  display: 'flex',
+                }}
+                onClick={() =>
+                  showModalOnClick(
+                    {},
+                    'add',
+                    setModalType,
+                    setShowModal,
+                    setCurrentCard
+                  )
+                }
+              >
+                <span>Add Library Card</span>
+              </a>
+            </div>
           }
-        }, [
-          a({
-            id: 'btn_addLibraryCard',
-            className: 'btn-primary btn-add common-background',
-            style: {
-              marginTop: '30%',
-              display: 'flex',
-            },
-            onClick: () =>
-              showModalOnClick(
-                {},
-                'add',
-                setModalType,
-                setShowModal,
-                setCurrentCard
-              ),
-          }, [
-            span({}, ['Add Library Card']),
-          ]),
-        ]),
-      }),
-    ]),
-    h(SimpleTable, {
-      isLoading,
-      rowData: processLCData(visibleCards),
-      columnHeaders: columnHeaderData,
-      styles,
-      tableSize,
-      paginationBar,
-    }),
-    h(LibraryCardFormModal, {
-      showModal,
-      updateOnClick: updateListFn,
-      createOnClick: addLibraryCard,
-      closeModal: () => setShowModal(false),
-      institutions,
-      users,
-      card: currentCard,
-      modalType,
-      lcaContent: '',
-    }),
-    h(ConfirmationModal, {
-      showConfirmation,
-      closeConfirmation: () => setShowConfirmation(false),
-      title: 'Delete Library Card?',
-      message: 'Are you sure you want to delete this library card?',
-      header: `${currentCard.userName || currentCard.userEmail} - ${
-        !isNil(currentCard.institution) ? currentCard.institution.name : ''
-      }`,
-      onConfirm: () =>
-        deleteOnClick(
-          currentCard,
-          libraryCards,
-          setLibraryCards,
-          setShowConfirmation
-        ),
-    }),
-    h(ReactTooltip, {
-      place: 'left',
-      effect: 'solid',
-      multiline: true,
-      className: 'tooltip-wrapper',
-    }),
-  ]);
+        />
+      </div>
+      <SimpleTable
+        isLoading={isLoading}
+        rowData={processLCData(visibleCards)}
+        columnHeaders={columnHeaderData}
+        styles={styles}
+        tableSize={tableSize}
+        paginationBar={paginationBar}
+      />
+      <LibraryCardFormModal
+        showModal={showModal}
+        updateOnClick={updateListFn}
+        createOnClick={addLibraryCard}
+        closeModal={() => setShowModal(false)}
+        institutions={institutions}
+        users={users}
+        card={currentCard}
+        modalType={modalType}
+        lcaContent=''
+      />
+      <ConfirmationModal
+        showConfirmation={showConfirmation}
+        closeConfirmation={() => setShowConfirmation(false)}
+        title='Delete Library Card?'
+        message='Are you sure you want to delete this library card?'
+        header={`${currentCard.userName || currentCard.userEmail} - ${!isNil(currentCard.institution) ? currentCard.institution.name : ''}`}
+        onConfirm={() => deleteOnClick(currentCard, libraryCards, setLibraryCards, setShowConfirmation)}
+      />
+      <ReactTooltip place='left' effect='solid' multiline={true} className='tooltip-wrapper' />
+    </div>
+  );
 }

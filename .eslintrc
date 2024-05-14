@@ -66,12 +66,13 @@
       "rules": {
         "no-undef": "off",
         "@typescript-eslint/no-unused-vars": [
-          "warn",
+          "error",
           {
-            "vars": "all",
             "args": "all",
-            "argsIgnorePattern": "_|^_|^props",
-            "destructuredArrayIgnorePattern": "_|^_",
+            "argsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_",
+            "destructuredArrayIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
             "ignoreRestSiblings": true
           }
         ]
