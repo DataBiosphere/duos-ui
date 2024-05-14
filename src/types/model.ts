@@ -109,13 +109,32 @@ export interface Dataset {
   alias: string;
   datasetIdentifier: string;
   objectId: string;
-  /**
-   * TODO: Determine what type this is
-   */
-  dataUse: unknown;
+  dataUse: DataUse;
   dacApproval: boolean;
   nihCertificationFile: FileStorageObject;
   alternativeDataSharingPlanFile: FileStorageObject;
+}
+
+interface DataUseRequirements {
+  required: string[];
+}
+
+interface DataUseProperties {
+  [key: string]: DataUsePropertyFields;
+}
+
+interface DataUsePropertyFields {
+  type: string;
+  [key: string]: string | DataUsePropertyFields;
+}
+export interface DataUse {
+  $id: string;
+  $schema: string;
+  title: string;
+  version: number;
+  type: string;
+  anyOf: DataUseRequirements[];
+  properties: DataUseProperties;
 }
 
 export interface DatasetProperty {
