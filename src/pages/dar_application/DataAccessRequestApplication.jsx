@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect, useState, useCallback } from 'react';
 import ResearcherInfo from './ResearcherInfo';
-import DataUseAgreements from './DataUseAgreements';
+import DataAccessAgreements from './DataAccessAgreements';
 import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
@@ -606,7 +606,7 @@ const DataAccessRequestApplication = (props) => {
 
               {!props.readOnlyMode ?
                 <div className='step-container'>
-                  <DataUseAgreements
+                  <DataAccessAgreements
                     datasets={datasets}
                     darCode={formData.darCode}
                     cancelAttest={() => setIsAttested(false)}
