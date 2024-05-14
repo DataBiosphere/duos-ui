@@ -103,6 +103,7 @@ describe('User', () => {
         cy.intercept('GET', 'api/user/me', { statusCode: 404 }).as('getMe');
         try {
           await User.getMe();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -144,6 +145,7 @@ describe('User', () => {
         cy.intercept('GET', 'api/user/*', { statusCode: 404 }).as('getById');
         try {
           await User.getById(testUser1.userId);
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -186,14 +188,14 @@ describe('User', () => {
         cy.intercept('GET', 'api/user/role/*', { statusCode: 404 }).as('list');
         try {
           await User.list('Admin');
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
-          assert(true);
+          assert(true, 'Rejection not handled');
         }
       });
     });
   });
 
-  //TODO
   describe('create', () => {
     beforeEach(() => {
       cy.intercept('POST', 'api/dacuser', testUser1).as('create');
@@ -376,8 +378,9 @@ describe('User', () => {
         );
         try {
           await User.registerUser();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
-          assert(true);
+          assert(true, 'Rejection not handled');
         }
       });
     });
@@ -424,8 +427,9 @@ describe('User', () => {
         }).as('getSOsForCurrentUser');
         try {
           await User.getSOsForCurrentUser();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
-          assert(true);
+          assert(true, 'Rejection not handled');
         }
       });
     });
@@ -472,6 +476,7 @@ describe('User', () => {
         }).as('getUnassignedUsers');
         try {
           await User.getUnassignedUsers();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -517,8 +522,9 @@ describe('User', () => {
         );
         try {
           await User.addRoleToUser(testUser1.userId, newRoleId);
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
-          assert(true);
+          assert(true, 'Rejection not handled');
         }
       });
     });
@@ -563,8 +569,9 @@ describe('User', () => {
         );
         try {
           await User.deleteRoleFromUser(testUser1.userId, roleIdToDelete);
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
-          assert(true);
+          assert(true, 'Rejection not handled');
         }
       });
     });
@@ -610,6 +617,7 @@ describe('User', () => {
         );
         try {
           await User.getUserRelevantDatasets();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -652,6 +660,7 @@ describe('User', () => {
         }).as('getAcknowledgements');
         try {
           await User.getAcknowledgements();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -734,6 +743,7 @@ describe('User', () => {
             acknowledgements.testAck1,
             acknowledgements.testAck2
           );
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
@@ -786,6 +796,7 @@ describe('User', () => {
         }).as('getApprovedDatasets');
         try {
           await User.getApprovedDatasets();
+          assert(false, 'Rejection handled or not thrown');
         } catch (err) {
           expect(err.response.status).to.eq(404);
         }
