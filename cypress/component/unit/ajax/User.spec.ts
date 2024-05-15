@@ -15,6 +15,7 @@ import {
   ApprovedDataset,
   Dataset,
 } from '../../../../src/types/model';
+import { Config } from '../../../../src/libs/config';
 
 const testUser1: Partial<DuosUserResponse> = {
   displayName: 'testUser1',
@@ -71,6 +72,9 @@ const approvedDataSet2: Partial<ApprovedDataset> = {
 };
 
 describe('User', () => {
+  beforeEach(() => {
+    cy.stub(Config, 'getApiUrl').resolves('https://www.google.com');
+  });
   describe('getMe', () => {
     beforeEach(() => {
       cy.intercept('GET', 'api/user/me', testUser1).as('getMe');
@@ -99,8 +103,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/me', { statusCode: 404 }).as('getMe');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getMe();
           assert(false, 'Rejection handled or not thrown');
@@ -141,8 +147,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/*', { statusCode: 404 }).as('getById');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getById(testUser1.userId);
           assert(false, 'Rejection handled or not thrown');
@@ -184,8 +192,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/role/*', { statusCode: 404 }).as('list');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.list('Admin');
           assert(false, 'Rejection handled or not thrown');
@@ -232,8 +242,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('should return false', async () => {
+      beforeEach(() => {
         cy.intercept('POST', 'api/dacuser', { statusCode: 404 }).as('create');
+      });
+      it('should return false', async () => {
         const result: CreateDuosUserResponse = await User.create(createRequest);
         expect(result).to.eq(false);
       });
@@ -281,8 +293,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('should return false', async () => {
+      beforeEach(() => {
         cy.intercept('PUT', 'api/user', { statusCode: 404 }).as('updateSelf');
+      });
+      it('should return false', async () => {
         const result: UpdateDuosUserResponse = await User.updateSelf(
           updateRequest
         );
@@ -335,8 +349,10 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('should return false', async () => {
+      beforeEach(() => {
         cy.intercept('PUT', 'api/user/*', { statusCode: 404 }).as('update');
+      });
+      it('should return false', async () => {
         const result: UpdateDuosUserResponse = await User.update(
           updateRequest,
           testUser1.userId
@@ -372,10 +388,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('POST', 'api/user', { statusCode: 404 }).as(
           'registerUser'
-        );
+        );      
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.registerUser();
           assert(false, 'Rejection handled or not thrown');
@@ -421,10 +439,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/signing-officials', {
           statusCode: 404,
-        }).as('getSOsForCurrentUser');
+        }).as('getSOsForCurrentUser');  
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getSOsForCurrentUser();
           assert(false, 'Rejection handled or not thrown');
@@ -470,10 +490,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/institution/unassigned', {
           statusCode: 404,
-        }).as('getUnassignedUsers');
+        }).as('getUnassignedUsers'); 
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getUnassignedUsers();
           assert(false, 'Rejection handled or not thrown');
@@ -516,10 +538,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('PUT', 'api/user/**', { statusCode: 404 }).as(
           'addRoleToUser'
         );
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.addRoleToUser(testUser1.userId, newRoleId);
           assert(false, 'Rejection handled or not thrown');
@@ -563,10 +587,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('DELETE', 'api/user/role/**', { statusCode: 404 }).as(
           'deleteRoleFromUser'
         );
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.deleteRoleFromUser(testUser1.userId, roleIdToDelete);
           assert(false, 'Rejection handled or not thrown');
@@ -611,10 +637,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/me/dac/datasets', { statusCode: 404 }).as(
           'getUserRelevantDatasets'
         );
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getUserRelevantDatasets();
           assert(false, 'Rejection handled or not thrown');
@@ -654,10 +682,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/acknowledgements', {
           statusCode: 404,
         }).as('getAcknowledgements');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getAcknowledgements();
           assert(false, 'Rejection handled or not thrown');
@@ -676,10 +706,12 @@ describe('User', () => {
     });
 
     describe('is called with no keys', () => {
-      it('should not make a request and send back an empty object', async () => {
+      beforeEach(() => {
         cy.intercept('POST', 'api/user/acknowledgements', {
           statusCode: 500,
         }).as('acceptAcknowledgments');
+      });
+      it('should not make a request and send back an empty object', async () => {
         try {
           const res: AcknowledgementMap = await User.acceptAcknowledgments();
           assert(true, 'No outgoing request was made');
@@ -734,10 +766,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('POST', 'api/user/acknowledgements', {
           statusCode: 404,
         }).as('acceptAcknowledgments');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.acceptAcknowledgments(
             acknowledgements.testAck1,
@@ -790,10 +824,12 @@ describe('User', () => {
       });
     });
     describe('on rejection', () => {
-      it('does not handle the rejection', async () => {
+      beforeEach(() => {
         cy.intercept('GET', 'api/user/me/researcher/datasets', {
           statusCode: 404,
         }).as('getApprovedDatasets');
+      });
+      it('does not handle the rejection', async () => {
         try {
           await User.getApprovedDatasets();
           assert(false, 'Rejection handled or not thrown');
