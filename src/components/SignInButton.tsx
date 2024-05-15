@@ -13,10 +13,39 @@ import ReactTooltip from 'react-tooltip';
 import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
+import { History } from 'history';
+import CSS from 'csstype';
 
-export const SignIn = (props) => {
+interface SignInButtonProps {
+  customStyle: CSS.Properties | undefined;
+  history: History;
+  onSignIn: () => Promise<void>;
+}
+
+interface ErrorInfo {
+  title?: string;
+  description?: string;
+  show?: boolean;
+  msg?: string;
+}
+
+type ErrorDisplay = ErrorInfo | JSX.Element;
+
+interface HttpError extends Error {
+  status?: number;
+}
+
+interface GoogleSuccessPayload {
+  accessToken: string;
+}
+
+declare global {
+  interface Window { google: any; }
+}
+
+export const SignInButton = (props: SignInButtonProps) => {
   const [clientId, setClientId] = useState('');
-  const [errorDisplay, setErrorDisplay] = useState({});
+  const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
   const { onSignIn, history, customStyle } = props;
 
   useEffect(() => {
@@ -34,12 +63,14 @@ export const SignIn = (props) => {
       ReactTooltip.rebuild();
     };
     init();
-    return () => (isSubscribed = false);
+    return () => {
+      isSubscribed = false;
+    };
   });
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
-  const checkToSAndRedirect = async (redirectPath) => {
+  const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
     const user = await User.getMe();
     if (!user.roles) {
@@ -65,7 +96,7 @@ export const SignIn = (props) => {
     }
   };
 
-  const onSuccess = async (response) => {
+  const onSuccess = async (response: GoogleSuccessPayload) => {
     Storage.setGoogleData(response);
 
     const redirectTo = getRedirectTo();
@@ -79,29 +110,29 @@ export const SignIn = (props) => {
     }
   };
 
-  const getRedirectTo = () => {
+  const getRedirectTo = (): string => {
     const queryParams = new URLSearchParams(window.location.search);
     return queryParams.get('redirectTo') || window.location.pathname;
   };
 
-  const shouldRedirectTo = (page) => page !== '/' && page !== '/home';
+  const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home';
 
-  const attemptSignInCheckToSAndRedirect = async (redirectTo, shouldRedirect) => {
+  const attemptSignInCheckToSAndRedirect = async (redirectTo:string, shouldRedirect: boolean) => {
     await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     Metrics.identify(Storage.getAnonymousId());
     Metrics.syncProfile();
     Metrics.captureEvent(eventList.userSignIn);
   };
 
-  const handleRegistration = async (redirectTo, shouldRedirect) => {
+  const handleRegistration = async (redirectTo: string, shouldRedirect: boolean) => {
     try {
       await registerAndRedirectNewUser(redirectTo, shouldRedirect);
     } catch (error) {
-      await handleErrors(error, redirectTo, shouldRedirect);
+      await handleErrors(error as HttpError, redirectTo, shouldRedirect);
     }
   };
 
-  const registerAndRedirectNewUser = async (redirectTo, shouldRedirect) => {
+  const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
     await onSignIn();
@@ -111,7 +142,7 @@ export const SignIn = (props) => {
     history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
-  const handleErrors = async (error, redirectTo, shouldRedirect) => {
+  const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
     const status = error.status;
 
     switch (status) {
@@ -127,7 +158,7 @@ export const SignIn = (props) => {
     }
   };
 
-  const handleConflictError = async (redirectTo, shouldRedirect) => {
+  const handleConflictError = async (redirectTo: string, shouldRedirect: boolean) => {
     try {
       await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     } catch (error) {
@@ -135,7 +166,7 @@ export const SignIn = (props) => {
     }
   };
 
-  const onFailure = (response) => {
+  const onFailure = (response: any) => {
     Storage.clearStorage();
     if (response.error === 'popup_closed_by_user') {
       setErrorDisplay(
@@ -153,27 +184,27 @@ export const SignIn = (props) => {
   };
 
   const spinnerOrSignInButton = () => {
-    return clientId === ''
-      ? Spinner
-      : <div style={{ display: 'flex' }}>
+    return (clientId === ''
+      ? Spinner()
+      : (<div style={{ display: 'flex' }}>
         {isNil(customStyle)
           ? GoogleIS.signInButton(clientId, onSuccess, onFailure)
           : <button className={'btn-primary'} style={customStyle} onClick={() => {
             GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
           }}>
-            Submit a Data Access Request
+          Submit a Data Access Request
           </button>}
         {isNil(customStyle) &&
-          <a
-            className='navbar-duos-icon-help'
-            style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
-            href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
-            data-for="tip_google-help"
-            data-tip="No Google help? Click here!"
-          />
+        <a
+          className='navbar-duos-icon-help'
+          style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
+          href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
+          data-for="tip_google-help"
+          data-tip="No Google help? Click here!"
+        />
         }
         <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
-      </div>;
+      </div>));
   };
 
   return (
@@ -186,8 +217,8 @@ export const SignIn = (props) => {
           <Alert
             id="dialog"
             type="danger"
-            title={errorDisplay.title}
-            description={errorDisplay.description}
+            title={(errorDisplay as ErrorInfo).title}
+            description={(errorDisplay as ErrorInfo).description}
           />
         </div>
       }
@@ -195,4 +226,4 @@ export const SignIn = (props) => {
   );
 };
 
-export default SignIn;
+export default SignInButton;

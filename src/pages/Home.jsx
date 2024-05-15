@@ -1,5 +1,5 @@
 import React from 'react';
-import SignIn from '../components/SignIn';
+import SignInButton from '../components/SignInButton';
 import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
@@ -96,7 +96,7 @@ const Home = (props) => {
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
           <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
           {!isLogged && <div style={signInPositionStyle}>
-            <SignIn props={props} onSignIn={onSignIn} history={history} />
+            <SignInButton props={props} onSignIn={onSignIn} history={history} />
           </div>}
           <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
