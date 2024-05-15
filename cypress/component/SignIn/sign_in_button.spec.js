@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { mount } from 'cypress/react';
-import SignIn from '../../../src/components/SignIn';
+import SignInButton from '../../../src/components/SignInButton';
 import { Config } from '../../../src/libs/config';
 
 const signInText = 'Sign-in';
@@ -17,14 +17,14 @@ describe('Sign In Component', function() {
     cy.readFile('config/alpha.json').then((config) => {
       const clientId = config.clientId;
       cy.stub(Config, 'getGoogleClientId').returns(clientId);
-      mount(<SignIn />);
+      mount(<SignInButton />);
       cy.contains(signInText).should('exist');
     });
   });
   it('Spinner loads when client id is empty', function () {
     cy.viewport(600, 300);
     cy.stub(Config, 'getGoogleClientId').returns('');
-    mount(<SignIn />);
+    mount(<SignInButton />);
     cy.contains(signInText).should('not.exist');
   });
 });
