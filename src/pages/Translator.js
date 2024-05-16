@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { div, img, h1, h2, h3, form, textarea, button, label, ul, li, a, span } from 'react-hyperscript-helpers';
+import React, { useState } from 'react';
 import { cloneDeep, groupBy, isNil } from 'lodash/fp';
 import { Translate } from '../libs/ajax/Translate';
 import homeHeaderBackground from '../images/home_header_background.png';
@@ -59,11 +58,10 @@ export default function Translator() {
   };
 
   return (
-    div({ className: 'row' }, [
-      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-        div({
-          className: 'row',
-          style: {
+    <div className="row">
+      <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div className="row"
+          style={{
             backgroundColor: 'white',
             height: '350px',
             position: 'relative',
@@ -71,90 +69,88 @@ export default function Translator() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
-          }}, [
-          img({ style: { height: 'inherit', minWidth: '100%' }, src: homeHeaderBackground}),
-          div({ className: 'flex-col', style: { position: 'absolute', width: '100%' }}, [
-            h1({ style: homeTitle }, ['The DUO Translator']),
-            label(
-              { className: 'hidden-xs', style: homeBannerDescription },
-              ['Map your consent form to the GA4GH Data Use Ontology!']
-            ),
-            form({ className: 'flex-col', style: { width: '100%' } }, [
-              textarea({
-                rows: 3,
-                style: {
+          }}>
+          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Header Background" />
+          <div className="flex-col" style={{ position: 'absolute', width: '100%' }}>
+            <h1 style={homeTitle}>The DUO Translator</h1>
+            <label className="hidden-xs" style={homeBannerDescription}>
+              Map your consent form to the GA4GH Data Use Ontology!
+            </label>
+            <form className="flex-col" style={{ width: '100%' }}>
+              <textarea
+                rows={3}
+                style={{
                   width: '90%',
                   maxWidth: 800,
                   margin: '20px 30px',
                   padding: 20,
                   borderRadius: 5
-                },
-                onChange: (e) => { setParagraph(e.target.value); }
-              }),
-              button({
-                className: 'button button-blue',
-                type: 'button',
-                onClick: submit,
-                style: {
+                }}
+                onChange={(e) => { setParagraph(e.target.value); }}
+              />
+              <button
+                className="button button-blue"
+                type="button"
+                onClick={submit}
+                style={{
                   fontSize: 20,
                   minWidth: 250,
                   boxShadow: 'rgba(0, 0, 0, 0.3) 5px 5px 7px'
-                }
-              }, ['Submit'])
-            ])
-          ])
-        ]),
-        div({ isRendered: !isNil(results), style: { padding: 20 } }, [
-          div({ className: 'row' }, [
-            div({ className: 'col-lg-12', style: { backgroundColor: 'white' } }, [
-              h2(`Translation Results`)
-            ])
-          ]),
-
-          div({
-            isRendered: isLoading,
-            className: 'flex-row',
-            style: { width: '100%', justifyContent: 'center' }
-          }, [Spinner]),
-
-          div({ isRendered: error !== undefined && error !== null }, [
-            'There was an error running your request',
-            error
-          ]),
-
-          div({ isRendered: !isLoading && !error, className: 'row no-margin' }, [
-            results && Object.keys(results).length === 0 && div([
-              'No results found'
-            ]),
-            results && Object
-              .keys(results)
-              .map(key => {
-                return div({ key: `category-${key}`, className: 'col-md-4' }, [
-                  h3([key]),
-
-                  ul(
-                    { className: 'search-result-list'},
-                    results[key].map(searchResult => {
-                      return li(
-                        {
-                          key: `category-${key}-result-${searchResult.key}`,
-                          style: { marginBottom: 15 }
-                        },
-                        [
-                          div([searchResult.title]),
-                          div([
-                            a({href: searchResult.url}, [searchResult.urlDisplay]),
-                            span({ style: {fontSize: '1rem', opacity: 0.7, marginLeft: 6} }, `(${searchResult.urlDomain})`)
-                          ])
-                        ]
-                      );
-                    })
-                  )
-                ]);
-              })
-          ])
-        ])
-      ])
-    ])
+                }}
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+        {!isNil(results) && (
+          <div style={{ padding: 20 }}>
+            <div className="row">
+              <div className="col-lg-12" style={{ backgroundColor: 'white' }}>
+                <h2>Translation Results</h2>
+              </div>
+            </div>
+            {isLoading && (
+              <div className="flex-row" style={{ width: '100%', justifyContent: 'center' }}>
+                <Spinner />
+              </div>
+            )}
+            {(error!==undefined && error!==null) && (
+              <div>
+                There was an error running your request
+                <br />
+                {error}
+              </div>
+            )}
+            {(!isLoading && !error) && (
+              <div className="row no-margin">
+                {results && Object.keys(results).length === 0 ? (
+                  <div>No results found</div>
+                ) : (
+                  results && Object.keys(results).map(key => (
+                    <div key={`category-${key}`} className="col-md-4">
+                      <h3>{key}</h3>
+                      <ul className="search-result-list">
+                        {results[key].map(searchResult => (
+                          <li key={`category-${key}-result-${searchResult.key}`} style={{ marginBottom: 15 }}>
+                            <div>{searchResult.title}</div>
+                            <div>
+                              <a href={searchResult.url}>{searchResult.urlDisplay}</a>
+                              <span style={{ fontSize: '1rem', opacity: 0.7, marginLeft: 6 }}>
+                                ({searchResult.urlDomain})
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
