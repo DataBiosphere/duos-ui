@@ -1,5 +1,4 @@
-import {useEffect, useState} from 'react';
-import {a, div, h, span} from 'react-hyperscript-helpers';
+import React,{useEffect, useState} from 'react';
 import {DataUseTranslation} from '../../libs/dataUseTranslation';
 import {isEmpty, isNil, flatMap, keys, get} from 'lodash/fp';
 import {DataUsePills} from './DataUsePill';
@@ -94,14 +93,14 @@ const highlightedWords = [
 ];
 
 const DataUseSummary = ({translatedDataUse}) => {
-  return flatMap( key => {
+  return flatMap(key => {
     const dataUses = translatedDataUse[key];
-    return div({key: key},[DataUsePills(dataUses)]);
+    return <div key={key}>{<DataUsePills dataUses={dataUses} />}</div>;
   })(keys(translatedDataUse));
 };
 
 const SkeletonLoader = () => {
-  return div({className: 'text-placeholder', style: styles.skeletonLoader});
+  return <div className='text-placeholder' style={styles.skeletonLoader}></div>;
 };
 
 const CollapseExpandLink = ({expanded, setExpanded}) => {
@@ -109,50 +108,60 @@ const CollapseExpandLink = ({expanded, setExpanded}) => {
     'Hide Research Use Statement (Narrative)' :
     'Expand to view Research Purpose and Vote';
 
-  return a({
-    style: styles.link,
-    id: 'expand-rp-vote-button',
-    onClick: () => setExpanded(!expanded),
-  }, [linkMessage]);
+  return (
+    <a
+      style={styles.link}
+      id='expand-rp-vote-button'
+      onClick={() => setExpanded(!expanded)}
+    >
+      {linkMessage}
+    </a>
+  );
 };
 
 const ResearchPurposeSummary = ({darInfo}) => {
-  return !isNil(darInfo) ?
-    div({style: styles.researchPurposeSummary}, [
-      h(HighlightText, {
-        highlight: highlightedWords,
-        text: darInfo.rus,
-      })
-    ]) :
-    div();
+  return !isNil(darInfo) ? (
+    <div style={styles.researchPurposeSummary}>
+      <HighlightText
+        highlight={highlightedWords}
+        text={darInfo.rus}
+      />
+    </div>
+  ) : (
+    <div />
+  );
 };
 
-export const ChairVoteInfo = ({dacVotes, isChair, adminPage = false}) => {
-  return div(
-    {
-      style: styles.chairVoteInfo,
-      isRendered: isChair && dacVotes.length > 0,
-      datacy: 'chair-vote-info',
-    },
-    [
-      div(
-        {
-          style: {
+export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
+
+  if (isChair && dacVotes.length > 0) {
+    return (
+      <div
+        style={styles.chairVoteInfo}
+        data-cy='chair-vote-info'
+      >
+        <div
+          style={{
             backgroundColor: '#FFFFFF',
             padding: '1% 0',
             marginTop: '10%',
-          },
-        },
-        [
-          div({style: {fontSize: 17, color: '#333F52', fontFamily: 'Montserrat'}}, [adminPage ? 'DAC Votes (summary)' : "My DAC's Votes (summary)"]),
-          h(VotesPieChart, {
-            votes: dacVotes,
-            styleOverride: {}
-          }),
-        ]
-      ),
-    ]
-  );
+          }}
+        >
+          <div
+            style={{ fontSize: 17, color: '#333F52', fontFamily: 'Montserrat' }}
+          >
+            {adminPage ? 'DAC Votes (summary)' : `My DAC's Votes (summary)`}
+          </div>
+          <VotesPieChart
+            votes={dacVotes}
+            styleOverride={{}}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return <div />;
 };
 
 export default function ResearchProposalVoteSlab(props) {
@@ -167,46 +176,58 @@ export default function ResearchProposalVoteSlab(props) {
     setCurrentUserVotes(extractUserRPVotesFromBucket(bucket, user, isChair, adminPage));
   }, [bucket, isChair, adminPage]);
 
-  return div({ datacy: 'rp-slab', style: styles.baseStyle }, [
-    div({ style: styles.slabTitle, id: convertLabelToKey(get('key')(bucket)) }, [
-      'RUS (GA4GH DUO)'
-    ]),
-    div({ isRendered: isLoading, className: 'text-placeholder', style: {height: '100px'}} ),
-    div({ isRendered: !isLoading }, [
-      div({ style: styles.collapsedData }, [
-        isLoading ? h(SkeletonLoader, {}) : h(DataUseSummary, {translatedDataUse}),
-        h(CollapseExpandLink, {
-          expanded,
-          setExpanded,
-          isRendered: !isLoading
-        }),
-        div({ datacy: 'rp-expanded', isRendered: expanded, style: styles.expandedData }, [
-          div({ datacy: 'research-purpose' }, [
-            span({ style: styles.researchPurposeTitle }, ['Research Use Statement (Narrative)']),
-            h(ResearchPurposeSummary, {darInfo}),
-            h(DataUseAlertBox, {translatedDataUse}),
-            !isEmpty(bucket) && h(CollectionSubmitVoteBox, {
-              question: 'Was the Research Use Statement (Narrative) accurately converted to a structured format?',
-              votes: currentUserVotes,
-              isFinal: false,
-              isDisabled: adminPage || readOnly || isEmpty(currentUserVotes),
-              isLoading,
-              adminPage,
-              bucketKey: bucket.key,
-              updateFinalVote,
-              key: bucket.key
-            }),
-            h(ChairVoteInfo, {dacVotes, isChair, isLoading, adminPage}),
-            h(MemberVoteSummary, {
-              title: adminPage ? 'DAC Member Votes' : (isChair ? 'My DAC Member\'s Votes (detail)' : 'Other DAC Member\'s Votes'),
-              isLoading,
-              dacVotes,
-              adminPage,
-              isChair
-            })
-          ]),
-        ]),
-      ]),
-    ])
-  ]);
+  return (
+    <div data-cy='rp-slab' style={styles.baseStyle}>
+      <div style={styles.slabTitle} id={convertLabelToKey(get('key')(bucket))}>
+        RUS (GA4GH DUO)
+      </div>
+      {isLoading && (
+        <div className='text-placeholder' style={{ height: '100px' }} />
+      )}
+
+      {
+        !isLoading && (
+          <div>
+            <div style={styles.collapsedData}>
+              {isLoading ? (
+                <SkeletonLoader/>
+              ) : (
+                <DataUseSummary translatedDataUse={translatedDataUse} />
+              )}
+              {!isLoading && <CollapseExpandLink expanded={expanded} setExpanded={setExpanded} />}
+              {expanded && (
+                <div data-cy='rp-expanded' style={styles.expandedData}>
+                  <div data-cy='research-purpose'>
+                    <span style={styles.researchPurposeTitle}>Research Use Statement (Narrative)</span>
+                    <ResearchPurposeSummary darInfo={darInfo} />
+                    <DataUseAlertBox translatedDataUse={translatedDataUse} />
+                    {!isEmpty(bucket) && (
+                      <CollectionSubmitVoteBox
+                        question='Was the Research Use Statement (Narrative) accurately converted to a structured format?'
+                        votes={currentUserVotes}
+                        isFinal={false}
+                        isDisabled={adminPage || readOnly || isEmpty(currentUserVotes)}
+                        isLoading={isLoading}
+                        adminPage={adminPage}
+                        bucketKey={bucket.key}
+                        updateFinalVote={updateFinalVote}
+                        key={bucket.key}
+                      />
+                    )}
+                    <ChairVoteInfo dacVotes={dacVotes} isChair={isChair} isLoading={isLoading} adminPage={adminPage} />
+                    <MemberVoteSummary
+                      title={adminPage ? 'DAC Member Votes' : isChair ? `My DAC Member's Votes (detail)` : `Other DAC Member's Votes`}
+                      isLoading={isLoading}
+                      dacVotes={dacVotes}
+                      adminPage={adminPage}
+                      isChair={isChair}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+    </div>
+  );
 }
