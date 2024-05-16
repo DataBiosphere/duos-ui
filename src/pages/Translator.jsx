@@ -115,7 +115,7 @@ export default function Translator() {
                 <Spinner />
               </div>
             )}
-            {(error!==undefined && error!==null) && (
+            {(error !== undefined && error !== null) && (
               <div>
                 There was an error running your request
                 <br />
