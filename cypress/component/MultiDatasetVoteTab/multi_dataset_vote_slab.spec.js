@@ -362,6 +362,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
   });
 
   it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function() {
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
