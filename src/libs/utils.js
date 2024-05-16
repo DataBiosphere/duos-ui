@@ -546,12 +546,12 @@ export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
   }
 };
 
-export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
+export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, id) => {
   let attributes;
   if (!disabled) {
-    attributes = {onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, key, id: key};
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, 'data-tip': dataTip, id};
   } else {
-    attributes = {style, disabled, 'data-tip': dataTip, key};
+    attributes = {style, disabled, 'data-tip': dataTip};
   }
   if (!isEmpty(dataTip)) {
     attributes['data-tip'] = dataTip;
