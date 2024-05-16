@@ -93,14 +93,10 @@ const highlightedWords = [
 ];
 
 const DataUseSummary = ({translatedDataUse}) => {
-  return (
-    <>
-      {flatMap(keys(translatedDataUse), key => {
-        const dataUses = translatedDataUse[key];
-        return <div key={key}>{<DataUsePills dataUses={dataUses} />}</div>;
-      })}
-    </>
-  );
+  return flatMap( key => {
+    const dataUses = translatedDataUse[key];
+    return <div key={key}>{DataUsePills(dataUses)}</div>;
+  })(keys(translatedDataUse));
 };
 
 const SkeletonLoader = () => {
@@ -172,7 +168,7 @@ export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
+  const {darInfo,bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote } = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
