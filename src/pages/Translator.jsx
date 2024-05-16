@@ -58,9 +58,9 @@ export default function Translator() {
   };
 
   return (
-    <div className="row">
-      <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div className="row"
+    <div className='row'>
+      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12'>
+        <div className='row'
           style={{
             backgroundColor: 'white',
             height: '350px',
@@ -70,13 +70,13 @@ export default function Translator() {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Header Background" />
-          <div className="flex-col" style={{ position: 'absolute', width: '100%' }}>
+          <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt='Header Background' />
+          <div className='flex-col' style={{ position: 'absolute', width: '100%' }}>
             <h1 style={homeTitle}>The DUO Translator</h1>
-            <label className="hidden-xs" style={homeBannerDescription}>
+            <label className='hidden-xs' style={homeBannerDescription}>
               Map your consent form to the GA4GH Data Use Ontology!
             </label>
-            <form className="flex-col" style={{ width: '100%' }}>
+            <form className='flex-col' style={{ width: '100%' }}>
               <textarea
                 rows={3}
                 style={{
@@ -89,8 +89,8 @@ export default function Translator() {
                 onChange={(e) => { setParagraph(e.target.value); }}
               />
               <button
-                className="button button-blue"
-                type="button"
+                className='button button-blue'
+                type='button'
                 onClick={submit}
                 style={{
                   fontSize: 20,
@@ -105,13 +105,13 @@ export default function Translator() {
         </div>
         {!isNil(results) && (
           <div style={{ padding: 20 }}>
-            <div className="row">
-              <div className="col-lg-12" style={{ backgroundColor: 'white' }}>
+            <div className='row'>
+              <div className='col-lg-12' style={{ backgroundColor: 'white' }}>
                 <h2>Translation Results</h2>
               </div>
             </div>
             {isLoading && (
-              <div className="flex-row" style={{ width: '100%', justifyContent: 'center' }}>
+              <div className='flex-row' style={{ width: '100%', justifyContent: 'center' }}>
                 <Spinner />
               </div>
             )}
@@ -123,14 +123,14 @@ export default function Translator() {
               </div>
             )}
             {(!isLoading && !error) && (
-              <div className="row no-margin">
+              <div className='row no-margin'>
                 {results && Object.keys(results).length === 0 ? (
                   <div>No results found</div>
                 ) : (
                   results && Object.keys(results).map(key => (
-                    <div key={`category-${key}`} className="col-md-4">
+                    <div key={`category-${key}`} className='col-md-4'>
                       <h3>{key}</h3>
-                      <ul className="search-result-list">
+                      <ul className='search-result-list'>
                         {results[key].map(searchResult => (
                           <li key={`category-${key}-result-${searchResult.key}`} style={{ marginBottom: 15 }}>
                             <div>{searchResult.title}</div>
