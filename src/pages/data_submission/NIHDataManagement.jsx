@@ -157,7 +157,7 @@ export const NIHDataManagement = (props) => {
                   />
                 </div>
               )}
-              <FormField // todo: other reason for request
+              <FormField
                 id='alternativeDataSharingPlanExplanation'
                 defaultValue={formData?.alternativeDataSharingPlanExplanation}
                 onChange={onChange}
