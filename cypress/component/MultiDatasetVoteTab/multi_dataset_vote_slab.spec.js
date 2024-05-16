@@ -277,7 +277,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    cy.get('[datacy=chair-vote-info]').should('not.exist');
+    cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function() {
@@ -294,7 +294,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    cy.get('[datacy=chair-vote-info]').should('not.exist');
+    cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function() {
@@ -311,7 +311,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    cy.get('[datacy=chair-vote-info]').should('exist');
+    cy.get('[data-cy=chair-vote-info]').should('exist');
   });
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function() {
