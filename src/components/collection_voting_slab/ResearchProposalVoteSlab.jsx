@@ -161,14 +161,14 @@ export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
     );
   }
 
-  return <div />;
+  return null;
 };
 
 export default function ResearchProposalVoteSlab(props) {
   const [expanded, setExpanded] = useState(false);
   const [currentUserVotes, setCurrentUserVotes] = useState([]);
   const [dacVotes, setDacVotes] = useState([]);
-  const {darInfo,bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote } = props;
+  const {darInfo, bucket, isChair, isLoading, readOnly, adminPage, updateFinalVote} = props;
   const translatedDataUse = !isNil(darInfo) ? DataUseTranslation.translateDarInfo(darInfo) : {};
   useEffect(() => {
     const user = Storage.getCurrentUser();
