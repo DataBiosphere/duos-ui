@@ -133,35 +133,30 @@ const ResearchPurposeSummary = ({darInfo}) => {
 };
 
 export const ChairVoteInfo = ({ dacVotes, isChair, adminPage = false }) => {
-
-  if (isChair && dacVotes.length > 0) {
-    return (
+  return (isChair && dacVotes.length > 0) && (
+    <div
+      style={styles.chairVoteInfo}
+      data-cy='chair-vote-info'
+    >
       <div
-        style={styles.chairVoteInfo}
-        data-cy='chair-vote-info'
+        style={{
+          backgroundColor: '#FFFFFF',
+          padding: '1% 0',
+          marginTop: '10%',
+        }}
       >
         <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            padding: '1% 0',
-            marginTop: '10%',
-          }}
+          style={{ fontSize: 17, color: '#333F52', fontFamily: 'Montserrat' }}
         >
-          <div
-            style={{ fontSize: 17, color: '#333F52', fontFamily: 'Montserrat' }}
-          >
-            {adminPage ? 'DAC Votes (summary)' : `My DAC's Votes (summary)`}
-          </div>
-          <VotesPieChart
-            votes={dacVotes}
-            styleOverride={{}}
-          />
+          {adminPage ? 'DAC Votes (summary)' : `My DAC's Votes (summary)`}
         </div>
+        <VotesPieChart
+          votes={dacVotes}
+          styleOverride={{}}
+        />
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 export default function ResearchProposalVoteSlab(props) {
