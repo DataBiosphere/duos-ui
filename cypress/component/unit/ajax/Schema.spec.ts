@@ -4,7 +4,7 @@ import {Schema} from '../../../../src/libs/ajax/Schema';
 
 describe('Schema', () => {
   beforeEach(() => {
-    cy.stub(Config, 'getApiUrl').resolves('http://localhost:3000/');
+    cy.stub(Config, 'getApiUrl').resolves(Cypress.env().baseUrl);
   });
   describe('Tests for /schemas/dataset-registration/v1', () => {
     it('Successfully GETs a dataset registration schema', () => {
