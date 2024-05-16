@@ -77,7 +77,6 @@ const controlLabelStyle = {
 
 const DatasetRegistration = (props) => {
   const [registrationState, setRegistrationState] = useState(getInitialState);
-
   const { datasetId } = props.match.params;
   const { push } = props.history;
 
@@ -426,9 +425,9 @@ const DatasetRegistration = (props) => {
           ...registrationState,
           showDialogSubmit: false
         });
-      } else {
+      }
+      else {
         let formData = registrationState.datasetData;
-        // Handle form submission
         let ds = formatFormData(formData);
         if (fp.isEmpty(registrationState.updateDataset)) {
           DataSet.postDatasetForm(ds).then(() => {
@@ -835,7 +834,7 @@ const DatasetRegistration = (props) => {
                       onBlur={handleChange}
                       disabled={!isUpdateDataset}
                       className={
-                        fp.isEmpty(registrationState.datasetData.researcher) && showValidationMessages
+                        (fp.isEmpty(registrationState.datasetData.researcher) && showValidationMessages)
                           ? 'form-control required-field-error'
                           : 'form-control'
                       }
@@ -877,8 +876,7 @@ const DatasetRegistration = (props) => {
                 <div className='form-group'>
                   <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                     <label className='control-label rp-title-question dataset-color'>
-                      1.3 Dataset Name*
-                      <span>Please provide a publicly displayable name for the dataset</span>
+                      1.3 Dataset Name* <span>Please provide a publicly displayable name for the dataset</span>
                     </label>
                   </div>
 
@@ -993,7 +991,7 @@ const DatasetRegistration = (props) => {
                       defaultValue={registrationState.datasetData.phenotype}
                       onBlur={handleChange}
                       className={(fp.isEmpty(registrationState.datasetData.phenotype) && showValidationMessages) ? 'form-control required-field-error' : 'form-control'}
-                      required
+                      required={true}
                     />
                     {(fp.isEmpty(registrationState.datasetData.phenotype) && showValidationMessages) && (
                       <span className='cancel-color required-field-error-span'>Required field</span>
@@ -1085,13 +1083,13 @@ const DatasetRegistration = (props) => {
                     </span>
                     <div style={{ marginLeft: '15px' }} className='row'>
                       {
-                        isTypeOfResearchInvalid && registrationState.showValidationMessages && (
+                        (isTypeOfResearchInvalid && registrationState.showValidationMessages) && (
                           <span
                             className='cancel-color required-field-error-span'
                           >
-                        One of the following fields is required.<br />
-                        Disease related studies require a disease selection.<br />
-                        Other studies require additional details.
+                           One of the following fields is required.<br />
+                           Disease related studies require a disease selection.<br />
+                           Other studies require additional details.
                           </span>
                         )
                       }
@@ -1174,7 +1172,7 @@ const DatasetRegistration = (props) => {
                     <div className='form-group'>
                       <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
                         <label className='control-label rp-title-question dataset-color'>
-                        2.2 Secondary Data Use Terms
+                           2.2 Secondary Data Use Terms
                           <span>Please select all applicable data use parameters.</span>
                         </label>
                       </div>
