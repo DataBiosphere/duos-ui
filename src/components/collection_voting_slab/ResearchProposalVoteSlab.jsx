@@ -93,10 +93,14 @@ const highlightedWords = [
 ];
 
 const DataUseSummary = ({translatedDataUse}) => {
-  return flatMap(key => {
-    const dataUses = translatedDataUse[key];
-    return <div key={key}>{<DataUsePills dataUses={dataUses} />}</div>;
-  })(keys(translatedDataUse));
+  return (
+    <>
+      {flatMap(keys(translatedDataUse), key => {
+        const dataUses = translatedDataUse[key];
+        return <div key={key}>{<DataUsePills dataUses={dataUses} />}</div>;
+      })}
+    </>
+  );
 };
 
 const SkeletonLoader = () => {
