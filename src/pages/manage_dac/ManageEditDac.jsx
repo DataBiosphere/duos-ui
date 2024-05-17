@@ -338,6 +338,11 @@ export default function ManageEditDac(props) {
         <button onClick={okHandler}>Save</button>
         <button onClick={closeHandler}>Cancel</button>
       </form>
+      {
+        state.error.show && <div>
+          <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+        </div>
+      }
     </div>
   );
 };
