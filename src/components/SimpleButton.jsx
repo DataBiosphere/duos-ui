@@ -26,6 +26,7 @@ export default function SimpleButton(props) {
   const { onClick, label, disabled, baseColor, additionalStyle, keyProp, hoverStyle = {}} = props;
   const backgroundColor = props.backgroundColor || baseColor || 'rgb(0, 96, 159)';
   const fontColor = props.fontColor || 'white';
+  const keyId = keyProp || `${label}-button`;
   const [style, setStyle] = useState({});
 
   useEffect(() => {
@@ -35,8 +36,6 @@ export default function SimpleButton(props) {
   const getDivAttributes = (disabled) => {
     const baseAttributes = {
       style,
-      key: keyProp || `${label}-button`,
-      id: keyProp || `${label}-button`,
       onClick: () => !disabled && onClick(),
       onMouseEnter: () =>
         !disabled && updateStyle({backgroundColor: hoverStyle.backgroundColor || backgroundColor, fontColor: hoverStyle.color || fontColor, additionalStyle, pointerBool: true, disabled, setStyle}),
@@ -47,7 +46,7 @@ export default function SimpleButton(props) {
   };
 
   return (
-    <button {...getDivAttributes(disabled)}>
+    <button key={keyId} id={keyId} {...getDivAttributes(disabled)}>
       {label}
     </button>
   );

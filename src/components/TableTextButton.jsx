@@ -28,6 +28,6 @@ export default function TableTextButton(props) {
   const style = setStyle(disabled, baseStyle, 'backgroundColor');
   const divAttributes = setDivAttributes(disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, keyProp);
   return (
-    <div {...divAttributes}>{label}</div>
+    <div key={keyProp} {...divAttributes}>{label}</div>
   );
 }
