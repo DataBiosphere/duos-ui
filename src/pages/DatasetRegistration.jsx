@@ -275,16 +275,12 @@ const DatasetRegistration = (props) => {
   const handleChange = (e) => {
     const field = e.target.name;
     const value = e.target.value;
-    setRegistrationState(prevState => ({
-      ...prevState,
-      datasetData: {
-        ...prevState.datasetData,
-        [field]: value
-      },
-      disableOkBtn: false,
-      problemSavingRequest: false,
-      submissionSuccess: false
-    }));
+    const prev = { ...registrationState };
+    prev.datasetData[field] = value;
+    prev.disableOkBtn = false;
+    prev.problemSavingRequest = false;
+    prev.submissionSuccess = false;
+    setRegistrationState(prev);
   };
 
   // same as handleChange, but adds call to validate dataset name and only affects state if a change has been made
@@ -292,16 +288,12 @@ const DatasetRegistration = (props) => {
     const value = e.target.value;
     if (registrationState.datasetData.datasetName !== value) {
       await validateDatasetName(value);
-      setRegistrationState(prevState => ({
-        ...prevState,
-        datasetData: {
-          ...prevState.datasetData,
-          datasetName: value
-        },
-        disableOkBtn: false,
-        problemSavingRequest: false,
-        submissionSuccess: false
-      }));
+      const prev = { ...registrationState };
+      prev.datasetData.datasetName = value;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
+      setRegistrationState(prev);
     }
   };
 
@@ -310,32 +302,24 @@ const DatasetRegistration = (props) => {
     const value = e.target.value.replace(/[^\d]/, '');
 
     if (value === '' || parseInt(value, 10) > -1) {
-      setRegistrationState(prevState => ({
-        ...prevState,
-        datasetData: {
-          ...prevState.datasetData,
-          [field]: value
-        },
-        disableOkBtn: false,
-        problemSavingRequest: false,
-        submissionSuccess: false
-      }));
+      const prev = { ...registrationState };
+      prev.datasetData[field] = value;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
+      setRegistrationState(prev);
     }
   };
 
   const handleCheckboxChange = (e) => {
     const field = e.target.name;
     const value = e.target.checked;
-    setRegistrationState(prevState => ({
-      ...prevState,
-      formData: {
-        ...prevState.formData,
-        [field]: value
-      },
-      disableOkBtn: false,
-      problemSavingRequest: false,
-      submissionSuccess: false
-    }));
+    const prev = { ...registrationState };
+    prev.formData[field] = value;
+    prev.disableOkBtn = false;
+    prev.problemSavingRequest = false;
+    prev.submissionSuccess = false;
+    setRegistrationState(prev);
   };
 
   const validateRequiredFields = (formData) => {
@@ -383,9 +367,9 @@ const DatasetRegistration = (props) => {
       let allValid = validateRequiredFields(prevState.datasetData);
       return {
         ...prevState,
-        showDialogSubmit: allValid ? true : false,
+        showDialogSubmit: allValid,
         problemLoadingUpdateDataset: false,
-        showValidationMessages: allValid ? false :true
+        showValidationMessages: !allValid
       };
     });
   };
@@ -780,6 +764,7 @@ const DatasetRegistration = (props) => {
       is updated, as it will be linked to your dataset for future correspondence
     </span>
   );
+
 
   return (
     <div className='container'>
