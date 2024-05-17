@@ -4,6 +4,8 @@ import {styles} from './ManageDacTable';
 import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
 import {Delete, Edit} from '@mui/icons-material';
+import { Link } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {
   return {
@@ -60,14 +62,14 @@ export function actionsCellData({dac, editDac, deleteDac, userRole}) {
 
   const actions = (
     <>
-      <TableIconButton
-        key='edit-dac-icon'
-        dataTip='Edit DAC'
-        onClick={() => editDac(dac)}
-        icon={Edit}
-        style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
-        hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
-      />
+      <div style={{ paddingTop: '5px' }}>
+        <Link
+          to={`/manage_edit_dac/${dac.dacId}`}
+          data-tip={`Edit ${dac.name}`}
+          className={'glyphicon glyphicon-pencil'}
+        >
+        </Link>
+      </div>
       {isAdmin && <TableIconButton
         key='delete-dac-icon'
         dataTip={(deleteDisabled?'All datasets assigned to this DAC must be reassigned before this can be deleted' :'Delete DAC')}

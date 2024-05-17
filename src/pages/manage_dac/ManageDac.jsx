@@ -11,12 +11,14 @@ import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import ManageEditDac from './ManageEditDac';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
 
-export const ManageDac = function ManageDac() {
+export const ManageDac = function ManageDac(props) {
 
+  const {history} = props;
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
   const [dacIDs, setDacIDs] = useState([]);
@@ -154,6 +156,7 @@ export const ManageDac = function ManageDac() {
         setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
+        history={history}
       />
       <ConfirmationModal
         showConfirmation={showConfirmationModal}
@@ -181,14 +184,14 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showDacModal && (
-        <AddDacModal
-          showModal={showDacModal}
-          isEditMode={isEditMode}
-          onOKRequest={okAddDacModal}
-          onCloseRequest={closeAddDacModal}
-          dac={selectedDac}
-          userRole={userRole}
-        />
+        <ManageEditDac
+        showModal={showDacModal}
+        isEditMode={isEditMode}
+        onOKRequest={okAddDacModal}
+        onCloseRequest={closeAddDacModal}
+        dac={selectedDac}
+        userRole={userRole}
+      />
       )}
     </div>
   );
