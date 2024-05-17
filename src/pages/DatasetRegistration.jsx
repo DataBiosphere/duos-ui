@@ -17,6 +17,7 @@ import addDatasetIcon from '../images/icon_dataset_add.png';
 import { searchOntologies } from '../libs/utils';
 import { OntologyService } from '../libs/ontologyService';
 
+// TODO: Deprecated - remove this component when all datasets have been converted to studies
 const getInitialState = () => {
   return {
     dacList: [],
@@ -1192,177 +1193,177 @@ const DatasetRegistration = (props) => {
                           <span className='access-color'>No methods development or validation studies (NMDS)</span>
                         </label>
                       </div>
+                    </div>
 
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={genetic}
-                            onChange={handleCheckboxChange}
-                            id='checkGenetic'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='genetic'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkGenetic'>
-                            <span className='access-color'>Genetic Studies Only (GSO)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={publication}
-                            onChange={handleCheckboxChange}
-                            id='checkPublication'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='publication'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkPublication'>
-                            <span className='access-color'>Publication Required (PUB)</span>
-                          </label>
-                        </div>
-                      </div>
-
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={collaboration}
-                            onChange={handleCheckboxChange}
-                            id='checkCollaboration'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='collaboration'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkCollaboration'>
-                            <span className='access-color'>Collaboration Required (COL)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={ethics}
-                            onChange={handleCheckboxChange}
-                            id='checkEthics'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='ethics'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkEthics'>
-                            <span className='access-color'>Ethics Approval Required (IRB)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={geographic}
-                            onChange={handleCheckboxChange}
-                            id='checkGeographic'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='geographic'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkGeographic'>
-                            <span className='access-color'>Geographic Restriction (GS-)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={moratorium}
-                            onChange={handleCheckboxChange}
-                            id='checkMoratorium'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='moratorium'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkMoratorium'>
-                            <span className='access-color'>Publication Moratorium (MOR)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {
-                        (generalUse || npoa) && (
-                          <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                            <div className='checkbox'>
-                              <input
-                                checked={npoa}
-                                onChange={handleCheckboxChange}
-                                id='checkNpoa'
-                                type='checkbox'
-                                className='checkbox-inline rp-checkbox'
-                                name='npoa'
-                                disabled={isUpdateDataset}
-                              />
-                              <label className='regular-checkbox rp-choice-questions' htmlFor='checkNpoa'>
-                                <span className='access-color'>No Populations Origins or Ancestry Research (NPOA)</span>
-                              </label>
-                            </div>
-                          </div>
-                        )
-                      }
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={nonProfit}
-                            onChange={handleCheckboxChange}
-                            id='checkNonProfit'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='nonProfit'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkNonProfit'>
-                            <span className='access-color'>Non-Profit Use Only (NPU)</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <div className='checkbox'>
-                          <input
-                            checked={secondaryOther}
-                            onChange={handleCheckboxChange}
-                            id='checkSecondaryOther'
-                            type='checkbox'
-                            className='checkbox-inline rp-checkbox'
-                            name='secondaryOther'
-                            disabled={isUpdateDataset}
-                          />
-                          <label className='regular-checkbox rp-choice-questions' htmlFor='checkSecondaryOther'>
-                            <span className='access-color'>Other Secondary Use Terms:</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
-                        <textarea
-                          defaultValue={secondaryOtherText}
-                          onBlur={(e) => setOtherText(e, 'secondary')}
-                          name='secondaryOtherText'
-                          id='inputSecondaryOtherText'
-                          className='form-control'
-                          rows='6'
-                          required={false}
-                          placeholder='Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.'
-                          disabled={isUpdateDataset || !secondaryOther}
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={genetic}
+                          onChange={handleCheckboxChange}
+                          id='checkGenetic'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='genetic'
+                          disabled={isUpdateDataset}
                         />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkGenetic'>
+                          <span className='access-color'>Genetic Studies Only (GSO)</span>
+                        </label>
                       </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={publication}
+                          onChange={handleCheckboxChange}
+                          id='checkPublication'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='publication'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkPublication'>
+                          <span className='access-color'>Publication Required (PUB)</span>
+                        </label>
+                      </div>
+                    </div>
+
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={collaboration}
+                          onChange={handleCheckboxChange}
+                          id='checkCollaboration'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='collaboration'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkCollaboration'>
+                          <span className='access-color'>Collaboration Required (COL)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={ethics}
+                          onChange={handleCheckboxChange}
+                          id='checkEthics'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='ethics'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkEthics'>
+                          <span className='access-color'>Ethics Approval Required (IRB)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={geographic}
+                          onChange={handleCheckboxChange}
+                          id='checkGeographic'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='geographic'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkGeographic'>
+                          <span className='access-color'>Geographic Restriction (GS-)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={moratorium}
+                          onChange={handleCheckboxChange}
+                          id='checkMoratorium'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='moratorium'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkMoratorium'>
+                          <span className='access-color'>Publication Moratorium (MOR)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {
+                      (generalUse || npoa) && (
+                        <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                          <div className='checkbox'>
+                            <input
+                              checked={npoa}
+                              onChange={handleCheckboxChange}
+                              id='checkNpoa'
+                              type='checkbox'
+                              className='checkbox-inline rp-checkbox'
+                              name='npoa'
+                              disabled={isUpdateDataset}
+                            />
+                            <label className='regular-checkbox rp-choice-questions' htmlFor='checkNpoa'>
+                              <span className='access-color'>No Populations Origins or Ancestry Research (NPOA)</span>
+                            </label>
+                          </div>
+                        </div>
+                      )
+                    }
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={nonProfit}
+                          onChange={handleCheckboxChange}
+                          id='checkNonProfit'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='nonProfit'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkNonProfit'>
+                          <span className='access-color'>Non-Profit Use Only (NPU)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <div className='checkbox'>
+                        <input
+                          checked={secondaryOther}
+                          onChange={handleCheckboxChange}
+                          id='checkSecondaryOther'
+                          type='checkbox'
+                          className='checkbox-inline rp-checkbox'
+                          name='secondaryOther'
+                          disabled={isUpdateDataset}
+                        />
+                        <label className='regular-checkbox rp-choice-questions' htmlFor='checkSecondaryOther'>
+                          <span className='access-color'>Other Secondary Use Terms:</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'>
+                      <textarea
+                        defaultValue={secondaryOtherText}
+                        onBlur={(e) => setOtherText(e, 'secondary')}
+                        name='secondaryOtherText'
+                        id='inputSecondaryOtherText'
+                        className='form-control'
+                        rows='6'
+                        required={false}
+                        placeholder='Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.'
+                        disabled={isUpdateDataset || !secondaryOther}
+                      />
                     </div>
                   </span>
                 </div>
