@@ -26,15 +26,7 @@ export default function ManageResearcherDAAs() {
         const daaList = await DAA.getDaas();
         const dacList = await DAC.list();
 
-        // the construction of this list is currently a work-around because our endpoint in the backend
-        // does not currently populate the DAA IDs on the each researcher's libary card
-        const researcherObjectList = await Promise.all(
-          researcherList.map(async (researcher) => {
-            return await User.getById(researcher.userId);
-          })
-        );
-
-        setResearchers(researcherObjectList);
+        setResearchers(researcherList);
         setSigningOfficial(soUser);
         setDaas(daaList);
         setDacs(dacList);
