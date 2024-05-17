@@ -277,7 +277,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    cy.get('[datacy=chair-vote-info]').should('not.exist');
+    cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
 
   it('Does not render pie chart or table when current user is chairperson but no votes for dac in this bucket', function() {
@@ -294,7 +294,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 100});
 
-    cy.get('[datacy=chair-vote-info]').should('not.exist');
+    cy.get('[data-cy=chair-vote-info]').should('not.exist');
   });
 
   it('Renders a pie chart with votes for dac of user when current user is chairperson', function() {
@@ -311,10 +311,12 @@ describe('MultiDatasetVoteSlab - Tests', function() {
     );
     cy.stub(Storage, 'getCurrentUser').returns({userId: 300});
 
-    cy.get('[datacy=chair-vote-info]').should('exist');
+    cy.get('[data-cy=chair-vote-info]').should('exist');
   });
 
   it('Does not render rows of vote summary table for votes outside of dac for current user', function() {
+    // workaround so that notifications don't overlap the clicked buttons and cause an error
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -338,6 +340,8 @@ describe('MultiDatasetVoteSlab - Tests', function() {
   });
 
   it('Renders collapsed row of vote summary table when the same user has same vote for multiple elections', function() {
+    // workaround so that notifications don't overlap the clicked buttons and cause an error
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}
@@ -358,6 +362,7 @@ describe('MultiDatasetVoteSlab - Tests', function() {
   });
 
   it('Renders collapsed row with appended rationales when the same user has same vote but different rationales for multiple elections', function() {
+    cy.viewport(1024, 768);
     mount(
       <MultiDatasetVoteSlab
         title={'GROUP 1'}

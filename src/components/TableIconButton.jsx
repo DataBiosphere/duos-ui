@@ -48,7 +48,7 @@ export default function TableIconButton(props) {
   //NOTE: span wrapper is needed for svg child elements due to flaky behavior onMouseEnter and onMouseLeave
   // https://github.com/facebook/react/issues/4492 --> NOTE: though the issue is from the React repo, the bug is tied to browser specs, NOT React
   return (
-    <span {...attributes}>
+    <span key={keyProp} {...attributes}>
       {isRendered && !isNil(Icon) && (
         <Icon style={appliedStyle} className={classes.root} />
       )}
