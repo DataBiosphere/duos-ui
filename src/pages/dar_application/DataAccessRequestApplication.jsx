@@ -195,7 +195,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(datasets);
     });
     if (!props.readOnlyMode) {
-      const updatedTabs = [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }];
+      const updatedTabs = checkEnv(envGroups.DEV) ? [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }] : [...ApplicationTabs, { name: 'Data Use Agreement' }];
       setApplicationTabs(updatedTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);
