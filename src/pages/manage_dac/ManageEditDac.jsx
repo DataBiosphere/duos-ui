@@ -32,7 +32,6 @@ export default function ManageEditDac(props) {
     memberIdsToRemove: [],
     searchInputChanged: false
   });
-  const {dacId} = props.match.params;
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,10 +50,10 @@ export default function ManageEditDac(props) {
 
   const okHandler = async () => {
     let currentDac = state.dac;
-    console.log(currentDac);
+    // console.log(currentDac);
     if (state.dirtyFlag) {
-        // TODO: removed the admin check .. not sure how to get the user role if not passed in as prop
-        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      // TODO: removed the admin check .. not sure how to get the user role if not passed in as prop
+      await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
 
       // Order here is important. Since users cannot have multiple roles in the
       // same DAC, we have to make sure we remove users before re-adding any
@@ -187,7 +186,7 @@ export default function ManageEditDac(props) {
     setState(prev => {
       let newDac = Object.assign({}, prev.dac);
       newDac[name] = value;
-      console.log(newDac);
+    //   console.log(newDac);
       return {
         ...prev,
         dac: newDac,
@@ -234,137 +233,136 @@ export default function ManageEditDac(props) {
   };
 
   return (
-    isLoading ? 
-    <Spinner/> :
-    <div className='container container-wide'>
-      <div className='row no-margin'>
-      <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
-        <Link
-            id="link_manage_dac"
-            to="/manage_dac"
-            className="navbar-brand"
-            style={{paddingRight: '16px'}}
-        >
-             <img id="back-arrow-icon" src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}} />
-        </Link>
-        <div style={Styles.ICON_CONTAINER}>
-          <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG} />
-        </div>
-        <div style={Styles.HEADER_CONTAINER}>
-          <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>Manage My Data Access Committee</div>
-          <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{state.dac.name}</div>
-        </div>
-        </div>
-        <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
-        <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
-            <div className="form-group first-form-group">
-            <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Name</label>
-            <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <input
-                id="txt_dacName"
-                type="text"
-                defaultValue={state.dac.name}
-                onChange={handleChange}
-                name="name"
-                className="form-control col-lg-12 vote-input"
-                required={true}
-                disabled={props.userRole === CHAIRPERSON}
-                />
+    isLoading ?
+      <Spinner/> :
+      <div className='container container-wide'>
+        <div className='row no-margin'>
+          <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+            <Link
+              id="link_manage_dac"
+              to="/manage_dac"
+              className="navbar-brand"
+              style={{paddingRight: '16px'}}
+            >
+              <img id="back-arrow-icon" src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}} />
+            </Link>
+            <div style={Styles.ICON_CONTAINER}>
+              <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG} />
             </div>
+            <div style={Styles.HEADER_CONTAINER}>
+              <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>Manage My Data Access Committee</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{state.dac.name}</div>
             </div>
-
-            <div className="form-group">
-            <label id="lbl_dacDescription" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Description</label>
-            <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <textarea
-                id="txt_dacDescription"
-                defaultValue={state.dac.description}
-                onChange={handleChange}
-                name="description"
-                className="form-control col-lg-12 vote-input"
-                required={true}
-                disabled={props.userRole === CHAIRPERSON}
-                />
-            </div>
-            </div>
-
-            <div className="form-group first-form-group">
-            <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Email</label>
-            <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <input
-                id="txt_dacEmail"
-                type="text"
-                defaultValue={state.dac.email}
-                onChange={handleChange}
-                name="email"
-                className="form-control col-lg-12 vote-input"
-                required={true}
-                disabled={props.userRole === CHAIRPERSON}
-                />
-            </div>
-            </div>
-            {
-            (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
-                <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
+          </div>
+          <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
+            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
+              <div className="form-group first-form-group">
+                <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Name</label>
                 <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <DacUsers
-                    dac={state.dac}
-                    removeButton={true}
-                    removeHandler={removeDacMember}
-                />
+                  <input
+                    id="txt_dacName"
+                    type="text"
+                    defaultValue={state.dac.name}
+                    onChange={handleChange}
+                    name="name"
+                    className="form-control col-lg-12 vote-input"
+                    required={true}
+                    disabled={props.userRole === CHAIRPERSON}
+                  />
                 </div>
-            </div>
+              </div>
+
+              <div className="form-group">
+                <label id="lbl_dacDescription" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Description</label>
+                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <textarea
+                    id="txt_dacDescription"
+                    defaultValue={state.dac.description}
+                    onChange={handleChange}
+                    name="description"
+                    className="form-control col-lg-12 vote-input"
+                    required={true}
+                    disabled={props.userRole === CHAIRPERSON}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group first-form-group">
+                <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Email</label>
+                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <input
+                    id="txt_dacEmail"
+                    type="text"
+                    defaultValue={state.dac.email}
+                    onChange={handleChange}
+                    name="email"
+                    className="form-control col-lg-12 vote-input"
+                    required={true}
+                    disabled={props.userRole === CHAIRPERSON}
+                  />
+                </div>
+              </div>
+              {
+                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
+                  <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
+                  <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                    <DacUsers
+                      dac={state.dac}
+                      removeButton={true}
+                      removeHandler={removeDacMember}
+                    />
+                  </div>
+                </div>
+              }
+
+              <div className="form-group">
+                <label id="lbl_dacChair" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Chairperson(s)</label>
+                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <AsyncSelect
+                    id="sel_dacChair"
+                    isDisabled={false}
+                    isMulti
+                    loadOptions={(query, callback) => chairSearch(query, callback)}
+                    onChange={(option) => onChairSearchChange(option)}
+                    onInputChange={() => onSearchInputChanged()}
+                    onMenuClose={() => onSearchMenuClosed()}
+                    noOptionsMessage={() => 'Select a DUOS User...'}
+                    value={state.chairsSelectedOptions}
+                    classNamePrefix="select"
+                    placeholder="Select a DUOS User..."
+                    className="select-autocomplete"
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label id="lbl_dacMember" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Member(s)</label>
+                <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <AsyncSelect
+                    id="sel_dacMember"
+                    isDisabled={false}
+                    isMulti={true}
+                    loadOptions={(query, callback) => memberSearch(query, callback)}
+                    onChange={(option) => onMemberSearchChange(option)}
+                    onInputChange={() => onSearchInputChanged()}
+                    onMenuClose={() => onSearchMenuClosed()}
+                    noOptionsMessage={() => 'Select a DUOS User...'}
+                    value={state.membersSelectedOptions}
+                    classNamePrefix="select"
+                    placeholder="Select a DUOS User..."
+                    className="select-autocomplete"
+                  />
+                </div>
+              </div>
+              <button onClick={okHandler}>Save</button>
+              <button onClick={closeHandler}>Cancel</button>
+            </form>
+            {
+              state.error.show && <div>
+                <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+              </div>
             }
-
-            <div className="form-group">
-            <label id="lbl_dacChair" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Chairperson(s)</label>
-            <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <AsyncSelect
-                id="sel_dacChair"
-                isDisabled={false}
-                isMulti
-                loadOptions={(query, callback) => chairSearch(query, callback)}
-                onChange={(option) => onChairSearchChange(option)}
-                onInputChange={() => onSearchInputChanged()}
-                onMenuClose={() => onSearchMenuClosed()}
-                noOptionsMessage={() => 'Select a DUOS User...'}
-                value={state.chairsSelectedOptions}
-                classNamePrefix="select"
-                placeholder="Select a DUOS User..."
-                className="select-autocomplete"
-                />
-            </div>
-            </div>
-
-            <div className="form-group">
-            <label id="lbl_dacMember" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Member(s)</label>
-            <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                <AsyncSelect
-                id="sel_dacMember"
-                isDisabled={false}
-                isMulti={true}
-                loadOptions={(query, callback) => memberSearch(query, callback)}
-                onChange={(option) => onMemberSearchChange(option)}
-                onInputChange={() => onSearchInputChanged()}
-                onMenuClose={() => onSearchMenuClosed()}
-                noOptionsMessage={() => 'Select a DUOS User...'}
-                value={state.membersSelectedOptions}
-                classNamePrefix="select"
-                placeholder="Select a DUOS User..."
-                className="select-autocomplete"
-                />
-            </div>
-            </div>
-            <button onClick={okHandler}>Save</button>
-            <button onClick={closeHandler}>Cancel</button>
-        </form>
-        {
-            state.error.show && <div>
-            <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
-            </div>
-        }
+          </div>
         </div>
       </div>
-    </div>
   );
 }

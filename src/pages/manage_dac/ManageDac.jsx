@@ -7,7 +7,6 @@ import { DAC } from '../../libs/ajax/DAC';
 import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
-import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
@@ -16,9 +15,8 @@ import ManageEditDac from './ManageEditDac';
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
 
-export const ManageDac = function ManageDac(props) {
+export const ManageDac = function ManageDac() {
 
-  const {history} = props;
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
   const [dacIDs, setDacIDs] = useState([]);
@@ -149,14 +147,12 @@ export const ManageDac = function ManageDac(props) {
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDacModal={setShowDacModal}
         setShowDatasetsModal={setShowDatasetsModal}
         setShowMembersModal={setShowMembersModal}
         setShowConfirmationModal={setShowConfirmationModal}
         setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
-        history={history}
       />
       <ConfirmationModal
         showConfirmation={showConfirmationModal}
@@ -185,13 +181,13 @@ export const ManageDac = function ManageDac(props) {
       )}
       {showDacModal && (
         <ManageEditDac
-        showModal={showDacModal}
-        isEditMode={isEditMode}
-        onOKRequest={okAddDacModal}
-        onCloseRequest={closeAddDacModal}
-        dac={selectedDac}
-        userRole={userRole}
-      />
+          showModal={showDacModal}
+          isEditMode={isEditMode}
+          onOKRequest={okAddDacModal}
+          onCloseRequest={closeAddDacModal}
+          dac={selectedDac}
+          userRole={userRole}
+        />
       )}
     </div>
   );

@@ -145,21 +145,18 @@ export const ManageDacTable = function ManageDacTable(props) {
     isLoading,
     dacs,
     userRole,
-    setShowDacModal,
     setShowDatasetsModal,
     setShowMembersModal,
     setShowConfirmationModal,
     setIsEditMode,
     setSelectedDac,
-    setSelectedDatasets,
-    history
+    setSelectedDatasets
   } = props;
 
   const editDac = useCallback((selectedDac) => {
-    setShowDacModal(true);
     setSelectedDac(selectedDac);
     setIsEditMode(true);
-  }, [setSelectedDac, setIsEditMode, history]);
+  }, [setSelectedDac, setIsEditMode]);
 
   const deleteDac = useCallback((selectedDac) => {
     setShowConfirmationModal(true);
