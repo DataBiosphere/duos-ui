@@ -33,11 +33,12 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
+  const dacId = props.match.params.dacId;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        state.dac = await DAC.get(props.match.params.dacId);
+        state.dac = await DAC.get(dacId);
         setState(prev => ({ ...prev, dac: state.dac }));
       }
       catch(e) {
@@ -46,7 +47,7 @@ export default function ManageEditDac(props) {
     };
     fetchData();
     setIsLoading(false);
-  }, [props.match.params]);
+  }, []);
 
   const okHandler = async () => {
     let currentDac = state.dac;
@@ -72,6 +73,7 @@ export default function ManageEditDac(props) {
         handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.');
       }
     } else {
+      console.log('SUCCESS!');
       closeHandler();
     }
   };
@@ -353,8 +355,26 @@ export default function ManageEditDac(props) {
                   />
                 </div>
               </div>
-              <button onClick={okHandler}>Save</button>
-              <button onClick={closeHandler}>Cancel</button>
+              <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px'}}>
+                <button
+                  id='btn_save'
+                  onClick={okHandler}
+                  className='f-left btn-primary common-background'
+                >
+                    Save
+                </button>
+                <div style={{ marginLeft: '40px' }}>
+                  <button
+                    id='btn_cancel'
+                    onClick={closeHandler}
+                    className='f-left btn-secondary'
+                  >
+                   Cancel
+                  </button>
+                </div>
+              </div>
+              {/* <button onClick={okHandler}>Save</button>
+              <button onClick={closeHandler}>Cancel</button> */}
             </form>
             {
               state.error.show && <div>
