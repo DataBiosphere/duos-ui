@@ -3,9 +3,9 @@ import {isNil, isEmpty} from 'lodash/fp';
 import {styles} from './ManageDacTable';
 import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
-import {Delete, Edit} from '@mui/icons-material';
+import {Delete} from '@mui/icons-material';
 import { Link } from 'react-router-dom';
-import ReactTooltip from 'react-tooltip';
+import editPencilIcon from '../../images/edit_pencil.svg';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {
   return {
@@ -56,7 +56,7 @@ export function datasetsCellData({dac, viewDatasets, label='dac-datasets'}) {
 }
 
 
-export function actionsCellData({dac, editDac, deleteDac, userRole}) {
+export function actionsCellData({dac, deleteDac, userRole}) {
   const isAdmin = (userRole === 'Admin');
   const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets));
 
@@ -66,8 +66,8 @@ export function actionsCellData({dac, editDac, deleteDac, userRole}) {
         <Link
           to={`/manage_edit_dac/${dac.dacId}`}
           data-tip={`Edit ${dac.name}`}
-          className={'glyphicon glyphicon-pencil'}
         >
+          <img id="edit-pencil-icon" src={editPencilIcon}/>
         </Link>
       </div>
       {isAdmin && <TableIconButton
