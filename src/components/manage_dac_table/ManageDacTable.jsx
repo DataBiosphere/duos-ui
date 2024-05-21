@@ -145,6 +145,7 @@ export const ManageDacTable = function ManageDacTable(props) {
     isLoading,
     dacs,
     userRole,
+    setShowEditPage,
     setShowDatasetsModal,
     setShowMembersModal,
     setShowConfirmationModal,
@@ -154,6 +155,7 @@ export const ManageDacTable = function ManageDacTable(props) {
   } = props;
 
   const editDac = useCallback((selectedDac) => {
+    setShowEditPage(true);
     setSelectedDac(selectedDac);
     setIsEditMode(true);
   }, [setSelectedDac, setIsEditMode]);
