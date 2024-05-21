@@ -16,14 +16,12 @@ import { Styles } from '../../libs/theme';
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
-const ADMIN = 'Admin';
 
 export default function ManageEditDac(props) {
   const [state, setState] = useState({
-    isEditMode: props.isEditMode,
     error: Models.error,
     dirtyFlag: false,
-    dac: props.isEditMode ? props.dac : Models.dac,
+    dac: Models.dac,
     chairsSelectedOptions: [],
     chairIdsToAdd: [],
     chairIdsToRemove: [],
@@ -38,8 +36,8 @@ export default function ManageEditDac(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        state.dac = await DAC.get(dacId);
-        setState(prev => ({ ...prev, dac: state.dac }));
+        const fetchedDac = await DAC.get(dacId);
+        setState(prev => ({ ...prev, dac: fetchedDac }));
       }
       catch(e) {
         Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
@@ -47,7 +45,7 @@ export default function ManageEditDac(props) {
     };
     fetchData();
     setIsLoading(false);
-  }, []);
+  }, [dacId, setState]);
 
   const okHandler = async (event) => {
     event.preventDefault();
