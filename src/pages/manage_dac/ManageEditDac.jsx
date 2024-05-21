@@ -49,9 +49,10 @@ export default function ManageEditDac(props) {
     setIsLoading(false);
   }, []);
 
-  const okHandler = async () => {
+  const okHandler = async (event) => {
+    event.preventDefault();
+
     let currentDac = state.dac;
-    // console.log(currentDac);
     if (state.dirtyFlag) {
       // TODO: removed the admin check .. not sure how to get the user role if not passed in as prop
       await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
@@ -71,9 +72,10 @@ export default function ManageEditDac(props) {
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200');
       if (!ld.isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.');
+      } else {
+        closeHandler();
       }
     } else {
-      console.log('SUCCESS!');
       closeHandler();
     }
   };
@@ -188,7 +190,6 @@ export default function ManageEditDac(props) {
     setState(prev => {
       let newDac = Object.assign({}, prev.dac);
       newDac[name] = value;
-    //   console.log(newDac);
       return {
         ...prev,
         dac: newDac,

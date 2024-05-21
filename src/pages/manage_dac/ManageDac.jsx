@@ -194,13 +194,7 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showEditPage && (
-        <ManageEditDac
-          isEditMode={isEditMode}
-          onOKRequest={okAddDacModal}
-          onCloseRequest={closeAddDacModal}
-          dac={selectedDac}
-          userRole={userRole}
-        />
+        <ManageEditDac/>
       )}
     </div>
   );
