@@ -53,14 +53,7 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
-  // the construction of this list is currently a work-around because our endpoint in the backend
-  // does not currently populate the DAA IDs on the each researcher's libary card
-  const researcherObjectList = await Promise.all(
-    researcherList.map(async (researcher) => {
-      return await User.getById(researcher.userId);
-    })
-  );
-  setResearchers(researcherObjectList);
+  setResearchers(researcherList);
 };
 
 const displayNameCell = (displayName, email, id, daas, setResearchers) => {
