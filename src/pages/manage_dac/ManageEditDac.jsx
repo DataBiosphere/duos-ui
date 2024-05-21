@@ -372,8 +372,6 @@ export default function ManageEditDac(props) {
                   </button>
                 </div>
               </div>
-              {/* <button onClick={okHandler}>Save</button>
-              <button onClick={closeHandler}>Cancel</button> */}
             </form>
             {
               state.error.show && <div>

@@ -4,7 +4,7 @@ import {styles} from './ManageDacTable';
 import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
 import {Delete} from '@mui/icons-material';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import editPencilIcon from '../../images/edit_pencil.svg';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {

@@ -158,7 +158,7 @@ export const ManageDacTable = function ManageDacTable(props) {
     setShowEditPage(true);
     setSelectedDac(selectedDac);
     setIsEditMode(true);
-  }, [setSelectedDac, setIsEditMode]);
+  }, [setShowEditPage, setSelectedDac, setIsEditMode]);
 
   const deleteDac = useCallback((selectedDac) => {
     setShowConfirmationModal(true);
