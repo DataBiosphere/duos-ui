@@ -5,6 +5,7 @@ import { DAC } from '../../libs/ajax/DAC';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
+import {FormField, FormFieldTypes} from '../../components/forms/forms';
 import { Link } from 'react-router-dom';
 import { DacUsers } from './DacUsers';
 import { Notifications } from '../../libs/utils';
@@ -12,6 +13,7 @@ import editDACIcon from '../../images/dac_icon.svg';
 import backArrowIcon from '../../images/back_arrow.svg';
 import { Spinner } from '../../components/Spinner';
 import { Styles } from '../../libs/theme';
+import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
@@ -31,7 +33,16 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [uploadDAA, setUploadDaa] = useState(false);
   const dacId = props.match.params.dacId;
+
+  const handleDUOSDAA = (event) => {
+    setUploadDaa(!event.target.checked);
+  };
+
+  const handleUploadDAA = (event) => {
+    setUploadDaa(event.target.checked);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -255,129 +266,192 @@ export default function ManageEditDac(props) {
               <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{state.dac.name}</div>
             </div>
           </div>
-          <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
-            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
-              <div className="form-group first-form-group">
-                <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Name</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                  <input
-                    id="txt_dacName"
-                    type="text"
-                    defaultValue={state.dac.name}
-                    onChange={handleChange}
-                    name="name"
-                    className="form-control col-lg-12 vote-input"
-                    required={true}
-                    disabled={props.userRole === CHAIRPERSON}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label id="lbl_dacDescription" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Description</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                  <textarea
-                    id="txt_dacDescription"
-                    defaultValue={state.dac.description}
-                    onChange={handleChange}
-                    name="description"
-                    className="form-control col-lg-12 vote-input"
-                    required={true}
-                    disabled={props.userRole === CHAIRPERSON}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group first-form-group">
-                <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Email</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                  <input
-                    id="txt_dacEmail"
-                    type="text"
-                    defaultValue={state.dac.email}
-                    onChange={handleChange}
-                    name="email"
-                    className="form-control col-lg-12 vote-input"
-                    required={true}
-                    disabled={props.userRole === CHAIRPERSON}
-                  />
-                </div>
-              </div>
-              {
-                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
-                  <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
-                  <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                    <DacUsers
-                      dac={state.dac}
-                      removeButton={true}
-                      removeHandler={removeDacMember}
-                    />
+          <hr/>
+          <div>
+            <div className='col-lg-6'> 
+              <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
+                <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
+                  <div className="form-group first-form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                    <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Name</label>
+                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                      <input
+                        id="txt_dacName"
+                        type="text"
+                        defaultValue={state.dac.name}
+                        onChange={handleChange}
+                        name="name"
+                        className="form-control col-lg-12 vote-input"
+                        required={true}
+                        disabled={props.userRole === CHAIRPERSON}
+                      />
+                    </div>
                   </div>
-                </div>
-              }
 
-              <div className="form-group">
-                <label id="lbl_dacChair" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Chairperson(s)</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                  <AsyncSelect
-                    id="sel_dacChair"
-                    isDisabled={false}
-                    isMulti
-                    loadOptions={(query, callback) => chairSearch(query, callback)}
-                    onChange={(option) => onChairSearchChange(option)}
-                    onInputChange={() => onSearchInputChanged()}
-                    onMenuClose={() => onSearchMenuClosed()}
-                    noOptionsMessage={() => 'Select a DUOS User...'}
-                    value={state.chairsSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
-                  />
-                </div>
+                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                    <label id="lbl_dacDescription" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Description</label>
+                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                      <textarea
+                        id="txt_dacDescription"
+                        defaultValue={state.dac.description}
+                        onChange={handleChange}
+                        name="description"
+                        className="form-control col-lg-12 vote-input"
+                        required={true}
+                        disabled={props.userRole === CHAIRPERSON}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group first-form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                    <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Email</label>
+                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                      <input
+                        id="txt_dacEmail"
+                        type="text"
+                        defaultValue={state.dac.email}
+                        onChange={handleChange}
+                        name="email"
+                        className="form-control col-lg-12 vote-input"
+                        required={true}
+                        disabled={props.userRole === CHAIRPERSON}
+                      />
+                    </div>
+                  </div>
+                  {
+                    (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                      <label id="lbl_dacMembers" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Members</label>
+                      <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                        <DacUsers
+                          dac={state.dac}
+                          removeButton={true}
+                          removeHandler={removeDacMember}
+                        />
+                      </div>
+                    </div>
+                  }
+
+                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                    <label id="lbl_dacChair" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>Add Chairperson(s)</label>
+                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                      <AsyncSelect
+                        id="sel_dacChair"
+                        isDisabled={false}
+                        isMulti
+                        loadOptions={(query, callback) => chairSearch(query, callback)}
+                        onChange={(option) => onChairSearchChange(option)}
+                        onInputChange={() => onSearchInputChanged()}
+                        onMenuClose={() => onSearchMenuClosed()}
+                        noOptionsMessage={() => 'Select a DUOS User...'}
+                        value={state.chairsSelectedOptions}
+                        classNamePrefix="select"
+                        placeholder="Select a DUOS User..."
+                        className="select-autocomplete"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
+                    <label id="lbl_dacMember" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>Add Member(s)</label>
+                    <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                      <AsyncSelect
+                        id="sel_dacMember"
+                        isDisabled={false}
+                        isMulti={true}
+                        loadOptions={(query, callback) => memberSearch(query, callback)}
+                        onChange={(option) => onMemberSearchChange(option)}
+                        onInputChange={() => onSearchInputChanged()}
+                        onMenuClose={() => onSearchMenuClosed()}
+                        noOptionsMessage={() => 'Select a DUOS User...'}
+                        value={state.membersSelectedOptions}
+                        classNamePrefix="select"
+                        placeholder="Select a DUOS User..."
+                        className="select-autocomplete"
+                      />
+                    </div>
+                  </div>
+                  <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px'}}>
+                    <button
+                      id='btn_save'
+                      onClick={okHandler}
+                      className='f-left btn-primary common-background'
+                    >
+                        Save
+                    </button>
+                    <div style={{ marginLeft: '40px' }}>
+                      <button
+                        id='btn_cancel'
+                        onClick={closeHandler}
+                        className='f-left btn-secondary'
+                      >
+                      Cancel
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                {
+                  state.error.show && <div>
+                    <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                  </div>
+                }
               </div>
-              <div className="form-group">
-                <label id="lbl_dacMember" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Member(s)</label>
-                <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
-                  <AsyncSelect
-                    id="sel_dacMember"
-                    isDisabled={false}
-                    isMulti={true}
-                    loadOptions={(query, callback) => memberSearch(query, callback)}
-                    onChange={(option) => onMemberSearchChange(option)}
-                    onInputChange={() => onSearchInputChanged()}
-                    onMenuClose={() => onSearchMenuClosed()}
-                    noOptionsMessage={() => 'Select a DUOS User...'}
-                    value={state.membersSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
-                  />
-                </div>
-              </div>
-              <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px'}}>
-                <button
-                  id='btn_save'
-                  onClick={okHandler}
-                  className='f-left btn-primary common-background'
-                >
-                    Save
-                </button>
-                <div style={{ marginLeft: '40px' }}>
-                  <button
-                    id='btn_cancel'
-                    onClick={closeHandler}
-                    className='f-left btn-secondary'
-                  >
-                   Cancel
-                  </button>
-                </div>
-              </div>
-            </form>
-            {
-              state.error.show && <div>
-                <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
-              </div>
-            }
+            </div>
+            <div className='col-lg-6'>
+              <label id="lbl_daaCreation" className="col-lg-10 control-label">Select a Data Access Agreement (DAA) to govern access to your DAC&apos;s datasets</label>
+              {// radio one with DUOS DAA download; i don't know what the DUOS DAA actually is --> DUOS Code of Conduct?
+              // radio two with input field (Enter your DAA name) & upload button
+              // const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
+              //   let irbUpdate, collaborationUpdate;
+              //   irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+              //   collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
+              //   return assign(irbUpdate.data, collaborationUpdate.data);
+              // };
+              <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
+                <form>
+                  <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+                    <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+                      <input type="radio" name="daa" value="apply" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
+                      &nbsp;&nbsp;DUOS Data Access Agreement
+                      <div style={{marginTop:'10px'}}>
+                        <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
+                          <span className="glyphicon glyphicon-download-alt"></span>
+                          {' '}
+                          DUOS DAA
+                        </a>
+                      </div>
+                    </label>
+                  </li>
+                  <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+                    <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                      <input type="radio" name="daa"  value="remove" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
+                      &nbsp;&nbsp;or use your own DAA
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <input
+                          id="txt_daaName"
+                          type="text"
+                          defaultValue={state.dac.name} // need to change this to the actual DAA name
+                          onChange={handleChange} // need to change handleChange
+                          name="daaNaame"
+                          className="form-control col-lg-12 vote-input"
+                          required={true}
+                          disabled={props.userRole === CHAIRPERSON}
+                        />
+                        </div>
+                        <div className="button button-white" style={{marginTop: '10px', width: '158px'}}>
+                        <FormField
+                            key={'uploadedDaa'}
+                            type={FormFieldTypes.FILE}
+                            id={'uploadedDaa'}
+                            hideTextBar={true}
+                            // validation={validation.irbDocument}
+                            // onValidationChange={onValidationChange}
+                            onChange={() => {}}
+                          />
+                        </div>
+                    </label>
+                  </li>
+                </form>
+              </ul>
+              }
+            </div>
           </div>
         </div>
       </div>
