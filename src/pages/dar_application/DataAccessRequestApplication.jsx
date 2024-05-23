@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEffect, useState, useCallback } from 'react';
 import ResearcherInfo from './ResearcherInfo';
+import DataAccessAgreements from './DataAccessAgreements';
 import DataUseAgreements from './DataUseAgreements';
 import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
@@ -22,6 +23,7 @@ import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } fro
 import './DataAccessRequestApplication.css';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 import {
   validateDARFormData
@@ -193,7 +195,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(datasets);
     });
     if (!props.readOnlyMode) {
-      const updatedTabs = [...ApplicationTabs, { name: 'Data Use Agreement' }];
+      const updatedTabs = checkEnv(envGroups.DEV) ? [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }] : [...ApplicationTabs, { name: 'Data Use Agreement' }];
       setApplicationTabs(updatedTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);
@@ -606,13 +608,23 @@ const DataAccessRequestApplication = (props) => {
 
               {!props.readOnlyMode ?
                 <div className='step-container'>
-                  <DataUseAgreements
-                    darCode={formData.darCode}
-                    cancelAttest={() => setIsAttested(false)}
-                    isAttested={isAttested}
-                    attest={attemptSubmit}
-                    save={() => setShowDialogSave(true)}
-                  />
+                  {checkEnv(envGroups.DEV) ?
+                    <DataAccessAgreements
+                      datasets={datasets}
+                      darCode={formData.darCode}
+                      cancelAttest={() => setIsAttested(false)}
+                      isAttested={isAttested}
+                      attest={attemptSubmit}
+                      save={() => setShowDialogSave(true)}
+                    /> :
+                    <DataUseAgreements
+                      darCode={formData.darCode}
+                      cancelAttest={() => setIsAttested(false)}
+                      isAttested={isAttested}
+                      attest={attemptSubmit}
+                      save={() => setShowDialogSave(true)}
+                    />
+                  }
                 </div> : <div />}
 
               {isAttested &&
