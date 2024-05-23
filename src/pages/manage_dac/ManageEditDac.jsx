@@ -2,6 +2,7 @@ import * as ld from 'lodash';
 import React, { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax/DAC';
+import { DAA } from '../../libs/ajax/DAA';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
@@ -33,8 +34,11 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [daas, setDaas] = useState([]);
   const [uploadDAA, setUploadDaa] = useState(false);
+  // const [daaFileData, setDaaFileData] = useState(null);
   const dacId = props.match.params.dacId;
+  const daa = daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId));
 
   const handleDUOSDAA = (event) => {
     setUploadDaa(!event.target.checked);
@@ -44,18 +48,30 @@ export default function ManageEditDac(props) {
     setUploadDaa(event.target.checked);
   };
 
+  // const handleDAAUpload = (event) => {
+  //   const submitData = new FormData(event.target.form);
+  //   setDaaFileData(event.target.files[0]);
+  // }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedDac = await DAC.get(dacId);
+        const daas = await DAA.getDaas();
         setState(prev => ({ ...prev, dac: fetchedDac }));
+        setDaas(daas);
+        const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
+        if (daa && daa.file) {
+          setUploadDaa(true);
+        }
+        setIsLoading(false);
       }
       catch(e) {
         Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
+        setIsLoading(false);
       }
     };
     fetchData();
-    setIsLoading(false);
   }, [dacId, setState]);
 
   const okHandler = async (event) => {
@@ -76,6 +92,8 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+      // const ops5 = daaFileData ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
+      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200');
@@ -268,7 +286,7 @@ export default function ManageEditDac(props) {
           </div>
           <hr/>
           <div>
-            <div className='col-lg-6'> 
+            <div className='col-lg-6'>
               <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
                 <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
                   <div className="form-group first-form-group" style={{display: 'flex', flexDirection: 'column'}}>
@@ -396,7 +414,7 @@ export default function ManageEditDac(props) {
             </div>
             <div className='col-lg-6'>
               <label id="lbl_daaCreation" className="col-lg-10 control-label">Select a Data Access Agreement (DAA) to govern access to your DAC&apos;s datasets</label>
-              {// radio one with DUOS DAA download; i don't know what the DUOS DAA actually is --> DUOS Code of Conduct?
+              {
               // radio two with input field (Enter your DAA name) & upload button
               // const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
               //   let irbUpdate, collaborationUpdate;
@@ -404,52 +422,53 @@ export default function ManageEditDac(props) {
               //   collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
               //   return assign(irbUpdate.data, collaborationUpdate.data);
               // };
-              <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
-                <form>
-                  <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-                    <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                      <input type="radio" name="daa" value="apply" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
-                      &nbsp;&nbsp;DUOS Data Access Agreement
-                      <div style={{marginTop:'10px'}}>
-                        <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
-                          <span className="glyphicon glyphicon-download-alt"></span>
-                          {' '}
-                          DUOS DAA
-                        </a>
-                      </div>
-                    </label>
-                  </li>
-                  <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-                    <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                      <input type="radio" name="daa"  value="remove" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
-                      &nbsp;&nbsp;or use your own DAA
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <input
-                          id="txt_daaName"
-                          type="text"
-                          defaultValue={state.dac.name} // need to change this to the actual DAA name
-                          onChange={handleChange} // need to change handleChange
-                          name="daaNaame"
-                          className="form-control col-lg-12 vote-input"
-                          required={true}
-                          disabled={props.userRole === CHAIRPERSON}
-                        />
+                <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
+                  <form>
+                    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+                      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
+                        <input type="radio" name="daa" value="apply" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
+                        &nbsp;&nbsp;DUOS Data Access Agreement
+                        <div style={{marginTop:'10px'}}>
+                          <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
+                            <span className="glyphicon glyphicon-download-alt"></span>
+                            {' '}
+                            Broad DAA
+                          </a>
                         </div>
-                        <div className="button button-white" style={{marginTop: '10px', width: '158px'}}>
-                        <FormField
+                      </label>
+                    </li>
+                    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
+                      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
+                        <input type="radio" name="daa"  value="remove" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
+                        &nbsp;&nbsp;or use your own DAA
+                        {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <input
+                            id="txt_daaName"
+                            type="text"
+                            defaultValue={daaFileData ? daaFileData.name : ''}
+                            onChange={handleChange} // need to change handleChange
+                            name="daaName"
+                            className="form-control col-lg-12 vote-input"
+                            required={true}
+                            disabled={props.userRole === CHAIRPERSON}
+                          />
+                        </div> */}
+                        <div className="button-white" style={{marginTop: '10px'}}>
+                          <FormField
                             key={'uploadedDaa'}
                             type={FormFieldTypes.FILE}
                             id={'uploadedDaa'}
-                            hideTextBar={true}
-                            // validation={validation.irbDocument}
-                            // onValidationChange={onValidationChange}
-                            onChange={() => {}}
+                            placeholder={daa?.file && daa.file.fileName ? daa.file.fileName : ''}
+                            // onChange={(event) => setDaaFileData(event.target.files[0])}
+                            // onChange={({value}) => handleDAAUpload(value)}
+                            // // validation={validation.irbDocument}
+                            // onChange={handleDAAUpload}
                           />
                         </div>
-                    </label>
-                  </li>
-                </form>
-              </ul>
+                      </label>
+                    </li>
+                  </form>
+                </ul>
               }
             </div>
           </div>
