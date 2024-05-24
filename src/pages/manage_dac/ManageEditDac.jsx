@@ -35,8 +35,8 @@ export default function ManageEditDac(props) {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [daas, setDaas] = useState([]);
-  const [uploadDAA, setUploadDaa] = useState(false);
-  // const [daaFileData, setDaaFileData] = useState(null);
+  const [uploadDAA, setUploadDaa] = useState(null);
+  const [daaFileData, setDaaFileData] = useState(null);
   const dacId = props.match.params.dacId;
   const daa = daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId));
 
@@ -62,7 +62,11 @@ export default function ManageEditDac(props) {
         setDaas(daas);
         const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
         if (daa && daa.file) {
-          setUploadDaa(true);
+          if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
+            setUploadDaa(true);
+          } else {
+            setUploadDaa(false);
+          }
         }
         setIsLoading(false);
       }
@@ -92,13 +96,16 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      // const ops5 = daaFileData ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
-      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
+      const ops5 = daaFileData && uploadDAA === false ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
+      // wrong, we don't want to create a DAA LC link, we want to add this DAC id to the DAA's list of DAC ids
+      // i think we need a new endpoint for this
+      // const ops6 = uploadDAA ? [() => DAA.createDaaDacLink(1, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
+      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200');
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r) !== '201');
       if (!ld.isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.');
+        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
       } else {
         closeHandler();
       }
@@ -112,14 +119,15 @@ export default function ManageEditDac(props) {
   };
 
   const handleErrors = (message) => {
-    setState(prev => ({
-      ...prev,
-      error: {
-        title: 'Error',
-        show: true,
-        msg: message
-      }
-    }));
+    Notifications.showError({text: message});
+    // setState(prev => ({
+    //   ...prev,
+    //   error: {
+    //     title: 'Error',
+    //     show: true,
+    //     msg: message
+    //   }
+    // }));
   };
 
   const chairSearch = (query, callback) => {
@@ -426,20 +434,20 @@ export default function ManageEditDac(props) {
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                        <input type="radio" name="daa" value="apply" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
-                        &nbsp;&nbsp;DUOS Data Access Agreement
+                        <input type="radio" name="daa" value="default" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
+                        &nbsp;&nbsp;DUOS Uniform DAA
                         <div style={{marginTop:'10px'}}>
                           <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
                             <span className="glyphicon glyphicon-download-alt"></span>
                             {' '}
-                            Broad DAA
+                            DUOS Uniform DAA
                           </a>
                         </div>
                       </label>
                     </li>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <input type="radio" name="daa"  value="remove" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
+                        <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;or use your own DAA
                         {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <input
@@ -459,6 +467,14 @@ export default function ManageEditDac(props) {
                             type={FormFieldTypes.FILE}
                             id={'uploadedDaa'}
                             placeholder={daa?.file && daa.file.fileName ? daa.file.fileName : ''}
+                            onChange={({value}) => {
+                              setDaaFileData(value);
+                              setUploadDaa(true);
+                              setState(prev => ({
+                                ...prev,
+                                dirtyFlag: true
+                              }));
+                            }}
                             // onChange={(event) => setDaaFileData(event.target.files[0])}
                             // onChange={({value}) => handleDAAUpload(value)}
                             // // validation={validation.irbDocument}
