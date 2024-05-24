@@ -26,6 +26,7 @@ export const ManageDac = function ManageDac() {
   // modal state
   const [showDacModal, setShowDacModal] = useState(false);
   const [showEditPage, setShowEditPage] = useState(false);
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showDatasetsModal, setShowDatasetsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -101,8 +102,7 @@ export const ManageDac = function ManageDac() {
   };
 
   const addDac = () => {
-    setShowDacModal(true);
-    setIsEditMode(false);
+    setShowAddPage(true);
   };
 
   const okAddDacModal = async () => {
@@ -140,6 +140,7 @@ export const ManageDac = function ManageDac() {
             className="col-md-12 btn-primary btn-add common-background"
             style={{ marginTop: '30%', display: 'flex' }}
             onClick={addDac}
+            href={'manage_add_dac'}
           >
             <span>Add DAC</span>
           </a>
@@ -183,14 +184,8 @@ export const ManageDac = function ManageDac() {
           datasets={selectedDatasets}
         />
       )}
-      {showDacModal && (
-        <AddDacModal
-          showModal={showDacModal}
-          isEditMode={isEditMode}
-          onOKRequest={okAddDacModal}
-          onCloseRequest={closeAddDacModal}
-          dac={selectedDac}
-          userRole={userRole}
+      {showAddPage && (
+        <ManageEditDac
         />
       )}
       {showEditPage && (
