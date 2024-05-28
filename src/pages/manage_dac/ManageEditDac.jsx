@@ -127,7 +127,7 @@ export default function ManageEditDac(props) {
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       // const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r) !== '201');
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
       } else {
