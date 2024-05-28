@@ -96,14 +96,14 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const ops5 = daaFileData && uploadDAA === false ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
+      const ops5 = daaFileData && uploadDAA === true ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
       // wrong, we don't want to create a DAA LC link, we want to add this DAC id to the DAA's list of DAC ids
       // i think we need a new endpoint for this
       // const ops6 = uploadDAA ? [() => DAA.createDaaDacLink(1, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       // const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r) !== '201');
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r.status) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
       } else {
