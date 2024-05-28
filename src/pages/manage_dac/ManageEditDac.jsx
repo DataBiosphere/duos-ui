@@ -93,7 +93,21 @@ export default function ManageEditDac(props) {
       if (dacId !== undefined) {
         await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
       } else {
-        currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+        if (uploadDAA !== null) {
+          if (uploadDAA === true) {
+            if (daaFileData === null) {
+              handleErrors('Please upload a DAA file before saving.');
+              return;
+            }
+            // i don't think we need an extra step here because it will get handled in ops5 ?
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          } else {
+            // need to create the link between the DAA and the DAC --> new endpoint!!
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          }
+        } else {
+          handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+        }
       }
       
       // Order here is important. Since users cannot have multiple roles in the
@@ -106,10 +120,10 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const ops5 = daaFileData && uploadDAA === false ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
+      const ops5 = daaFileData && uploadDAA === true ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
       // wrong, we don't want to create a DAA LC link, we want to add this DAC id to the DAA's list of DAC ids
       // i think we need a new endpoint for this
-      // const ops6 = uploadDAA ? [() => DAA.createDaaDacLink(1, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
+      // const ops6 = uploadDAA === false ? [() => DAA.createDaaDacLink(1, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       // const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);

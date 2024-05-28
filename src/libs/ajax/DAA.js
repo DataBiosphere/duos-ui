@@ -1,6 +1,7 @@
 import fileDownload from 'js-file-download';
 import { getApiUrl } from '../ajax';
 import { Config } from '../config';
+import { isFileEmpty } from '../utils';
 import axios from 'axios';
 
 
@@ -64,4 +65,17 @@ export const DAA = {
       fileDownload(response.data, daaFileName);
     });
   },
+
+  createDaa: async (file, dacId) => {
+    if (isFileEmpty(file)) {
+      return Promise.resolve({ data: null });
+    } else {
+      let authOpts = Config.authOpts();
+      authOpts.headers['Content-Type'] = 'multipart/form-data';
+      let formData = new FormData();
+      formData.append('file', file);
+      const url = `${await getApiUrl()}/api/daa/dac/${dacId}`;
+      return axios.post(url, formData, authOpts);
+    }
+  }
 };
