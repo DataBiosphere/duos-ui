@@ -107,6 +107,7 @@ export default function ManageEditDac(props) {
           }
         } else {
           handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+          return;
         }
       }
       
@@ -121,10 +122,12 @@ export default function ManageEditDac(props) {
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
       const ops5 = daaFileData && uploadDAA === true ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
+      const ops6 = uploadDAA === false ? [() => DAA.addDaaToDac(12, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
       // wrong, we don't want to create a DAA LC link, we want to add this DAC id to the DAA's list of DAC ids
       // i think we need a new endpoint for this
       // const ops6 = uploadDAA === false ? [() => DAA.createDaaDacLink(1, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
+      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       // const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
@@ -458,7 +461,13 @@ export default function ManageEditDac(props) {
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                        <input type="radio" name="daa" value="default" checked={uploadDAA === false} onChange={handleDUOSDAA} style={{accentColor:'#00609f'}}/>
+                      <input type="radio" name="daa" value="default" checked={uploadDAA === false} onChange={({value}) => {
+                              setUploadDaa(false);
+                              setState(prev => ({
+                                ...prev,
+                                dirtyFlag: true
+                              }));
+                            }} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;DUOS Uniform DAA
                         <div style={{marginTop:'10px'}}>
                           <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
