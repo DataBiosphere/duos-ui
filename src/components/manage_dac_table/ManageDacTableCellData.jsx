@@ -64,7 +64,10 @@ export function actionsCellData({dac, deleteDac, userRole}) {
     <>
       <div style={{ paddingTop: '5px' }}>
         <Link
-          to={`/manage_edit_dac/${dac.dacId}`}
+          to={{
+            pathname: `/manage_edit_dac/${dac.dacId}`,
+            state: { userRole: userRole }
+          }}
           data-tip={`Edit ${dac.name}`}
         >
           <img id="edit-pencil-icon" src={editPencilIcon}/>
