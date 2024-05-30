@@ -196,7 +196,7 @@ export default function ManageResearcherDAAsTable(props) {
               fontSize: '16px',
               maxWidth: '60%',
             })}>
-              The table below allows you to pre-authorize your Institution&apos;s users to request access to datasets, 
+              The table below allows you to pre-authorize your Institution&apos;s users to request access to datasets,
               known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
               Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
             </div>

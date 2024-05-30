@@ -1,7 +1,7 @@
 import fileDownload from 'js-file-download';
 import { getApiUrl } from '../ajax';
 import { Config } from '../config';
-import { isFileEmpty } from '../utils';3
+import { isFileEmpty } from '../utils';
 import axios from 'axios';
 
 

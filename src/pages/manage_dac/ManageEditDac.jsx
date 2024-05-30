@@ -40,19 +40,6 @@ export default function ManageEditDac(props) {
   const dacId = props.match.params.dacId;
   const daa = daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId));
 
-  const handleDUOSDAA = (event) => {
-    setUploadDaa(!event.target.checked);
-  };
-
-  const handleUploadDAA = (event) => {
-    setUploadDaa(event.target.checked);
-  };
-
-  // const handleDAAUpload = (event) => {
-  //   const submitData = new FormData(event.target.form);
-  //   setDaaFileData(event.target.files[0]);
-  // }
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -105,7 +92,7 @@ export default function ManageEditDac(props) {
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.')
+        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
       } else {
         closeHandler();
       }
@@ -434,13 +421,14 @@ export default function ManageEditDac(props) {
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                        <input type="radio" name="daa" value="default" checked={uploadDAA === false} onChange={({value}) => {
-                              setUploadDaa(false);
-                              setState(prev => ({
-                                ...prev,
-                                dirtyFlag: true
-                              }));
-                            }} style={{accentColor:'#00609f'}}/>
+                        <input type="radio" name="daa" value="default" checked={uploadDAA === false}
+                          onChange={() => {
+                            setUploadDaa(false);
+                            setState(prev => ({
+                              ...prev,
+                              dirtyFlag: true
+                            }));
+                          }} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;DUOS Uniform DAA
                         <div style={{marginTop:'10px'}}>
                           <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
@@ -453,7 +441,7 @@ export default function ManageEditDac(props) {
                     </li>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={handleUploadDAA} style={{accentColor:'#00609f'}}/>
+                        <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;or use your own DAA
                         {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <input
