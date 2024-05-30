@@ -11,6 +11,7 @@ import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import ManageEditDac from './ManageEditDac';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
@@ -24,6 +25,7 @@ export const ManageDac = function ManageDac() {
 
   // modal state
   const [showDacModal, setShowDacModal] = useState(false);
+  const [showEditPage, setShowEditPage] = useState(false);
   const [showDatasetsModal, setShowDatasetsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -154,6 +156,7 @@ export const ManageDac = function ManageDac() {
         setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
+        setShowEditPage={setShowEditPage}
       />
       <ConfirmationModal
         showConfirmation={showConfirmationModal}
@@ -189,6 +192,9 @@ export const ManageDac = function ManageDac() {
           dac={selectedDac}
           userRole={userRole}
         />
+      )}
+      {showEditPage && (
+        <ManageEditDac/>
       )}
     </div>
   );

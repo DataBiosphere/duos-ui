@@ -3,7 +3,9 @@ import {isNil, isEmpty} from 'lodash/fp';
 import {styles} from './ManageDacTable';
 import TableIconButton from '../TableIconButton';
 import {Styles} from '../../libs/theme';
-import {Delete, Edit} from '@mui/icons-material';
+import {Delete} from '@mui/icons-material';
+import {Link} from 'react-router-dom';
+import editPencilIcon from '../../images/edit_pencil.svg';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {
   return {
@@ -54,20 +56,23 @@ export function datasetsCellData({dac, viewDatasets, label='dac-datasets'}) {
 }
 
 
-export function actionsCellData({dac, editDac, deleteDac, userRole}) {
+export function actionsCellData({dac, deleteDac, userRole}) {
   const isAdmin = (userRole === 'Admin');
   const deleteDisabled = (!isNil(dac.datasets) && !isEmpty(dac.datasets));
 
   const actions = (
     <>
-      <TableIconButton
-        key='edit-dac-icon'
-        dataTip='Edit DAC'
-        onClick={() => editDac(dac)}
-        icon={Edit}
-        style={Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON)}
-        hoverStyle={Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)}
-      />
+      <div style={{ paddingTop: '5px' }}>
+        <Link
+          to={{
+            pathname: `/manage_edit_dac/${dac.dacId}`,
+            state: { userRole: userRole }
+          }}
+          data-tip={`Edit ${dac.name}`}
+        >
+          <img id="edit-pencil-icon" src={editPencilIcon}/>
+        </Link>
+      </div>
       {isAdmin && <TableIconButton
         key='delete-dac-icon'
         dataTip={(deleteDisabled?'All datasets assigned to this DAC must be reassigned before this can be deleted' :'Delete DAC')}
