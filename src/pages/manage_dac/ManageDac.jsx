@@ -7,7 +7,6 @@ import { DAC } from '../../libs/ajax/DAC';
 import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
-import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
@@ -24,13 +23,11 @@ export const ManageDac = function ManageDac() {
   const [userRole, setUserRole] = useState();
 
   // modal state
-  const [showDacModal, setShowDacModal] = useState(false);
   const [showEditPage, setShowEditPage] = useState(false);
   const [showAddPage, setShowAddPage] = useState(false);
   const [showDatasetsModal, setShowDatasetsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // modal data
   const [selectedDac, setSelectedDac] = useState({});
@@ -94,21 +91,8 @@ export const ManageDac = function ManageDac() {
     setShowConfirmationModal(false);
   };
 
-
-  const closeAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
-  };
-
   const addDac = () => {
     setShowAddPage(true);
-  };
-
-  const okAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
   };
 
   const closeViewDatasetsModal = () => {
@@ -150,11 +134,9 @@ export const ManageDac = function ManageDac() {
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDacModal={setShowDacModal}
         setShowDatasetsModal={setShowDatasetsModal}
         setShowMembersModal={setShowMembersModal}
         setShowConfirmationModal={setShowConfirmationModal}
-        setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
         setShowEditPage={setShowEditPage}

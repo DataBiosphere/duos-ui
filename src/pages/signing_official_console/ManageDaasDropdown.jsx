@@ -3,7 +3,6 @@ import { Button } from '@mui/material';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 
 export default function ManageDaasDropdown(props) {
   const [applyAll, setApplyAll] = useState(null);
@@ -53,7 +52,7 @@ export default function ManageDaasDropdown(props) {
           label={`Download agreement`}
           onDownload={() => {DAA.getDaaFileById(1, 'DUOS Uniform Data Access Agreement');}} // TODO: will need to change the id to be id of real DUOS Uniform DAA once created
         />
-      )
+      );
     }
     return (
       <DownloadLink
