@@ -82,6 +82,6 @@ export const DAA = {
   addDaaToDac: async (daaId, dacId) => {
     const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
     const res = await axios.put(url, {}, Config.authOpts());
-    return res.data;
+    return res.status;
   }
 };
