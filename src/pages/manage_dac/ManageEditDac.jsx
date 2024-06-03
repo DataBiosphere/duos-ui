@@ -409,13 +409,6 @@ export default function ManageEditDac(props) {
             <div className='col-lg-6'>
               <label id="lbl_daaCreation" className="col-lg-10 control-label">Select a Data Access Agreement (DAA) to govern access to your DAC&apos;s datasets</label>
               {
-              // radio two with input field (Enter your DAA name) & upload button
-              // const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
-              //   let irbUpdate, collaborationUpdate;
-              //   irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
-              //   collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
-              //   return assign(irbUpdate.data, collaborationUpdate.data);
-              // };
                 <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
@@ -442,18 +435,6 @@ export default function ManageEditDac(props) {
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
                         <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;or use your own DAA
-                        {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <input
-                            id="txt_daaName"
-                            type="text"
-                            defaultValue={daaFileData ? daaFileData.name : ''}
-                            onChange={handleChange} // need to change handleChange
-                            name="daaName"
-                            className="form-control col-lg-12 vote-input"
-                            required={true}
-                            disabled={props.userRole === CHAIRPERSON}
-                          />
-                        </div> */}
                         <div className="button-white" style={{marginTop: '10px'}}>
                           <FormField
                             key={'uploadedDaa'}
@@ -468,10 +449,6 @@ export default function ManageEditDac(props) {
                                 dirtyFlag: true
                               }));
                             }}
-                            // onChange={(event) => setDaaFileData(event.target.files[0])}
-                            // onChange={({value}) => handleDAAUpload(value)}
-                            // // validation={validation.irbDocument}
-                            // onChange={handleDAAUpload}
                           />
                         </div>
                       </label>
