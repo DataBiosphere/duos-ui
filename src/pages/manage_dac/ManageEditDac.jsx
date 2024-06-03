@@ -38,7 +38,7 @@ export default function ManageEditDac(props) {
   const [uploadDAA, setUploadDaa] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
   const dacId = props.match.params.dacId;
-  const daa = daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId));
+  const [daa, setDaa] = useState(daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId)));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,17 +48,17 @@ export default function ManageEditDac(props) {
         setState(prev => ({ ...prev, dac: fetchedDac }));
         setDaas(daas);
         const matchingDaas = daas.filter(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
-        const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
-          return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
-        });
-        // const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
-        console.log(daas);
-        console.log('useEffectDaa',daa);
-        if (daa && daa.file) {
-          if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
-            setUploadDaa(true);
-          } else {
-            setUploadDaa(false);
+        if (matchingDaas.length > 0) {
+          const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+            return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
+          });
+          setDaa(daa);
+          if (daa && daa.file) {
+            if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
+              setUploadDaa(true);
+            } else {
+              setUploadDaa(false);
+            }
           }
         }
         setIsLoading(false);
@@ -113,14 +113,6 @@ export default function ManageEditDac(props) {
 
   const handleErrors = (message) => {
     Notifications.showError({text: message});
-    // setState(prev => ({
-    //   ...prev,
-    //   error: {
-    //     title: 'Error',
-    //     show: true,
-    //     msg: message
-    //   }
-    // }));
   };
 
   const chairSearch = (query, callback) => {
@@ -467,7 +459,7 @@ export default function ManageEditDac(props) {
                             key={'uploadedDaa'}
                             type={FormFieldTypes.FILE}
                             id={'uploadedDaa'}
-                            placeholder={daa?.file && daa.file.fileName ? daa.file.fileName : ''}
+                            placeholder={daa?.file && daa.file.fileName && daa.file.fileName !== 'DUOS Uniform Data Access Agreement' ? daa.file.fileName : ''}
                             onChange={({value}) => {
                               setDaaFileData(value);
                               setUploadDaa(true);
