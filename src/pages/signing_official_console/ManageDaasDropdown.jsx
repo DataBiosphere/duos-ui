@@ -4,7 +4,6 @@ import { DownloadLink } from '../../components/DownloadLink';
 import { DAA } from '../../libs/ajax/DAA';
 import { Notifications } from '../../libs/utils';
 
-
 export default function ManageDaasDropdown(props) {
   const [applyAll, setApplyAll] = useState(null);
   const {actionsTitle, download, moreData, researchers, refreshResearchers, setResearchers} = props;
