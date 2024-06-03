@@ -19,6 +19,7 @@ import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
+const ADMIN = 'Admin';
 
 export default function ManageEditDac(props) {
   const [state, setState] = useState({
@@ -76,8 +77,9 @@ export default function ManageEditDac(props) {
 
     let currentDac = state.dac;
     if (state.dirtyFlag) {
-      // TODO: removed the admin check .. not sure how to get the user role if not passed in as prop
-      await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      if (props.location.state.userRole === ADMIN) {
+        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      }
 
       // Order here is important. Since users cannot have multiple roles in the
       // same DAC, we have to make sure we remove users before re-adding any
@@ -291,7 +293,7 @@ export default function ManageEditDac(props) {
                         name="name"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -306,7 +308,7 @@ export default function ManageEditDac(props) {
                         name="description"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -322,7 +324,7 @@ export default function ManageEditDac(props) {
                         name="email"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
