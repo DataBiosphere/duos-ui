@@ -47,7 +47,13 @@ export default function ManageEditDac(props) {
         const daas = await DAA.getDaas();
         setState(prev => ({ ...prev, dac: fetchedDac }));
         setDaas(daas);
-        const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
+        const matchingDaas = daas.filter(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
+        const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+          return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
+        });
+        // const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
+        console.log(daas);
+        console.log('useEffectDaa',daa);
         if (daa && daa.file) {
           if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
             setUploadDaa(true);
@@ -257,6 +263,7 @@ export default function ManageEditDac(props) {
     }
   };
 
+  console.log('daa',daa);
   return (
     isLoading ?
       <Spinner/> :
