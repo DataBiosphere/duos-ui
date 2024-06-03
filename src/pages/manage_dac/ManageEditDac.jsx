@@ -254,7 +254,6 @@ export default function ManageEditDac(props) {
     }
   };
 
-  console.log('daa',daa);
   return (
     isLoading ?
       <Spinner/> :
