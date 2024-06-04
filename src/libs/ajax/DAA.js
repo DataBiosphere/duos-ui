@@ -88,6 +88,6 @@ export const DAA = {
   deleteDaa: async (daaId) => {
     const url = `${await getApiUrl()}/api/daa/${daaId}`;
     const res = await axios.delete(url, Config.authOpts());
-    return res.data;
+    return res;
   },
 };

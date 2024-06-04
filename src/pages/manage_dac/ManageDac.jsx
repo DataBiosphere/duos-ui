@@ -4,6 +4,7 @@ import {useState, useEffect, useCallback} from 'react';
 import { Styles } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import { DAC } from '../../libs/ajax/DAC';
+import { DAA } from '../../libs/ajax/DAA';
 import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
@@ -20,6 +21,7 @@ export const ManageDac = function ManageDac() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
+  const [daas, setDaas] = useState([]);
   const [dacIDs, setDacIDs] = useState([]);
   const [userRole, setUserRole] = useState();
 
@@ -70,12 +72,42 @@ export const ManageDac = function ManageDac() {
     ]);
   }, [reloadDacList, reloadUserRole]);
 
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setIsLoading(true);
+        const daaList = await DAA.getDaas();
+        setDaas(daaList);
+        setIsLoading(false);
+      } catch (error) {
+        Notifications.showError({
+          text: 'Error: Unable to retrieve current DAAs from server',
+        });
+        setIsLoading(false);
+      }
+    };
+    init();
+  }, []);
+
   const handleDeleteDac = async () => {
-    let status;
-    await DAC.delete(selectedDac.dacId).then((resp) => {
-      status = resp.status;
+    let statusDaa;
+    let statusDac;
+    const matchingDaas = daas.filter(daa => daa.dacs.some(d => d.dacId === selectedDac.dacId));
+    const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+      return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
     });
-    if (status === 200) {
+    await DAA.deleteDaa(daa.daaId).then((resp) => {
+      statusDaa = resp.status;
+    });
+    if (statusDaa === 200) {
+      await DAC.delete(selectedDac.dacId).then((resp) => {
+        statusDac = resp.status;
+      });
+    } else {
+      Notifications.showError({text: 'DAA could not be deleted.'});
+      return;
+    }
+    if (statusDac === 200) {
       Notifications.showSuccess({text: 'DAC successfully deleted.'});
       setShowConfirmationModal(false);
       await reloadDacList();
