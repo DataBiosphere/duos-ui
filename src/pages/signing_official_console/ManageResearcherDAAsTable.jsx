@@ -95,9 +95,12 @@ export default function ManageResearcherDAAsTable(props) {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
         const matchingDaas = daas.filter(daa => daa.dacs.some(d => d.dacId === dac.dacId));
-        const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
-          return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
-        });
+        let daa;
+        if (matchingDaas.length > 0) {
+          daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+            return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
+          });
+        }
         const id = daa ? daa.daaId : 0;
         const fileName = daa ? daa.file.fileName : '';
         acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={{id: id, fileName: fileName}} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};

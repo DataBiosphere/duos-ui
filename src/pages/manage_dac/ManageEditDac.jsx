@@ -14,7 +14,10 @@ import editDACIcon from '../../images/dac_icon.svg';
 import backArrowIcon from '../../images/back_arrow.svg';
 import { Spinner } from '../../components/Spinner';
 import { Styles } from '../../libs/theme';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import { DownloadLink } from '../../components/DownloadLink';
+import DUOSUniformDataAccessAgreement from '../../assets/DUOS_Uniform_Data_Access_Agreement.pdf';
+import Chip from '@mui/material/Chip';
+import ClearIcon from '@mui/icons-material/Clear';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
@@ -37,6 +40,7 @@ export default function ManageEditDac(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [daas, setDaas] = useState([]);
   const [uploadDAA, setUploadDaa] = useState(null);
+  const [deleteDaa, setDeleteDaa] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
   const dacId = props.match.params.dacId;
   const [daa, setDaa] = useState(daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId)));
@@ -55,7 +59,7 @@ export default function ManageEditDac(props) {
           });
           setDaa(daa);
           if (daa && daa.file) {
-            if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
+            if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx') {
               setUploadDaa(true);
             } else {
               setUploadDaa(false);
@@ -93,7 +97,10 @@ export default function ManageEditDac(props) {
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
       const ops5 = daaFileData && uploadDAA === true ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
       const ops6 = uploadDAA === false ? [() => DAA.addDaaToDac(12, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
+      // const ops7 = deleteDaa === true && daaFileData && uploadDAA ? [() => DAA.deleteDacDaaRelationship(daa.daaId, currentDac.dacId)] : [];
+      // need to add email operation as well!!!!! 
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
+      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6, ops7);
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
@@ -254,6 +261,7 @@ export default function ManageEditDac(props) {
     }
   };
 
+  console.log(deleteDaa);
   return (
     isLoading ?
       <Spinner/> :
@@ -421,7 +429,7 @@ export default function ManageEditDac(props) {
                           }} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;DUOS Uniform DAA
                         <div style={{marginTop:'10px'}}>
-                          <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
+                          <a target="_blank" rel="noreferrer" href={DUOSUniformDataAccessAgreement} className="button button-white">
                             <span className="glyphicon glyphicon-download-alt"></span>
                             {' '}
                             DUOS Uniform DAA
@@ -433,12 +441,29 @@ export default function ManageEditDac(props) {
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
                         <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
                         &nbsp;&nbsp;or use your own DAA
+                        {/* <Chip
+                          label={daa.file.fileName}
+                          onDelete={() => {}}
+                          onClick={() => setDeleteDaa(true)}
+                          // onClick={() => {DAA.getDaaFileById(daa.daaId, daa.file.fileName);}}
+                          deleteIcon={<ClearIcon style={{color:'#00609f'}}/>}
+                          sx={{fontFamily: 'Montserrat', fontWeight:'bold', fontSize:'12px'}}
+                        /> */}
+                        {/* <Chip
+                          label={daa.file.fileName}
+                          onClick={() => {DAA.getDaaFileById(daa.daaId, daa.file.fileName);}} //TODO: need to figure out if on click we are also making this the focused one or just downloading it?
+                          deleteIcon={<ClearIcon style={{color:'#00609f'}}/>}
+                          sx={{fontFamily: 'Montserrat', fontWeight:'bold', fontSize:'10px'}}
+                          variant="outlined"
+                        />  */}
+                        {/* {uploadDAA === true && <DownloadLink label={daa?.file && daa.file.fileName && daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx' ? daa.file.fileName : ''} onDownload={() => {DAA.getDaaFileById(daa.daaId, daa.file.fileName);}}/>} */}
                         <div className="button-white" style={{marginTop: '10px'}}>
                           <FormField
                             key={'uploadedDaa'}
                             type={FormFieldTypes.FILE}
                             id={'uploadedDaa'}
-                            placeholder={daa?.file && daa.file.fileName && daa.file.fileName !== 'DUOS Uniform Data Access Agreement' ? daa.file.fileName : ''}
+                            placeholder={daa?.file && daa.file.fileName && daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx' ? daa.file.fileName : ''}
+                            // placeholder={''}
                             onChange={({value}) => {
                               setDaaFileData(value);
                               setUploadDaa(true);

@@ -90,4 +90,10 @@ export const DAA = {
     const res = await axios.delete(url, Config.authOpts());
     return res;
   },
+
+  deleteDacDaaRelationship: async (daaId, dacId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
+    const res = await axios.delete(url, Config.authOpts());
+    return res;
+  },
 };
