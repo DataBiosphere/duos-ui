@@ -1,4 +1,3 @@
-import * as ld from 'lodash';
 import React, { useState } from 'react';
 import { Styles } from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
@@ -26,9 +25,8 @@ export const UploadDaaModal = (props) => {
     props.onCloseRequest();
   };
 
-  const handleErrors = (message) => {
-    
-  };
+  // const handleErrors = (message) => {
+  // };
 
   const attachmentChangeHandler = (e) => {
     setModalState({
@@ -74,33 +72,33 @@ export const UploadDaaModal = (props) => {
           Upload a file
         </div>
         <div style={{ borderBottom: '1px solid #1FB50' }} />
-          <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)}>
-            {({ isDragActive, openUploader, getRootProps, getInputProps }) => (
-              <div style={{
-                backgroundColor: modalState.attachment.length !== 0 ? '#eef0f5' : (isDragActive ? '#6898c1' : '#eef0f5'),
-                fontSize: 14,
-                lineHeight: '100px',
-                paddingLeft: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexDirection: 'column',
-                border: modalState.attachment.length === 0 ? '5px dashed' : 'none',
-                borderColor: '#c2cee1'
-              }}>
-                  {
-                    modalState.attachment.length === 0 && (
-                      <div>
-                        <UploadFileRoundedIcon style={{fill:'#4d72aa', scale: '5'}}/>
-                      </div>
-                    )
-                  }
-                  <div {...getRootProps()}>
-                    <input {...getInputProps()} />
-                    <b style={{color: '#4d72aa'}}>
-                      {modalState.attachment.length === 0 ? 'Drag and drop a PDF file to upload or click to browse files' : modalState.attachment[0].name}
-                    </b>
-                    {
+        <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)}>
+          {({ isDragActive, getRootProps, getInputProps }) => (
+            <div style={{
+              backgroundColor: modalState.attachment.length !== 0 ? '#eef0f5' : (isDragActive ? '#6898c1' : '#eef0f5'),
+              fontSize: 14,
+              lineHeight: '100px',
+              paddingLeft: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              border: modalState.attachment.length === 0 ? '5px dashed' : 'none',
+              borderColor: '#c2cee1'
+            }}>
+              {
+                modalState.attachment.length === 0 && (
+                  <div>
+                    <UploadFileRoundedIcon style={{fill:'#4d72aa', scale: '5'}}/>
+                  </div>
+                )
+              }
+              <div {...getRootProps()}>
+                <input {...getInputProps()} />
+                <b style={{color: '#4d72aa'}}>
+                  {modalState.attachment.length === 0 ? 'Drag and drop a PDF file to upload or click to browse files' : modalState.attachment[0].name}
+                </b>
+                {
                   modalState.attachment.length !== 0 && (
                     <button
                       style={{
@@ -114,28 +112,28 @@ export const UploadDaaModal = (props) => {
                     </button>
                   )
                 }
-                  </div>
               </div>
-            )}
-          </Dropzone>
-          <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px', marginTop:'20px'}}>
-            <button
-              id='btn_save'
-              onClick={okHandler}
-              className='f-right btn-primary common-background'
-            >
-                Save
-            </button>
-            <div style={{ marginLeft: '100px' }}>
-              <button
-                id='btn_cancel'
-                onClick={closeHandler}
-                className='f-right btn-secondary'
-              >
-              Cancel
-              </button>
             </div>
+          )}
+        </Dropzone>
+        <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px', marginTop:'20px'}}>
+          <button
+            id='btn_save'
+            onClick={okHandler}
+            className='f-right btn-primary common-background'
+          >
+            Save
+          </button>
+          <div style={{ marginLeft: '100px' }}>
+            <button
+              id='btn_cancel'
+              onClick={closeHandler}
+              className='f-right btn-secondary'
+            >
+            Cancel
+            </button>
           </div>
+        </div>
       </div>
     </Modal>
   );
