@@ -90,13 +90,12 @@ export const ManageDac = function ManageDac() {
   }, []);
 
   const handleDeleteDac = async () => {
-    let statusDaa;
     let statusDac;
     const matchingDaas = daas.filter(daa => daa.initialDacId === selectedDac.dacId && daa.daaId !== 21);
     const deletePromises = matchingDaas.map(daa => DAA.deleteDaa(daa.daaId));
     const deleteResponses = await Promise.all(deletePromises);
     const failedDeletes = deleteResponses.filter(resp => resp.status !== 200);
-    const fullSelectedDac = await DAC.get(selectedDac.dacId); // THIS IS HACKY! BUT ALL I CAN DO RIGHT NOW!
+    const fullSelectedDac = await DAC.get(selectedDac.dacId); // THIS IS HACKY! BUT ALL I CAN DO
     if (fullSelectedDac.associatedDaa.daaId === 21) {
       await DAA.deleteDacDaaRelationship(21, selectedDac.dacId).then((resp) => {
         if (resp.status !== 200) {
@@ -108,15 +107,7 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({text: 'Some DAAs could not be deleted.'});
       return;
     }
-  
-    // const matchingDaas = daas.filter(daa => daa.dacs.some(d => d.dacId === selectedDac.dacId));
-    // const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
-    //   return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
-    // });
-    // const daa = selectedDac.associatedDaa;
-    // await DAA.deleteDaa(daa.daaId).then((resp) => {
-    //   statusDaa = resp.status;
-    // });
+    
     await DAC.delete(selectedDac.dacId).then((resp) => {
       statusDac = resp.status;
     });
