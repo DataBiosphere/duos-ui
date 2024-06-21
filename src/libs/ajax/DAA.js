@@ -96,4 +96,10 @@ export const DAA = {
     const res = await axios.delete(url, Config.authOpts());
     return res;
   },
+
+  sendDaaUpdateEmails: async (dacId, oldDaaId) => {
+    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/{newDaaName}`;
+    const res = await axios.post(url, {}, Config.authOpts());
+    return res.data;
+  }
 };
