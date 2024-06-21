@@ -107,7 +107,7 @@ export const ManageDac = function ManageDac() {
       Notifications.showError({text: 'Some DAAs could not be deleted.'});
       return;
     }
-    
+
     await DAC.delete(selectedDac.dacId).then((resp) => {
       statusDac = resp.status;
     });
