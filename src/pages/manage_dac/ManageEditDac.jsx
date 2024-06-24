@@ -40,8 +40,8 @@ export default function ManageEditDac(props) {
   const [newDaaId, setNewDaaId] = useState(null);
   const [uploadDAA, setUploadDaa] = useState(null);
   const [selectedDaa, setSelectedDaa] = useState(null);
+  const [createdDaa, setCreatedDaa] = useState(null);
   const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
-  const [deleteDaa, setDeleteDaa] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const dacId = props.match.params.dacId;
@@ -57,29 +57,9 @@ export default function ManageEditDac(props) {
         setDaas(daas);
         const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
         setMatchingDaas(matchingDaas);
-        console.log(matchingDaas);
         const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-        console.log(daa);
         setDaa(daa);
         setSelectedDaa(daa?.daaId ? daa.daaId : null);
-        // if (daa?.file.fileName !== 'DUOS Uniform Data Access Agreement.docx') {
-        //   setUploadDaa(true);
-        // } else { 
-        //   setUploadDaa(false);
-        // }
-        // if (matchingDaas.length > 0) {
-        //   const daa = matchingDaas.reduce((latestDaa, currentDaa) => {
-        //     return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
-        //   });
-        //   setDaa(daa);
-        //   if (daa && daa.file) {
-        //     if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx') {
-        //       setUploadDaa(true);
-        //     } else {
-        //       setUploadDaa(false);
-        //     }
-        //   }
-        // }
         setIsLoading(false);
       }
       catch(e) {
@@ -99,6 +79,11 @@ export default function ManageEditDac(props) {
         await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
       }
 
+      let newDaa = null;
+      if (newDaaId !== null) {
+        newDaa = await DAA.getDaaById(newDaaId);
+      }
+
       // Order here is important. Since users cannot have multiple roles in the
       // same DAC, we have to make sure we remove users before re-adding any
       // back in a different role.
@@ -111,13 +96,14 @@ export default function ManageEditDac(props) {
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
       // const ops5 = daaFileData && uploadedDAAFile ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
       const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
-      const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDac?.daaId)] : [];
+      const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
       // ops6 --> check if newDaaId has changed (if it's not null & is not equal to the current daaId, then we need to email!
       // const ops7 = deleteDaa === true && daaFileData && uploadDAA ? [() => DAA.deleteDacDaaRelationship(daa.daaId, currentDac.dacId)] : [];
-      // need to add email operation ass well!!!!! 
+      // need to add email operation ass well!!!!!
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
-      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6, ops7);
+      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
       const responses = await PromiseSerial(allOperations);
+      console.log(responses);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
@@ -281,7 +267,16 @@ export default function ManageEditDac(props) {
     setUploadedDaaFile(attachment);
     // setUploadDaa(true);
     setDaaFileData(attachment[0]);
-    await DAA.createDaa(attachment[0], state.dac.dacId);
+    const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
+    // const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [async() => {
+      // const newDaa = await DAA.getDaaById(newDaaId);
+    console.log(createdDaa);
+    console.log('dacId', state.dac.dacId);
+    console.log('oldDaaId', state.dac?.associatedDac?.daaId);
+    console.log('newDaaName',createdDaa.data.file.fileName);
+    DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
+    setCreatedDaa(createdDaa.data);
+    console.log(createdDaa.data);
     setState(prev => ({
       ...prev,
       dirtyFlag: true
@@ -291,13 +286,13 @@ export default function ManageEditDac(props) {
   const DaaItem = ({ specificDaa }) => (
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
       <input type="radio" name="daa"  value="upload" checked={selectedDaa === specificDaa.daaId || (daa?.daaId ? daa.daaId === specificDaa.daaId : false)} onChange={() => {
-                              setSelectedDaa(specificDaa.daaId);
-                              setNewDaaId(specificDaa.daaId);
-                              setState(prev => ({
-                                ...prev,
-                                dirtyFlag: true
-                              }));
-                            }} style={{accentColor:'#00609f'}}/>
+        setSelectedDaa(specificDaa.daaId);
+        setNewDaaId(specificDaa.daaId);
+        setState(prev => ({
+          ...prev,
+          dirtyFlag: true
+        }));
+      }} style={{accentColor:'#00609f'}}/>
       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
         <div className="col-lg-9">
           <div className='row' style={{paddingLeft:'15px'}}>
@@ -309,7 +304,7 @@ export default function ManageEditDac(props) {
         </div>
         <div className="col-lg-3">
           <div style={{ marginLeft: '10px' }}>
-            <a target="_blank" rel="noreferrer" download={specificDaa.file.fileName} onClick={() => {DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName)}} className="button button-white" style={{ padding: '10px 12px' }}>
+            <a target="_blank" rel="noreferrer" download={specificDaa.file.fileName} onClick={() => {DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName);}} className="button button-white" style={{ padding: '10px 12px' }}>
               <span className="glyphicon glyphicon-download-alt"></span>
             </a>
           </div>
@@ -475,7 +470,7 @@ export default function ManageEditDac(props) {
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                      <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
+                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <input type="radio" name="daa" value="default" checked={selectedDaa === 21 || (daa?.daaId ? daa.daaId === 21 : false)}
@@ -505,43 +500,30 @@ export default function ManageEditDac(props) {
                     <hr/>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                      <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use your own agreement</label>
-                      <br/>
-                      { //daa && daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx' && 
-                      matchingDaas.map((daa, index) => (
-                        <DaaItem key={index} specificDaa={daa}/>
-                      ))
-                      // <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                      //   <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
-                      //   <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                      //     <div className="col-lg-9">
-                      //       <div className='row' style={{paddingLeft:'15px'}}>
-                      //         {daa?.file && daa.file.fileName && daa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx' ? daa.file.fileName : ''}
-                      //       </div>
-                      //       <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
-                      //       Uploaded on {daa?.updateDate ? new Date(daa.updateDate).toLocaleDateString() : ''}
-                      //       </div>
-                      //     </div>
-                      //     <div className="col-lg-3">
-                      //       <div style={{ marginLeft: '10px' }}>
-                      //         <a target="_blank" rel="noreferrer" download={daa.file.fileName} onClick={() => {DAA.getDaaFileById(daa.daaId, daa.file.fileName)}} className="button button-white" style={{ padding: '10px 12px' }}>
-                      //           <span className="glyphicon glyphicon-download-alt"></span>
-                      //         </a>
-                      //       </div>
-                      //     </div>
-                      //   </div>
-                      // </div>
-                      }
-                      {uploadedDAAFile !== null &&
-                       <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                        <input type="radio" name="daa"  value="upload" checked={uploadedDAAFile} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
+                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use your own agreement</label>
+                        <br/>
+                        {
+                          matchingDaas.map((daa, index) => (
+                            <DaaItem key={index} specificDaa={daa}/>
+                          ))
+                        }
+                        {uploadedDAAFile !== null &&
+                        <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
+                          <input type="radio" name="daa"  value="upload" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId || (daa?.daaId ? daa.daaId === createdDaa.daaId : false)} onChange={() => {
+                            setSelectedDaa(createdDaa.daaId);
+                            setNewDaaId(createdDaa.daaId);
+                            setState(prev => ({
+                              ...prev,
+                              dirtyFlag: true
+                            }));
+                          }} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div className="col-lg-9">
                               <div className='row' style={{paddingLeft:'15px'}}>
                                 {daaFileData.name}
                               </div>
                               <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
-                              Uploaded on {new Date().toLocaleDateString()}
+                                Uploaded on {new Date().toLocaleDateString()}
                               </div>
                             </div>
                             <div className="col-lg-3">
@@ -552,21 +534,21 @@ export default function ManageEditDac(props) {
                               </div>
                             </div>
                           </div>
-                      </div>
-                      }
-                      <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
-                        <button className="button button-white" onClick={(event) => {
-                                                                          event.preventDefault();
-                                                                          setShowUploadModal(true)
-                                                                        }}> 
-                          <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <PublishIcon style={{scale:"1.5"}}/>
-                            <div style={{ marginLeft: '10px' }}>
-                              Upload file
+                        </div>
+                        }
+                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
+                          <button className="button button-white" onClick={(event) => {
+                            event.preventDefault();
+                            setShowUploadModal(true);
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <PublishIcon style={{scale:'1.5'}}/>
+                              <div style={{ marginLeft: '10px' }}>
+                                Upload file
+                              </div>
                             </div>
-                          </div>
-                        </button>
-                      </div>
+                          </button>
+                        </div>
                       </label>
                     </li>
                   </form>
