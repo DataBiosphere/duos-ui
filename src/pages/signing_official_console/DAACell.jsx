@@ -10,7 +10,10 @@ export default function DAACell(props) {
   const card = libraryCards?.find(card => card.institutionId === institutionId);
   const daaIds = researcher && card?.daaIds;
   const filteredDaas = daaIds && daas?.filter(daa => daaIds.includes(daa.daaId));
-  const hasDacId = filteredDaas && filteredDaas.some(daa => daa.dacs.some(dac => dac.dacId === rowDac.dacId));
+  const hasDacId = filteredDaas && filteredDaas.some(daa => daa?.dacs?.some(dac => dac.dacId === rowDac.dacId));
+  // const [fullDac, setFullDac] = useState(null);
+  // const hasDacId = filteredDaas && filteredDaas.some(daa => daa.daaId === fullDac.associatedDaa.daaId);
+
 
   const createDaaLcLink = async (daaId, researcher, dacName) => {
     try {
@@ -33,7 +36,7 @@ export default function DAACell(props) {
   };
 
   const handleClick = async (daas, specificDac, researcher) => {
-    const daaId = daas.find(daa => daa.dacs.some(dac => dac.dacId === specificDac.dacId))?.daaId;
+    const daaId = daas.find(daa => daa?.dacs?.some(dac => dac.dacId === specificDac.dacId))?.daaId;
     if (!hasDacId) {
       createDaaLcLink(daaId, researcher, specificDac.name);
     } else {
