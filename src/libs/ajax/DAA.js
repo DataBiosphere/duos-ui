@@ -97,9 +97,9 @@ export const DAA = {
     return res;
   },
 
-  sendDaaUpdateEmails: async (dacId, oldDaaId) => {
-    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/{newDaaName}`;
+  sendDaaUpdateEmails: async (dacId, oldDaaId, newDaaName) => {
+    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`;
     const res = await axios.post(url, {}, Config.authOpts());
-    return res.data;
+    return res.status;
   }
 };
