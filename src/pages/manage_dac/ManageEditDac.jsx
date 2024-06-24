@@ -38,14 +38,13 @@ export default function ManageEditDac(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [daas, setDaas] = useState([]);
   const [newDaaId, setNewDaaId] = useState(null);
-  const [uploadDAA, setUploadDaa] = useState(null);
   const [selectedDaa, setSelectedDaa] = useState(null);
   const [createdDaa, setCreatedDaa] = useState(null);
   const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const dacId = props.match.params.dacId;
-  const [daa, setDaa] = useState(daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId)));
+  const [daa, setDaa] = useState(daas.find(daa => daa?.dacs?.some(d => d.dacId === state.dac.dacId)));
   const [matchingDaas, setMatchingDaas] = useState([]);
 
   useEffect(() => {
@@ -95,6 +94,10 @@ export default function ManageEditDac(props) {
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
       const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
+      // console.log(currentDac.dacId);
+      // console.log(currentDac?.associatedDaa?.daaId);
+      // console.log(newDaa.file.fileName);
+      // console.log('sanity check', newDaaId);
       const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
       // ops6 --> check if newDaaId has changed (if it's not null & is not equal to the current daaId, then we need to email!
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
@@ -262,6 +265,9 @@ export default function ManageEditDac(props) {
     setUploadedDaaFile(attachment);
     setDaaFileData(attachment[0]);
     const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
+    // console.log(state.dac.dacId);
+    // console.log(state.dac?.associatedDaa?.daaId);
+    // console.log(createdDaa.data.file.fileName);
     DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
     setCreatedDaa(createdDaa.data);
     setState(prev => ({
@@ -272,7 +278,8 @@ export default function ManageEditDac(props) {
 
   const DaaItem = ({ specificDaa }) => (
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-      <input type="radio" name="daa"  value="upload" checked={selectedDaa === specificDaa.daaId || (daa?.daaId ? daa.daaId === specificDaa.daaId : false)} onChange={() => {
+      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId || (daa?.daaId ? daa.daaId === specificDaa.daaId : false)} onChange={() => {
+        // console.log(specificDaa.file.fileName);
         setSelectedDaa(specificDaa.daaId);
         setNewDaaId(specificDaa.daaId);
         setState(prev => ({
@@ -460,8 +467,9 @@ export default function ManageEditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" value="default" checked={selectedDaa === 21 || (daa?.daaId ? daa.daaId === 21 : false)}
+                          <input type="radio" name="daa" checked={selectedDaa === 21 || (daa?.daaId ? daa.daaId === 21 : false)}
                             onChange={() => {
+                              // console.log('duos daa');
                               setSelectedDaa(21);
                               setNewDaaId(21);
                               setState(prev => ({
@@ -496,7 +504,8 @@ export default function ManageEditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa"  value="upload" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId || (daa?.daaId ? daa.daaId === createdDaa.daaId : false)} onChange={() => {
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId || (daa?.daaId ? daa.daaId === createdDaa.daaId : false)} onChange={() => {
+                            // console.log('createdDaa.file.fileName');
                             setSelectedDaa(createdDaa.daaId);
                             setNewDaaId(createdDaa.daaId);
                             setState(prev => ({
