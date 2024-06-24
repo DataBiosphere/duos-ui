@@ -116,6 +116,11 @@ export const UploadDaaModal = (props) => {
             </div>
           )}
         </Dropzone>
+        {
+          modalState.attachment.length !== 0 && (
+            <strong style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '20px', fontSize: '1.6rem', textDecoration: 'underline'}}>Clicking Save will create this new Data Access Agreement and associate it with this DAC.</strong>
+          )
+        }
         <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px', marginTop:'20px'}}>
           <button
             id='btn_save'
