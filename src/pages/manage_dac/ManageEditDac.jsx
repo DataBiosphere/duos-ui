@@ -94,16 +94,11 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      // const ops5 = daaFileData && uploadedDAAFile ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
       const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
       const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
       // ops6 --> check if newDaaId has changed (if it's not null & is not equal to the current daaId, then we need to email!
-      // const ops7 = deleteDaa === true && daaFileData && uploadDAA ? [() => DAA.deleteDacDaaRelationship(daa.daaId, currentDac.dacId)] : [];
-      // need to add email operation ass well!!!!!
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
-      // const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
       const responses = await PromiseSerial(allOperations);
-      console.log(responses);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
       if (!ld.isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
@@ -265,18 +260,10 @@ export default function ManageEditDac(props) {
 
   const handleAttachment = async(attachment) => {
     setUploadedDaaFile(attachment);
-    // setUploadDaa(true);
     setDaaFileData(attachment[0]);
     const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
-    // const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [async() => {
-      // const newDaa = await DAA.getDaaById(newDaaId);
-    console.log(createdDaa);
-    console.log('dacId', state.dac.dacId);
-    console.log('oldDaaId', state.dac?.associatedDac?.daaId);
-    console.log('newDaaName',createdDaa.data.file.fileName);
     DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
     setCreatedDaa(createdDaa.data);
-    console.log(createdDaa.data);
     setState(prev => ({
       ...prev,
       dirtyFlag: true
