@@ -44,7 +44,6 @@ export default function ManageEditDac(props) {
   const [daaFileData, setDaaFileData] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const dacId = props.match.params.dacId;
-  const [daa, setDaa] = useState(daas.find(daa => daa?.dacs?.some(d => d.dacId === state.dac.dacId)));
   const [matchingDaas, setMatchingDaas] = useState([]);
 
   useEffect(() => {
@@ -57,7 +56,6 @@ export default function ManageEditDac(props) {
         const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
         setMatchingDaas(matchingDaas);
         const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-        setDaa(daa);
         setSelectedDaa(daa?.daaId ? daa.daaId : null);
         setIsLoading(false);
       }
@@ -276,21 +274,22 @@ export default function ManageEditDac(props) {
     }));
   };
 
+  const handleDaaChange = (daaId) => {
+    setSelectedDaa(daaId);
+    setNewDaaId(daaId);
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true
+    }));
+  };
+
   const DaaItem = ({ specificDaa }) => (
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId || (daa?.daaId ? daa.daaId === specificDaa.daaId : false)} onChange={() => {
-        // console.log(specificDaa.file.fileName);
-        setSelectedDaa(specificDaa.daaId);
-        setNewDaaId(specificDaa.daaId);
-        setState(prev => ({
-          ...prev,
-          dirtyFlag: true
-        }));
-      }} style={{accentColor:'#00609f'}}/>
+      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
         <div className="col-lg-9">
           <div className='row' style={{paddingLeft:'15px'}}>
-            {specificDaa?.file && specificDaa.file.fileName && specificDaa.file.fileName !== 'DUOS Uniform Data Access Agreement.docx' ? specificDaa.file.fileName : ''}
+            {specificDaa.file.fileName}
           </div>
           <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
             Uploaded on {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
@@ -467,16 +466,8 @@ export default function ManageEditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 21 || (daa?.daaId ? daa.daaId === 21 : false)}
-                            onChange={() => {
-                              // console.log('duos daa');
-                              setSelectedDaa(21);
-                              setNewDaaId(21);
-                              setState(prev => ({
-                                ...prev,
-                                dirtyFlag: true
-                              }));
-                            }} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa === 21}
+                            onChange={() => handleDaaChange(21)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div className="col-lg-9">
                               DUOS Uniform DAA
@@ -504,15 +495,7 @@ export default function ManageEditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId || (daa?.daaId ? daa.daaId === createdDaa.daaId : false)} onChange={() => {
-                            // console.log('createdDaa.file.fileName');
-                            setSelectedDaa(createdDaa.daaId);
-                            setNewDaaId(createdDaa.daaId);
-                            setState(prev => ({
-                              ...prev,
-                              dirtyFlag: true
-                            }));
-                          }} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div className="col-lg-9">
                               <div className='row' style={{paddingLeft:'15px'}}>
