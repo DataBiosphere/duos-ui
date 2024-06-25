@@ -83,5 +83,23 @@ export const DAA = {
     const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
     const res = await axios.put(url, {}, Config.authOpts());
     return res.status;
+  },
+
+  deleteDaa: async (daaId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}`;
+    const res = await axios.delete(url, Config.authOpts());
+    return res;
+  },
+
+  deleteDacDaaRelationship: async (daaId, dacId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
+    const res = await axios.delete(url, Config.authOpts());
+    return res;
+  },
+
+  sendDaaUpdateEmails: async (dacId, oldDaaId, newDaaName) => {
+    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`;
+    const res = await axios.post(url, {}, Config.authOpts());
+    return res.status;
   }
 };

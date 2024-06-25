@@ -6,7 +6,6 @@ import { DAA } from '../../libs/ajax/DAA';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
-import {FormField, FormFieldTypes} from '../../components/forms/forms';
 import { Link } from 'react-router-dom';
 import { DacUsers } from './DacUsers';
 import { Notifications } from '../../libs/utils';
@@ -14,11 +13,14 @@ import editDACIcon from '../../images/dac_icon.svg';
 import backArrowIcon from '../../images/back_arrow.svg';
 import { Spinner } from '../../components/Spinner';
 import { Styles } from '../../libs/theme';
-import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
+import DUOSUniformDataAccessAgreement from '../../assets/DUOS_Uniform_Data_Access_Agreement.pdf';
+import PublishIcon from '@mui/icons-material/Publish';
+import { UploadDaaModal } from '../../components/modals/UploadDaaModal';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
+const ADMIN = 'Admin';
 
 export default function ManageEditDac(props) {
   const [state, setState] = useState({
@@ -34,11 +36,14 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [daas, setDaas] = useState([]);
-  const [uploadDAA, setUploadDaa] = useState(null);
+  const [newDaaId, setNewDaaId] = useState(null);
+  const [selectedDaa, setSelectedDaa] = useState(null);
+  const [createdDaa, setCreatedDaa] = useState(null);
+  const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const dacId = props.match.params.dacId; // the existence of this can add as a flag for edit mode?
-  const daa = daas.find(daa => daa.dacs.some(d => d.dacId === state.dac.dacId));
+  const [matchingDaas, setMatchingDaas] = useState([]);
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
   // const handleUploadDAA = (event) => {
@@ -58,15 +63,10 @@ export default function ManageEditDac(props) {
           const fetchedDac = await DAC.get(dacId);
           const daas = await DAA.getDaas();
           setState(prev => ({ ...prev, dac: fetchedDac }));
-          setDaas(daas);
-          const daa = daas.find(daa => daa.dacs.some(d => d.dacId === fetchedDac.dacId));
-          if (daa && daa.file) {
-            if (daa.file.fileName !== 'DUOS Uniform Data Access Agreement') {
-              setUploadDaa(true);
-            } else {
-              setUploadDaa(false);
-            }
-          }
+          const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
+          setMatchingDaas(matchingDaas);
+          const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
+          setSelectedDaa(daa?.daaId ? daa.daaId : null);
           setIsLoading(false);
         }
         catch(e) {
@@ -85,50 +85,56 @@ export default function ManageEditDac(props) {
 
     let currentDac = state.dac;
     if (state.dirtyFlag) {
-      // TODO: removed the admin check .. not sure how to get the user role if not passed in as prop
-      if (dacId !== undefined) {
-        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
-      } else {
-        if (uploadDAA !== null) {
-          if (uploadDAA === true) {
-            if (daaFileData === null) {
-              handleErrors('Please upload a DAA file before saving.');
-              return;
-            }
-            // i don't think we need an extra step here because it will get handled in ops5 ?
-            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          } else {
-            // need to create the link between the DAA and the DAC --> new endpoint!!
-            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          }
+      if (props.location.state.userRole === ADMIN) {
+        if (dacId !== undefined) {
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
-          return;
+          if (daaFileData !== null) {
+            if (daaFileData === true) {
+              if (daaFileData === null) {
+                handleErrors('Please upload a DAA file before saving.');
+                return;
+              }
+              // i don't think we need an extra step here because it will get handled in ops5 ?
+              currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+            } else {
+              // need to create the link between the DAA and the DAC --> new endpoint!!
+              currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+            }
+          } else {
+            handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+            return;
+          }
         }
-      }
 
-      // Order here is important. Since users cannot have multiple roles in the
-      // same DAC, we have to make sure we remove users before re-adding any
-      // back in a different role.
-      // Chairs are a special case since we cannot remove all chairs from a DAC
-      // so we handle that case first.
-      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
-      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
-      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const ops5 = daaFileData && uploadDAA === true ? [() => DAA.createDaa(daaFileData, currentDac.dacId)] : [];
-      const ops6 = uploadDAA === false ? [() => DAA.addDaaToDac(12, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
-      const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
-      if (!ld.isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
+        let newDaa = null;
+        if (newDaaId !== null) {
+          newDaa = await DAA.getDaaById(newDaaId);
+        }
+
+        // Order here is important. Since users cannot have multiple roles in the
+        // same DAC, we have to make sure we remove users before re-adding any
+        // back in a different role.
+        // Chairs are a special case since we cannot remove all chairs from a DAC
+        // so we handle that case first.
+        const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+        const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+        const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
+        const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
+        const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+        const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
+        const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
+        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
+        const responses = await PromiseSerial(allOperations);
+        const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
+        if (!ld.isEmpty(errorCodes)) {
+          handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
+        } else {
+          closeHandler();
+        }
       } else {
         closeHandler();
       }
-    } else {
-      closeHandler();
     }
   };
 
@@ -280,6 +286,50 @@ export default function ManageEditDac(props) {
     }
   };
 
+  const handleAttachment = async(attachment) => {
+    setUploadedDaaFile(attachment);
+    setDaaFileData(attachment[0]);
+    const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
+    DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
+    setCreatedDaa(createdDaa.data);
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true
+    }));
+  };
+
+  const handleDaaChange = (daaId) => {
+    setSelectedDaa(daaId);
+    setNewDaaId(daaId);
+    setState(prev => ({
+      ...prev,
+      dirtyFlag: true
+    }));
+  };
+
+  const DaaItem = ({ specificDaa }) => (
+    <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
+      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
+      <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+        <div className="col-lg-9">
+          <div className='row' style={{paddingLeft:'15px'}}>
+            {specificDaa.file.fileName}
+          </div>
+          <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
+            Uploaded on {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
+          </div>
+        </div>
+        <div className="col-lg-3">
+          <div style={{ marginLeft: '10px' }}>
+            <a target="_blank" rel="noreferrer" download={specificDaa.file.fileName} onClick={() => {DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName);}} className="button button-white" style={{ padding: '10px 12px' }}>
+              <span className="glyphicon glyphicon-download-alt"></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     isLoading ?
       <Spinner/> :
@@ -318,7 +368,7 @@ export default function ManageEditDac(props) {
                         name="name"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -333,7 +383,7 @@ export default function ManageEditDac(props) {
                         name="description"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -349,7 +399,7 @@ export default function ManageEditDac(props) {
                         name="email"
                         className="form-control col-lg-12 vote-input"
                         required={true}
-                        disabled={props.userRole === CHAIRPERSON}
+                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -444,59 +494,70 @@ export default function ManageEditDac(props) {
                   <form>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                        <input type="radio" name="daa" value="default" checked={uploadDAA === false}
-                          onChange={() => {
-                            setUploadDaa(false);
-                            setState(prev => ({
-                              ...prev,
-                              dirtyFlag: true
-                            }));
-                          }} style={{accentColor:'#00609f'}}/>
-                        &nbsp;&nbsp;DUOS Uniform DAA
-                        <div style={{marginTop:'10px'}}>
-                          <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink} className="button button-white">
-                            <span className="glyphicon glyphicon-download-alt"></span>
-                            {' '}
-                            DUOS Uniform DAA
-                          </a>
+                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
+                        <br/>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <input type="radio" name="daa" checked={selectedDaa === 17}
+                            onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
+                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
+                            <div className="col-lg-9">
+                              DUOS Uniform DAA
+                            </div>
+                            <div className="col-lg-3">
+                              <div style={{ marginLeft: '10px' }}>
+                                <a target="_blank" rel="noreferrer" href={DUOSUniformDataAccessAgreement} className="button button-white" style={{ padding: '10px 12px' }}>
+                                  <span className="glyphicon glyphicon-download-alt"></span>
+                                </a>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </label>
                     </li>
+                    <hr/>
                     <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
                       <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <input type="radio" name="daa"  value="upload" checked={uploadDAA === true} onChange={() => setUploadDaa(true)} style={{accentColor:'#00609f'}}/>
-                        &nbsp;&nbsp;or use your own DAA
-                        {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <input
-                            id="txt_daaName"
-                            type="text"
-                            defaultValue={daaFileData ? daaFileData.name : ''}
-                            onChange={handleChange} // need to change handleChange
-                            name="daaName"
-                            className="form-control col-lg-12 vote-input"
-                            required={true}
-                            disabled={props.userRole === CHAIRPERSON}
-                          />
-                        </div> */}
-                        <div className="button-white" style={{marginTop: '10px'}}>
-                          <FormField
-                            key={'uploadedDaa'}
-                            type={FormFieldTypes.FILE}
-                            id={'uploadedDaa'}
-                            placeholder={daa?.file && daa.file.fileName ? daa.file.fileName : ''}
-                            onChange={({value}) => {
-                              setDaaFileData(value);
-                              setUploadDaa(true);
-                              setState(prev => ({
-                                ...prev,
-                                dirtyFlag: true
-                              }));
-                            }}
-                            // onChange={(event) => setDaaFileData(event.target.files[0])}
-                            // onChange={({value}) => handleDAAUpload(value)}
-                            // // validation={validation.irbDocument}
-                            // onChange={handleDAAUpload}
-                          />
+                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use your own agreement</label>
+                        <br/>
+                        {
+                          matchingDaas.map((daa, index) => (
+                            <DaaItem key={index} specificDaa={daa}/>
+                          ))
+                        }
+                        {uploadedDAAFile !== null &&
+                        <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
+                            <div className="col-lg-9">
+                              <div className='row' style={{paddingLeft:'15px'}}>
+                                {daaFileData.name}
+                              </div>
+                              <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
+                                Uploaded on {new Date().toLocaleDateString()}
+                              </div>
+                            </div>
+                            <div className="col-lg-3">
+                              <div style={{ marginLeft: '10px' }}>
+                                <a target="_blank" rel="noreferrer" download={uploadedDAAFile[0].name} href={URL.createObjectURL(uploadedDAAFile[0])} className="button button-white" style={{ padding: '10px 12px' }}>
+                                  <span className="glyphicon glyphicon-download-alt"></span>
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        }
+                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
+                          <button className="button button-white" onClick={(event) => {
+                            event.preventDefault();
+                            setShowUploadModal(true);
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <PublishIcon style={{scale:'1.5'}}/>
+                              <div style={{ marginLeft: '10px' }}>
+                                Upload file
+                              </div>
+                            </div>
+                          </button>
                         </div>
                       </label>
                     </li>
@@ -506,6 +567,15 @@ export default function ManageEditDac(props) {
             </div>
           </div>
         </div>
+        {showUploadModal && (
+          <UploadDaaModal
+            showModal={showUploadModal}
+            setShowModal={setShowUploadModal}
+            userRole={props.location.state.userRole}
+            onCloseRequest={() => setShowUploadModal(false)}
+            onAttachmentChange={handleAttachment}
+          />
+        )}
       </div>
   );
 }

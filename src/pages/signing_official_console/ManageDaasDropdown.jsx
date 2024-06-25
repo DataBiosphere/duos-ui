@@ -50,7 +50,7 @@ export default function ManageDaasDropdown(props) {
       return (
         <DownloadLink
           label={`Download agreement`}
-          onDownload={() => {DAA.getDaaFileById(1, 'DUOS Uniform Data Access Agreement');}} // TODO: will need to change the id to be id of real DUOS Uniform DAA once created
+          onDownload={() => {DAA.getDaaFileById(17, 'DUOS Uniform Data Access Agreement');}}
         />
       );
     }
