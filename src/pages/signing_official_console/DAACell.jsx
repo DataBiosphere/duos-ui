@@ -11,8 +11,6 @@ export default function DAACell(props) {
   const daaIds = researcher && card?.daaIds;
   const filteredDaas = daaIds && daas?.filter(daa => daaIds.includes(daa.daaId));
   const hasDacId = filteredDaas && filteredDaas.some(daa => daa?.dacs?.some(dac => dac.dacId === rowDac.dacId));
-  // const [fullDac, setFullDac] = useState(null);
-  // const hasDacId = filteredDaas && filteredDaas.some(daa => daa.daaId === fullDac.associatedDaa.daaId);
 
 
   const createDaaLcLink = async (daaId, researcher, dacName) => {
