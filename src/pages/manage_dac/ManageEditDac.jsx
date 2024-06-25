@@ -456,8 +456,8 @@ export default function ManageEditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 21}
-                            onChange={() => handleDaaChange(21)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa === 17}
+                            onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div className="col-lg-9">
                               DUOS Uniform DAA
