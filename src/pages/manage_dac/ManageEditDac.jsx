@@ -36,7 +36,6 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [daas, setDaas] = useState([]);
   const [newDaaId, setNewDaaId] = useState(null);
   const [selectedDaa, setSelectedDaa] = useState(null);
   const [createdDaa, setCreatedDaa] = useState(null);
@@ -52,7 +51,6 @@ export default function ManageEditDac(props) {
         const fetchedDac = await DAC.get(dacId);
         const daas = await DAA.getDaas();
         setState(prev => ({ ...prev, dac: fetchedDac }));
-        setDaas(daas);
         const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
         setMatchingDaas(matchingDaas);
         const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
@@ -91,13 +89,8 @@ export default function ManageEditDac(props) {
       const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
       const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
       const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : []; // this needs to change once we actually have a DUOS DAA
-      // console.log(currentDac.dacId);
-      // console.log(currentDac?.associatedDaa?.daaId);
-      // console.log(newDaa.file.fileName);
-      // console.log('sanity check', newDaaId);
+      const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
       const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
-      // ops6 --> check if newDaaId has changed (if it's not null & is not equal to the current daaId, then we need to email!
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
       const responses = await PromiseSerial(allOperations);
       const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
@@ -263,9 +256,6 @@ export default function ManageEditDac(props) {
     setUploadedDaaFile(attachment);
     setDaaFileData(attachment[0]);
     const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
-    // console.log(state.dac.dacId);
-    // console.log(state.dac?.associatedDaa?.daaId);
-    // console.log(createdDaa.data.file.fileName);
     DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
     setCreatedDaa(createdDaa.data);
     setState(prev => ({
