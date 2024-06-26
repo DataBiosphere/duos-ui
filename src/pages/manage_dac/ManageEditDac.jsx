@@ -2,6 +2,7 @@ import * as ld from 'lodash';
 import React, { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax/DAC';
+// import { DAA } from '../../libs/ajax/DAA';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
@@ -32,14 +33,15 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [newDaaId, setNewDaaId] = useState(null);
-  const [selectedDaa, setSelectedDaa] = useState(null);
-  const [createdDaa, setCreatedDaa] = useState(null);
-  const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
-  const [daaFileData, setDaaFileData] = useState(null);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  // const [newDaaId, setNewDaaId] = useState(null);
+  // const [selectedDaa, setSelectedDaa] = useState(null);
+  // const [createdDaa, setCreatedDaa] = useState(null);
+  // const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
+  // const [daaFileData, setDaaFileData] = useState(null);
+  // const [showUploadModal, setShowUploadModal] = useState(false);
+  const [fetchedDac, setFetchedDac] = useState(null);
   const dacId = props.match.params.dacId; // the existence of this can add as a flag for edit mode?
-  const [matchingDaas, setMatchingDaas] = useState([]);
+  // const [matchingDaas, setMatchingDaas] = useState([]);
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
   // don't want to do this if add dac
@@ -48,20 +50,12 @@ export default function ManageEditDac(props) {
       if (dacId !== undefined) {
         try {
           const fetchedDac = await DAC.get(dacId);
-          const daas = await DAA.getDaas();
+          setFetchedDac(fetchedDac);
           setState(prev => ({ ...prev, dac: fetchedDac }));
-          const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
-          setMatchingDaas(matchingDaas);
-          const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-          setSelectedDaa(daa?.daaId ? daa.daaId : null);
-          setIsLoading(false);
         }
         catch(e) {
           Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
-          setIsLoading(false);
         }
-      } else {
-        setIsLoading(false);
       }
     };
     fetchData();
@@ -77,27 +71,23 @@ export default function ManageEditDac(props) {
         if (dacId !== undefined) {
           await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          if (daaFileData !== null) {
-            if (daaFileData === true) {
-              if (daaFileData === null) {
-                handleErrors('Please upload a DAA file before saving.');
-                return;
-              }
-              // i don't think we need an extra step here because it will get handled in ops5 ?
-              currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-            } else {
-              // need to create the link between the DAA and the DAC --> new endpoint!!
-              currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-            }
-          } else {
-            handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
-            return;
-          }
-        }
-
-        let newDaa = null;
-        if (newDaaId !== null) {
-          newDaa = await DAA.getDaaById(newDaaId);
+          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          // if (daaFileData !== null) {
+          //   if (daaFileData === true) {
+          //     if (daaFileData === null) {
+          //       handleErrors('Please upload a DAA file before saving.');
+          //       return;
+          //     }
+          //     // i don't think we need an extra step here because it will get handled in ops5 ?
+          //     currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          //   } else {
+          //     // need to create the link between the DAA and the DAC --> new endpoint!!
+          //     currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          //   }
+          // } else {
+          //   handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+          //   return;
+          // }
         }
 
         // Order here is important. Since users cannot have multiple roles in the
@@ -110,9 +100,7 @@ export default function ManageEditDac(props) {
         const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
         const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
         const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-        const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
-        const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
-        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
+        const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
         const responses = await PromiseSerial(allOperations);
         const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
         if (!ld.isEmpty(errorCodes)) {
@@ -300,7 +288,7 @@ export default function ManageEditDac(props) {
             </div>
             <div style={Styles.HEADER_CONTAINER}>
               <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>{dacText}</div>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{dacId === undefined ? 'Create DAC' : state.dac.name}</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{dacId === undefined ? 'Create DAC' : fetchedDac?.name}</div>
             </div>
           </div>
           <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
@@ -352,86 +340,6 @@ export default function ManageEditDac(props) {
                 </div>
               </div>
               {
-              // radio two with input field (Enter your DAA name) & upload button
-              // const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
-              //   let irbUpdate, collaborationUpdate;
-              //   irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
-              //   collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
-              //   return assign(irbUpdate.data, collaborationUpdate.data);
-              // };
-                <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
-                  <form>
-                    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-                      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>
-                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
-                        <br/>
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa !== null ? selectedDaa === 17 : false}
-                            onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
-                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
-                            <div className="col-lg-9">
-                              DUOS Uniform DAA
-                            </div>
-                            <div className="col-lg-3">
-                              <div style={{ marginLeft: '10px' }}>
-                                <a target="_blank" rel="noreferrer" href={DUOSUniformDataAccessAgreement} className="button button-white" style={{ padding: '10px 12px' }}>
-                                  <span className="glyphicon glyphicon-download-alt"></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </label>
-                    </li>
-                    <hr/>
-                    <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-                      <label style={{fontWeight: 'normal', whiteSpace: 'nowrap' }}>
-                        <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use your own agreement</label>
-                        <br/>
-                        {
-                          matchingDaas.map((daa, index) => (
-                            <DaaItem key={index} specificDaa={daa}/>
-                          ))
-                        }
-                        {uploadedDAAFile !== null &&
-                        <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={selectedDaa !== null ? (uploadedDAAFile || selectedDaa === createdDaa.daaId) : false} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
-                          <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                            <div className="col-lg-9">
-                              <div className='row' style={{paddingLeft:'15px'}}>
-                                {daaFileData.name}
-                              </div>
-                              <div className='row' style={{fontSize:'1rem', paddingLeft:'15px'}}>
-                                Uploaded on {new Date().toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div className="col-lg-3">
-                              <div style={{ marginLeft: '10px' }}>
-                                <a target="_blank" rel="noreferrer" download={uploadedDAAFile[0].name} href={URL.createObjectURL(uploadedDAAFile[0])} className="button button-white" style={{ padding: '10px 12px' }}>
-                                  <span className="glyphicon glyphicon-download-alt"></span>
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        }
-                        <div style={{ display: 'flex', alignItems: 'center', paddingTop: '15px' }}>
-                          <button className="button button-white" onClick={(event) => {
-                            event.preventDefault();
-                            setShowUploadModal(true);
-                          }}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <PublishIcon style={{scale:'1.5'}}/>
-                              <div style={{ marginLeft: '10px' }}>
-                                Upload file
-                              </div>
-                            </div>
-                          </button>
-                        </div>
-                      </label>
-                    </li>
-                  </form>
-                </ul>
                 (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
                   <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
                   <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
