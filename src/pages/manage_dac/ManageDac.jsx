@@ -13,6 +13,8 @@ import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
+import ManageEditDacDaa from './ManageEditDacDaa';
+import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
@@ -231,7 +233,10 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showEditPage && (
-        <ManageEditDac/>
+        checkEnv(envGroups.DEV) ?
+          <ManageEditDacDaa/> :
+          <ManageEditDac/>
+        
       )}
     </div>
   );
