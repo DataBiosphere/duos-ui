@@ -76,6 +76,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/manage_edit_dac/:dacId" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_add_dac" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     {checkEnv(envGroups.DEV) && <AuthenticatedRoute path="/manage_edit_dac_daa/:dacId" component={ManageEditDacDaa} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
+    {checkEnv(envGroups.DEV) &&  <AuthenticatedRoute path="/manage_add_dac_daa" component={ManageEditDacDaa} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>

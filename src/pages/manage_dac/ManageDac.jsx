@@ -92,7 +92,7 @@ export const ManageDac = function ManageDac() {
 
   const handleDeleteDac = async () => {
     let statusDac;
-    const matchingDaas = daas.filter(daa => daa.initialDacId === selectedDac.dacId && daa.daaId !== 21);
+    const matchingDaas = daas.filter(daa => daa.initialDacId === selectedDac.dacId && daa.daaId !== 17);
     const deletePromises = matchingDaas.map(daa => DAA.deleteDaa(daa.daaId));
     const deleteResponses = await Promise.all(deletePromises);
     const failedDeletes = deleteResponses.filter(resp => resp.status !== 200);
@@ -165,7 +165,7 @@ export const ManageDac = function ManageDac() {
             style={{ marginTop: '30%', display: 'flex' }}
             onClick={addDac}
             to={{
-              pathname: 'manage_add_dac',
+              pathname: checkEnv(envGroups.DEV) ? `/manage_add_dac_daa` : `/manage_add_dac`,
               state: { userRole: userRole}
             }}
           >
