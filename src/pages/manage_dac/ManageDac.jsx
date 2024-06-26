@@ -97,8 +97,8 @@ export const ManageDac = function ManageDac() {
     const deleteResponses = await Promise.all(deletePromises);
     const failedDeletes = deleteResponses.filter(resp => resp.status !== 200);
     const fullSelectedDac = await DAC.get(selectedDac.dacId); // THIS IS HACKY! BUT ALL I CAN DO
-    if (fullSelectedDac.associatedDaa.daaId === 21) {
-      await DAA.deleteDacDaaRelationship(21, selectedDac.dacId).then((resp) => {
+    if (fullSelectedDac.associatedDaa.daaId === 17) {
+      await DAA.deleteDacDaaRelationship(17, selectedDac.dacId).then((resp) => {
         if (resp.status !== 200) {
           failedDeletes.push(resp);
         }
