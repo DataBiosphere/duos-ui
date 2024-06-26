@@ -46,15 +46,6 @@ export default function ManageEditDac(props) {
   const [matchingDaas, setMatchingDaas] = useState([]);
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
-  // const handleUploadDAA = (event) => {
-  //   setUploadDaa(event.target.checked);
-  // };
-
-  // const handleDAAUpload = (event) => {
-  //   const submitData = new FormData(event.target.form);
-  //   setDaaFileData(event.target.files[0]);
-  // }
-
   // don't want to do this if add dac
   useEffect(() => {
     const fetchData = async () => {
@@ -497,7 +488,7 @@ export default function ManageEditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 17}
+                          <input type="radio" name="daa" checked={selectedDaa !== null ? selectedDaa === 17 : false}
                             onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div className="col-lg-9">
@@ -526,7 +517,7 @@ export default function ManageEditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa !== null ? (uploadedDAAFile || selectedDaa === createdDaa.daaId) : false} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div className="col-lg-9">
                               <div className='row' style={{paddingLeft:'15px'}}>

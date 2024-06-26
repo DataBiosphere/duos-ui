@@ -12,6 +12,7 @@ import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
+import { Link } from 'react-router-dom';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
@@ -156,15 +157,18 @@ export const ManageDac = function ManageDac() {
           </div>
         </div>
         <div className="right-header-section">
-          <a
+          <Link
             id="btn_addDAC"
             className="col-md-12 btn-primary btn-add common-background"
             style={{ marginTop: '30%', display: 'flex' }}
             onClick={addDac}
-            href={'manage_add_dac'}
+            to={{
+              pathname: 'manage_add_dac',
+              state: { userRole: userRole}
+            }}
           >
             <span>Add DAC</span>
-          </a>
+          </Link>
         </div>
       </div>
       <ManageDacTable
