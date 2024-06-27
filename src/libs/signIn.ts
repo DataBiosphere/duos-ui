@@ -9,9 +9,30 @@ import { Storage } from '../libs/storage';
 import { History } from 'history';
 import { Auth } from './auth/auth';
 
+export const SignIn = {
+  checkToSAndRedirect: (redirectPath : string | null, history: History) =>  checkToSAndRedirect(redirectPath, history),
+  getRedirectTo: () => getRedirectTo(),
+  shouldRedirectTo: (page: string) => shouldRedirectTo(page),
+  attemptSignInCheckToSAndRedirect: (
+    redirectTo: string,
+    shouldRedirect: boolean,
+    history: History
+  ) => attemptSignInCheckToSAndRedirect(redirectTo, shouldRedirect, history),
+  registerAndRedirectNewUser: (
+    redirectTo: string,
+    shouldRedirect: boolean,
+    history: History
+  ) => registerAndRedirectNewUser(redirectTo, shouldRedirect, history),
+  handleConflictError: (
+    redirectTo: string,
+    shouldRedirect: boolean,
+    history: History
+  ) => handleConflictError(redirectTo, shouldRedirect, history),
+};
+
 // Utility function called in the normal success case and in the undocumented 409 case
 // Check for ToS Acceptance - redirect user if not set.
-export const checkToSAndRedirect = async (
+const checkToSAndRedirect = async (
   redirectPath: string | null,
   history: History
 ) => {
@@ -39,26 +60,26 @@ export const checkToSAndRedirect = async (
   }
 };
 
-export const getRedirectTo = (): string => {
+const getRedirectTo = (): string => {
   const queryParams = new URLSearchParams(window.location.search);
   return queryParams.get('redirectTo') || window.location.pathname;
 };
 
-export const shouldRedirectTo = (page: string): boolean =>
+const shouldRedirectTo = (page: string): boolean =>
   page !== '/' && page !== '/home';
 
-export const attemptSignInCheckToSAndRedirect = async (
+const attemptSignInCheckToSAndRedirect = async (
   redirectTo: string,
   shouldRedirect: boolean,
   history: History
 ) => {
-  await checkToSAndRedirect(shouldRedirect ? redirectTo : null, history);
+  await SignIn.checkToSAndRedirect(shouldRedirect ? redirectTo : null, history);
   Metrics.identify(Storage.getAnonymousId());
   Metrics.syncProfile();
   Metrics.captureEvent(eventList.userSignIn);
 };
 
-export const registerAndRedirectNewUser = async (
+const registerAndRedirectNewUser = async (
   redirectTo: string,
   shouldRedirect: boolean,
   history: History
@@ -73,13 +94,13 @@ export const registerAndRedirectNewUser = async (
   );
 };
 
-export const handleConflictError = async (
+const handleConflictError = async (
   redirectTo: string,
   shouldRedirect: boolean,
   history: History
 ) => {
   try {
-    await checkToSAndRedirect(shouldRedirect ? redirectTo : null, history);
+    await SignIn.checkToSAndRedirect(shouldRedirect ? redirectTo : null, history);
   } catch (error) {
     Auth.signOut();
   }

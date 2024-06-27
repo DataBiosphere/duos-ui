@@ -6,13 +6,7 @@ import { Auth } from '../libs/auth/auth';
 import CSS from 'csstype';
 import { useHistory } from 'react-router';
 import { OidcUser } from '../libs/auth/oidcBroker';
-import {
-  attemptSignInCheckToSAndRedirect,
-  getRedirectTo,
-  handleConflictError,
-  registerAndRedirectNewUser,
-  shouldRedirectTo,
-} from '../libs/signIn';
+import { SignIn } from '../libs/signIn';
 
 interface SignInButtonProps {
   style: CSS.Properties | undefined;
@@ -38,17 +32,17 @@ export const SignInButton = (props: SignInButtonProps) => {
   // eslint-disable-next-line no-unused-vars
   const onSuccess = async (_: OidcUser) => {
 
-    const redirectTo = getRedirectTo();
-    const shouldRedirect = shouldRedirectTo(redirectTo);
+    const redirectTo = SignIn.getRedirectTo();
+    const shouldRedirect = SignIn.shouldRedirectTo(redirectTo);
     Storage.setAnonymousId();
     try {
-      await attemptSignInCheckToSAndRedirect(
+      await SignIn.attemptSignInCheckToSAndRedirect(
         redirectTo,
         shouldRedirect,
         history
       );
     } catch (error: unknown) {
-      await registerAndRedirectNewUser(
+      await SignIn.registerAndRedirectNewUser(
         redirectTo,
         shouldRedirect,
         history
@@ -72,7 +66,7 @@ export const SignInButton = (props: SignInButtonProps) => {
         });
         break;
       case 409:
-        handleConflictError(redirectTo, shouldRedirect, history);
+        SignIn.handleConflictError(redirectTo, shouldRedirect, history);
         break;
       default:
         setShowError(true);
