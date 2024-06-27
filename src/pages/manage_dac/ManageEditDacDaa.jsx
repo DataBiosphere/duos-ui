@@ -78,11 +78,10 @@ export default function ManageEditDacDaa(props) {
         if (dacId !== undefined) {
           await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          // currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
           if (daaFileData === null && selectedDaa !== 21) {
             handleErrors('Please select either the default agreement or upload your own agreement before saving.');
             return;
-          } else if (daaFileData !== null && selectedDaa === null) { // not sure about this
+          } else if (daaFileData !== null && selectedDaa === undefined) {
             currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
             const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId);
             setCreatedDaa(createdDaa.data);
@@ -109,7 +108,7 @@ export default function ManageEditDacDaa(props) {
           //   return;
           // }
         }
-      
+
 
         let newDaa = null;
         if (newDaaId !== null) {
@@ -126,7 +125,7 @@ export default function ManageEditDacDaa(props) {
         const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
         const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
         const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-        const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
+        const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
         const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId && dacId !== undefined ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
         const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
         const responses = await PromiseSerial(allOperations);
@@ -308,17 +307,25 @@ export default function ManageEditDacDaa(props) {
         ...prev,
         dirtyFlag: true
       }));
-      // may possibly need more here?
+      setSelectedDaa(undefined);
     }
   };
 
   const handleDaaChange = (daaId) => {
-    setSelectedDaa(daaId);
-    setNewDaaId(daaId);
-    setState(prev => ({
-      ...prev,
-      dirtyFlag: true
-    }));
+    if (daaId === undefined) {
+      setSelectedDaa(undefined);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+    } else {
+      setSelectedDaa(daaId);
+      setNewDaaId(daaId);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+    }
   };
 
   const DaaItem = ({ specificDaa }) => (
@@ -504,8 +511,8 @@ export default function ManageEditDacDaa(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 17}
-                            onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa === 21}
+                            onChange={() => handleDaaChange(21)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div className="col-lg-9">
                               DUOS Uniform DAA
@@ -533,7 +540,7 @@ export default function ManageEditDacDaa(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div className="col-lg-9">
                               <div className='row' style={{paddingLeft:'15px'}}>
