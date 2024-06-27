@@ -4,7 +4,6 @@ import {useState, useEffect, useCallback} from 'react';
 import { Styles } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import { DAC } from '../../libs/ajax/DAC';
-import { DAA } from '../../libs/ajax/DAA';
 import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
@@ -23,7 +22,6 @@ export const ManageDac = function ManageDac() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
-  const [daas, setDaas] = useState([]);
   const [dacIDs, setDacIDs] = useState([]);
   const [userRole, setUserRole] = useState();
 
