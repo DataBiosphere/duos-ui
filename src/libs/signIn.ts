@@ -24,7 +24,7 @@ export const checkToSAndRedirect = async (
   const userStatus = await ToS.getStatus();
   const { tosAccepted } = userStatus;
   if (!isEmpty(userStatus) && !tosAccepted) {
-    Storage.setUserIsLogged(false);
+    Auth.signOut();
     if (isNil(redirectPath)) {
       history.push(`/tos_acceptance`);
     } else {

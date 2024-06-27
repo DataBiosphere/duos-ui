@@ -5,7 +5,7 @@ describe('Home', function() {
   it('Home page loads correctly', function() {
     cy.visit(Cypress.env('baseUrl'));
     cy.contains('DUOS');
-    cy.contains('Sign-in/Register');
+    cy.contains('Sign in');
     cy.contains('What is DUOS and how does it work?');
     cy.contains('DUOS for DACs');
     cy.contains('Institutional Oversight');

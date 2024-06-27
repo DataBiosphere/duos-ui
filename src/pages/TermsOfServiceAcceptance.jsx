@@ -2,7 +2,6 @@ import React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { Auth } from '../libs/auth/auth';
 import { TosService } from '../libs/tosService';
-import { Storage } from '../libs/storage';
 import SimpleButton from '../components/SimpleButton';
 import { Theme } from '../libs/theme';
 
@@ -20,10 +19,6 @@ export default function TermsOfServiceAcceptance(props) {
 
   const acceptToS = useCallback(async () => {
     await TosService.acceptTos();
-    // TODO: Determine if this is the correct user flow
-    // Can the user only accept ToS once the have signed in?
-    // What state is the user in after signIn, but before accepting ToS?
-    await Storage.setUserIsLogged(true);
 
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
     // user's profile.

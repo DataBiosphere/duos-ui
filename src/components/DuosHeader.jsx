@@ -233,7 +233,7 @@ const NavigationTabsComponent = (props) => {
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
           >
-            <SignInButton style={{ whiteSpace: 'nowrap', color: 'black' }}></SignInButton>
+            <SignInButton style={{ whiteSpace: 'nowrap', color: 'black' }} />
           </div>
         )}
         {isLogged && (
