@@ -79,25 +79,35 @@ export default function ManageEditDacDaa(props) {
           await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
           // currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          if (daaFileData !== null) {
-            if (daaFileData === true) {
-              if (daaFileData === null) {
-                handleErrors('Please upload a DAA file before saving.');
-                return;
-              }
-              // i don't think we need an extra step here because it will get handled in ops5 ?
-              // currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-            } else {
-              // need to create the link between the DAA and the DAC --> new endpoint!!
-              // first create the DAA
-              // then create the DAC
-              // then create the DAC DAA relationship ? or should we handle that in the ops?
-              currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-            }
-          } else {
-            handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+          if (daaFileData === null && selectedDaa !== 21) {
+            handleErrors('Please select either the default agreement or upload your own agreement before saving.');
             return;
+          } else if (daaFileData !== null && selectedDaa === null) { // not sure about this
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+            const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId);
+            setCreatedDaa(createdDaa.data);
+          } else {
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
           }
+          // if (daaFileData !== null) { //daaFileData = attachment[0], this is the actual file data
+          //   if (daaFileData === true) {
+          //     if (daaFileData === null) {
+          //       handleErrors('Please upload a DAA file before saving.');
+          //       return;
+          //     }
+          //     // i don't think we need an extra step here because it will get handled in ops5 ?
+          //     // currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          //   } else {
+          //     // need to create the link between the DAA and the DAC --> new endpoint!!
+          //     // first create the DAA
+          //     // then create the DAC
+          //     // then create the DAC DAA relationship ? or should we handle that in the ops?
+          //     currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          //   }
+          // } else {
+          //   handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
+          //   return;
+          // }
         }
       
 
