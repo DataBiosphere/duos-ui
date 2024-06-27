@@ -4,15 +4,15 @@ import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
 
-export type UserRoleName = 
-  'Admin' | 'Chairperson' | 'Member' | 'Researcher' | 
+export type UserRoleName =
+  'Admin' | 'Chairperson' | 'Member' | 'Researcher' |
   'Alumni' | 'SigningOfficial' | 'DataSubmitter' | 'All';
 
 export interface UserRole {
-  roleId: number, 
+  roleId: number,
   name: UserRoleName,
-  userId: number, 
-  userRoleId: number, 
+  userId: number,
+  userRoleId: number,
 }
 
 export interface DuosUser {
@@ -83,7 +83,7 @@ export const User = {
   update: async (user, userId) => {
     const url = `${await getApiUrl()}/api/user/${userId}`;
     // We should not be updating the user's create date, associated institution, or library cards
-    let filteredUser = flow(
+    const filteredUser = flow(
       cloneDeep,
       unset('updatedUser.createDate'),
       unset('updatedUser.institution'),

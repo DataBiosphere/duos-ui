@@ -1,4 +1,4 @@
-/* 
+/*
     This file should abstract out the oidcBroker actions
     and implement DUOS specific auth login (signIn, signOut, etc.)
 */
@@ -21,7 +21,8 @@ export const Auth = {
     const um: UserManager = OidcBroker.getUserManager();
     // UserManager events.
     // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
-    um.events.addUserLoaded((user: OidcUser) => {
+    // eslint-disable-next-line no-unused-vars
+    um.events.addUserLoaded((_: OidcUser) => {
       //TODO: DUOS-3072 Add metrics for user loaded
     });
     um.events.addAccessTokenExpiring((): void => {

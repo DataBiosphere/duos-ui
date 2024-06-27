@@ -23,8 +23,6 @@ interface ErrorInfo {
   description?: string;
 }
 
-type ErrorDisplay = ErrorInfo | JSX.Element;
-
 interface HttpError extends Error {
   status?: number;
 }
@@ -34,9 +32,11 @@ export const SignInButton = (props: SignInButtonProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showError, setShowError] = useState<boolean>(false);
   const { style } = props;
+
   const history = useHistory();
 
-  const onSuccess = async (response: OidcUser) => {
+  // eslint-disable-next-line no-unused-vars
+  const onSuccess = async (_: OidcUser) => {
 
     const redirectTo = getRedirectTo();
     const shouldRedirect = shouldRedirectTo(redirectTo);
