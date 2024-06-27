@@ -74,47 +74,12 @@ export const ManageDac = function ManageDac() {
     ]);
   }, [reloadDacList, reloadUserRole]);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        setIsLoading(true);
-        const daaList = await DAA.getDaas();
-        setDaas(daaList);
-        setIsLoading(false);
-      } catch (error) {
-        Notifications.showError({
-          text: 'Error: Unable to retrieve current DAAs from server',
-        });
-        setIsLoading(false);
-      }
-    };
-    init();
-  }, []);
-
   const handleDeleteDac = async () => {
-    let statusDac;
-    const matchingDaas = daas.filter(daa => daa.initialDacId === selectedDac.dacId && daa.daaId !== 17);
-    const deletePromises = matchingDaas.map(daa => DAA.deleteDaa(daa.daaId));
-    const deleteResponses = await Promise.all(deletePromises);
-    const failedDeletes = deleteResponses.filter(resp => resp.status !== 200);
-    const fullSelectedDac = await DAC.get(selectedDac.dacId); // THIS IS HACKY! BUT ALL I CAN DO
-    if (fullSelectedDac.associatedDaa.daaId === 17) {
-      await DAA.deleteDacDaaRelationship(17, selectedDac.dacId).then((resp) => {
-        if (resp.status !== 200) {
-          failedDeletes.push(resp);
-        }
-      });
-    }
-    if (failedDeletes.length > 0) {
-      Notifications.showError({text: 'Some DAAs could not be deleted.'});
-      return;
-    }
-
+    let status;
     await DAC.delete(selectedDac.dacId).then((resp) => {
-      statusDac = resp.status;
+      status = resp.status;
     });
-
-    if (statusDac === 200) {
+    if (status === 200) {
       Notifications.showSuccess({text: 'DAC successfully deleted.'});
       setShowConfirmationModal(false);
       await reloadDacList();
