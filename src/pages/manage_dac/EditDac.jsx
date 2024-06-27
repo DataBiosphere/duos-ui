@@ -277,7 +277,7 @@ export default function EditDac(props) {
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
       <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-        <div className="col-lg-9">
+        <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
           <div className='row' style={{paddingLeft:'15px'}}>
             {specificDaa.file.fileName}
           </div>
@@ -285,7 +285,7 @@ export default function EditDac(props) {
             Uploaded on {specificDaa?.updateDate ? new Date(specificDaa.updateDate).toLocaleDateString() : ''}
           </div>
         </div>
-        <div className="col-lg-3">
+        <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
           <div style={{ marginLeft: '10px' }}>
             <a target="_blank" rel="noreferrer" download={specificDaa.file.fileName} onClick={() => {DAA.getDaaFileById(specificDaa.daaId, specificDaa.file.fileName);}} className="button button-white" style={{ padding: '10px 12px' }}>
               <span className="glyphicon glyphicon-download-alt"></span>
@@ -319,60 +319,60 @@ export default function EditDac(props) {
             </div>
           </div>
           <hr/>
-          <div>
-            <div className='col-lg-6'>
-              <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
-                <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
-                  <div className="form-group first-form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                    <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Name</label>
-                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data"  style={{ width: '83.33%', maxWidth: '1200px' }}>
+                  <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                    <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>DAC Name</label>
+                    <div style={{ flexBasis: '66.67%'}}>
                       <input
                         id="txt_dacName"
                         type="text"
                         defaultValue={state.dac.name}
                         onChange={handleChange}
                         name="name"
-                        className="form-control col-lg-12 vote-input"
+                        className="form-control vote-input"
                         required={true}
                         disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
 
-                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                    <label id="lbl_dacDescription" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Description</label>
-                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                    <label id="lbl_dacDescription" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>DAC Description</label>
+                    <div style={{ flexBasis: '66.67%'}}>
                       <textarea
                         id="txt_dacDescription"
                         defaultValue={state.dac.description}
                         onChange={handleChange}
                         name="description"
-                        className="form-control col-lg-12 vote-input"
+                        className="form-control vote-input"
                         required={true}
                         disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
 
-                  <div className="form-group first-form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                    <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Email</label>
-                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                    <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>DAC Email</label>
+                    <div style={{ flexBasis: '66.67%'}}>
                       <input
                         id="txt_dacEmail"
                         type="text"
                         defaultValue={state.dac.email}
                         onChange={handleChange}
                         name="email"
-                        className="form-control col-lg-12 vote-input"
+                        className="form-control vote-input"
                         required={true}
                         disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
                   {
-                    (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                      <label id="lbl_dacMembers" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>DAC Members</label>
-                      <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                    (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                      <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>DAC Members</label>
+                      <div style={{ flexBasis: '66.67%'}}>
                         <DacUsers
                           dac={state.dac}
                           removeButton={true}
@@ -382,9 +382,9 @@ export default function EditDac(props) {
                     </div>
                   }
 
-                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                    <label id="lbl_dacChair" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>Add Chairperson(s)</label>
-                    <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                    <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>Add Chairperson(s)</label>
+                    <div style={{ flexBasis: '66.67%'}}>
                       <AsyncSelect
                         id="sel_dacChair"
                         isDisabled={false}
@@ -401,9 +401,9 @@ export default function EditDac(props) {
                       />
                     </div>
                   </div>
-                  <div className="form-group" style={{display: 'flex', flexDirection: 'column'}}>
-                    <label id="lbl_dacMember" className="col-lg-9 col-md-3 col-sm-3 col-xs-4" style={{fontSize:'16px'}}>Add Member(s)</label>
-                    <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                  <div style={{display: 'flex', flexDirection: 'column', marginBottom: '15px'}}>
+                    <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px', fontSize:'16px' }}>Add Member(s)</label>
+                    <div style={state.searchInputChanged ? { paddingBottom: '10rem', flexBasis: '66.67%'} : {flexBasis: '66.67%'}}>
                       <AsyncSelect
                         id="sel_dacMember"
                         isDisabled={false}
@@ -420,7 +420,7 @@ export default function EditDac(props) {
                       />
                     </div>
                   </div>
-                  <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px'}}>
+                  <div className='inline-block' style={{paddingBottom: '20px'}}>
                     <button
                       id='btn_save'
                       onClick={okHandler}
@@ -446,8 +446,8 @@ export default function EditDac(props) {
                 }
               </div>
             </div>
-            <div className='col-lg-6'>
-              <label id="lbl_daaCreation" className="col-lg-10 control-label">Select a Data Access Agreement (DAA) to govern access to your DAC&apos;s datasets</label>
+            <div style={{ flexBasis: '50%', flexGrow: 0, flexShrink: 0 }}>
+              <label id="lbl_daaCreation" className="control-label" style={{ flexBasis: '83.33%'}}>Select a Data Access Agreement (DAA) to govern access to your DAC&apos;s datasets</label>
               {
                 <ul role="menu" style={{ padding: '0px', textTransform:'none', listStyle: 'none'}}>
                   <form>
@@ -459,10 +459,10 @@ export default function EditDac(props) {
                           <input type="radio" name="daa" checked={selectedDaa === 17}
                             onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
-                            <div className="col-lg-9">
+                            <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               DUOS Uniform DAA
                             </div>
-                            <div className="col-lg-3">
+                            <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
                               <div style={{ marginLeft: '10px' }}>
                                 <a target="_blank" rel="noreferrer" href={DUOSUniformDataAccessAgreement} className="button button-white" style={{ padding: '10px 12px' }}>
                                   <span className="glyphicon glyphicon-download-alt"></span>
@@ -487,7 +487,7 @@ export default function EditDac(props) {
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
                           <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                            <div className="col-lg-9">
+                            <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               <div className='row' style={{paddingLeft:'15px'}}>
                                 {daaFileData.name}
                               </div>
@@ -495,7 +495,7 @@ export default function EditDac(props) {
                                 Uploaded on {new Date().toLocaleDateString()}
                               </div>
                             </div>
-                            <div className="col-lg-3">
+                            <div style={{ flexBasis: '25%', flexGrow: 0, flexShrink: 0, marginLeft: '10px' }}>
                               <div style={{ marginLeft: '10px' }}>
                                 <a target="_blank" rel="noreferrer" download={uploadedDAAFile[0].name} href={URL.createObjectURL(uploadedDAAFile[0])} className="button button-white" style={{ padding: '10px 12px' }}>
                                   <span className="glyphicon glyphicon-download-alt"></span>

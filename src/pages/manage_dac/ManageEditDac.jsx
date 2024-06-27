@@ -260,11 +260,11 @@ export default function ManageEditDac(props) {
               <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{state.dac.name}</div>
             </div>
           </div>
-          <div className='col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding'>
-            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data">
-              <div className="form-group first-form-group">
-                <label id="lbl_dacName" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Name</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data"  style={{ width: '83.33%', maxWidth: '1200px' }}>
+              <div style={{ display: 'flex', marginBottom: '15px' }}>
+                <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Name</label>
+                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
                   <input
                     id="txt_dacName"
                     type="text"
@@ -279,40 +279,40 @@ export default function ManageEditDac(props) {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label id="lbl_dacDescription" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Description</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+              <div style={{ display: 'flex', marginBottom: '15px' }}>
+                <label id="lbl_dacDescription" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Description</label>
+                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
                   <textarea
                     id="txt_dacDescription"
                     defaultValue={state.dac.description}
                     onChange={handleChange}
                     name="description"
-                    className="form-control col-lg-12 vote-input"
+                    className="form-control vote-input"
                     required={true}
                     disabled={props.location.state.userRole === CHAIRPERSON}
                   />
                 </div>
               </div>
 
-              <div className="form-group first-form-group">
-                <label id="lbl_dacEmail" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Email</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+              <div style={{ display: 'flex', marginBottom: '15px' }}>
+                <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Email</label>
+                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
                   <input
                     id="txt_dacEmail"
                     type="text"
                     defaultValue={state.dac.email}
                     onChange={handleChange}
                     name="email"
-                    className="form-control col-lg-12 vote-input"
+                    className="form-control vote-input"
                     required={true}
                     disabled={props.location.state.userRole === CHAIRPERSON}
                   />
                 </div>
               </div>
               {
-                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div className="form-group" >
-                  <label id="lbl_dacMembers" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">DAC Members</label>
-                  <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div style={{ display: 'flex', marginBottom: '15px' }}>
+                  <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Members</label>
+                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
                     <DacUsers
                       dac={state.dac}
                       removeButton={true}
@@ -322,9 +322,9 @@ export default function ManageEditDac(props) {
                 </div>
               }
 
-              <div className="form-group">
-                <label id="lbl_dacChair" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Chairperson(s)</label>
-                <div className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+              <div style={{ display: 'flex', marginBottom: '15px' }}>
+                <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">Add Chairperson(s)</label>
+                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
                   <AsyncSelect
                     id="sel_dacChair"
                     isDisabled={false}
@@ -341,9 +341,9 @@ export default function ManageEditDac(props) {
                   />
                 </div>
               </div>
-              <div className="form-group">
-                <label id="lbl_dacMember" className="col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color">Add Member(s)</label>
-                <div style={state.searchInputChanged ? { paddingBottom: '10rem' } : {}} className="col-lg-9 col-md-9 col-sm-9 col-xs-8">
+              <div style={{ display: 'flex', marginBottom: '15px' }}>
+                <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">Add Member(s)</label>
+                <div style={state.searchInputChanged ? { paddingBottom: '10rem', flexBasis: '66.67%', paddingLeft: '15px' } : {flexBasis: '66.67%', paddingLeft: '15px' }}>
                   <AsyncSelect
                     id="sel_dacMember"
                     isDisabled={false}
@@ -360,7 +360,7 @@ export default function ManageEditDac(props) {
                   />
                 </div>
               </div>
-              <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px'}}>
+              <div className='inline-block' style={{paddingBottom: '20px'}}>
                 <button
                   id='btn_save'
                   onClick={okHandler}
