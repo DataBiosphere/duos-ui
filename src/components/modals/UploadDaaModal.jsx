@@ -25,9 +25,6 @@ export const UploadDaaModal = (props) => {
     props.onCloseRequest();
   };
 
-  // const handleErrors = (message) => {
-  // };
-
   const attachmentChangeHandler = (e) => {
     setModalState({
       ...modalState,
@@ -72,7 +69,7 @@ export const UploadDaaModal = (props) => {
           Upload a file
         </div>
         <div style={{ borderBottom: '1px solid #1FB50' }} />
-        <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)}>
+        <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)} maxFiles={1} multiple={false}>
           {({ isDragActive, getRootProps, getInputProps }) => (
             <div style={{
               backgroundColor: modalState.attachment.length !== 0 ? '#eef0f5' : (isDragActive ? '#6898c1' : '#eef0f5'),
@@ -121,7 +118,7 @@ export const UploadDaaModal = (props) => {
             <strong style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '20px', fontSize: '1.6rem', textDecoration: 'underline'}}>Clicking Save will create this new Data Access Agreement and associate it with this DAC.</strong>
           )
         }
-        <div className='col-lg-12 col-xs-12 inline-block' style={{paddingBottom: '20px', marginTop:'20px'}}>
+        <div className='inline-block' style={{paddingBottom: '20px', marginTop:'20px'}}>
           <button
             id='btn_save'
             onClick={okHandler}

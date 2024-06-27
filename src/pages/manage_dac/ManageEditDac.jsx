@@ -18,6 +18,9 @@ export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
 const ADMIN = 'Admin';
 
+// NOTE: This component is to be removed after the promotion of the Dynamic DAA feature
+// and is to be replaced by the EditDac component.
+
 export default function ManageEditDac(props) {
   const [state, setState] = useState({
     error: Models.error,
@@ -268,9 +271,10 @@ export default function ManageEditDac(props) {
                     defaultValue={state.dac.name}
                     onChange={handleChange}
                     name="name"
-                    className="form-control col-lg-12 vote-input"
+                    className="form-control vote-input"
                     required={true}
                     disabled={props.location.state.userRole === CHAIRPERSON}
+                    style={{ width: '100%' }}
                   />
                 </div>
               </div>

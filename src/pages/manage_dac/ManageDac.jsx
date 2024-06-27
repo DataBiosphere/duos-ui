@@ -13,7 +13,7 @@ import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
-import ManageEditDacDaa from './ManageEditDacDaa';
+import EditDac from './EditDac';
 import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 const CHAIR = 'Chairperson';
@@ -176,7 +176,7 @@ export const ManageDac = function ManageDac() {
         <div className="right-header-section">
           <a
             id="btn_addDAC"
-            className="col-md-12 btn-primary btn-add common-background"
+            className="btn-primary btn-add common-background"
             style={{ marginTop: '30%', display: 'flex' }}
             onClick={addDac}
           >
@@ -234,9 +234,8 @@ export const ManageDac = function ManageDac() {
       )}
       {showEditPage && (
         checkEnv(envGroups.DEV) ?
-          <ManageEditDacDaa/> :
+          <EditDac/> :
           <ManageEditDac/>
-        
       )}
     </div>
   );

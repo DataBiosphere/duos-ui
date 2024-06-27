@@ -22,7 +22,7 @@ export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
 const ADMIN = 'Admin';
 
-export default function ManageEditDacDaa(props) {
+export default function EditDac(props) {
   const [state, setState] = useState({
     error: Models.error,
     dirtyFlag: false,

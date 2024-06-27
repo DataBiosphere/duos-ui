@@ -97,6 +97,8 @@ export const DAA = {
     return res;
   },
 
+  // NOTE: In the future, this functionality should be handled in the backend and should not be
+  // dependent on the UI.
   sendDaaUpdateEmails: async (dacId, oldDaaId, newDaaName) => {
     const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`;
     const res = await axios.post(url, {}, Config.authOpts());
