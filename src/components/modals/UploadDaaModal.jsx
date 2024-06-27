@@ -5,6 +5,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
+import styles from '../../pages/manage_dac/ManageDac.module.css';
 
 const getInitialState = () => {
   return {
@@ -71,17 +72,10 @@ export const UploadDaaModal = (props) => {
         <div style={{ borderBottom: '1px solid #1FB50' }} />
         <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)} maxFiles={1} multiple={false}>
           {({ isDragActive, getRootProps, getInputProps }) => (
-            <div style={{
+            <div className={styles['upload-daa-dropzone']} style={{
               backgroundColor: modalState.attachment.length !== 0 ? '#eef0f5' : (isDragActive ? '#6898c1' : '#eef0f5'),
-              fontSize: 14,
-              lineHeight: '100px',
-              paddingLeft: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              border: modalState.attachment.length === 0 ? '5px dashed' : 'none',
-              borderColor: '#c2cee1'
+              borderStyle: modalState.attachment.length === 0 ? 'dashed' : 'none',
+              borderWidth: modalState.attachment.length === 0 ? '5px' : 'none',
             }}>
               {
                 modalState.attachment.length === 0 && (
