@@ -13,7 +13,7 @@ import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
 import { Link } from 'react-router-dom';
-import ManageEditDacDaa from './ManageEditDacDaa';
+import EditDac from './EditDac';
 import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 const CHAIR = 'Chairperson';
@@ -215,7 +215,7 @@ export const ManageDac = function ManageDac() {
       )}
       {showEditPage && (
         checkEnv(envGroups.DEV) ?
-          <ManageEditDacDaa/> :
+          <EditDac/> :
           <ManageEditDac/>
       )}
     </div>
