@@ -126,8 +126,7 @@ export default function ManageEditDacDaa(props) {
         const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
         const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
         const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
-        const ops6 = newDaaId !== null && newDaaId !== currentDac?.associatedDac?.daaId && dacId !== undefined ? [() => DAA.sendDaaUpdateEmails(currentDac.dacId, currentDac?.associatedDaa?.daaId, encodeURIComponent(newDaa.file.fileName))] : [];
-        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5, ops6);
+        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
         const responses = await PromiseSerial(allOperations);
         const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
         if (!ld.isEmpty(errorCodes)) {
@@ -294,7 +293,6 @@ export default function ManageEditDacDaa(props) {
       setUploadedDaaFile(attachment);
       setDaaFileData(attachment[0]);
       const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
-      DAA.sendDaaUpdateEmails(state.dac.dacId, state.dac?.associatedDaa?.daaId, encodeURIComponent(createdDaa.data.file.fileName));
       setCreatedDaa(createdDaa.data);
       setState(prev => ({
         ...prev,
