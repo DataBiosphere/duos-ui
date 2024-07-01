@@ -43,6 +43,7 @@ export default function EditDac(props) {
   const [daaFileData, setDaaFileData] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const dacId = props.match.params.dacId;
+  const [broadDaa, setBroadDaa] = useState(null);
   const [matchingDaas, setMatchingDaas] = useState([]);
 
   useEffect(() => {
@@ -50,11 +51,13 @@ export default function EditDac(props) {
       try {
         const fetchedDac = await DAC.get(dacId);
         const daas = await DAA.getDaas();
+        const broadDaa = daas.find(daa => daa.broadDaa === true);
+        setBroadDaa(broadDaa);
         setState(prev => ({ ...prev, dac: fetchedDac }));
         const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
         setMatchingDaas(matchingDaas);
         const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-        setSelectedDaa(daa?.daaId ? daa.daaId : null);
+        setSelectedDaa(daa?.daaId ? daa : null);
         setIsLoading(false);
       }
       catch(e) {
@@ -263,7 +266,7 @@ export default function EditDac(props) {
   };
 
   const handleDaaChange = (daaId) => {
-    setSelectedDaa(daaId);
+    setSelectedDaa({ ...selectedDaa, daaId: daaId });
     setNewDaaId(daaId);
     setState(prev => ({
       ...prev,
@@ -273,7 +276,7 @@ export default function EditDac(props) {
 
   const DaaItem = ({ specificDaa }) => (
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
+      <input type="radio" name="daa" checked={selectedDaa.daaId === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
         <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
           <div className='row' style={{paddingLeft:'15px'}}>
@@ -454,8 +457,7 @@ export default function EditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 17}
-                            onChange={() => handleDaaChange(17)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa?.daaId === broadDaa.daaId} onChange={() => handleDaaChange(broadDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               DUOS Uniform DAA
@@ -483,7 +485,7 @@ export default function EditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               <div className='row' style={{paddingLeft:'15px'}}>
