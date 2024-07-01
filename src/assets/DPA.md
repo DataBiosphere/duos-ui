@@ -9,8 +9,8 @@ to Broad’s mission and consistent with its tax-exempt status. Through its Data
 registers and enables widespread access to various types of data and materials, including genomic and imaging data to
 promote global scientific and genomic research. Per these terms and conditions  (this “Agreement”), Broad allows the
 Data Submitter, an institution, to register Data in DUOS and issue permissions to the Data Submitter’s Authorized
-Submission Representatives  (defined below) to register and submit datasets in the DUOS Dataset Catalog (***see***
-**https://duos.broadinstitute.org/dataset_catalog**, the “Application”) at such Authorized Submission Representatives’
+Submission Representatives  (defined below) to register and submit datasets in the DUOS Dataset Library (***see***
+**https://duos.broadinstitute.org/datalibrary**, the “Application”) at such Authorized Submission Representatives’
 discretion and provided further, the Data Submitter is and remains responsible for its compliance with this Agreement
 and for compliance herewith by its Authorized Submission Representatives.\
 \
