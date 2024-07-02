@@ -82,7 +82,7 @@ export const headerTabsConfig = [
     link: '/admin_manage_dar_collections',
     children: [
       { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-      { label: 'Dataset Catalog', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
@@ -119,16 +119,15 @@ export const headerTabsConfig = [
     search: 'member_console',
     children: [
       { label: 'DAR Requests', link: '/member_console' },
-      { label: 'Datasets', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' }
     ],
     isRendered: (user) => user.isMember
   },
   {
     label: 'Researcher Console',
-    link: '/dataset_catalog',
-    search: 'dataset_catalog',
+    link: '/datalibrary',
+    search: 'datalibrary',
     children: [
-      { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
       { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
