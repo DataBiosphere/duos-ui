@@ -44,6 +44,7 @@ export default function EditDac(props) {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [fetchedDac, setFetchedDac] = useState(null);
   const dacId = props.match.params.dacId;
+  const [broadDaa, setBroadDaa] = useState(null);
   const [matchingDaas, setMatchingDaas] = useState([]);
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
@@ -54,11 +55,22 @@ export default function EditDac(props) {
           const fetchedDac = await DAC.get(dacId);
           setFetchedDac(fetchedDac);
           const daas = await DAA.getDaas();
+          const broadDaa = daas.find(daa => daa.broadDaa === true);
+          setBroadDaa(broadDaa);
           setState(prev => ({ ...prev, dac: fetchedDac }));
           const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
           setMatchingDaas(matchingDaas);
           const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-          setSelectedDaa(daa?.daaId ? daa.daaId : null);
+          setSelectedDaa(daa?.daaId ? daa : null);
+        }
+        catch(e) {
+          Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
+        }
+      } else {
+        try {
+          const daas = await DAA.getDaas();
+          const broadDaa = daas.find(daa => daa.broadDaa === true);
+          setBroadDaa(broadDaa);
         }
         catch(e) {
           Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
@@ -78,7 +90,7 @@ export default function EditDac(props) {
         if (dacId !== undefined) {
           await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
-          if (daaFileData === null && selectedDaa !== 21) {
+          if (daaFileData === null && selectedDaa.daaId !== broadDaa.daaId) {
             handleErrors('Please select either the default agreement or upload your own agreement before saving.');
             return;
           } else if (daaFileData !== null && selectedDaa === undefined) {
@@ -108,7 +120,6 @@ export default function EditDac(props) {
           //   return;
           // }
         }
-
 
         let newDaa = null;
         if (newDaaId !== null) {
@@ -317,7 +328,7 @@ export default function EditDac(props) {
         dirtyFlag: true
       }));
     } else {
-      setSelectedDaa(daaId);
+      setSelectedDaa({ ...selectedDaa, daaId: daaId });
       setNewDaaId(daaId);
       setState(prev => ({
         ...prev,
@@ -328,7 +339,7 @@ export default function EditDac(props) {
 
   const DaaItem = ({ specificDaa }) => (
     <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-      <input type="radio" name="daa" checked={selectedDaa === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
+      <input type="radio" name="daa" checked={selectedDaa.daaId === specificDaa.daaId} onChange={() => handleDaaChange(specificDaa.daaId)} style={{accentColor:'#00609f'}}/>
       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
         <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
           <div className='row' style={{paddingLeft:'15px'}}>
@@ -509,8 +520,7 @@ export default function EditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa === 21}
-                            onChange={() => handleDaaChange(21)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId} onChange={() => handleDaaChange(broadDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               DUOS Uniform DAA
@@ -538,7 +548,7 @@ export default function EditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa === createdDaa.daaId} onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId} onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               <div className='row' style={{paddingLeft:'15px'}}>

@@ -19,6 +19,9 @@ export const MEMBER = 'member';
 const CHAIRPERSON = 'Chairperson';
 const ADMIN = 'Admin';
 
+// NOTE: This component is to be removed after the promotion of the Dynamic DAA feature
+// and is to be replaced by the EditDac component.
+
 export default function ManageEditDac(props) {
   const [state, setState] = useState({
     error: Models.error,
