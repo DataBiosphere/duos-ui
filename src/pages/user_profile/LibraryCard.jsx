@@ -19,6 +19,10 @@ export default function LibraryCard(props) {
             {fileName}
           </a>
         </div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <p style={{ margin: '0px 0px 0px 10px' }}>Issued by</p>
+          <p style={{ margin: '0px 0px 0px 10px' }}>{issuedBy}, {new Date(issuedOn).toLocaleDateString(undefined, {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+        </div>
       </div>
     );
   };
@@ -37,9 +41,6 @@ export default function LibraryCard(props) {
     <div style={{display: 'flex', flexDirection: 'column'}}>
       {daaDivs}
     </div>
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <p style={{ margin: '0px 0px 0px 10px' }}>Issued on: {issuedOn}</p>
-      <p style={{ margin: '0px 0px 0px 10px' }}>Issued by: {issuedBy}</p>
-    </div>
+    
   </div>;
 }
