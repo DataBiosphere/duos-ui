@@ -8,7 +8,7 @@ export default function RequiredDAAs(props) {
     if (!datasetDacId) {
       return <div key={dataset.id}></div>;
     }
-    const daa = daas.find((daa) => daa.dacs.some((d) => d.dacId === datasetDacId));
+    const daa = daas.find((daa) => daa.dacs?.some((d) => d.dacId === datasetDacId));
     const id = daa.daaId;
     const fileName = daa.file.fileName.split('.')[0];
     if (fileNames.has(fileName)) {
