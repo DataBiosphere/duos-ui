@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ERACommons from '../../components/ERACommons';
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax/User';
+import { DAA } from '../../libs/ajax/DAA';
 import { isNil } from 'lodash';
 import LibraryCard from './LibraryCard';
 
@@ -16,6 +17,9 @@ export default function ResearcherStatus(props) {
   const [issuedOn, setIssuedOn] = useState('');
   const [issuedBy, setIssuedBy] = useState('');
   const [hasCard, setHasCard] = useState(true);
+  const [card, setCard] = useState(null);
+  const [daaIds, setDaaIds] = useState([]);
+  const [daaObjects, setDaaObjects] = useState([]);
   const nihStatusUpdate = useCallback(() => {}, []);
 
   useEffect(() => {
@@ -26,10 +30,19 @@ export default function ResearcherStatus(props) {
             setHasCard(false);
           }
           else {
+            setCard(user.libraryCards[0]);
+            setDaaIds(user.libraryCards[0].daaIds);
             const signingOfficialUsers = await User.getSOsForCurrentUser();
+            // issued on will now have to be when the daa-lc relationships were created (where can i find this?)
             setIssuedOn(user.libraryCards[0].createDate);
             const names = signingOfficialUsers.map(so => so.displayName);
+            // issued by could possibly change if instead of all the SOs we want to show specifically who created the daa-lc relationship (again, where can i find this?)
             setIssuedBy(names.join(', '));
+
+            const daaPromises = user.libraryCards[0].daaIds.map(id => DAA.getDaaById(id));
+            const daaObjects = await Promise.all(daaPromises);
+            setDaaObjects(daaObjects);
+            console.log(daaObjects);
           }
         }
       } catch (error) {
@@ -83,13 +96,14 @@ export default function ResearcherStatus(props) {
         fontWeight: '600',
         lineHeight: 'normal'
       }} >
-      Library Card
+      Library Cards issued to you
     </p>
     <div style={{ marginTop: '15px' }} />
     {hasCard ? (
       <LibraryCard
         issuedOn={issuedOn}
-        issuedBy={issuedBy} />
+        issuedBy={issuedBy} 
+        daas={daaObjects}/>
     ) : (
       <div>
         <p>No Library Card Found</p>

@@ -1,32 +1,41 @@
 import React from 'react';
+import { DAA } from '../../libs/ajax/DAA';
 
 export default function LibraryCard(props) {
 
   const {
     issuedOn,
-    issuedBy
+    issuedBy,
+    daas
   } = props;
 
+  const DAADownload = (id, fileName) => {
+    return (
+      <div className="flex flex-row" style={{ justifyContent: 'flex-start', marginBottom: '30px'}}>
+        <div>
+          <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)} className="button button-white" style={{ marginRight: '2rem'}}>
+            <span className="glyphicon glyphicon-download"></span>
+            {' '}
+            {fileName}
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  const daaDivs = daas.map((daa) => {
+    const id = daa.daaId;
+    const fileName = daa.file.fileName.split('.')[0];
+    return (
+      <div key={id}>
+        {DAADownload(id, fileName)}
+      </div>
+    );
+  });
+
   return <div style={{ display: 'flex' }}>
-    <div style={{
-      height: '50px',
-      width: '160px',
-      background: '#00A097',
-      borderRadius: '4px',
-      boxShadow: '0px 4px 4px 0px rgba(0, 0, 0, 0.25) inset',
-      paddingTop: '1px'
-    }}>
-      <p style={{
-        fontFamily: 'Montserrat',
-        fontSize: '16px',
-        fontWeight: '500',
-        lineHeight: '30px',
-        letterSpacing: '0em',
-        textAlign: 'center',
-        color: 'rgba(255, 255, 255, 1)'
-      }}>
-        Yes
-      </p>
+    <div style={{display: 'flex', flexDirection: 'column'}}>
+      {daaDivs}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <p style={{ margin: '0px 0px 0px 10px' }}>Issued on: {issuedOn}</p>
