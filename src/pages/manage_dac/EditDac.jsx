@@ -42,30 +42,43 @@ export default function EditDac(props) {
   const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
   const [daaFileData, setDaaFileData] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [fetchedDac, setFetchedDac] = useState(null);
   const dacId = props.match.params.dacId;
   const [broadDaa, setBroadDaa] = useState(null);
   const [matchingDaas, setMatchingDaas] = useState([]);
+  const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const fetchedDac = await DAC.get(dacId);
-        const daas = await DAA.getDaas();
-        const broadDaa = daas.find(daa => daa.broadDaa === true);
-        setBroadDaa(broadDaa);
-        setState(prev => ({ ...prev, dac: fetchedDac }));
-        const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
-        setMatchingDaas(matchingDaas);
-        const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
-        setSelectedDaa(daa?.daaId ? daa : null);
-        setIsLoading(false);
-      }
-      catch(e) {
-        Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
-        setIsLoading(false);
+      if (dacId !== undefined) {
+        try {
+          const fetchedDac = await DAC.get(dacId);
+          setFetchedDac(fetchedDac);
+          const daas = await DAA.getDaas();
+          const broadDaa = daas.find(daa => daa.broadDaa === true);
+          setBroadDaa(broadDaa);
+          setState(prev => ({ ...prev, dac: fetchedDac }));
+          const matchingDaas = daas.filter(daa => daa.initialDacId === fetchedDac.dacId);
+          setMatchingDaas(matchingDaas);
+          const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
+          setSelectedDaa(daa?.daaId ? daa : null);
+        }
+        catch(e) {
+          Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
+        }
+      } else {
+        try {
+          const daas = await DAA.getDaas();
+          const broadDaa = daas.find(daa => daa.broadDaa === true);
+          setBroadDaa(broadDaa);
+        }
+        catch(e) {
+          Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
+        }
       }
     };
     fetchData();
+    setIsLoading(false);
   }, [dacId, setState]);
 
   const okHandler = async (event) => {
@@ -74,35 +87,43 @@ export default function EditDac(props) {
     let currentDac = state.dac;
     if (state.dirtyFlag) {
       if (props.location.state.userRole === ADMIN) {
-        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
-      }
+        if (dacId !== undefined) {
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+        } else {
+          if (daaFileData === null && selectedDaa.daaId !== broadDaa.daaId) {
+            handleErrors('Please select either the default agreement or upload your own agreement before saving.');
+            return;
+          } else if (daaFileData !== null && selectedDaa === undefined) {
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+            const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId);
+            setCreatedDaa(createdDaa.data);
+          } else {
+            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          }
+        }
 
-      let newDaa = null;
-      if (newDaaId !== null) {
-        newDaa = await DAA.getDaaById(newDaaId);
-      }
-
-      // Order here is important. Since users cannot have multiple roles in the
-      // same DAC, we have to make sure we remove users before re-adding any
-      // back in a different role.
-      // Chairs are a special case since we cannot remove all chairs from a DAC
-      // so we handle that case first.
-      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
-      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
-      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-      const ops5 = newDaaId !== null ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
-      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
-      const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
-      if (!ld.isEmpty(errorCodes)) {
-        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
+        // Order here is important. Since users cannot have multiple roles in the
+        // same DAC, we have to make sure we remove users before re-adding any
+        // back in a different role.
+        // Chairs are a special case since we cannot remove all chairs from a DAC
+        // so we handle that case first.
+        const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+        const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+        const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
+        const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
+        const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+        const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
+        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
+        const responses = await PromiseSerial(allOperations);
+        const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
+        if (!ld.isEmpty(errorCodes)) {
+          handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
+        } else {
+          closeHandler();
+        }
       } else {
         closeHandler();
       }
-    } else {
-      closeHandler();
     }
   };
 
@@ -255,23 +276,41 @@ export default function EditDac(props) {
   };
 
   const handleAttachment = async(attachment) => {
-    setUploadedDaaFile(attachment);
-    setDaaFileData(attachment[0]);
-    const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
-    setCreatedDaa(createdDaa.data);
-    setState(prev => ({
-      ...prev,
-      dirtyFlag: true
-    }));
+    if (dacId !== undefined) {
+      setUploadedDaaFile(attachment);
+      setDaaFileData(attachment[0]);
+      const createdDaa = await DAA.createDaa(attachment[0], state.dac.dacId);
+      setCreatedDaa(createdDaa.data);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+    } else {
+      setUploadedDaaFile(attachment);
+      setDaaFileData(attachment[0]);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+      setSelectedDaa(undefined);
+    }
   };
 
   const handleDaaChange = (daaId) => {
-    setSelectedDaa({ ...selectedDaa, daaId: daaId });
-    setNewDaaId(daaId);
-    setState(prev => ({
-      ...prev,
-      dirtyFlag: true
-    }));
+    if (daaId === undefined) {
+      setSelectedDaa(undefined);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+    } else {
+      setSelectedDaa({ ...selectedDaa, daaId: daaId });
+      setNewDaaId(daaId);
+      setState(prev => ({
+        ...prev,
+        dirtyFlag: true
+      }));
+    }
   };
 
   const DaaItem = ({ specificDaa }) => (
@@ -315,8 +354,8 @@ export default function EditDac(props) {
               <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG} />
             </div>
             <div style={Styles.HEADER_CONTAINER}>
-              <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>Manage My Data Access Committee</div>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{state.dac.name}</div>
+              <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>{dacText}</div>
+              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{dacId === undefined ? 'Create DAC' : fetchedDac?.name}</div>
             </div>
           </div>
           <hr/>
@@ -457,7 +496,7 @@ export default function EditDac(props) {
                         <label id="lbl_daaCreation" className="control-label" style={{marginTop:'0px'}}>Use default agreement</label>
                         <br/>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <input type="radio" name="daa" checked={selectedDaa?.daaId === broadDaa.daaId} onChange={() => handleDaaChange(broadDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={selectedDaa !== null && selectedDaa?.daaId === broadDaa?.daaId} onChange={() => handleDaaChange(broadDaa.daaId)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px'}}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               DUOS Uniform DAA
@@ -485,7 +524,7 @@ export default function EditDac(props) {
                         }
                         {uploadedDAAFile !== null &&
                         <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '15px'}}>
-                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId} onChange={() => handleDaaChange(createdDaa.daaId)} style={{accentColor:'#00609f'}}/>
+                          <input type="radio" name="daa" checked={uploadedDAAFile || selectedDaa.daaId === createdDaa.daaId} onChange={createdDaa?.daaId ? () => handleDaaChange(createdDaa.daaId) : () => handleDaaChange(undefined)} style={{accentColor:'#00609f'}}/>
                           <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
                             <div style={{ flexBasis: '75%', flexGrow: 0, flexShrink: 0, marginLeft: '10px'}}>
                               <div className='row' style={{paddingLeft:'15px'}}>

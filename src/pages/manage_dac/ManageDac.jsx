@@ -7,11 +7,11 @@ import { DAC } from '../../libs/ajax/DAC';
 import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
-import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
+import { Link } from 'react-router-dom';
 import EditDac from './EditDac';
 import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
@@ -26,12 +26,11 @@ export const ManageDac = function ManageDac() {
   const [userRole, setUserRole] = useState();
 
   // modal state
-  const [showDacModal, setShowDacModal] = useState(false);
   const [showEditPage, setShowEditPage] = useState(false);
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showDatasetsModal, setShowDatasetsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // modal data
   const [selectedDac, setSelectedDac] = useState({});
@@ -95,22 +94,8 @@ export const ManageDac = function ManageDac() {
     setShowConfirmationModal(false);
   };
 
-
-  const closeAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
-  };
-
   const addDac = () => {
-    setShowDacModal(true);
-    setIsEditMode(false);
-  };
-
-  const okAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
+    setShowAddPage(true);
   };
 
   const closeViewDatasetsModal = () => {
@@ -137,25 +122,27 @@ export const ManageDac = function ManageDac() {
           </div>
         </div>
         <div className="right-header-section">
-          <a
+          <Link
             id="btn_addDAC"
             className="btn-primary btn-add common-background"
             style={{ marginTop: '30%', display: 'flex' }}
             onClick={addDac}
+            to={{
+              pathname: checkEnv(envGroups.DEV) ? `/manage_add_dac_daa` : `/manage_add_dac`,
+              state: { userRole: userRole}
+            }}
           >
             <span>Add DAC</span>
-          </a>
+          </Link>
         </div>
       </div>
       <ManageDacTable
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDacModal={setShowDacModal}
         setShowDatasetsModal={setShowDatasetsModal}
         setShowMembersModal={setShowMembersModal}
         setShowConfirmationModal={setShowConfirmationModal}
-        setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
         setShowEditPage={setShowEditPage}
@@ -185,14 +172,8 @@ export const ManageDac = function ManageDac() {
           datasets={selectedDatasets}
         />
       )}
-      {showDacModal && (
-        <AddDacModal
-          showModal={showDacModal}
-          isEditMode={isEditMode}
-          onOKRequest={okAddDacModal}
-          onCloseRequest={closeAddDacModal}
-          dac={selectedDac}
-          userRole={userRole}
+      {showAddPage && (
+        <ManageEditDac
         />
       )}
       {showEditPage && (
