@@ -94,9 +94,9 @@ export default function ManageResearcherDAAsTable(props) {
     columnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
-        const daa = daas.find(daa => daa?.dacs?.some(d => d.dacId === dac.dacId));
-        const id = daa?.daaId;
-        const fileName = daa?.file.fileName;
+        const daa = daas.find(daa => daa.dacs?.some(d => d.dacId === dac.dacId));
+        const id = daa.daaId;
+        const fileName = daa.file.fileName;
         acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={{id: id, fileName: fileName}} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
         return acc;
       }, {}),
