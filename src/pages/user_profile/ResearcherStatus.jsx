@@ -6,6 +6,8 @@ import { User } from '../../libs/ajax/User';
 import { DAA } from '../../libs/ajax/DAA';
 import { isNil } from 'lodash';
 import LibraryCard from './LibraryCard';
+import DAAs from './DAAs';
+import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 export default function ResearcherStatus(props) {
 
@@ -17,8 +19,6 @@ export default function ResearcherStatus(props) {
   const [issuedOn, setIssuedOn] = useState('');
   const [issuedBy, setIssuedBy] = useState('');
   const [hasCard, setHasCard] = useState(true);
-  const [card, setCard] = useState(null);
-  const [daaIds, setDaaIds] = useState([]);
   const [daaObjects, setDaaObjects] = useState([]);
   const nihStatusUpdate = useCallback(() => {}, []);
 
@@ -30,19 +30,16 @@ export default function ResearcherStatus(props) {
             setHasCard(false);
           }
           else {
-            setCard(user.libraryCards[0]);
-            setDaaIds(user.libraryCards[0].daaIds);
+            const card = user.libraryCards[0];
+            const daaIds = card.daaIds;
             const signingOfficialUsers = await User.getSOsForCurrentUser();
-            // issued on will now have to be when the daa-lc relationships were created (where can i find this?)
-            setIssuedOn(user.libraryCards[0].createDate);
+            setIssuedOn(card.createDate);
             const names = signingOfficialUsers.map(so => so.displayName);
-            // issued by could possibly change if instead of all the SOs we want to show specifically who created the daa-lc relationship (again, where can i find this?)
             setIssuedBy(names.join(', '));
 
-            const daaPromises = user.libraryCards[0].daaIds.map(id => DAA.getDaaById(id));
+            const daaPromises = daaIds.map(id => DAA.getDaaById(id));
             const daaObjects = await Promise.all(daaPromises);
             setDaaObjects(daaObjects);
-            console.log(daaObjects);
           }
         }
       } catch (error) {
@@ -99,19 +96,27 @@ export default function ResearcherStatus(props) {
       Library Cards issued to you
     </p>
     <div style={{ marginTop: '15px' }} />
-    {hasCard ? (
-      <LibraryCard
-        issuedOn={issuedOn}
-        issuedBy={issuedBy} 
-        daas={daaObjects}/>
-    ) : (
-      <div>
-        <p>No Library Card Found</p>
-        <p style={{
-          marginTop: '10px',
-          marginBottom:'50px'
-        }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional Signing Official must register in DUOS, request and receive Signing Official permissions, and issue you a Library Card.</p>
-      </div>
-    )}
+    {hasCard ?
+      (checkEnv(envGroups.DEV) ?
+        (
+          <DAAs
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}/>
+        ) :
+        (
+          <LibraryCard
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}/>
+        )) : (
+        <div>
+          <p>No Library Card Found</p>
+          <p style={{
+            marginTop: '10px',
+            marginBottom:'50px'
+          }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional Signing Official must register in DUOS, request and receive Signing Official permissions, and issue you a Library Card.</p>
+        </div>
+      )}
   </div>;
 }
