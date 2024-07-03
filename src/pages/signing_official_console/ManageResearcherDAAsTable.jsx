@@ -94,7 +94,7 @@ export default function ManageResearcherDAAsTable(props) {
     columnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
-        const matchingDaas = daas.filter(daa => daa?.dacs?.some(d => d.dacId === dac.dacId));
+        const matchingDaas = daas.filter(daa => daa.dacs?.some(d => d.dacId === dac.dacId));
         let daa;
         if (matchingDaas.length > 0) {
           daa = matchingDaas.reduce((latestDaa, currentDaa) => {

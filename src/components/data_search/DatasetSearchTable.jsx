@@ -30,6 +30,7 @@ const studyTableHeader = [
 
 const datasetTableHeader = [
   'DUOS ID',
+  'Dataset Name',
   'Data Use',
   'Data Types',
   'Participants',
@@ -296,6 +297,10 @@ export const DatasetSearchTable = (props) => {
                   {
                     value: <Link key={`dataset.datasetId`} href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.datasetIdentifier}</Link>,
                     increaseWidth: true,
+                  },
+                  {
+                    value: dataset.datasetName,
+                    truncate: true,
                   },
                   {
                     value: () => {

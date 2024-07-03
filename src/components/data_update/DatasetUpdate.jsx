@@ -101,7 +101,7 @@ export const DatasetUpdate = (props) => {
     multiPartFormData.append('consentGroups', consentGroups);
 
     DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).then(() => {
-      history.push('/dataset_catalog');
+      history.push('/datalibrary');
       Notifications.showSuccess({ text: 'Update submitted successfully!' });
     }, () => {
       Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });
