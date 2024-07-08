@@ -592,6 +592,7 @@ const DataAccessRequestApplication = (props) => {
                   uploadedIrbDocument={uploadedIrbDocument}
                   updateUploadedIrbDocument={updateIrbDocument}
                   setDatasets={setDatasets}
+                  draftDar={props.draftDar}
                 />
               </div>
 

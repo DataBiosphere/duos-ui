@@ -92,7 +92,8 @@ export default function DataAccessRequest(props) {
     readOnlyMode,
     includeInstructions,
     formValidationChange,
-    ariaLevel = 2
+    ariaLevel = 2,
+    draftDar
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
@@ -133,10 +134,53 @@ export default function DataAccessRequest(props) {
     batchFormFieldChange(newFormData);
   };
 
+  const deletableDataset = (ds, index) => {
+    return (
+      <div>
+        <div id={ds.datasetIdentifier+'_summary'} className='collaborator-summary-card' >
+          <div id={ds.datasetIdentifier+'_name'} style={{ display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem' }}>
+            <div style={{fontWeight:'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
+            <div>|</div>
+            <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
+          </div>
+          {/* Delete Button */}
+          <a
+            id={index+'_deleteMember'}
+            style={{ marginLeft: 10 }}
+            onClick={async ({key, value}) => {
+              console.log('datasetId', ds.dataSetId);
+              console.log('datasets', datasets);
+              const remainingDatasets = datasets.filter(dataset => dataset.dataSetId !== ds.dataSetId);
+              console.log('remainingDatasets', remainingDatasets);
+              const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
+              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
+              onChange({key, value: datasetIds});
+              setDatasets(fullDatasets);
+            }}
+          >
+            <span
+              className='glyphicon glyphicon-trash collaborator-delete-icon'
+              aria-hidden='true'
+              data-tip='Delete dataset'
+              data-for='tip_delete'
+            ></span>
+            <span style={{ marginLeft: '1rem' }}></span>
+          </a>
+        </div>
+      </div>
+    );
+  };
+
   return (
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
+        {draftDar? 
+        <div>
+          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
+          <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
+          {datasets?.map((ds) => deletableDataset(ds))}
+        </div> :  
         <FormField
           id={'datasetIds'}
           key={'datasetIds'}
@@ -165,7 +209,7 @@ export default function DataAccessRequest(props) {
             onChange({key, value: datasetIds});
             setDatasets(fullDatasets);
           }}
-        />
+        />}
 
         <FormField
           id={'projectTitle'}
