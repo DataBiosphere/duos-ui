@@ -154,7 +154,7 @@ export default function DataAccessRequest(props) {
               console.log('remainingDatasets', remainingDatasets);
               const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
               const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-              onChange({key, value: datasetIds});
+              onChange({key: 'datasetIds', value: datasetIds});
               setDatasets(fullDatasets);
             }}
           >
