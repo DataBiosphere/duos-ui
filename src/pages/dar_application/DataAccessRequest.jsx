@@ -143,7 +143,7 @@ export default function DataAccessRequest(props) {
             <div>|</div>
             <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
           </div>
-          {/* Delete Button */}
+          {datasets.length > 1 ? 
           <a
             id={index+'_deleteMember'}
             style={{ marginLeft: 10 }}
@@ -165,7 +165,7 @@ export default function DataAccessRequest(props) {
               data-for='tip_delete'
             ></span>
             <span style={{ marginLeft: '1rem' }}></span>
-          </a>
+          </a> : <div></div>}
         </div>
       </div>
     );
