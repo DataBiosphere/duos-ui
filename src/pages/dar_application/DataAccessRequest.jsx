@@ -143,29 +143,27 @@ export default function DataAccessRequest(props) {
             <div>|</div>
             <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
           </div>
-          {datasets.length > 1 ? 
-          <a
-            id={index+'_deleteMember'}
-            style={{ marginLeft: 10 }}
-            onClick={async ({key, value}) => {
-              console.log('datasetId', ds.dataSetId);
-              console.log('datasets', datasets);
-              const remainingDatasets = datasets.filter(dataset => dataset.dataSetId !== ds.dataSetId);
-              console.log('remainingDatasets', remainingDatasets);
-              const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
-              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-              onChange({key: 'datasetIds', value: datasetIds});
-              setDatasets(fullDatasets);
-            }}
-          >
-            <span
-              className='glyphicon glyphicon-trash collaborator-delete-icon'
-              aria-hidden='true'
-              data-tip='Delete dataset'
-              data-for='tip_delete'
-            ></span>
-            <span style={{ marginLeft: '1rem' }}></span>
-          </a> : <div></div>}
+          {datasets.length > 1 ?
+            <a
+              id={index+'_deleteMember'}
+              style={{ marginLeft: 10 }}
+              onClick={async () => {
+                const remainingDatasets = datasets.filter(dataset => dataset.dataSetId !== ds.dataSetId);
+                const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
+                const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
+                onChange({key: 'datasetIds', value: datasetIds});
+                setDatasets(fullDatasets);
+              }}
+            >
+              <span
+                className='glyphicon glyphicon-trash collaborator-delete-icon'
+                aria-hidden='true'
+                data-tip='Delete dataset'
+                data-for='tip_delete'
+              ></span>
+              <span style={{ marginLeft: '1rem' }}></span>
+            </a> : <div></div>
+          }
         </div>
       </div>
     );
@@ -175,41 +173,42 @@ export default function DataAccessRequest(props) {
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
-        {draftDar? 
-        <div>
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
-          <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
-          {datasets?.map((ds) => deletableDataset(ds))}
-        </div> :  
-        <FormField
-          id={'datasetIds'}
-          key={'datasetIds'}
-          type={FormFieldTypes.SELECT}
-          disabled={readOnlyMode}
-          isAsync={true}
-          isMulti={true}
-          title={'2.1 Select Dataset(s)'}
-          validators={[FormValidators.REQUIRED]}
-          validation={validation.datasetIds}
-          onValidationChange={onValidationChange}
-          description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
-          defaultValue={datasets?.map((ds) => formatSearchDataset(ds))}
-          selectConfig={{
-            // return custom html for displaying dataset options
-            formatOptionLabel: (opt) => opt.label,
-            // return string value of dataset for accessibility / html keys
-            getOptionLabel: (opt) => opt.displayText,
-          }}
-          loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
-          placeholder={'Dataset Name, Sample Collection ID, or PI'}
-          onChange={async ({key, value}) => {
-            const datasets = value.map((val) => val.dataset);
-            const datasetIds = datasets?.map((ds) => ds.dataSetId);
-            const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-            onChange({key, value: datasetIds});
-            setDatasets(fullDatasets);
-          }}
-        />}
+        {draftDar?
+          <div>
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
+            <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
+            {datasets?.map((ds) => deletableDataset(ds))}
+          </div> :
+          <FormField
+            id={'datasetIds'}
+            key={'datasetIds'}
+            type={FormFieldTypes.SELECT}
+            disabled={readOnlyMode}
+            isAsync={true}
+            isMulti={true}
+            title={'2.1 Select Dataset(s)'}
+            validators={[FormValidators.REQUIRED]}
+            validation={validation.datasetIds}
+            onValidationChange={onValidationChange}
+            description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
+            defaultValue={datasets?.map((ds) => formatSearchDataset(ds))}
+            selectConfig={{
+              // return custom html for displaying dataset options
+              formatOptionLabel: (opt) => opt.label,
+              // return string value of dataset for accessibility / html keys
+              getOptionLabel: (opt) => opt.displayText,
+            }}
+            loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
+            placeholder={'Dataset Name, Sample Collection ID, or PI'}
+            onChange={async ({key, value}) => {
+              const datasets = value.map((val) => val.dataset);
+              const datasetIds = datasets?.map((ds) => ds.dataSetId);
+              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
+              onChange({key, value: datasetIds});
+              setDatasets(fullDatasets);
+            }}
+          />
+        }
 
         <FormField
           id={'projectTitle'}
