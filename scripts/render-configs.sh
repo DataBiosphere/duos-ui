@@ -58,7 +58,7 @@ parse_cli_args() {
 
 auth_gcloud() {
   echo "Getting cluster credentials"
-  gcloud container clusters get-credentials --zone us-central1-a --project $PROJECT terra-dev
+  gcloud container clusters get-credentials --zone us-central1-a --project "$PROJECT" terra-dev
 }
 
 write_certs() {
@@ -80,7 +80,7 @@ SSL_KEY_FILE=server.key" > ../.env.local
 write_config() {
   echo "Generating public/config.json file"
   JSON=$(curl https://duos-k8s.dsde-dev.broadinstitute.org/config.json)
-  echo $JSON > ../public/config.json
+  echo "$JSON" > ../public/config.json
   jq '.env = "local"' ../public/config.json > /dev/null
   jq '.tag = "dev"' ../public/config.json > /dev/null
   jq '.hash = "dev"' ../public/config.json > /dev/null
