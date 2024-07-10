@@ -79,24 +79,11 @@ SSL_KEY_FILE=server.key" > ../.env.local
 
 write_config() {
   echo "Generating public/config.json file"
-  echo '
-{
-  "env": "local",
-  "tag": "dev",
-  "hash": "dev",
-  "bardApiUrl": "https://terra-bard-dev.appspot.com",
-  "apiUrl": "https://consent.dsde-dev.broadinstitute.org/",
-  "ontologyApiUrl": "https://consent-ontology.dsde-dev.broadinstitute.org/",
-  "terraUrl": "https://bvdp-saturn-dev.appspot.com",
-  "tdrApiUrl": "https://jade.datarepo-dev.broadinstitute.org",
-  "clientId": "TODO: pull from GSM?",
-  "errorApiKey": "TODO: pull from GSM?",
-  "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
-  "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
-  "gaId": "TODO: pull from GSM?",
-  "features": {}
-}
-' > ../public/config.json
+  JSON=$(curl https://duos-k8s.dsde-dev.broadinstitute.org/config.json)
+  echo $JSON > ../public/config.json
+  jq '.env = "local"' ../public/config.json > /dev/null
+  jq '.tag = "dev"' ../public/config.json > /dev/null
+  jq '.hash = "dev"' ../public/config.json > /dev/null
 }
 
 parse_cli_args "$@"
