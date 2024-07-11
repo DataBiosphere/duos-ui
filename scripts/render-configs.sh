@@ -1,7 +1,7 @@
 #!/bin/bash
 # Populates local cert files necessary for local development
 # You MUST be on the Broad VPN
-# You MUST have gcloud and kubectl installed to run this script.
+# You MUST have jq, gcloud and kubectl installed to run this script.
 # You MUST authenticate via gcloud
 #
 # See usage section below for more details. All arguments are optional.
