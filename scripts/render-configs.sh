@@ -1,5 +1,5 @@
 #!/bin/bash
-# Populates local cert files necessary for local development.
+# Populates configurations necessary for local development.
 # Certs are regenerated on a 3-month rotation so this script is optimized for that task.
 # You MUST be on the Broad VPN
 # You MUST have jq, gcloud and kubectl installed to run this script.
