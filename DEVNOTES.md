@@ -12,8 +12,10 @@ nvm install 16
 npm install
 ```
 
-3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
-Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev` 
+3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
+Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev`.
+The installation steps outlined in this step can also be completed using the [render-configs.sh](scripts/render-configs.sh) script which can generate all required
+files for local development.
 ```
 cp config/alpha.json public/config.json
 ```
@@ -23,7 +25,7 @@ Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitu
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics):
+Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics). Cert files are regenerated on a 3-month rotation so these will need to be updated when they are expired:
 ```shell
 gcloud container clusters get-credentials --zone us-central1-a --project <project> terra-dev
 kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > server.crt
