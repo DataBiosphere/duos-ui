@@ -14,7 +14,7 @@ export default function DAAs(props) {
       <div className="flex flex-row" style={{ justifyContent: 'flex-start', marginBottom: '30px'}}>
         <div>
           <a target="_blank" rel="noreferrer" onClick={() => DAA.getDaaFileById(id, fileName)} className="button button-white" style={{ marginRight: '2rem', display: 'flex', alignItems: 'center'}}>
-            <span className="glyphicon glyphicon-download"></span>
+            <span style={{paddingRight: '1rem'}}className="glyphicon glyphicon-download"></span>
             {' '}
             {fileName}
           </a>
