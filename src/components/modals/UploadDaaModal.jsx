@@ -87,7 +87,7 @@ export const UploadDaaModal = (props) => {
               <div {...getRootProps()}>
                 <input {...getInputProps()} />
                 <b style={{color: '#4d72aa'}}>
-                  {modalState.attachment.length === 0 ? 'Drag and drop a PDF file to upload or click to browse files' : modalState.attachment[0].name}
+                  {modalState.attachment.length === 0 ? 'Drag and drop a file to upload or click to browse files' : modalState.attachment[0].name}
                 </b>
                 {
                   modalState.attachment.length !== 0 && (

@@ -2,7 +2,6 @@ import * as ld from 'lodash';
 import React, { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax/DAC';
-// import { DAA } from '../../libs/ajax/DAA';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
@@ -36,18 +35,10 @@ export default function ManageEditDac(props) {
     searchInputChanged: false
   });
   const [isLoading, setIsLoading] = useState(true);
-  // const [newDaaId, setNewDaaId] = useState(null);
-  // const [selectedDaa, setSelectedDaa] = useState(null);
-  // const [createdDaa, setCreatedDaa] = useState(null);
-  // const [uploadedDAAFile, setUploadedDaaFile] = useState(null);
-  // const [daaFileData, setDaaFileData] = useState(null);
-  // const [showUploadModal, setShowUploadModal] = useState(false);
   const [fetchedDac, setFetchedDac] = useState(null);
-  const dacId = props.match.params.dacId; // the existence of this can add as a flag for edit mode?
-  // const [matchingDaas, setMatchingDaas] = useState([]);
+  const dacId = props.match.params.dacId;
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
 
-  // don't want to do this if add dac
   useEffect(() => {
     const fetchData = async () => {
       if (dacId !== undefined) {
@@ -75,22 +66,6 @@ export default function ManageEditDac(props) {
           await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
         } else {
           currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          // if (daaFileData !== null) {
-          //   if (daaFileData === true) {
-          //     if (daaFileData === null) {
-          //       handleErrors('Please upload a DAA file before saving.');
-          //       return;
-          //     }
-          //     // i don't think we need an extra step here because it will get handled in ops5 ?
-          //     currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          //   } else {
-          //     // need to create the link between the DAA and the DAC --> new endpoint!!
-          //     currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-          //   }
-          // } else {
-          //   handleErrors('You must select a Data Access Agreement to govern access to your DAC\'s datasets.');
-          //   return;
-          // }
         }
 
         // Order here is important. Since users cannot have multiple roles in the
