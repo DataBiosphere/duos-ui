@@ -10,6 +10,7 @@ import {
   needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
+import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -173,7 +174,7 @@ export default function DataAccessRequest(props) {
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
-        {draftDar?
+        {draftDar && checkEnv(envGroups.DEV) ?
           <div>
             <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
             <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
