@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import * as ld from 'lodash';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
@@ -11,6 +12,9 @@ import {
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
 import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
+import ReactTooltip from 'react-tooltip';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -98,11 +102,18 @@ export default function DataAccessRequest(props) {
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
+  const [removedIds, setRemovedIds] = useState([]);
+  // const [isLastDeletable, setIsLastDeletable] = useState(false);
 
+  // i need to figure out a way to only actually remove them without using onChange
   const onChange = ({key, value}) => {
     formFieldChange({key, value});
   };
 
+  useEffect(() => {
+    console.log('removedIds', removedIds);
+    console.log('datasets', datasets);
+  }, [removedIds]);
 
   const onValidationChange = ({key, validation}) => {
     formValidationChange({key, validation});
@@ -136,35 +147,64 @@ export default function DataAccessRequest(props) {
   };
 
   const deletableDataset = (ds, index) => {
+    const isRemoved = removedIds.includes(ds.dataSetId);
+    const rowStyle = isRemoved ?
+      { backgroundColor: 'lightgray', opacity: .5 } :
+      {  };
     return (
       <div>
-        <div id={ds.datasetIdentifier+'_summary'} className='collaborator-summary-card' >
+        <div id={ds.datasetIdentifier+'_summary'} className='collaborator-summary-card' style={rowStyle}>
           <div id={ds.datasetIdentifier+'_name'} style={{ display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem' }}>
             <div style={{fontWeight:'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
             <div>|</div>
             <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
           </div>
-          {datasets.length > 1 ?
-            <a
-              id={index+'_deleteMember'}
-              style={{ marginLeft: 10 }}
-              onClick={async () => {
-                const remainingDatasets = datasets.filter(dataset => dataset.dataSetId !== ds.dataSetId);
-                const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
-                const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-                onChange({key: 'datasetIds', value: datasetIds});
-                setDatasets(fullDatasets);
-              }}
-            >
-              <span
-                className='glyphicon glyphicon-trash collaborator-delete-icon'
-                aria-hidden='true'
-                data-tip='Delete dataset'
-                data-for='tip_delete'
-              ></span>
-              <span style={{ marginLeft: '1rem' }}></span>
-            </a> : <div></div>
-          }
+          <a
+            id={index+'_deleteMember'}
+            style={{ marginLeft: 10 }}
+            onClick={async(e) => {
+              const isCurrentLastDeletable = removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId);
+              if (isCurrentLastDeletable) {
+                e.preventDefault();
+                return;
+              }
+              // if (isLastDeletable) {
+              //   e.preventDefault();
+              //   return;
+              // }
+              const remainingDatasets = datasets.filter((dataset) => dataset.dataSetId !== ds.dataSetId);
+              // console.log(datasets);
+              const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
+              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
+              const toBeRemoved = removedIds.includes(ds.dataSetId)
+                  ? removedIds.filter((id) => id !== ds.dataSetId)
+                  : [...removedIds, ds.dataSetId];
+              setRemovedIds(toBeRemoved);
+              const isLastDeletable = toBeRemoved.length === (datasets.length-1);
+              console.log(isLastDeletable);
+              if (isLastDeletable) {
+                e.preventDefault();
+                return;
+              }
+            }}
+          >
+            {!removedIds.includes(ds.dataSetId) ? (
+              <>
+                <DeleteIcon 
+                  data-tip='Delete dataset' 
+                  data-for={removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 'tip_last' : ''}
+                  style={{color: '#0948B7', fontSize: "2.3rem", verticalAlign: "middle", opacity: removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1}} 
+                  // disabled={isLastDeletable}
+                />
+                {removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) && <ReactTooltip id='tip_last' place='right' effect='solid'>
+                  The last dataset can not be deleted
+                </ReactTooltip>}
+              </>
+            ) : (
+              <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: "2.3rem", verticalAlign: "middle"}}/>
+            )}
+            <span style={{ marginLeft: '1rem' }}></span>
+          </a>
         </div>
       </div>
     );
