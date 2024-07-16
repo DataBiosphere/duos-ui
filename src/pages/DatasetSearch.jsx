@@ -12,6 +12,7 @@ import anvilIcon from '../images/anvil-logo.svg';
 import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
+import firecloudIcon from '../images/firecloud-logo.png';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
@@ -193,6 +194,15 @@ export const DatasetSearch = (props) => {
       },
       icon: cfdeIcon,
       title: 'CFDE Data Library',
+    },
+    'firecloud': {
+      query: {
+        'match_phrase': {
+          'study.description': 'FireCloud'
+        }
+      },
+      icon: firecloudIcon,
+      title: 'FireCloud Data Library',
     },
     '/custom': {
       query: {
