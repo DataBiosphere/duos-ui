@@ -146,7 +146,7 @@ export default function DataAccessRequest(props) {
       { backgroundColor: 'lightgray', opacity: .5 } :
       {  };
     return (
-      <div>
+      <div key={index}>
         <div id={ds.datasetIdentifier+'_summary'} className='collaborator-summary-card' style={rowStyle}>
           <div id={ds.datasetIdentifier+'_name'} style={{ display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem' }}>
             <div style={{fontWeight:'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
@@ -203,7 +203,7 @@ export default function DataAccessRequest(props) {
           <div>
             <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
             <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
-            {datasets?.map((ds) => deletableDataset(ds))}
+            {datasets?.map((ds, index) => deletableDataset(ds, index))}
           </div> :
           <FormField
             id={'datasetIds'}
