@@ -3,10 +3,10 @@ import React from 'react';
 export default function RequiredDAAs(props) {
   const { datasets, daas, daaDownload } = props;
   const fileNames = new Set();
-  const daaDivs = datasets.map((dataset) => {
+  const daaDivs = datasets.map((dataset, index) => {
     const datasetDacId = dataset.dacId;
     if (!datasetDacId) {
-      return <div key={dataset.id}></div>;
+      return <div key={dataset.id + '-' + index}></div>;
     }
     const daa = daas.find((daa) => daa.dacs?.some((d) => d.dacId === datasetDacId));
     const id = daa.daaId;
