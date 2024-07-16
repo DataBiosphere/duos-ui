@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import * as ld from 'lodash';
+import React, { useState } from 'react';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
@@ -110,11 +109,6 @@ export default function DataAccessRequest(props) {
     formFieldChange({key, value});
   };
 
-  useEffect(() => {
-    console.log('removedIds', removedIds);
-    console.log('datasets', datasets);
-  }, [removedIds]);
-
   const onValidationChange = ({key, validation}) => {
     formValidationChange({key, validation});
   };
@@ -168,20 +162,12 @@ export default function DataAccessRequest(props) {
                 e.preventDefault();
                 return;
               }
-              // if (isLastDeletable) {
-              //   e.preventDefault();
-              //   return;
-              // }
               const remainingDatasets = datasets.filter((dataset) => dataset.dataSetId !== ds.dataSetId);
-              // console.log(datasets);
               const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
-              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-              const toBeRemoved = removedIds.includes(ds.dataSetId)
-                  ? removedIds.filter((id) => id !== ds.dataSetId)
-                  : [...removedIds, ds.dataSetId];
+              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds); // this should probably be used at some point
+              const toBeRemoved = removedIds.includes(ds.dataSetId) ? removedIds.filter((id) => id !== ds.dataSetId) : [...removedIds, ds.dataSetId];
               setRemovedIds(toBeRemoved);
               const isLastDeletable = toBeRemoved.length === (datasets.length-1);
-              console.log(isLastDeletable);
               if (isLastDeletable) {
                 e.preventDefault();
                 return;
@@ -190,18 +176,17 @@ export default function DataAccessRequest(props) {
           >
             {!removedIds.includes(ds.dataSetId) ? (
               <>
-                <DeleteIcon 
-                  data-tip='Delete dataset' 
+                <DeleteIcon
+                  data-tip='Delete dataset'
                   data-for={removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 'tip_last' : ''}
-                  style={{color: '#0948B7', fontSize: "2.3rem", verticalAlign: "middle", opacity: removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1}} 
-                  // disabled={isLastDeletable}
+                  style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle', opacity: removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1}}
                 />
                 {removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) && <ReactTooltip id='tip_last' place='right' effect='solid'>
                   The last dataset can not be deleted
                 </ReactTooltip>}
               </>
             ) : (
-              <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: "2.3rem", verticalAlign: "middle"}}/>
+              <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>
             )}
             <span style={{ marginLeft: '1rem' }}></span>
           </a>
