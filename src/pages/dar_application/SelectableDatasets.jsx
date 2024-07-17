@@ -18,13 +18,14 @@ export default function SelectableDatasets(props) {
     setSelectedDatasets(newSelectedDatasets);
   };
 
-  const deletableStyled = (ds, isLastDeletable) => {
+  const deletableStyled = (ds) => {
+    const isDeletable = removedIds.length < datasets.length - 1;
     return <div
       key={'selectable_dataset_' + ds.dataSetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
       style={{cursor: 'pointer'}}
-      onClick={() => updateLocalState(ds)}>
+      onClick={() => isDeletable ? updateLocalState(ds) : {} }>
       <div id={ds.datasetIdentifier + '_name'}
         style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
         <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
@@ -43,7 +44,7 @@ export default function SelectableDatasets(props) {
               opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1
             }}
           />
-          {isLastDeletable &&
+          {!isDeletable &&
             <ReactTooltip id="tip_last" place="right" effect="solid">
               The last dataset can not be deleted
             </ReactTooltip>}
@@ -75,11 +76,9 @@ export default function SelectableDatasets(props) {
 
   const datasetList = () => {
     return datasets.map((ds) => {
-      const toBeRemoved = removedIds.includes(ds.dataSetId);
-      const isLastDeletable = toBeRemoved.length === (datasets.length - 1);
       return removedIds.includes(ds.dataSetId) ?
         unDeletableStyled(ds) :
-        deletableStyled(ds, isLastDeletable);
+        deletableStyled(ds);
     });
 
   };
