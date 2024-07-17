@@ -83,6 +83,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
+  const [queryState, setQueryState] = useState(query);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
 
@@ -233,9 +234,11 @@ export const DatasetSearch = (props) => {
   const fullQuery = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery;
 
+  const hasChangedPage = query !== queryState;
+
   useEffect(() => {
     const init = async () => {
-      if (loading) {
+      if (loading || hasChangedPage) {
         if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
           props.history.push('/profile');
@@ -245,6 +248,7 @@ export const DatasetSearch = (props) => {
           await DataSet.searchDatasetIndex(fullQuery).then((datasets) => {
             setDatasets(datasets);
             setLoading(false);
+            setQueryState(query);
           });
         } catch (error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
@@ -252,7 +256,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, [loading, isInstitutionSet, fullQuery, props.history]);
+  }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage]);
 
   return (
     loading ?
