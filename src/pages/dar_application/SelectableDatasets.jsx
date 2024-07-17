@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ReactTooltip from 'react-tooltip';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
@@ -7,15 +7,18 @@ export default function SelectableDatasets(props) {
   const {datasets, setSelectedDatasets} = props;
   const [removedIds, setRemovedIds] = useState([]);
 
+  useEffect(() => {
+    // Populate parent state with the current state of datasets to be saved to the DAR
+    const newSelectedDatasets = datasets.filter(ds => !removedIds.includes(ds.dataSetId));
+    setSelectedDatasets(newSelectedDatasets);
+  }, [removedIds, datasets, setSelectedDatasets]);
+
   const updateLocalState = (ds) => {
     if (removedIds.includes(ds.dataSetId)) {
       setRemovedIds(removedIds.toSpliced(removedIds.indexOf(ds.dataSetId), 1));
     } else {
       setRemovedIds(removedIds.concat(ds.dataSetId));
     }
-    const newSelectedDatasets = datasets.filter(ds => !removedIds.includes(ds.dataSetId));
-    // Populate parent state with the current state of datasets to be saved to the DAR
-    setSelectedDatasets(newSelectedDatasets);
   };
 
   const deletableStyled = (ds) => {
