@@ -188,6 +188,7 @@ const DataAccessRequestApplication = (props) => {
   };
 
   const [datasets, setDatasets] = useState([]);
+  const [selectedDatasets, setSelectedDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
 
   useEffect(() => {
@@ -350,7 +351,7 @@ const DataAccessRequestApplication = (props) => {
   const attemptSubmit = () => {
     const validation = validateDARFormData({
       formData,
-      datasets,
+      selectedDatasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -449,8 +450,8 @@ const DataAccessRequestApplication = (props) => {
     const { dataRequestId } = props.match.params;
     try {
       let referenceId = formattedFormData.referenceId;
-
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
+      setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds));
       referenceId = darPartialResponse.referenceId;
       if (isNil(dataRequestId)) {
         props.history.replace('/dar_application/' + referenceId);
@@ -592,6 +593,7 @@ const DataAccessRequestApplication = (props) => {
                   uploadedIrbDocument={uploadedIrbDocument}
                   updateUploadedIrbDocument={updateIrbDocument}
                   setDatasets={setDatasets}
+                  setSelectedDatasets={setSelectedDatasets}
                   draftDar={props.draftDar}
                 />
               </div>
@@ -630,7 +632,7 @@ const DataAccessRequestApplication = (props) => {
 
               {isAttested &&
                 <div className='step-container'>
-                  <DucAddendum doSubmit={doSubmit} save={() => setShowDialogSave(true)} isLoading={isLoading} formData={formData} datasets={datasets} dataUseTranslations={dataUseTranslations} />
+                  <DucAddendum doSubmit={doSubmit} save={() => setShowDialogSave(true)} isLoading={isLoading} formData={formData} datasets={selectedDatasets} dataUseTranslations={dataUseTranslations} />
                 </div>
               }
             </div>

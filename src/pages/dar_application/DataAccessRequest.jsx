@@ -11,9 +11,7 @@ import {
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
 import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
-import ReactTooltip from 'react-tooltip';
-import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
-import DeleteIcon from '@mui/icons-material/Delete';
+import SelectableDatasets from './SelectableDatasets';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -92,6 +90,7 @@ export default function DataAccessRequest(props) {
     uploadedCollaborationLetter,
     updateCollaborationLetter,
     setDatasets,
+    setSelectedDatasets,
     validation,
     readOnlyMode,
     includeInstructions,
@@ -101,8 +100,6 @@ export default function DataAccessRequest(props) {
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
-  const [removedIds, setRemovedIds] = useState([]);
-  // const [isLastDeletable, setIsLastDeletable] = useState(false);
 
   // i need to figure out a way to only actually remove them without using onChange
   const onChange = ({key, value}) => {
@@ -140,61 +137,6 @@ export default function DataAccessRequest(props) {
     batchFormFieldChange(newFormData);
   };
 
-  const deletableDataset = (ds, index) => {
-    const isRemoved = removedIds.includes(ds.dataSetId);
-    const rowStyle = isRemoved ?
-      { backgroundColor: 'lightgray', opacity: .5 } :
-      {  };
-    return (
-      <div key={index}>
-        <div id={ds.datasetIdentifier+'_summary'} className='collaborator-summary-card' style={rowStyle}>
-          <div id={ds.datasetIdentifier+'_name'} style={{ display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem' }}>
-            <div style={{fontWeight:'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
-            <div>|</div>
-            <div style={{ marginLeft: '0.5rem' }}>{ds.datasetName}</div>
-          </div>
-          <a
-            id={index+'_deleteMember'}
-            style={{ marginLeft: 10 }}
-            onClick={async(e) => {
-              const isCurrentLastDeletable = removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId);
-              if (isCurrentLastDeletable) {
-                e.preventDefault();
-                return;
-              }
-              const remainingDatasets = datasets.filter((dataset) => dataset.dataSetId !== ds.dataSetId);
-              const datasetIds = remainingDatasets?.map((ds) => ds.dataSetId);
-              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds); // this should probably be used at some point
-              const toBeRemoved = removedIds.includes(ds.dataSetId) ? removedIds.filter((id) => id !== ds.dataSetId) : [...removedIds, ds.dataSetId];
-              setRemovedIds(toBeRemoved);
-              const isLastDeletable = toBeRemoved.length === (datasets.length-1);
-              if (isLastDeletable) {
-                e.preventDefault();
-                return;
-              }
-            }}
-          >
-            {!removedIds.includes(ds.dataSetId) ? (
-              <>
-                <DeleteIcon
-                  data-tip='Delete dataset'
-                  data-for={removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 'tip_last' : ''}
-                  style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle', opacity: removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1}}
-                />
-                {removedIds.length === (datasets.length-1) && !removedIds.includes(ds.dataSetId) && <ReactTooltip id='tip_last' place='right' effect='solid'>
-                  The last dataset can not be deleted
-                </ReactTooltip>}
-              </>
-            ) : (
-              <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>
-            )}
-            <span style={{ marginLeft: '1rem' }}></span>
-          </a>
-        </div>
-      </div>
-    );
-  };
-
   return (
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
@@ -202,8 +144,11 @@ export default function DataAccessRequest(props) {
         {draftDar && checkEnv(envGroups.DEV) ?
           <div>
             <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
-            <p style={{ marginBottom: '1rem' }}>Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:</p>
-            {datasets?.map((ds, index) => deletableDataset(ds, index))}
+            <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
+            <SelectableDatasets
+              datasets={datasets}
+              setSelectedDatasets={setSelectedDatasets}
+            />
           </div> :
           <FormField
             id={'datasetIds'}
