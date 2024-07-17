@@ -149,7 +149,6 @@ export const ManageDacTable = function ManageDacTable(props) {
     setShowDatasetsModal,
     setShowMembersModal,
     setShowConfirmationModal,
-    setIsEditMode,
     setSelectedDac,
     setSelectedDatasets
   } = props;
@@ -157,14 +156,12 @@ export const ManageDacTable = function ManageDacTable(props) {
   const editDac = useCallback((selectedDac) => {
     setShowEditPage(true);
     setSelectedDac(selectedDac);
-    setIsEditMode(true);
-  }, [setShowEditPage, setSelectedDac, setIsEditMode]);
+  }, [setShowEditPage, setSelectedDac]);
 
   const deleteDac = useCallback((selectedDac) => {
     setShowConfirmationModal(true);
     setSelectedDac(selectedDac);
-    setIsEditMode(false);
-  }, [setShowConfirmationModal, setSelectedDac, setIsEditMode]);
+  }, [setShowConfirmationModal, setSelectedDac]);
 
   const viewMembers = useCallback((selectedDac) => {
     setShowMembersModal(true);

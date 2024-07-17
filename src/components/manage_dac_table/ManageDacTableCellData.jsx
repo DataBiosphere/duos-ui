@@ -6,6 +6,7 @@ import {Styles} from '../../libs/theme';
 import {Delete} from '@mui/icons-material';
 import {Link} from 'react-router-dom';
 import editPencilIcon from '../../images/edit_pencil.svg';
+import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 export function nameCellData({name = '- -', dac, viewMembers, dacId, label= 'dac-name'}) {
   return {
@@ -65,7 +66,7 @@ export function actionsCellData({dac, deleteDac, userRole}) {
       <div style={{ paddingTop: '5px' }}>
         <Link
           to={{
-            pathname: `/manage_edit_dac/${dac.dacId}`,
+            pathname: checkEnv(envGroups.DEV) ? `/manage_edit_dac_daa/${dac.dacId}` : `/manage_edit_dac/${dac.dacId}`,
             state: { userRole: userRole }
           }}
           data-tip={`Edit ${dac.name}`}

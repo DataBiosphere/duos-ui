@@ -94,9 +94,15 @@ export default function ManageResearcherDAAsTable(props) {
     columnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
-        const daa = daas.find(daa => daa.dacs?.some(d => d.dacId === dac.dacId));
-        const id = daa?.daaId;
-        const fileName = daa?.file.fileName;
+        const matchingDaas = daas.filter(daa => daa.dacs?.some(d => d.dacId === dac.dacId));
+        let daa;
+        if (matchingDaas.length > 0) {
+          daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+            return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
+          });
+        }
+        const id = daa ? daa.daaId : 0;
+        const fileName = daa ? daa.file.fileName : '';
         acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={{id: id, fileName: fileName}} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
         return acc;
       }, {}),
@@ -196,10 +202,9 @@ export default function ManageResearcherDAAsTable(props) {
               fontSize: '16px',
               maxWidth: '60%',
             })}>
-              Issue, Update, or Deactivate for User&apos;s ability to request access to datasets, by agreeing to
-              Data Access Committee&apos;s (DAC&apos;s) Data Access Agreements (DAAs) in the table below.
-              Issuing a checkmark in a cell for a researcher denotes your approval of that researcher
-              to request data from the listed DAC, according to its linked DAA.
+              The table below allows you to pre-authorize your Institution&apos;s users to request access to datasets,
+              known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
+              Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
             </div>
           </div>
         </div>
