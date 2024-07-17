@@ -3,8 +3,11 @@ import { useEffect, useState } from 'react';
 import ERACommons from '../../components/ERACommons';
 import { Notifications } from '../../libs/utils';
 import { User } from '../../libs/ajax/User';
+import { DAA } from '../../libs/ajax/DAA';
 import { isNil } from 'lodash';
 import LibraryCard from './LibraryCard';
+import DAAs from './DAAs';
+import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 export default function ResearcherStatus(props) {
 
@@ -16,6 +19,7 @@ export default function ResearcherStatus(props) {
   const [issuedOn, setIssuedOn] = useState('');
   const [issuedBy, setIssuedBy] = useState('');
   const [hasCard, setHasCard] = useState(true);
+  const [daaObjects, setDaaObjects] = useState([]);
   const nihStatusUpdate = useCallback(() => {}, []);
 
   useEffect(() => {
@@ -26,10 +30,16 @@ export default function ResearcherStatus(props) {
             setHasCard(false);
           }
           else {
+            const card = user.libraryCards[0];
+            const daaIds = card.daaIds;
             const signingOfficialUsers = await User.getSOsForCurrentUser();
-            setIssuedOn(user.libraryCards[0].createDate);
+            setIssuedOn(card.createDate);
             const names = signingOfficialUsers.map(so => so.displayName);
             setIssuedBy(names.join(', '));
+
+            const daaPromises = daaIds.map(id => DAA.getDaaById(id));
+            const daaObjects = await Promise.all(daaPromises);
+            setDaaObjects(daaObjects);
           }
         }
       } catch (error) {
@@ -83,21 +93,30 @@ export default function ResearcherStatus(props) {
         fontWeight: '600',
         lineHeight: 'normal'
       }} >
-      Library Card
+      Library Cards issued to you
     </p>
     <div style={{ marginTop: '15px' }} />
-    {hasCard ? (
-      <LibraryCard
-        issuedOn={issuedOn}
-        issuedBy={issuedBy} />
-    ) : (
-      <div>
-        <p>No Library Card Found</p>
-        <p style={{
-          marginTop: '10px',
-          marginBottom:'50px'
-        }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional Signing Official must register in DUOS, request and receive Signing Official permissions, and issue you a Library Card.</p>
-      </div>
-    )}
+    {hasCard ?
+      (checkEnv(envGroups.DEV) ?
+        (
+          <DAAs
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}/>
+        ) :
+        (
+          <LibraryCard
+            issuedOn={issuedOn}
+            issuedBy={issuedBy}
+            daas={daaObjects}/>
+        )) : (
+        <div>
+          <p>No Library Card Found</p>
+          <p style={{
+            marginTop: '10px',
+            marginBottom:'50px'
+          }}>You must have a Library Card to submit a data access request. To obtain one, your Institutional Signing Official must register in DUOS, request and receive Signing Official permissions, and issue you a Library Card.</p>
+        </div>
+      )}
   </div>;
 }

@@ -96,7 +96,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
     const id = rowData[index][0].id;
     const mapKey = id || `noId-index-${index}`;
     if (rowData[index][0].striped) {
-      baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#e2e8f4';
+      baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#F7F8F9';
     }
     const renderedRow = (
       <div style={Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle)} key={`row-data-${mapKey}`} role="row" className={`row-data-${index}`}>
