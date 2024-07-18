@@ -4,7 +4,7 @@ import ReactTooltip from 'react-tooltip';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
 
 export default function SelectableDatasets(props) {
-  const {datasets, setSelectedDatasets} = props;
+  const {datasets, setSelectedDatasets, disabled} = props;
   const [removedIds, setRemovedIds] = useState([]);
 
   useEffect(() => {
@@ -23,12 +23,13 @@ export default function SelectableDatasets(props) {
 
   const deletableStyled = (ds) => {
     const isDeletable = removedIds.length < datasets.length - 1;
+    const clickable = isDeletable && !disabled;
     return <div
       key={'selectable_dataset_' + ds.dataSetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
       style={{cursor: 'pointer'}}
-      onClick={() => isDeletable ? updateLocalState(ds) : {} }>
+      onClick={() => clickable ? updateLocalState(ds) : {} }>
       <div id={ds.datasetIdentifier + '_name'}
         style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
         <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
@@ -63,7 +64,7 @@ export default function SelectableDatasets(props) {
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
       style={{cursor: 'pointer', backgroundColor: 'lightgray', opacity: .5}}
-      onClick={() => updateLocalState(ds)}>
+      onClick={() => disabled ? {} : updateLocalState(ds)}>
       <div id={ds.datasetIdentifier + '_name'}
         style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
         <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>

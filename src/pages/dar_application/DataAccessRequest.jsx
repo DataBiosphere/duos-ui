@@ -146,6 +146,7 @@ export default function DataAccessRequest(props) {
             <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
             <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
             <SelectableDatasets
+              disabled={readOnlyMode}
               datasets={datasets}
               setSelectedDatasets={setSelectedDatasets}
             />
