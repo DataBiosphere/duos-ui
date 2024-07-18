@@ -28,17 +28,17 @@ export default function SelectableDatasets(props) {
       key={'selectable_dataset_' + ds.dataSetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
-      style={{cursor: 'pointer'}}
-      onClick={() => clickable ? updateLocalState(ds) : {} }>
+      style={disabled ? {} : {cursor: 'pointer'}}
+      {...(clickable ? {onClick: () => updateLocalState(ds)} : {})}>
       <div id={ds.datasetIdentifier + '_name'}
         style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
         <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
         <div>|</div>
         <div style={{marginLeft: '0.5rem'}}>{ds.datasetName}</div>
       </div>
-      <a id={'remove_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
+      <span id={'remove_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
         <>
-          <DeleteIcon
+          {!disabled && <DeleteIcon
             data-tip="Delete dataset"
             data-for={removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.dataSetId) ? 'tip_last' : ''}
             style={{
@@ -47,34 +47,37 @@ export default function SelectableDatasets(props) {
               verticalAlign: 'middle',
               opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1
             }}
-          />
+          />}
           {!isDeletable &&
             <ReactTooltip id="tip_last" place="right" effect="solid">
               The last dataset can not be deleted
             </ReactTooltip>}
         </>
         <span style={{marginLeft: '1rem'}}></span>
-      </a>
+      </span>
     </div>;
   };
 
   const unDeletableStyled = (ds) => {
+    const style = disabled ?
+      {backgroundColor: 'lightgray', opacity: .5} :
+      {backgroundColor: 'lightgray', opacity: .5, cursor: 'pointer'};
     return <div
       key={'selectable_dataset_' + ds.dataSetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
-      style={{cursor: 'pointer', backgroundColor: 'lightgray', opacity: .5}}
-      onClick={() => disabled ? {} : updateLocalState(ds)}>
+      style={style}
+      {...(disabled ? {} : {onClick: () => updateLocalState(ds)})}>
       <div id={ds.datasetIdentifier + '_name'}
         style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
         <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
         <div>|</div>
         <div style={{marginLeft: '0.5rem'}}>{ds.datasetName}</div>
       </div>
-      <a id={'restore_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
-        <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>
+      <span id={'restore_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
+        {!disabled && <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>}
         <span style={{marginLeft: '1rem'}}></span>
-      </a>
+      </span>
     </div>;
   };
 
