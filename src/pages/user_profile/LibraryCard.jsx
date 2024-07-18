@@ -1,5 +1,7 @@
 import React from 'react';
 
+// NOTE: This component will be deprecated upon promotion of dynamic DAAs. It will be replaced by DAAs.jsx.
+
 export default function LibraryCard(props) {
 
   const {

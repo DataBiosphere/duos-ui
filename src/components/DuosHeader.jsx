@@ -16,8 +16,8 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
 import {isFunction, isNil} from 'lodash/fp';
+import {DAAUtils} from '../utils/DAAUtils';
 
 const styles = {
   drawerPaper: {
@@ -96,9 +96,9 @@ export const headerTabsConfig = [
     children: [
       { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => DAAUtils.isEnabled() },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => checkEnv(envGroups.DEV) }
+      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() }
     ],
     isRendered: (user) => user.isSigningOfficial
   },

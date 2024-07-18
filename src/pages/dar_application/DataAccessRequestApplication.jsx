@@ -23,7 +23,6 @@ import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } fro
 import './DataAccessRequestApplication.css';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
 
 import {
   validateDARFormData
@@ -31,6 +30,7 @@ import {
 import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
+import {DAAUtils} from '../../utils/DAAUtils';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -196,7 +196,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(datasets);
     });
     if (!props.readOnlyMode) {
-      const updatedTabs = checkEnv(envGroups.DEV) ? [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }] : [...ApplicationTabs, { name: 'Data Use Agreement' }];
+      const updatedTabs = DAAUtils.isEnabled() ? [...ApplicationTabs, { name: 'Data Access Agreements (DAA)' }] : [...ApplicationTabs, { name: 'Data Use Agreement' }];
       setApplicationTabs(updatedTabs);
     }
   }, [formData.datasetIds, props.readOnlyMode]);
@@ -611,7 +611,7 @@ const DataAccessRequestApplication = (props) => {
 
               {!props.readOnlyMode ?
                 <div className='step-container'>
-                  {checkEnv(envGroups.DEV) ?
+                  {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
                       datasets={(props.draftDar && checkEnv(envGroups.DEV)) ? selectedDatasets : datasets}
                       darCode={formData.darCode}

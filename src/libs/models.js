@@ -6,7 +6,8 @@ export const Models = {
     createDate: null,
     updateDate: null,
     chairpersons: [],
-    members: []
+    members: [],
+    associatedDaa: null
   },
   dar: {
     researcherProperties: [],

@@ -1,0 +1,10 @@
+.upload-daa-dropzone {
+  font-size: 14px;
+  line-height: 100px;
+  padding-left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border-color: #c2cee1;
+}
