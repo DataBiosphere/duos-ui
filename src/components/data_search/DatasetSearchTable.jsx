@@ -15,6 +15,7 @@ import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
+import DatasetModal from '../modals/DatasetModal';
 
 
 const studyTableHeader = [
@@ -49,6 +50,7 @@ export const DatasetSearchTable = (props) => {
   const [tdrApiUrl, setTdrApiUrl] = useState('');
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
   const [dataUse, setDataUse] = useState();
+  const [showDatasetModal, setShowDatasetModal] = useState(false);
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -221,9 +223,10 @@ export const DatasetSearchTable = (props) => {
   };
 
   const applyForAccess = async () => {
-    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
-    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    setShowDatasetModal(true);
+    // const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
+    // const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    // history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
   const clearSearchRef = () => {
@@ -459,6 +462,14 @@ export const DatasetSearchTable = (props) => {
           showModal={showTranslatedDULModal}
           dataUse={dataUse}
           onCloseRequest={()=>setShowTranslatedDULModal(false)}
+        />
+      }
+      {
+        showDatasetModal &&
+        <DatasetModal
+          showModal={showDatasetModal}
+          datasets={selected}
+          onCloseRequest={()=>setShowDatasetModal(false)}
         />
       }
     </>
