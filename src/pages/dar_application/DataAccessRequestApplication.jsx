@@ -351,7 +351,7 @@ const DataAccessRequestApplication = (props) => {
   const attemptSubmit = () => {
     const validation = validateDARFormData({
       formData,
-      datasets: (props.draftDar && checkEnv(envGroups.DEV)) ? selectedDatasets : datasets,
+      datasets: (props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets,
       dataUseTranslations,
       irbDocument: uploadedIrbDocument,
       collaborationLetter: uploadedCollaborationLetter,
@@ -613,7 +613,7 @@ const DataAccessRequestApplication = (props) => {
                 <div className='step-container'>
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
-                      datasets={(props.draftDar && checkEnv(envGroups.DEV)) ? selectedDatasets : datasets}
+                      datasets={(props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets}
                       darCode={formData.darCode}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
@@ -637,7 +637,7 @@ const DataAccessRequestApplication = (props) => {
                     save={() => setShowDialogSave(true)}
                     isLoading={isLoading}
                     formData={formData}
-                    datasets={(props.draftDar && checkEnv(envGroups.DEV)) ? selectedDatasets : datasets}
+                    datasets={(props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets}
                     dataUseTranslations={dataUseTranslations} />
                 </div>
               }

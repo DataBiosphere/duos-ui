@@ -10,8 +10,8 @@ import {
   needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
-import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
 import SelectableDatasets from './SelectableDatasets';
+import {DAAUtils} from '../../utils/DAAUtils';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -141,7 +141,7 @@ export default function DataAccessRequest(props) {
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
-        {draftDar && checkEnv(envGroups.DEV) ?
+        {draftDar && DAAUtils.isEnabled() ?
           <div>
             <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
             <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
