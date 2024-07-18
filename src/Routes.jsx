@@ -44,6 +44,7 @@ import {checkEnv, envGroups} from './utils/EnvironmentUtils';
 import { DatasetUpdateForm } from './pages/DatasetUpdateForm';
 import DatasetSearch from './pages/DatasetSearch';
 import { StudyUpdateForm } from './pages/StudyUpdateForm';
+import {DAAUtils} from './utils/DAAUtils';
 import EditDac from './pages/manage_dac/EditDac';
 
 const Routes = (props) => (
@@ -74,8 +75,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_edit_dac/:dacId" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/manage_add_dac" component={ManageEditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
-    {checkEnv(envGroups.DEV) && <AuthenticatedRoute path="/manage_edit_dac_daa/:dacId" component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
-    {checkEnv(envGroups.DEV) &&  <AuthenticatedRoute path="/manage_add_dac_daa" component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
+    {DAAUtils.isEnabled() && <AuthenticatedRoute path="/manage_edit_dac_daa/:dacId" component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
+    {DAAUtils.isEnabled() &&  <AuthenticatedRoute path="/manage_add_dac_daa" component={EditDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />}
     <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]}/>
     <AuthenticatedRoute path="/dar_collection/:collectionId" component={DarCollectionReview} props={props} rolesAllowed={[USER_ROLES.researcher, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.signingOfficial]}/>
@@ -89,7 +90,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_application/:dataRequestId" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/dar_application" component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/signing_official_console/researchers" component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
-    {checkEnv(envGroups.DEV) && <AuthenticatedRoute path="/signing_official_console/researchers_daa_associations" component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
+    {DAAUtils.isEnabled() && <AuthenticatedRoute path="/signing_official_console/researchers_daa_associations" component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
