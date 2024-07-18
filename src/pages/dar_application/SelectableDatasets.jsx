@@ -21,6 +21,15 @@ export default function SelectableDatasets(props) {
     }
   };
 
+  const datasetDescriptionDiv = (ds) => {
+    return <div id={ds.datasetIdentifier + '_name'}
+      style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
+      <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
+      <div>|</div>
+      <div style={{marginLeft: '0.5rem'}}>{ds.datasetName}</div>
+    </div>;
+  };
+
   const deletableStyled = (ds) => {
     const isDeletable = removedIds.length < datasets.length - 1;
     const clickable = isDeletable && !disabled;
@@ -30,12 +39,7 @@ export default function SelectableDatasets(props) {
       className="collaborator-summary-card"
       style={disabled ? {} : {cursor: 'pointer'}}
       {...(clickable ? {onClick: () => updateLocalState(ds)} : {})}>
-      <div id={ds.datasetIdentifier + '_name'}
-        style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
-        <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
-        <div>|</div>
-        <div style={{marginLeft: '0.5rem'}}>{ds.datasetName}</div>
-      </div>
+      {datasetDescriptionDiv(ds)}
       <span id={'remove_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
         <>
           {!disabled && <DeleteIcon
@@ -68,12 +72,7 @@ export default function SelectableDatasets(props) {
       className="collaborator-summary-card"
       style={style}
       {...(disabled ? {} : {onClick: () => updateLocalState(ds)})}>
-      <div id={ds.datasetIdentifier + '_name'}
-        style={{display: 'flex', alignItems: 'center', flex: '1 1 100%', marginRight: '1.5rem'}}>
-        <div style={{fontWeight: 'bold', marginRight: '0.5rem'}}>{ds.datasetIdentifier}</div>
-        <div>|</div>
-        <div style={{marginLeft: '0.5rem'}}>{ds.datasetName}</div>
-      </div>
+      {datasetDescriptionDiv(ds)}
       <span id={'restore_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
         {!disabled && <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>}
         <span style={{marginLeft: '1rem'}}></span>
