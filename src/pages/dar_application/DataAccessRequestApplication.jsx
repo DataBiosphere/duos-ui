@@ -445,6 +445,9 @@ const DataAccessRequestApplication = (props) => {
   const saveDarDraft = async () => {
     let formattedFormData = cloneDeep(formData);
     // DAR datasetIds needs to be a list of ids
+    if (DAAUtils.isEnabled()) {
+      formattedFormData.datasetIds = selectedDatasets.map(d => d.dataSetId);
+    }
 
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = props.match.params;
@@ -613,7 +616,7 @@ const DataAccessRequestApplication = (props) => {
                 <div className='step-container'>
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
-                      datasets={(props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets}
+                      datasets={selectedDatasets}
                       darCode={formData.darCode}
                       cancelAttest={() => setIsAttested(false)}
                       isAttested={isAttested}
@@ -637,7 +640,7 @@ const DataAccessRequestApplication = (props) => {
                     save={() => setShowDialogSave(true)}
                     isLoading={isLoading}
                     formData={formData}
-                    datasets={(props.draftDar && DAAUtils.isEnabled()) ? selectedDatasets : datasets}
+                    datasets={DAAUtils.isEnabled() ? selectedDatasets : datasets}
                     dataUseTranslations={dataUseTranslations} />
                 </div>
               }
