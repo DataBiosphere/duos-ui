@@ -114,7 +114,7 @@ describe('Selectable Datasets - Not Read Only', () => {
     });
   });
 
-  describe('With 4 Datasets in Read-Only Mode', () => {
+  describe('Selectable Datasets - Read Only', () => {
     beforeEach(() => {
       mount(<SelectableDatasets {...propsDisabled} />);
     });
