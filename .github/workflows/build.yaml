@@ -44,11 +44,12 @@ jobs:
         .
     - name: Log Github Actor
       run: echo "${{ github.actor }}"
-    - name: Auth to GCR
+    - name: Auth to GCP
       if: github.actor != 'dependabot[bot]'
-      uses: 'google-github-actions/auth@v2'
+      uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
+        workload_identity_provider: 'projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider'
+        service_account: 'gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com'
     - name: Auth Docker for GCR
       if: github.actor != 'dependabot[bot]'
       run: gcloud auth configure-docker --quiet
