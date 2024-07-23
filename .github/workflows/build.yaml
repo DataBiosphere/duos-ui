@@ -55,12 +55,10 @@ jobs:
         # Centralized in dsp-tools-k8s; ask in #dsp-devops-champions for help troubleshooting
         workload_identity_provider: 'projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider'
         service_account: 'gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com'
-    - name: Auth Docker for GCR
-      if: github.actor != 'dependabot[bot]'
-      run: gcloud auth configure-docker --quiet
     - name: Push Image to GCR
       if: github.actor != 'dependabot[bot]'
       run: |
+        gcloud auth configure-docker --quiet
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
