@@ -10,6 +10,7 @@ export const Models = {
     associatedDaa: null
   },
   dar: {
+    properties: [],
     researcherProperties: [],
     researcherId: '',
     rus: '',
