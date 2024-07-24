@@ -5,6 +5,7 @@ import {
 import { isEmpty, isNil } from 'lodash/fp';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAA } from '../../libs/ajax/DAA';
+import { User } from '../../libs/ajax/User';
 import { Storage } from '../../libs/storage';
 
 const listStyle = {
@@ -34,7 +35,6 @@ function FormattedDatasets({ datasets }) {
 
 export default function DatasetModal(props) {
   const { showModal, onCloseRequest, onApply, datasetIds } = props;
-  console.log(props.datasetIds);
 
   const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
   console.log('allDatasets', allDatasets);
@@ -42,14 +42,16 @@ export default function DatasetModal(props) {
   const [datasets, setDatasets] = useState([]);
   const [user, setUser] = useState(null);
   const [libraryCard, setLibraryCard] = useState({});
-  console.log(datasets);
+  console.log('datasets',datasets);
 
   const closeHandler = () => {
     onCloseRequest();
   };
 
-  const applyHandler = () => {
-    onApply();
+  const applyHandler = (filteredDatasets) => {
+    // take the filteredDatasets and convert it to a list of strings with are prefaced with 'dataset-' and the datasetId
+    const datasetStrings = filteredDatasets.map(dataset => `dataset-${dataset.dataSetId}`);
+    onApply(datasetStrings);
   };
 
   const fetchAllDatasets = async (datasetIds) => {
@@ -64,12 +66,13 @@ export default function DatasetModal(props) {
     const getData = async () => {
       const user = Storage.getCurrentUser();
       setUser(user);
-      console.log(Storage.getCurrentUser());
+      console.log('user',Storage.getCurrentUser());
       const libraryCard = !isEmpty(user.libraryCards) ? user.libraryCards[0] : {};
       setLibraryCard(libraryCard);
       const fetchedDatasets = await fetchAllDatasets(allDatasets);
-      console.log(fetchedDatasets);
+      console.log('fetchedDatasets',fetchedDatasets);
       const daas = await DAA.getDaas();
+      console.log('daas', daas);
 
       const filteredDatasets = fetchedDatasets.filter((dataset) => {
         const datasetDacId = dataset.dacId;
@@ -80,7 +83,7 @@ export default function DatasetModal(props) {
         }
       });
 
-      console.log(filteredDatasets);
+      console.log('filteredDatasets', filteredDatasets);
       setDatasets(filteredDatasets);
     };
 
@@ -125,7 +128,7 @@ export default function DatasetModal(props) {
       </DialogContent>
       <DialogActions id='dialog-footer'>
         <Button onClick={closeHandler}>Cancel</Button>
-        <Button onClick={applyHandler}variant='contained' style={{borderRadius: '0'}}>Apply</Button>
+        <Button onClick={() => applyHandler(datasets)} variant='contained' style={{borderRadius: '0'}}>Apply</Button>
       </DialogActions>
     </Dialog>
   );

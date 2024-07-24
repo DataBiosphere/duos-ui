@@ -191,7 +191,7 @@ export const DatasetSearchTable = (props) => {
     } else {
       newSelected = selected.concat(idsToModify);
     }
-
+    
     setSelected(newSelected);
   };
 
@@ -226,8 +226,8 @@ export const DatasetSearchTable = (props) => {
     setShowDatasetModal(true);
   }; 
 
-  const applyForAccess = async () => {
-    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
+  const applyForAccess = async (datasets) => {
+    const draftDatasets = datasets.map((id) => parseInt(id.replace('dataset-', '')));
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
