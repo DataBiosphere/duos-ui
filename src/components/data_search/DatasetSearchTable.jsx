@@ -222,11 +222,14 @@ export const DatasetSearchTable = (props) => {
     setExportableDatasets({});
   };
 
-  const applyForAccess = async () => {
+  const filterApprovedDatasets = async () => {
     setShowDatasetModal(true);
-    // const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
-    // const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    // history.push(`/dar_application/${darDraft.referenceId}`);
+  }; 
+
+  const applyForAccess = async () => {
+    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
+    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
   const clearSearchRef = () => {
@@ -450,7 +453,7 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-          <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+          <Button variant="contained" onClick={filterApprovedDatasets} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
           </Button>
           }
@@ -468,8 +471,9 @@ export const DatasetSearchTable = (props) => {
         showDatasetModal &&
         <DatasetModal
           showModal={showDatasetModal}
-          datasets={selected}
+          datasetIds={selected}
           onCloseRequest={()=>setShowDatasetModal(false)}
+          onApply={applyForAccess}
         />
       }
     </>
