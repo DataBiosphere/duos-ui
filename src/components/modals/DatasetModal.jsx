@@ -16,17 +16,17 @@ const listStyle = {
 
 function FormattedDatasets({ datasets }) {
   return (
-    <div style={{border: '0.5px solid #cccccc', borderRadius: '10px'}}>
+    <div style={{border: '0.5px solid #cccccc', borderRadius: '10px', overflow: 'auto', maxHeight: '150px'}}>
       <ul key='dulUnorderedList' style={{...listStyle, border: '0.5px solid #cccccc', borderRadius: '10px', padding: '10px'}} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
         {datasets.map((dataset) => (
-          <li key={dataset.dataSetId} className="translated-restriction" style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
-          <span style={{fontWeight: 'bold'}}>{dataset.datasetIdentifier}</span>
-          <span style={{wordWrap: 'break-word'}}>
-            {dataset.datasetName.length > 50 
-              ? `${dataset.datasetName.substring(0, 50)}...` 
-              : dataset.datasetName}
-          </span>
-        </li>
+          <li key={dataset.dataSetId} className="translated-restriction" style={{display: 'grid', gridTemplateColumns: '1fr 3.5fr'}}>
+            <span style={{fontWeight: 'bold'}}>{dataset.datasetIdentifier}</span>
+            <span style={{wordWrap: 'break-word'}}>
+              {dataset.datasetName.length > 50 
+                ? `${dataset.datasetName.substring(0, 50)}...` 
+                : dataset.datasetName}
+            </span>
+          </li>
         ))}
       </ul>
     </div>
@@ -107,18 +107,6 @@ export default function DatasetModal(props) {
     >
       <DialogTitle id='dialog-title'>
         <span style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.0rem', color:'#1E1E1E'}}>Datasets available for Data Access Request</span>
-        {/* <IconButton
-          aria-label="close"
-          onClick={closeHandler}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton> */}
       </DialogTitle>
       <DialogContent id='dialog-content'>
         <div>
