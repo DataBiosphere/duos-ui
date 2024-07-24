@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sherlock-version: ${{ steps.short-sha.outputs.sha }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -44,17 +47,18 @@ jobs:
         .
     - name: Log Github Actor
       run: echo "${{ github.actor }}"
-    - name: Auth to GCR
+    - id: 'auth'
       if: github.actor != 'dependabot[bot]'
+      name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v2'
       with:
-        credentials_json: ${{ secrets.GCR_PUBLISH_KEY_B64 }}
-    - name: Auth Docker for GCR
-      if: github.actor != 'dependabot[bot]'
-      run: gcloud auth configure-docker --quiet
+        # Centralized in dsp-tools-k8s; ask in #dsp-devops-champions for help troubleshooting
+        workload_identity_provider: 'projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider'
+        service_account: 'gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com'
     - name: Push Image to GCR
       if: github.actor != 'dependabot[bot]'
       run: |
+        gcloud auth configure-docker --quiet
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
