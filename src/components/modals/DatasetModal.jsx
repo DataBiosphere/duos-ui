@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton
+  Dialog, DialogTitle, DialogContent, DialogActions, Button
 } from '@mui/material';
 import { isEmpty, isNil } from 'lodash/fp';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAA } from '../../libs/ajax/DAA';
-import { User } from '../../libs/ajax/User';
 import { Storage } from '../../libs/storage';
 
 const listStyle = {
@@ -22,8 +21,8 @@ function FormattedDatasets({ datasets }) {
           <li key={dataset.dataSetId} className="translated-restriction" style={{display: 'grid', gridTemplateColumns: '1fr 3.5fr'}}>
             <span style={{fontWeight: 'bold'}}>{dataset.datasetIdentifier}</span>
             <span style={{wordWrap: 'break-word'}}>
-              {dataset.datasetName.length > 50 
-                ? `${dataset.datasetName.substring(0, 50)}...` 
+              {dataset.datasetName.length > 50
+                ? `${dataset.datasetName.substring(0, 50)}...`
                 : dataset.datasetName}
             </span>
           </li>
@@ -37,11 +36,11 @@ export default function DatasetModal(props) {
   const { showModal, onCloseRequest, onApply, datasetIds } = props;
 
   const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
-  console.log('allDatasets', allDatasets);
+  // console.log('allDatasets', allDatasets);
 
   const [datasets, setDatasets] = useState([]);
-  const [user, setUser] = useState(null);
-  const [libraryCard, setLibraryCard] = useState({});
+  // const [user, setUser] = useState(null);
+  // const [libraryCard, setLibraryCard] = useState({});
   console.log('datasets',datasets);
 
   const closeHandler = () => {
@@ -49,7 +48,6 @@ export default function DatasetModal(props) {
   };
 
   const applyHandler = (filteredDatasets) => {
-    // take the filteredDatasets and convert it to a list of strings with are prefaced with 'dataset-' and the datasetId
     const datasetStrings = filteredDatasets.map(dataset => `dataset-${dataset.dataSetId}`);
     onApply(datasetStrings);
   };
@@ -65,25 +63,25 @@ export default function DatasetModal(props) {
   useEffect(() => {
     const getData = async () => {
       const user = Storage.getCurrentUser();
-      setUser(user);
-      console.log('user',Storage.getCurrentUser());
+      // setUser(user);
+      // console.log('user',Storage.getCurrentUser());
       const libraryCard = !isEmpty(user.libraryCards) ? user.libraryCards[0] : {};
-      setLibraryCard(libraryCard);
+      // setLibraryCard(libraryCard);
       const fetchedDatasets = await fetchAllDatasets(allDatasets);
-      console.log('fetchedDatasets',fetchedDatasets);
+      // console.log('fetchedDatasets',fetchedDatasets);
       const daas = await DAA.getDaas();
-      console.log('daas', daas);
+      // console.log('daas', daas);
 
       const filteredDatasets = fetchedDatasets.filter((dataset) => {
         const datasetDacId = dataset.dacId;
         const daa = daas.find((daa) => daa.dacs?.some((d) => d.dacId === datasetDacId));
-        console.log('daa',daa);
+        // console.log('daa',daa);
         if (libraryCard.daaIds.includes(daa?.daaId)) {
           return dataset;
         }
       });
 
-      console.log('filteredDatasets', filteredDatasets);
+      // console.log('filteredDatasets', filteredDatasets);
       setDatasets(filteredDatasets);
     };
 
