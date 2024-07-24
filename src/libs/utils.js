@@ -625,18 +625,6 @@ export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFil
   setFilteredList(searchList);
 };
 
-export const getBooleanFromEventHtmlDataValue = (e) => {
-  if (!isNil(e)) {
-    if (!isNil(e.target)) {
-      const dataValue = e.target.getAttribute('data-value');
-      if (!isNil(dataValue)) {
-        return dataValue.toLowerCase() === 'true';
-      }
-    }
-  }
-  return false;
-};
-
 export const hasDataSubmitterRole = (user) => {
   const roles = get('roles')(user);
   const dsRole = find({'roleId': 8})(roles);
