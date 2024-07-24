@@ -13,6 +13,7 @@ import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
 import firecloudIcon from '../images/firecloud-logo.png';
+import aouIcon from '../images/aou-logo.png';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
@@ -204,6 +205,15 @@ export const DatasetSearch = (props) => {
       },
       icon: firecloudIcon,
       title: 'FireCloud Data Library',
+    },
+    'allofus': {
+      query: {
+        'match_phrase': {
+          'study.description': 'All of Us'
+        }
+      },
+      icon: aouIcon,
+      title: 'All of Us Data Library',
     },
     '/custom': {
       query: {
