@@ -7,7 +7,6 @@ import ManageEditDac from './pages/manage_dac/ManageEditDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/dar_application/DataAccessRequestApplication';
 import DACDatasets from './pages/DACDatasets';
-import DatasetRegistration from './pages/DatasetRegistration';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
@@ -93,9 +92,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/signing_official_console/dar_requests" component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {checkEnv(envGroups.NON_STAGING) && <AuthenticatedRoute path="/signing_official_console/data_submitters" component={ensureSoHasDaaAcknowledgement(SigningOfficialDataSubmitters, false, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path="/dataset_submissions" component={DatasetSubmissions} props={props} rolesAllowed={[USER_ROLES.dataSubmitter]}/>
-    <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_update/:datasetId" component={DatasetUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/data_submission_form" component={DataSubmissionForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/study_update/:studyId" component={StudyUpdateForm} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.dataSubmitter]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />

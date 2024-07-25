@@ -43,12 +43,14 @@ export default function DACDatasetApprovalStatus(props) {
 
   const dacAccepted = (dataset) => <div style={{color: '#1ea371', fontWeight: 'bold'}}>
     <span>ACCEPTED</span>
-    <Link
-      style={{marginLeft: '15px'}}
-      id={`${dataset.dataSetId}_edit`}
-      className={'glyphicon glyphicon-pencil'}
-      to={dataset.study?.studyId === undefined ? `dataset_registration/${dataset.dataSetId}` : `study_update/${dataset.study.studyId}`}
-    />
+    {dataset.study?.studyId &&
+      <Link
+        style={{marginLeft: '15px'}}
+        id={`${dataset.dataSetId}_edit`}
+        className={'glyphicon glyphicon-pencil'}
+        to={`study_update/${dataset.study.studyId}`}
+      />
+    }
     {dataset.deletable &&
       <>
         <Link
