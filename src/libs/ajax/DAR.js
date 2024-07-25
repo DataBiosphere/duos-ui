@@ -5,7 +5,9 @@ import { Config } from '../config';
 import axios from 'axios';
 import { isFileEmpty } from '../utils';
 import { getApiUrl, fetchOk, getOntologyUrl, fetchAny } from '../ajax';
-
+import {Metrics} from './Metrics';
+import eventList from '../events';
+import {Storage} from '../storage';
 
 export const DAR = {
   //v2 get for DARs
@@ -17,6 +19,8 @@ export const DAR = {
 
   //v2 update for dar partials
   updateDarDraft: async (dar, referenceId) => {
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.captureEvent(eventList.darUpdate);
     const url = `${await getApiUrl()}/api/dar/v2/draft/${referenceId}`;
     const res = await axios.put(url, dar, Config.authOpts());
     return res.data;
@@ -24,6 +28,8 @@ export const DAR = {
 
   //api endpoint for v2 draft submission
   postDarDraft: async (dar) => {
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.captureEvent(eventList.darDraft);
     const url = `${await getApiUrl()}/api/dar/v2/draft/`;
     const res = await axios.post(url, dar, Config.authOpts());
     return res.data;
@@ -38,6 +44,8 @@ export const DAR = {
 
   //v2 endpoint for DAR POST
   postDar: async (dar) => {
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.captureEvent(eventList.darSubmit);
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await getApiUrl()}/api/dar/v2`;
     const res = axios.post(url, filteredDar, Config.authOpts());

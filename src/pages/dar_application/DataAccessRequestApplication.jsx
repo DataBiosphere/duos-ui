@@ -31,6 +31,8 @@ import { isArray, set } from 'lodash';
 import DucAddendum from './DucAddendum';
 import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
+import {Metrics} from '../../libs/ajax/Metrics';
+import eventList from '../../libs/events';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -347,7 +349,7 @@ const DataAccessRequestApplication = (props) => {
     }
   }, [goToStep, isAttested]);
 
-  const attemptSubmit = () => {
+  const attemptSubmit = async () => {
     const validation = validateDARFormData({
       formData,
       datasets,
@@ -372,9 +374,11 @@ const DataAccessRequestApplication = (props) => {
     if (isInvalidForm) {
       scrollToFormErrors(validation, eraCommonsIdValid, hasLibraryCard);
     } else {
+      await Metrics.identify(Storage.getAnonymousId());
+      await Metrics.captureEvent(eventList.darAttest);
       setIsAttested(true);
       addDucAddendumTab();
-      goToDucAddendum();
+      await goToDucAddendum();
     }
 
     return !isInvalidForm;
