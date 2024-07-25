@@ -91,7 +91,6 @@ describe('Data Access Request - Validation', () => {
 
   describe('With Library Cards', () => {
     beforeEach(() => {
-      cy.stub(Metrics, 'identify').returns(Promise.resolve('anonymous_identifier'));
       cy.stub(Metrics, 'captureEvent').returns(Promise.resolve());
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
       cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));

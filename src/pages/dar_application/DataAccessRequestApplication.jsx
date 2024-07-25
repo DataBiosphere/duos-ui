@@ -374,7 +374,6 @@ const DataAccessRequestApplication = (props) => {
     if (isInvalidForm) {
       scrollToFormErrors(validation, eraCommonsIdValid, hasLibraryCard);
     } else {
-      await Metrics.identify(Storage.getAnonymousId());
       await Metrics.captureEvent(eventList.darAttest);
       setIsAttested(true);
       addDucAddendumTab();
