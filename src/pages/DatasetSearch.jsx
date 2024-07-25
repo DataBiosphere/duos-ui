@@ -18,6 +18,8 @@ import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
 import { toLower } from 'lodash';
+import {Metrics} from '../libs/ajax/Metrics';
+import eventList from '../libs/events';
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -245,6 +247,16 @@ export const DatasetSearch = (props) => {
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery;
 
   const hasChangedPage = query !== queryState;
+
+  useEffect(() => {
+    const init = async () => {
+      await Metrics.identify(Storage.getAnonymousId());
+      key === '/datalibrary' ?
+        await Metrics.captureEvent(eventList.dataLibrary) :
+        await Metrics.captureEvent(eventList.dataLibraryBrand(key));
+    };
+    init();
+  }, [key]);
 
   useEffect(() => {
     const init = async () => {
