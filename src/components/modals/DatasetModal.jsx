@@ -35,13 +35,7 @@ function FormattedDatasets({ datasets }) {
 export default function DatasetModal(props) {
   const { showModal, onCloseRequest, onApply, datasetIds } = props;
 
-  const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
-  // console.log('allDatasets', allDatasets);
-
   const [datasets, setDatasets] = useState([]);
-  // const [user, setUser] = useState(null);
-  // const [libraryCard, setLibraryCard] = useState({});
-  console.log('datasets',datasets);
 
   const closeHandler = () => {
     onCloseRequest();
@@ -63,25 +57,19 @@ export default function DatasetModal(props) {
   useEffect(() => {
     const getData = async () => {
       const user = Storage.getCurrentUser();
-      // setUser(user);
-      // console.log('user',Storage.getCurrentUser());
       const libraryCard = !isEmpty(user.libraryCards) ? user.libraryCards[0] : {};
-      // setLibraryCard(libraryCard);
+      const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
       const fetchedDatasets = await fetchAllDatasets(allDatasets);
-      // console.log('fetchedDatasets',fetchedDatasets);
       const daas = await DAA.getDaas();
-      // console.log('daas', daas);
 
       const filteredDatasets = fetchedDatasets.filter((dataset) => {
         const datasetDacId = dataset.dacId;
         const daa = daas.find((daa) => daa.dacs?.some((d) => d.dacId === datasetDacId));
-        // console.log('daa',daa);
         if (libraryCard.daaIds.includes(daa?.daaId)) {
           return dataset;
         }
       });
 
-      // console.log('filteredDatasets', filteredDatasets);
       setDatasets(filteredDatasets);
     };
 

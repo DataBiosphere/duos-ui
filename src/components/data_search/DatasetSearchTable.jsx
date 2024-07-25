@@ -16,7 +16,7 @@ import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
 import DatasetModal from '../modals/DatasetModal';
-
+import { DAAUtils } from '../../utils/DAAUtils';
 
 const studyTableHeader = [
   'Study Name',
@@ -191,7 +191,7 @@ export const DatasetSearchTable = (props) => {
     } else {
       newSelected = selected.concat(idsToModify);
     }
-    
+
     setSelected(newSelected);
   };
 
@@ -224,7 +224,7 @@ export const DatasetSearchTable = (props) => {
 
   const filterApprovedDatasets = async () => {
     setShowDatasetModal(true);
-  }; 
+  };
 
   const applyForAccess = async (datasets) => {
     const draftDatasets = datasets.map((id) => parseInt(id.replace('dataset-', '')));
@@ -453,9 +453,9 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-          <Button variant="contained" onClick={filterApprovedDatasets} sx={{ transform: 'scale(1.5)' }} >
+            <Button variant="contained" onClick={() => DAAUtils.isEnabled() ? filterApprovedDatasets() : applyForAccess(selected)} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
-          </Button>
+            </Button>
           }
         </Box>
       </Box>
