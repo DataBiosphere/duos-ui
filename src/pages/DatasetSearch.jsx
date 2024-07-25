@@ -250,7 +250,6 @@ export const DatasetSearch = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      await Metrics.identify(Storage.getAnonymousId());
       key === '/datalibrary' ?
         await Metrics.captureEvent(eventList.dataLibrary) :
         await Metrics.captureEvent(eventList.dataLibraryBrand(key));
