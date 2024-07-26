@@ -177,8 +177,8 @@ export const DatasetSearchTable = (props) => {
         });
       });
     } else if (selector === 'row') {
-      const checkedRowIds = data.subtable.rows.map(row => row.id);
-      const isRowSelected = checkedRowIds.every(id => selected.includes(id));
+      const rowIds = data.subtable.rows.map(row => row.id);
+      const isRowSelected = rowIds.every(id => selected.includes(id));
       isRowSelected ?
         await Metrics.captureEvent(eventList.dataLibraryStudyUnselected) :
         await Metrics.captureEvent(eventList.dataLibraryStudySelected);
