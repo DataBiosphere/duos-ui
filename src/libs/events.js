@@ -7,11 +7,15 @@ const eventList = {
   userSignIn: 'user:signin',
 
   pageView: 'page:view',
-  dataLibrary: 'page:view:dataLibrary',
+  dataLibrary: 'page:view:data-library',
   dataLibraryBrand: (brand) => {
     const cleanKey = brand.replaceAll('/', '');
-    return `page:view:dataLibrary:${cleanKey}`;
-  }
+    return `page:view:data-library-${cleanKey}`;
+  },
+  dataLibraryDatasetSelected: 'page:view:data-library-dataset-selected',
+  dataLibraryDatasetUnselected: 'page:view:data-library-dataset-unselected',
+  dataLibraryStudySelected: 'page:view:data-library-study-selected',
+  dataLibraryStudyUnselected: 'page:view:data-library-study-unselected'
 };
 
 export default eventList;
