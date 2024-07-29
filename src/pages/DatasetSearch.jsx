@@ -252,7 +252,7 @@ export const DatasetSearch = (props) => {
     const init = async () => {
       key === '/datalibrary' ?
         await Metrics.captureEvent(eventList.dataLibrary) :
-        await Metrics.captureEvent(eventList.dataLibraryBrand(key));
+        await Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
     };
     init();
   }, [key]);

@@ -180,15 +180,15 @@ export const DatasetSearchTable = (props) => {
       const rowIds = data.subtable.rows.map(row => row.id);
       const isRowSelected = rowIds.every(id => selected.includes(id));
       isRowSelected ?
-        await Metrics.captureEvent(eventList.dataLibraryStudyUnselected) :
-        await Metrics.captureEvent(eventList.dataLibraryStudySelected);
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-unselected'}) :
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-selected'});
       data.subtable.rows.forEach((row) => {
         idsToModify.push(row.id);
       });
     } else if (selector === 'subrow') {
       selected.includes(data.id) ?
-        await Metrics.captureEvent(eventList.dataLibraryDatasetUnselected) :
-        await Metrics.captureEvent(eventList.dataLibraryDatasetSelected);
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'dataset-unselected'}) :
+        await Metrics.captureEvent(eventList.dataLibrary,{'action': 'dataset-selected'});
       idsToModify.push(data.id);
     }
 
