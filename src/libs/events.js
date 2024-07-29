@@ -12,10 +12,7 @@ const eventList = {
     const cleanKey = brand.replaceAll('/', '');
     return `page:view:dataLibrary:${cleanKey}`;
   },
-  darDraft: 'dar:draft',
-  darUpdate: 'dar:update',
-  darAttest: 'dar:attest',
-  darSubmit: 'dar:submit'
+  dar: 'page:view:dar'
 };
 
 export default eventList;
