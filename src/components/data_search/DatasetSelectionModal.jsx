@@ -17,24 +17,25 @@ function FormattedDatasets({ datasets }) {
   return (
     <div style={{border: '0.5px solid #cccccc', borderRadius: '10px', overflow: 'auto', maxHeight: '150px'}}>
       <ul key='dulUnorderedList' style={{...listStyle, border: '0.5px solid #cccccc', borderRadius: '10px', padding: '10px'}} id="txt_translatedRestrictions" className="row no-margin translated-restriction">
-        {datasets.map((dataset) => (
-          <li key={dataset.dataSetId} className="translated-restriction" style={{display: 'grid', gridTemplateColumns: '1fr 3.5fr'}}>
+        {datasets.map((dataset) => {
+          const displayName = dataset.datasetName.length > 50
+            ? `${dataset.datasetName.substring(0, 50)}...`
+            : dataset.datasetName;
+          return <li key={dataset.dataSetId} className="translated-restriction"
+            style={{display: 'grid', gridTemplateColumns: '1fr 3.5fr'}}>
             <span style={{fontWeight: 'bold'}}>{dataset.datasetIdentifier}</span>
-            <span style={{wordWrap: 'break-word'}}>
-              {dataset.datasetName.length > 50
-                ? `${dataset.datasetName.substring(0, 50)}...`
-                : dataset.datasetName}
-            </span>
-          </li>
-        ))}
+            <span style={{wordWrap: 'break-word'}}>{displayName}</span>
+          </li>;
+        })}
       </ul>
     </div>
   );
 }
 
-export default function DatasetModal(props) {
+export default function DatasetSelectionModal(props) {
   const { showModal, onCloseRequest, onApply, datasetIds } = props;
 
+  const [allDatasets, setAllDatasets] = useState([]);
   const [datasets, setDatasets] = useState([]);
 
   const closeHandler = () => {
@@ -60,6 +61,7 @@ export default function DatasetModal(props) {
       const libraryCard = !isEmpty(user.libraryCards) ? user.libraryCards[0] : {};
       const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
       const fetchedDatasets = await fetchAllDatasets(allDatasets);
+      setAllDatasets(fetchedDatasets);
       const daas = await DAA.getDaas();
 
       const filteredDatasets = fetchedDatasets.filter((dataset) => {
@@ -69,7 +71,6 @@ export default function DatasetModal(props) {
           return dataset;
         }
       });
-
       setDatasets(filteredDatasets);
     };
 
@@ -95,14 +96,24 @@ export default function DatasetModal(props) {
         <span style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.0rem', color:'#1E1E1E'}}>Datasets available for Data Access Request</span>
       </DialogTitle>
       <DialogContent id='dialog-content'>
-        <div>
-          <div style={{ fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>Based on your credentials you can fill out a Data Access Request form for these dataset(s):</div>
-          <FormattedDatasets datasets={datasets} />
-        </div>
+        {(datasets.length > 0) ?
+          <div>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>Based on your credentials
+              you can fill out a Data Access Request form for these dataset(s):
+            </div>
+            <FormattedDatasets datasets={datasets}/>
+          </div>
+          :
+          <div>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>The requested datasets require that your Signing Official issues you a Library Card before proceeding.</div>
+            <FormattedDatasets datasets={allDatasets}/>
+          </div>
+        }
       </DialogContent>
-      <DialogActions id='dialog-footer'>
-        <Button onClick={closeHandler}>Cancel</Button>
-        <Button onClick={() => applyHandler(datasets)} variant='contained' style={{borderRadius: '0'}}>Apply</Button>
+      <DialogActions id="dialog-footer">
+        <Button onClick={closeHandler} style={{fontSize: '1.1rem'}}>Cancel</Button>
+        {(datasets.length > 0) &&
+          <Button onClick={() => applyHandler(datasets)} variant="contained" style={{fontSize: '1.1rem'}}>Apply</Button>}
       </DialogActions>
     </Dialog>
   );

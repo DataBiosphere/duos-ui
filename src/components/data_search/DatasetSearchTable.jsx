@@ -15,7 +15,7 @@ import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
-import DatasetModal from '../modals/DatasetModal';
+import DatasetSelectionModal from './DatasetSelectionModal';
 import { DAAUtils } from '../../utils/DAAUtils';
 
 const studyTableHeader = [
@@ -469,7 +469,7 @@ export const DatasetSearchTable = (props) => {
       }
       {
         showDatasetModal &&
-        <DatasetModal
+        <DatasetSelectionModal
           showModal={showDatasetModal}
           datasetIds={selected}
           onCloseRequest={()=>setShowDatasetModal(false)}
