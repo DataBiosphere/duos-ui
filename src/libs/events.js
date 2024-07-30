@@ -8,6 +8,7 @@ const eventList = {
 
   pageView: 'page:view',
   dataLibrary: 'page:view:data-library',
+  dar: 'page:view:dar'
 };
 
 export default eventList;
