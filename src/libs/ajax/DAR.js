@@ -5,7 +5,9 @@ import { Config } from '../config';
 import axios from 'axios';
 import { isFileEmpty } from '../utils';
 import { getApiUrl, fetchOk, getOntologyUrl, fetchAny } from '../ajax';
-
+import {DAAUtils} from '../../utils/DAAUtils';
+import {Metrics} from './Metrics';
+import eventList from '../events';
 
 export const DAR = {
   //v2 get for DARs
@@ -15,16 +17,22 @@ export const DAR = {
     return await res.json();
   },
 
-  //v2 update for dar partials
+  //v2, v3 Draft DAR Update
   updateDarDraft: async (dar, referenceId) => {
-    const url = `${await getApiUrl()}/api/dar/v2/draft/${referenceId}`;
+    await Metrics.captureEvent(eventList.dar, {'action': 'update'});
+    const url = DAAUtils.isEnabled() ?
+      `${await getApiUrl()}/api/dar/v3/draft/${referenceId}` :
+      `${await getApiUrl()}/api/dar/v2/draft/${referenceId}`;
     const res = await axios.put(url, dar, Config.authOpts());
     return res.data;
   },
 
-  //api endpoint for v2 draft submission
+  //v2, v3 Draft DAR Creation
   postDarDraft: async (dar) => {
-    const url = `${await getApiUrl()}/api/dar/v2/draft/`;
+    await Metrics.captureEvent(eventList.dar, {'action': 'draft'});
+    const url = DAAUtils.isEnabled() ?
+      `${await getApiUrl()}/api/dar/v3/draft` :
+      `${await getApiUrl()}/api/dar/v2/draft`;
     const res = await axios.post(url, dar, Config.authOpts());
     return res.data;
   },
@@ -36,10 +44,13 @@ export const DAR = {
     return await res;
   },
 
-  //v2 endpoint for DAR POST
+  //v2, v3 DAR Creation
   postDar: async (dar) => {
+    await Metrics.captureEvent(eventList.dar, {'action': 'submit'});
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
-    const url = `${await getApiUrl()}/api/dar/v2`;
+    const url = DAAUtils.isEnabled() ?
+      `${await getApiUrl()}/api/dar/v3` :
+      `${await getApiUrl()}/api/dar/v2`;
     const res = axios.post(url, filteredDar, Config.authOpts());
     return await res.data;
   },

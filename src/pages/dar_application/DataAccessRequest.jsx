@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import {FormField, FormFieldTitle, FormFieldTypes, FormValidators} from '../../components/forms/forms';
@@ -10,6 +10,8 @@ import {
   needsGsoAcknowledgement,
   newIrbDocumentExpirationDate,
 } from '../../utils/darFormUtils';
+import SelectableDatasets from './SelectableDatasets';
+import {DAAUtils} from '../../utils/DAAUtils';
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -88,19 +90,21 @@ export default function DataAccessRequest(props) {
     uploadedCollaborationLetter,
     updateCollaborationLetter,
     setDatasets,
+    setSelectedDatasets,
     validation,
     readOnlyMode,
     includeInstructions,
     formValidationChange,
-    ariaLevel = 2
+    ariaLevel = 2,
+    draftDar
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
 
+  // i need to figure out a way to only actually remove them without using onChange
   const onChange = ({key, value}) => {
     formFieldChange({key, value});
   };
-
 
   const onValidationChange = ({key, validation}) => {
     formValidationChange({key, validation});
@@ -137,35 +141,46 @@ export default function DataAccessRequest(props) {
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
-        <FormField
-          id={'datasetIds'}
-          key={'datasetIds'}
-          type={FormFieldTypes.SELECT}
-          disabled={readOnlyMode}
-          isAsync={true}
-          isMulti={true}
-          title={'2.1 Select Dataset(s)'}
-          validators={[FormValidators.REQUIRED]}
-          validation={validation.datasetIds}
-          onValidationChange={onValidationChange}
-          description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
-          defaultValue={datasets?.map((ds) => formatSearchDataset(ds))}
-          selectConfig={{
-            // return custom html for displaying dataset options
-            formatOptionLabel: (opt) => opt.label,
-            // return string value of dataset for accessibility / html keys
-            getOptionLabel: (opt) => opt.displayText,
-          }}
-          loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
-          placeholder={'Dataset Name, Sample Collection ID, or PI'}
-          onChange={async ({key, value}) => {
-            const datasets = value.map((val) => val.dataset);
-            const datasetIds = datasets?.map((ds) => ds.dataSetId);
-            const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
-            onChange({key, value: datasetIds});
-            setDatasets(fullDatasets);
-          }}
-        />
+        {DAAUtils.isEnabled() ?
+          <div>
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
+            <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
+            <SelectableDatasets
+              disabled={readOnlyMode}
+              datasets={datasets}
+              setSelectedDatasets={setSelectedDatasets}
+            />
+          </div> :
+          <FormField
+            id={'datasetIds'}
+            key={'datasetIds'}
+            type={FormFieldTypes.SELECT}
+            disabled={readOnlyMode}
+            isAsync={true}
+            isMulti={true}
+            title={'2.1 Select Dataset(s)'}
+            validators={[FormValidators.REQUIRED]}
+            validation={validation.datasetIds}
+            onValidationChange={onValidationChange}
+            description={includeInstructions ? 'Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:' : ''}
+            defaultValue={datasets?.map((ds) => formatSearchDataset(ds))}
+            selectConfig={{
+              // return custom html for displaying dataset options
+              formatOptionLabel: (opt) => opt.label,
+              // return string value of dataset for accessibility / html keys
+              getOptionLabel: (opt) => opt.displayText,
+            }}
+            loadOptions={(query, callback) => searchDatasets(query, callback, datasets)}
+            placeholder={'Dataset Name, Sample Collection ID, or PI'}
+            onChange={async ({key, value}) => {
+              const datasets = value.map((val) => val.dataset);
+              const datasetIds = datasets?.map((ds) => ds.dataSetId);
+              const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
+              onChange({key, value: datasetIds});
+              setDatasets(fullDatasets);
+            }}
+          />
+        }
 
         <FormField
           id={'projectTitle'}
