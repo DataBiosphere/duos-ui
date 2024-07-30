@@ -6,13 +6,15 @@ import { groupBy, isEmpty, concat, compact, map } from 'lodash';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import DatasetExportButton from './DatasetExportButton';
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
+import eventList from '../../libs/events';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
+import { Metrics } from '../../libs/ajax/Metrics';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
+import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
 
@@ -166,7 +168,7 @@ export const DatasetSearchTable = (props) => {
 
 
 
-  const selectHandler = (event, data, selector) => {
+  const selectHandler = async (event, data, selector) => {
     let idsToModify = [];
     if (selector === 'all') {
       data.rows.forEach((row) => {
@@ -175,10 +177,18 @@ export const DatasetSearchTable = (props) => {
         });
       });
     } else if (selector === 'row') {
+      const rowIds = data.subtable.rows.map(row => row.id);
+      const isRowSelected = rowIds.every(id => selected.includes(id));
+      isRowSelected ?
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-unselected'}) :
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-selected'});
       data.subtable.rows.forEach((row) => {
         idsToModify.push(row.id);
       });
     } else if (selector === 'subrow') {
+      selected.includes(data.id) ?
+        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'dataset-unselected'}) :
+        await Metrics.captureEvent(eventList.dataLibrary,{'action': 'dataset-selected'});
       idsToModify.push(data.id);
     }
 

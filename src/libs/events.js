@@ -7,11 +7,7 @@ const eventList = {
   userSignIn: 'user:signin',
 
   pageView: 'page:view',
-  dataLibrary: 'page:view:dataLibrary',
-  dataLibraryBrand: (brand) => {
-    const cleanKey = brand.replaceAll('/', '');
-    return `page:view:dataLibrary:${cleanKey}`;
-  },
+  dataLibrary: 'page:view:data-library',
   dar: 'page:view:dar'
 };
 
