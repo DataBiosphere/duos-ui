@@ -5,10 +5,11 @@ import DataAccessRequestApplication from '../../../src/pages/dar_application/Dat
 import { MemoryRouter } from 'react-router-dom';
 import { DAR } from '../../../src/libs/ajax/DAR';
 import { DataSet } from '../../../src/libs/ajax/DataSet';
-import { User } from '../../../src/libs/ajax/User';
-import { Storage } from '../../../src/libs/storage.js';
+import { Metrics } from '../../../src/libs/ajax/Metrics';
 import { Navigation } from '../../../src/libs/utils.js';
 import { NotificationService } from '../../../src/libs/notificationService';
+import { Storage } from '../../../src/libs/storage.js';
+import { User } from '../../../src/libs/ajax/User';
 
 const props = {
   match: {
@@ -90,6 +91,7 @@ describe('Data Access Request - Validation', () => {
 
   describe('With Library Cards', () => {
     beforeEach(() => {
+      cy.stub(Metrics, 'captureEvent').returns(Promise.resolve());
       cy.stub(User, 'getSOsForCurrentUser').returns(userSigningOfficials);
       cy.stub(DataSet, 'autocompleteDatasets').returns(Promise.resolve(datasets));
       cy.stub(DataSet, 'getDatasetsByIds').returns(Promise.resolve(datasets));

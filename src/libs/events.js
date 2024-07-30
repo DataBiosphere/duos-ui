@@ -11,7 +11,8 @@ const eventList = {
   dataLibraryBrand: (brand) => {
     const cleanKey = brand.replaceAll('/', '');
     return `page:view:dataLibrary:${cleanKey}`;
-  }
+  },
+  dar: 'page:view:dar'
 };
 
 export default eventList;
