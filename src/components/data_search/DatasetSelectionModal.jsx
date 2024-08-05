@@ -1,11 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button
 } from '@mui/material';
-import { isEmpty, isNil } from 'lodash/fp';
-import { DataSet } from '../../libs/ajax/DataSet';
-import { DAA } from '../../libs/ajax/DAA';
-import { Storage } from '../../libs/storage';
 
 const listStyle = {
   listStyle: 'none',
@@ -33,49 +29,18 @@ function FormattedDatasets({ datasets }) {
 }
 
 export default function DatasetSelectionModal(props) {
-  const { showModal, onCloseRequest, onApply, datasetIds } = props;
+  const { showModal, onCloseRequest, onApply, allowableTermSelections, openTermSelections, externalTermSelections, unselectableTermSelections } = props;
 
-  const [allDatasets, setAllDatasets] = useState([]);
-  const [datasets, setDatasets] = useState([]);
+  useEffect(() => {
+    // console.log('allowableTermSelections:', allowableTermSelections);
+    // console.log('openTermSelections:', openTermSelections);
+    // console.log('externalTermSelections:', externalTermSelections);
+    // console.log('unselectableTermSelections:', unselectableTermSelections);
+  }, [allowableTermSelections, openTermSelections, unselectableTermSelections]);
 
   const closeHandler = () => {
     onCloseRequest();
   };
-
-  const applyHandler = (filteredDatasets) => {
-    const datasetStrings = filteredDatasets.map(dataset => `dataset-${dataset.dataSetId}`);
-    onApply(datasetStrings);
-  };
-
-  const fetchAllDatasets = async (datasetIds) => {
-    const filteredDatasetIds = datasetIds.filter((id) => !isNil(id) && Number.isInteger(id) && id > 0);
-    if (isEmpty(filteredDatasetIds)) {
-      return [];
-    }
-    return DataSet.getDatasetsByIds(filteredDatasetIds);
-  };
-
-  useEffect(() => {
-    const getData = async () => {
-      const user = Storage.getCurrentUser();
-      const libraryCard = !isEmpty(user.libraryCards) ? user.libraryCards[0] : {};
-      const allDatasets = datasetIds.map((id) => parseInt(id.replace('dataset-', '')));
-      const fetchedDatasets = await fetchAllDatasets(allDatasets);
-      setAllDatasets(fetchedDatasets);
-      const daas = await DAA.getDaas();
-
-      const filteredDatasets = fetchedDatasets.filter((dataset) => {
-        const datasetDacId = dataset.dacId;
-        const daa = daas.find((daa) => daa.dacs?.some((d) => d.dacId === datasetDacId));
-        if (libraryCard.daaIds.includes(daa?.daaId)) {
-          return dataset;
-        }
-      });
-      setDatasets(filteredDatasets);
-    };
-
-    getData();
-  }, [datasetIds]);
 
   return (
     <Dialog
@@ -96,24 +61,43 @@ export default function DatasetSelectionModal(props) {
         <span style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.0rem', color:'#1E1E1E'}}>Datasets available for Data Access Request</span>
       </DialogTitle>
       <DialogContent id='dialog-content'>
-        {(datasets.length > 0) ?
+        {(allowableTermSelections.length > 0) &&
           <div>
             <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>Based on your credentials
               you can fill out a Data Access Request form for these dataset(s):
             </div>
-            <FormattedDatasets datasets={datasets}/>
+            <FormattedDatasets datasets={allowableTermSelections}/>
           </div>
-          :
+        }
+        {(unselectableTermSelections.length > 0) &&
           <div>
-            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>The requested datasets require that your Signing Official issues you a Library Card before proceeding.</div>
-            <FormattedDatasets datasets={allDatasets}/>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>The requested datasets
+              require that your Signing Official issues you a Library Card before proceeding.
+            </div>
+            <FormattedDatasets datasets={unselectableTermSelections}/>
+          </div>
+        }
+        {(openTermSelections.length > 0) &&
+          <div>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>The following datasets
+              are Open Access and do not require a Data Access Request.
+            </div>
+            <FormattedDatasets datasets={openTermSelections}/>
+          </div>
+        }
+        {(externalTermSelections.length > 0) &&
+          <div>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.2rem', paddingBottom: '15px'}}>The following datasets
+              are External Access and do not require a Data Access Request.
+            </div>
+            <FormattedDatasets datasets={externalTermSelections}/>
           </div>
         }
       </DialogContent>
       <DialogActions id="dialog-footer">
         <Button onClick={closeHandler} style={{fontSize: '1.1rem'}}>Cancel</Button>
-        {(datasets.length > 0) &&
-          <Button onClick={() => applyHandler(datasets)} variant="contained" style={{fontSize: '1.1rem'}}>Apply</Button>}
+        {(allowableTermSelections.length > 0) &&
+          <Button onClick={() => onApply()} variant="contained" style={{fontSize: '1.1rem'}}>Apply</Button>}
       </DialogActions>
     </Dialog>
   );

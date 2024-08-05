@@ -7,7 +7,6 @@ import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import DatasetExportButton from './DatasetExportButton';
 import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
 import eventList from '../../libs/events';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
@@ -17,8 +16,7 @@ import { Styles } from '../../libs/theme';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
-import DatasetSelectionModal from './DatasetSelectionModal';
-import { DAAUtils } from '../../utils/DAAUtils';
+import ApplyForAccess from './ApplyForAccess';
 
 const studyTableHeader = [
   'Study Name',
@@ -52,7 +50,6 @@ export const DatasetSearchTable = (props) => {
   const [tdrApiUrl, setTdrApiUrl] = useState('');
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
   const [dataUse, setDataUse] = useState();
-  const [showDatasetModal, setShowDatasetModal] = useState(false);
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -230,16 +227,6 @@ export const DatasetSearchTable = (props) => {
 
   const collapseHandler = () => {
     setExportableDatasets({});
-  };
-
-  const filterApprovedDatasets = async () => {
-    setShowDatasetModal(true);
-  };
-
-  const applyForAccess = async (datasets) => {
-    const draftDatasets = datasets.map((id) => parseInt(id.replace('dataset-', '')));
-    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
   const clearSearchRef = () => {
@@ -463,9 +450,11 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-            <Button variant="contained" onClick={() => DAAUtils.isEnabled() ? filterApprovedDatasets() : applyForAccess(selected)} sx={{ transform: 'scale(1.5)' }} >
-            Apply for Access
-            </Button>
+            <ApplyForAccess
+              history={history}
+              datasets={datasets}
+              selectedDatasetKeys={selected}>
+            </ApplyForAccess>
           }
         </Box>
       </Box>
@@ -475,15 +464,6 @@ export const DatasetSearchTable = (props) => {
           showModal={showTranslatedDULModal}
           dataUse={dataUse}
           onCloseRequest={()=>setShowTranslatedDULModal(false)}
-        />
-      }
-      {
-        showDatasetModal &&
-        <DatasetSelectionModal
-          showModal={showDatasetModal}
-          datasetIds={selected}
-          onCloseRequest={()=>setShowDatasetModal(false)}
-          onApply={applyForAccess}
         />
       }
     </>
