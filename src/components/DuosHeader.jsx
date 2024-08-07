@@ -144,7 +144,7 @@ const NavigationTabsComponent = (props) => {
     currentUser, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
-    onSubtabChange
+    onSubtabChange, showProfileLinks, profileState
   } = props;
   const [selectedMenuTab, setSelectedMenuTab] = useState(false);
   const [selectedSubTab, setSelectedSubTab] = useState(false);
@@ -234,7 +234,7 @@ const NavigationTabsComponent = (props) => {
               <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <li className="dropdown user-li" style={{ listStyleType: 'none' }}>
+            <li className="dropdown user-li" onClick={showProfileLinks} style={{ listStyleType: 'none' }}>
               <a id="sel_user" role="button" className="dropdown-toggle" data-toggle="dropdown">
                 <div id="dacUser">
                   {currentUser.displayName}
@@ -242,7 +242,7 @@ const NavigationTabsComponent = (props) => {
                 </div>
                 <small id="dacUserMail">{currentUser.email}</small>
               </a>
-              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{ top: orientation === 'vertical' ? '-100%' : '100%' }}>
+              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{ display: `${profileState ? 'block': 'none'}`, top: orientation === 'vertical' ? '-100%' : '100%' }}>
                 <li>
                   <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
                 </li>
@@ -315,7 +315,8 @@ const DuosHeader = (props) => {
     showSupportRequestModal: false,
     hover: false,
     notificationData: [],
-    openDrawer: false
+    openDrawer: false,
+    showProfileLinks: false
   });
 
   useEffect(() => {
@@ -347,6 +348,14 @@ const DuosHeader = (props) => {
       ...state,
       showSupportRequestModal: true,
       openDrawer: false
+    });
+  };
+
+  const profileLinks = () => {
+    const profileState = state.showProfileLinks;
+    setState({
+      ...state,
+      showProfileLinks: !profileState
     });
   };
 
@@ -485,6 +494,8 @@ const DuosHeader = (props) => {
             initialTab={initialTab}
             initialSubTab={initialSubTab}
             orientation="horizontal"
+            showProfileLinks={profileLinks}
+            profileState={state.showProfileLinks}
           />
         </div>
       </Hidden>
@@ -532,6 +543,8 @@ const DuosHeader = (props) => {
               initialSubTab={initialSubTab}
               orientation="vertical"
               onSubtabChange={() => toggleDrawer(false)}
+              showProfileLinks={profileLinks}
+              profileState={state.showProfileLinks}
             />
           </Drawer>
         </div>
