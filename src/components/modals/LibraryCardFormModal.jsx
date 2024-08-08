@@ -46,7 +46,7 @@ const FormFieldRow = (props) => {
       <SearchSelect
         id={'institution-form-field'}
         name='Institution'
-        onSelection={(selection) => updateInstitution(selection)}
+        onSelection={(selection) => updateInstitution(selection?.value?.institutionId)}
         options={dropdownOptions}
         placeholder='Search for institution...'
         value={card.institutionId}
