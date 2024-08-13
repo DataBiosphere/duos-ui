@@ -13,7 +13,7 @@ import {
 } from '../../libs/utils';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
-import ManageUsersDropdown from './ManageUsersDropdown';
+import DisplayNameCell from './DisplayNameCell';
 import ManageDaasDropdown from './ManageDaasDropdown';
 import DAACell from './DAACell';
 
@@ -58,20 +58,7 @@ const refreshResearchers = async (setResearchers) => {
 
 const displayNameCell = (displayName, email, id, daas, setResearchers) => {
   return {
-    data: (
-      <>
-        <li className="dropdown" style={{ listStyleType: 'none' }}>
-          <div role="button" data-toggle="dropdown">
-            <div id="dacUser" style={{ color: 'black' }}>
-              {displayName || 'Invite sent, pending registration'}
-              <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
-              <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
-            </div>
-          </div>
-          <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
-        </li>
-      </>
-    ),
+    data: (<DisplayNameCell key={id} displayName={displayName} email={email} id={id} daas={daas} setResearchers={setResearchers} refreshResearchers={refreshResearchers} />),
     id,
     style: {},
     label: 'display-names',
