@@ -1,5 +1,7 @@
 import React from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {DataSet} from '../libs/ajax/DataSet';
+import {Storage} from '../libs/storage';
 import {Styles} from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import SearchBar from '../components/SearchBar';
@@ -8,7 +10,6 @@ import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import style from './DACDatasets.module.css';
 import {Button} from '@mui/material';
-import {DatasetService} from '../utils/DatasetService';
 
 export default function DACDatasets(props) {
 
@@ -28,10 +29,30 @@ export default function DACDatasets(props) {
   useEffect(() => {
     const init = async () => {
       try {
+        const user = Storage.getCurrentUser();
+        const dacIds = user.roles?.map(r => r.dacId).filter(id => id !== undefined);
+        const query = {
+          'from': 0,
+          'size': 10000,
+          'query': {
+            'terms': {
+              'dacId': dacIds
+            }
+          }
+        };
         setIsLoading(true);
-        const dacDatasets = await DatasetService.populateDacDatasets();
-        setDatasets(dacDatasets);
-        setFilteredList(dacDatasets);
+        try {
+          if (dacIds.length === 0) {
+            Notifications.showError({ text: 'User does not have any DAC associations' });
+          } else {
+            await DataSet.searchDatasetIndex(query).then((datasets) => {
+              setDatasets(datasets);
+              setFilteredList(datasets);
+            });
+          }
+        } catch (error) {
+          Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+        }
         setIsLoading(false);
       } catch (error) {
         Notifications.showError({text: 'Error initializing datasets table'});
@@ -96,8 +117,10 @@ export default function DACDatasets(props) {
       datasets={filteredList}
       columns={[
         DACDatasetTableColumnOptions.DUOS_ID,
-        DACDatasetTableColumnOptions.DATA_SUBMITTER,
+        DACDatasetTableColumnOptions.PHS_ID,
         DACDatasetTableColumnOptions.DATASET_NAME,
+        DACDatasetTableColumnOptions.STUDY_NAME,
+        DACDatasetTableColumnOptions.DATA_SUBMITTER,
         DACDatasetTableColumnOptions.DATA_CUSTODIAN,
         DACDatasetTableColumnOptions.DATA_USE,
         DACDatasetTableColumnOptions.STATUS

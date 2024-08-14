@@ -35,12 +35,14 @@ export const styles = {
     border: 'none'
   }),
   cellWidths: {
-    duosId: '15%',
+    duosId: '10%',
+    phsId: '10%',
+    datasetName: '15%',
+    studyName: '15%',
     dataSubmitter: '15%',
-    datasetName: '25%',
     dataCustodian: '15%',
-    dataUse: '15%',
-    status: '15%'
+    dataUse: '10%',
+    status: '10%'
   },
   color: {
     dataUseGroup: '#000000',
@@ -58,8 +60,10 @@ export const styles = {
 
 export const DACDatasetTableColumnOptions = {
   DUOS_ID: 'duosId',
-  DATA_SUBMITTER: 'dataSubmitter',
+  PHS_ID: 'phsId',
   DATASET_NAME: 'datasetName',
+  STUDY_NAME: 'studyName',
+  DATA_SUBMITTER: 'dataSubmitter',
   DATA_CUSTODIAN: 'dataCustodian',
   DATA_USE: 'dataUse',
   STATUS: 'status',
@@ -67,8 +71,10 @@ export const DACDatasetTableColumnOptions = {
 
 const columnHeaderConfig = {
   duosId: {label: 'DUOS ID', cellStyle: {width: styles.cellWidths.duosId}, cellDataFn: cellData.duosIdCellData, sortable: true},
-  dataSubmitter: {label: 'Data Submitter', cellStyle: {width: styles.cellWidths.dataSubmitter}, cellDataFn: cellData.dataSubmitterCellData, sortable: true},
+  phsId: {label: 'PHS ID', cellStyle: {width: styles.cellWidths.phsId}, cellDataFn: cellData.duosPhsIdCellData, sortable: true},
   datasetName: {label: 'Dataset Name', cellStyle: {width: styles.cellWidths.datasetName}, cellDataFn: cellData.datasetNameCellData, sortable: true},
+  studyName: {label: 'Study Name', cellStyle: {width: styles.cellWidths.studyName}, cellDataFn: cellData.studyNameCellData, sortable: true},
+  dataSubmitter: {label: 'Data Submitter', cellStyle: {width: styles.cellWidths.dataSubmitter}, cellDataFn: cellData.dataSubmitterCellData, sortable: true},
   dataCustodian: {label: 'Data Custodian', cellStyle: {width: styles.cellWidths.dataCustodian}, cellDataFn: cellData.dataCustodianCellData, sortable: true},
   dataUse: {label: 'Data Use', cellStyle: {width: styles.cellWidths.dataUse}, cellDataFn: cellData.dataUseCellData, sortable: false},
   status: {label: 'Status', cellStyle: {width: styles.cellWidths.status}, cellDataFn: cellData.statusCellData, sortable: false},
