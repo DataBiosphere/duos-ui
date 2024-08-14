@@ -452,22 +452,30 @@ export const getSearchFilterFunctions = () => {
        * pre-populated with data use codes and translations
        */
       const loweredTerm = toLower(term);
-      const name = dataset.name;
+      const name = dataset.name || dataset.datasetName;
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
-      const allPropValues = dataset.properties.map((p) => p.propertyValue).join('');
+      const allPropValues = dataset.properties?.map((p) => p.propertyValue).join('');
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval
           ? 'accepted'
           : 'rejected'
         : 'yes no';
+      const studyName = dataset.study?.studyName;
+      let dataUse = [];
+      dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.code));
+      dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.description));
+      dataUse = dataUse.concat(dataset.dataUse?.secondary?.map(du => du.code));
+      dataUse = dataUse.concat(dataset.dataUse?.secondary?.map(du => du.description));
       return includes(loweredTerm, toLower(alias)) ||
         includes(loweredTerm, toLower(name)) ||
         includes(loweredTerm, toLower(identifier)) ||
         includes(loweredTerm, toLower(allPropValues)) ||
         includes(loweredTerm, toLower(dataset.codeList)) ||
-        includes(loweredTerm, toLower(status));
+        includes(loweredTerm, toLower(status)) ||
+        includes(loweredTerm, toLower(studyName)) ||
+        includes(loweredTerm, toLower(dataUse.join(' ')));
     }, targetList),
     datasetTerms: (term, targetList) => filter(datasetTerm => {
       /**
