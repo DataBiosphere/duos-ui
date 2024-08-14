@@ -17,10 +17,10 @@ export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
 }
 
 export function duosPhsIdCellData({dataset, label = 'duosPhsIdCellData'}) {
-  const dbGaPPhsID = dataset.study?.properties?.filter(p => p.key === 'dbGaPPhsID')?.value;
+  const phsId = dataset.study?.phsId;
   return {
-    data: <div className={style['cell-data']}>{dbGaPPhsID}</div>,
-    value: dbGaPPhsID,
+    data: <div className={style['cell-data']}>{phsId}</div>,
+    value: phsId,
     id: `identifier-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.duosId},
     label

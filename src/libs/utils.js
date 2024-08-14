@@ -463,6 +463,7 @@ export const getSearchFilterFunctions = () => {
           : 'rejected'
         : 'yes no';
       const studyName = dataset.study?.studyName;
+      const phsId = dataset.study?.phsId;
       let dataUse = [];
       dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.code));
       dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.description));
@@ -475,6 +476,7 @@ export const getSearchFilterFunctions = () => {
         includes(loweredTerm, toLower(dataset.codeList)) ||
         includes(loweredTerm, toLower(status)) ||
         includes(loweredTerm, toLower(studyName)) ||
+        includes(loweredTerm, toLower(phsId)) ||
         includes(loweredTerm, toLower(dataUse.join(' ')));
     }, targetList),
     datasetTerms: (term, targetList) => filter(datasetTerm => {
