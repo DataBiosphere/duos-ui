@@ -23,6 +23,7 @@ const sampleDataset = {
     'description': 'Test Dataset Submission',
     'studyName': 'Test Dataset Submission V2',
     'studyId': 39,
+    'phsId': 'PHS ID',
     'phenotype': 'Test Dataset Submission',
     'species': 'Test Dataset Submission',
     'piName': 'Test Dataset Submission',
@@ -178,6 +179,12 @@ describe('Dac Dataset Table Component', function () {
       .then(() => {
         cy.contains('HMB').should('not.exist');
         cy.contains('GRU').should('exist');
+      });
+    cy.get('[data-cy="search-bar"]')
+      .clear()
+      .type('PHS')
+      .then(() => {
+        cy.contains('PHS').should('exist');
       });
   });
 });
