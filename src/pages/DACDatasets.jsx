@@ -45,10 +45,9 @@ export default function DACDatasets(props) {
           if (dacIds.length === 0) {
             Notifications.showError({ text: 'User does not have any DAC associations' });
           } else {
-            await DataSet.searchDatasetIndex(query).then((datasets) => {
-              setDatasets(datasets);
-              setFilteredList(datasets);
-            });
+            const datasetTerms = await DataSet.searchDatasetIndex(query);
+            setDatasets(datasetTerms);
+            setFilteredList(datasetTerms);
           }
         } catch (error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
