@@ -465,10 +465,10 @@ export const getSearchFilterFunctions = () => {
       const studyName = dataset.study?.studyName;
       const phsId = dataset.study?.phsId;
       let dataUse = [];
-      dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.code));
-      dataUse = dataUse.concat(dataset.dataUse?.primary?.map(du => du.description));
-      dataUse = dataUse.concat(dataset.dataUse?.secondary?.map(du => du.code));
-      dataUse = dataUse.concat(dataset.dataUse?.secondary?.map(du => du.description));
+      dataUse.push(dataset.dataUse?.primary?.map(du => du.code));
+      dataUse.concat(dataset.dataUse?.primary?.map(du => du.description));
+      dataUse.concat(dataset.dataUse?.secondary?.map(du => du.code));
+      dataUse.concat(dataset.dataUse?.secondary?.map(du => du.description));
       return includes(loweredTerm, toLower(alias)) ||
         includes(loweredTerm, toLower(name)) ||
         includes(loweredTerm, toLower(identifier)) ||
@@ -590,7 +590,7 @@ export const sortVisibleTable = ({list = [], sort}) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        if (aVal === null || bVal === null) {
+        if ((aVal === null || bVal === null) || (aVal.type === 'div' || bVal.type === 'div')) {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
           return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);
