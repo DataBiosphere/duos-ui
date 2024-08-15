@@ -32,6 +32,8 @@ export default function DACDatasets(props) {
         const user = Storage.getCurrentUser();
         const dacIds = user.roles?.map(r => r.dacId).filter(id => id !== undefined);
         const query = {
+          'from': 0,
+          'size': 10000,
           'query': {
             'terms': {
               'dacId': dacIds
