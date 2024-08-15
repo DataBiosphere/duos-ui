@@ -66,7 +66,6 @@ const user = {
     'id': 150,
     'name': 'The Broad Institute of MIT and Harvard'
   },
-  //  const dacIds = user.roles?.map(r => r.dacId).filter(id => id !== undefined);
   roles: [{dacId: 4}]
 };
 
