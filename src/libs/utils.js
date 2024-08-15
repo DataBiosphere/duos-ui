@@ -466,9 +466,9 @@ export const getSearchFilterFunctions = () => {
       const phsId = dataset.study?.phsId;
       let dataUse = [];
       dataUse.push(dataset.dataUse?.primary?.map(du => du.code));
-      dataUse.concat(dataset.dataUse?.primary?.map(du => du.description));
-      dataUse.concat(dataset.dataUse?.secondary?.map(du => du.code));
-      dataUse.concat(dataset.dataUse?.secondary?.map(du => du.description));
+      dataUse.push(dataset.dataUse?.primary?.map(du => du.description));
+      dataUse.push(dataset.dataUse?.secondary?.map(du => du.code));
+      dataUse.push(dataset.dataUse?.secondary?.map(du => du.description));
       return includes(loweredTerm, toLower(alias)) ||
         includes(loweredTerm, toLower(name)) ||
         includes(loweredTerm, toLower(identifier)) ||
