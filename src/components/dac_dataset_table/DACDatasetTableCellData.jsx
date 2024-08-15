@@ -17,10 +17,10 @@ export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
 }
 
 export function duosPhsIdCellData({dataset, label = 'duosPhsIdCellData'}) {
-  const phsId = dataset.study?.phsId;
+  const displayValue = dataset.study?.phsId ? dataset.study.phsId : '';
   return {
-    data: <div className={style['cell-data']}>{phsId}</div>,
-    value: phsId,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
     id: `identifier-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.duosId},
     label
@@ -28,7 +28,7 @@ export function duosPhsIdCellData({dataset, label = 'duosPhsIdCellData'}) {
 }
 
 export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}) {
-  const displayValue = dataset.submitter?.displayName;
+  const displayValue = dataset.submitter?.displayName ? dataset.submitter.displayName : '';
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
@@ -39,9 +39,10 @@ export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}
 }
 
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
+  const displayValue = dataset.datasetName ? dataset.datasetName : '';
   return {
-    data: <div className={style['cell-data']}>{dataset.datasetName}</div>,
-    value: dataset.datasetName,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
     id: `name-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.datasetName},
     label
@@ -49,9 +50,10 @@ export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
 }
 
 export function studyNameCellData({dataset, label = 'studyNameCellData'}) {
+  const displayValue = dataset.study?.studyName ? dataset.study.studyName : '';
   return {
-    data: <div className={style['cell-data']}>{dataset.study?.studyName}</div>,
-    value: dataset.study?.studyName,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
     id: `name-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.datasetName},
     label
@@ -59,7 +61,7 @@ export function studyNameCellData({dataset, label = 'studyNameCellData'}) {
 }
 
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
-  const displayValue = dataset.study?.dataCustodianEmail;
+  const displayValue = dataset.study?.dataCustodianEmail ? dataset.study.dataCustodianEmail.join(', ') : '';
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
@@ -104,7 +106,7 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
     </div>;
   return {
     data: display,
-    value: codeList,
+    value: codeList.join(', '),
     id: `data-use-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.dataUse},
     label
