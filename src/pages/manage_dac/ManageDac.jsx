@@ -1,6 +1,6 @@
 import React from 'react';
 import ManageDacTable from '../../components/manage_dac_table/ManageDacTable';
-import {useState, useEffect, useCallback} from 'react';
+import {useState, useEffect} from 'react';
 import { Styles } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import { DAC } from '../../libs/ajax/DAC';
