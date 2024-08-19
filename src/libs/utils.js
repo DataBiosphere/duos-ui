@@ -452,22 +452,30 @@ export const getSearchFilterFunctions = () => {
        * pre-populated with data use codes and translations
        */
       const loweredTerm = toLower(term);
-      const name = dataset.name;
+      const name = dataset.name || dataset.datasetName;
       const alias = dataset.alias;
       const identifier = dataset.datasetIdentifier;
-      const allPropValues = dataset.properties.map((p) => p.propertyValue).join('');
+      const allPropValues = dataset.properties?.map((p) => p.propertyValue).join('');
       // Approval status
       const status = !isNil(dataset.dacApproval)
         ? dataset.dacApproval
           ? 'accepted'
           : 'rejected'
         : 'yes no';
+      const studyName = dataset.study?.studyName;
+      const phsId = dataset.study?.phsId;
+      let dataUse = [];
+      dataUse.push(dataset.dataUse?.primary?.flatMap(du => [du.code, du.description]));
+      dataUse.push(dataset.dataUse?.secondary?.flatMap(du => [du.code, du.description]));
       return includes(loweredTerm, toLower(alias)) ||
         includes(loweredTerm, toLower(name)) ||
         includes(loweredTerm, toLower(identifier)) ||
         includes(loweredTerm, toLower(allPropValues)) ||
         includes(loweredTerm, toLower(dataset.codeList)) ||
-        includes(loweredTerm, toLower(status));
+        includes(loweredTerm, toLower(status)) ||
+        includes(loweredTerm, toLower(studyName)) ||
+        includes(loweredTerm, toLower(phsId)) ||
+        includes(loweredTerm, toLower(dataUse.join(' ')));
     }, targetList),
     datasetTerms: (term, targetList) => filter(datasetTerm => {
       /**
@@ -580,7 +588,7 @@ export const sortVisibleTable = ({list = [], sort}) => {
       if (typeof aVal === 'number') {
         return (aVal > bVal ? -1 : 1) * sort.dir;
       } else {
-        if (aVal === null || bVal === null) {
+        if (aVal === null || bVal === null || aVal.type === 'div' || bVal.type === 'div') {
           return (aVal > bVal ? -1 : 1) * sort.dir;
         } else {
           return (aVal.localeCompare(bVal, 'en', {sensitivity: 'base', numeric: true}) * sort.dir);

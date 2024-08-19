@@ -3,97 +3,70 @@
 import React from 'react';
 import {mount} from 'cypress/react';
 import DACDatasets from '../../../src/pages/DACDatasets';
-import {DatasetService} from '../../../src/utils/DatasetService';
+import {DataSet} from '../../../src/libs/ajax/DataSet';
+import {Storage} from '../../../src/libs/storage';
 import {BrowserRouter} from 'react-router-dom';
 
 const sampleDataset = {
-  'dataSetId': 1,
-  'name': 'Name',
-  'datasetName': 'Name',
-  'createDate': 'Nov 22, 2022',
+  'datasetId': 1,
   'createUserId': 1,
-  'updateDate': 1669148177373,
-  'updateUserId': 1,
-  'active': true,
-  'needsApproval': false,
-  'alias': 612,
-  'datasetIdentifier': 'DUOS-000612',
-  'dataUse': {
-    'hmbResearch': true
-  },
-  'dacId': 1,
-  'consentId': 'dcf14449-ff38-4fc5-8ab1-4e08f91f2521',
-  'translatedDataUse': 'Samples are restricted for use under the following conditions:\nData is limited for health/medical/biomedical research. [HMB]\nCommercial use is not prohibited.\nData use for methods development research irrespective of the specified data use limitations is not prohibited.\nRestrictions for use as a control set for diseases other than those defined were not specified.',
-  'deletable': true,
-  'properties': [
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Data Type',
-      'propertyValue': 'test',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': '# of participants',
-      'propertyValue': '2',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Description',
-      'propertyValue': 'Test Description',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Phenotype/Indication',
-      'propertyValue': 'Indication',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Dataset Name',
-      'propertyValue': 'Test Name',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'url',
-      'propertyValue': 'http://...',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Data Depositor',
-      'propertyValue': 'Test User',
-      'propertyType': 'String'
-    },
-    {
-      'dataSetId': 1408,
-      'propertyName': 'Species',
-      'propertyValue': 'human',
-      'propertyType': 'String'
-    }
-  ],
+  'createUserDisplayName': 'Admin',
+  'datasetIdentifier': 'DUOS-000649',
+  'deletable': false,
+  'datasetName': 'Test Dataset Submission V2',
+  'participantCount': 10,
+  'dataLocation': 'AnVIL Workspace',
+  'url': 'http://www.abcnews.com',
+  'dacId': 4,
+  'dataUse': {},
   'study': {
-    'studyId': 1,
-    'name': 'xyz 123',
-    'description': 'test',
+    'description': 'Test Dataset Submission',
+    'studyName': 'Test Dataset Submission V2',
+    'studyId': 39,
+    'phsId': 'PHS ID',
+    'phenotype': 'Test Dataset Submission',
+    'species': 'Test Dataset Submission',
+    'piName': 'Test Dataset Submission',
+    'dataSubmitterEmail': 'user@broadinstitute.org',
+    'dataSubmitterId': 3351,
+    'dataCustodianEmail': [
+      'grushton@broadinstitute.org'
+    ],
     'publicVisibility': true,
-    'piName': 'Magnum PI',
-    'datasetIds': [
-      1408
-    ],
-    'properties': [
-      {
-        'studyPropertyId': 110,
-        'studyId': 17,
-        'key': 'dataCustodianEmail',
-        'type': 'Json',
-        "value": []
-      }
-    ],
+    'dataTypes': [
+      'CITE-seq'
+    ]
   },
+  'submitter': {
+    'userId': 1,
+    'displayName': 'Admin',
+    'institution': {
+      'id': 150,
+      'name': 'The Broad Institute of MIT and Harvard'
+    }
+  },
+  'updateUser': {
+    'userId': 1,
+    'displayName': 'Admin',
+    'institution': {
+      'id': 150,
+      'name': 'The Broad Institute of MIT and Harvard'
+    }
+  },
+  'dac': {
+    'dacId': 4,
+    'dacName': 'DAC 0002'
+  }
+};
+
+const user = {
+  'userId': 1,
+  'displayName': 'Admin',
+  'institution': {
+    'id': 150,
+    'name': 'The Broad Institute of MIT and Harvard'
+  },
+  roles: [{dacId: 4}]
 };
 
 // It's necessary to wrap components that contain `Link` components
@@ -106,7 +79,9 @@ const WrappedDACDatasetsComponent = (props) => {
 describe('Dac Dataset Table Component', function () {
   it('Dac Dataset Table Page Loads', function () {
     cy.viewport(800, 500);
-    mount(<DACDatasets/>);
+    cy.stub(Storage, 'getCurrentUser').returns(user);
+    cy.stub(DataSet, 'searchDatasetIndex').returns([sampleDataset]);
+    mount(WrappedDACDatasetsComponent({}));
     cy.contains("My DAC's Datasets").should('exist');
   });
   it('Dataset with data use is visible on page', function () {
@@ -114,12 +89,22 @@ describe('Dac Dataset Table Component', function () {
     const datasetWithDataUseInfo = Object.assign(
       {},
       sampleDataset,
-      {codeList: ['HMB'], translations: [{code: 'HMB', description: 'HMB'}]});
+      {dataUse: {
+        primary: [
+          {
+            code: 'HMB',
+            description: 'Data is limited for health/medical/biomedical research.'
+          }
+        ]
+      }}
+    );
     const datasets = [datasetWithDataUseInfo];
-    cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
-    mount(<DACDatasets/>);
+    cy.stub(DataSet, 'searchDatasetIndex').returns(datasets);
+    cy.stub(Storage, 'getCurrentUser').returns(user);
+    mount(WrappedDACDatasetsComponent({}));
     cy.contains('HMB').should('exist');
   });
+
   it('Rejected dataset is visible on page', function () {
     cy.viewport(800, 500);
     const rejectedDataset = Object.assign(
@@ -127,10 +112,12 @@ describe('Dac Dataset Table Component', function () {
       sampleDataset,
       {dacApproval: false});
     const datasets = [rejectedDataset];
-    cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
-    mount(<DACDatasets/>);
+    cy.stub(DataSet, 'searchDatasetIndex').returns(datasets);
+    cy.stub(Storage, 'getCurrentUser').returns(user);
+    mount(WrappedDACDatasetsComponent({}));
     cy.contains('REJECTED').should('exist');
   });
+
   it('Accepted dataset is visible on page', function () {
     cy.viewport(800, 500);
     const approvedDataset = Object.assign(
@@ -138,22 +125,43 @@ describe('Dac Dataset Table Component', function () {
       sampleDataset,
       {dacApproval: true});
     const datasets = [approvedDataset];
-    cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
+    cy.stub(DataSet, 'searchDatasetIndex').returns(datasets);
+    cy.stub(Storage, 'getCurrentUser').returns(user);
     mount(WrappedDACDatasetsComponent({}));
     cy.contains('ACCEPTED').should('exist');
   });
+
   it('Datasets filter on data use', function () {
     cy.viewport(800, 500);
     const hmbDataset = Object.assign(
       {},
       sampleDataset,
-      {dataSetId: 1, codeList: ['HMB'], translations: [{code: 'HMB', description: 'HMB'}]});
+      {dataUse: {
+        primary: [
+          {
+            code: 'HMB',
+            description: 'Data is limited for health/medical/biomedical research.'
+          }
+        ]
+      }}
+    );
     const gruDataset = Object.assign(
       {},
       sampleDataset,
-      {dataSetId: 2, dataUse: {generalUse: true}, codeList: ['GRU'], translations: [{code: 'GRU', description: 'GRU'}]});
+      {
+        datasetId: 2,
+        dataUse: {
+          primary: [
+            {
+              code: 'GRU',
+              description: 'Data is available for general research use.'
+            }
+          ]
+        }}
+    );
     const datasets = [hmbDataset, gruDataset];
-    cy.stub(DatasetService, 'populateDacDatasets').returns(datasets);
+    cy.stub(DataSet, 'searchDatasetIndex').returns(datasets);
+    cy.stub(Storage, 'getCurrentUser').returns(user);
     mount(WrappedDACDatasetsComponent({}));
     cy.contains('HMB').should('exist');
     cy.contains('GRU').should('exist');
@@ -170,6 +178,12 @@ describe('Dac Dataset Table Component', function () {
       .then(() => {
         cy.contains('HMB').should('not.exist');
         cy.contains('GRU').should('exist');
+      });
+    cy.get('[data-cy="search-bar"]')
+      .clear()
+      .type('PHS')
+      .then(() => {
+        cy.contains('PHS').should('exist');
       });
   });
 });

@@ -1,11 +1,8 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
 import {styles} from './DACDatasetsTable';
-import {DatasetService} from '../../utils/DatasetService';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
-import {isEmpty, map} from 'lodash/fp';
 import ReactTooltip from 'react-tooltip';
-import { firstNonEmptyPropertyValue } from '../../utils/DatasetUtils';
 
 export const consoleTypes = { CHAIR: 'chair' };
 
@@ -13,63 +10,104 @@ export function duosIdCellData({dataset, label = 'duosIdCellData'}) {
   return {
     data: <div className={style['cell-data']}>{dataset.datasetIdentifier}</div>,
     value: dataset.datasetIdentifier,
-    id: `identifier-cell-data-${dataset.dataSetId}`,
+    id: `identifier-cell-data-${dataset.datasetId}`,
+    cellStyle: {width: styles.cellWidths.duosId},
+    label
+  };
+}
+
+export function duosPhsIdCellData({dataset, label = 'duosPhsIdCellData'}) {
+  const displayValue = dataset.study?.phsId ? dataset.study.phsId : '';
+  return {
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
+    id: `identifier-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.duosId},
     label
   };
 }
 
 export function dataSubmitterCellData({dataset, label = 'dataSubmitterCellData'}) {
-  const dataDepositor = DatasetService.findDatasetPropertyValue(dataset, 'Data Depositor');
-  const displayValue = isEmpty(dataDepositor) ? dataset.createUser.displayName : dataDepositor;
+  const displayValue = dataset.submitter?.displayName ? dataset.submitter.displayName : '';
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
-    id: `data-submitter-cell-data-${dataset.dataSetId}`,
+    id: `data-submitter-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.dataSubmitter},
     label
   };
 }
 
 export function datasetNameCellData({dataset, label = 'datasetNameCellData'}) {
+  const displayValue = dataset.datasetName ? dataset.datasetName : '';
   return {
-    data: <div className={style['cell-data']}>{dataset.name}</div>,
-    value: dataset.name,
-    id: `name-cell-data-${dataset.dataSetId}`,
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
+    id: `name-cell-data-${dataset.datasetId}`,
+    cellStyle: {width: styles.cellWidths.datasetName},
+    label
+  };
+}
+
+export function studyNameCellData({dataset, label = 'studyNameCellData'}) {
+  const displayValue = dataset.study?.studyName ? dataset.study.studyName : '';
+  return {
+    data: <div className={style['cell-data']}>{displayValue}</div>,
+    value: displayValue,
+    id: `name-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.datasetName},
     label
   };
 }
 
 export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}) {
-  const displayValue = firstNonEmptyPropertyValue(dataset, ['dataCustodianEmail']);
+  const displayValue = dataset.study?.dataCustodianEmail ? dataset.study.dataCustodianEmail.join(', ') : '';
   return {
     data: <div className={style['cell-data']}>{displayValue}</div>,
     value: displayValue,
-    id: `custodian-cell-data-${dataset.dataSetId}`,
+    id: `custodian-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.dataCustodian},
     label
   };
 }
 
 export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
-  const translationList = map((translation, index) => {
-    return <li key={`${translation.code}_${index}`}>{translation.code}: {translation.description}</li>;
-  })(dataset.translations);
+  const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
+    if (dataUse.code === 'OTHER') {
+      return {'code': `OTH1`, 'description': dataUse.description};
+    } else if (dataUse.code === 'DS') {
+      const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2);
+      return {'code': `${dataUse.code} (${disease})`, 'description': dataUse.description};
+    } else {
+      return {'code': dataUse.code, 'description': dataUse.description};
+    }
+  }) : [];
+  if (dataset.dataUse?.secondary) {
+    dataset.dataUse?.secondary.forEach((dataUse) => {
+      if (dataUse.code === 'OTHER') {
+        codesAndDescriptions.push({'code': `OTH2`, 'description': dataUse.description});
+      } else {
+        codesAndDescriptions.push({'code': dataUse.code, 'description': dataUse.description});
+      }
+    });
+  }
+  const codeList = codesAndDescriptions.map(du => du.code);
   const display =
     <div className={style['cell-data']}>
-      <span className={style['data-use']} data-tip={true} data-for={`dataset-data-use-${dataset.dataSetId}`}>{dataset.codeList}</span>
+      <span className={style['data-use']} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
       <ReactTooltip
         place={'right'}
         effect={'solid'}
-        id={`dataset-data-use-${dataset.dataSetId}`}>
-        <ul>{translationList}</ul>
+        id={`dataset-data-use-${dataset.datasetId}`}>
+        <ul>{codesAndDescriptions.map((translation, index) => {
+          return <li key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
+        })}</ul>
       </ReactTooltip>
     </div>;
   return {
     data: display,
-    value: dataset.codeList,
-    id: `data-use-cell-data-${dataset.dataSetId}`,
+    value: codeList.join(', '),
+    id: `data-use-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.dataUse},
     label
   };
@@ -78,7 +116,7 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
 export function statusCellData({dataset, label = 'statusCellData', history}) {
   return {
     data: <DACDatasetApprovalStatus dataset={dataset} history={history}/>,
-    id: `status-cell-data-${dataset.dataSetId}`,
+    id: `status-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.status},
     label
   };
@@ -86,8 +124,10 @@ export function statusCellData({dataset, label = 'statusCellData', history}) {
 
 export default {
   duosIdCellData,
-  dataSubmitterCellData,
+  duosPhsIdCellData,
   datasetNameCellData,
+  studyNameCellData,
+  dataSubmitterCellData,
   dataCustodianCellData,
   dataUseCellData,
   statusCellData,
