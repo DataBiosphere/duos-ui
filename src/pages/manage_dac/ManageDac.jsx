@@ -4,7 +4,6 @@ import {useState, useEffect, useCallback} from 'react';
 import { Styles } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
 import { DAC } from '../../libs/ajax/DAC';
-import {contains, filter, map} from 'lodash/fp';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
@@ -22,7 +21,6 @@ export const ManageDac = function ManageDac() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
-  const [dacIDs, setDacIDs] = useState([]);
   const [userRole, setUserRole] = useState();
 
   // modal state
@@ -36,40 +34,28 @@ export const ManageDac = function ManageDac() {
   const [selectedDac, setSelectedDac] = useState({});
   const [selectedDatasets, setSelectedDatasets] = useState([]);
 
-
-  const reloadUserRole = useCallback(async () => {
-    setIsLoading(true);
+  const initializeDACs = async () => {
     const currentUser = Storage.getCurrentUser();
     const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : [];
-    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
-    let dacIDs = filter({name: CHAIR})(currentUser.roles);
-    dacIDs = map('dacId')(dacIDs);
-    if (role === CHAIR) {
-      setDacIDs(dacIDs);
-    }
+    const role = roles.includes(ADMIN) ? ADMIN : CHAIR;
     setUserRole(role);
-    setIsLoading(false);
-  }, []);
-
-  const reloadDacList = useCallback(async () => {
+    let chairDACIds = currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId);
     setIsLoading(true);
-    DAC.list().then(
-      dacs => {
-        if (userRole === CHAIR) {
-          dacs = dacs.filter((dac) => dacIDs.includes(dac.dacId));
-        }
-        setDacs(dacs);
-        setIsLoading(false);
-      }
-    );
-  }, [dacIDs, userRole]);
+    const allDacs = await DAC.list();
+    if (roles.includes(ADMIN)) {
+      setDacs(allDacs);
+    } else {
+      setDacs(allDacs.filter((dac) => chairDACIds.includes(dac.dacId)));
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    Promise.all([
-      reloadUserRole(),
-      reloadDacList()
-    ]);
-  }, [reloadDacList, reloadUserRole]);
+    const init = async () => {
+      await initializeDACs();
+    };
+    init();
+  }, []);
 
   const handleDeleteDac = async () => {
     let status;
@@ -79,7 +65,7 @@ export const ManageDac = function ManageDac() {
     if (status === 200) {
       Notifications.showSuccess({text: 'DAC successfully deleted.'});
       setShowConfirmationModal(false);
-      await reloadDacList();
+      await initializeDACs();
     } else {
       Notifications.showError({text: 'DAC could not be deleted.'});
     }
