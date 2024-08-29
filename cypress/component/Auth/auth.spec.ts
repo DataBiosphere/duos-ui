@@ -7,7 +7,7 @@ import {Storage} from '../../../src/libs/storage';
 
 describe('Auth', function () {
   it('Sign Out Clears the session when called', async function () {
-    cy.stub(Config, 'getConfig').returns('{}');
+    cy.intercept('/config.json', {});
     cy.stub(Config, 'getGoogleClientId').returns('12345');
     cy.stub(GoogleIS, 'revokeAccessToken');
     await Auth.initialize();
