@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {isFunction, isNil} from 'lodash/fp';
 import {DAAUtils} from '../utils/DAAUtils';
+import {Auth} from '../libs/auth/auth';
 
 const styles = {
   drawerPaper: {
@@ -340,7 +341,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-    props.onSignOut();
+    Auth.signOut();
   };
 
   const supportRequestModal = () => {
