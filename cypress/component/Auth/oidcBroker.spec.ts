@@ -2,11 +2,23 @@
 
 import {Config} from '../../../src/libs/config';
 import {GoogleIS} from '../../../src/libs/googleIS';
+import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
 
 describe('OidcBroker', function () {
+  // Intercept configuration calls
+  beforeEach(() => {
+    cy.intercept({
+      method: 'GET',
+      url: '/config.json',
+      hostname: 'localhost',
+    }, {'env': 'local'});
+    cy.stub(OAuth2, 'getConfig').returns({
+      'authorityEndpoint': 'authorityEndpoint',
+      'clientId': 'clientId'
+    });
+  });
   it('Sign Out calls Oidc UserManager sign-out functions', async function () {
-    cy.intercept('/config.json', {});
     cy.stub(Config, 'getGoogleClientId').returns('12345');
     cy.stub(GoogleIS, 'revokeAccessToken');
     await OidcBroker.initialize();
