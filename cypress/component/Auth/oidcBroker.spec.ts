@@ -6,6 +6,7 @@ import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
 
 describe('OidcBroker', function () {
   it('Sign Out calls Oidc UserManager sign-out functions', async function () {
+    cy.stub(Config, 'getConfig').returns('{}');
     cy.stub(Config, 'getGoogleClientId').returns('12345');
     cy.stub(GoogleIS, 'revokeAccessToken');
     await OidcBroker.initialize();
