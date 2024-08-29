@@ -16,3 +16,6 @@ jobs:
           install: false
           component: true
           browser: chrome
+          record: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
