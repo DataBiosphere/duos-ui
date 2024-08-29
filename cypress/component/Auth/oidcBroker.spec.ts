@@ -12,7 +12,7 @@ describe('OidcBroker', function () {
       method: 'GET',
       url: '/config.json',
       hostname: 'localhost',
-    }, {'env': 'local'});
+    }, {'env': 'ci'});
     cy.stub(OAuth2, 'getConfig').returns({
       'authorityEndpoint': 'authorityEndpoint',
       'clientId': 'clientId'
