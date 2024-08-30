@@ -8,7 +8,7 @@ import {Storage} from '../../../src/libs/storage';
 
 describe('Auth', function () {
   // Intercept configuration calls
-  beforeEach(() => {
+  beforeEach(async () => {
     cy.intercept({
       method: 'GET',
       url: '/config.json',
@@ -18,11 +18,11 @@ describe('Auth', function () {
       'authorityEndpoint': 'authorityEndpoint',
       'clientId': 'clientId'
     });
+    await Auth.initialize();
   });
   it('Sign Out Clears the session when called', async function () {
     cy.stub(Config, 'getGoogleClientId').returns('12345');
     cy.stub(GoogleIS, 'revokeAccessToken');
-    await Auth.initialize();
     Storage.setUserIsLogged(true);
     expect(Storage.userIsLogged()).to.be.true;
     await Auth.signOut();
