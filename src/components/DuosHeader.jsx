@@ -226,7 +226,7 @@ const NavigationTabsComponent = (props) => {
                 {supportrequestModal}
               </ul>
             )
-          };
+          }
         </div>
         {/* Navbar right side */}
         {!isLogged &&
