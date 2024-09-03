@@ -224,20 +224,28 @@ const NavigationTabsComponent = (props) => {
                 </li>
                 {contactUsButton}
                 {supportrequestModal}
+                {/* Sign-in button location when window is narrow and menu is vertical */}
+                {!isLogged && orientation === 'vertical' && <li style={{marginRight: 0}}>
+                  <SignInButton
+                    customStyle={undefined}
+                    props={props}
+                    onSignIn={onSignIn}
+                    history={history}/>
+                </li>}
               </ul>
             )
           }
         </div>
         {/* Navbar right side */}
-        {!isLogged &&
+        {/* Sign-in button location when window is wider and menu is not vertical */}
+        {!isLogged && orientation !== 'vertical' &&
           <div
             style={{
               minWidth: '185px',
               display: 'flex',
               alignItems: 'center',
               flexDirection: orientation === 'vertical' ? 'column' : 'row'
-            }}
-          >
+            }}>
             <SignInButton
               customStyle={undefined}
               props={props}
