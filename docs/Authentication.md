@@ -51,9 +51,9 @@ that handles most of our authentication logic. `UserManager` is instantiated wit
 that come from open (and intentionally undocumented) server side APIs:
 * Authorization Endpoint: https://consent.dsde-prod.broadinstitute.org/oauth2/authorize
 * Token Endpoint: https://consent.dsde-prod.broadinstitute.org/oauth2/token
-These endpoints return configuration information specific to DSP's custom tenant. 
 
-From there, we use `OidcBroker` functions to instantiate a [User](https://authts.github.io/oidc-client-ts/classes/User.html),
+These endpoints return configuration information specific to DSP's custom tenant. From there, 
+we use `OidcBroker` functions to instantiate a [User](https://authts.github.io/oidc-client-ts/classes/User.html),
 which we extend as a `OidcUser` and tack on a set of `B2cIdTokenClaims` that extends [IdTokenClaims](https://authts.github.io/oidc-client-ts/interfaces/IdTokenClaims.html).
 
 #### Sign In Case
