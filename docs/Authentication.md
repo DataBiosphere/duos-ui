@@ -9,9 +9,10 @@ the user is redirected back to the application with a valid token that can
 be used for all back-end API calls.
 
 ## Table of Contents
-* UI Auth Flow
-* DSP's B2C Tenant Choices
-* Server Auth Flow
+* [UI Auth Flow](#UI-Auth-Flow)
+* [OIDC Mechanics](#OIDC-Mechanics)
+* [DSP's B2C Tenant Choices](#DSP's-B2C-Tenant-Choices)
+* [Server Auth Flow](#Server-Auth-Flow)
 
 ### UI Auth Flow
 
@@ -22,15 +23,16 @@ be used for all back-end API calls.
 * Microsoft: If a user chooses Microsoft, a Microsoft identity is expected
 
 ```mermaid
+%%{init: { 'theme': 'forest' } }%%
 sequenceDiagram
     User-->>DUOS: clicks the sign in button
-    DUOS-->>B2C: user redirected to tenant
-    note right of B2C: User chooses identity provider
-    B2C ->>+ Google: Google Choice
-    Google ->>- B2C: authenticated user with token
-    B2C ->>+ Microsoft: Microsoft Choice
-    Microsoft ->>- B2C: authenticated user with token
-    B2C -->> DUOS: user returned to UI with token
+    DUOS-->>B2C Tenant: user redirected to tenant
+    note right of B2C Tenant: User chooses identity provider
+    B2C Tenant ->>+ Google: Google Choice
+    Google ->>- B2C Tenant: authenticated user with token
+    B2C Tenant ->>+ Microsoft: Microsoft Choice
+    Microsoft ->>- B2C Tenant: authenticated user with token
+    B2C Tenant -->> DUOS: user returned to UI with token
     DUOS -->> User: DUOS displays authenticated user page
 ```
 
@@ -38,11 +40,44 @@ sequenceDiagram
 
 DUOS uses the [oidc-client-ts](https://github.com/authts/oidc-client-ts) library
 to facilitate user authentication through either Google or Microsoft. Once authenticated,
-the library returns to DUOS with user claims information about the authenticated identity.
+the library provides DUOS with user claims information about the authenticated identity.
 DSP's tenant requests claims that are [configured here](https://github.com/broadinstitute/terraform-ap-deployments/blob/master/azure/b2c/policies/SignUpOrSignin.xml.tftpl).
 Once authenticated, the DUOS application will use the `oidc-client-ts` library to access
 an identity's `access_token` and make API calls using it. All downstream API servers are
-expected to validate that token against the same B2C tenant. 
+expected to validate that token against the same B2C tenant.
+
+DUOS' implementation instantiates an OIDC library [UserManager](https://authts.github.io/oidc-client-ts/classes/UserManager.html)
+that handles most of our authentication logic. `UserManager` is instantiated with configuration values
+that come from open (and intentionally undocumented) server side APIs:
+* Authorization Endpoint: https://consent.dsde-prod.broadinstitute.org/oauth2/authorize
+* Token Endpoint: https://consent.dsde-prod.broadinstitute.org/oauth2/token
+These endpoints return configuration information specific to DSP's custom tenant. 
+
+From there, we use `OidcBroker` functions to instantiate a [User](https://authts.github.io/oidc-client-ts/classes/User.html),
+which we extend as a `OidcUser` and tack on a set of `B2cIdTokenClaims` that extends [IdTokenClaims](https://authts.github.io/oidc-client-ts/interfaces/IdTokenClaims.html).
+
+#### Sign In Case
+```mermaid
+%%{init: { 'theme': 'forest' } }%%
+sequenceDiagram
+    App -->> App: OidcBroker.initialize UserManager
+    OidcBroker -->> UserManager: Sign In Event
+    UserManager -->> oidc-client-ts: Delegate Auth
+    oidc-client-ts -->> Tenant: Delegate Auth
+    B2C Tenant -->> B2C Tenant: Handle Auth Dance
+    B2C Tenant -->> oidc-client-ts: Auth Results
+    oidc-client-ts -->> UserManager: Auth Results
+    UserManager -->> OidcBroker: Store User, Token
+```
+
+#### Sign Out Case
+```mermaid
+%%{init: { 'theme': 'forest' } }%%
+sequenceDiagram
+    OidcBroker -->> UserManager: Sign Out Event
+    UserManager -->> oidc-client-ts: removeUser
+    UserManager -->> oidc-client-ts: clearStaleState
+```
 
 ### DSP's B2C Tenant Choices
 ![B2C Tenant Choice](b2c_tennant.png)
@@ -58,10 +93,11 @@ tacks on a list of extra headers that services can use:
 * OAUTH2_CLAIM_aud
 
 ```mermaid
+%%{init: { 'theme': 'forest' } }%%
 sequenceDiagram
     Client -->> Proxy: Request with access token
-    Proxy -->>+ B2C: Validate token
-    B2C -->>- Proxy: Validated token with claims
+    Proxy -->>+ B2C Tenant: Validate token
+    B2C Tenant -->>- Proxy: Validated token with claims
     Proxy -->> API: Perform authenticated request
     API -->> Client: Return response
 ```
