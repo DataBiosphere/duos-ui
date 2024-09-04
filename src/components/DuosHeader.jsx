@@ -19,6 +19,7 @@ import Box from '@mui/material/Box';
 import {isFunction, isNil} from 'lodash/fp';
 import {DAAUtils} from '../utils/DAAUtils';
 import {Auth} from '../libs/auth/auth';
+import SignInButton from '../components/SignInButton';
 
 const styles = {
   drawerPaper: {
@@ -139,6 +140,8 @@ export const headerTabsConfig = [
 
 const NavigationTabsComponent = (props) => {
   const {
+    onSignIn,
+    history,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
@@ -222,11 +225,35 @@ const NavigationTabsComponent = (props) => {
                 </li>
                 {contactUsButton}
                 {supportrequestModal}
+                {/* Sign-in button location when window is narrow and menu is vertical */}
+                {!isLogged && orientation === 'vertical' && <li style={{marginRight: 0}}>
+                  <SignInButton
+                    customStyle={undefined}
+                    props={props}
+                    onSignIn={onSignIn}
+                    history={history}/>
+                </li>}
               </ul>
             )
-          };
+          }
         </div>
         {/* Navbar right side */}
+        {/* Sign-in button location when window is wider and menu is not vertical */}
+        {!isLogged && orientation !== 'vertical' &&
+          <div
+            style={{
+              minWidth: '185px',
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: orientation === 'vertical' ? 'column' : 'row'
+            }}>
+            <SignInButton
+              customStyle={undefined}
+              props={props}
+              onSignIn={onSignIn}
+              history={history}/>
+          </div>
+        }
         {isLogged && (
           <div
             style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
@@ -311,7 +338,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const { location, classes } = props;
+  const {location, classes, onSignIn, history} = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -479,6 +506,8 @@ const DuosHeader = (props) => {
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
+            onSignIn={onSignIn}
+            history={history}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -526,6 +555,8 @@ const DuosHeader = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
+              onSignIn={onSignIn}
+              history={history}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}

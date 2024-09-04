@@ -74,7 +74,7 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader />
+          <DuosHeader onSignIn={signIn} />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
           <Routes onSignIn={signIn} isLogged={isLoggedIn} env={env} />
         </div>
