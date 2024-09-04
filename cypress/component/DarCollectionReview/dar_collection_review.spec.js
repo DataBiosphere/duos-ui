@@ -464,9 +464,7 @@ const dar = {
       'createUserId': null,
       'updateDate': 1643730658770,
       'updateUserId': 11111,
-      'active': true,
       'consentName': null,
-      'needsApproval': null,
       'alias': 999,
       'datasetIdentifier': 'DUOS-00999',
       'dataUse': {
@@ -670,8 +668,6 @@ const dacDatasets = [{
       'propertyValue': 'Sleep Apnea'
     }
   ],
-  'active': true,
-  'needsApproval': true,
   'isAssociatedToDataOwners': null,
   'updateAssociationToDataOwnerAllowed': null,
   'alias': 999,
