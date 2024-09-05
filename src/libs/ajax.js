@@ -44,6 +44,10 @@ export const getOntologyUrl = async(baseUrl = '') => {
   return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
 };
 
+export const getECMUrl = async() => {
+  return await Config.getECMUrl();
+};
+
 export const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
