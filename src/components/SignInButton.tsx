@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { Alert } from './Alert';
+import {Auth} from '../libs/auth/auth';
 import { ToS } from '../libs/ajax/ToS';
 import { User } from '../libs/ajax/User';
 import { Metrics } from '../libs/ajax/Metrics';
@@ -81,7 +82,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     const userStatus = await ToS.getStatus();
     const { tosAccepted } = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
-      await Storage.setUserIsLogged(false);
+      await Auth.signOut();
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
       } else {
@@ -150,7 +151,7 @@ export const SignInButton = (props: SignInButtonProps) => {
         setErrorDisplay({ show: true, title: 'Error', msg: JSON.stringify(error) });
         break;
       case 409:
-        handleConflictError(redirectTo, shouldRedirect);
+        await handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
         setErrorDisplay({ show: true, title: 'Error', msg: 'Unexpected error, please try again' });
@@ -162,7 +163,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     try {
       await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     } catch (error) {
-      Storage.clearStorage();
+      await Auth.signOut();
     }
   };
 

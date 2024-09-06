@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {isFunction, isNil} from 'lodash/fp';
 import {DAAUtils} from '../utils/DAAUtils';
+import {Auth} from '../libs/auth/auth';
 import SignInButton from '../components/SignInButton';
 
 const styles = {
@@ -367,7 +368,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-    props.onSignOut();
+    Auth.signOut();
   };
 
   const supportRequestModal = () => {

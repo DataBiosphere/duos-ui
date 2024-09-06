@@ -1,18 +1,36 @@
 /* eslint-disable no-undef */
 
 import React from 'react';
-import { mount } from 'cypress/react';
+import {mount} from 'cypress/react';
+import {Auth} from '../../../src/libs/auth/auth';
 import TermsOfServiceAcceptance from '../../../src/pages/TermsOfServiceAcceptance';
-import { ToS } from '../../../src/libs/ajax/ToS';
-import {Storage} from '../../../src/libs/storage';
 import {Navigation} from '../../../src/libs/utils';
+import {OAuth2} from '../../../src/libs/ajax/OAuth2';
+import {ToS} from '../../../src/libs/ajax/ToS';
+import {Storage} from '../../../src/libs/storage';
 
 const text = 'TOS Text';
 const mocks = {
-  history: { push() {} }
+  history: {
+    push() {
+    }
+  }
 };
 
 describe('Terms of Service Acceptance Page', function () {
+  // Intercept configuration calls
+  beforeEach(async () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/config.json',
+      hostname: 'localhost',
+    }, {'env': 'ci'});
+    cy.stub(OAuth2, 'getConfig').returns({
+      'authorityEndpoint': 'authorityEndpoint',
+      'clientId': 'clientId'
+    });
+    await Auth.initialize();
+  });
   it('Standard text loads correctly and buttons work', function () {
     cy.viewport(600, 300);
     cy.stub(ToS, 'getDUOSText').returns(text);

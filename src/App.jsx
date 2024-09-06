@@ -12,7 +12,6 @@ import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
-import {GoogleIS} from './libs/googleIS';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -66,14 +65,6 @@ function App() {
     setUserIsLogged();
   });
 
-  const signOut = async () => {
-    const clientId = await Config.getGoogleClientId();
-    await GoogleIS.revokeAccessToken(clientId);
-    await Storage.setUserIsLogged(false);
-    await Storage.clearStorage();
-    await setIsLoggedIn(false);
-  };
-
   const signIn = async () => {
     await Storage.setUserIsLogged(true);
     await setIsLoggedIn(true);
@@ -83,9 +74,9 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignOut={signOut} onSignIn={signIn} />
+          <DuosHeader onSignIn={signIn} />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes onSignOut={signOut} onSignIn={signIn} isLogged={isLoggedIn} env={env} />
+          <Routes onSignIn={signIn} isLogged={isLoggedIn} env={env} />
         </div>
       </div>
       <DuosFooter />
