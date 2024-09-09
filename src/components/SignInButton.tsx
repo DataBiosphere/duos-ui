@@ -12,13 +12,11 @@ import ReactTooltip from 'react-tooltip';
 import eventList from '../libs/events';
 import {StackdriverReporter} from '../libs/stackdriverReporter';
 import {History} from 'history';
-import CSS from 'csstype';
 import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUserResponse} from '../types/responseTypes';
 
 
 interface SignInButtonProps {
-  customStyle: CSS.Properties | undefined;
   history: History;
   onSignIn: () => Promise<void>;
 }
@@ -162,9 +160,16 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const signInElement = (): React.JSX.Element => {
     return (
-      <div style={{display: 'flex'}}>
+      <div style={{display: 'flex', marginRight: 30}}>
         <button
-          className={'btn-secondary'}
+          style={{
+            height: 50,
+            width: 200,
+            fontSize: 18,
+            fontWeight: 500,
+            color: 'rgb(77, 114, 170)',
+            borderRadius: 5
+          }}
           onClick={async () => {
             setIsLoading(true);
             Auth.signIn(true).then(onSuccess, onFailure);
