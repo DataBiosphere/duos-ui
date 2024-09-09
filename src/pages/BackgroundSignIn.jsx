@@ -36,7 +36,7 @@ export default function BackgroundSignIn(props) {
 
     const performLogin = () => {
       setLoading(true);
-      Storage.setOidcUser({ od_token: accessToken });
+      Storage.setOidcUser({ id_token: accessToken });
       getUser().then(
         user => {
           user = Object.assign(user, setUserRoleStatuses(user, Storage));
