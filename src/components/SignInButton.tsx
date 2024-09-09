@@ -105,6 +105,9 @@ export const SignInButton = (props: SignInButtonProps) => {
     const registeredUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
     await onSignIn();
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.syncProfile();
+    await Metrics.captureEvent(eventList.userRegister);
     history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
