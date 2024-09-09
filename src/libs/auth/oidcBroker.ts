@@ -2,7 +2,6 @@ import {
   IdTokenClaims,
   OidcMetadata,
   SigninPopupArgs,
-  SigninSilentArgs,
   User,
   UserManager,
   UserManagerSettings,
@@ -41,7 +40,6 @@ const generateOidcUserManagerSettings = async (
     authority: config.authorityEndpoint,
     client_id: config.clientId,
     popup_redirect_uri: `${window.origin}/redirect-from-oauth`,
-    silent_redirect_uri: `${window.origin}/redirect-from-oauth-silent`,
     metadata,
     prompt: 'consent login',
     scope: 'openid email profile',
@@ -78,15 +76,7 @@ export const OidcBroker = {
     const userManager: OidcUserManager = new UserManager(OidcBroker.getUserManagerSettings());
     return await userManager.getUser();
   },
-  getUserSync: (): OidcUser | null => {
-    const settings: UserManagerSettings =
-        OidcBroker.getUserManagerSettings();
-    const oidcStorage: string | null = localStorage.getItem(
-      `oidc.user:${settings.authority}:${settings.client_id}`
-    );
-    return oidcStorage !== null ? User.fromStorageString(oidcStorage) : null;
-  },
-  signIn: async (popup: boolean, args?: SigninPopupArgs | SigninSilentArgs): Promise<User | null> => {
+  signIn: async (popup: boolean, args?: SigninPopupArgs): Promise<User | null> => {
     const um: UserManager = OidcBroker.getUserManager();
     return popup ? await um.signinPopup(args) : await um.signinSilent(args);
   },
