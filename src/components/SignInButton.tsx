@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { isEmpty, isNil } from 'lodash/fp';
-import { Alert } from './Alert';
+import React, {useState} from 'react';
+import {isEmpty, isNil} from 'lodash/fp';
+import {Alert} from './Alert';
 import {Auth} from '../libs/auth/auth';
-import { ToS } from '../libs/ajax/ToS';
-import { User } from '../libs/ajax/User';
-import { Metrics } from '../libs/ajax/Metrics';
-import { Config } from '../libs/config';
-import { Storage } from '../libs/storage';
-import { Navigation, setUserRoleStatuses } from '../libs/utils';
+import {ToS} from '../libs/ajax/ToS';
+import {User} from '../libs/ajax/User';
+import {Metrics} from '../libs/ajax/Metrics';
+import {Storage} from '../libs/storage';
+import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
-import { Spinner } from './Spinner';
 import ReactTooltip from 'react-tooltip';
-import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
-import { StackdriverReporter } from '../libs/stackdriverReporter';
-import { History } from 'history';
+import {StackdriverReporter} from '../libs/stackdriverReporter';
+import {History} from 'history';
 import CSS from 'csstype';
+import {OidcUser} from '../libs/auth/oidcBroker';
+import {DuosUserResponse} from '../types/responseTypes';
+
 
 interface SignInButtonProps {
   customStyle: CSS.Properties | undefined;
@@ -30,57 +30,23 @@ interface ErrorInfo {
   msg?: string;
 }
 
-type ErrorDisplay = ErrorInfo | JSX.Element;
+type ErrorDisplay = ErrorInfo | React.JSX.Element;
 
 interface HttpError extends Error {
   status?: number;
 }
 
-interface GoogleSuccessPayload {
-  accessToken: string;
-}
-
-declare global {
-  interface Window { google: any; }
-}
-
 export const SignInButton = (props: SignInButtonProps) => {
-  const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
-  const { onSignIn, history, customStyle } = props;
-
-  useEffect(() => {
-    // Using `isSubscribed` resolves the
-    // "To fix, cancel all subscriptions and asynchronous tasks in a useEffect cleanup function." warning
-    let isSubscribed = true;
-    const init = async () => {
-      if (isSubscribed) {
-        const googleClientId = await Config.getGoogleClientId();
-        setClientId(googleClientId);
-        if (window.google !== undefined && GoogleIS.client === null) {
-          await GoogleIS.initTokenClient(googleClientId, onSuccess, onFailure);
-        }
-      }
-      ReactTooltip.rebuild();
-    };
-    init();
-    return () => {
-      isSubscribed = false;
-    };
-  });
+  const {onSignIn, history} = props;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Utility function called in the normal success case and in the undocumented 409 case
-  // Check for ToS Acceptance - redirect user if not set.
+  // Check for ToS Acceptance - sign out and redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
-    const user = await User.getMe();
-    if (!user.roles) {
-      await StackdriverReporter.report('roles not found for user: ' + user.email);
-    }
-    setUserRoleStatuses(user, Storage);
-    await onSignIn();
     const userStatus = await ToS.getStatus();
-    const { tosAccepted } = userStatus;
+    const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Auth.signOut();
       if (isNil(redirectPath)) {
@@ -90,22 +56,31 @@ export const SignInButton = (props: SignInButtonProps) => {
       }
     } else {
       if (isNil(redirectPath)) {
-        Navigation.back(user, history);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         history.push(redirectPath);
       }
     }
   };
 
-  const onSuccess = async (response: GoogleSuccessPayload) => {
-    Storage.setGoogleData(response);
+  // eslint-disable-next-line no-unused-vars
+  const onSuccess = async (_: OidcUser) => {
+    const duosUser: DuosUserResponse = await User.getMe();
+    Storage.setCurrentUser(duosUser);
+    setUserRoleStatuses(duosUser, Storage);
+    if (!duosUser.roles) {
+      await StackdriverReporter.report('roles not found for user: ' + duosUser.email);
+    }
 
     const redirectTo = getRedirectTo();
     const shouldRedirect = shouldRedirectTo(redirectTo);
     Storage.setAnonymousId();
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.syncProfile();
+    await Metrics.captureEvent(eventList.userSignIn);
 
     try {
-      await attemptSignInCheckToSAndRedirect(redirectTo, shouldRedirect);
+      await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     } catch (error) {
       await handleRegistration(redirectTo, shouldRedirect);
     }
@@ -117,13 +92,6 @@ export const SignInButton = (props: SignInButtonProps) => {
   };
 
   const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home';
-
-  const attemptSignInCheckToSAndRedirect = async (redirectTo:string, shouldRedirect: boolean) => {
-    await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
-    Metrics.identify(Storage.getAnonymousId());
-    Metrics.syncProfile();
-    Metrics.captureEvent(eventList.userSignIn);
-  };
 
   const handleRegistration = async (redirectTo: string, shouldRedirect: boolean) => {
     try {
@@ -137,9 +105,6 @@ export const SignInButton = (props: SignInButtonProps) => {
     const registeredUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
     await onSignIn();
-    Metrics.identify(Storage.getAnonymousId());
-    Metrics.syncProfile();
-    Metrics.captureEvent(eventList.userRegister);
     history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
@@ -148,13 +113,13 @@ export const SignInButton = (props: SignInButtonProps) => {
 
     switch (status) {
       case 400:
-        setErrorDisplay({ show: true, title: 'Error', msg: JSON.stringify(error) });
+        setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
         break;
       case 409:
         await handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
-        setErrorDisplay({ show: true, title: 'Error', msg: 'Unexpected error, please try again' });
+        setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
         break;
     }
   };
@@ -173,46 +138,56 @@ export const SignInButton = (props: SignInButtonProps) => {
       setErrorDisplay(
         <span>
           Sign-in cancelled ...
-          <img height="20px" src={loadingIndicator} />
+          <img height="20px" src={loadingIndicator} alt={'loading'}/>
         </span>
       );
       setTimeout(() => {
         setErrorDisplay({});
       }, 2000);
     } else {
-      setErrorDisplay({ title: response.error, description: response.details });
+      setErrorDisplay({title: response.error, description: response.details});
     }
   };
 
-  const spinnerOrSignInButton = () => {
-    return (clientId === ''
-      ? Spinner()
-      : (<div style={{ display: 'flex' }}>
-        {isNil(customStyle)
-          ? GoogleIS.signInButton(clientId, onSuccess, onFailure)
-          : <button className={'btn-primary'} style={customStyle} onClick={() => {
-            GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
-          }}>
-          Submit a Data Access Request
-          </button>}
-        {isNil(customStyle) &&
+  const loadingElement = (): React.JSX.Element => {
+    return (
+      <span>
+        <img height='20px' src={loadingIndicator} alt={'loading'}/>
+      </span>
+    );
+  };
+
+  const signInElement = (): React.JSX.Element => {
+    return (
+      <div style={{display: 'flex'}}>
+        <button
+          className={'btn-secondary'}
+          onClick={async () => {
+            setIsLoading(true);
+            Auth.signIn(true).then(onSuccess, onFailure);
+            setIsLoading(false);
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? loadingElement() : 'Sign In'}
+        </button>
         <a
           className='navbar-duos-icon-help'
-          style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
+          style={{color: 'white', height: 16, width: 16, marginLeft: 5}}
           href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
           data-for="tip_google-help"
-          data-tip="No Google help? Click here!"
+          data-tip="Need account help? Click here!"
         />
-        }
-        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
-      </div>));
+        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper"/>
+      </div>
+    );
   };
 
   return (
     <div>
       {isEmpty(errorDisplay)
         ? <div>
-          {spinnerOrSignInButton()}
+          {signInElement()}
         </div>
         : <div className="dialog-alert">
           <Alert

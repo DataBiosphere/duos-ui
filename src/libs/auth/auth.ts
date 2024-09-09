@@ -4,9 +4,16 @@
 */
 import {OidcBroker, OidcUser} from './oidcBroker';
 import {Storage} from './../storage';
-import { UserManager } from 'oidc-client-ts';
+import {UserManager} from 'oidc-client-ts';
 
 export const Auth = {
+  getToken: (): string => {
+    // In a future ticket, it would be better to make get Token an async function and call
+    // the UserManager.getUser to get the token. Since authOpts depends on getToken being synchonous
+    // it would be a lot of places to change the uses of authOpts.
+    const oidcUser: OidcUser | null = OidcBroker.getUserSync();
+    return oidcUser !== null ? oidcUser.access_token : 'token';
+  },
   initialize: async (): Promise<void> => {
     await OidcBroker.initialize();
     const oidcUser: OidcUser | null = await OidcBroker.getUser();
@@ -29,6 +36,15 @@ export const Auth = {
     } else {
       await Auth.signOut();
     }
+  },
+  signIn: async (popup: boolean): Promise<OidcUser> => {
+    const user: OidcUser | null = await OidcBroker.signIn(popup);
+    if (user === null) {
+      throw new Error('signInSilent called before signInPopup');
+    }
+    Storage.setOidcUser(user);
+    Storage.setUserIsLogged(true);
+    return user;
   },
   signOut: async () => {
     Storage.clearStorage();

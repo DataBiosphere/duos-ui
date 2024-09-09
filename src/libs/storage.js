@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
 const GoogleUser = 'Gapi'; // Google user info, including token
+const OidcUser = 'OidcUser'; // Google user info, including token
 const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 const anonymousId = 'anonymousId';
@@ -50,12 +51,12 @@ export const Storage = {
     sessionStorage.setItem(UserSettings, JSON.stringify(userSettings));
   },
 
-  setGoogleData: data => {
-    sessionStorage.setItem(GoogleUser, JSON.stringify(data));
+  setOidcUser: oidcUser => {
+    sessionStorage.setItem(OidcUser, JSON.stringify(oidcUser));
   },
 
-  getGoogleData: () => {
-    return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem(GoogleUser)) : null;
+  getOidcUser: () => {
+    return sessionStorage.getItem(OidcUser) ? JSON.parse(sessionStorage.getItem(OidcUser)) : null;
   },
 
   userIsLogged: () => {

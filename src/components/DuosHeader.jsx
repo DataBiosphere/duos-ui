@@ -140,7 +140,6 @@ export const headerTabsConfig = [
 
 const NavigationTabsComponent = (props) => {
   const {
-    onSignIn,
     history,
     orientation,
     makeNotifications,
@@ -230,7 +229,6 @@ const NavigationTabsComponent = (props) => {
                   <SignInButton
                     customStyle={undefined}
                     props={props}
-                    onSignIn={onSignIn}
                     history={history}/>
                 </li>}
               </ul>
@@ -250,7 +248,6 @@ const NavigationTabsComponent = (props) => {
             <SignInButton
               customStyle={undefined}
               props={props}
-              onSignIn={onSignIn}
               history={history}/>
           </div>
         }
@@ -338,7 +335,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const {location, classes, onSignIn, history} = props;
+  const {location, classes, history} = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -506,7 +503,6 @@ const DuosHeader = (props) => {
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
-            onSignIn={onSignIn}
             history={history}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
@@ -555,7 +551,6 @@ const DuosHeader = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
-              onSignIn={onSignIn}
               history={history}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
