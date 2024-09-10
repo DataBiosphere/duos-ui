@@ -1,8 +1,6 @@
 /* eslint-disable no-undef */
 
 import {Auth} from '../../../src/libs/auth/auth';
-import {Config} from '../../../src/libs/config';
-import {GoogleIS} from '../../../src/libs/googleIS';
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {Storage} from '../../../src/libs/storage';
 import { v4 as uuid } from 'uuid';
@@ -22,8 +20,6 @@ describe('Auth', function () {
     await Auth.initialize();
   });
   it('Sign Out Clears the session when called', async function () {
-    cy.stub(Config, 'getGoogleClientId').returns('12345');
-    cy.stub(GoogleIS, 'revokeAccessToken');
     Storage.setUserIsLogged(true);
     Storage.setAnonymousId(uuid());
     Storage.setData('key', 'val');
