@@ -104,8 +104,6 @@ export interface Dataset {
   deletable: boolean;
   properties: DatasetProperty[];
   study: Study;
-  active: boolean;
-  needsApproval: boolean;
   alias: string;
   datasetIdentifier: string;
   objectId: string;
