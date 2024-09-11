@@ -9,4 +9,4 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: npm audit
-        run: npm audit --omit=dev
+        run: npm run audit
