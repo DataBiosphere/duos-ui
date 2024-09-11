@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { isEmpty, isNil } from 'lodash/fp';
-import { Alert } from './Alert';
+import React, {useEffect, useState} from 'react';
+import {isEmpty, isNil} from 'lodash/fp';
+import {Alert} from './Alert';
 import {Auth} from '../libs/auth/auth';
-import { ToS } from '../libs/ajax/ToS';
-import { User } from '../libs/ajax/User';
-import { Metrics } from '../libs/ajax/Metrics';
-import { Config } from '../libs/config';
-import { Storage } from '../libs/storage';
-import { Navigation, setUserRoleStatuses } from '../libs/utils';
+import {ToS} from '../libs/ajax/ToS';
+import {User} from '../libs/ajax/User';
+import {Metrics} from '../libs/ajax/Metrics';
+import {Config} from '../libs/config';
+import {Storage} from '../libs/storage';
+import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
-import { Spinner } from './Spinner';
+import {Spinner} from './Spinner';
 import ReactTooltip from 'react-tooltip';
-import { GoogleIS } from '../libs/googleIS';
+import {GoogleIS} from '../libs/googleIS';
 import eventList from '../libs/events';
-import { StackdriverReporter } from '../libs/stackdriverReporter';
-import { History } from 'history';
+import {StackdriverReporter} from '../libs/stackdriverReporter';
+import {DuosUser} from '../types/model';
+import {DuosUserResponse} from '../types/responseTypes';
+import {History} from 'history';
 import CSS from 'csstype';
 
 interface SignInButtonProps {
@@ -41,13 +43,15 @@ interface GoogleSuccessPayload {
 }
 
 declare global {
-  interface Window { google: any; }
+  interface Window {
+    google: any;
+  }
 }
 
 export const SignInButton = (props: SignInButtonProps) => {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
-  const { onSignIn, history, customStyle } = props;
+  const {onSignIn, history, customStyle} = props;
 
   useEffect(() => {
     // Using `isSubscribed` resolves the
@@ -73,22 +77,28 @@ export const SignInButton = (props: SignInButtonProps) => {
   // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
-    const user = await User.getMe();
+    const user: DuosUserResponse = await User.getMe();
     if (!user.roles) {
       await StackdriverReporter.report('roles not found for user: ' + user.email);
     }
     setUserRoleStatuses(user, Storage);
     await onSignIn();
     const userStatus = await ToS.getStatus();
-    const { tosAccepted } = userStatus;
+    const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
-      await Auth.signOut();
+      // User has authenticated, but has not accepted ToS
+      Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
       } else {
         history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
       }
     } else {
+      // User is authenticated, registered and has accepted ToS.
+      // Log sign-in and redirect to destination.
+      await Metrics.identify(Storage.getAnonymousId());
+      await Metrics.syncProfile();
+      await Metrics.captureEvent(eventList.userSignIn);
       if (isNil(redirectPath)) {
         Navigation.back(user, history);
       } else {
@@ -105,7 +115,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     Storage.setAnonymousId();
 
     try {
-      await attemptSignInCheckToSAndRedirect(redirectTo, shouldRedirect);
+      await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
     } catch (error) {
       await handleRegistration(redirectTo, shouldRedirect);
     }
@@ -118,13 +128,6 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const shouldRedirectTo = (page: string): boolean => page !== '/' && page !== '/home';
 
-  const attemptSignInCheckToSAndRedirect = async (redirectTo:string, shouldRedirect: boolean) => {
-    await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
-    Metrics.identify(Storage.getAnonymousId());
-    Metrics.syncProfile();
-    Metrics.captureEvent(eventList.userSignIn);
-  };
-
   const handleRegistration = async (redirectTo: string, shouldRedirect: boolean) => {
     try {
       await registerAndRedirectNewUser(redirectTo, shouldRedirect);
@@ -134,12 +137,12 @@ export const SignInButton = (props: SignInButtonProps) => {
   };
 
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
-    const registeredUser = await User.registerUser();
+    const registeredUser: DuosUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
     await onSignIn();
-    Metrics.identify(Storage.getAnonymousId());
-    Metrics.syncProfile();
-    Metrics.captureEvent(eventList.userRegister);
+    await Metrics.identify(Storage.getAnonymousId());
+    await Metrics.syncProfile();
+    await Metrics.captureEvent(eventList.userRegister);
     history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
@@ -148,13 +151,13 @@ export const SignInButton = (props: SignInButtonProps) => {
 
     switch (status) {
       case 400:
-        setErrorDisplay({ show: true, title: 'Error', msg: JSON.stringify(error) });
+        setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
         break;
       case 409:
         await handleConflictError(redirectTo, shouldRedirect);
         break;
       default:
-        setErrorDisplay({ show: true, title: 'Error', msg: 'Unexpected error, please try again' });
+        setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
         break;
     }
   };
@@ -173,38 +176,38 @@ export const SignInButton = (props: SignInButtonProps) => {
       setErrorDisplay(
         <span>
           Sign-in cancelled ...
-          <img height="20px" src={loadingIndicator} />
+          <img height="20px" src={loadingIndicator} alt={'Loading'}/>
         </span>
       );
       setTimeout(() => {
         setErrorDisplay({});
       }, 2000);
     } else {
-      setErrorDisplay({ title: response.error, description: response.details });
+      setErrorDisplay({title: response.error, description: response.details});
     }
   };
 
   const spinnerOrSignInButton = () => {
     return (clientId === ''
       ? Spinner()
-      : (<div style={{ display: 'flex' }}>
+      : (<div style={{display: 'flex'}}>
         {isNil(customStyle)
           ? GoogleIS.signInButton(clientId, onSuccess, onFailure)
           : <button className={'btn-primary'} style={customStyle} onClick={() => {
             GoogleIS.requestAccessToken(clientId, onSuccess, onFailure);
           }}>
-          Submit a Data Access Request
+                Submit a Data Access Request
           </button>}
         {isNil(customStyle) &&
-        <a
-          className='navbar-duos-icon-help'
-          style={{ color: 'white', height: 16, width: 16, marginLeft: 5 }}
-          href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
-          data-for="tip_google-help"
-          data-tip="No Google help? Click here!"
-        />
+            <a
+              className='navbar-duos-icon-help'
+              style={{color: 'white', height: 16, width: 16, marginLeft: 5}}
+              href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
+              data-for="tip_google-help"
+              data-tip="No Google help? Click here!"
+            />
         }
-        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper" />
+        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper"/>
       </div>));
   };
 
