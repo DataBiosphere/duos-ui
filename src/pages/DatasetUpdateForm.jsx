@@ -6,10 +6,12 @@ import lockIcon from '../images/lock-icon.png';
 import { Styles } from '../libs/theme';
 import DatasetUpdate from '../components/data_update/DatasetUpdate';
 import { DataSet } from '../libs/ajax/DataSet';
+import {useNavigate, useParams} from 'react-router-dom';
 
-export const DatasetUpdateForm = (props) => {
-  const { navigate } = props;
-  const { datasetId } = props.match.params;
+export const DatasetUpdateForm = () => {
+  const navigate = useNavigate();
+  const params = useParams();
+  const datasetId = params.datasetId;
 
   const [failedInit, setFailedInit] = useState(true);
   const [dataset, setDataset] = useState({});

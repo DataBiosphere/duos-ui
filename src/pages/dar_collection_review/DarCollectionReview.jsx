@@ -13,6 +13,7 @@ import { Storage } from '../../libs/storage';
 import MultiDatasetVotingTab from './MultiDatasetVotingTab';
 import { Collections } from '../../libs/ajax/Collections';
 import DataAccessRequestApplication from '../dar_application/DataAccessRequestApplication';
+import {useParams} from 'react-router-dom';
 
 const tabContainerColor = 'rgb(115,154,164)';
 
@@ -79,7 +80,8 @@ const tabsForUser = (user, buckets, adminPage = false) => {
 };
 
 export default function DarCollectionReview(props) {
-  const collectionId = props.match.params.collectionId;
+  const params = useParams();
+  const collectionId = params.collectionId;
   const [collection, setCollection] = useState({});
   const [darInfo, setDarInfo] = useState({});
   const [referenceIdForDocuments, setReferenceIdForDocuments] = useState();

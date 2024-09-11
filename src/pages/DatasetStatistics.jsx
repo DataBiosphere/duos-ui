@@ -9,13 +9,14 @@ import { find } from 'lodash/fp';
 import { ReadMore } from '../components/ReadMore';
 import { formatDate } from '../libs/utils';
 import { Button } from '@mui/material';
-import {useNavigate} from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 
-export default function DatasetStatistics(props) {
+export default function DatasetStatistics() {
   const navigate = useNavigate();
-  const { match: { params: { datasetIdentifier }} } = props;
+  const params = useParams();
+  const datasetIdentifier = params.datasetIdentifier;
   const [datasetId, setDatasetId] = useState();
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
@@ -110,7 +111,6 @@ export default function DatasetStatistics(props) {
           {dars?.map((dar) => (
             <div style={Styles.READ_MORE} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
-                props={props}
                 readLessText="Show less"
                 readMoreText="Show More"
                 readStyle={{ fontWeight: 500, margin: '20px', height: 0 }}

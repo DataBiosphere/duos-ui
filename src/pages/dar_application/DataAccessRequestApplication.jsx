@@ -33,6 +33,7 @@ import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
+import {useParams} from 'react-router-dom';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -135,6 +136,7 @@ const DataAccessRequestApplication = (props) => {
 
   const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
 
+  const params = useParams();
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({ key, value }) => {
     setFormData(
@@ -240,7 +242,7 @@ const DataAccessRequestApplication = (props) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { collectionId } = props.match.params;
+        const { collectionId } = params;
         if (props.readOnlyMode) {
           const collection = await Collections.getCollectionById(collectionId);
           setResearcher(collection.createUser);
@@ -256,10 +258,10 @@ const DataAccessRequestApplication = (props) => {
       }
     };
     fetchData();
-  }, [props.match.params, props.readOnlyMode]);
+  }, [props.readOnlyMode]);
 
   const init = useCallback(async () => {
-    const { dataRequestId, collectionId } = props.match.params;
+    const { dataRequestId, collectionId } = params;
     let formData = {};
     setIsLoading(false);
 
@@ -289,7 +291,7 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
-  }, [onScroll, props.match.params, researcher]);
+  }, [onScroll, params, researcher]);
 
   useEffect(() => {
     init();
@@ -453,7 +455,7 @@ const DataAccessRequestApplication = (props) => {
     }
 
     // Make sure we navigate back to the current DAR after saving.
-    const { dataRequestId } = props.match.params;
+    const { dataRequestId } = params;
     try {
       let referenceId = formattedFormData.referenceId;
       let darPartialResponse = await updateDraftResponse(formattedFormData, referenceId);
@@ -481,7 +483,7 @@ const DataAccessRequestApplication = (props) => {
     props.navigate.goBack();
   };
 
-  const { dataRequestId } = props.match.params;
+  const { dataRequestId } = params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
   return (
