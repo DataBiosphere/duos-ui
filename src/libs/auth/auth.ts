@@ -9,7 +9,6 @@ import { UserManager } from 'oidc-client-ts';
 export const Auth = {
   initialize: async (): Promise<void> => {
     await OidcBroker.initialize();
-    const oidcUser: OidcUser | null = await OidcBroker.getUser();
     const um: UserManager = OidcBroker.getUserManager();
     // UserManager events.
     // For details of each event, see https://authts.github.io/oidc-client-ts/classes/UserManagerEvents.html
@@ -24,11 +23,6 @@ export const Auth = {
       Auth.signOut();
       //TODO: DUOS-3082 Add an alert that session has expired
     });
-    if (oidcUser !== null) {
-      Storage.setUserIsLogged(true);
-    } else {
-      await Auth.signOut();
-    }
   },
   signOut: async () => {
     Storage.clearStorage();
