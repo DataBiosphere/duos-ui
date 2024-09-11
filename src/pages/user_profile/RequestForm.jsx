@@ -4,9 +4,11 @@ import { Support } from '../../libs/ajax/Support';
 import { Notifications } from '../../libs/utils';
 import { isNil } from 'lodash';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
+import {useNavigate} from 'react-router-dom';
 
 export default function SupportRequestsPage(props) {
 
+  const navigate = useNavigate();
   const profile = props.location.state?.data || undefined;
   const headerStyle = {
     fontWeight: 'bold',
@@ -44,7 +46,7 @@ export default function SupportRequestsPage(props) {
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
-    await props.navigate('/profile');
+    await navigate('/profile');
   };
 
   const handleSupportRequestsChange = ({ key, value }) => {

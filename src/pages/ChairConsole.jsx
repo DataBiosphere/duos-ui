@@ -9,15 +9,16 @@ import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
 import { cancelCollectionFn, openCollectionFn, updateCollectionFn } from '../utils/DarCollectionUtils';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import {useNavigate} from 'react-router-dom';
 
-export default function ChairConsole(props) {
+export default function ChairConsole() {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [relevantDatasets, setRelevantDatasets] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
-  const { navigate } = props;
+  const navigate = useNavigate();
 
   const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
     searchTerms,

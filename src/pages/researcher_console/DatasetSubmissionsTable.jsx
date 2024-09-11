@@ -5,12 +5,14 @@ import loadingIndicator from '../../images/loading-indicator.svg';
 import SortableTable from '../../components/sortable_table/SortableTable';
 import { concat, join, isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { ConfirmationDialog } from '../..//components/modals/ConfirmationDialog';
 
 
 export default function DatasetSubmissionsTable(props) {
+
+  const navigate = useNavigate();
 
   const spinner = <div style={{textAlign: 'center', height: '44', width: '180'}}>
     <img src={loadingIndicator} alt={'Loading'}/>
@@ -91,7 +93,7 @@ export default function DatasetSubmissionsTable(props) {
         Notifications.showSuccess({
           text: `Removed dataset '${termName}' successfully.`,
         });
-        props.navigate('/datalibrary');});
+        navigate('/datalibrary');});
     } catch (error) {
       Notifications.showError({
         text: `Error removing ${termName} as a dataset`,

@@ -16,12 +16,10 @@ import NihAnvilUse from './NihAnvilUse';
 import {uniqueValidator} from '../../components/forms/formValidation';
 import {set} from 'lodash';
 import UsgOmbText from '../../components/UsgOmbText';
+import {useNavigate} from 'react-router-dom';
 
-export const DataSubmissionForm = (props) => {
-  const {
-    navigate
-  } = props;
-
+export const DataSubmissionForm = () => {
+  const navigate = useNavigate();
   const [registrationSchema, setRegistrationSchema] = useState({});
   const [institutions, setInstitutions] = useState([]);
   const [studyNames, setStudyNames] = useState([]);

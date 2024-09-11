@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAC } from '../../libs/ajax/DAC';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {isNil} from 'lodash/fp';
 import Button from '@mui/material/Button';
 import ReactTooltip from 'react-tooltip';
@@ -13,6 +13,7 @@ export default function DACDatasetApprovalStatus(props) {
 
   const [dataset, setDataset] = useState(props.dataset);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleClick = () => {
     setOpen(true);
@@ -29,7 +30,7 @@ export default function DACDatasetApprovalStatus(props) {
         Notifications.showSuccess({
           text: `Deleted dataset '${name}' successfully.`,
         });
-        props.navigate('/chair_console');
+        navigate('/chair_console');
       });
     } catch {
       Notifications.showError({text: `Error deleting dataset '${name}'`});

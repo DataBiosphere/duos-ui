@@ -7,6 +7,7 @@ import cellData from './DACDatasetTableCellData';
 import {isNil} from 'lodash/fp';
 import {goToPage as updatePage, recalculateVisibleTable} from '../../libs/utils';
 import {useCallback} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 export const styles = {
   baseStyle: {
@@ -123,7 +124,9 @@ export const DACDatasetsTable = function DACDatasetTable(props) {
   const [pageCount, setPageCount] = useState(1);
   const [sort, setSort] = useState(getInitialSort(props.columns));
   const [tableSize, setTableSize] = useState(10);
-  const { datasets, columns, isLoading, consoleType, navigate } = props;
+  const { datasets, columns, isLoading, consoleType } = props;
+  const navigate = useNavigate();
+
 
   const changeTableSize = useCallback((value) => {
     if (value > 0 && !isNaN(parseInt(value))) {

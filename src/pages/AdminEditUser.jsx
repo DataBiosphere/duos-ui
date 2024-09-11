@@ -8,6 +8,7 @@ import {ResearcherReview} from '../components/ResearcherReview';
 import editUserIcon from '../images/icon_edit_user.png';
 import {PageHeading} from '../components/PageHeading';
 import {SearchSelect} from '../components/SearchSelect';
+import {useNavigate} from 'react-router-dom';
 
 const adminRole = {'roleId': 4, 'name': USER_ROLES.admin};
 const researcherRole = {'roleId': 5, 'name': USER_ROLES.researcher};
@@ -15,6 +16,7 @@ const signingOfficialRole = {'roleId': 7, 'name': USER_ROLES.signingOfficial};
 
 
 export const AdminEditUser = (props) => {
+  const navigate = useNavigate();
   const [state, setState] = useState({
     user: {},
     displayName: '',
@@ -89,7 +91,7 @@ export const AdminEditUser = (props) => {
     try {
       await User.update(user, userId);
       await updateRolesIfDifferent(userId, state.updatedRoles);
-      props.navigate('/admin_manage_users');
+      navigate('/admin_manage_users');
     } catch (error) {
       Notifications.showError({ text: 'Error: Failed to update user' });
     }
@@ -307,7 +309,7 @@ export const AdminEditUser = (props) => {
                 <div style={{ marginLeft: '40px' }}>
                   <button
                     id='btn_save'
-                    onClick={() => props.navigate('/admin_manage_users')}
+                    onClick={() => navigate('/admin_manage_users')}
                     className='f-left btn-primary btn-back'
                   >
                    Back

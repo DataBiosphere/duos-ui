@@ -5,10 +5,11 @@ import {TosService} from '../libs/tosService';
 import {Storage} from '../libs/storage';
 import SimpleButton from '../components/SimpleButton';
 import {Theme} from '../libs/theme';
+import {useNavigate} from 'react-router-dom';
 
-export default function TermsOfServiceAcceptance(props) {
+export default function TermsOfServiceAcceptance() {
   const [tosText, setTosText] = useState('');
-  const {navigate} = props;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const init = async () => {

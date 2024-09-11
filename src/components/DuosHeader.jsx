@@ -141,7 +141,6 @@ export const headerTabsConfig = [
 const NavigationTabsComponent = (props) => {
   const {
     onSignIn,
-    navigate,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
@@ -150,6 +149,7 @@ const NavigationTabsComponent = (props) => {
     tabs, initialTab, initialSubTab,
     onSubtabChange, showProfileLinks, profileState
   } = props;
+  const navigate = useNavigate();
   const [selectedMenuTab, setSelectedMenuTab] = useState(false);
   const [selectedSubTab, setSelectedSubTab] = useState(false);
 
@@ -231,7 +231,6 @@ const NavigationTabsComponent = (props) => {
                     customStyle={undefined}
                     props={props}
                     onSignIn={onSignIn}
-                    navigate={navigate}
                   />
                 </li>}
               </ul>
@@ -252,7 +251,6 @@ const NavigationTabsComponent = (props) => {
               customStyle={undefined}
               props={props}
               onSignIn={onSignIn}
-              navigate={navigate}
             />
           </div>
         }
@@ -340,7 +338,8 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const {location, classes, onSignIn, navigate} = props;
+  const {location, classes, onSignIn} = props;
+  const navigate = useNavigate();
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -509,7 +508,6 @@ const DuosHeader = (props) => {
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             onSignIn={onSignIn}
-            navigate={navigate}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -558,7 +556,6 @@ const DuosHeader = (props) => {
           >
             <NavigationTabsComponent
               onSignIn={onSignIn}
-              navigate={navigate}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}

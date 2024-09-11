@@ -4,10 +4,11 @@ import {Auth} from '../libs/auth/auth';
 import {Storage} from '../libs/storage';
 import {TosService} from '../libs/tosService';
 import SimpleButton from '../components/SimpleButton';
+import {useNavigate} from 'react-router-dom';
 
-export default function TermsOfService(props) {
+export default function TermsOfService() {
   const [tosText, setTosText] = useState('');
-  const {navigate} = props;
+  const navigate = useNavigate();
   const isLogged = Storage.userIsLogged();
 
   useEffect(() => {

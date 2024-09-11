@@ -8,15 +8,16 @@ import { Styles } from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 import { DarCollectionTable, DarCollectionTableColumnOptions } from '../components/dar_collection_table/DarCollectionTable';
 import { consoleTypes } from '../components/dar_collection_table/DarCollectionTableCellData';
+import {useNavigate} from 'react-router-dom';
 
-export default function MemberConsole(props) {
+export default function MemberConsole() {
   const [collections, setCollections] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [relevantDatasets, setRelevantDatasets] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
-  const { navigate } = props;
+  const navigate = useNavigate();
 
   const handleSearchChange = useCallback(
     (searchTerms) =>

@@ -15,12 +15,11 @@ import { setUserRoleStatuses } from '../libs/utils';
 import {DuosUserResponse} from '../types/responseTypes';
 import { Spinner } from './Spinner';
 import CSS from 'csstype';
-import {NavigateFunction} from 'react-router/dist/lib/hooks';
 import ReactTooltip from 'react-tooltip';
+import {useNavigate} from 'react-router-dom';
 
 interface SignInButtonProps {
   customStyle: CSS.Properties | undefined;
-  navigate: NavigateFunction;
   onSignIn: () => Promise<void>;
 }
 
@@ -48,7 +47,8 @@ declare global {
 export const SignInButton = (props: SignInButtonProps) => {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
-  const { onSignIn, navigate, customStyle } = props;
+  const { onSignIn, customStyle } = props;
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Using `isSubscribed` resolves the

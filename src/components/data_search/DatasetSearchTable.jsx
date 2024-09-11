@@ -17,6 +17,7 @@ import { Styles } from '../../libs/theme';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
+import {useNavigate} from 'react-router-dom';
 
 
 const studyTableHeader = [
@@ -42,7 +43,7 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, navigate, icon, title } = props;
+  const { datasets, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
@@ -53,6 +54,7 @@ export const DatasetSearchTable = (props) => {
   const [dataUse, setDataUse] = useState();
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
+  const navigate = useNavigate();
 
   const assembleFullQuery = (searchTerm, filters) => {
     const queryChunks = [

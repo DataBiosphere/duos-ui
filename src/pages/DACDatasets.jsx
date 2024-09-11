@@ -10,10 +10,11 @@ import {getSearchFilterFunctions, Notifications, searchOnFilteredList} from '../
 import {consoleTypes} from '../components/dac_dataset_table/DACDatasetTableCellData';
 import style from './DACDatasets.module.css';
 import {Button} from '@mui/material';
+import {useNavigate} from 'react-router-dom';
 
-export default function DACDatasets(props) {
+export default function DACDatasets() {
 
-  const {navigate} = props;
+  const navigate = useNavigate();
   const [datasets, setDatasets] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

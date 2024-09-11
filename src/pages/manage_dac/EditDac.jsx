@@ -6,7 +6,7 @@ import { DAA } from '../../libs/ajax/DAA';
 import { Models } from '../../libs/models';
 import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { DacUsers } from './DacUsers';
 import { Notifications } from '../../libs/utils';
 import editDACIcon from '../../images/dac_icon.svg';
@@ -47,6 +47,7 @@ export default function EditDac(props) {
   const [broadDaa, setBroadDaa] = useState(null);
   const [matchingDaas, setMatchingDaas] = useState([]);
   const dacText = dacId === undefined ? 'Create a new Data Access Committee in the system' : 'Manage My Data Access Committee';
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,7 +129,7 @@ export default function EditDac(props) {
   };
 
   const closeHandler = () => {
-    props.navigate('/manage_dac');
+    navigate('/manage_dac');
   };
 
   const handleErrors = (message) => {

@@ -15,10 +15,11 @@ import { User } from '../libs/ajax/User';
 import { DataSet } from '../libs/ajax/DataSet';
 import {Storage} from '../libs/storage';
 import { set } from 'lodash';
+import {useNavigate} from 'react-router-dom';
 
 
 export const StudyUpdateForm = (props) => {
-  const { navigate } = props;
+  const navigate = useNavigate();
   const { studyId } = props.match.params;
 
   const [formData, setFormData] = useState({properties:{}});

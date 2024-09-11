@@ -113,9 +113,9 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   };
 }
 
-export function statusCellData({dataset, label = 'statusCellData', navigate}) {
+export function statusCellData({dataset, label = 'statusCellData'}) {
   return {
-    data: <DACDatasetApprovalStatus dataset={dataset} navigate={navigate}/>,
+    data: <DACDatasetApprovalStatus dataset={dataset}/>,
     id: `status-cell-data-${dataset.datasetId}`,
     cellStyle: {width: styles.cellWidths.status},
     label

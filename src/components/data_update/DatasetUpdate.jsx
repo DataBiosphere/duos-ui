@@ -6,11 +6,12 @@ import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
 import { DAC } from '../../libs/ajax/DAC';
 import { Notifications } from '../../libs/utils';
+import {useNavigate} from 'react-router-dom';
 
 // TODO: Deprecated - remove this component when all datasets have been converted to studies
 export const DatasetUpdate = (props) => {
-  const { dataset, navigate } = props;
-
+  const { dataset } = props;
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} });
 
   const searchOntologies = async (query, callback) => {
