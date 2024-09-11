@@ -46,8 +46,6 @@ import EditDac from './pages/manage_dac/EditDac';
 import {Storage} from './libs/storage';
 import * as Utils from './libs/utils';
 
-// TODO: Props are different now ... rewrite according to:
-// https://reactrouter.com/en/main/start/faq#why-does-route-have-an-element-prop-instead-of-render-or-component
 const DuosRoutes = () => (
   <Routes>
     <Route path="/" element={<Home/>}/>
