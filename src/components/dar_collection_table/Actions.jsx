@@ -3,7 +3,7 @@ import TableIconButton from '../TableIconButton';
 import { Styles, Theme } from '../../libs/theme';
 import { Block, Delete } from '@mui/icons-material';
 import SimpleButton from '../SimpleButton';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Notifications } from '../../libs/utils';
 import { includes, toLower } from 'lodash/fp';
 
@@ -25,9 +25,9 @@ const hoverPrimaryButtonStyle = {
 };
 
 //redirect function on researcher collections to view the collection's initial DAR application
-const redirectToDARApplication = (darCollectionId, history) => {
+const redirectToDARApplication = (darCollectionId, navigate) => {
   try {
-    history.push(`/dar_application_review/${darCollectionId}`);
+    navigate(`/dar_application_review/${darCollectionId}`);
   } catch (error) {
     Notifications.showError({
       text: 'Error: Cannot view target Data Access Request'
@@ -36,8 +36,8 @@ const redirectToDARApplication = (darCollectionId, history) => {
 };
 
 //redirect function on DAR draft to resume DAR application
-const resumeDARApplication = (referenceId, history) => {
-  history.push(`/dar_application/${referenceId}`);
+const resumeDARApplication = (referenceId, navigate) => {
+  navigate(`/dar_application/${referenceId}`);
 };
 
 export default function Actions(props) {
@@ -45,7 +45,7 @@ export default function Actions(props) {
   const collectionId = collection.darCollectionId;
   const uniqueId = (collectionId ? collectionId : collection.referenceIds[0]);
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const openButtonAttributes = {
     keyProp: `${consoleType}-open-${uniqueId}`,
@@ -115,7 +115,7 @@ export default function Actions(props) {
   const reviewButtonAttributes = {
     keyProp: `${consoleType}-review-${uniqueId}`,
     label: 'Review',
-    onClick: () => redirectToDARApplication(collectionId, history),
+    onClick: () => redirectToDARApplication(collectionId, navigate),
     baseColor: 'white',
     fontColor: Theme.palette.secondary,
     hoverStyle: {
@@ -144,7 +144,7 @@ export default function Actions(props) {
 
   const resumeButtonAttributes = {
     keyProp: `${consoleType}-resume-${uniqueId}`,
-    onClick: () => resumeDARApplication(collection.referenceIds[0], history),
+    onClick: () => resumeDARApplication(collection.referenceIds[0], navigate),
     label: 'Resume',
     baseColor: Theme.palette.secondary,
     fontColor: 'white',

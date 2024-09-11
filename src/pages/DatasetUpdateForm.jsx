@@ -8,7 +8,7 @@ import DatasetUpdate from '../components/data_update/DatasetUpdate';
 import { DataSet } from '../libs/ajax/DataSet';
 
 export const DatasetUpdateForm = (props) => {
-  const { history } = props;
+  const { navigate } = props;
   const { datasetId } = props.match.params;
 
   const [failedInit, setFailedInit] = useState(true);
@@ -44,7 +44,7 @@ export const DatasetUpdateForm = (props) => {
     </div>
 
     <form style={{ margin: 'auto', maxWidth: 800 }}>
-      <DatasetUpdate dataset={dataset} history={history} />
+      <DatasetUpdate dataset={dataset} navigate={navigate} />
     </form>
   </div>;
 };

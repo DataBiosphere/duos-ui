@@ -44,7 +44,7 @@ export default function SupportRequestsPage(props) {
 
   const goToPrevPage = async (event) => {
     event.preventDefault();
-    await props.history.push('/profile');
+    await props.navigate('/profile');
   };
 
   const handleSupportRequestsChange = ({ key, value }) => {

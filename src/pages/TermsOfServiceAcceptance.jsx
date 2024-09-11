@@ -8,7 +8,7 @@ import {Theme} from '../libs/theme';
 
 export default function TermsOfServiceAcceptance(props) {
   const [tosText, setTosText] = useState('');
-  const {history} = props;
+  const {navigate} = props;
 
   useEffect(() => {
     const init = async () => {
@@ -27,8 +27,8 @@ export default function TermsOfServiceAcceptance(props) {
     const queryParams = new URLSearchParams(window.location.search);
     const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/profile';
 
-    history.push(redirect);
-  }, [history]);
+    navigate(redirect);
+  }, [navigate]);
 
   const acceptButton = <SimpleButton
     keyProp="tos-accept"
@@ -46,7 +46,7 @@ export default function TermsOfServiceAcceptance(props) {
 
   const signOut = async () => {
     await Auth.signOut();
-    history.push('/');
+    navigate('/');
   };
 
   const rejectButton = <SimpleButton

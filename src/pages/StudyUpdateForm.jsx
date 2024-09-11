@@ -18,7 +18,7 @@ import { set } from 'lodash';
 
 
 export const StudyUpdateForm = (props) => {
-  const { history } = props;
+  const { navigate } = props;
   const { studyId } = props.match.params;
 
   const [formData, setFormData] = useState({properties:{}});
@@ -207,7 +207,7 @@ export const StudyUpdateForm = (props) => {
     const multiPartFormData = createMultiPartFormData(update);
 
     DataSet.updateStudy(studyId, multiPartFormData).then(() => {
-      history.push('/datalibrary');
+      navigate('/datalibrary');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });
     }, (e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });

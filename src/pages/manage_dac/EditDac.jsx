@@ -128,7 +128,7 @@ export default function EditDac(props) {
   };
 
   const closeHandler = () => {
-    props.history.push('/manage_dac');
+    props.navigate('/manage_dac');
   };
 
   const handleErrors = (message) => {

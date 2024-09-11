@@ -116,9 +116,9 @@ export default function DarCollectionReview(props) {
       Notifications.showError({
         text: 'Error initializing Data Access Request collection page. You have been redirected to your console',
       });
-      Navigation.console(user, props.history);
+      Navigation.console(user, props.navigate);
     }
-  }, [adminPage, props.history, collectionId]);
+  }, [adminPage, props.navigate, collectionId]);
 
   //Remember, votes are contained within buckets, so updating final votes will update the bucket
   //define updateFinalVote as a callback function so that its function definition can be updated alongside dataUseBucket

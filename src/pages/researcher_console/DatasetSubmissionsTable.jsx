@@ -91,7 +91,7 @@ export default function DatasetSubmissionsTable(props) {
         Notifications.showSuccess({
           text: `Removed dataset '${termName}' successfully.`,
         });
-        props.history.push('/datalibrary');});
+        props.navigate('/datalibrary');});
     } catch (error) {
       Notifications.showError({
         text: `Error removing ${termName} as a dataset`,

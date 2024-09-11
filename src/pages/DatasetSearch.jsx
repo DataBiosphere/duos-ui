@@ -20,6 +20,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { toLower } from 'lodash';
 import {Metrics} from '../libs/ajax/Metrics';
 import eventList from '../libs/events';
+import {useParams} from 'react-router-dom';
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -84,7 +85,8 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 };
 
 export const DatasetSearch = (props) => {
-  const { match: { params: { query } } } = props;
+  const params = useParams();
+  const { query } = params;
   const [datasets, setDatasets] = useState([]);
   const [queryState, setQueryState] = useState(query);
   const [loading, setLoading] = useState(true);
@@ -262,7 +264,7 @@ export const DatasetSearch = (props) => {
       if (loading || hasChangedPage) {
         if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
-          props.history.push('/profile');
+          props.navigate('/profile');
           return;
         }
         try {
@@ -277,7 +279,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage]);
+  }, [loading, isInstitutionSet, fullQuery, props.navigate, hasChangedPage]);
 
   return (
     loading ?

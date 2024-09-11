@@ -13,7 +13,7 @@ import { Button } from '@mui/material';
 const LINE = <div style={{ borderTop: '1px solid #BABEC1', height: 0 }} />;
 
 export default function DatasetStatistics(props) {
-  const { history, match: { params: { datasetIdentifier }} } = props;
+  const { navigate, match: { params: { datasetIdentifier }} } = props;
   const [datasetId, setDatasetId] = useState();
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
@@ -21,7 +21,7 @@ export default function DatasetStatistics(props) {
 
   const applyForAccess = async () => {
     const darDraft = await DAR.postDarDraft({ datasetId: [datasetId]  });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    navigate(`/dar_application/${darDraft.referenceId}`);
   };
 
   useEffect(() => {

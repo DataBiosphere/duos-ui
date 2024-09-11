@@ -9,7 +9,7 @@ import { Notifications } from '../../libs/utils';
 
 // TODO: Deprecated - remove this component when all datasets have been converted to studies
 export const DatasetUpdate = (props) => {
-  const { dataset, history } = props;
+  const { dataset, navigate } = props;
 
   const [formData, setFormData] = useState({ dac: {}, dataUse: {}, properties: {} });
 
@@ -101,7 +101,7 @@ export const DatasetUpdate = (props) => {
     multiPartFormData.append('consentGroups', consentGroups);
 
     DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).then(() => {
-      history.push('/datalibrary');
+      navigate('/datalibrary');
       Notifications.showSuccess({ text: 'Update submitted successfully!' });
     }, () => {
       Notifications.showError({ text: 'Some errors occurred, the dataset was not updated.' });

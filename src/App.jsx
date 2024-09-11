@@ -5,18 +5,18 @@ import './App.css';
 import {Config} from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
-import {useHistory, useLocation} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import loadingImage from './images/loading-indicator.svg';
 
 import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
-import Routes from './Routes';
+import DuosRoutes from './DuosRoutes';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [env, setEnv] = useState('');
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
 
   const trackPageView = (location) => {
@@ -37,18 +37,19 @@ function App() {
   });
 
   useEffect(() => {
-    const initializeReactGA = async (history) => {
+    const initializeReactGA = async () => {
       const gaId = await Config.getGAId();
       ReactGA.initialize(gaId, {
         titleCase: false
       });
       //call trackPageView to register initial page load
       trackPageView(location);
+      // TODO: Figure out what to do here, we don't have a listen function on navigate.
       //pass trackPageView as callback function for url change listener
-      history.listen(trackPageView);
+      // history.listen(trackPageView);
     };
-    initializeReactGA(history);
-  }, [history, location]);
+    initializeReactGA();
+  }, [location]);
 
   useEffect(() => {
     const stackdriverStart = async () => {
@@ -74,9 +75,9 @@ function App() {
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignIn={signIn} />
+          <DuosHeader onSignIn={signIn} navigate={navigate} location={location} />
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes onSignIn={signIn} isLogged={isLoggedIn} env={env} />
+          <DuosRoutes onSignIn={signIn} isLogged={isLoggedIn} env={env} />
         </div>
       </div>
       <DuosFooter />

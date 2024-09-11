@@ -89,7 +89,7 @@ export const AdminEditUser = (props) => {
     try {
       await User.update(user, userId);
       await updateRolesIfDifferent(userId, state.updatedRoles);
-      props.history.push('/admin_manage_users');
+      props.navigate('/admin_manage_users');
     } catch (error) {
       Notifications.showError({ text: 'Error: Failed to update user' });
     }
@@ -307,7 +307,7 @@ export const AdminEditUser = (props) => {
                 <div style={{ marginLeft: '40px' }}>
                   <button
                     id='btn_save'
-                    onClick={() => props.history.push('/admin_manage_users')}
+                    onClick={() => props.navigate('/admin_manage_users')}
                     className='f-left btn-primary btn-back'
                   >
                    Back

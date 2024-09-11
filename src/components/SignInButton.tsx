@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { isEmpty, isNil } from 'lodash/fp';
 import { Alert } from './Alert';
+import loadingIndicator from '../images/loading-indicator.svg';
 import {Auth} from '../libs/auth/auth';
 import { ToS } from '../libs/ajax/ToS';
 import { User } from '../libs/ajax/User';
 import { Metrics } from '../libs/ajax/Metrics';
 import { Config } from '../libs/config';
-import { Storage } from '../libs/storage';
-import { Navigation, setUserRoleStatuses } from '../libs/utils';
-import loadingIndicator from '../images/loading-indicator.svg';
-import { Spinner } from './Spinner';
-import ReactTooltip from 'react-tooltip';
-import { GoogleIS } from '../libs/googleIS';
 import eventList from '../libs/events';
+import { GoogleIS } from '../libs/googleIS';
 import { StackdriverReporter } from '../libs/stackdriverReporter';
-import { History } from 'history';
+import { Storage } from '../libs/storage';
+import { setUserRoleStatuses } from '../libs/utils';
+import {DuosUserResponse} from '../types/responseTypes';
+import { Spinner } from './Spinner';
 import CSS from 'csstype';
+import {NavigateFunction} from 'react-router/dist/lib/hooks';
+import ReactTooltip from 'react-tooltip';
 
 interface SignInButtonProps {
   customStyle: CSS.Properties | undefined;
-  history: History;
+  navigate: NavigateFunction;
   onSignIn: () => Promise<void>;
 }
 
@@ -47,7 +48,7 @@ declare global {
 export const SignInButton = (props: SignInButtonProps) => {
   const [clientId, setClientId] = useState('');
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
-  const { onSignIn, history, customStyle } = props;
+  const { onSignIn, navigate, customStyle } = props;
 
   useEffect(() => {
     // Using `isSubscribed` resolves the
@@ -73,7 +74,7 @@ export const SignInButton = (props: SignInButtonProps) => {
   // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
-    const user = await User.getMe();
+    const user: DuosUserResponse = await User.getMe();
     if (!user.roles) {
       await StackdriverReporter.report('roles not found for user: ' + user.email);
     }
@@ -84,15 +85,15 @@ export const SignInButton = (props: SignInButtonProps) => {
     if (!isEmpty(userStatus) && !tosAccepted) {
       await Auth.signOut();
       if (isNil(redirectPath)) {
-        history.push(`/tos_acceptance`);
+        navigate('/tos_acceptance');
       } else {
-        history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
+        navigate(`/tos_acceptance?redirectTo=${redirectPath}`);
       }
     } else {
       if (isNil(redirectPath)) {
-        Navigation.back(user, history);
+        navigate('/');
       } else {
-        history.push(redirectPath);
+        navigate(redirectPath);
       }
     }
   };
@@ -140,7 +141,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     Metrics.identify(Storage.getAnonymousId());
     Metrics.syncProfile();
     Metrics.captureEvent(eventList.userRegister);
-    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
+    navigate(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
   const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {

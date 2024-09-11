@@ -42,7 +42,7 @@ const datasetTableHeader = [
 ];
 
 export const DatasetSearchTable = (props) => {
-  const { datasets, history, icon, title } = props;
+  const { datasets, navigate, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
@@ -233,7 +233,7 @@ export const DatasetSearchTable = (props) => {
   const applyForAccess = async () => {
     const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    navigate(`/dar_application/${darDraft.referenceId}`);
   };
 
   const clearSearchRef = () => {

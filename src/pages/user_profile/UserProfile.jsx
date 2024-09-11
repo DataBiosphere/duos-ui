@@ -15,6 +15,7 @@ import ControlledAccessGrants from './ControlledAccessGrants';
 import ga4ghLogo from '../../images/ga4gh-logo.png';
 import userProfileIcon from '../../images/user-profile.png';
 import {setUserRoleStatuses} from '../../libs/utils';
+import {useNavigate} from 'react-router-dom';
 
 export default function UserProfile(props) {
 
@@ -23,6 +24,7 @@ export default function UserProfile(props) {
   const [institutions, setInstitutions] = useState([]);
   const [name, setName] = useState('');
   const [updatedName, setUpdatedName] = useState('');
+  const navigate = useNavigate();
 
   const [profile, setProfile] = useState({
     profileName: '',
@@ -79,7 +81,7 @@ export default function UserProfile(props) {
   }, []);
 
   const goToRequestRole = () => {
-    props.history.push({
+    navigate({
       pathname: '/request_role',
       state: { data: profile }
     });

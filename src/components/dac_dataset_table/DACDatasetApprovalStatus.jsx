@@ -29,7 +29,7 @@ export default function DACDatasetApprovalStatus(props) {
         Notifications.showSuccess({
           text: `Deleted dataset '${name}' successfully.`,
         });
-        props.history.push('/chair_console');
+        props.navigate('/chair_console');
       });
     } catch {
       Notifications.showError({text: `Error deleting dataset '${name}'`});

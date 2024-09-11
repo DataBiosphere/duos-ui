@@ -413,7 +413,7 @@ const DataAccessRequestApplication = (props) => {
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
-      }, Navigation.console(Storage.getCurrentUser(), props.history).response);
+      }, Navigation.console(Storage.getCurrentUser(), props.navigate).response);
     } catch (error) {
       setShowDialogSubmit(false);
       NotyUtil.showError({
@@ -460,7 +460,7 @@ const DataAccessRequestApplication = (props) => {
       setDatasets(await DataSet.getDatasetsByIds(formData.datasetIds));
       referenceId = darPartialResponse.referenceId;
       if (isNil(dataRequestId)) {
-        props.history.replace('/dar_application/' + referenceId);
+        props.navigate.replace('/dar_application/' + referenceId);
       }
       //execute saveDARDocuments method only if documents are required for the DAR
       //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
@@ -478,7 +478,7 @@ const DataAccessRequestApplication = (props) => {
   };
 
   const back = () => {
-    props.history.goBack();
+    props.navigate.goBack();
   };
 
   const { dataRequestId } = props.match.params;

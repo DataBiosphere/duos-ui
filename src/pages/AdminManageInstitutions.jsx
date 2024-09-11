@@ -114,7 +114,7 @@ export default function AdminManageInstitutions(props) {
       </div>
       {!isLoading && <InstitutionTable
         filteredList={filteredList}
-        history={props.history}
+        navigate={props.navigate}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         tableSize={tableSize}

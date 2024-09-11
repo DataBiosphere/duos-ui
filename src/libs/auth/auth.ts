@@ -31,6 +31,7 @@ export const Auth = {
     }
   },
   signOut: async () => {
+    console.log('Signout called');
     Storage.clearStorage();
     Storage.setUserIsLogged(false);
     await OidcBroker.signOut();

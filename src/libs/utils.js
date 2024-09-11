@@ -198,23 +198,25 @@ export const setUserRoleStatuses = (user, Storage) => {
 };
 
 export const Navigation = {
-  back: async (user, history) => {
+  back: async (user, navigate) => {
+    console.log('Navigation: user', user);
+    console.log('Navigation: navigate', navigate);
     const queryParams = new URLSearchParams(window.location.search);
     let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
-    history.push(page);
+    navigate(page);
   },
-  console: async (user, history) => {
+  console: async (user, navigate) => {
     const queryParams = new URLSearchParams(window.location.search);
     let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
     let page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
-    history.push(page);
+    navigate(page);
   }
 };
 

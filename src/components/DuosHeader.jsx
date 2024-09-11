@@ -4,7 +4,7 @@ import Hidden from '@mui/material/Hidden';
 import {IconButton} from '@mui/material';
 import { withStyles } from 'tss-react/mui';
 import MenuIcon from '@mui/icons-material/Menu';
-import {Link, withRouter} from 'react-router-dom';
+import {Link, useLocation, useNavigate, useParams} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
@@ -141,7 +141,7 @@ export const headerTabsConfig = [
 const NavigationTabsComponent = (props) => {
   const {
     onSignIn,
-    history,
+    navigate,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
@@ -231,7 +231,8 @@ const NavigationTabsComponent = (props) => {
                     customStyle={undefined}
                     props={props}
                     onSignIn={onSignIn}
-                    history={history}/>
+                    navigate={navigate}
+                  />
                 </li>}
               </ul>
             )
@@ -251,7 +252,8 @@ const NavigationTabsComponent = (props) => {
               customStyle={undefined}
               props={props}
               onSignIn={onSignIn}
-              history={history}/>
+              navigate={navigate}
+            />
           </div>
         }
         {isLogged && (
@@ -338,7 +340,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const {location, classes, onSignIn, history} = props;
+  const {location, classes, onSignIn, navigate} = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -366,7 +368,7 @@ const DuosHeader = (props) => {
   };
 
   const signOut = () => {
-    props.history.push('/home');
+    navigate('/home');
     toggleDrawer(false);
     Auth.signOut();
   };
@@ -413,7 +415,7 @@ const DuosHeader = (props) => {
   };
 
   const goToLink = (link) => {
-    props.history.push(link);
+    navigate(link);
     toggleDrawer(false);
   };
 
@@ -507,7 +509,7 @@ const DuosHeader = (props) => {
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
             onSignIn={onSignIn}
-            history={history}
+            navigate={navigate}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -556,7 +558,7 @@ const DuosHeader = (props) => {
           >
             <NavigationTabsComponent
               onSignIn={onSignIn}
-              history={history}
+              navigate={navigate}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}
@@ -585,5 +587,21 @@ const DuosHeader = (props) => {
     </nav>
   );
 };
+
+// See https://reactrouter.com/en/main/start/faq#what-happened-to-withrouter-i-need-it
+function withRouter(Component) {
+  function ComponentWithRouterProp(props) {
+    let location = useLocation();
+    let navigate = useNavigate();
+    let params = useParams();
+    return (
+      <Component
+        {...props}
+        router={{location, navigate, params}}
+      />
+    );
+  }
+  return ComponentWithRouterProp;
+}
 
 export default withRouter(withStyles(DuosHeader, styles));

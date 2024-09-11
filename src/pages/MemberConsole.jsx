@@ -16,7 +16,7 @@ export default function MemberConsole(props) {
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
-  const { history } = props;
+  const { navigate } = props;
 
   const handleSearchChange = useCallback(
     (searchTerms) =>
@@ -44,7 +44,7 @@ export default function MemberConsole(props) {
     init();
   }, []);
 
-  const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
+  const goToVote = useCallback((collectionId) => navigate(`/dar_collection/${collectionId}`), [navigate]);
 
   return (
     <div style={Styles.PAGE}>

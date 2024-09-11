@@ -7,7 +7,7 @@ import SimpleButton from '../components/SimpleButton';
 
 export default function TermsOfService(props) {
   const [tosText, setTosText] = useState('');
-  const {history} = props;
+  const {navigate} = props;
   const isLogged = Storage.userIsLogged();
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function TermsOfService(props) {
 
     // log user out and send them back home.
     await Auth.signOut();
-    history.push('/');
+    navigate('/');
   };
 
   return (

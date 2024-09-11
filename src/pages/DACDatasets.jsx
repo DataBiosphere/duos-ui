@@ -13,7 +13,7 @@ import {Button} from '@mui/material';
 
 export default function DACDatasets(props) {
 
-  const {history} = props;
+  const {navigate} = props;
   const [datasets, setDatasets] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +101,7 @@ export default function DACDatasets(props) {
     <div>
       <Button
         className={style['add-button']}
-        onClick={() => history.push('data_submission_form')}
+        onClick={() => navigate('data_submission_form')}
         variant="outlined">
         <div style={{verticalAlign: 'center', color: '#0948B7'}}>
           <span
@@ -126,7 +126,7 @@ export default function DACDatasets(props) {
       ]}
       isLoading={isLoading}
       consoleType={consoleTypes.CHAIR}
-      history={history}
+      navigate={navigate}
     />
   </div>;
 

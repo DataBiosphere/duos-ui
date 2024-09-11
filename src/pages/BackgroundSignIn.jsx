@@ -3,13 +3,13 @@ import { User } from '../libs/ajax/User';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import { useState, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SpinnerComponent } from '../components/SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
 
 export default function BackgroundSignIn(props) {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   let token = queryParams.get('token');
   let { onSignIn, onError, bearerToken } = props;
@@ -25,7 +25,7 @@ export default function BackgroundSignIn(props) {
     };
 
     const redirect = (user) => {
-      Navigation.back(user, history);
+      Navigation.back(user, navigate);
       if (onSignIn)
         onSignIn();
     };
@@ -81,7 +81,7 @@ export default function BackgroundSignIn(props) {
     if (accessToken)
       performLogin();
     return () => { };
-  }, [accessToken, history, onError, onSignIn]);
+  }, [accessToken, navigate, onError, onSignIn]);
 
   return (
     <div>

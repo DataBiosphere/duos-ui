@@ -17,7 +17,7 @@ export default function ChairConsole(props) {
   const [isLoading, setIsLoading] = useState(true);
   const searchRef = useRef('');
   const filterFn = getSearchFilterFunctions().darCollections;
-  const { history } = props;
+  const { navigate } = props;
 
   const handleSearchChange = useCallback((searchTerms) => searchOnFilteredList(
     searchTerms,
@@ -47,7 +47,7 @@ export default function ChairConsole(props) {
   const updateCollections = updateCollectionFn({collections, filterFn, searchRef, setCollections, setFilteredList});
   const cancelCollection = cancelCollectionFn({updateCollections, role: USER_ROLES.chairperson});
   const openCollection = openCollectionFn({updateCollections, role: USER_ROLES.chairperson});
-  const goToVote = useCallback((collectionId) => history.push(`/dar_collection/${collectionId}`), [history]);
+  const goToVote = useCallback((collectionId) => navigate(`/dar_collection/${collectionId}`), [navigate]);
 
   return (
     <div style={Styles.PAGE}>
