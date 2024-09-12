@@ -46,7 +46,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     const userStatus = await ToS.getStatus();
     const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
-      await Auth.signOut();
+      Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
       } else {
@@ -135,18 +135,18 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const onFailure = (response: any) => {
     Storage.clearStorage();
-    if (response.error === 'popup_closed_by_user') {
+    // Known error case from oidc-client-ts PopupWindow: "new Error("Popup closed by user")"
+    if (response.toString().includes('Popup closed by user')) {
       setErrorDisplay(
-        <span>
-          Sign-in cancelled ...
-          <img height="20px" src={loadingIndicator} alt={'loading'}/>
-        </span>
-      );
+        {title: 'Sign in cancelled', description: 'Sign in cancelled by closing the sign in window'});
       setTimeout(() => {
         setErrorDisplay({});
       }, 2000);
     } else {
-      setErrorDisplay({title: response.error, description: response.details});
+      setErrorDisplay({title: 'Error', description: response.toString()});
+      setTimeout(() => {
+        setErrorDisplay({});
+      }, 2000);
     }
   };
 
@@ -172,7 +172,7 @@ export const SignInButton = (props: SignInButtonProps) => {
           }}
           onClick={async () => {
             setIsLoading(true);
-            Auth.signIn(true).then(onSuccess, onFailure);
+            Auth.signIn().then(onSuccess, onFailure);
             setIsLoading(false);
           }}
           disabled={isLoading}

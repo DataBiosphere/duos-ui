@@ -30,8 +30,8 @@ export const Auth = {
       await Auth.signOut();
     }
   },
-  signIn: async (popup: boolean): Promise<OidcUser> => {
-    const user: OidcUser | null = await OidcBroker.signIn(popup);
+  signIn: async (): Promise<OidcUser> => {
+    const user: OidcUser | null = await OidcBroker.signIn();
     if (user === null) {
       throw new Error('signInSilent called before signInPopup');
     }

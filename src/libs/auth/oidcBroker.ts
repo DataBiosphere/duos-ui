@@ -76,9 +76,9 @@ export const OidcBroker = {
     const userManager: OidcUserManager = new UserManager(OidcBroker.getUserManagerSettings());
     return await userManager.getUser();
   },
-  signIn: async (popup: boolean, args?: SigninPopupArgs): Promise<User | null> => {
+  signIn: async (args?: SigninPopupArgs): Promise<User | null> => {
     const um: UserManager = OidcBroker.getUserManager();
-    return popup ? await um.signinPopup(args) : await um.signinSilent(args);
+    return await um.signinPopup(args);
   },
   signOut: async (): Promise<void> => {
     const um: UserManager = OidcBroker.getUserManager();
