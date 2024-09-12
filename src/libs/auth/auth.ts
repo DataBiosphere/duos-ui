@@ -33,7 +33,7 @@ export const Auth = {
   signIn: async (): Promise<OidcUser> => {
     const user: OidcUser | null = await OidcBroker.signIn();
     if (user === null) {
-      throw new Error('signInSilent called before signInPopup');
+      throw new Error('Unexpected error, please contact customer support.');
     }
     Storage.setOidcUser(user);
     Storage.setUserIsLogged(true);

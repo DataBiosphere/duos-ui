@@ -15,7 +15,6 @@ import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUserResponse} from '../types/responseTypes';
 
-
 interface SignInButtonProps {
   history: History;
   onSignIn: () => Promise<void>;
