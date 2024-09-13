@@ -7,6 +7,9 @@ import {Storage} from './../storage';
 import {UserManager} from 'oidc-client-ts';
 
 export const Auth = {
+  signInError: () => {
+    return 'Unexpected error, please contact customer support.';
+  },
   initialize: async (): Promise<void> => {
     await OidcBroker.initialize();
     const oidcUser: OidcUser | null = await OidcBroker.getUser();
@@ -33,7 +36,7 @@ export const Auth = {
   signIn: async (): Promise<OidcUser> => {
     const user: OidcUser | null = await OidcBroker.signIn();
     if (user === null) {
-      throw new Error('Unexpected error, please contact customer support.');
+      throw new Error(Auth.signInError());
     }
     Storage.setOidcUser(user);
     Storage.setUserIsLogged(true);

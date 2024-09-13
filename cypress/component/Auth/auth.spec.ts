@@ -1,13 +1,47 @@
 /* eslint-disable no-undef */
 
+import {OidcBroker, OidcUser, B2cIdTokenClaims} from '../../../src/libs/auth/oidcBroker';
 import {Auth} from '../../../src/libs/auth/auth';
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {Storage} from '../../../src/libs/storage';
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
 
-describe('Auth', function () {
+const claims: B2cIdTokenClaims = {
+  jti: undefined, nbf: undefined, sub: undefined,
+  iss: '',
+  aud: '',
+  exp: 0,
+  iat: 0
+}
+
+const user: OidcUser = {
+  access_token: "", get expires_in(): number | undefined {
+    return undefined;
+  }, session_state: undefined, state: undefined, token_type: "", get expired(): boolean | undefined {
+    return undefined;
+  }, get scopes(): string[] {
+    return [];
+  }, toStorageString(): string {
+    return "";
+  },
+  profile: claims
+};
+
+describe('Auth Failure', function () {
+  it('Sign In error throws expected message', async function () {
+    cy.stub(OidcBroker, 'signIn').returns(null);
+    cy.on('fail', (err) => {
+      return err.message !== Auth.signInError();
+    });
+    Auth.signIn();
+    expect(Storage.getOidcUser()).to.be.null;
+    expect(Storage.userIsLogged()).to.be.false;
+  });
+});
+
+describe('Auth Success', function () {
   // Intercept configuration calls
-  beforeEach(async () => {
+  beforeEach(() => {
     cy.intercept({
       method: 'GET',
       url: '/config.json',
@@ -17,8 +51,16 @@ describe('Auth', function () {
       'authorityEndpoint': 'authorityEndpoint',
       'clientId': 'clientId'
     });
-    await Auth.initialize();
+    Auth.initialize();
   });
+
+  it('Sign In stores the current user', async function () {
+    cy.stub(OidcBroker, 'signIn').returns(user);
+    await Auth.signIn();
+    expect(Storage.getOidcUser()).to.not.be.empty;
+    expect(Storage.userIsLogged()).to.be.true;
+  });
+
   it('Sign Out Clears the session when called', async function () {
     Storage.setUserIsLogged(true);
     Storage.setAnonymousId(uuid());
