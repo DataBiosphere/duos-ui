@@ -13,6 +13,7 @@ import eventList from '../libs/events';
 import {StackdriverReporter} from '../libs/stackdriverReporter';
 import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
+import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
 
 interface SignInButtonProps {
@@ -44,6 +45,7 @@ export const SignInButton = (props: SignInButtonProps) => {
     const userStatus = await ToS.getStatus();
     const {tosAccepted} = userStatus;
     if (!isEmpty(userStatus) && !tosAccepted) {
+      // User has authenticated, but has not accepted ToS
       Storage.setUserIsLogged(false);
       if (isNil(redirectPath)) {
         history.push(`/tos_acceptance`);
@@ -51,6 +53,11 @@ export const SignInButton = (props: SignInButtonProps) => {
         history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
       }
     } else {
+      // User is authenticated, registered and has accepted ToS.
+      // Log sign-in and redirect to destination.
+      await Metrics.identify(Storage.getAnonymousId());
+      await Metrics.syncProfile();
+      await Metrics.captureEvent(eventList.userSignIn);
       if (isNil(redirectPath)) {
         Navigation.back(Storage.getCurrentUser(), history);
       } else {
@@ -98,7 +105,7 @@ export const SignInButton = (props: SignInButtonProps) => {
   };
 
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
-    const registeredUser = await User.registerUser();
+    const registeredUser: DuosUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
     await Metrics.identify(Storage.getAnonymousId());
     await Metrics.syncProfile();
