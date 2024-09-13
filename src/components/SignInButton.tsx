@@ -17,7 +17,6 @@ import {DuosUserResponse} from '../types/responseTypes';
 
 interface SignInButtonProps {
   history: History;
-  onSignIn: () => Promise<void>;
 }
 
 interface ErrorInfo {
@@ -35,7 +34,7 @@ interface HttpError extends Error {
 
 export const SignInButton = (props: SignInButtonProps) => {
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
-  const {onSignIn, history} = props;
+  const {history} = props;
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Utility function called in the normal success case and in the undocumented 409 case
@@ -101,7 +100,6 @@ export const SignInButton = (props: SignInButtonProps) => {
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
-    await onSignIn();
     await Metrics.identify(Storage.getAnonymousId());
     await Metrics.syncProfile();
     await Metrics.captureEvent(eventList.userRegister);
