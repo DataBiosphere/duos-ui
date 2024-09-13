@@ -48,7 +48,7 @@ describe('Auth Success', function () {
       hostname: 'localhost',
     }, {'env': 'ci'});
     cy.stub(OAuth2, 'getConfig').returns({
-      'authorityEndpoint': 'authorityEndpoint',
+      'authorityEndpoint': Cypress.config().baseUrl,
       'clientId': 'clientId'
     });
     Auth.initialize();
