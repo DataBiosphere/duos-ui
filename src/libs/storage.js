@@ -3,9 +3,8 @@ import { v4 as uuid } from 'uuid';
 
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
-const GoogleUser = 'Gapi'; // Google user info, including token
-const OidcUser = 'OidcUser'; // Google user info, including token
-const UserIsLogged = 'isLogged'; // User log status flag
+const OidcUser = 'OidcUser'; // B2C Tenant user info, including token
+const UserIsLogged = 'isLogged'; // User authenticated status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 const anonymousId = 'anonymousId';
 const ENV = 'env';
@@ -15,16 +14,16 @@ export const Storage = {
     sessionStorage.clear();
   },
 
+  /**
+   * This user object is what we save in Consent
+   * @param data
+   */
   setCurrentUser: data => {
     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
   },
 
   getCurrentUser: () => {
     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)) : null;
-  },
-
-  getCurrentUserRoles: () => {
-    return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)).roles : null;
   },
 
   getCurrentUserSettings: (key) => {
@@ -51,6 +50,10 @@ export const Storage = {
     sessionStorage.setItem(UserSettings, JSON.stringify(userSettings));
   },
 
+  /**
+   * This user object is returned from our B2C tenant
+   * @param oidcUser
+   */
   setOidcUser: oidcUser => {
     sessionStorage.setItem(OidcUser, JSON.stringify(oidcUser));
   },
