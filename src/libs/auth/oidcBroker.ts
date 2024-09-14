@@ -23,8 +23,6 @@ export interface OidcUser extends User {
     profile: B2cIdTokenClaims;
 }
 
-type OidcUserManager = UserManager;
-
 let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;
 let userManager: UserManager | null = null;
@@ -71,10 +69,6 @@ export const OidcBroker = {
       throw new Error('Cannot retrieve userManagerSettings before OidcBroker is initialized');
     }
     return userManagerSettings;
-  },
-  getUser: async (): Promise<OidcUser | null> => {
-    const userManager: OidcUserManager = new UserManager(OidcBroker.getUserManagerSettings());
-    return await userManager.getUser();
   },
   signIn: async (args?: SigninPopupArgs): Promise<User | null> => {
     const um: UserManager = OidcBroker.getUserManager();
