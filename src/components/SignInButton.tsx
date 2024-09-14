@@ -39,7 +39,7 @@ export const SignInButton = (props: SignInButtonProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Utility function called in the normal success case and in the undocumented 409 case
-  // Check for ToS Acceptance - sign out and redirect user if not set.
+  // Check for ToS Acceptance - redirect user if not set.
   const checkToSAndRedirect = async (redirectPath: string | null) => {
     // Check if the user has accepted ToS yet or not:
     const userStatus = await ToS.getStatus();
