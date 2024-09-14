@@ -9,29 +9,9 @@ import {Storage} from '../../../src/libs/storage';
 import {Metrics} from '../../../src/libs/ajax/Metrics';
 import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
 import {ToS} from '../../../src/libs/ajax/ToS';
+import {oidcUser} from '../Auth/oidcUser';
 
 const signInText = 'Sign In';
-
-const claims = {
-  jti: undefined, nbf: undefined, sub: undefined,
-  iss: '',
-  aud: '',
-  exp: 0,
-  iat: 0
-};
-
-const user = {
-  access_token: '', get expires_in() {
-    return undefined;
-  }, session_state: undefined, state: undefined, token_type: '', get expired() {
-    return undefined;
-  }, get scopes() {
-    return [];
-  }, toStorageString() {
-    return '';
-  },
-  profile: claims
-};
 
 const duosUser = {
   displayName: 'display name',
@@ -59,7 +39,7 @@ describe('Sign In: Component Loads', function() {
 
   it('Sign In: On Success', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(user));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
@@ -80,7 +60,7 @@ describe('Sign In: Component Loads', function() {
   it('Sign In: No Roles Error Reporter Is Called', function () {
     const bareUser = {email: 'test@user.com'};
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(user));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
     cy.stub(User, 'getMe').returns(bareUser);
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
