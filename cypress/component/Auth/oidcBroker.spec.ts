@@ -1,32 +1,7 @@
 /* eslint-disable no-undef */
 
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
-import {
-  B2cIdTokenClaims,
-  OidcBroker,
-  OidcUser
-} from '../../../src/libs/auth/oidcBroker';
-
-const claims: B2cIdTokenClaims = {
-  jti: undefined, nbf: undefined, sub: undefined,
-  iss: '',
-  aud: '',
-  exp: 0,
-  iat: 0
-}
-
-const user: OidcUser = {
-  access_token: "", get expires_in(): number | undefined {
-    return undefined;
-  }, session_state: undefined, state: undefined, token_type: "", get expired(): boolean | undefined {
-    return undefined;
-  }, get scopes(): string[] {
-    return [];
-  }, toStorageString(): string {
-    return "";
-  },
-  profile: claims
-};
+import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
 
 describe('OidcBroker Failure', function () {
 
@@ -72,7 +47,6 @@ describe('OidcBroker Success', function () {
     cy.spy(um, 'signinPopup').as('signinPopup');
     // Since we are not calling a real sign-in url, we expect oidc-client errors when doing so
     cy.on('uncaught:exception', (err) => {
-      console.log(err);
       return !(err.message.includes('Invalid URL'))
     });
     OidcBroker.signIn();
@@ -88,4 +62,5 @@ describe('OidcBroker Success', function () {
     expect(um.removeUser).to.be.called;
     expect(um.clearStaleState).to.be.called;
   });
+
 });

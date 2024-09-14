@@ -1,31 +1,11 @@
 /* eslint-disable no-undef */
 
-import {OidcBroker, OidcUser, B2cIdTokenClaims} from '../../../src/libs/auth/oidcBroker';
+import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
 import {Auth} from '../../../src/libs/auth/auth';
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {Storage} from '../../../src/libs/storage';
 import {v4 as uuid} from 'uuid';
-
-const claims: B2cIdTokenClaims = {
-  jti: undefined, nbf: undefined, sub: undefined,
-  iss: '',
-  aud: '',
-  exp: 0,
-  iat: 0
-}
-
-const user: OidcUser = {
-  access_token: "", get expires_in(): number | undefined {
-    return undefined;
-  }, session_state: undefined, state: undefined, token_type: "", get expired(): boolean | undefined {
-    return undefined;
-  }, get scopes(): string[] {
-    return [];
-  }, toStorageString(): string {
-    return "";
-  },
-  profile: claims
-};
+import {oidcUser} from './oidcUser';
 
 describe('Auth Failure', function () {
   it('Sign In error throws expected message', async function () {
@@ -55,7 +35,7 @@ describe('Auth Success', function () {
   });
 
   it('Sign In stores the current user', async function () {
-    cy.stub(OidcBroker, 'signIn').returns(user);
+    cy.stub(OidcBroker, 'signIn').returns(oidcUser);
     await Auth.signIn();
     expect(Storage.getOidcUser()).to.not.be.empty;
     expect(Storage.userIsLogged()).to.be.true;
@@ -76,4 +56,5 @@ describe('Auth Success', function () {
     expect(Storage.getData('key')).to.be.null;
     expect(Storage.getEnv()).to.be.null;
   });
+
 });
