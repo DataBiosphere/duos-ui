@@ -59,7 +59,7 @@ export const SignInButton = (props: SignInButtonProps) => {
       await Metrics.syncProfile();
       await Metrics.captureEvent(eventList.userSignIn);
       if (isNil(redirectPath)) {
-        Navigation.back(Storage.getCurrentUser(), history);
+        await Navigation.back(Storage.getCurrentUser(), history);
       } else {
         history.push(redirectPath);
       }
@@ -68,23 +68,22 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   // eslint-disable-next-line no-unused-vars
   const onSuccess = async (_: OidcUser) => {
-    const duosUser: DuosUserResponse = await User.getMe();
-    Storage.setCurrentUser(duosUser);
-    setUserRoleStatuses(duosUser, Storage);
-    if (!duosUser.roles) {
-      await StackdriverReporter.report('roles not found for user: ' + duosUser.email);
-    }
-
     const redirectTo = getRedirectTo();
     const shouldRedirect = shouldRedirectTo(redirectTo);
-    Storage.setAnonymousId();
-    await Metrics.identify(Storage.getAnonymousId());
-    await Metrics.syncProfile();
-    await Metrics.captureEvent(eventList.userSignIn);
-
     try {
-      await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
-    } catch (error) {
+      const duosUser: DuosUserResponse = await User.getMe();
+      if (duosUser) {
+        Storage.setCurrentUser(duosUser);
+        setUserRoleStatuses(duosUser, Storage);
+        if (!duosUser.roles) {
+          await StackdriverReporter.report('roles not found for user: ' + duosUser.email);
+        }
+        await syncSignInOrRegistrationEvent(eventList.userSignIn);
+        await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
+      } else {
+        await handleRegistration(redirectTo, shouldRedirect);
+      }
+    } catch (err) {
       await handleRegistration(redirectTo, shouldRedirect);
     }
   };
@@ -107,10 +106,15 @@ export const SignInButton = (props: SignInButtonProps) => {
   const registerAndRedirectNewUser = async (redirectTo: string, shouldRedirect: boolean) => {
     const registeredUser: DuosUser = await User.registerUser();
     setUserRoleStatuses(registeredUser, Storage);
+    await syncSignInOrRegistrationEvent(eventList.userRegister);
+    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
+  };
+
+  const syncSignInOrRegistrationEvent = async (event: String) => {
+    Storage.setAnonymousId();
     await Metrics.identify(Storage.getAnonymousId());
     await Metrics.syncProfile();
-    await Metrics.captureEvent(eventList.userRegister);
-    history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
+    await Metrics.captureEvent(event);
   };
 
   const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
