@@ -73,4 +73,21 @@ describe('Sign In: Component Loads', function() {
     });
   });
 
+  it('Sign In: Redirects to ToS if not accepted', function () {
+    cy.viewport(600, 300);
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    cy.stub(User, 'getMe').returns(duosUser);
+    cy.stub(ToS, 'getStatus').returns(Object.assign({}, userStatus, {'tosAccepted': false}));
+    cy.stub(Metrics, 'identify');
+    cy.stub(Metrics, 'syncProfile');
+    cy.stub(Metrics, 'captureEvent');
+    let history = [];
+    mount(<SignInButton history={history} />);
+    cy.get('button').click().then(() => {
+      expect(history).to.not.be.empty;
+      expect(history[0].includes('tos_acceptance')).to.be.true;
+    });
+
+  });
+
 });
