@@ -12,8 +12,8 @@ nvm install 22.6.0
 npm install
 ```
 
-3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
-Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev`.
+3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`
+Remember to set the `env` value appropriately, for example, `dev`. Certain features are not available on different environments and this will simulate that for local development.
 The installation steps outlined in this step can also be completed using the [render-configs.sh](scripts/render-configs.sh) script which can generate all required
 files for local development.
 ```
@@ -51,7 +51,7 @@ npm start
 ### Running under Docker
 
 Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes.
-Remember to set the `env` value appropriately in `config.json`. We use `local` for running via npm, but under docker, we use a real env like `dev`
+Remember to set the `env` value appropriately, for example, `dev`. Certain features are not available on different environments and this will simulate that for local development.
 
 ```yaml
     volumes:
