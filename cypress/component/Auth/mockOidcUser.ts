@@ -1,6 +1,6 @@
 import {OidcUser} from "../../../src/libs/auth/oidcBroker";
 
-export const oidcUser: OidcUser = {
+export const mockOidcUser: OidcUser = {
   access_token: '',
   get expires_in(): number | undefined {
     return undefined;

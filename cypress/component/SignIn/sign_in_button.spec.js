@@ -9,7 +9,7 @@ import {Storage} from '../../../src/libs/storage';
 import {Metrics} from '../../../src/libs/ajax/Metrics';
 import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
 import {ToS} from '../../../src/libs/ajax/ToS';
-import {oidcUser} from '../Auth/oidcUser';
+import {mockOidcUser} from '../Auth/mockOidcUser';
 
 const signInText = 'Sign In';
 
@@ -41,7 +41,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: On Success', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
@@ -62,7 +62,7 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: No Roles Error Reporter Is Called', function () {
     const bareUser = {email: 'test@user.com'};
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
     cy.stub(User, 'getMe').returns(bareUser);
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
@@ -77,7 +77,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: Redirects to ToS if not accepted', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
     cy.stub(Metrics, 'identify');
@@ -93,7 +93,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: Registers user if not found and redirects to ToS', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
     // Simulate user not found
     cy.stub(User, 'getMe').throws();
     cy.stub(User, 'registerUser').returns(duosUser);

@@ -5,7 +5,7 @@ import {Auth} from '../../../src/libs/auth/auth';
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {Storage} from '../../../src/libs/storage';
 import {v4 as uuid} from 'uuid';
-import {oidcUser} from './oidcUser';
+import {mockOidcUser} from './mockOidcUser';
 
 describe('Auth Failure', function () {
   it('Sign In error throws expected message', async function () {
@@ -35,7 +35,7 @@ describe('Auth Success', function () {
   });
 
   it('Sign In stores the current user', async function () {
-    cy.stub(OidcBroker, 'signIn').returns(oidcUser);
+    cy.stub(OidcBroker, 'signIn').returns(mockOidcUser);
     await Auth.signIn();
     expect(Storage.getOidcUser()).to.not.be.empty;
     expect(Storage.userIsLogged()).to.be.true;
