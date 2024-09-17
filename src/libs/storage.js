@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 // Storage Variables
 const CurrentUser = 'CurrentUser'; // System user
 const OidcUser = 'OidcUser'; // B2C Tenant user info, including token
-const UserIsLogged = 'isLogged'; // User authenticated status flag
+const UserIsLogged = 'isLogged'; // User log status flag
 const UserSettings = 'UserSettings'; // Different user settings for saving statuses in the app
 const anonymousId = 'anonymousId';
 const ENV = 'env';
