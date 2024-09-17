@@ -53,11 +53,7 @@ export const SignInButton = (props: SignInButtonProps) => {
         history.push(`/tos_acceptance?redirectTo=${redirectPath}`);
       }
     } else {
-      // User is authenticated, registered and has accepted ToS.
-      // Log sign-in and redirect to destination.
-      await Metrics.identify(Storage.getAnonymousId());
-      await Metrics.syncProfile();
-      await Metrics.captureEvent(eventList.userSignIn);
+      // User is authenticated, registered and has accepted ToS: redirect to destination.
       if (isNil(redirectPath)) {
         await Navigation.back(Storage.getCurrentUser(), history);
       } else {
