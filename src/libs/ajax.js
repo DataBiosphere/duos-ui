@@ -30,18 +30,16 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error);
 });
 
-export const getApiUrl = async(baseUrl = '') => {
-  const env = await Config.getEnv();
-  return env === 'local' ? baseUrl : await Config.getApiUrl();
+export const getApiUrl = async() => {
+  return await Config.getApiUrl();
 };
 
 export const getBardApiUrl = async() => {
   return await Config.getBardApiUrl();
 };
 
-export const getOntologyUrl = async(baseUrl = '') => {
-  const env = await Config.getEnv();
-  return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
+export const getOntologyUrl = async() => {
+  return await Config.getOntologyApiUrl();
 };
 
 export const sleep = (ms) => {

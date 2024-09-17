@@ -33,8 +33,8 @@ class Status extends Component {
   };
 
   async componentDidMount() {
-    const consentStatusUrl = `${ await getApiUrl('/api') }/status`;
-    const ontologyStatusUrl = `${ await getOntologyUrl('/ontology') }/status`;
+    const consentStatusUrl = `${ await getApiUrl() }/status`;
+    const ontologyStatusUrl = `${ await getOntologyUrl() }/status`;
     fetch(consentStatusUrl, { method: 'GET' })
       .then(response => response.json())
       .then(data => this.setState({ consentStatus: data }));
