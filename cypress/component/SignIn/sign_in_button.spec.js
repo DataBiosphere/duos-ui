@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
 import React from 'react';
-import { mount } from 'cypress/react18';
+import {mount} from 'cypress/react18';
 import SignInButton from '../../../src/components/SignInButton';
 import {User} from '../../../src/libs/ajax/User';
 import {Auth} from '../../../src/libs/auth/auth';
@@ -17,7 +17,7 @@ const duosUser = {
   displayName: 'display name',
   email: 'test@user.com',
   roles: [{
-    name : 'Admin'
+    name: 'Admin'
   }]
 };
 
@@ -29,11 +29,13 @@ const userStatus = {
   'tosAccepted': true
 };
 
-describe('Sign In: Component Loads', function() {
+const notAcceptedUserStatus = Object.assign({}, userStatus, {'tosAccepted': false});
+
+describe('Sign In: Component Loads', function () {
 
   it('Sign In Button Loads', function () {
     cy.viewport(600, 300);
-    mount(<SignInButton history={undefined} />);
+    mount(<SignInButton history={undefined}/>);
     cy.contains(signInText).should('exist');
   });
 
@@ -46,7 +48,7 @@ describe('Sign In: Component Loads', function() {
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     cy.stub(ToS, 'getStatus').returns(userStatus);
-    mount(<SignInButton history={[]} />);
+    mount(<SignInButton history={[]}/>);
     cy.get('button').click().then(() => {
       expect(Storage.getCurrentUser()).to.deep.equal(duosUser);
       expect(Storage.getAnonymousId()).to.not.be.null;
@@ -67,7 +69,7 @@ describe('Sign In: Component Loads', function() {
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     cy.stub(ToS, 'getStatus').returns(userStatus);
-    mount(<SignInButton history={[]} />);
+    mount(<SignInButton history={[]}/>);
     cy.get('button').click().then(() => {
       expect(StackdriverReporter.report).to.be.called;
     });
@@ -77,17 +79,35 @@ describe('Sign In: Component Loads', function() {
     cy.viewport(600, 300);
     cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
     cy.stub(User, 'getMe').returns(duosUser);
-    cy.stub(ToS, 'getStatus').returns(Object.assign({}, userStatus, {'tosAccepted': false}));
+    cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     let history = [];
-    mount(<SignInButton history={history} />);
+    mount(<SignInButton history={history}/>);
     cy.get('button').click().then(() => {
       expect(history).to.not.be.empty;
       expect(history[0].includes('tos_acceptance')).to.be.true;
     });
+  });
 
+  it('Sign In: Registers user if not found and redirects to ToS', function () {
+    cy.viewport(600, 300);
+    cy.stub(Auth, 'signIn').returns(Promise.resolve(oidcUser));
+    // Simulate user not found
+    cy.stub(User, 'getMe').throws();
+    cy.stub(User, 'registerUser').returns(duosUser);
+    cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
+    cy.stub(Metrics, 'identify');
+    cy.stub(Metrics, 'syncProfile');
+    cy.stub(Metrics, 'captureEvent');
+    let history = [];
+    mount(<SignInButton history={history}/>);
+    cy.get('button').click().then(() => {
+      expect(User.registerUser).to.be.called;
+      expect(history).to.not.be.empty;
+      expect(history[0].includes('tos_acceptance')).to.be.true;
+    });
   });
 
 });
