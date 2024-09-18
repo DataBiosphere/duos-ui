@@ -13,9 +13,10 @@ describe('Auth Failure', function () {
     cy.on('fail', (err) => {
       return err.message !== Auth.signInError();
     });
-    Auth.signIn();
-    expect(Storage.getOidcUser()).to.be.null;
-    expect(Storage.userIsLogged()).to.be.false;
+    Auth.signIn().then(() => {
+      expect(Storage.getOidcUser()).to.be.null;
+      expect(Storage.userIsLogged()).to.be.false;
+    });
   });
 });
 
