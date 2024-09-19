@@ -4,9 +4,12 @@
 */
 import {OidcBroker, OidcUser} from './oidcBroker';
 import {Storage} from './../storage';
-import { UserManager } from 'oidc-client-ts';
+import {UserManager} from 'oidc-client-ts';
 
 export const Auth = {
+  signInError: () => {
+    return 'Unexpected error, please contact customer support.';
+  },
   initialize: async (): Promise<void> => {
     await OidcBroker.initialize();
     const um: UserManager = OidcBroker.getUserManager();
@@ -23,6 +26,15 @@ export const Auth = {
       Auth.signOut();
       //TODO: DUOS-3082 Add an alert that session has expired
     });
+  },
+  signIn: async (): Promise<OidcUser> => {
+    const user: OidcUser | null = await OidcBroker.signIn();
+    if (user === null) {
+      throw new Error(Auth.signInError());
+    }
+    Storage.setOidcUser(user);
+    Storage.setUserIsLogged(true);
+    return user;
   },
   signOut: async () => {
     Storage.clearStorage();

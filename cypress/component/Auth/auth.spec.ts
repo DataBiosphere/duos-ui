@@ -1,29 +1,48 @@
 /* eslint-disable no-undef */
 
+import {OidcBroker} from '../../../src/libs/auth/oidcBroker';
 import {Auth} from '../../../src/libs/auth/auth';
-import {Config} from '../../../src/libs/config';
-import {GoogleIS} from '../../../src/libs/googleIS';
 import {OAuth2} from '../../../src/libs/ajax/OAuth2';
 import {Storage} from '../../../src/libs/storage';
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
+import {mockOidcUser} from './mockOidcUser';
 
-describe('Auth', function () {
+describe('Auth Failure', function () {
+  it('Sign In error throws expected message', async function () {
+    cy.stub(OidcBroker, 'signIn').returns(null);
+    cy.on('fail', (err) => {
+      return err.message !== Auth.signInError();
+    });
+    Auth.signIn().then(() => {
+      expect(Storage.getOidcUser()).to.be.null;
+      expect(Storage.userIsLogged()).to.be.false;
+    });
+  });
+});
+
+describe('Auth Success', function () {
   // Intercept configuration calls
-  beforeEach(async () => {
+  beforeEach(() => {
     cy.intercept({
       method: 'GET',
       url: '/config.json',
       hostname: 'localhost',
     }, {'env': 'ci'});
     cy.stub(OAuth2, 'getConfig').returns({
-      'authorityEndpoint': 'authorityEndpoint',
+      'authorityEndpoint': Cypress.config().baseUrl,
       'clientId': 'clientId'
     });
-    await Auth.initialize();
+    Auth.initialize();
   });
+
+  it('Sign In stores the current user', async function () {
+    cy.stub(OidcBroker, 'signIn').returns(mockOidcUser);
+    await Auth.signIn();
+    expect(Storage.getOidcUser()).to.not.be.empty;
+    expect(Storage.userIsLogged()).to.be.true;
+  });
+
   it('Sign Out Clears the session when called', async function () {
-    cy.stub(Config, 'getGoogleClientId').returns('12345');
-    cy.stub(GoogleIS, 'revokeAccessToken');
     Storage.setUserIsLogged(true);
     Storage.setAnonymousId(uuid());
     Storage.setData('key', 'val');
@@ -38,4 +57,5 @@ describe('Auth', function () {
     expect(Storage.getData('key')).to.be.null;
     expect(Storage.getEnv()).to.be.null;
   });
+
 });

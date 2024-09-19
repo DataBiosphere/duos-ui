@@ -65,18 +65,13 @@ function App() {
     setUserIsLogged();
   });
 
-  const signIn = async () => {
-    await Storage.setUserIsLogged(true);
-    await setIsLoggedIn(true);
-  };
-
   return (
     <div className="body">
       <div className="wrap">
         <div className="main">
-          <DuosHeader onSignIn={signIn} />
+          <DuosHeader/>
           <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes onSignIn={signIn} isLogged={isLoggedIn} env={env} />
+          <Routes isLogged={isLoggedIn} env={env} />
         </div>
       </div>
       <DuosFooter />

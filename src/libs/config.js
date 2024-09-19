@@ -74,9 +74,7 @@ export const Config = {
 
 export const Token = {
   getToken: () => {
-    return Storage.getGoogleData() !== null ?
-      Storage.getGoogleData().accessToken :
-      'token';
+    return Storage.getOidcUser()?.id_token;
   },
 };
 

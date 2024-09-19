@@ -1,6 +1,7 @@
 import {
   IdTokenClaims,
   OidcMetadata,
+  SigninPopupArgs,
   User,
   UserManager,
   UserManagerSettings,
@@ -9,7 +10,6 @@ import {
 
 import {Config} from '../config';
 import {OAuth2, OAuthConfig} from '../ajax/OAuth2';
-import {GoogleIS} from '../googleIS';
 
 export interface B2cIdTokenClaims extends IdTokenClaims {
     email_verified?: boolean;
@@ -22,8 +22,6 @@ export interface B2cIdTokenClaims extends IdTokenClaims {
 export interface OidcUser extends User {
     profile: B2cIdTokenClaims;
 }
-
-type OidcUserManager = UserManager;
 
 let config: OAuthConfig | null = null;
 let userManagerSettings: UserManagerSettings | null = null;
@@ -40,7 +38,6 @@ const generateOidcUserManagerSettings = async (
     authority: config.authorityEndpoint,
     client_id: config.clientId,
     popup_redirect_uri: `${window.origin}/redirect-from-oauth`,
-    silent_redirect_uri: `${window.origin}/redirect-from-oauth-silent`,
     metadata,
     prompt: 'consent login',
     scope: 'openid email profile',
@@ -73,14 +70,11 @@ export const OidcBroker = {
     }
     return userManagerSettings;
   },
-  getUser: async (): Promise<OidcUser | null> => {
-    const userManager: OidcUserManager = new UserManager(OidcBroker.getUserManagerSettings());
-    return await userManager.getUser();
+  signIn: async (args?: SigninPopupArgs): Promise<User | null> => {
+    const um: UserManager = OidcBroker.getUserManager();
+    return await um.signinPopup(args);
   },
   signOut: async (): Promise<void> => {
-    // TODO: When sign-in is migrated to OIDC, we can remove GoogleIS functionality
-    const clientId = await Config.getGoogleClientId();
-    await GoogleIS.revokeAccessToken(clientId);
     const um: UserManager = OidcBroker.getUserManager();
     await um.removeUser();
     await um.clearStaleState();
