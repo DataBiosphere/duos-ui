@@ -1,11 +1,13 @@
 import axios from 'axios';
-import { getDefaultProperties } from '@databiosphere/bard-client';
+import {getDefaultProperties} from '@databiosphere/bard-client';
 
-import { Storage } from '../storage';
-import { getBardApiUrl } from '../ajax';
+import {Storage} from '../storage';
+import {getBardApiUrl} from '../ajax';
+import {Token} from '../config';
 
 export const Metrics = {
-  captureEvent: (event, details, signal) => captureEventFn(event, details, signal).catch(() => { }),
+  captureEvent: (event, details, signal) => captureEventFn(event, details, signal).catch(() => {
+  }),
   syncProfile: (signal) => syncProfile(signal),
   identify: (anonId, signal) => identify(anonId, signal),
 };
@@ -42,7 +44,7 @@ const captureEventFn = async (event, details = {}, signal) => {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/event`,
     data: body,
-    headers: isRegistered ? { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` } : undefined,
+    headers: isRegistered ? {Authorization: `Bearer ${Token.getToken()}`} : undefined,
     signal,
   };
 
@@ -59,11 +61,12 @@ const syncProfile = async (signal) => {
   const config = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/syncProfile`,
-    headers: { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` },
+    headers: {Authorization: `Bearer ${Token.getToken()}`},
     signal,
   };
 
-  return axios(config).catch(() => { });
+  return axios(config).catch(() => {
+  });
 };
 
 /**
@@ -74,17 +77,18 @@ const syncProfile = async (signal) => {
  * @returns {Promise} - A Promise that resolves when the user is identified.
  */
 const identify = async (anonId, signal) => {
-  const body = { anonId };
+  const body = {anonId};
 
   const config = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/identify`,
     data: body,
-    headers: { Authorization: `Bearer ${Storage.getGoogleData()?.accessToken}` },
+    headers: {Authorization: `Bearer ${Token.getToken()}`},
     signal,
   };
 
-  return axios(config).catch(() => { });
+  return axios(config).catch(() => {
+  });
 };
 
 

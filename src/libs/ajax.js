@@ -1,15 +1,15 @@
 import {getOr, isNil} from 'lodash/fp';
+import {Auth} from './auth/auth';
 import {Config} from './config';
 import {spinnerService} from './spinner-service';
 import {StackdriverReporter} from './stackdriverReporter';
-import {Storage} from './storage';
 import axios from 'axios';
 
 //define axios interceptor
 //to log out user and redirect to home when response has 401 status
 //return responses with statuses in the 200s and reject the rest
 const redirectOnLogout = () => {
-  Storage.clearStorage();
+  Auth.signOut();
   window.location.href = `/home?redirectTo=${window.location.pathname}`;
 };
 
@@ -30,18 +30,16 @@ axios.interceptors.response.use(function (response) {
   return Promise.reject(error);
 });
 
-export const getApiUrl = async(baseUrl = '') => {
-  const env = await Config.getEnv();
-  return env === 'local' ? baseUrl : await Config.getApiUrl();
+export const getApiUrl = async() => {
+  return await Config.getApiUrl();
 };
 
 export const getBardApiUrl = async() => {
   return await Config.getBardApiUrl();
 };
 
-export const getOntologyUrl = async(baseUrl = '') => {
-  const env = await Config.getEnv();
-  return env === 'local' ? baseUrl : await Config.getOntologyApiUrl();
+export const getOntologyUrl = async() => {
+  return await Config.getOntologyApiUrl();
 };
 
 export const sleep = (ms) => {
