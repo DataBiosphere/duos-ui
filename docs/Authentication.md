@@ -40,7 +40,10 @@ sequenceDiagram
 
 DUOS uses the [oidc-client-ts](https://github.com/authts/oidc-client-ts) library
 to facilitate user authentication through either Google or Microsoft. Once authenticated,
-the library provides DUOS with user claims information about the authenticated identity.
+the library provides DUOS with user information about the authenticated identity and an 
+access token that can be verified/validated in a proxy layer that sits in front of each
+service DUOS communicates with.
+
 DSP's tenant requests claims that are [configured here](https://github.com/broadinstitute/terraform-ap-deployments/blob/master/azure/b2c/policies/SignUpOrSignin.xml.tftpl).
 Once authenticated, the DUOS application will use the `oidc-client-ts` library to access
 an identity's `access_token` and make API calls using it. All downstream API servers are
@@ -79,8 +82,20 @@ sequenceDiagram
     UserManager -->> oidc-client-ts: clearStaleState
 ```
 
-### DSP's B2C Tenant Choices
+### DSP's B2C Tenant
 ![B2C Tenant Choice](b2c_tennant.png)
+
+DSP maintains resources in Azure that allow for a customized tenant in
+https://github.com/broadinstitute/terraform-ap-deployments/tree/master/azure/b2c
+
+* In `assets`, there is a unified_simple.html file that serves as a template for a sign-in page
+* In `policies`, there is a `TrustFrameworkBase.xml.tftpl` that references that template 
+* In `policies`, there is a `TrustFrameworkBaseExtension.xml.tftpl` that references that TrustFrameworkBase
+* In `policies`, there is a `SignUpOrSignin.xml.tftpl` that references that TrustFrameworkExtension
+
+For DUOS, we have custom versions of each that have new profile name, `B2C_1A_signup_signin_duos_<env>`.
+The profile name is used as a parameter to the OIDC tenant. The UI the tenant shows is based on
+that profile name.
 
 ### Server Auth Flow
 
