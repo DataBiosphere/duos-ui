@@ -217,6 +217,21 @@ export const DatasetSearch = (props) => {
       icon: aouIcon,
       title: 'All of Us Data Library',
     },
+    'openaccess': {
+      query: {
+        'bool': {
+          'should': [
+            {
+              'term': {
+                'accessManagement': 'open'
+              }
+            }
+          ]
+        }
+      },
+      icon: duosIcon,
+      title: 'DUOS Open Access Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
