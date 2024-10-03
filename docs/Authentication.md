@@ -83,7 +83,7 @@ sequenceDiagram
 ```
 
 ### DSP's B2C Tenant
-![B2C Tenant Choice](b2c_tennant.png)
+![B2C Tenant Choice](b2c_tenant.png)
 
 DSP maintains resources in Azure that allow for a customized tenant in
 https://github.com/broadinstitute/terraform-ap-deployments/tree/master/azure/b2c
