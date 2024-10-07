@@ -2,11 +2,13 @@
   "env": "",
   "hash": "",
   "tag": "",
+  "bardApiUrl": "",
   "apiUrl": "",
   "ontologyApiUrl": "",
   "terraUrl": "",
   "tdrApiUrl": "",
   "errorApiKey": "",
+  "profileUrl": "",
   "nihUrl": "",
   "gaId": "",
   "features": {}

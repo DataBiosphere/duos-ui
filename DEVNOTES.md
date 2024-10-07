@@ -19,7 +19,7 @@ environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.
 will simulate it for local development. The installation steps outlined in this step can also be completed using the 
 [render-configs.sh](scripts/render-configs.sh) script which can generate all required files for local development.
 ```
-cp config/alpha.json public/config.json
+cp config/base_config.json public/config.json
 ```
 
 Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
