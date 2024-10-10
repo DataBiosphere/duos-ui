@@ -41,9 +41,14 @@ const datasetTableHeader = [
   'Export to Terra',
 ];
 
+const defaultFilters = {
+  accessManagement: [],
+  dataUse: [],
+}
+
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
-  const [filters, setFilters] = useState([]);
+  const [filters, setFilters] = useState(defaultFilters);
   const [filtered, setFiltered] = useState([]);
   const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
@@ -52,7 +57,9 @@ export const DatasetSearchTable = (props) => {
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
   const [dataUse, setDataUse] = useState();
   const searchRef = useRef('');
-  const isFiltered = (filter) => filters.indexOf(filter) > -1;
+
+  const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
+  const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
 
   const assembleFullQuery = (searchTerm, filters) => {
     const queryChunks = [
@@ -96,13 +103,21 @@ export const DatasetSearchTable = (props) => {
     }
 
     var filterQuery = {};
-    if (filters.length > 0) {
+    if (numSelectedFilters(filters) > 0) {
       const shouldTerms = [];
 
-      filters.forEach(term => {
+      filters.accessManagement.forEach(term => {
         shouldTerms.push({
           'term': {
             'accessManagement': term
+          }
+        });
+      });
+
+      filters.dataUse.forEach(term => {
+        shouldTerms.push({
+          'match': {
+            'dataUse.primary.code': term
           }
         });
       });
@@ -119,7 +134,7 @@ export const DatasetSearchTable = (props) => {
     }
 
     // do not add filter subquery if no filters are applied
-    if (filters.length > 0) {
+    if (numSelectedFilters(filters) > 0) {
       return {
         'from': 0,
         'size': 10000,
@@ -143,12 +158,12 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const filterHandler = (event, data, filter, searchTerm) => {
-    var newFilters = [];
-    if (!isFiltered(filter) && filter !== '') {
-      newFilters = filters.concat(filter);
+  const filterHandler = (event, data, category, filter, searchTerm) => {
+    var newFilters = defaultFilters;
+    if (!isFiltered(filter, category) && filter !== '') {
+      newFilters[category] = filters[category].concat(filter);
     } else {
-      newFilters = filters.filter((f) => f !== filter);
+      newFilters[category] = filters[category].filter((f) => f !== filter);
     }
     setFilters(newFilters);
 
@@ -419,7 +434,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
+            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} searchRef={searchRef}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
