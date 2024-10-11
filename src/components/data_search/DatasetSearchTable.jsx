@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { Box, Button, Link } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { groupBy, isEmpty, concat, compact, map } from 'lodash';
+import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import DatasetExportButton from './DatasetExportButton';
@@ -17,18 +18,6 @@ import { Styles } from '../../libs/theme';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
-
-
-const studyTableHeader = [
-  'Study Name',
-  'Description',
-  'Datasets',
-  'Participants',
-  'Phenotype',
-  'Species',
-  'PI Name',
-  'Data Custodian',
-];
 
 const datasetTableHeader = [
   'DUOS ID',
@@ -45,7 +34,6 @@ export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
-  const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
   const [exportableDatasets, setExportableDatasets] = useState({}); // datasetId -> snapshot
   const [tdrApiUrl, setTdrApiUrl] = useState('');
@@ -218,18 +206,6 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const expandHandler = async (event, data) => {
-    try {
-      getExportableDatasets(event, data);
-    } catch {
-      Notifications.showError({ text: 'Unable to retrieve exportable datasets from Terra' });
-    }
-  };
-
-  const collapseHandler = () => {
-    setExportableDatasets({});
-  };
-
   const applyForAccess = async () => {
     const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
     const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
@@ -252,134 +228,6 @@ export const DatasetSearchTable = (props) => {
       return;
     }
 
-    const studies = groupBy(filtered, 'study.studyId');
-    const table = {
-      id: 'study-table',
-      headers: studyTableHeader.map((header) => ({ value: header })),
-      rows: Object.values(studies).map((entry, index) => {
-        const sum = entry.reduce((acc, dataset) => {
-          return acc + dataset.participantCount;
-        }, 0);
-        return {
-          id: 'study-' + entry[0].study.studyId,
-          data: [
-            {
-              value: entry[0].study.studyName,
-              truncate: true,
-              increaseWidth: true,
-            },
-            {
-              value: entry[0].study.description,
-              hideUnderIcon: true,
-            },
-            {
-              value: entry.length,
-              truncate: true,
-            },
-            {
-              value: isNaN(sum) ? undefined : sum,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.phenotype,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.species,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.piName,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.dataCustodianEmail?.join(', '),
-              truncate: true,
-            },
-          ],
-          subtable: {
-            headers: datasetTableHeader.map((header) => ({ value: header })),
-            rows: entry.map((dataset) => {
-              return {
-                id: 'dataset-' + dataset.datasetId,
-                datasetIdentifier: dataset.datasetIdentifier,
-                data: [
-                  {
-                    value: <Link key={`dataset.datasetId`} href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.datasetIdentifier}</Link>,
-                    increaseWidth: true,
-                  },
-                  {
-                    value: dataset.datasetName,
-                    truncate: true,
-                  },
-                  {
-                    value: () => {
-                      const dataUse = dataset.dataUse;
-                      const primaryDataUse = map(dataUse?.primary, 'code').join(', ');
-                      const secondaryDataUse = map(dataUse?.secondary, 'code').join(', ');
-                      const mergedDataUse = compact(concat(primaryDataUse, secondaryDataUse)).join(', ');
-                      return <a
-                        id={`${index}_linkTranslatedDul`}
-                        name="link_translatedDul"
-                        onClick={()=>openTranslatedDUL(dataUse)}
-                      >{mergedDataUse}</a>;
-                    }
-                  },
-                  {
-                    value: dataset.dataTypes,
-                  },
-                  {
-                    value: dataset.participantCount,
-                  },
-                  {
-                    value: () => {
-                      let accessType;
-                      if (dataset.accessManagement === 'external') {
-                        accessType = dataset.url ? <Link href={dataset.url}>External to DUOS</Link> : 'External to DUOS';
-                      } else if (dataset.accessManagement === 'open') {
-                        accessType = dataset.url ? <Link href={dataset.url}>Open Access</Link> : 'Open Access';
-                      } else {
-                        accessType = dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
-                      }
-                      return accessType;
-                    }
-                  },
-                  {
-                    value: () => {
-                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
-                      if (exportableSnapshots.length === 0) {
-                        return dataset.dataLocation;
-                      }
-                      return exportableSnapshots.map((snapshot, i) =>
-                        <Link
-                          key={`${i}`}
-                          href={`${tdrApiUrl}/snapshots/${snapshot.id}`}
-                          target="_blank"
-                        >
-                          {snapshot.name}{'\n'}
-                        </Link>);
-                    }
-                  },
-                  {
-                    value: () => {
-                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
-                      return exportableSnapshots
-                        .map((snapshot, i) =>
-                          <DatasetExportButton
-                            key={`${i}`}
-                            snapshot={snapshot}
-                            title={`Export snapshot ${snapshot.name}`} />);
-                    }
-                  },
-                ],
-              };
-            }),
-          }
-        };
-      }),
-    };
-
-    setTableData(table);
   }, [filtered, exportableDatasets, tdrApiUrl]);
 
   useEffect(() => {
@@ -431,24 +279,9 @@ export const DatasetSearchTable = (props) => {
                     <h1>No datasets registered for this library.</h1>
                   </Box>
                 );
-              } else if (isEmpty(filtered)) {
-                return (
-                  <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <h1>There are no datasets that fit these criteria.</h1>
-                  </Box>
-                );
               } else {
                 return (
-                  <CollapsibleTable
-                    data={tableData}
-                    selected={selected}
-                    selectHandler={selectHandler}
-                    expandHandler={expandHandler}
-                    collapseHandler={collapseHandler}
-                    summary='faceted study search table'
-                  />
+                  <DatasetSearchTableDisplay onSelect={selectHandler} filteredData={filtered} selected={selected}/>
                 );
               }
             })()}

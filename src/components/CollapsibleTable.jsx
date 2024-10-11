@@ -286,7 +286,7 @@ export const CollapsibleTable = (props) => {
     }
   }, [data, selected]);
 
-  return !isEmpty(data) && (
+  return <>{!isEmpty(data) && (
     <TableContainer component={Paper}>
       <Table aria-label={summary}>
         {/* main table header */}
@@ -314,7 +314,7 @@ export const CollapsibleTable = (props) => {
         </TableBody>
       </Table>
     </TableContainer>
-  );
+  )}</>;
 };
 
 export default CollapsibleTable;
