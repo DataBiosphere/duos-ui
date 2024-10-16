@@ -51,7 +51,6 @@ const searchDatasets = (query, callback, currentDatasets) => {
       return {
         id: ds.id || ds.datasetId,
         datasetId: ds.id || ds.datasetId,
-        datasetId: ds.id || ds.datasetId,
         identifier: ds.identifier || ds.datasetIdentifier,
         datasetIdentifier: ds.identifier || ds.datasetIdentifier,
         datasetName: ds.name || ds.datasetName,
