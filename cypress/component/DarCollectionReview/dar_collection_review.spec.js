@@ -303,7 +303,7 @@ const dar = {
           'status': 'Open',
           'createDate': 1669062648000,
           'referenceId': 'dars-id-123',
-          'dataSetId': 13,
+          'datasetId': 13,
           'votes': {
             '8675': {
               'voteId': 8675,
@@ -396,7 +396,7 @@ const dar = {
           'status': 'Open',
           'createDate': 1669062648000,
           'referenceId': 'dars-id-123',
-          'dataSetId': 13,
+          'datasetId': 13,
           'votes': {
             '8688': {
               'voteId': 8688,
@@ -456,7 +456,7 @@ const dar = {
   },
   'datasets': [
     {
-      'dataSetId': 13,
+      'datasetId': 13,
       'objectId': null,
       'name': 'Sleep Apnea',
       'datasetName': 'Sleep Apnea',
@@ -483,7 +483,7 @@ const dar = {
       'properties': [
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': '# of participants',
           'propertyValue': 17,
@@ -495,7 +495,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Dataset Name',
           'propertyValue': 'Sleep Apnea',
@@ -507,7 +507,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Description',
           'propertyValue': 'Single cell RNA-sequence',
@@ -519,7 +519,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Data Type',
           'propertyValue': 'RNA-seq',
@@ -531,7 +531,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Data Depositor',
           'propertyValue': 'data_depositor@example.com',
@@ -543,7 +543,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Species',
           'propertyValue': 'Human',
@@ -555,7 +555,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'Phenotype/Indication',
           'propertyValue': 'sleep apnea',
@@ -567,7 +567,7 @@ const dar = {
         },
         {
           'propertyId': null,
-          'dataSetId': 13,
+          'datasetId': 13,
           'propertyKey': null,
           'propertyName': 'url',
           'propertyValue': 'https://...',
@@ -658,7 +658,7 @@ const matchResponse = [
 const dacDatasets = [{
   'datasetName': null,
   'dacId': 3,
-  'dataSetId': 13,
+  'datasetId': 13,
   'consentId': 'B177D3C2-CDD8-4153-9CBF-AE4F0C34609A',
   'translatedDataUse': '',
   'deletable': null,

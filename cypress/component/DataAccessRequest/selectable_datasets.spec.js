@@ -6,22 +6,22 @@ import SelectableDatasets from '../../../src/pages/dar_application/SelectableDat
 
 const datasets = [
   {
-    dataSetId: 123456,
+    datasetId: 123456,
     datasetIdentifier: `DUOS-123456`,
     datasetName: 'Some Dataset 1'
   },
   {
-    dataSetId: 234567,
+    datasetId: 234567,
     datasetIdentifier: `DUOS-234567`,
     datasetName: 'Some Dataset 2'
   },
   {
-    dataSetId: 345678,
+    datasetId: 345678,
     datasetIdentifier: `DUOS-345678`,
     datasetName: 'Some Dataset 3'
   },
   {
-    dataSetId: 456789,
+    datasetId: 456789,
     datasetIdentifier: `DUOS-456789`,
     datasetName: 'Some Dataset 4'
   },

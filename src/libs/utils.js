@@ -56,8 +56,8 @@ export const darCollectionUtils = {
             if (isNil(relevantDatasets)) {
               return electionArr;
             } else {
-              const relevantIds = map(dataset => dataset.dataSetId)(relevantDatasets);
-              return filter(election => includes(election.dataSetId, relevantIds))(electionArr);
+              const relevantIds = map(dataset => dataset.datasetId)(relevantDatasets);
+              return filter(election => includes(election.datasetId, relevantIds))(electionArr);
             }
           }
         }),

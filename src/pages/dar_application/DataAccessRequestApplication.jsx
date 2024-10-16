@@ -270,8 +270,8 @@ const DataAccessRequestApplication = (props) => {
       const { dars, datasets } = collection;
       const darReferenceId = head(keys(dars));
       formData = await DAR.getPartialDarRequest(darReferenceId);
-      // This is a collection, so we need to get the datasets and dataSetIds from the collection
-      formData.datasetIds = map(ds => get('dataSetId')(ds))(datasets);
+      // This is a collection, so we need to get the datasets and datasetIds from the collection
+      formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
@@ -449,7 +449,7 @@ const DataAccessRequestApplication = (props) => {
     let formattedFormData = cloneDeep(formData);
     // DAR datasetIds needs to be a list of ids
     if (DAAUtils.isEnabled()) {
-      formattedFormData.datasetIds = selectedDatasets.map(d => d.dataSetId);
+      formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId);
     }
 
     // Make sure we navigate back to the current DAR after saving.

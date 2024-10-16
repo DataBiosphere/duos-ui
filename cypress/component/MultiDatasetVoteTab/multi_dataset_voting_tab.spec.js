@@ -15,7 +15,7 @@ const bucket1 = {
   key: 'bucket1',
   elections: [
     [
-      {dataSetId: 300, electionId: 101, status: 'Open', electionType: 'DataAccess'},
+      {datasetId: 300, electionId: 101, status: 'Open', electionType: 'DataAccess'},
       {electionId: 100, electionType: 'RP Vote'}
     ],
   ],
@@ -58,7 +58,7 @@ const bucket2 = {
   key: 'bucket2',
   elections: [
     [
-      {dataSetId: 400, electionId: 101, status: 'Open', electionType: 'DataAccess'},
+      {datasetId: 400, electionId: 101, status: 'Open', electionType: 'DataAccess'},
       {electionId: 100, electionType: 'RP Vote'}
     ],
   ],
@@ -97,8 +97,8 @@ const bucket2 = {
 
 const collection = {
   datasets: [
-    {dataSetId: 300},
-    {dataSetId: 400}
+    {datasetId: 300},
+    {datasetId: 400}
   ],
   createUser: {
     libraryCards: [{id: 1}]
@@ -107,7 +107,7 @@ const collection = {
 
 const collectionMissingLibraryCard = {
   datasets: [
-    {dataSetId: 300}
+    {datasetId: 300}
   ],
   createUser: {
     libraryCards: []
@@ -116,7 +116,7 @@ const collectionMissingLibraryCard = {
 
 beforeEach(() => {
   cy.stub(Storage, 'getCurrentUser').returns({userId: 200});
-  cy.stub(User, 'getUserRelevantDatasets').returns([{dataSetId: 300}, {dataSetId: 400}]);
+  cy.stub(User, 'getUserRelevantDatasets').returns([{datasetId: 300}, {datasetId: 400}]);
 });
 
 describe('MultiDatasetVoteTab - Tests', function() {

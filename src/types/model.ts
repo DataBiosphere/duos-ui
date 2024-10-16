@@ -95,7 +95,7 @@ export interface Institution {
 export interface Dataset {
   name: string;
   datasetName: string;
-  dataSetId: number;
+  datasetId: number;
   createUserId: number;
   createUser: DuosUserResponse;
   dacId: string;

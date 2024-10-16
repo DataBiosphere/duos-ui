@@ -41,7 +41,7 @@ const autocompleteOntologies = (query, callback) => {
 };
 
 const searchDatasets = (query, callback, currentDatasets) => {
-  const currentDatasetIds = currentDatasets.map((ds) => ds.dataSetId);
+  const currentDatasetIds = currentDatasets.map((ds) => ds.datasetId);
 
   DataSet.autocompleteDatasets(query).then(items => {
     const processedDatasets = items.map((ds) => {
@@ -49,9 +49,8 @@ const searchDatasets = (query, callback, currentDatasets) => {
       // a simplified auto-complete dataset object. We need to standardize the keys to ensure
       // legacy functionality is maintained.
       return {
-        id: ds.id || ds.dataSetId || ds.datasetId,
-        datasetId: ds.id || ds.dataSetId || ds.datasetId,
-        dataSetId: ds.id || ds.dataSetId || ds.datasetId,
+        id: ds.id || ds.datasetId,
+        datasetId: ds.id || ds.datasetId,
         identifier: ds.identifier || ds.datasetIdentifier,
         datasetIdentifier: ds.identifier || ds.datasetIdentifier,
         datasetName: ds.name || ds.datasetName,
@@ -59,7 +58,7 @@ const searchDatasets = (query, callback, currentDatasets) => {
         ... ds
       };
     });
-    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.dataSetId)).map(function (item) {
+    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -68,8 +67,8 @@ const searchDatasets = (query, callback, currentDatasets) => {
 
 const formatSearchDataset = (ds) => {
   return {
-    key: ds.dataSetId,
-    value: ds.dataSetId,
+    key: ds.datasetId,
+    value: ds.datasetId,
     dataset: ds,
     displayText: ds.datasetIdentifier,
     label: <span>
@@ -174,7 +173,7 @@ export default function DataAccessRequest(props) {
             placeholder={'Dataset Name, Sample Collection ID, or PI'}
             onChange={async ({key, value}) => {
               const datasets = value.map((val) => val.dataset);
-              const datasetIds = datasets?.map((ds) => ds.dataSetId);
+              const datasetIds = datasets?.map((ds) => ds.datasetId);
               const fullDatasets = await DataSet.getDatasetsByIds(datasetIds);
               onChange({key, value: datasetIds});
               setDatasets(fullDatasets);

@@ -11,7 +11,7 @@ const collectionWithMixedElectionStatuses = {
         0: {
           status: 'Closed',
           electionType: 'DataAccess',
-          dataSetId: 100
+          datasetId: 100
         }
       }
     },
@@ -20,7 +20,7 @@ const collectionWithMixedElectionStatuses = {
         1: {
           status: 'Open',
           electionType: 'DataAccess',
-          dataSetId: 200,
+          datasetId: 200,
           votes: {0: {type: 'DAC'}}
         }
       }
@@ -35,7 +35,7 @@ const collectionWithSameElectionStatus = {
         0: {
           status: 'Closed',
           electionType: 'DataAccess',
-          dataSetId: 100
+          datasetId: 100
         }
       }
     },
@@ -44,7 +44,7 @@ const collectionWithSameElectionStatus = {
         1: {
           status: 'Closed',
           electionType: 'DataAccess',
-          dataSetId: 200
+          datasetId: 200
         }
       }
     }
@@ -362,7 +362,7 @@ describe('Dar Collection determineCollectionStatus', () => {
         0: {data: {datasetIds: [100]}}
       }
     };
-    const relevantDatasets = [{dataSetId: 100}];
+    const relevantDatasets = [{datasetId: 100}];
     const status = determineCollectionStatus(collection, relevantDatasets);
     expect(toLower(status)).equals('unreviewed');
   });
@@ -388,12 +388,12 @@ describe('Dar Collection determineCollectionStatus', () => {
             0: {
               status: 'Closed',
               electionType: 'DataAccess',
-              dataSetId: 100
+              datasetId: 100
             },
             1: {
               status: 'Open',
               electionType: 'RP',
-              dataSetId: 100
+              datasetId: 100
             },
           }
         }
@@ -411,24 +411,24 @@ describe('Dar Collection determineCollectionStatus', () => {
             0: {
               status: 'Closed',
               electionType: 'DataAccess',
-              dataSetId: 100
+              datasetId: 100
             },
             1: {
               status: 'Open',
               electionType: 'RP',
-              dataSetId: 100
+              datasetId: 100
             },
           }
         }
       }
     };
-    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
     const status = determineCollectionStatus(collection, relevantDatasets);
     expect(toLower(status)).equals('denied');
   });
 
   it('Only considers DARs for relevant datasets when determining collection status', () => {
-    const relevantDatasets = [{dataSetId: 100}];
+    const relevantDatasets = [{datasetId: 100}];
     const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
     expect(toLower(status)).equals('denied');
   });
@@ -444,13 +444,13 @@ describe('Dar Collection determineCollectionStatus', () => {
   });
 
   it('Appends together statuses when relevant datasets is non-null and elections have different statuses', () => {
-    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
     const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
     expect(toLower(status)).equals('denied, open');
   });
 
   it('Only returns unique statuses when relevant datasets is non-null and multiple elections have the same status', () => {
-    const relevantDatasets = [{dataSetId: 100}, {dataSetId: 200}];
+    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
     const status = determineCollectionStatus(collectionWithSameElectionStatus, relevantDatasets);
     expect(toLower(status)).equals('denied');
   });
