@@ -129,22 +129,22 @@ export default function DucAddendum(props) {
         return [
           {
             data: dataset.datasetIdentifier,
-            id: dataset.dataSetId,
+            id: dataset.datasetId,
             style: columnStyles
           },
           {
             data: dataset.datasetName?.replaceAll('_', '_\u200b'),
-            id: dataset.dataSetId,
+            id: dataset.datasetId,
             style: columnStyles
           },
           {
             data: '',
-            id: dataset.dataSetId,
+            id: dataset.datasetId,
             style: columnStyles
           },
           {
             data: '',
-            id: dataset.dataSetId,
+            id: dataset.datasetId,
             style: columnStyles
           }
         ];

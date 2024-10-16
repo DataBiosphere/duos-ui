@@ -9,15 +9,15 @@ export default function SelectableDatasets(props) {
 
   useEffect(() => {
     // Populate parent state with the current state of datasets to be saved to the DAR
-    const newSelectedDatasets = datasets.filter(ds => !removedIds.includes(ds.dataSetId));
+    const newSelectedDatasets = datasets.filter(ds => !removedIds.includes(ds.datasetId));
     setSelectedDatasets(newSelectedDatasets);
   }, [removedIds, datasets, setSelectedDatasets]);
 
   const updateLocalState = (ds) => {
-    if (removedIds.includes(ds.dataSetId)) {
-      setRemovedIds(removedIds.toSpliced(removedIds.indexOf(ds.dataSetId), 1));
+    if (removedIds.includes(ds.datasetId)) {
+      setRemovedIds(removedIds.toSpliced(removedIds.indexOf(ds.datasetId), 1));
     } else {
-      setRemovedIds(removedIds.concat(ds.dataSetId));
+      setRemovedIds(removedIds.concat(ds.datasetId));
     }
   };
 
@@ -34,22 +34,22 @@ export default function SelectableDatasets(props) {
     const isDeletable = removedIds.length < datasets.length - 1;
     const clickable = isDeletable && !disabled;
     return <div
-      key={'selectable_dataset_' + ds.dataSetId}
+      key={'selectable_dataset_' + ds.datasetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
       style={disabled ? {} : {cursor: 'pointer'}}
       {...(clickable ? {onClick: () => updateLocalState(ds)} : {})}>
       {datasetDescriptionDiv(ds)}
-      <span id={'remove_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
+      <span id={'remove_dataset_' + ds.datasetId} style={{marginLeft: 10}}>
         <>
           {!disabled && <DeleteIcon
             data-tip="Delete dataset"
-            data-for={removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.dataSetId) ? 'tip_last' : ''}
+            data-for={removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 'tip_last' : ''}
             style={{
               color: '#0948B7',
               fontSize: '2.3rem',
               verticalAlign: 'middle',
-              opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.dataSetId) ? 0.5 : 1
+              opacity: removedIds.length === (datasets.length - 1) && !removedIds.includes(ds.datasetId) ? 0.5 : 1
             }}
           />}
           {!isDeletable &&
@@ -67,13 +67,13 @@ export default function SelectableDatasets(props) {
       {backgroundColor: 'lightgray', opacity: .5} :
       {backgroundColor: 'lightgray', opacity: .5, cursor: 'pointer'};
     return <div
-      key={'selectable_dataset_' + ds.dataSetId}
+      key={'selectable_dataset_' + ds.datasetId}
       id={ds.datasetIdentifier + '_summary'}
       className="collaborator-summary-card"
       style={style}
       {...(disabled ? {} : {onClick: () => updateLocalState(ds)})}>
       {datasetDescriptionDiv(ds)}
-      <span id={'restore_dataset_' + ds.dataSetId} style={{marginLeft: 10}}>
+      <span id={'restore_dataset_' + ds.datasetId} style={{marginLeft: 10}}>
         {!disabled && <RestoreFromTrashIcon style={{color: '#0948B7', fontSize: '2.3rem', verticalAlign: 'middle'}}/>}
         <span style={{marginLeft: '1rem'}}></span>
       </span>
@@ -82,7 +82,7 @@ export default function SelectableDatasets(props) {
 
   const datasetList = () => {
     return datasets.map((ds) => {
-      return removedIds.includes(ds.dataSetId) ?
+      return removedIds.includes(ds.datasetId) ?
         unDeletableStyled(ds) :
         deletableStyled(ds);
     });

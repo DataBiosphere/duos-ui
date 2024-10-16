@@ -64,7 +64,7 @@ const userNoLibraryCard = {
 
 const datasets = [
   {
-    dataSetId: 123456,
+    datasetId: 123456,
     datasetIdentifier: `DUOS-123456`,
     name: 'Some Dataset',
     dataUse: {

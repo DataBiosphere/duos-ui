@@ -41,8 +41,8 @@ export const DataSet = {
     return res.data;
   },
 
-  getDataSetsByDatasetId: async (dataSetId) => {
-    const url = `${await getApiUrl()}/api/dataset/v2/${dataSetId}`;
+  getDataSetsByDatasetId: async (datasetId) => {
+    const url = `${await getApiUrl()}/api/dataset/v2/${datasetId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
