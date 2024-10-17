@@ -251,7 +251,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.datasetName} id={`${datasets[0].study.studyId}-dataset-name`}>
+        data: <OverflowTooltip place={'top'} tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
           {trimNewlineCharacters(dataset.datasetName)}
         </OverflowTooltip>,
         value: dataset.datasetName,
