@@ -1,44 +1,41 @@
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
-import _ from 'lodash';
-import { Box, Button, Link } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
-import { groupBy, isEmpty, concat, compact, map } from 'lodash';
+import { isEmpty } from 'lodash';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
-import CollapsibleTable from '../CollapsibleTable';
+import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
 import TableHeaderSection from '../TableHeaderSection';
-import DatasetExportButton from './DatasetExportButton';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
-import eventList from '../../libs/events';
-import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
-import { Metrics } from '../../libs/ajax/Metrics';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
-import TranslatedDulModal from '../modals/TranslatedDulModal';
 
-const datasetTableHeader = [
-  'DUOS ID',
-  'Dataset Name',
-  'Data Use',
-  'Data Types',
-  'Participants',
-  'Access Type',
-  'Data Location',
-  'Export to Terra',
-];
+const styles = {
+  subTab: {
+    padding: '0 25px',
+    fontSize: '15px',
+    textTransform: 'none',
+    fontFamily: 'Montserrat, sans-serif',
+    color: '#00609f',
+  },
+  subTabActive: {
+    fontWeight: 'bold',
+    borderBottom: `5px solid #00609f`
+  },
+};
+
+
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [filters, setFilters] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
-  const [exportableDatasets, setExportableDatasets] = useState({}); // datasetId -> snapshot
-  const [tdrApiUrl, setTdrApiUrl] = useState('');
-  const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
-  const [dataUse, setDataUse] = useState();
+  const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
   const searchRef = useRef('');
   const isFiltered = (filter) => filters.indexOf(filter) > -1;
 
@@ -153,62 +150,8 @@ export const DatasetSearchTable = (props) => {
     };
     search();
   };
-
-
-
-  const selectHandler = async (event, data, selector) => {
-    let idsToModify = [];
-    if (selector === 'all') {
-      data.rows.forEach((row) => {
-        row.subtable.rows.forEach((subRow) => {
-          idsToModify.push(subRow.id);
-        });
-      });
-    } else if (selector === 'row') {
-      const rowIds = data.subtable.rows.map(row => row.id);
-      const isRowSelected = rowIds.every(id => selected.includes(id));
-      isRowSelected ?
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-unselected'}) :
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-selected'});
-      data.subtable.rows.forEach((row) => {
-        idsToModify.push(row.id);
-      });
-    } else if (selector === 'subrow') {
-      selected.includes(data.id) ?
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'dataset-unselected'}) :
-        await Metrics.captureEvent(eventList.dataLibrary,{'action': 'dataset-selected'});
-      idsToModify.push(data.id);
-    }
-
-    let newSelected = [];
-    const allSelected = idsToModify.every((id) => selected.includes(id));
-    if (allSelected) {
-      newSelected = selected.filter((id) => !idsToModify.includes(id));
-    } else {
-      newSelected = selected.concat(idsToModify);
-    }
-
-    setSelected(newSelected);
-  };
-
-  const getExportableDatasets = async (event, data) => {
-    setTdrApiUrl(await Config.getTdrApiUrl());
-    // Note the dataset identifier is in each sub-table row.
-    const datasetIdentifiers = data.subtable.rows.map((row) => row.datasetIdentifier);
-    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
-    if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = _.chain(snapshots.items)
-      // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-        .groupBy('duosId')
-        .value();
-      setExportableDatasets(datasetIdToSnapshot);
-    }
-  };
-
   const applyForAccess = async () => {
-    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
-    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    const darDraft = await DAR.postDarDraft({ datasetId: selected });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
@@ -216,19 +159,12 @@ export const DatasetSearchTable = (props) => {
     searchRef.current.value = '';
     filterHandler(null, datasets, '', '');
   };
-
-  const openTranslatedDUL = (dataUse) => {
-    const mergedPrimaryAndSecondary = concat(dataUse.primary, dataUse.secondary);
-    setDataUse(mergedPrimaryAndSecondary);
-    setShowTranslatedDULModal(true);
-  };
-
   useEffect(() => {
     if (isEmpty(filtered)) {
       return;
     }
 
-  }, [filtered, exportableDatasets, tdrApiUrl]);
+  }, [filtered]);
 
   useEffect(() => {
     setFiltered(datasets);
@@ -265,6 +201,24 @@ export const DatasetSearchTable = (props) => {
             </Box>
           </div>
         </Box>
+        <Box sx={{display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black'}}>
+          <Tabs
+            value={false}
+            orientation={'horizontal'}
+            TabIndicatorProps={{ style: { background: '#00609f' } }}
+          >
+            {Object.values(datasetSearchTableTabs).map((tab) => <Tab
+              key={tab.key}
+              label={tab.label}
+              style={{
+                ...styles.subTab,
+                ...(tab.key === selectedTable ? styles.subTabActive : {})
+              }}
+              onClick={() => setSelectedTable(tab)}
+              component={Button}
+            />)}
+          </Tabs>
+        </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
             <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} searchRef={searchRef}/>
@@ -280,9 +234,7 @@ export const DatasetSearchTable = (props) => {
                   </Box>
                 );
               } else {
-                return (
-                  <DatasetSearchTableDisplay onSelect={selectHandler} filteredData={filtered} selected={selected}/>
-                );
+                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected}/>;
               }
             })()}
           </Box>
@@ -296,14 +248,6 @@ export const DatasetSearchTable = (props) => {
           }
         </Box>
       </Box>
-      {
-        showTranslatedDULModal &&
-        <TranslatedDulModal
-          showModal={showTranslatedDULModal}
-          dataUse={dataUse}
-          onCloseRequest={()=>setShowTranslatedDULModal(false)}
-        />
-      }
     </>
   );
 };

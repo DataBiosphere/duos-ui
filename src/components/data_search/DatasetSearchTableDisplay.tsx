@@ -1,79 +1,56 @@
-import CollapsibleTable from '../CollapsibleTable';
 import * as React from 'react';
 import {Box} from '@mui/material';
-import {groupBy, isEmpty} from 'lodash';
+import {isEmpty} from 'lodash';
 import {DatasetTerm} from 'src/types/model';
+import SimpleTable from '../SimpleTable';
+import {Styles} from '../../libs/theme';
+import {
+  DatasetSearchTableTab,
+} from './DatasetSearchTableConstants';
 
-const studyTableHeader = [
-  'Study Name',
-  'Description',
-  'Datasets',
-  'Participants',
-  'Phenotype',
-  'Species',
-  'PI Name',
-  'Data Custodian',
-];
+const styles = {
+  baseStyle: {
+    fontFamily: 'Montserrat',
+    fontSize: '1.4rem',
+    fontWeight: 400,
+    display: 'flex',
+    padding: '1rem 2%',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    whiteSpace: 'pre-wrap',
+    backgroundColor: 'white',
+    border: '1px solid #DEDEDE',
+    borderRadius: '4px',
+    textOverflow: 'ellipsis',
+    height: '4rem',
+    marginTop: 5,
+  },
+  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
+    justifyContent: 'space-between',
+    fontFamily: 'Montserrat',
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    letterSpacing: '0.2px',
+    backgroundColor: '#E2E8F4',
+    border: 'none',
+    textTransform: 'uppercase',
+    lineHeight: '16px',
+  }),
+  containerOverride: {}
+};
+
 
 interface DatasetSearchTableDisplayProps{
-  onSelect: (event: any, data: any, selector: any) => void;
+  onSelect: (newSelectedIds: number[]) => void;
   filteredData: DatasetTerm[];
-  selected: DatasetTerm[];
+  selected: number[];
+  tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
 }
 
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
-  const { onSelect, filteredData, selected } = props;
-
-  const studies = groupBy(filteredData, 'study.studyId');
-
-  const tableData = {
-    id: 'study-table',
-    headers: studyTableHeader.map((header) => ({ value: header })),
-    rows: Object.values(studies).map((entry) => {
-      const sum = entry.reduce((acc, dataset) => {
-        return acc + dataset.participantCount;
-      }, 0);
-      return {
-        id: 'study-' + entry[0].study.studyId,
-        data: [
-          {
-            value: entry[0].study.studyName,
-            truncate: true,
-            increaseWidth: true,
-          },
-          {
-            value: entry[0].study.description,
-            hideUnderIcon: true,
-          },
-          {
-            value: entry.length,
-            truncate: true,
-          },
-          {
-            value: isNaN(sum) ? undefined : sum,
-            truncate: true,
-          },
-          {
-            value: entry[0].study.phenotype,
-            truncate: true,
-          },
-          {
-            value: entry[0].study.species,
-            truncate: true,
-          },
-          {
-            value: entry[0].study.piName,
-            truncate: true,
-          },
-          {
-            value: entry[0].study.dataCustodianEmail?.join(', '),
-            truncate: true,
-          },
-        ],
-      };
-    }),
-  };
-
+  const { onSelect, filteredData, selected, tab } = props;
+  const headers = tab.makeHeaders(filteredData, selected, onSelect);
+  const rowData = tab.makeRows(filteredData, headers);
 
   return isEmpty(filteredData) ? (
     <Box sx={{
@@ -83,11 +60,13 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     </Box>
   )
     : (
-      <CollapsibleTable
-        data={tableData}
+      <SimpleTable
+        rowData={rowData}
+        columnHeaders={headers}
         selected={selected}
-        selectHandler={onSelect}
-        summary='faceted study search table'
+        styles={styles}
+        tableSize={10}
+        summary='faceted dataset search table'
       />
     );
 };
