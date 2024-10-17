@@ -11,7 +11,7 @@ const linkStyle = {color: '#2FA4E7'};
 const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>;
 const profileUnsubmitted = <span>Please submit {profileLink} to be able to create a Data Access Request</span>;
 const profileSubmitted = <span>Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request</span>;
-const libraryCardLink = <a href="https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs" style={linkStyle} target="_blank" rel="noopener noreferrer">Library Card</a>;
+const libraryCardLink = <a href="https://support.terra.bio/hc/en-us/articles/28510945983003-How-to-Submit-a-Data-Access-Request-DAR-in-DUOS" style={linkStyle} target="_blank" rel="noopener noreferrer">Library Card</a>;
 
 
 export default function ResearcherInfo(props) {

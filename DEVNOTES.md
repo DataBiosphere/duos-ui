@@ -1,10 +1,10 @@
 # Local Development
 
-1. We use [node@16](https://github.com/nvm-sh/nvm#installing-and-updating):
+1. We use [node@22.6.0](https://github.com/nvm-sh/nvm#installing-and-updating):
 
 ```
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install 16
+nvm install 22.6.0
 ```
 2. Install deps:
 
@@ -12,12 +12,14 @@ nvm install 16
 npm install
 ```
 
-3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
-Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev`.
-The installation steps outlined in this step can also be completed using the [render-configs.sh](scripts/render-configs.sh) script which can generate all required
-files for local development.
+3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any 
+environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where 
+{%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
+`dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment 
+will simulate it for local development. The installation steps outlined in this step can also be completed using the 
+[render-configs.sh](scripts/render-configs.sh) script which can generate all required files for local development.
 ```
-cp config/alpha.json public/config.json
+cp config/base_config.json public/config.json
 ```
 
 Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
@@ -50,8 +52,9 @@ npm start
 ```
 ### Running under Docker
 
-Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes.
-Remember to set the `env` value appropriately in `config.json`. We use `local` for running via npm, but under docker, we use a real env like `dev`
+Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes. Remember to set
+the `env` value appropriately, for example, `dev`. Certain features are available only in specific environments. Setting
+the `env` value to the desired environment will simulate it for local development.
 
 ```yaml
     volumes:
@@ -78,7 +81,7 @@ run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
 ```json
 {
-  "baseUrl": "https://local.dsde-dev,broadinstitute.org:3000/"
+  "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"
 }
 ```
 Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`

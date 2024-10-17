@@ -1,15 +1,11 @@
 import React from 'react';
-import SignInButton from '../components/SignInButton';
 import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
 import { Link } from 'react-router-dom';
-import { Storage } from '../libs/storage';
 
 const Home = (props) => {
-  const { onSignIn, history } = props;
-  const isLogged = Storage.userIsLogged();
 
   const homeTitle = {
     color: '#FFFFFF',
@@ -82,22 +78,11 @@ const Home = (props) => {
     display: 'block'
   };
 
-  const signInPositionStyle = {
-    padding: '1em 1em 0 0',
-    alignItems: 'center',
-    position: 'absolute',
-    top: '0',
-    right: '1rem',
-  };
-
   return (
     <div className="row">
       <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div className="row" style={{ backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}>
           <img style={{ height: 'inherit', minWidth: '100%' }} src={homeHeaderBackground} alt="Home header background" />
-          {!isLogged && <div style={signInPositionStyle}>
-            <SignInButton props={props} onSignIn={onSignIn} history={history} />
-          </div>}
           <div style={{ position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
             <img style={duosLogo} alt="DUOS logo" src={duosLogoImg} />
             <h1 style={homeTitle}>Data Use Oversight System</h1>
@@ -122,21 +107,21 @@ const Home = (props) => {
             <p style={header}>DUOS for DACs</p>
             <p style={description}>DACs can swiftly manage data access requests <br /> and clearly track data use compliance.</p>
             <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a id="zendesk-dac-link" href="https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              <a id="terra-support-dac-link" href="https://support.terra.bio/hc/en-us/articles/28513346337179-Overview-DUOS-for-Data-Access-Committees-DACs" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
             </div>
           </div>
           <div className="col-lg-4 col-md-4 ">
             <p style={header}>Institutional Oversight</p>
             <p style={description}>DUOS reduces repetitive work for Signing Officials and expedites data sharing through our innovative Library Card-style agreements.</p>
             <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide" target="_blank" rel="noreferrer" id="zendesk-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS" target="_blank" rel="noreferrer" id="terra-support-so-link" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
             </div>
           </div>
           <div className="col-lg-4 col-md-4">
             <p style={header}>Looking for data?</p>
             <p style={description}>DUOS helps researchers request and access data from multiple sources with a single application.</p>
             <div className="row" style={{ display: 'flex', justifyContent: 'center' }}>
-              <a href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide" id="zendesk-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
+              <a href="https://support.terra.bio/hc/en-us/articles/28510385779099-Overview-DUOS-for-Researchers" id="terra-support-researcher-link" target="_blank" rel="noreferrer" style={{ color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}>LEARN MORE</a>
             </div>
           </div>
         </div>

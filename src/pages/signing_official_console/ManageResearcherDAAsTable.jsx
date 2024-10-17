@@ -13,7 +13,7 @@ import {
 } from '../../libs/utils';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
-import ManageUsersDropdown from './ManageUsersDropdown';
+import DisplayNameCell from './DisplayNameCell';
 import ManageDaasDropdown from './ManageDaasDropdown';
 import DAACell from './DAACell';
 
@@ -58,20 +58,7 @@ const refreshResearchers = async (setResearchers) => {
 
 const displayNameCell = (displayName, email, id, daas, setResearchers) => {
   return {
-    data: (
-      <>
-        <li className="dropdown" style={{ listStyleType: 'none' }}>
-          <div role="button" data-toggle="dropdown">
-            <div id="dacUser" style={{ color: 'black' }}>
-              {displayName || 'Invite sent, pending registration'}
-              <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
-              <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
-            </div>
-          </div>
-          <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
-        </li>
-      </>
-    ),
+    data: (<DisplayNameCell key={id} displayName={displayName} email={email} id={id} daas={daas} setResearchers={setResearchers} refreshResearchers={refreshResearchers} />),
     id,
     style: {},
     label: 'display-names',
@@ -202,7 +189,8 @@ export default function ManageResearcherDAAsTable(props) {
               fontSize: '16px',
               maxWidth: '60%',
             })}>
-              The table below allows you to pre-authorize your Institution&apos;s users to request access to datasets,
+              The table below allows you to <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
+                id="terra-support-pre-auth-link" target="_blank" rel="noreferrer">pre-authorize</a> your Institution&apos;s users to request access to datasets,
               known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
               Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
             </div>
