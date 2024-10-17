@@ -153,7 +153,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.description}
         onChange={({ value }) => {
-          formData.properties.description = value;
+          formData.properties.duosId = value;
         }}
       />
       <FormField
@@ -198,7 +198,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.species}
         onChange={({ value }) => {
-          formData.properties.species = value;
+          formData.properties.donorSize = value;
         }}
       />
       <FormField
@@ -207,7 +207,7 @@ export const DatasetUpdate = (props) => {
         validators={[FormValidators.REQUIRED]}
         defaultValue={formData.properties.phenotype}
         onChange={({ value }) => {
-          formData.properties.phenotype = value;
+          formData.properties.dataType = value;
         }}
       />
       <FormField
