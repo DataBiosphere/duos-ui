@@ -7,7 +7,6 @@ import CollapsibleTable from '../CollapsibleTable';
 import TableHeaderSection from '../TableHeaderSection';
 import DatasetExportButton from './DatasetExportButton';
 import { DataSet } from '../../libs/ajax/DataSet';
-import { DAR } from '../../libs/ajax/DAR';
 import eventList from '../../libs/events';
 import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
@@ -17,7 +16,7 @@ import { Styles } from '../../libs/theme';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import isEqual from 'lodash/isEqual';
 import TranslatedDulModal from '../modals/TranslatedDulModal';
-
+import ApplyForAccess from './ApplyForAccess';
 
 const studyTableHeader = [
   'Study Name',
@@ -245,12 +244,6 @@ export const DatasetSearchTable = (props) => {
     setExportableDatasets({});
   };
 
-  const applyForAccess = async () => {
-    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
-    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
-    history.push(`/dar_application/${darDraft.referenceId}`);
-  };
-
   const clearSearchRef = () => {
     searchRef.current.value = '';
     filterHandler(null, datasets, '', '');
@@ -472,9 +465,11 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-          <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
-            Apply for Access
-          </Button>
+            <ApplyForAccess
+              history={history}
+              datasets={datasets}
+              selectedDatasetKeys={selected}>
+            </ApplyForAccess>
           }
         </Box>
       </Box>
