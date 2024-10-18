@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import {isFunction, isNil} from 'lodash/fp';
 import {DAAUtils} from '../utils/DAAUtils';
+import {Auth} from '../libs/auth/auth';
 import SignInButton from '../components/SignInButton';
 
 const styles = {
@@ -139,7 +140,6 @@ export const headerTabsConfig = [
 
 const NavigationTabsComponent = (props) => {
   const {
-    onSignIn,
     history,
     orientation,
     makeNotifications,
@@ -203,7 +203,7 @@ const NavigationTabsComponent = (props) => {
                   <a
                     id="link_about"
                     className="navbar-duos-link"
-                    href="https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS"
+                    href="https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS"
                     target="_blank"
                     rel="noreferrer"
                   >
@@ -215,7 +215,7 @@ const NavigationTabsComponent = (props) => {
                   <a
                     id="link_help"
                     className="navbar-duos-link"
-                    href="https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-"
+                    href="https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS"
                     target="_blank" rel="noreferrer"
                   >
                     <div className="navbar-duos-icon-help" style={navbarDuosIcon}></div>
@@ -227,9 +227,7 @@ const NavigationTabsComponent = (props) => {
                 {/* Sign-in button location when window is narrow and menu is vertical */}
                 {!isLogged && orientation === 'vertical' && <li style={{marginRight: 0}}>
                   <SignInButton
-                    customStyle={undefined}
                     props={props}
-                    onSignIn={onSignIn}
                     history={history}/>
                 </li>}
               </ul>
@@ -247,21 +245,26 @@ const NavigationTabsComponent = (props) => {
               flexDirection: orientation === 'vertical' ? 'column' : 'row'
             }}>
             <SignInButton
-              customStyle={undefined}
               props={props}
-              onSignIn={onSignIn}
               history={history}/>
           </div>
         }
         {isLogged && (
           <div
-            style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: orientation === 'vertical' ? 'column' : 'row'
+            }}
           >
+            <a href="https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS"
+              id="terra-support-docs-link" target="_blank" rel="noreferrer"
+              style={{color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20}}>Help</a>
             <button onClick={showRequestModal} style={styles.navButton}>
-              <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
+              <div id="help" style={{whiteSpace: 'nowrap'}}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <li className="dropdown user-li" onClick={showProfileLinks} style={{ listStyleType: 'none' }}>
+            <li className="dropdown user-li" onClick={showProfileLinks} style={{listStyleType: 'none'}}>
               <a id="sel_user" role="button" className="dropdown-toggle" data-toggle="dropdown">
                 <div id="dacUser">
                   {currentUser.displayName}
@@ -269,7 +272,10 @@ const NavigationTabsComponent = (props) => {
                 </div>
                 <small id="dacUserMail">{currentUser.email}</small>
               </a>
-              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{ display: `${profileState ? 'block': 'none'}`, top: orientation === 'vertical' ? '-100%' : '100%' }}>
+              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{
+                display: `${profileState ? 'block' : 'none'}`,
+                top: orientation === 'vertical' ? '-100%' : '100%'
+              }}>
                 <li>
                   <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
                 </li>
@@ -337,7 +343,7 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const {location, classes, onSignIn, history} = props;
+  const {location, classes, history} = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
@@ -367,7 +373,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-    props.onSignOut();
+    Auth.signOut();
   };
 
   const supportRequestModal = () => {
@@ -505,7 +511,6 @@ const DuosHeader = (props) => {
         <div className="row no-margin" style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
-            onSignIn={onSignIn}
             history={history}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
@@ -554,7 +559,6 @@ const DuosHeader = (props) => {
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
-              onSignIn={onSignIn}
               history={history}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.

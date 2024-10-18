@@ -1,7 +1,6 @@
 brew "git"
 brew "git-secrets"
 brew "jq"
-brew "vault", restart_service: true
 brew "volta"
 cask "docker"
 cask "google-cloud-sdk"

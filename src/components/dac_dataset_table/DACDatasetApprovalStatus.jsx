@@ -22,10 +22,10 @@ export default function DACDatasetApprovalStatus(props) {
     setOpen(false);
   };
 
-  const handleAction = ({dataSetId, name}) => {
+  const handleAction = ({datasetId, name}) => {
     setOpen(false);
     try {
-      DataSet.deleteDataset(dataSetId).then(() => {
+      DataSet.deleteDataset(datasetId).then(() => {
         Notifications.showSuccess({
           text: `Deleted dataset '${name}' successfully.`,
         });
@@ -37,7 +37,7 @@ export default function DACDatasetApprovalStatus(props) {
   };
 
   const updateApprovalStatus = async (approvalState) => {
-    const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.dataSetId, approvalState);
+    const updatedDataset = await DAC.updateApprovalStatus(dataset.dacId, dataset.datasetId, approvalState);
     setDataset(updatedDataset);
   };
 
@@ -46,7 +46,7 @@ export default function DACDatasetApprovalStatus(props) {
     {dataset.study?.studyId &&
       <Link
         style={{marginLeft: '15px'}}
-        id={`${dataset.dataSetId}_edit`}
+        id={`${dataset.datasetId}_edit`}
         className={'glyphicon glyphicon-pencil'}
         to={`study_update/${dataset.study.studyId}`}
       />
@@ -55,7 +55,7 @@ export default function DACDatasetApprovalStatus(props) {
       <>
         <Link
           style={{marginLeft: '15px'}}
-          id={`${dataset.dataSetId}_delete`}
+          id={`${dataset.datasetId}_delete`}
           className={'glyphicon glyphicon-trash'}
           onClick={handleClick}
           to={`#`}
@@ -72,8 +72,8 @@ export default function DACDatasetApprovalStatus(props) {
   const dacUndecided = (dataset) => <div style={{display: 'flex', alignItems: 'center'}}>
     <Button
       data-tip={true}
-      data-for={`approve-dataset-button-${dataset.dataSetId}`}
-      id={`btn_approveDataset-${dataset.dataSetId}`}
+      data-for={`approve-dataset-button-${dataset.datasetId}`}
+      id={`btn_approveDataset-${dataset.datasetId}`}
       onClick={() => updateApprovalStatus(true)}
       className={style['btn-primary-dac-datasets']}>
       YES
@@ -81,11 +81,11 @@ export default function DACDatasetApprovalStatus(props) {
     <ReactTooltip
       place={'left'}
       effect={'solid'}
-      id={`approve-dataset-button-${dataset.dataSetId}`}>Approve dataset for Data Access Committee</ReactTooltip>
+      id={`approve-dataset-button-${dataset.datasetId}`}>Approve dataset for Data Access Committee</ReactTooltip>
     <Button
       data-tip={true}
-      data-for={`reject-dataset-button-${dataset.dataSetId}`}
-      id={`btn_rejectDataset-${dataset.dataSetId}`}
+      data-for={`reject-dataset-button-${dataset.datasetId}`}
+      id={`btn_rejectDataset-${dataset.datasetId}`}
       onClick={() => updateApprovalStatus(false)}
       className={style['btn-primary-dac-datasets']}>
       NO
@@ -93,7 +93,7 @@ export default function DACDatasetApprovalStatus(props) {
     <ReactTooltip
       place={'right'}
       effect={'solid'}
-      id={`reject-dataset-button-${dataset.dataSetId}`}>Reject dataset for Data Access Committee</ReactTooltip>
+      id={`reject-dataset-button-${dataset.datasetId}`}>Reject dataset for Data Access Committee</ReactTooltip>
   </div>;
 
   return (!isNil(dataset?.dacApproval))

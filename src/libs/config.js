@@ -29,11 +29,6 @@ export const Config = {
 
   getTag: async () => (await getConfig()).tag,
 
-  getFeatureFlag: async (featureName) => {
-    const feature = _.get(await getConfig(), 'features', {});
-    return _.get(feature, featureName, false);
-  },
-
   getProject: async () => {
     const env = await Config.getEnv();
     switch (env) {
@@ -67,13 +62,6 @@ export const Config = {
     },
   }),
 
-  fileOpts: (token = Token.getToken()) => ({
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-    },
-  }),
-
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: {'Content-Type': 'application/json'},
@@ -84,19 +72,11 @@ export const Config = {
     headers: {'Content-Type': 'application/binary'}
   }),
 
-  fileBody: (token = Token.getToken()) => ({
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: '*/*',
-    },
-  }),
 };
 
-const Token = {
+export const Token = {
   getToken: () => {
-    return Storage.getGoogleData() !== null ?
-      Storage.getGoogleData().accessToken :
-      'token';
+    return Storage.getOidcUser()?.id_token;
   },
 };
 
