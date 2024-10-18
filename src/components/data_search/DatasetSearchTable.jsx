@@ -212,7 +212,7 @@ export const DatasetSearchTable = (props) => {
               label={tab.label}
               style={{
                 ...styles.subTab,
-                ...(tab.key === selectedTable ? styles.subTabActive : {})
+                ...(tab.key === selectedTable.key ? styles.subTabActive : {})
               }}
               onClick={() => setSelectedTable(tab)}
               component={Button}
