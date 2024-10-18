@@ -186,7 +186,7 @@ export const SignInButton = (props: SignInButtonProps) => {
         <a
           className='navbar-duos-icon-help'
           style={{color: 'white', height: 16, width: 16, marginLeft: 5}}
-          href='https://broad-duos.zendesk.com/hc/en-us/articles/6160103983771-How-to-Create-a-Google-Account-with-a-Non-Google-Email'
+          href='https://support.terra.bio/hc/en-us/articles/28504837523995-How-to-Register-for-DUOS'
           data-for="tip_google-help"
           data-tip="Need account help? Click here!"
         />
