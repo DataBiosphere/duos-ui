@@ -6,6 +6,7 @@
   "ontologyApiUrl": "https://ontologyURL.org/",
   "terraUrl": "https://terraURL.org/",
   "tdrApiUrl": "https://tdrApiUrl.org/",
+  "ecmApiUrl": "https://ecmApiUrl.org",
   "errorApiKey": "example",
   "gaId": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
