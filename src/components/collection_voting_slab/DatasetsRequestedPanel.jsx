@@ -51,8 +51,8 @@ export default function DatasetsRequestedPanel(props) {
     const datasets = adminPage ?
       bucketDatasets :
       filter(dataset => {
-        const { dataSetId } = dataset;
-        return includes(dataSetId)(dacDatasetIds);
+        const { datasetId } = dataset;
+        return includes(datasetId)(dacDatasetIds);
       })(bucketDatasets);
 
     setFilteredDatasets(datasets);
@@ -84,7 +84,7 @@ export default function DatasetsRequestedPanel(props) {
   const DatasetList = () => {
     const datasetRows = map(dataset => {
       return (
-        <div style={{display: 'flex'}} key={dataset.dataSetId} className="dataset-list-item">
+        <div style={{display: 'flex'}} key={dataset.datasetId} className="dataset-list-item">
           <div style={{width: '12.5%'}}>{datasetId(dataset)}</div>
           <div style={{width: '75%'}}>{datasetName(dataset)}</div>
         </div>

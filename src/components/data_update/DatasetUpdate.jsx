@@ -100,7 +100,7 @@ export const DatasetUpdate = (props) => {
     multiPartFormData.append('dataset', JSON.stringify(newDataset));
     multiPartFormData.append('consentGroups', consentGroups);
 
-    DataSet.updateDatasetV3(dataset.dataSetId, multiPartFormData).then(() => {
+    DataSet.updateDatasetV3(dataset.datasetId, multiPartFormData).then(() => {
       history.push('/datalibrary');
       Notifications.showSuccess({ text: 'Update submitted successfully!' });
     }, () => {
