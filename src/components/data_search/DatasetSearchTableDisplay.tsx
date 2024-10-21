@@ -7,6 +7,7 @@ import {Styles} from '../../libs/theme';
 import {
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
+import {SnapshotSummaryModel} from "src/types/tdrModel";
 
 const styles = {
   baseStyle: {
@@ -44,12 +45,13 @@ interface DatasetSearchTableDisplayProps{
   onSelect: (newSelectedIds: number[]) => void;
   filteredData: DatasetTerm[];
   selected: number[];
+  exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }
   tab: DatasetSearchTableTab<DatasetTerm | DatasetTerm[]>
 }
 
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
-  const { onSelect, filteredData, selected, tab } = props;
-  const headers = tab.makeHeaders(filteredData, selected, onSelect);
+  const { onSelect, exportableDatasets, filteredData, selected, tab } = props;
+  const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets);
   const rowData = tab.makeRows(filteredData, headers);
 
   return isEmpty(filteredData) ? (

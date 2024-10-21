@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash';
+import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
 import TableHeaderSection from '../TableHeaderSection';
@@ -12,7 +13,7 @@ import { DAR } from '../../libs/ajax/DAR';
 import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import isEqual from 'lodash/isEqual';
+import * as _ from 'lodash';
 
 const styles = {
   subTab: {
@@ -33,10 +34,11 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
-}
+};
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
+  const [exportableDatasets, setExportableDatasets] = useState();
   const [filters, setFilters] = useState(defaultFilters);
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -45,6 +47,20 @@ export const DatasetSearchTable = (props) => {
 
   const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
   const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
+
+  const getExportableDatasets = async (datasets) => {
+    // Note the dataset identifier is in each sub-table row.
+    const datasetIdentifiers = datasets.map((row) => row.datasetIdentifier);
+    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
+    if (snapshots.filteredTotal > 0) {
+      const datasetIdToSnapshot = _.chain(snapshots.items)
+        // Ignore any snapshots that a user does not have export (steward or reader) to
+        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+        .groupBy('duosId')
+        .value();
+      setExportableDatasets(datasetIdToSnapshot);
+    }
+  };
 
   const assembleFullQuery = (searchTerm, filters) => {
     const queryChunks = [
@@ -156,7 +172,7 @@ export const DatasetSearchTable = (props) => {
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          var newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+          var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
           setFiltered(newFiltered);
         });
       } catch (error) {
@@ -174,11 +190,12 @@ export const DatasetSearchTable = (props) => {
     searchRef.current.value = '';
     filterHandler(null, datasets, '', '');
   };
+
   useEffect(() => {
     if (isEmpty(filtered)) {
       return;
     }
-
+    getExportableDatasets(filtered);
   }, [filtered]);
 
   useEffect(() => {
@@ -249,7 +266,7 @@ export const DatasetSearchTable = (props) => {
                   </Box>
                 );
               } else {
-                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected}/>;
+                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
               }
             })()}
           </Box>

@@ -3,11 +3,13 @@ import _, {groupBy} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
 import {OverflowTooltip} from '../Tooltips';
+import {SnapshotSummaryModel} from 'src/types/tdrModel';
+import DatasetExportButton from './DatasetExportButton';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
   label: string;
-  makeHeaders: (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void) => HeaderData<T>[];
+  makeHeaders: (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }) => HeaderData<T>[];
   makeRows: (datasets: DatasetTerm[], headers: HeaderData<T>[]) => CellData[][];
 }
 
@@ -47,7 +49,8 @@ interface HeaderData<T>{
   cellDataFn: (datasets: T) => CellData;
 }
 
-export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void): HeaderData<DatasetTerm[]>[] => {
+// eslint-disable-next-line no-unused-vars
+export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, _exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }): HeaderData<DatasetTerm[]>[] => {
   interface StudyCellWidths{
     selected: number;
     studyName: string;
@@ -202,7 +205,7 @@ export const makeStudyTableRowData = (datasets: DatasetTerm[], headers: HeaderDa
   return Object.values(studies).map((datasets: DatasetTerm[]) => headers.map(header => header.cellDataFn(datasets)));
 };
 
-export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void): HeaderData<DatasetTerm>[] => {
+export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }): HeaderData<DatasetTerm>[] => {
   interface CellWidths{
     selected: number;
     datasetName: string;
@@ -213,11 +216,12 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     donorSize: string;
     dataLocation: string;
     dac: string;
+    exportToTerra: number;
   }
   const cellWidths: CellWidths = {
     selected: 50,
     // subtract the selected column width
-    datasetName: 'calc(25% - 50px)',
+    datasetName: 'calc(25% - 150px)',
     studyName: '10%',
     duosId: '10%',
     accessType: '10%',
@@ -225,6 +229,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     donorSize: '7%',
     dataLocation: '13%',
     dac: '10%',
+    exportToTerra: 100,
   };
   const datasetIds = datasets.map(dataset => dataset.datasetId);
   return [
@@ -381,6 +386,26 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
         label: `DAC for dataset ${dataset.datasetId}: ${dataset.dac?.dacName}`
       })
     },
+    {
+      label: 'Export to Terra',
+      sortable: false,
+      cellStyle: makeHeaderStyle(cellWidths.exportToTerra),
+      cellDataFn: (dataset: DatasetTerm) => {
+        const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
+        return {
+          data: <>{exportableSnapshots
+            .map((snapshot, i) =>
+              <DatasetExportButton
+                key={`${i}`}
+                snapshot={snapshot}
+                title={`Export snapshot ${snapshot.name}`}/>)}</>,
+          value: 'Export to Workspace',
+          id: `${dataset.datasetId}-export-to-terra`,
+          style: makeRowStyle(cellWidths.exportToTerra),
+          label: `Export to Terra for dataset ${dataset.datasetId}`
+        };
+      }
+    }
   ];
 };
 
