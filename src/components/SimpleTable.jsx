@@ -104,7 +104,7 @@ const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow
           let output;
           //columnHeaders determine width of the columns,
           //therefore extract width from columnHeader and apply to cell style
-          const columnWidthStyle = columnHeaders[cellIndex].cellStyle;
+          const columnWidthStyle = { width: columnHeaders[cellIndex].cellStyle.width };
           const appliedStyle = Object.assign({}, style, columnWidthStyle);
           //assume component is in hyperscript format
           //wrap component in dive with columnWidth applied
