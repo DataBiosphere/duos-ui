@@ -38,7 +38,7 @@ const defaultFilters = {
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
-  const [exportableDatasets, setExportableDatasets] = useState();
+  const [exportableDatasets, setExportableDatasets] = useState({});
   const [filters, setFilters] = useState(defaultFilters);
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
