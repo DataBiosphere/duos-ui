@@ -11,6 +11,8 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
+  getECMUrl: async () => (await getConfig()).ecmApiUrl,
+
   getTdrApiUrl: async () => (await getConfig()).tdrApiUrl,
 
   getTerraUrl: async () => (await getConfig()).terraUrl,

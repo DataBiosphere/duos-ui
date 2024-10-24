@@ -62,13 +62,36 @@ export default function ERACommons(props) {
       setExpirationCount(eraAuthState.expirationCount);
       setEraCommonsId(eraAuthState.eraCommonsId);
       onNihStatusUpdate(eraAuthState.nihValid);
+      // TODO Testing code to replace old functionality with:
+      try {
+        const ecmResponse = AuthenticateNIH.getECMeRACommonsStatus();
+        console.log(ecmResponse);
+      } catch (err) {
+        console.log(err);
+      }
     };
     initResearcherProfile();
   }, [researcherProfile, onNihStatusUpdate]);
 
   const redirectToNihLogin = async () => {
+    // TODO Testing code to replace old functionality with:
+    try {
+      const redirectURI = window.location.origin;
+      const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(redirectURI, destination);
+      console.log(authUrl);
+    } catch (err) {
+      console.log(err);
+    }
     const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>';
     window.location.href = `${ await Config.getNihUrl() }?${queryString.stringify({ 'return-url': returnUrl })}`;
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const redirectToECMAuthUrl = async () => {
+    const redirectURI = window.location.origin;
+    const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(redirectURI, destination);
+    console.log(authUrl);
+    window.location.href = authUrl;
   };
 
   const deleteNihAccount = async () => {
