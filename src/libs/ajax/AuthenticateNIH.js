@@ -58,4 +58,14 @@ export const AuthenticateNIH = {
     return undefined;
   },
 
+  postECMeRACommonsOauthcode: async (state, oauthcode) => {
+    const url = `${await getECMUrl()}/api/oauth/v1/era-commons/oauthcode`;
+    const data = {
+      state: state,
+      oauthcode: oauthcode
+    };
+    const res = await axios.post(url, data,  Config.authOpts());
+    return res.data;
+  }
+
 };
