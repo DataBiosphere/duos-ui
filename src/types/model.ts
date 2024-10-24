@@ -95,7 +95,7 @@ export interface Institution {
 export interface Dataset {
   name: string;
   datasetName: string;
-  dataSetId: number;
+  datasetId: number;
   createUserId: number;
   createUser: DuosUserResponse;
   dacId: string;
@@ -111,6 +111,69 @@ export interface Dataset {
   dacApproval: boolean;
   nihCertificationFile: FileStorageObject;
   alternativeDataSharingPlanFile: FileStorageObject;
+}
+
+interface DacTerm {
+  dacId: number;
+  dacName: string;
+  dacEmail: string;
+}
+
+interface InstitutionTerm {
+  id: number;
+  name: string;
+}
+
+interface UserTerm {
+  userId: number;
+  displayName: string;
+  institution: InstitutionTerm;
+}
+
+export interface StudyTerm {
+  description: string;
+  studyName: string;
+  studyId: number;
+  phsId: string;
+  phenotype: string;
+  species: string;
+  piName: string;
+  dataSubmitterEmail: string;
+  dataSubmitterId: number;
+  dataCustodianEmail: string[];
+  publicVisibility: boolean;
+  dataTypes: string[];
+}
+
+interface DataUseTerm {
+  code: string;
+  description: string;
+}
+
+interface DataUseSummary {
+  primary: DataUseTerm[];
+  secondary: DataUseTerm[];
+}
+
+export interface DatasetTerm {
+  datasetId: number;
+  createUserId: number;
+  createUserDisplayName: string;
+  datasetIdentifier: string;
+  deletable: boolean;
+  datasetName: string;
+  participantCount: number;
+  dataUse: DataUseSummary;
+  dataLocation: string;
+  url: string;
+  dacId: number;
+  dacApproval: boolean;
+  accessManagement: string;
+  approvedUserIds: number[];
+  study: StudyTerm;
+  submitter: UserTerm;
+  updateUser: UserTerm;
+  dac: DacTerm;
 }
 
 interface DataUseRequirements {

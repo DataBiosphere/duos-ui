@@ -7,11 +7,11 @@ import { Votes } from '../../../src/libs/ajax/Votes';
 import {votingColors} from '../../../src/pages/dar_collection_review/MultiDatasetVotingTab';
 import {ControlledAccessType} from '../../../src/libs/dataUseTranslation';
 
-const openElection1 = {dataSetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'};
+const openElection1 = {datasetId: 10, electionId: 101, status: 'Open', electionType: 'DataAccess'};
 
-const openElection2 = {dataSetId: 20, electionId: 102, status: 'Open', electionType: 'DataAccess'};
+const openElection2 = {datasetId: 20, electionId: 102, status: 'Open', electionType: 'DataAccess'};
 
-const closedElection = {dataSetId: 30, electionId: 103, status: 'Closed', electionType: 'DataAccess'};
+const closedElection = {datasetId: 30, electionId: 103, status: 'Closed', electionType: 'DataAccess'};
 
 const votesForOpenElection1 = {
   dataAccess: {

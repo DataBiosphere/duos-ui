@@ -1,65 +1,66 @@
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import * as React from 'react';
-import _ from 'lodash';
-import { Box, Button, Link } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { useEffect, useState, useRef } from 'react';
-import { groupBy, isEmpty, concat, compact, map } from 'lodash';
-import CollapsibleTable from '../CollapsibleTable';
+import { isEmpty } from 'lodash';
+import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
+import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
+import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
 import TableHeaderSection from '../TableHeaderSection';
-import DatasetExportButton from './DatasetExportButton';
 import { DataSet } from '../../libs/ajax/DataSet';
 import { DAR } from '../../libs/ajax/DAR';
-import eventList from '../../libs/events';
-import { Config } from '../../libs/config';
 import DatasetFilterList from './DatasetFilterList';
-import { Metrics } from '../../libs/ajax/Metrics';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
-import isEqual from 'lodash/isEqual';
-import TranslatedDulModal from '../modals/TranslatedDulModal';
+import * as _ from 'lodash';
+
+const styles = {
+  subTab: {
+    padding: '0 25px',
+    fontSize: '15px',
+    textTransform: 'none',
+    fontFamily: 'Montserrat, sans-serif',
+    color: '#00609f',
+  },
+  subTabActive: {
+    fontWeight: 'bold',
+    borderBottom: `5px solid #00609f`
+  },
+};
 
 
-const studyTableHeader = [
-  'Study Name',
-  'Description',
-  'Datasets',
-  'Participants',
-  'Phenotype',
-  'Species',
-  'PI Name',
-  'Data Custodian',
-];
-
-const datasetTableHeader = [
-  'DUOS ID',
-  'Dataset Name',
-  'Data Use',
-  'Data Types',
-  'Participants',
-  'Access Type',
-  'Data Location',
-  'Export to Terra',
-];
 
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
-}
+};
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
+  const [exportableDatasets, setExportableDatasets] = useState({});
   const [filters, setFilters] = useState(defaultFilters);
   const [filtered, setFiltered] = useState([]);
-  const [tableData, setTableData] = useState({});
   const [selected, setSelected] = useState([]);
-  const [exportableDatasets, setExportableDatasets] = useState({}); // datasetId -> snapshot
-  const [tdrApiUrl, setTdrApiUrl] = useState('');
-  const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
-  const [dataUse, setDataUse] = useState();
+  const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
   const searchRef = useRef('');
 
   const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
   const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
+
+  const getExportableDatasets = async (datasets) => {
+    // Note the dataset identifier is in each sub-table row.
+    const datasetIdentifiers = datasets.map((row) => row.datasetIdentifier);
+    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
+    if (snapshots.filteredTotal > 0) {
+      const datasetIdToSnapshot = _.chain(snapshots.items)
+        // Ignore any snapshots that a user does not have export (steward or reader) to
+        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+        .groupBy('duosId')
+        .value();
+      setExportableDatasets(datasetIdToSnapshot);
+    }
+  };
 
   const assembleFullQuery = (searchTerm, filters) => {
     const queryChunks = [
@@ -171,7 +172,7 @@ export const DatasetSearchTable = (props) => {
     const search = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          var newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
+          var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
           setFiltered(newFiltered);
         });
       } catch (error) {
@@ -180,74 +181,8 @@ export const DatasetSearchTable = (props) => {
     };
     search();
   };
-
-
-
-  const selectHandler = async (event, data, selector) => {
-    let idsToModify = [];
-    if (selector === 'all') {
-      data.rows.forEach((row) => {
-        row.subtable.rows.forEach((subRow) => {
-          idsToModify.push(subRow.id);
-        });
-      });
-    } else if (selector === 'row') {
-      const rowIds = data.subtable.rows.map(row => row.id);
-      const isRowSelected = rowIds.every(id => selected.includes(id));
-      isRowSelected ?
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-unselected'}) :
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'study-selected'});
-      data.subtable.rows.forEach((row) => {
-        idsToModify.push(row.id);
-      });
-    } else if (selector === 'subrow') {
-      selected.includes(data.id) ?
-        await Metrics.captureEvent(eventList.dataLibrary, {'action': 'dataset-unselected'}) :
-        await Metrics.captureEvent(eventList.dataLibrary,{'action': 'dataset-selected'});
-      idsToModify.push(data.id);
-    }
-
-    let newSelected = [];
-    const allSelected = idsToModify.every((id) => selected.includes(id));
-    if (allSelected) {
-      newSelected = selected.filter((id) => !idsToModify.includes(id));
-    } else {
-      newSelected = selected.concat(idsToModify);
-    }
-
-    setSelected(newSelected);
-  };
-
-  const getExportableDatasets = async (event, data) => {
-    setTdrApiUrl(await Config.getTdrApiUrl());
-    // Note the dataset identifier is in each sub-table row.
-    const datasetIdentifiers = data.subtable.rows.map((row) => row.datasetIdentifier);
-    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
-    if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = _.chain(snapshots.items)
-      // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
-        .groupBy('duosId')
-        .value();
-      setExportableDatasets(datasetIdToSnapshot);
-    }
-  };
-
-  const expandHandler = async (event, data) => {
-    try {
-      getExportableDatasets(event, data);
-    } catch {
-      Notifications.showError({ text: 'Unable to retrieve exportable datasets from Terra' });
-    }
-  };
-
-  const collapseHandler = () => {
-    setExportableDatasets({});
-  };
-
   const applyForAccess = async () => {
-    const draftDatasets = selected.map((id) => parseInt(id.replace('dataset-', '')));
-    const darDraft = await DAR.postDarDraft({ datasetId: draftDatasets });
+    const darDraft = await DAR.postDarDraft({ datasetId: selected });
     history.push(`/dar_application/${darDraft.referenceId}`);
   };
 
@@ -256,146 +191,12 @@ export const DatasetSearchTable = (props) => {
     filterHandler(null, datasets, '', '');
   };
 
-  const openTranslatedDUL = (dataUse) => {
-    const mergedPrimaryAndSecondary = concat(dataUse.primary, dataUse.secondary);
-    setDataUse(mergedPrimaryAndSecondary);
-    setShowTranslatedDULModal(true);
-  };
-
   useEffect(() => {
     if (isEmpty(filtered)) {
       return;
     }
-
-    const studies = groupBy(filtered, 'study.studyId');
-    const table = {
-      id: 'study-table',
-      headers: studyTableHeader.map((header) => ({ value: header })),
-      rows: Object.values(studies).map((entry, index) => {
-        const sum = entry.reduce((acc, dataset) => {
-          return acc + dataset.participantCount;
-        }, 0);
-        return {
-          id: 'study-' + entry[0].study.studyId,
-          data: [
-            {
-              value: entry[0].study.studyName,
-              truncate: true,
-              increaseWidth: true,
-            },
-            {
-              value: entry[0].study.description,
-              hideUnderIcon: true,
-            },
-            {
-              value: entry.length,
-              truncate: true,
-            },
-            {
-              value: isNaN(sum) ? undefined : sum,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.phenotype,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.species,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.piName,
-              truncate: true,
-            },
-            {
-              value: entry[0].study.dataCustodianEmail?.join(', '),
-              truncate: true,
-            },
-          ],
-          subtable: {
-            headers: datasetTableHeader.map((header) => ({ value: header })),
-            rows: entry.map((dataset) => {
-              return {
-                id: 'dataset-' + dataset.datasetId,
-                datasetIdentifier: dataset.datasetIdentifier,
-                data: [
-                  {
-                    value: <Link key={`dataset.datasetId`} href={`/dataset/${dataset.datasetIdentifier}`}>{dataset.datasetIdentifier}</Link>,
-                    increaseWidth: true,
-                  },
-                  {
-                    value: dataset.datasetName,
-                    truncate: true,
-                  },
-                  {
-                    value: () => {
-                      const dataUse = dataset.dataUse;
-                      const primaryDataUse = map(dataUse?.primary, 'code').join(', ');
-                      const secondaryDataUse = map(dataUse?.secondary, 'code').join(', ');
-                      const mergedDataUse = compact(concat(primaryDataUse, secondaryDataUse)).join(', ');
-                      return <a
-                        id={`${index}_linkTranslatedDul`}
-                        name="link_translatedDul"
-                        onClick={()=>openTranslatedDUL(dataUse)}
-                      >{mergedDataUse}</a>;
-                    }
-                  },
-                  {
-                    value: dataset.dataTypes,
-                  },
-                  {
-                    value: dataset.participantCount,
-                  },
-                  {
-                    value: () => {
-                      let accessType;
-                      if (dataset.accessManagement === 'external') {
-                        accessType = dataset.url ? <Link href={dataset.url}>External to DUOS</Link> : 'External to DUOS';
-                      } else if (dataset.accessManagement === 'open') {
-                        accessType = dataset.url ? <Link href={dataset.url}>Open Access</Link> : 'Open Access';
-                      } else {
-                        accessType = dataset.dac?.dacEmail ? <Link href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
-                      }
-                      return accessType;
-                    }
-                  },
-                  {
-                    value: () => {
-                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
-                      if (exportableSnapshots.length === 0) {
-                        return dataset.dataLocation;
-                      }
-                      return exportableSnapshots.map((snapshot, i) =>
-                        <Link
-                          key={`${i}`}
-                          href={`${tdrApiUrl}/snapshots/${snapshot.id}`}
-                          target="_blank"
-                        >
-                          {snapshot.name}{'\n'}
-                        </Link>);
-                    }
-                  },
-                  {
-                    value: () => {
-                      const exportableSnapshots = exportableDatasets[dataset.datasetIdentifier] || [];
-                      return exportableSnapshots
-                        .map((snapshot, i) =>
-                          <DatasetExportButton
-                            key={`${i}`}
-                            snapshot={snapshot}
-                            title={`Export snapshot ${snapshot.name}`} />);
-                    }
-                  },
-                ],
-              };
-            }),
-          }
-        };
-      }),
-    };
-
-    setTableData(table);
-  }, [filtered, exportableDatasets, tdrApiUrl]);
+    getExportableDatasets(filtered);
+  }, [filtered]);
 
   useEffect(() => {
     setFiltered(datasets);
@@ -432,6 +233,24 @@ export const DatasetSearchTable = (props) => {
             </Box>
           </div>
         </Box>
+        <Box sx={{display: 'flex', flexDirection: 'row', padding: '0 5rem', marginTop: '1rem', borderBottom: '1px solid black'}}>
+          <Tabs
+            value={false}
+            orientation={'horizontal'}
+            TabIndicatorProps={{ style: { background: '#00609f' } }}
+          >
+            {Object.values(datasetSearchTableTabs).map((tab) => <Tab
+              key={tab.key}
+              label={tab.label}
+              style={{
+                ...styles.subTab,
+                ...(tab.key === selectedTable.key ? styles.subTabActive : {})
+              }}
+              onClick={() => setSelectedTable(tab)}
+              component={Button}
+            />)}
+          </Tabs>
+        </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
             <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} searchRef={searchRef}/>
@@ -446,25 +265,8 @@ export const DatasetSearchTable = (props) => {
                     <h1>No datasets registered for this library.</h1>
                   </Box>
                 );
-              } else if (isEmpty(filtered)) {
-                return (
-                  <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                    <h1>There are no datasets that fit these criteria.</h1>
-                  </Box>
-                );
               } else {
-                return (
-                  <CollapsibleTable
-                    data={tableData}
-                    selected={selected}
-                    selectHandler={selectHandler}
-                    expandHandler={expandHandler}
-                    collapseHandler={collapseHandler}
-                    summary='faceted study search table'
-                  />
-                );
+                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
               }
             })()}
           </Box>
@@ -478,14 +280,6 @@ export const DatasetSearchTable = (props) => {
           }
         </Box>
       </Box>
-      {
-        showTranslatedDULModal &&
-        <TranslatedDulModal
-          showModal={showTranslatedDULModal}
-          dataUse={dataUse}
-          onCloseRequest={()=>setShowTranslatedDULModal(false)}
-        />
-      }
     </>
   );
 };
