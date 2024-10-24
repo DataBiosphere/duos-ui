@@ -236,7 +236,7 @@ export const DatasetSearch = (props) => {
     'stanley': {
       query: {
         'match_phrase': {
-          'study.description': 'stanley'
+          'study.description': 'Stanley Center'
         }
       },
       icon: stanleyIcon,
