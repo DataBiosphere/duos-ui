@@ -2,9 +2,10 @@ import {DatasetTerm} from 'src/types/model';
 import _, {groupBy} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
-import {OverflowTooltip} from '../Tooltips';
+import {OverflowTooltip, tooltipStyle} from '../Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
 import DatasetExportButton from './DatasetExportButton';
+import ReactTooltip from 'react-tooltip';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -72,12 +73,30 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
     piName: '10%',
     dataCustodians: '20%'
   };
-  const datasetIds = datasets.map(dataset => dataset.datasetId);
+  const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
+  const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
+  //const isSelected = selected.includes(dataset.datasetId);
+  //         const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
+  //         const tooltipText = `${dataset.accessManagement == 'open' ? 'Applying for access to open access datasets is not necessary' : 'To apply for access to external access datasets, please follow the link to the external site'}`;
+  //         return {
+  //           data: <>
+  //             <ReactTooltip
+  //               place={'top'}
+  //               disable={isSelectable(dataset)}
+  //               effect={'solid'}
+  //               scrollHide={true}
+  //               id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+  //             <div data-for={checkboxId} data-tip={true}>
+  //               <Checkbox checked={isSelected}
+  //                 disabled={!isSelectable(dataset)}
+  //                 onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
+  //             </div>
+  //           </>,
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
-        indeterminate={selected.length > 0 && selected.length < datasetIds.length}
-        onClick={() => onSelect(datasetIds.length === selected.length ? [] : datasetIds)}/>,
+        indeterminate={selected.length > 0 && selected.length < selectableDatasetIds.length}
+        onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(studyCellWidths.selected),
       cellDataFn: datasets => {
@@ -85,9 +104,22 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
         const numberSelected = _.intersection(studyDatasetIds, selected).length;
         const fullySelected = numberSelected === studyDatasetIds.length;
         const indeterminate = numberSelected > 0 && numberSelected < studyDatasetIds.length;
+        const checkboxId = `${datasets[0].study.studyId}-is-selected-checkbox`;
+        const isSelectableStudy = datasets.filter(isSelectable).length === datasets.length;
+        const tooltipText = 'This study contains some open or external datasets. Please select to apply for access on the individual dataset level.';
         return {
-          data: <Checkbox checked={fullySelected} indeterminate={indeterminate}
-            onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>,
+          data: <>
+            <ReactTooltip
+              place={'top'}
+              disable={isSelectableStudy}
+              effect={'solid'}
+              scrollHide={true}
+              id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+            <div data-for={checkboxId} data-tip={true}>
+              <Checkbox checked={fullySelected} indeterminate={indeterminate} disabled={!isSelectableStudy}
+                onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
+            </div>
+          </>,
           value: fullySelected ? 'Selected' : indeterminate ? 'Partially Selected' : 'Not Selected',
           id: `${datasets[0].study.studyId}-is-selected`,
           style: makeRowStyle(studyCellWidths.selected),
@@ -231,19 +263,33 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     dac: '10%',
     exportToTerra: 100,
   };
-  const datasetIds = datasets.map(dataset => dataset.datasetId);
+  const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
+  const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
         indeterminate={selected.length > 0 && selected.length < datasets.length}
-        onClick={() => onSelect(datasetIds.length === selected.length ? [] : datasetIds)}/>,
+        onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(cellWidths.selected),
       cellDataFn: (dataset: DatasetTerm) => {
         const isSelected = selected.includes(dataset.datasetId);
+        const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
+        const tooltipText = `${dataset.accessManagement == 'open' ? 'Applying for access to open access datasets is not necessary' : 'To apply for access to external access datasets, please follow the link to the external site'}`;
         return {
-          data: <Checkbox checked={isSelected}
-            onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>,
+          data: <>
+            <ReactTooltip
+              place={'top'}
+              disable={isSelectable(dataset)}
+              effect={'solid'}
+              scrollHide={true}
+              id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+            <div data-for={checkboxId} data-tip={true}>
+              <Checkbox checked={isSelected}
+                disabled={!isSelectable(dataset)}
+                onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
+            </div>
+          </>,
           value: isSelected ? 'Selected' : 'Not Selected',
           id: `${dataset.datasetId}-is-selected`,
           style: makeRowStyle(cellWidths.selected),
