@@ -31,6 +31,7 @@ type ErrorDisplay = ErrorInfo | React.JSX.Element;
 
 interface HttpError extends Error {
   status?: number;
+  body?: ReadableStream<Uint8Array>;
 }
 
 export const SignInButton = (props: SignInButtonProps) => {
@@ -113,18 +114,48 @@ export const SignInButton = (props: SignInButtonProps) => {
     await Metrics.captureEvent(event);
   };
 
+  const streamToString = async (error: HttpError): Promise<string> => {
+    const reader = error.body?.getReader();
+
+    if (!reader) {
+      return 'Error message not readable.';
+    }
+
+    const decoder = new TextDecoder('utf-8');
+    let result = '';
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      result += decoder.decode(value);
+    }
+    return result;
+  };
+
+  const handleServerError = async (error: HttpError) => {
+    const errorMessage = await streamToString(error);
+    setErrorDisplay({show: true, title: 'Error', description: errorMessage});
+    setTimeout(() => {
+      setErrorDisplay({});
+    }, 10000);
+  };
+
   const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
     const status = error.status;
 
     switch (status) {
       case 400:
-        setErrorDisplay({show: true, title: 'Error', msg: JSON.stringify(error)});
+        setErrorDisplay({show: true, title: 'Error', description: JSON.stringify(error)});
         break;
       case 409:
         await handleConflictError(redirectTo, shouldRedirect);
         break;
+      case 500:
+        await handleServerError(error);
+        break;
       default:
-        setErrorDisplay({show: true, title: 'Error', msg: 'Unexpected error, please try again'});
+        setErrorDisplay({show: true, title: 'Error', description: 'Unexpected error, please try again'});
         break;
     }
   };
