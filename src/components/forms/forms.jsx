@@ -37,6 +37,7 @@ export const commonOptionalProps = [
   'defaultValue',
   'hideTitle',
   'style',
+  'titleStyle',
   'validators',
   'onChange',
   'type',
@@ -216,6 +217,7 @@ export const FormFieldTitle = (props) => {
     ariaLevel,
     required,
     validation,
+    titleStyle,
   } = props;
 
   return <div>
@@ -223,6 +225,7 @@ export const FormFieldTitle = (props) => {
       <label
         id={`lbl_${formId}`}
         className={`control-label ${isValid(validation) ? '' : 'errored'}`}
+        style={titleStyle}
         htmlFor={`${formId}`}
         aria-level={ariaLevel}>
         {title}
@@ -238,7 +241,7 @@ export const FormField = (config) => {
   const {
     id, name, type = FormFieldTypes.TEXT, ariaLevel,
     title, hideTitle, description, helpText,
-    defaultValue, style, validators,
+    defaultValue, style, titleStyle, validators,
     validation, onValidationChange
   } = config;
 
@@ -288,6 +291,7 @@ export const FormField = (config) => {
       formId={id}
       ariaLevel={ariaLevel}
       validation={getValidation()}
+      titleStyle={titleStyle}
     />
     <type.component
       {...config}

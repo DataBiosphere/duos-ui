@@ -82,6 +82,7 @@ export default function ResearcherInfo(props) {
             id='researcherName'
             placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
+            titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={researcher.displayName}
@@ -150,6 +151,7 @@ export default function ResearcherInfo(props) {
             description='I certify that the principal investigator listed below is aware of this study'
             placeholder='Firstname Lastname'
             title='1.3 Principal Investigator'
+            titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             validation={validation.piName}
@@ -209,6 +211,7 @@ export default function ResearcherInfo(props) {
             type={FormFieldTypes.SELECT}
             description='I certify that the individual listed below is my Institutional Signing official'
             title='1.6 Institutional Signing Official'
+            titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={formData.signingOfficial}
@@ -231,6 +234,7 @@ export default function ResearcherInfo(props) {
             description='I certify that the individual listed below is my IT Director'
             placeholder='Enter Firstname Lastname'
             title='1.7 Information Technology (IT) Director'
+            titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             validation={validation.itDirector}
@@ -247,6 +251,7 @@ export default function ResearcherInfo(props) {
               disabled={readOnlyMode}
               type={FormFieldTypes.RADIOGROUP}
               title='1.8 Cloud Use Statement'
+              titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
               description={[
                 <span key='anvil-use-description'>
                   Will you perform all of your data storage and analysis for this project on the
