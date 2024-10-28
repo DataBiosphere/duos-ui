@@ -75,23 +75,6 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
   };
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
-  //const isSelected = selected.includes(dataset.datasetId);
-  //         const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
-  //         const tooltipText = `${dataset.accessManagement == 'open' ? 'Applying for access to open access datasets is not necessary' : 'To apply for access to external access datasets, please follow the link to the external site'}`;
-  //         return {
-  //           data: <>
-  //             <ReactTooltip
-  //               place={'top'}
-  //               disable={isSelectable(dataset)}
-  //               effect={'solid'}
-  //               scrollHide={true}
-  //               id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
-  //             <div data-for={checkboxId} data-tip={true}>
-  //               <Checkbox checked={isSelected}
-  //                 disabled={!isSelectable(dataset)}
-  //                 onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
-  //             </div>
-  //           </>,
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
