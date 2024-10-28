@@ -116,13 +116,12 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const streamToString = async (error: HttpError): Promise<string> => {
     const reader = error.body?.getReader();
+    let result = '';
+    const decoder = new TextDecoder('utf-8');
 
     if (!reader) {
-      return 'Error message not readable.';
+      return result;
     }
-
-    const decoder = new TextDecoder('utf-8');
-    let result = '';
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
