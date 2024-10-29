@@ -13,6 +13,8 @@ import {
 import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
 
+const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
+
 const formatOntologyForSelect = (ontology) => {
   return {
     value: ontology.id,
@@ -144,7 +146,7 @@ export default function DataAccessRequest(props) {
 
         {DAAUtils.isEnabled() ?
           <div>
-            <label style={{ fontSize: '24px', fontWeight: 500, color: '#333333', display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
+            <label style={{ ...titleStyle, display: 'block', marginBottom: '0.5rem' }} className="control-label">2.1 Select Dataset(s)</label>
             <p style={{ marginBottom: '1rem' }}>Currently selected datasets:</p>
             <SelectableDatasets
               disabled={readOnlyMode}
@@ -160,7 +162,7 @@ export default function DataAccessRequest(props) {
             isAsync={true}
             isMulti={true}
             title={'2.1 Select Dataset(s)'}
-            titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
+            titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             validation={validation.datasetIds}
             onValidationChange={onValidationChange}
@@ -188,7 +190,7 @@ export default function DataAccessRequest(props) {
           id={'projectTitle'}
           key={'projectTitle'}
           title={'2.2 Descriptive Title of Project'}
-          titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
+          titleStyle={titleStyle}
           disabled={readOnlyMode}
           validators={[FormValidators.REQUIRED]}
           validation={validation.projectTitle}
@@ -211,7 +213,7 @@ export default function DataAccessRequest(props) {
           disabled={readOnlyMode}
           type={FormFieldTypes.TEXTAREA}
           title={'2.3 Research Use Statement (RUS)'}
-          titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
+          titleStyle={titleStyle}
           validators={[FormValidators.REQUIRED]}
           description={
             <>
@@ -329,7 +331,7 @@ export default function DataAccessRequest(props) {
           disabled={readOnlyMode}
           type={FormFieldTypes.TEXTAREA}
           title={'2.4 Non-Technical Summary'}
-          titleStyle={{ fontSize: '24px', fontWeight: 500, color: '#333333' }}
+          titleStyle={titleStyle}
           validators={[FormValidators.REQUIRED]}
           description={includeInstructions ? 'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).' : ''}
           placeholder={'Please limit your your non-technical summary to 1100 characters'}
