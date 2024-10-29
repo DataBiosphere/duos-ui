@@ -114,26 +114,13 @@ export const SignInButton = (props: SignInButtonProps) => {
     await Metrics.captureEvent(event);
   };
 
-  const streamToString = async (error: HttpError): Promise<string> => {
-    const reader = error.body?.getReader();
-    let result = '';
-    const decoder = new TextDecoder('utf-8');
-
-    if (!reader) {
-      return result;
-    }
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      result += decoder.decode(value);
-    }
-    return result;
+  const errorStreamToString = async (error: HttpError) => {
+    const body = await new Response(error.body).json();
+    return body.message || JSON.stringify(body);
   };
 
   const handleServerError = async (error: HttpError) => {
-    const errorMessage = await streamToString(error);
+    const errorMessage = await errorStreamToString(error);
     setErrorDisplay({show: true, title: 'Error', description: errorMessage});
     setTimeout(() => {
       setErrorDisplay({});
