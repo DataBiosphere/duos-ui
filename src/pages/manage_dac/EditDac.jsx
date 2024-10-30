@@ -16,11 +16,10 @@ import { Styles } from '../../libs/theme';
 import DUOSUniformDataAccessAgreement from '../../assets/DUOS_Uniform_Data_Access_Agreement.pdf';
 import PublishIcon from '@mui/icons-material/Publish';
 import { UploadDaaModal } from '../../components/modals/UploadDaaModal';
+import {Storage} from '../../libs/storage';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
-const CHAIRPERSON = 'Chairperson';
-const ADMIN = 'Admin';
 
 export default function EditDac(props) {
   const [state, setState] = useState({
@@ -83,44 +82,42 @@ export default function EditDac(props) {
 
   const okHandler = async (event) => {
     event.preventDefault();
-
+    const user = Storage.getCurrentUser();
     let currentDac = state.dac;
     if (state.dirtyFlag) {
-      if (props.location.state.userRole === ADMIN) {
-        if (dacId !== undefined) {
-          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      if (dacId !== undefined) {
+        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      } else {
+        if (daaFileData === null && selectedDaa.daaId !== broadDaa.daaId) {
+          handleErrors('Please select either the default agreement or upload your own agreement before saving.');
+          return;
+        } else if (user.isAdmin && daaFileData !== null && selectedDaa === undefined) {
+          currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
+          const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId);
+          setCreatedDaa(createdDaa.data);
         } else {
-          if (daaFileData === null && selectedDaa.daaId !== broadDaa.daaId) {
-            handleErrors('Please select either the default agreement or upload your own agreement before saving.');
-            return;
-          } else if (daaFileData !== null && selectedDaa === undefined) {
-            currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
-            const createdDaa = await DAA.createDaa(daaFileData, currentDac.dacId);
-            setCreatedDaa(createdDaa.data);
-          } else {
+          if (user.isAdmin) {
             currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
           }
         }
+      }
 
-        // Order here is important. Since users cannot have multiple roles in the
-        // same DAC, we have to make sure we remove users before re-adding any
-        // back in a different role.
-        // Chairs are a special case since we cannot remove all chairs from a DAC
-        // so we handle that case first.
-        const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-        const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-        const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
-        const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
-        const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-        const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
-        const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
-        const responses = await PromiseSerial(allOperations);
-        const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
-        if (!ld.isEmpty(errorCodes)) {
-          handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
-        } else {
-          closeHandler();
-        }
+      // Order here is important. Since users cannot have multiple roles in the
+      // same DAC, we have to make sure we remove users before re-adding any
+      // back in a different role.
+      // Chairs are a special case since we cannot remove all chairs from a DAC
+      // so we handle that case first.
+      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
+      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
+      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+      const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
+      const responses = await PromiseSerial(allOperations);
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
+      if (!ld.isEmpty(errorCodes)) {
+        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
       } else {
         closeHandler();
       }
@@ -374,7 +371,6 @@ export default function EditDac(props) {
                         name="name"
                         className="form-control vote-input"
                         required={true}
-                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -389,7 +385,6 @@ export default function EditDac(props) {
                         name="description"
                         className="form-control vote-input"
                         required={true}
-                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
@@ -405,7 +400,6 @@ export default function EditDac(props) {
                         name="email"
                         className="form-control vote-input"
                         required={true}
-                        disabled={props.location.state.userRole === CHAIRPERSON}
                       />
                     </div>
                   </div>
