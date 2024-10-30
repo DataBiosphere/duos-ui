@@ -89,7 +89,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
         const indeterminate = numberSelected > 0 && numberSelected < studyDatasetIds.length;
         const checkboxId = `${datasets[0].study.studyId}-is-selected-checkbox`;
         const isSelectableStudy = datasets.filter(isSelectable).length === datasets.length;
-        const tooltipText = 'This study contains some open or external datasets. Please select to apply for access on the individual dataset level.';
+        const tooltipText = 'This study contains some open or external datasets. Select the \'View By Datasets\' tab to apply for access to datasets in this study.';
         return {
           data: <>
             <ReactTooltip
