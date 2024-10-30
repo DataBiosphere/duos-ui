@@ -11,7 +11,7 @@ import { Checkbox } from '@mui/material';
 import { flatten, uniq, compact, capitalize } from 'lodash';
 
 export const DatasetFilterList = (props) => {
-  const { datasets, filters, filterHandler, isFiltered, searchRef } = props;
+  const { datasets, filters, filterHandler, isFiltered } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
@@ -32,7 +32,7 @@ export const DatasetFilterList = (props) => {
             const category = 'accessManagement';
             return (
               <ListItem disablePadding key={filter}>
-                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter, searchRef.current.value)}>
+                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
                   <ListItemIcon>
                     <Checkbox checked={isFiltered(filter, category)} />
                   </ListItemIcon>
@@ -53,7 +53,7 @@ export const DatasetFilterList = (props) => {
             const category = 'dataUse';
             return (
               <ListItem disablePadding key={filter}>
-                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter, searchRef.current.value)}>
+                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
                   <ListItemIcon>
                     <Checkbox checked={isFiltered(filter, category)} />
                   </ListItemIcon>
