@@ -5,13 +5,15 @@ import {useEffect, useRef, useState} from 'react';
 // Copied from ReactTooltip Types
 type Place = 'top' | 'right' | 'bottom' | 'left';
 
-interface TooltipProps {
+export const tooltipStyle: React.CSSProperties = {maxWidth: '30vw', textWrap: 'wrap'};
+
+interface OverflowTooltipProps {
   tooltipText: string;
   children: React.ReactNode | React.ReactNode[];
   id: string;
   place: Place
 }
-export const OverflowTooltip = (props: TooltipProps) => {
+export const OverflowTooltip = (props: OverflowTooltipProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isOverflown, setIsOverflown] = useState(false);
   useEffect(() => {
@@ -31,6 +33,6 @@ export const OverflowTooltip = (props: TooltipProps) => {
       effect={'solid'}
       disable={!isOverflown}
       scrollHide={true}
-      id={props.id}><div style={{maxWidth: '30vw', textWrap: 'wrap'}}>{props.tooltipText}</div></ReactTooltip>
+      id={props.id}><div style={tooltipStyle}>{props.tooltipText}</div></ReactTooltip>
   </>;
 };
