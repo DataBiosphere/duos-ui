@@ -27,7 +27,7 @@ Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitu
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics). Cert files are regenerated on a 3-month rotation so these will need to be updated when they are expired:
+Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics). Cert files are regenerated on a 3-month rotation so these will need to be updated when they are expired. The following commands need to be done on the Broad VPN.
 ```shell
 gcloud container clusters get-credentials --zone us-central1-a --project <project> terra-dev
 kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > server.crt
@@ -44,6 +44,7 @@ HTTPS=true
 SSL_CRT_FILE=server.crt
 SSL_KEY_FILE=server.key
 ```
+Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
 
 4. Start development server:
 
