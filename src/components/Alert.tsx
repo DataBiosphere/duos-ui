@@ -10,7 +10,8 @@ export interface AlertProps {
   onClose?: () => void;
 }
 
-export const Alert = ({id, type, title, description, onClose}: AlertProps) => {
+export const Alert = (props: AlertProps) => {
+  const {id, type, title, description, onClose} = props;
   return (
     <div id={`${id}_alert`} className={`alert-wrapper ${type}`} style={{border: '1px solid red', borderRadius: '5px'}}>
       {onClose && <span
