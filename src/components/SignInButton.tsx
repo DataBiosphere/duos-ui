@@ -122,9 +122,6 @@ export const SignInButton = (props: SignInButtonProps) => {
   const handleServerError = async (error: HttpError) => {
     const errorMessage = await errorStreamToString(error);
     setErrorDisplay({show: true, title: 'Error', description: errorMessage});
-    setTimeout(() => {
-      setErrorDisplay({});
-    }, 10000);
   };
 
   const handleErrors = async (error: HttpError, redirectTo: string, shouldRedirect: boolean) => {
@@ -160,14 +157,8 @@ export const SignInButton = (props: SignInButtonProps) => {
     if (response.toString().includes('Popup closed by user')) {
       setErrorDisplay(
         {title: 'Sign in cancelled', description: 'Sign in cancelled by closing the sign in window'});
-      setTimeout(() => {
-        setErrorDisplay({});
-      }, 2000);
     } else {
       setErrorDisplay({title: 'Error', description: response.toString()});
-      setTimeout(() => {
-        setErrorDisplay({});
-      }, 2000);
     }
   };
 
@@ -222,8 +213,9 @@ export const SignInButton = (props: SignInButtonProps) => {
           <Alert
             id="dialog"
             type="danger"
-            title={(errorDisplay as ErrorInfo).title}
-            description={(errorDisplay as ErrorInfo).description}
+            title={(errorDisplay as ErrorInfo).title || 'Error'}
+            description={(errorDisplay as ErrorInfo).description || ''}
+            onClose={() => setErrorDisplay({})}
           />
         </div>
       }
