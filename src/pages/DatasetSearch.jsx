@@ -298,6 +298,7 @@ export const DatasetSearch = (props) => {
           });
         } catch (error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+          setLoading(false);
         }
       }
     };
