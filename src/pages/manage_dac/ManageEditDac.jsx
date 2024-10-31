@@ -248,22 +248,22 @@ export default function ManageEditDac(props) {
   return (
     isLoading ?
       <Spinner/> :
-      <div className="container container-wide">
-        <div className="row no-margin">
-          <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+      <div className='container container-wide'>
+        <div className='row no-margin'>
+          <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
             <Link
-              id="link_manage_dac"
-              to="/manage_dac"
-              className="navbar-brand"
+              id='link_manage_dac'
+              to='/manage_dac'
+              className='navbar-brand'
               style={{paddingRight: '16px'}}
             >
-              <img id="back-arrow-icon" src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}}/>
+              <img id='back-arrow-icon' src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}} alt={'Back'}/>
             </Link>
             <div style={Styles.ICON_CONTAINER}>
-              <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG}/>
+              <img id='edit-dac-icon' src={editDACIcon} style={Styles.HEADER_IMG} alt={'Edit'}/>
             </div>
             <div style={Styles.HEADER_CONTAINER}>
-              <div className="common-color"
+              <div className='common-color'
                 style={{fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration: 'underline'}}>{dacText}</div>
               <div style={{
                 fontFamily: 'Montserrat',
@@ -273,19 +273,19 @@ export default function ManageEditDac(props) {
             </div>
           </div>
           <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '2rem'}}>
-            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data"
+            <form className='form-horizontal css-form' name='dacForm' noValidate encType='multipart/form-data'
               style={{width: '83.33%', maxWidth: '1200px'}}>
               <div style={{display: 'flex', marginBottom: '15px'}}>
-                <label id="lbl_dacName" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                  className="control-label common-color">DAC Name</label>
+                <label id='lbl_dacName' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Name</label>
                 <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <input
-                    id="txt_dacName"
-                    type="text"
+                    id='txt_dacName'
+                    type='text'
                     defaultValue={state.dac.name}
                     onChange={handleChange}
-                    name="name"
-                    className="form-control vote-input"
+                    name='name'
+                    className='form-control vote-input'
                     required={true}
                     style={{width: '100%'}}
                   />
@@ -293,31 +293,31 @@ export default function ManageEditDac(props) {
               </div>
 
               <div style={{display: 'flex', marginBottom: '15px'}}>
-                <label id="lbl_dacDescription" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                  className="control-label common-color">DAC Description</label>
+                <label id='lbl_dacDescription' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Description</label>
                 <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <textarea
-                    id="txt_dacDescription"
+                    id='txt_dacDescription'
                     defaultValue={state.dac.description}
                     onChange={handleChange}
-                    name="description"
-                    className="form-control vote-input"
+                    name='description'
+                    className='form-control vote-input'
                     required={true}
                   />
                 </div>
               </div>
 
               <div style={{display: 'flex', marginBottom: '15px'}}>
-                <label id="lbl_dacEmail" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                  className="control-label common-color">DAC Email</label>
+                <label id='lbl_dacEmail' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Email</label>
                 <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <input
-                    id="txt_dacEmail"
-                    type="text"
+                    id='txt_dacEmail'
+                    type='text'
                     defaultValue={state.dac.email}
                     onChange={handleChange}
-                    name="email"
-                    className="form-control vote-input"
+                    name='email'
+                    className='form-control vote-input'
                     required={true}
                   />
                 </div>
@@ -325,8 +325,8 @@ export default function ManageEditDac(props) {
               {
                 (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) &&
                 <div style={{display: 'flex', marginBottom: '15px'}}>
-                  <label id="lbl_dacMembers" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                    className="control-label common-color">DAC Members</label>
+                  <label id='lbl_dacMembers' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                    className='control-label common-color'>DAC Members</label>
                   <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                     <DacUsers
                       dac={state.dac}
@@ -338,11 +338,11 @@ export default function ManageEditDac(props) {
               }
 
               <div style={{display: 'flex', marginBottom: '15px'}}>
-                <label id="lbl_dacChair" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                  className="control-label common-color">Add Chairperson(s)</label>
+                <label id='lbl_dacChair' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>Add Chairperson(s)</label>
                 <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <AsyncSelect
-                    id="sel_dacChair"
+                    id='sel_dacChair'
                     isDisabled={false}
                     isMulti
                     loadOptions={(query, callback) => chairSearch(query, callback)}
@@ -351,22 +351,22 @@ export default function ManageEditDac(props) {
                     onMenuClose={() => onSearchMenuClosed()}
                     noOptionsMessage={() => 'Select a DUOS User...'}
                     value={state.chairsSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
+                    classNamePrefix='select'
+                    placeholder='Select a DUOS User...'
+                    className='select-autocomplete'
                   />
                 </div>
               </div>
               <div style={{display: 'flex', marginBottom: '15px'}}>
-                <label id="lbl_dacMember" style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
-                  className="control-label common-color">Add Member(s)</label>
+                <label id='lbl_dacMember' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>Add Member(s)</label>
                 <div style={state.searchInputChanged ? {
                   paddingBottom: '10rem',
                   flexBasis: '66.67%',
                   paddingLeft: '15px'
                 } : {flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <AsyncSelect
-                    id="sel_dacMember"
+                    id='sel_dacMember'
                     isDisabled={false}
                     isMulti={true}
                     loadOptions={(query, callback) => memberSearch(query, callback)}
@@ -375,24 +375,24 @@ export default function ManageEditDac(props) {
                     onMenuClose={() => onSearchMenuClosed()}
                     noOptionsMessage={() => 'Select a DUOS User...'}
                     value={state.membersSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
+                    classNamePrefix='select'
+                    placeholder='Select a DUOS User...'
+                    className='select-autocomplete'
                   />
                 </div>
               </div>
               <div style={{paddingBottom: '20px', float: 'right'}}>
                 <button
-                  id="btn_save"
+                  id='btn_save'
                   onClick={okHandler}
-                  className="f-left btn-primary common-background"
+                  className='f-left btn-primary common-background'
                 >
                   Save
                 </button>
                 <button
-                  id="btn_cancel"
+                  id='btn_cancel'
                   onClick={closeHandler}
-                  className="f-left btn-secondary"
+                  className='f-left btn-secondary'
                 >
                   Cancel
                 </button>
@@ -400,7 +400,7 @@ export default function ManageEditDac(props) {
             </form>
             {
               state.error.show && <div>
-                <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg}/>
+                <Alert id='modal' type='danger' title={state.error.title} description={this.state.error.msg}/>
               </div>
             }
           </div>
