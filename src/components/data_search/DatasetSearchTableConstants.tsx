@@ -410,7 +410,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => {
         return dataUseCellData({
           dataset,
-          label: `Data Use for dataset ${dataset.datasetId}: ${dataset}`,
+          label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
           divClass: ['data-use-cell'],
           spanClass: [],
           cellWidth: cellWidths.dataUse,
