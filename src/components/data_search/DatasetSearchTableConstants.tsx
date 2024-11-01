@@ -91,7 +91,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
         const indeterminate = numberSelected > 0 && numberSelected < studyDatasetIds.length;
         const checkboxId = `${datasets[0].study.studyId}-is-selected-checkbox`;
         const isSelectableStudy = datasets.filter(isSelectable).length === datasets.length;
-        const tooltipText = 'This study contains some open or external datasets. Select the \'View By Datasets\' tab to apply for access to datasets in this study.';
+        const tooltipText = 'This study contains one or more dataset that is either open access or whose requests are managed outside DUOS. Go to the datasets tab for additional information per dataset.';
         return {
           data: <>
             <ReactTooltip
@@ -260,7 +260,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => {
         const isSelected = selected.includes(dataset.datasetId);
         const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
-        const tooltipText = `${dataset.accessManagement == 'open' ? 'Applying for access to open access datasets is not necessary' : 'To apply for access to external access datasets, please follow the link to the external site'}`;
+        const tooltipText = `${dataset.accessManagement == 'open' ? 'Open access data doesn’t require a request, go to the link in the data location column to proceed.' : 'Data access is managed outside DUOS, follow the link in the data location column to proceed'}`;
         return {
           data: <>
             <ReactTooltip
