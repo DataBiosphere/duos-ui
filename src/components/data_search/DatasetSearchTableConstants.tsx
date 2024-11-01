@@ -6,6 +6,8 @@ import {OverflowTooltip, tooltipStyle} from '../Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
 import DatasetExportButton from './DatasetExportButton';
 import ReactTooltip from 'react-tooltip';
+import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
+import './DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -230,7 +232,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     dataType: string;
     donorSize: string;
     dataLocation: string;
-    dac: string;
+    dataUse: string;
     exportToTerra: number;
   }
   const cellWidths: CellWidths = {
@@ -243,7 +245,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     dataType: '15%',
     donorSize: '7%',
     dataLocation: '13%',
-    dac: '10%',
+    dataUse: '10%',
     exportToTerra: 100,
   };
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
@@ -402,18 +404,18 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       }
     },
     {
-      label: 'DAC',
+      label: 'Data Use',
       sortable: true,
-      cellStyle: makeHeaderStyle(cellWidths.dac),
-      cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.dac?.dacName} id={`${dataset.datasetId}-dataset-dac`}>
-          {dataset.dac?.dacName}
-        </OverflowTooltip>,
-        value: dataset.dac?.dacName,
-        id: `${dataset.datasetId}-dac`,
-        style: makeRowStyle(cellWidths.dac),
-        label: `DAC for dataset ${dataset.datasetId}: ${dataset.dac?.dacName}`
-      })
+      cellStyle: makeHeaderStyle(cellWidths.dataUse),
+      cellDataFn: (dataset: DatasetTerm) => {
+        return dataUseCellData({
+          dataset,
+          label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
+          divClass: ['data-use-cell'],
+          spanClass: [],
+          cellWidth: cellWidths.dataUse,
+          tooltipPlace: 'top'});
+      }
     },
     {
       label: 'Export to Terra',
