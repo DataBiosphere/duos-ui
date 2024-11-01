@@ -71,7 +71,7 @@ export function dataCustodianCellData({dataset, label = 'dataCustodianCellData'}
   };
 }
 
-export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
+export function dataUseCellData({dataset, label = 'dataUseCellData', divClass = style['cell-data'], spanClass = style['data-use'], cellWidth = styles.cellWidths.dataUse, tooltipPlace = 'right'}) {
   const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
     if (dataUse.code === 'OTHER') {
       return {'code': `OTH1`, 'description': dataUse.description};
@@ -93,10 +93,10 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
   }
   const codeList = codesAndDescriptions.map(du => du.code);
   const display =
-    <div className={style['cell-data']}>
-      <span className={style['data-use']} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
+    <div className={divClass}>
+      <span className={spanClass} data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
       <ReactTooltip
-        place={'right'}
+        place={tooltipPlace}
         effect={'solid'}
         id={`dataset-data-use-${dataset.datasetId}`}>
         <ul>{codesAndDescriptions.map((translation, index) => {
@@ -108,7 +108,7 @@ export function dataUseCellData({dataset, label = 'dataUseCellData'}) {
     data: display,
     value: codeList.join(', '),
     id: `data-use-cell-data-${dataset.datasetId}`,
-    cellStyle: {width: styles.cellWidths.dataUse},
+    cellStyle: {width: cellWidth},
     label
   };
 }

@@ -6,6 +6,8 @@ import {OverflowTooltip, tooltipStyle} from '../Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
 import DatasetExportButton from './DatasetExportButton';
 import ReactTooltip from 'react-tooltip';
+import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
+import './DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -406,45 +408,13 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.dataUse),
       cellDataFn: (dataset: DatasetTerm) => {
-        const codesAndDescriptions = dataset.dataUse?.primary ? dataset.dataUse.primary.map((dataUse) => {
-          if (dataUse.code === 'OTHER') {
-            return {'code': `OTH1`, 'description': dataUse.description};
-          } else if (dataUse.code === 'DS') {
-            const disease = dataUse.description.substring(dataUse.description.indexOf(':') + 2);
-            return {'code': `${dataUse.code} (${disease})`, 'description': dataUse.description};
-          } else {
-            return {'code': dataUse.code, 'description': dataUse.description};
-          }
-        }) : [];
-        if (dataset.dataUse?.secondary) {
-          dataset.dataUse?.secondary.forEach((dataUse) => {
-            if (dataUse.code === 'OTHER') {
-              codesAndDescriptions.push({'code': `OTH2`, 'description': dataUse.description});
-            } else {
-              codesAndDescriptions.push({'code': dataUse.code, 'description': dataUse.description});
-            }
-          });
-        }
-        const codeList = codesAndDescriptions.map(du => du.code);
-        const display =
-            <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>
-              <span data-tip={true} data-for={`dataset-data-use-${dataset.datasetId}`}>{codeList.join(', ')}</span>
-              <ReactTooltip
-                place={'top'}
-                effect={'solid'}
-                id={`dataset-data-use-${dataset.datasetId}`}>
-                <ul>{codesAndDescriptions.map((translation, index) => {
-                  return <li key={`${translation.code}_s_${index}`}>{translation.code}: {translation.description}</li>;
-                })}</ul>
-              </ReactTooltip>
-            </div>;
-        return {
-          data: display,
-          value: codeList.join(', '),
-          id: `${dataset.datasetId}-data-use`,
-          style: makeRowStyle(cellWidths.dataUse),
-          label: `Data Use for dataset ${dataset.datasetId}: ${codeList}`
-        };
+        return dataUseCellData({
+          dataset,
+          label: `Data Use for dataset ${dataset.datasetId}: ${dataset}`,
+          divClass: ['data-use-cell'],
+          spanClass: [],
+          cellWidth: cellWidths.dataUse,
+          tooltipPlace: 'top'});
       }
     },
     {
