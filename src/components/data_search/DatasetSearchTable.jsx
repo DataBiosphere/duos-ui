@@ -34,6 +34,7 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
+  search: []
 };
 
 export const DatasetSearchTable = (props) => {
@@ -43,7 +44,7 @@ export const DatasetSearchTable = (props) => {
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
-  const searchRef = useRef('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
   const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
@@ -62,7 +63,7 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const assembleFullQuery = (searchTerm, filters) => {
+  const assembleFullQuery = (filters) => {
     const queryChunks = [
       {
         'match': {
@@ -76,12 +77,12 @@ export const DatasetSearchTable = (props) => {
       }
     ];
 
-    // do not apply search modifier if there is no searchTerm
-    if (searchTerm !== '') {
+    // do not apply search modifier if there is no search term
+    if (filters.search.length > 0) {
       const searchModifier = [
         {
           'multi_match': {
-            'query': searchTerm,
+            'query': filters.search[filters.search.length - 1],
             'type':'phrase_prefix',
             'fields': [
               'datasetName',
@@ -159,8 +160,12 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const filterHandler = (event, data, category, filter, searchTerm) => {
+  const filterHandler = (event, data, category, filter) => {
     var newFilters = defaultFilters;
+    if (category === 'search') {
+      newFilters[category] = [];
+      setSearchTerm(filter);
+    }
     if (!isFiltered(filter, category) && filter !== '') {
       newFilters[category] = filters[category].concat(filter);
     } else {
@@ -168,8 +173,8 @@ export const DatasetSearchTable = (props) => {
     }
     setFilters(newFilters);
 
-    const fullQuery = assembleFullQuery(searchTerm, newFilters);
-    const search = async () => {
+    const fullQuery = assembleFullQuery(newFilters);
+    const doSearch = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
           var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
@@ -179,16 +184,11 @@ export const DatasetSearchTable = (props) => {
         Notifications.showError({ text: 'Failed to load Elasticsearch index' });
       }
     };
-    search();
+    doSearch();
   };
   const applyForAccess = async () => {
     const darDraft = await DAR.postDarDraft({ datasetId: selected });
     history.push(`/dar_application/${darDraft.referenceId}`);
-  };
-
-  const clearSearchRef = () => {
-    searchRef.current.value = '';
-    filterHandler(null, datasets, '', '');
   };
 
   useEffect(() => {
@@ -222,12 +222,12 @@ export const DatasetSearchTable = (props) => {
                 fontFamily: 'Montserrat',
                 fontSize: '1.5rem'
               }}
-              onChange={() => filterHandler(null, datasets, '', searchRef.current.value)}
-              ref={searchRef}
+              value={searchTerm}
+              onChange={() => filterHandler(null, datasets, 'search', event.target.value)}
             />
             <div/>
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={clearSearchRef} sx={{ width: '100px' }}>
+              <Button variant="contained" onClick={() => {filterHandler(null, datasets, 'search', '')}} sx={{ width: '100px' }}>
                 Clear Search
               </Button>
             </Box>
@@ -253,7 +253,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} searchRef={searchRef}/>
+            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
