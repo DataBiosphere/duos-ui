@@ -1,0 +1,15 @@
+{
+  "userId": 2,
+  "displayName": "Admin",
+  "institution": {
+    "id": 150,
+    "name": "The Broad Institute of MIT and Harvard"
+  },
+  "roles": [
+    {
+      "userId": 2,
+      "roleId": 4,
+      "name": "Admin"
+    }
+  ]
+}

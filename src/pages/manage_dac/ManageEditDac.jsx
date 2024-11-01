@@ -381,7 +381,6 @@ export default function ManageEditDac(props) {
                     classNamePrefix='select'
                     placeholder='Select a DUOS User...'
                     className='select-autocomplete'
-                    data-cy='sel_dacMember'
                   />
                 </div>
               </div>

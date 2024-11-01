@@ -1,0 +1,67 @@
+{
+  "dacId": 1,
+  "name": "Test DAC",
+  "description": "Test DAC",
+  "createDate": "Oct 6, 2020",
+  "updateDate": "Jun 27, 2024",
+  "chairpersons": [
+    {
+      "userId": 1,
+      "email": "test@broadinstitute.org",
+      "displayName": "Chairperson",
+      "createDate": 1704827256598,
+      "roles": [
+        {
+          "userId": 1,
+          "roleId": 2,
+          "name": "Chairperson",
+          "dacId": 1
+        }
+      ],
+      "emailPreference": true,
+      "institutionId": 150,
+      "eraCommonsId": "test"
+    }
+  ],
+  "members": [
+    {
+      "userId": 2,
+      "email": "test2@broadinstitute.org",
+      "displayName": "Member",
+      "createDate": 1704827256598,
+      "roles": [
+        {
+          "userId": 2,
+          "roleId": 1,
+          "name": "Member",
+          "dacId": 1
+        }
+      ],
+      "emailPreference": true,
+      "institutionId": 150,
+      "eraCommonsId": "test"
+    }
+  ],
+  "electionIds": [],
+  "datasetIds": [],
+  "email": "grushton@broadinstitute.org",
+  "associatedDaa": {
+    "daaId": 1,
+    "createUserId": 5146,
+    "createDate": 1713386755554,
+    "updateUserId": 5146,
+    "updateDate": 1713386755554,
+    "initialDacId": 8,
+    "file": {
+      "fileStorageObjectId": 216,
+      "entityId": 1,
+      "fileName": "test_daa.txt",
+      "category": "dataAccessAgreement",
+      "mediaType": "application/octet-stream",
+      "createUserId": 5146,
+      "createDate": 1713386755554,
+      "deleted": false
+    },
+    "broadDaa": true
+  }
+}

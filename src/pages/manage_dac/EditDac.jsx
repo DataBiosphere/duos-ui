@@ -371,6 +371,7 @@ export default function EditDac(props) {
                         name='name'
                         className='form-control vote-input'
                         required={true}
+                        data-cy='dac_name'
                       />
                     </div>
                   </div>
@@ -385,6 +386,7 @@ export default function EditDac(props) {
                         name='description'
                         className='form-control vote-input'
                         required={true}
+                        data-cy='dac_description'
                       />
                     </div>
                   </div>
@@ -400,6 +402,7 @@ export default function EditDac(props) {
                         name='email'
                         className='form-control vote-input'
                         required={true}
+                        data-cy='dac_email'
                       />
                     </div>
                   </div>
@@ -459,6 +462,7 @@ export default function EditDac(props) {
                       id='btn_save'
                       onClick={okHandler}
                       className='f-left btn-primary common-background'
+                      data-cy='btn_save'
                     >
                         Save
                     </button>
@@ -467,6 +471,7 @@ export default function EditDac(props) {
                         id='btn_cancel'
                         onClick={closeHandler}
                         className='f-left btn-secondary'
+                        data-cy='btn_cancel'
                       >
                       Cancel
                       </button>
