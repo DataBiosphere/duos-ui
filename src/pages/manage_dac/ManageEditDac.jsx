@@ -1,22 +1,21 @@
 import * as ld from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AsyncSelect from 'react-select/async';
-import { DAC } from '../../libs/ajax/DAC';
-import { Models } from '../../libs/models';
-import { PromiseSerial } from '../../libs/utils';
-import { Alert } from '../../components/Alert';
-import { Link } from 'react-router-dom';
-import { DacUsers } from './DacUsers';
-import { Notifications } from '../../libs/utils';
+import {DAC} from '../../libs/ajax/DAC';
+import {Models} from '../../libs/models';
+import {PromiseSerial} from '../../libs/utils';
+import {Alert} from '../../components/Alert';
+import {Link} from 'react-router-dom';
+import {DacUsers} from './DacUsers';
+import {Notifications} from '../../libs/utils';
 import editDACIcon from '../../images/dac_icon.svg';
 import backArrowIcon from '../../images/back_arrow.svg';
-import { Spinner } from '../../components/Spinner';
-import { Styles } from '../../libs/theme';
+import {Spinner} from '../../components/Spinner';
+import {Storage} from '../../libs/storage';
+import {Styles} from '../../libs/theme';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
-const CHAIRPERSON = 'Chairperson';
-const ADMIN = 'Admin';
 
 // NOTE: This component is to be removed after the promotion of the Dynamic DAA feature
 // and is to be replaced by the EditDac component.
@@ -45,9 +44,8 @@ export default function ManageEditDac(props) {
         try {
           const fetchedDac = await DAC.get(dacId);
           setFetchedDac(fetchedDac);
-          setState(prev => ({ ...prev, dac: fetchedDac }));
-        }
-        catch(e) {
+          setState(prev => ({...prev, dac: fetchedDac}));
+        } catch (e) {
           Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
         }
       }
@@ -58,34 +56,32 @@ export default function ManageEditDac(props) {
 
   const okHandler = async (event) => {
     event.preventDefault();
-
+    const user = Storage.getCurrentUser();
     let currentDac = state.dac;
     if (state.dirtyFlag) {
-      if (props.location.state.userRole === ADMIN) {
-        if (dacId !== undefined) {
-          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
-        } else {
+      if (dacId !== undefined) {
+        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description, currentDac.email);
+      } else {
+        if (user.isAdmin) {
           currentDac = await DAC.create(currentDac.name, currentDac.description, currentDac.email);
         }
+      }
 
-        // Order here is important. Since users cannot have multiple roles in the
-        // same DAC, we have to make sure we remove users before re-adding any
-        // back in a different role.
-        // Chairs are a special case since we cannot remove all chairs from a DAC
-        // so we handle that case first.
-        const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-        const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
-        const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
-        const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
-        const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
-        const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
-        const responses = await PromiseSerial(allOperations);
-        const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
-        if (!ld.isEmpty(errorCodes)) {
-          handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
-        } else {
-          closeHandler();
-        }
+      // Order here is important. Since users cannot have multiple roles in the
+      // same DAC, we have to make sure we remove users before re-adding any
+      // back in a different role.
+      // Chairs are a special case since we cannot remove all chairs from a DAC
+      // so we handle that case first.
+      const ops0 = state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops1 = state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops2 = state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
+      const ops3 = state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
+      const ops4 = state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
+      const responses = await PromiseSerial(allOperations);
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
+      if (!ld.isEmpty(errorCodes)) {
+        handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
       } else {
         closeHandler();
       }
@@ -146,7 +142,9 @@ export default function ManageEditDac(props) {
   const userSearch = (invalidUserIds, query, callback) => {
     DAC.autocompleteUsers(query).then(
       items => {
-        const filteredUsers = ld.filter(items, item => { return !invalidUserIds.includes(item.userId); });
+        const filteredUsers = ld.filter(items, item => {
+          return !invalidUserIds.includes(item.userId);
+        });
         const options = filteredUsers.map(function (item) {
           return {
             key: item.userId,
@@ -252,76 +250,84 @@ export default function ManageEditDac(props) {
       <Spinner/> :
       <div className='container container-wide'>
         <div className='row no-margin'>
-          <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+          <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
             <Link
-              id="link_manage_dac"
-              to="/manage_dac"
-              className="navbar-brand"
+              id='link_manage_dac'
+              to='/manage_dac'
+              className='navbar-brand'
               style={{paddingRight: '16px'}}
             >
-              <img id="back-arrow-icon" src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}} />
+              <img id='back-arrow-icon' src={backArrowIcon} style={{...Styles.HEADER_IMG, width: '30px'}} alt={'Back'}/>
             </Link>
             <div style={Styles.ICON_CONTAINER}>
-              <img id="edit-dac-icon" src={editDACIcon} style={Styles.HEADER_IMG} />
+              <img id='edit-dac-icon' src={editDACIcon} style={Styles.HEADER_IMG} alt={'Edit'}/>
             </div>
             <div style={Styles.HEADER_CONTAINER}>
-              <div className='common-color' style={{ fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration:'underline' }}>{dacText}</div>
-              <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>{dacId === undefined ? 'Create DAC' : fetchedDac?.name}</div>
+              <div className='common-color'
+                style={{fontFamily: 'Montserrat', fontSize: '1.4rem', textDecoration: 'underline'}}>{dacText}</div>
+              <div style={{
+                fontFamily: 'Montserrat',
+                fontWeight: 600,
+                fontSize: '2.8rem'
+              }}>{dacId === undefined ? 'Create DAC' : fetchedDac?.name}</div>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            <form className="form-horizontal css-form" name="dacForm" noValidate encType="multipart/form-data"  style={{ width: '83.33%', maxWidth: '1200px' }}>
-              <div style={{ display: 'flex', marginBottom: '15px' }}>
-                <label id="lbl_dacName" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Name</label>
-                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '2rem'}}>
+            <form className='form-horizontal css-form' name='dacForm' noValidate encType='multipart/form-data'
+              style={{width: '83.33%', maxWidth: '1200px'}}>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                <label id='lbl_dacName' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Name</label>
+                <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <input
-                    id="txt_dacName"
-                    type="text"
+                    id='txt_dacName'
+                    type='text'
                     defaultValue={state.dac.name}
                     onChange={handleChange}
-                    name="name"
-                    className="form-control vote-input"
+                    name='name'
+                    className='form-control vote-input'
                     required={true}
-                    disabled={props.location.state.userRole === CHAIRPERSON}
-                    style={{ width: '100%' }}
+                    style={{width: '100%'}}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', marginBottom: '15px' }}>
-                <label id="lbl_dacDescription" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Description</label>
-                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                <label id='lbl_dacDescription' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Description</label>
+                <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <textarea
-                    id="txt_dacDescription"
+                    id='txt_dacDescription'
                     defaultValue={state.dac.description}
                     onChange={handleChange}
-                    name="description"
-                    className="form-control vote-input"
+                    name='description'
+                    className='form-control vote-input'
                     required={true}
-                    disabled={props.location.state.userRole === CHAIRPERSON}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', marginBottom: '15px' }}>
-                <label id="lbl_dacEmail" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Email</label>
-                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                <label id='lbl_dacEmail' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>DAC Email</label>
+                <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <input
-                    id="txt_dacEmail"
-                    type="text"
+                    id='txt_dacEmail'
+                    type='text'
                     defaultValue={state.dac.email}
                     onChange={handleChange}
-                    name="email"
-                    className="form-control vote-input"
+                    name='email'
+                    className='form-control vote-input'
                     required={true}
-                    disabled={props.location.state.userRole === CHAIRPERSON}
                   />
                 </div>
               </div>
               {
-                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) && <div style={{ display: 'flex', marginBottom: '15px' }}>
-                  <label id="lbl_dacMembers" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">DAC Members</label>
-                  <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+                (state.dac.chairpersons.length > 0 || state.dac.members.length > 0) &&
+                <div style={{display: 'flex', marginBottom: '15px'}}>
+                  <label id='lbl_dacMembers' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                    className='control-label common-color'>DAC Members</label>
+                  <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                     <DacUsers
                       dac={state.dac}
                       removeButton={true}
@@ -331,11 +337,12 @@ export default function ManageEditDac(props) {
                 </div>
               }
 
-              <div style={{ display: 'flex', marginBottom: '15px' }}>
-                <label id="lbl_dacChair" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">Add Chairperson(s)</label>
-                <div style={{ flexBasis: '66.67%', paddingLeft: '15px' }}>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                <label id='lbl_dacChair' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>Add Chairperson(s)</label>
+                <div style={{flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <AsyncSelect
-                    id="sel_dacChair"
+                    id='sel_dacChair'
                     isDisabled={false}
                     isMulti
                     loadOptions={(query, callback) => chairSearch(query, callback)}
@@ -344,17 +351,22 @@ export default function ManageEditDac(props) {
                     onMenuClose={() => onSearchMenuClosed()}
                     noOptionsMessage={() => 'Select a DUOS User...'}
                     value={state.chairsSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
+                    classNamePrefix='select'
+                    placeholder='Select a DUOS User...'
+                    className='select-autocomplete'
                   />
                 </div>
               </div>
-              <div style={{ display: 'flex', marginBottom: '15px' }}>
-                <label id="lbl_dacMember" style={{ flexBasis: '33.33%', paddingRight: '15px' }} className="control-label common-color">Add Member(s)</label>
-                <div style={state.searchInputChanged ? { paddingBottom: '10rem', flexBasis: '66.67%', paddingLeft: '15px' } : {flexBasis: '66.67%', paddingLeft: '15px' }}>
+              <div style={{display: 'flex', marginBottom: '15px'}}>
+                <label id='lbl_dacMember' style={{flexBasis: '33.33%', paddingRight: '15px', marginTop: 0}}
+                  className='control-label common-color'>Add Member(s)</label>
+                <div style={state.searchInputChanged ? {
+                  paddingBottom: '10rem',
+                  flexBasis: '66.67%',
+                  paddingLeft: '15px'
+                } : {flexBasis: '66.67%', paddingLeft: '15px'}}>
                   <AsyncSelect
-                    id="sel_dacMember"
+                    id='sel_dacMember'
                     isDisabled={false}
                     isMulti={true}
                     loadOptions={(query, callback) => memberSearch(query, callback)}
@@ -363,34 +375,32 @@ export default function ManageEditDac(props) {
                     onMenuClose={() => onSearchMenuClosed()}
                     noOptionsMessage={() => 'Select a DUOS User...'}
                     value={state.membersSelectedOptions}
-                    classNamePrefix="select"
-                    placeholder="Select a DUOS User..."
-                    className="select-autocomplete"
+                    classNamePrefix='select'
+                    placeholder='Select a DUOS User...'
+                    className='select-autocomplete'
                   />
                 </div>
               </div>
-              <div className='inline-block' style={{paddingBottom: '20px'}}>
+              <div style={{paddingBottom: '20px', float: 'right'}}>
                 <button
                   id='btn_save'
                   onClick={okHandler}
                   className='f-left btn-primary common-background'
                 >
-                    Save
+                  Save
                 </button>
-                <div style={{ marginLeft: '40px' }}>
-                  <button
-                    id='btn_cancel'
-                    onClick={closeHandler}
-                    className='f-left btn-secondary'
-                  >
-                   Cancel
-                  </button>
-                </div>
+                <button
+                  id='btn_cancel'
+                  onClick={closeHandler}
+                  className='f-left btn-secondary'
+                >
+                  Cancel
+                </button>
               </div>
             </form>
             {
               state.error.show && <div>
-                <Alert id="modal" type="danger" title={state.error.title} description={this.state.error.msg} />
+                <Alert id='modal' type='danger' title={state.error.title} description={this.state.error.msg}/>
               </div>
             }
           </div>
