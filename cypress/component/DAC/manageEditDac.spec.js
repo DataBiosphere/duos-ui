@@ -15,14 +15,17 @@ const WrappedManageEditDac = (props) => {
   return <BrowserRouter><ManageEditDac {...props}/></BrowserRouter>;
 };
 
+/**
+ * This manage page is the pre-Data Access Agreement way to edit a DAC and will be removed when DAA work is complete.
+ */
 describe('ManageEditDAC Tests', () => {
 
   Cypress._.each([admin, chair], (user) => {
-    it('Should Load for ' + user.displayName, () => {
+    it('Manage Edit DAC page should load for ' + user.displayName, () => {
       cy.viewport(600, 600);
       cy.stub(Storage, 'getCurrentUser').returns(user);
       cy.stub(DAC, 'get').returns(dac);
-      const props = {match: {params: {dacId: 1}}};
+      const props = {match: {params: {dacId: dac.dacId}}};
       mount(WrappedManageEditDac(props));
       cy.contains(dac.name).should('exist');
       cy.get('[data-cy="dac_name"]').should('not.be.disabled');
