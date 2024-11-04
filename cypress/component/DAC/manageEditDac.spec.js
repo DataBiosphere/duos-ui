@@ -9,6 +9,7 @@ import {BrowserRouter} from 'react-router-dom';
 import admin from './admin.json';
 import chair from './chair.json';
 import dac from './dac.json';
+import {setUserRoleStatuses} from '../../../src/libs/utils';
 
 // It's necessary to wrap components that contain `Link` components
 const WrappedManageEditDac = (props) => {
@@ -23,7 +24,7 @@ describe('ManageEditDAC Tests', () => {
   Cypress._.each([admin, chair], (user) => {
     it('Manage Edit DAC page should load for ' + user.displayName, () => {
       cy.viewport(600, 600);
-      cy.stub(Storage, 'getCurrentUser').returns(user);
+      setUserRoleStatuses(user, Storage);
       cy.stub(DAC, 'get').returns(dac);
       const props = {match: {params: {dacId: dac.dacId}}};
       mount(WrappedManageEditDac(props));
@@ -33,6 +34,67 @@ describe('ManageEditDAC Tests', () => {
       cy.get('[data-cy="dac_email"]').should('not.be.disabled');
       cy.get('[data-cy="btn_save"]').should('not.be.disabled');
       cy.get('[data-cy="btn_cancel"]').should('not.be.disabled');
+    });
+  });
+
+  it('Admins can create a DAC', () => {
+    cy.viewport(600, 600);
+    Storage.clearStorage();
+    setUserRoleStatuses(admin, Storage);
+    const props = {
+      match: {
+        params: {
+          dacId: undefined
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(WrappedManageEditDac(props));
+    cy.get('[data-cy="dac_name"]').should('not.be.disabled');
+    cy.get('[data-cy="dac_name"]').should('be.empty');
+    cy.get('[data-cy="dac_description"]').should('not.be.disabled');
+    cy.get('[data-cy="dac_description"]').should('be.empty');
+    cy.get('[data-cy="dac_email"]').should('not.be.disabled');
+    cy.get('[data-cy="dac_email"]').should('be.empty');
+    cy.get('[data-cy="btn_save"]').should('not.be.disabled');
+    cy.get('[data-cy="btn_cancel"]').should('not.be.disabled');
+
+    // Create a DAC
+    const dacCreate = cy.stub(DAC, 'create');
+
+    cy.get('[data-cy="dac_name"]').type('New DAC Name');
+    cy.get('[data-cy="dac_description"]').type('New DAC Description');
+    cy.get('[data-cy="dac_email"]').type('New DAC Email');
+    cy.get('[data-cy="btn_save"]').click().then(() => {
+      expect(dacCreate).to.be.called;
+    });
+  });
+
+  it('Chairs cannot create a DAC', () => {
+    cy.viewport(600, 600);
+    Storage.clearStorage();
+    setUserRoleStatuses(chair, Storage);
+    const dacCreate = cy.stub(DAC, 'create');
+    const props = {
+      match: {
+        params: {
+          dacId: undefined
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(WrappedManageEditDac(props));
+    cy.get('[data-cy="dac_name"]').type('New DAC Name');
+    cy.get('[data-cy="dac_description"]').type('New DAC Description');
+    cy.get('[data-cy="dac_email"]').type('New DAC Email');
+    cy.get('[data-cy="btn_save"]').click().then(() => {
+      expect(dacCreate).to.not.be.called;
     });
   });
 
