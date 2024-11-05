@@ -1,53 +1,22 @@
 import * as React from 'react';
-import { CircularProgress, IconButton, Link } from '@mui/material';
-import { useState } from 'react';
-import IosShareIcon from '@mui/icons-material/IosShare';
-import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
+import {useEffect, useState} from 'react';
+import {Link} from '@mui/material';
+import {Config} from '../../libs/config';
 
 export const DatasetExportButton = (props) => {
-  const { snapshot, title } = props;
-  // The exportStatus flow is: initial -> prepping -> ready
-  // TODO: error handling?
-  const [exportStatus, setExportStatus] = useState('initial');
-  const [exportResult, setExportResult] = useState(null);
+  const {snapshot, title} = props;
 
-  // Not a supported export location
-  if (!snapshot) {
-    return null;
-  }
+  const [terraUrl, setTerraUrl] = useState('');
 
-  const prepExportHandler = async () => {
-    setExportStatus('prepping');
-    const job = await TerraDataRepo.prepareExport(snapshot.id);
-    const result = await TerraDataRepo.waitForJob(job.id);
-    setExportResult(result);
-    setExportStatus('ready');
-  };
+  useEffect(() => {
+    (async () => {
+      setTerraUrl(await Config.getTerraUrl());
+    })();
+  }, []);
 
-  if (exportStatus === 'initial') {
-    return (
-      <IconButton aria-label="prepare export to Terra" size="medium" onClick={prepExportHandler}>
-        <IosShareIcon size={15} />
-      </IconButton>
-    );
-  }
+  const link = `${terraUrl}/#import-data?snapshotId=${snapshot.id}&format=tdrexport&tdrSyncPermissions=false`;
 
-  if (exportStatus === 'prepping') {
-    return (
-      <IconButton aria-label="prepare export to Terra" size="medium" onClick={() => ({})} disabled>
-        <CircularProgress size={15} />,
-      </IconButton>
-    );
-  }
-
-  if (exportStatus === 'ready') {
-    return (
-      <Link href={exportResult.terraImportLink} target="_blank" rel="noopener noreferrer" title={title} aria-label={title}>Export</Link>
-    );
-  }
-
-  return null;
-
+  return <Link href={link} target="_blank" rel="noopener noreferrer" title={title} aria-label={title}>Export</Link>;
 };
 
 export default DatasetExportButton;
