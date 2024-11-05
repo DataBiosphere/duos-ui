@@ -1,0 +1,16 @@
+{
+  "userId": 1,
+  "displayName": "Chairperson",
+  "institution": {
+    "id": 150,
+    "name": "The Broad Institute of MIT and Harvard"
+  },
+  "roles": [
+    {
+      "userId": 1,
+      "roleId": 2,
+      "name": "Chairperson",
+      "dacId": 1
+    }
+  ]
+}

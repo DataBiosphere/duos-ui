@@ -30,6 +30,7 @@
     "no-unused-vars": "warn",
     "no-extra-semi": "warn",
     "quotes": ["warn", "single", {"avoidEscape": true, "allowTemplateLiterals": true}], // Checks for single quote usage where possible
+    "jsx-quotes": ["warn", "prefer-single"],
     "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
     "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
     "react/jsx-filename-extension": [
@@ -78,8 +79,8 @@
         ]
       },
       "extends": [
-        "eslint:recommended", 
-        "plugin:react/recommended", 
+        "eslint:recommended",
+        "plugin:react/recommended",
         "plugin:@typescript-eslint/eslint-recommended"
       ]
     }
