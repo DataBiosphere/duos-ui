@@ -1,0 +1,21 @@
+[
+  {
+    "daaId": 1,
+    "createUserId": 3479,
+    "createDate": 1722023675199,
+    "updateUserId": 3479,
+    "updateDate": 1722023675199,
+    "initialDacId": 1,
+    "file": {
+      "fileStorageObjectId": 1,
+      "entityId": "1",
+      "fileName": "DUOS_Uniform_Data_Access_Agreement.pdf",
+      "category": "dataAccessAgreement",
+      "mediaType": "application/octet-stream",
+      "createUserId": 3479,
+      "createDate": 1722023675199,
+      "deleted": false
+    },
+    "broadDaa": true
+  }
+]
