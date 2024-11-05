@@ -44,6 +44,11 @@ describe('EditDAC Tests', () => {
     Storage.clearStorage();
     setUserRoleStatuses(admin, Storage);
     cy.stub(DAA, 'getDaas').returns(daas);
+    cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200));
+    cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200));
+    cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200));
+    cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200));
+    cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200));
     const props = {
       match: {
         params: {
