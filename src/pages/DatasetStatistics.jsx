@@ -79,7 +79,7 @@ export default function DatasetStatistics(props) {
               </div>
             </div>
             <div style={{ paddingTop: '20px', paddingLeft: '30px' }}>
-              <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+              <Button variant='contained' onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
                 Apply for Access
               </Button>
             </div>
@@ -119,8 +119,8 @@ export default function DatasetStatistics(props) {
             <div style={Styles.READ_MORE} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
                 props={props}
-                readLessText="Show less"
-                readMoreText="Show More"
+                readLessText='Show less'
+                readMoreText='Show More'
                 readStyle={{ fontWeight: 500, margin: '20px', height: 0 }}
                 content={[
                   <div key='dar' style={{ display: 'flex' }}>
