@@ -5,12 +5,12 @@ import outdatedBrowserRework from 'outdated-browser-rework';
 outdatedBrowserRework({
   browserSupport: {
     Chrome: 67, // Includes Chrome for mobile devices
-    Edge: 40,
+    Edge: false,
     Safari: false,
-    'Mobile Safari': 10,
-    Opera: 54,
+    'Mobile Safari': false,
+    Opera: false,
     Firefox: 60,
-    Vivaldi: 1,
+    Vivaldi: false,
     IE: false,
   },
   isUnknownBrowserOK: true,
