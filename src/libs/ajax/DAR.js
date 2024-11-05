@@ -33,7 +33,7 @@ export const DAR = {
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3/draft` :
       `${await getApiUrl()}/api/dar/v2/draft`;
-    const res = await axios.post(url, dar, Config.authOpts());
+    const res = await axios.post(url, dar, Object.assign({}, Config.authOpts(), {validateStatus: () => true}));
     return res.data;
   },
 
