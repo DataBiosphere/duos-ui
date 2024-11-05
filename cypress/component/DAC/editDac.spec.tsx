@@ -82,4 +82,38 @@ describe('EditDAC Tests', () => {
     });
   });
 
+  it('Chairs cannot create a DAC', () => {
+    cy.viewport(600, 600);
+    Storage.clearStorage();
+    setUserRoleStatuses(chair, Storage);
+    cy.stub(DAA, 'getDaas').returns(daas);
+    cy.stub(DAC, 'removeDacMember').returns(Promise.resolve(200));
+    cy.stub(DAC, 'addDacChair').returns(Promise.resolve(200));
+    cy.stub(DAC, 'removeDacChair').returns(Promise.resolve(200));
+    cy.stub(DAC, 'addDacMember').returns(Promise.resolve(200));
+    cy.stub(DAA, 'addDaaToDac').returns(Promise.resolve(200));
+    const props = {
+      match: {
+        params: {
+          dacId: undefined
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(WrappedEditDac(props));
+
+    // Try to create a DAC
+    const dacCreate = cy.stub(DAC, 'create');
+    cy.get('[data-cy="dac_name"]').type('New DAC Name');
+    cy.get('[data-cy="dac_description"]').type('New DAC Description');
+    cy.get('[data-cy="dac_email"]').type('New DAC Email');
+    cy.get('[data-cy="daa_radio"]').first().check();
+    cy.get('[data-cy="btn_save"]').click().then(() => {
+      expect(dacCreate).to.not.be.called;
+    });
+  });
+
 });
