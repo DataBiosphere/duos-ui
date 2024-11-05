@@ -10,7 +10,8 @@
 </head>
 
 <body>
-  <div data-cy-root></div>
+  <!-- id="root" is necessary for any component that uses BaseModal.jsx since it calls: Modal.setAppElement('#root');-->
+  <div data-cy-root id="root"></div>
 </body>
 
 </html>
