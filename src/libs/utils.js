@@ -288,9 +288,9 @@ export const Notifications = {
  */
 export const PromiseSerial = funcs =>
   funcs.reduce((promise, func) =>
-    promise.then(result =>
-      func().then(Array.prototype.concat.bind(result))),
-  Promise.resolve([]));
+      promise.then(result =>
+        func().then(Array.prototype.concat.bind(result))),
+    Promise.resolve([]));
 
 //////////////////////////////////
 //DAR CONSOLES UTILITY FUNCTIONS//
@@ -637,4 +637,12 @@ export const hasDataSubmitterRole = (user) => {
   const roles = get('roles')(user);
   const dsRole = find({'roleId': 8})(roles);
   return !isNil(dsRole);
+};
+
+export const partition = (array, size) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
 };
