@@ -16,16 +16,20 @@ export const TerraDataRepo = {
       roleMap: {},
       errors: []
     };
-    for await (const sublist of partitionedIdentifiers) {
-      // Note that TDR is expecting dataset identifiers, not dataset ids
-      const url = `${await Config.getTdrApiUrl()}/api/repository/v1/snapshots?duosDatasetIds=${sublist.join('&duosDatasetIds=')}`;
-      const res = await axios.get(url, Config.authOpts());
-      enumerateSnapshotModel.total = res.data.total;
-      enumerateSnapshotModel.filteredTotal += res.data.filteredTotal;
-      Object.assign(enumerateSnapshotModel.roleMap, res.data.roleMap);
-      enumerateSnapshotModel.items.push(...res.data.items);
-      enumerateSnapshotModel.errors.push(...res.data.errors);
-    }
+    const rootTdrApiUrl = await Config.getTdrApiUrl();
+    const snapshotPromises = partitionedIdentifiers.map(sublist => {
+      const url = `${rootTdrApiUrl}/api/repository/v1/snapshots?duosDatasetIds=${sublist.join('&duosDatasetIds=')}`;
+      return axios.get(url, Config.authOpts());
+    });
+    await Promise.all(snapshotPromises).then(function(responses) {
+      responses.forEach(res => {
+        enumerateSnapshotModel.total = res.data.total;
+        enumerateSnapshotModel.filteredTotal += res.data.filteredTotal;
+        Object.assign(enumerateSnapshotModel.roleMap, res.data.roleMap);
+        enumerateSnapshotModel.items.push(...res.data.items);
+        enumerateSnapshotModel.errors.push(...res.data.errors);
+      });
+    });
     return enumerateSnapshotModel;
   },
 };
