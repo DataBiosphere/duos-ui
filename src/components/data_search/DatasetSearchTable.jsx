@@ -187,8 +187,18 @@ export const DatasetSearchTable = (props) => {
     doSearch();
   };
   const applyForAccess = async () => {
-    const darDraft = await DAR.postDarDraft({ datasetId: selected });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    try {
+      const draftResponse = await DAR.postDarDraft({ datasetId: selected  });
+      if (draftResponse.referenceId) {
+        history.push(`/dar_application/${draftResponse.referenceId}`);
+      } else if (draftResponse.message) {
+        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+      } else {
+        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+      }
+    } catch (error) {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
   };
 
   useEffect(() => {
@@ -207,11 +217,11 @@ export const DatasetSearchTable = (props) => {
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
         <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
-          <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+          <div className='right-header-section' style={Styles.RIGHT_HEADER_SECTION}>
             <input
-              data-cy="search-bar"
-              type="text"
-              placeholder="Enter search terms"
+              data-cy='search-bar'
+              type='text'
+              placeholder='Enter search terms'
               style={{
                 width: '100%',
                 border: '1px solid #cecece',
@@ -227,7 +237,7 @@ export const DatasetSearchTable = (props) => {
             />
             <div/>
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={() => {filterHandler(null, datasets, 'search', '')}} sx={{ width: '100px' }}>
+              <Button variant='contained' onClick={() => {filterHandler(null, datasets, 'search', '');}} sx={{ width: '100px' }}>
                 Clear Search
               </Button>
             </Box>
@@ -274,7 +284,7 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-          <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+          <Button variant='contained' onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
           </Button>
           }

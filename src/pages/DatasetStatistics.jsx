@@ -20,8 +20,18 @@ export default function DatasetStatistics(props) {
   const [isLoading, setIsLoading] = useState(true);
 
   const applyForAccess = async () => {
-    const darDraft = await DAR.postDarDraft({ datasetId: [datasetId]  });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    try {
+      const draftResponse = await DAR.postDarDraft({ datasetId: [datasetId]  });
+      if (draftResponse.referenceId) {
+        history.push(`/dar_application/${draftResponse.referenceId}`);
+      } else if (draftResponse.message) {
+        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+      } else {
+        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+      }
+    } catch (error) {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
   };
 
   useEffect(() => {
@@ -69,7 +79,7 @@ export default function DatasetStatistics(props) {
               </div>
             </div>
             <div style={{ paddingTop: '20px', paddingLeft: '30px' }}>
-              <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+              <Button variant='contained' onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
                 Apply for Access
               </Button>
             </div>
@@ -109,8 +119,8 @@ export default function DatasetStatistics(props) {
             <div style={Styles.READ_MORE} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
                 props={props}
-                readLessText="Show less"
-                readMoreText="Show More"
+                readLessText='Show less'
+                readMoreText='Show More'
                 readStyle={{ fontWeight: 500, margin: '20px', height: 0 }}
                 content={[
                   <div key='dar' style={{ display: 'flex' }}>
