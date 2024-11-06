@@ -383,8 +383,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => {
         let dataLocation;
         if (dataset.dataLocation === 'TDR Location') {
-          dataLocation = dataset.url ?
-            <Link href={dataset.url}>Terra Data Repo</Link> : 'Terra Data Repo';
+          dataLocation = 'Terra Data Repo';
         } else if (dataset.dataLocation === 'Terra Workspace') {
           dataLocation = dataset.url ?
             <Link href={dataset.url}>Terra Workspace</Link> : 'Terra Data Repo';
