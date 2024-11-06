@@ -141,7 +141,7 @@ export const DatasetSearchTable = (props) => {
       'query': {
         'bool': {
           'must': queryChunks,
-          // do not add filter subquery if no filters are applied
+          // Only add filter subquery when filters are applied.
           ...(Object.keys(filterQuery).length > 0 && { 'filter': filterQuery })
         }
       }
