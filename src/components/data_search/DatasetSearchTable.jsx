@@ -108,20 +108,26 @@ export const DatasetSearchTable = (props) => {
     if (numSelectedFilters(filters) > 0) {
       const filterTerms = [];
 
-      filters.accessManagement.forEach(term => {
-        filterTerms.push({
-          'term': {
-            'accessManagement': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.accessManagement.map(term => ({
+                'term': {
+                  'accessManagement': term
+                }
+              }))
+        }
       });
 
-      filters.dataUse.forEach(term => {
-        filterTerms.push({
-          'match': {
-            'dataUse.primary.code': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dataUse.map(term => ({
+                'match': {
+                  'dataUse.primary.code': term
+                }
+              }))
+        }
       });
 
       if (filterTerms.length > 0) {
