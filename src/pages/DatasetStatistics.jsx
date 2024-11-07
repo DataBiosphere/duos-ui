@@ -97,7 +97,7 @@ export default function DatasetStatistics(props) {
             <div style={Styles.TITLE}>Dataset Statistics</div>
             <div style={Styles.MEDIUM_ROW}>
               <div style={{fontWeight: '500', marginRight: '5px'}}>Dataset ID:</div>
-              <div>{dataset?.alias}</div>
+              <div>{dataset?.datasetIdentifier}</div>
             </div>
             <div style={Styles.MEDIUM_ROW}>
               <div style={{fontWeight: '500', marginRight: '5px'}}>Dataset Name:</div>
