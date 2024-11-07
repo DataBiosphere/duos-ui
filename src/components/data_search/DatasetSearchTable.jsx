@@ -1,8 +1,9 @@
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import useOnMount from '@mui/utils/useOnMount'
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
@@ -201,12 +202,12 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  useEffect(() => {
-    if (isEmpty(filtered)) {
+  useOnMount(() => {
+    if (isEmpty(datasets)) {
       return;
     }
-    getExportableDatasets(filtered);
-  }, [filtered]);
+    getExportableDatasets(datasets);
+  });
 
   useEffect(() => {
     setFiltered(datasets);
