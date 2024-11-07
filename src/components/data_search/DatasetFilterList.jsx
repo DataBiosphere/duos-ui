@@ -8,13 +8,14 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import { Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
-import { flatten, uniq, compact, capitalize } from 'lodash';
+import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
 
 export const DatasetFilterList = (props) => {
   const { datasets, filters, filterHandler, isFiltered } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
+  const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset?.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
@@ -51,6 +52,27 @@ export const DatasetFilterList = (props) => {
           dataUseFilters.map((filter) => {
             const filterName = filter.toUpperCase();
             const category = 'dataUse';
+            return (
+              <ListItem disablePadding key={filter}>
+                <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
+                  <ListItemIcon>
+                    <Checkbox checked={isFiltered(filter, category)} />
+                  </ListItemIcon>
+                  <ListItemText primary={filterName} sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
+                </ListItemButton>
+              </ListItem>
+            );
+          })
+        }
+      </List>
+      <Typography variant="h6" gutterBottom component="div" sx={{ fontFamily: 'Montserrat' }} marginTop="1em">
+        <span style={{ fontWeight: '600' }}>Data Access Committee</span> <span>(DACs)</span>
+      </Typography>
+      <List sx={{ margin: '-0.5em -0.5em'}}>
+        {
+          dacFilters.map((filter) => {
+            const filterName = filter;
+            const category = 'dac';
             return (
               <ListItem disablePadding key={filter}>
                 <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
