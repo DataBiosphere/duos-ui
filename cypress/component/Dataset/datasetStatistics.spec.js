@@ -34,7 +34,7 @@ const controlledProp = {
   'propertyType': 'String'
 };
 
-const location =   {
+const location = {
   'propertyId': 12657,
   'datasetId': 1975,
   'propertyName': 'URL',
