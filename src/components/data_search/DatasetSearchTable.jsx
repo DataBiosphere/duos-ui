@@ -104,60 +104,54 @@ export const DatasetSearchTable = (props) => {
       queryChunks.push(...searchModifier);
     }
 
-    var filterQuery = {};
+    let filterQuery = {};
     if (numSelectedFilters(filters) > 0) {
-      const shouldTerms = [];
+      const filterTerms = [];
 
-      filters.accessManagement.forEach(term => {
-        shouldTerms.push({
-          'term': {
-            'accessManagement': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.accessManagement.map(term => ({
+                'term': {
+                  'accessManagement': term
+                }
+              }))
+        }
       });
 
-      filters.dataUse.forEach(term => {
-        shouldTerms.push({
-          'match': {
-            'dataUse.primary.code': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dataUse.map(term => ({
+                'match': {
+                  'dataUse.primary.code': term
+                }
+              }))
+        }
       });
 
-      if (shouldTerms.length > 0) {
+      if (filterTerms.length > 0) {
         filterQuery = [
           {
             'bool': {
-              'should': shouldTerms
+              'must': filterTerms
             }
           }
         ];
       }
     }
 
-    // do not add filter subquery if no filters are applied
-    if (numSelectedFilters(filters) > 0) {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks,
-            'filter': filterQuery
-          }
+    return {
+      'from': 0,
+      'size': 10000,
+      'query': {
+        'bool': {
+          'must': queryChunks,
+          // Only add filter subquery when filters are applied.
+          ...(Object.keys(filterQuery).length > 0 && { 'filter': filterQuery })
         }
-      };
-    } else {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks
-          }
-        }
-      };
-    }
+      }
+    };
   };
 
   const filterHandler = (event, data, category, filter) => {
