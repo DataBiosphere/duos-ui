@@ -18,7 +18,8 @@ export const TerraDataRepo = {
     };
     const rootTdrApiUrl = await Config.getTdrApiUrl();
     const snapshotPromises = partitionedIdentifiers.map(sublist => {
-      const url = `${rootTdrApiUrl}/api/repository/v1/snapshots?duosDatasetIds=${sublist.join('&duosDatasetIds=')}`;
+      // 1000 should be safe with only 70 DUOS IDs.
+      const url = `${rootTdrApiUrl}/api/repository/v1/snapshots?limit=1000&duosDatasetIds=${sublist.join('&duosDatasetIds=')}`;
       return axios.get(url, Config.authOpts());
     });
     await Promise.all(snapshotPromises).then(function(responses) {
