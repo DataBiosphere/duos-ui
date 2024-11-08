@@ -15,7 +15,7 @@ export const DatasetFilterList = (props) => {
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
-  const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset?.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
+  const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
