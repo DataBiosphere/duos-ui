@@ -9,6 +9,7 @@ import {find} from 'lodash/fp';
 import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
+import {AccessManagement} from '../libs/Models.ts';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -62,31 +63,31 @@ export default function DatasetStatistics(props) {
     }
   };
 
-  const accessButton = () => {
+  const accessInstructions = () => {
     const accessManagement = extract('Access Management').toLowerCase();
-    if (accessManagement === 'controlled') {
-      return <Button variant='contained' onClick={applyForAccess} sx={{transform: 'scale(1.5)'}}>
-        Apply for Access
-      </Button>;
-    }
     const locationUrl = extract('URL');
-    if (accessManagement === 'open') {
-      return <span>
-        This dataset is open access, does not require an access request
-        {locationUrl &&
-          <span>, and can be accessed directly through this <a href={locationUrl}>link</a>.</span>
-        }
-      </span>;
-    }
-    if (accessManagement === 'external') {
-      return <span>
+    switch (accessManagement) {
+      case AccessManagement.CONTROLLED:
+        return <Button variant='contained' onClick={applyForAccess} sx={{transform: 'scale(1.5)'}}>
+          Apply for Access
+        </Button>;
+      case AccessManagement.OPEN:
+        return <span>dataset is open access, does not require an access request
+          {locationUrl &&
+            <span>, and can be accessed directly through this <a href={locationUrl}>link</a>.</span>
+          }
+        </span>;
+      case AccessManagement.EXTERNAL:
+        return <span>
         This dataset is externally managed. Requests cannot be made via DUOS
-        {locationUrl &&
-          <span>, but must be made directly through the <a href={locationUrl}>dataset&apos;s host repository</a>.</span>
-        }
-      </span>;
+          {locationUrl &&
+            <span>, but must be made directly through the <a
+              href={locationUrl}>dataset&apos;s host repository</a>.</span>
+          }
+        </span>;
+      default:
+        return <div/>;
     }
-    return <div/>;
   };
 
   if (!isLoading) {
@@ -106,7 +107,7 @@ export default function DatasetStatistics(props) {
               </div>
             </div>
             <div style={{paddingTop: '20px', paddingLeft: '30px'}}>
-              {accessButton()}
+              {accessInstructions()}
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Dataset Information</div>
