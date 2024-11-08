@@ -35,6 +35,7 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
+  dac: [],
   search: []
 };
 
@@ -129,6 +130,17 @@ export const DatasetSearchTable = (props) => {
                 }
               }))
         }
+      });
+
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dac.map(term => ({
+                'match_phrase': {
+                  'dac.dacName': term
+                }
+              }))
+            }
       });
 
       if (filterTerms.length > 0) {
