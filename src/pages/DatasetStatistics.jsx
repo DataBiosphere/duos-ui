@@ -72,14 +72,13 @@ export default function DatasetStatistics(props) {
           Apply for Access
         </Button>;
       case AccessManagement.OPEN:
-        return <span>dataset is open access, does not require an access request
+        return <span>This dataset is open access, does not require an access request
           {locationUrl &&
             <span>, and can be accessed directly through this <a href={locationUrl}>link</a>.</span>
           }
         </span>;
       case AccessManagement.EXTERNAL:
-        return <span>
-        This dataset is externally managed. Requests cannot be made via DUOS
+        return <span>This dataset is externally managed. Requests cannot be made via DUOS
           {locationUrl &&
             <span>, but must be made directly through the <a
               href={locationUrl}>dataset&apos;s host repository</a>.</span>
