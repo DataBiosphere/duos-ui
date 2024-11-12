@@ -1,5 +1,6 @@
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import useOnMount from '@mui/utils/useOnMount'
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -35,6 +36,7 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
+  dac: [],
   search: []
 };
 
@@ -105,60 +107,65 @@ export const DatasetSearchTable = (props) => {
       queryChunks.push(...searchModifier);
     }
 
-    var filterQuery = {};
+    let filterQuery = {};
     if (numSelectedFilters(filters) > 0) {
-      const shouldTerms = [];
+      const filterTerms = [];
 
-      filters.accessManagement.forEach(term => {
-        shouldTerms.push({
-          'term': {
-            'accessManagement': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.accessManagement.map(term => ({
+                'term': {
+                  'accessManagement': term
+                }
+              }))
+        }
       });
 
-      filters.dataUse.forEach(term => {
-        shouldTerms.push({
-          'match': {
-            'dataUse.primary.code': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dataUse.map(term => ({
+                'match': {
+                  'dataUse.primary.code': term
+                }
+              }))
+        }
       });
 
-      if (shouldTerms.length > 0) {
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dac.map(term => ({
+                'match_phrase': {
+                  'dac.dacName': term
+                }
+              }))
+            }
+      });
+
+      if (filterTerms.length > 0) {
         filterQuery = [
           {
             'bool': {
-              'should': shouldTerms
+              'must': filterTerms
             }
           }
         ];
       }
     }
 
-    // do not add filter subquery if no filters are applied
-    if (numSelectedFilters(filters) > 0) {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks,
-            'filter': filterQuery
-          }
+    return {
+      'from': 0,
+      'size': 10000,
+      'query': {
+        'bool': {
+          'must': queryChunks,
+          // Only add filter subquery when filters are applied.
+          ...(Object.keys(filterQuery).length > 0 && { 'filter': filterQuery })
         }
-      };
-    } else {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks
-          }
-        }
-      };
-    }
+      }
+    };
   };
 
   const filterHandler = (event, data, category, filter) => {
@@ -188,16 +195,26 @@ export const DatasetSearchTable = (props) => {
     doSearch();
   };
   const applyForAccess = async () => {
-    const darDraft = await DAR.postDarDraft({ datasetId: selected });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    try {
+      const draftResponse = await DAR.postDarDraft({ datasetId: selected  });
+      if (draftResponse.referenceId) {
+        history.push(`/dar_application/${draftResponse.referenceId}`);
+      } else if (draftResponse.message) {
+        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+      } else {
+        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+      }
+    } catch (error) {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
   };
 
-  useEffect(() => {
-    if (isEmpty(filtered)) {
+  useOnMount(() => {
+    if (isEmpty(datasets)) {
       return;
     }
-    getExportableDatasets(filtered);
-  }, [filtered]);
+    getExportableDatasets(datasets);
+  });
 
   useEffect(() => {
     setFiltered(datasets);
@@ -208,11 +225,11 @@ export const DatasetSearchTable = (props) => {
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
         <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
-          <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+          <div className='right-header-section' style={Styles.RIGHT_HEADER_SECTION}>
             <input
-              data-cy="search-bar"
-              type="text"
-              placeholder="Enter search terms"
+              data-cy='search-bar'
+              type='text'
+              placeholder='Enter search terms'
               style={{
                 width: '100%',
                 border: '1px solid #cecece',
@@ -228,7 +245,7 @@ export const DatasetSearchTable = (props) => {
             />
             <div/>
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={() => {filterHandler(null, datasets, 'search', '')}} sx={{ width: '100px' }}>
+              <Button variant='contained' onClick={() => {filterHandler(null, datasets, 'search', '');}} sx={{ width: '100px' }}>
                 Clear Search
               </Button>
             </Box>

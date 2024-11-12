@@ -327,25 +327,16 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       label: 'Access Type',
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.accessType),
-      cellDataFn: (dataset: DatasetTerm) => {
-        let accessType;
-        if (dataset.accessManagement === 'external') {
-          accessType = dataset.url ?
-            <Link href={dataset.url}>External to DUOS</Link> : 'External to DUOS';
-        } else if (dataset.accessManagement === 'open') {
-          accessType = dataset.url ? <Link href={dataset.url}>Open Access</Link> : 'Open Access';
-        } else {
-          accessType = dataset.dac?.dacEmail ? <Link
-            href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
-        }
-        return {
-          data: accessType,
-          value: dataset.accessManagement,
-          id: `${dataset.datasetId}-participant-count`,
-          style: makeRowStyle(cellWidths.accessType),
-          label: `Access Type for dataset ${dataset.datasetId}: ${dataset.accessManagement}`
-        };
-      }
+      cellDataFn: (dataset: DatasetTerm) => ({
+        data: dataset.accessManagement === 'external' ?
+          'External to DUOS' :
+          dataset.accessManagement === 'open' ?
+            'Open Access' : dataset.dac?.dacName,
+        value: dataset.accessManagement,
+        id: `${dataset.datasetId}-participant-count`,
+        style: makeRowStyle(cellWidths.accessType),
+        label: `Access Type for dataset ${dataset.datasetId}: ${dataset.accessManagement}`
+      })
     },
     {
       label: 'Data Type',
@@ -383,8 +374,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => {
         let dataLocation;
         if (dataset.dataLocation === 'TDR Location') {
-          dataLocation = dataset.url ?
-            <Link href={dataset.url}>Terra Data Repo</Link> : 'Terra Data Repo';
+          dataLocation = 'Terra Data Repo';
         } else if (dataset.dataLocation === 'Terra Workspace') {
           dataLocation = dataset.url ?
             <Link href={dataset.url}>Terra Workspace</Link> : 'Terra Data Repo';
