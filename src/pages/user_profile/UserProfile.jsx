@@ -27,7 +27,7 @@ export default function UserProfile(props) {
   const [profile, setProfile] = useState({
     profileName: '',
     email: undefined,
-    emailPreference: false,
+    emailPreference: undefined,
     id: undefined
   });
 
