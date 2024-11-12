@@ -1,6 +1,6 @@
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import useOnMount from '@mui/utils/useOnMount'
+import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -141,7 +141,7 @@ export const DatasetSearchTable = (props) => {
                   'dac.dacName': term
                 }
               }))
-            }
+        }
       });
 
       if (filterTerms.length > 0) {

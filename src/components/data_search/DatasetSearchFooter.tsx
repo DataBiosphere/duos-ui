@@ -29,7 +29,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
     {selectedDatasets.length > 1 && selectedStudies.length === 1 && (<div style={{paddingRight: 15}}> {selectedDatasets.length} Datasets selected from 1 Study </div>)}
     {selectedDatasets.length === 1 && (<div style={{paddingRight: 15}}> 1 Dataset selected from 1 Study </div>)}
     <Button
-      variant="contained"
+      variant='contained'
       onClick={onClick}
       sx={{fontSize: 14, height: 35, marginRight: 5}}
     >
