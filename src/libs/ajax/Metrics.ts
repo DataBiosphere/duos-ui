@@ -1,15 +1,24 @@
-import axios from 'axios';
+import axios, {AxiosRequestConfig} from 'axios';
 import {getDefaultProperties} from '@databiosphere/bard-client';
 
 import {Storage} from '../storage';
 import {getBardApiUrl} from '../ajax';
 import {Token} from '../config';
+import {MetricsEventName} from 'src/libs/events';
+
+// Set default timeout for all metrics calls to 30 seconds
+const defaultSignal: AbortSignal = AbortSignal.timeout(30000);
 
 export const Metrics = {
-  captureEvent: (event, details, signal) => captureEventFn(event, details, signal).catch(() => {
+  captureEvent: (
+    event: MetricsEventName,
+    details: Record<string, any> = {},
+    signal: AbortSignal = defaultSignal,
+    refreshAppcues: boolean = true
+  ) => captureEventFn(event, details, signal, refreshAppcues).catch(() => {
   }),
-  syncProfile: (signal) => syncProfile(signal),
-  identify: (anonId, signal) => identify(anonId, signal),
+  syncProfile: (signal: AbortSignal = defaultSignal) => syncProfile(signal),
+  identify: (anonId: String, signal: AbortSignal = defaultSignal) => identify(anonId, signal),
 };
 
 /**
@@ -18,11 +27,18 @@ export const Metrics = {
  * @param {string} event - The event name.
  * @param {Object} [details={}] - The event details.
  * @param {AbortSignal} [signal] - The abort signal.
+ * @param refreshAppcues - The refresh Appcues flag.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
-const captureEventFn = async (event, details = {}, signal) => {
+const captureEventFn = async (event: MetricsEventName, details: object = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
   const isSignedIn = Storage.userIsLogged();
   const isRegistered = isSignedIn && Storage.getCurrentUser();
+
+  // Send event to Appcues and refresh Appcues state
+  window.Appcues?.track(event);
+  if (refreshAppcues) {
+    window.Appcues?.page();
+  }
 
   if (!isRegistered && !Storage.getAnonymousId()) {
     Storage.setAnonymousId();
@@ -40,7 +56,7 @@ const captureEventFn = async (event, details = {}, signal) => {
     },
   };
 
-  const config = {
+  const config: AxiosRequestConfig = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/event`,
     data: body,
@@ -57,8 +73,8 @@ const captureEventFn = async (event, details = {}, signal) => {
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the profile is synced.
  */
-const syncProfile = async (signal) => {
-  const config = {
+const syncProfile = async (signal: AbortSignal): Promise<any> => {
+  const config: AxiosRequestConfig = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/syncProfile`,
     headers: {Authorization: `Bearer ${Token.getToken()}`},
@@ -76,10 +92,24 @@ const syncProfile = async (signal) => {
  * @param {AbortSignal} [signal] - The abort signal.
  * @returns {Promise} - A Promise that resolves when the user is identified.
  */
-const identify = async (anonId, signal) => {
+const identify = async (anonId: String, signal: AbortSignal): Promise<any> => {
   const body = {anonId};
 
-  const config = {
+  if (window.Appcues) {
+    const user = Storage.getCurrentUser();
+    const createDate = user.createDate ? user.createDate : new Date().getTime();
+    const appcuesProps = {
+      dateJoined: createDate,
+      app: 'DUOS'
+    };
+    if (user.userStatusInfo?.userSubjectId) {
+      window.Appcues.identify(user.userStatusInfo.userSubjectId, appcuesProps);
+    } else {
+      window.Appcues.identify(`${user.userId}`, appcuesProps);
+    }
+  }
+
+  const config: AxiosRequestConfig = {
     method: 'POST',
     url: `${await getBardApiUrl()}/api/identify`,
     data: body,
