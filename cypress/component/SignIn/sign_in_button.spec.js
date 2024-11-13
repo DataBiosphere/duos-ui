@@ -10,7 +10,7 @@ import {Metrics} from '../../../src/libs/ajax/Metrics';
 import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
 import {ToS} from '../../../src/libs/ajax/ToS';
 import {mockOidcUser} from '../Auth/mockOidcUser';
-
+import config from '../../fixtures/appConfig.json';
 const signInText = 'Sign In';
 
 const duosUser = {
@@ -39,6 +39,15 @@ const userStatus = {
 const notAcceptedUserStatus = Object.assign({}, userStatus, {'tosAccepted': false});
 
 describe('Sign In: Component Loads', function () {
+
+  // Intercept configuration calls
+  beforeEach(() => {
+    cy.intercept({
+      method: 'GET',
+      url: '/config.json',
+      hostname: 'localhost',
+    }, config);
+  });
 
   it('Sign In Button Loads', function () {
     cy.viewport(600, 300);
