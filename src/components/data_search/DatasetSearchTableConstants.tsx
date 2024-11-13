@@ -2,9 +2,12 @@ import {DatasetTerm} from 'src/types/model';
 import _, {groupBy} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
-import {OverflowTooltip} from '../Tooltips';
+import {OverflowTooltip, tooltipStyle} from '../Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
 import DatasetExportButton from './DatasetExportButton';
+import ReactTooltip from 'react-tooltip';
+import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
+import './DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -72,12 +75,13 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
     piName: '10%',
     dataCustodians: '20%'
   };
-  const datasetIds = datasets.map(dataset => dataset.datasetId);
+  const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
+  const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
-        indeterminate={selected.length > 0 && selected.length < datasetIds.length}
-        onClick={() => onSelect(datasetIds.length === selected.length ? [] : datasetIds)}/>,
+        indeterminate={selected.length > 0 && selected.length < selectableDatasetIds.length}
+        onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(studyCellWidths.selected),
       cellDataFn: datasets => {
@@ -85,9 +89,22 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
         const numberSelected = _.intersection(studyDatasetIds, selected).length;
         const fullySelected = numberSelected === studyDatasetIds.length;
         const indeterminate = numberSelected > 0 && numberSelected < studyDatasetIds.length;
+        const checkboxId = `${datasets[0].study.studyId}-is-selected-checkbox`;
+        const isSelectableStudy = datasets.filter(isSelectable).length === datasets.length;
+        const tooltipText = 'This study contains one or more dataset that is either open access or whose requests are managed outside DUOS. Go to the datasets tab for additional information per dataset.';
         return {
-          data: <Checkbox checked={fullySelected} indeterminate={indeterminate}
-            onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>,
+          data: <>
+            <ReactTooltip
+              place={'top'}
+              disable={isSelectableStudy}
+              effect={'solid'}
+              scrollHide={true}
+              id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+            <div data-for={checkboxId} data-tip={true}>
+              <Checkbox checked={fullySelected} indeterminate={indeterminate} disabled={!isSelectableStudy}
+                onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
+            </div>
+          </>,
           value: fullySelected ? 'Selected' : indeterminate ? 'Partially Selected' : 'Not Selected',
           id: `${datasets[0].study.studyId}-is-selected`,
           style: makeRowStyle(studyCellWidths.selected),
@@ -215,7 +232,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     dataType: string;
     donorSize: string;
     dataLocation: string;
-    dac: string;
+    dataUse: string;
     exportToTerra: number;
   }
   const cellWidths: CellWidths = {
@@ -228,22 +245,36 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     dataType: '15%',
     donorSize: '7%',
     dataLocation: '13%',
-    dac: '10%',
+    dataUse: '10%',
     exportToTerra: 100,
   };
-  const datasetIds = datasets.map(dataset => dataset.datasetId);
+  const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
+  const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
         indeterminate={selected.length > 0 && selected.length < datasets.length}
-        onClick={() => onSelect(datasetIds.length === selected.length ? [] : datasetIds)}/>,
+        onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(cellWidths.selected),
       cellDataFn: (dataset: DatasetTerm) => {
         const isSelected = selected.includes(dataset.datasetId);
+        const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
+        const tooltipText = `${dataset.accessManagement == 'open' ? 'Open access data doesn’t require a request, go to the link in the data location column to proceed.' : 'Data access is managed outside DUOS, follow the link in the data location column to proceed'}`;
         return {
-          data: <Checkbox checked={isSelected}
-            onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>,
+          data: <>
+            <ReactTooltip
+              place={'top'}
+              disable={isSelectable(dataset)}
+              effect={'solid'}
+              scrollHide={true}
+              id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+            <div data-for={checkboxId} data-tip={true}>
+              <Checkbox checked={isSelected}
+                disabled={!isSelectable(dataset)}
+                onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
+            </div>
+          </>,
           value: isSelected ? 'Selected' : 'Not Selected',
           id: `${dataset.datasetId}-is-selected`,
           style: makeRowStyle(cellWidths.selected),
@@ -296,25 +327,16 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       label: 'Access Type',
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.accessType),
-      cellDataFn: (dataset: DatasetTerm) => {
-        let accessType;
-        if (dataset.accessManagement === 'external') {
-          accessType = dataset.url ?
-            <Link href={dataset.url}>External to DUOS</Link> : 'External to DUOS';
-        } else if (dataset.accessManagement === 'open') {
-          accessType = dataset.url ? <Link href={dataset.url}>Open Access</Link> : 'Open Access';
-        } else {
-          accessType = dataset.dac?.dacEmail ? <Link
-            href={'mailto:' + dataset.dac.dacEmail}>{dataset.dac?.dacName}</Link> : dataset.dac?.dacName;
-        }
-        return {
-          data: accessType,
-          value: dataset.accessManagement,
-          id: `${dataset.datasetId}-participant-count`,
-          style: makeRowStyle(cellWidths.accessType),
-          label: `Access Type for dataset ${dataset.datasetId}: ${dataset.accessManagement}`
-        };
-      }
+      cellDataFn: (dataset: DatasetTerm) => ({
+        data: dataset.accessManagement === 'external' ?
+          'External to DUOS' :
+          dataset.accessManagement === 'open' ?
+            'Open Access' : dataset.dac?.dacName,
+        value: dataset.accessManagement,
+        id: `${dataset.datasetId}-participant-count`,
+        style: makeRowStyle(cellWidths.accessType),
+        label: `Access Type for dataset ${dataset.datasetId}: ${dataset.accessManagement}`
+      })
     },
     {
       label: 'Data Type',
@@ -352,8 +374,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => {
         let dataLocation;
         if (dataset.dataLocation === 'TDR Location') {
-          dataLocation = dataset.url ?
-            <Link href={dataset.url}>Terra Data Repo</Link> : 'Terra Data Repo';
+          dataLocation = 'Terra Data Repo';
         } else if (dataset.dataLocation === 'Terra Workspace') {
           dataLocation = dataset.url ?
             <Link href={dataset.url}>Terra Workspace</Link> : 'Terra Data Repo';
@@ -373,18 +394,18 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       }
     },
     {
-      label: 'DAC',
+      label: 'Data Use',
       sortable: true,
-      cellStyle: makeHeaderStyle(cellWidths.dac),
-      cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.dac?.dacName} id={`${dataset.datasetId}-dataset-dac`}>
-          {dataset.dac?.dacName}
-        </OverflowTooltip>,
-        value: dataset.dac?.dacName,
-        id: `${dataset.datasetId}-dac`,
-        style: makeRowStyle(cellWidths.dac),
-        label: `DAC for dataset ${dataset.datasetId}: ${dataset.dac?.dacName}`
-      })
+      cellStyle: makeHeaderStyle(cellWidths.dataUse),
+      cellDataFn: (dataset: DatasetTerm) => {
+        return dataUseCellData({
+          dataset,
+          label: `Data Use for dataset ${dataset.datasetId}: ${dataset.dataUse}`,
+          divClass: ['data-use-cell'],
+          spanClass: [],
+          cellWidth: cellWidths.dataUse,
+          tooltipPlace: 'top'});
+      }
     },
     {
       label: 'Export to Terra',

@@ -1,8 +1,9 @@
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import useOnMount from '@mui/utils/useOnMount'
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
@@ -34,6 +35,8 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
+  dac: [],
+  search: []
 };
 
 export const DatasetSearchTable = (props) => {
@@ -43,7 +46,7 @@ export const DatasetSearchTable = (props) => {
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
-  const searchRef = useRef('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
   const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
@@ -62,7 +65,7 @@ export const DatasetSearchTable = (props) => {
     }
   };
 
-  const assembleFullQuery = (searchTerm, filters) => {
+  const assembleFullQuery = (filters) => {
     const queryChunks = [
       {
         'match': {
@@ -76,12 +79,12 @@ export const DatasetSearchTable = (props) => {
       }
     ];
 
-    // do not apply search modifier if there is no searchTerm
-    if (searchTerm !== '') {
+    // do not apply search modifier if there is no search term
+    if (filters.search.length > 0) {
       const searchModifier = [
         {
           'multi_match': {
-            'query': searchTerm,
+            'query': filters.search[filters.search.length - 1],
             'type':'phrase_prefix',
             'fields': [
               'datasetName',
@@ -103,64 +106,73 @@ export const DatasetSearchTable = (props) => {
       queryChunks.push(...searchModifier);
     }
 
-    var filterQuery = {};
+    let filterQuery = {};
     if (numSelectedFilters(filters) > 0) {
-      const shouldTerms = [];
+      const filterTerms = [];
 
-      filters.accessManagement.forEach(term => {
-        shouldTerms.push({
-          'term': {
-            'accessManagement': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.accessManagement.map(term => ({
+                'term': {
+                  'accessManagement': term
+                }
+              }))
+        }
       });
 
-      filters.dataUse.forEach(term => {
-        shouldTerms.push({
-          'match': {
-            'dataUse.primary.code': term
-          }
-        });
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dataUse.map(term => ({
+                'match': {
+                  'dataUse.primary.code': term
+                }
+              }))
+        }
       });
 
-      if (shouldTerms.length > 0) {
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dac.map(term => ({
+                'match_phrase': {
+                  'dac.dacName': term
+                }
+              }))
+            }
+      });
+
+      if (filterTerms.length > 0) {
         filterQuery = [
           {
             'bool': {
-              'should': shouldTerms
+              'must': filterTerms
             }
           }
         ];
       }
     }
 
-    // do not add filter subquery if no filters are applied
-    if (numSelectedFilters(filters) > 0) {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks,
-            'filter': filterQuery
-          }
+    return {
+      'from': 0,
+      'size': 10000,
+      'query': {
+        'bool': {
+          'must': queryChunks,
+          // Only add filter subquery when filters are applied.
+          ...(Object.keys(filterQuery).length > 0 && { 'filter': filterQuery })
         }
-      };
-    } else {
-      return {
-        'from': 0,
-        'size': 10000,
-        'query': {
-          'bool': {
-            'must': queryChunks
-          }
-        }
-      };
-    }
+      }
+    };
   };
 
-  const filterHandler = (event, data, category, filter, searchTerm) => {
+  const filterHandler = (event, data, category, filter) => {
     var newFilters = defaultFilters;
+    if (category === 'search') {
+      newFilters[category] = [];
+      setSearchTerm(filter);
+    }
     if (!isFiltered(filter, category) && filter !== '') {
       newFilters[category] = filters[category].concat(filter);
     } else {
@@ -168,8 +180,8 @@ export const DatasetSearchTable = (props) => {
     }
     setFilters(newFilters);
 
-    const fullQuery = assembleFullQuery(searchTerm, newFilters);
-    const search = async () => {
+    const fullQuery = assembleFullQuery(newFilters);
+    const doSearch = async () => {
       try {
         await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
           var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
@@ -179,24 +191,29 @@ export const DatasetSearchTable = (props) => {
         Notifications.showError({ text: 'Failed to load Elasticsearch index' });
       }
     };
-    search();
+    doSearch();
   };
   const applyForAccess = async () => {
-    const darDraft = await DAR.postDarDraft({ datasetId: selected });
-    history.push(`/dar_application/${darDraft.referenceId}`);
+    try {
+      const draftResponse = await DAR.postDarDraft({ datasetId: selected  });
+      if (draftResponse.referenceId) {
+        history.push(`/dar_application/${draftResponse.referenceId}`);
+      } else if (draftResponse.message) {
+        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+      } else {
+        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+      }
+    } catch (error) {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
   };
 
-  const clearSearchRef = () => {
-    searchRef.current.value = '';
-    filterHandler(null, datasets, '', '');
-  };
-
-  useEffect(() => {
-    if (isEmpty(filtered)) {
+  useOnMount(() => {
+    if (isEmpty(datasets)) {
       return;
     }
-    getExportableDatasets(filtered);
-  }, [filtered]);
+    getExportableDatasets(datasets);
+  });
 
   useEffect(() => {
     setFiltered(datasets);
@@ -207,11 +224,11 @@ export const DatasetSearchTable = (props) => {
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <TableHeaderSection icon={icon} title={title} description="Search, filter, and select datasets, then click 'Apply for Access' to request access" />
         <Box sx={{paddingTop: '2em', paddingLeft: '2em'}}>
-          <div className="right-header-section" style={Styles.RIGHT_HEADER_SECTION}>
+          <div className='right-header-section' style={Styles.RIGHT_HEADER_SECTION}>
             <input
-              data-cy="search-bar"
-              type="text"
-              placeholder="Enter search terms"
+              data-cy='search-bar'
+              type='text'
+              placeholder='Enter search terms'
               style={{
                 width: '100%',
                 border: '1px solid #cecece',
@@ -222,12 +239,12 @@ export const DatasetSearchTable = (props) => {
                 fontFamily: 'Montserrat',
                 fontSize: '1.5rem'
               }}
-              onChange={() => filterHandler(null, datasets, '', searchRef.current.value)}
-              ref={searchRef}
+              value={searchTerm}
+              onChange={() => filterHandler(null, datasets, 'search', event.target.value)}
             />
             <div/>
             <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', paddingLeft: '1em', height: '4rem' }}>
-              <Button variant="contained" onClick={clearSearchRef} sx={{ width: '100px' }}>
+              <Button variant='contained' onClick={() => {filterHandler(null, datasets, 'search', '');}} sx={{ width: '100px' }}>
                 Clear Search
               </Button>
             </Box>
@@ -253,7 +270,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} searchRef={searchRef}/>
+            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
@@ -274,7 +291,7 @@ export const DatasetSearchTable = (props) => {
         <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
           {
             !isEmpty(datasets) &&
-          <Button variant="contained" onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
+          <Button variant='contained' onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
             Apply for Access
           </Button>
           }
