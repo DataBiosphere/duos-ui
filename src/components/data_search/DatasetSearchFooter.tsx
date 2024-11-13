@@ -13,6 +13,9 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
   const selectedStudies = _.uniq(
     _.filter(datasets, dataset => selectedDatasets.includes(dataset.datasetId))
       .map(dataset => dataset.study.studyId));
+  const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset';
+  const studyText = selectedStudies.length > 1 ? 'studies' : 'study';
+
   return <div style={{
     position: 'fixed',
     bottom: 0,
@@ -25,9 +28,7 @@ export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
     border: '1px solid #DEDEDE',
     alignItems: 'center'
   }}>
-    {selectedDatasets.length > 1 && selectedStudies.length > 1 && (<div style={{paddingRight: 15}}> {selectedDatasets.length} Datasets selected from {selectedStudies.length} Studies </div>)}
-    {selectedDatasets.length > 1 && selectedStudies.length === 1 && (<div style={{paddingRight: 15}}> {selectedDatasets.length} Datasets selected from 1 Study </div>)}
-    {selectedDatasets.length === 1 && (<div style={{paddingRight: 15}}> 1 Dataset selected from 1 Study </div>)}
+    <div style={{paddingRight: 15}}>{selectedDatasets.length} {datasetText} selected from {selectedStudies.length} {studyText}</div>
     <Button
       variant='contained'
       onClick={onClick}
