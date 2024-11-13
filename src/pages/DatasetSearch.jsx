@@ -275,9 +275,10 @@ export const DatasetSearch = (props) => {
 
   useEffect(() => {
     const init = async () => {
+      // noinspection ES6MissingAwait
       key === '/datalibrary' ?
-        await Metrics.captureEvent(eventList.dataLibrary) :
-        await Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
+        Metrics.captureEvent(eventList.dataLibrary) :
+        Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
     };
     init();
   }, [key]);

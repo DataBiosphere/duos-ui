@@ -109,9 +109,10 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const syncSignInOrRegistrationEvent = async (event: String) => {
     Storage.setAnonymousId();
-    await Metrics.identify(Storage.getAnonymousId());
-    await Metrics.syncProfile();
-    await Metrics.captureEvent(event);
+    Metrics.identify(Storage.getAnonymousId()).then(() => {
+      Metrics.syncProfile();
+      Metrics.captureEvent(event);
+    });
   };
 
   const errorStreamToString = async (error: HttpError) => {
