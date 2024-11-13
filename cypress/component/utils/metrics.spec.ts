@@ -23,7 +23,7 @@ describe('Metrics Tests', function () {
     });
   });
 
-  it(`Sync Profile`, function () {
+  it('Sync Profile', function () {
     cy.intercept('**/syncProfile').as('sync');
     Metrics.syncProfile();
     cy.wait('@sync').then(interception => {
@@ -31,7 +31,7 @@ describe('Metrics Tests', function () {
     });
   });
 
-  it(`Identify`, function () {
+  it('Identify', function () {
     cy.intercept('**/identify').as('identify');
     Metrics.identify('anonymousId');
     cy.wait('@identify').then(interception => {
