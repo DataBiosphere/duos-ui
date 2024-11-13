@@ -109,10 +109,12 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   const syncSignInOrRegistrationEvent = async (event: String) => {
     Storage.setAnonymousId();
-    Metrics.identify(Storage.getAnonymousId()).then(() => {
-      Metrics.syncProfile();
-      Metrics.captureEvent(event);
-    });
+    // noinspection ES6MissingAwait
+    Metrics.identify(Storage.getAnonymousId());
+    // noinspection ES6MissingAwait
+    Metrics.syncProfile();
+    // noinspection ES6MissingAwait
+    Metrics.captureEvent(event);
   };
 
   const errorStreamToString = async (error: HttpError) => {
