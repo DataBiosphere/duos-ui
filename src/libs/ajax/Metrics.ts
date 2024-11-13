@@ -30,7 +30,7 @@ export const Metrics = {
  * @param refreshAppcues - The refresh Appcues flag.
  * @returns {Promise} - A Promise that resolves when the event is captured.
  */
-const captureEventFn = async (event: MetricsEventName, details: object = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
+const captureEventFn = async (event: MetricsEventName, details: {} = {}, signal: AbortSignal, refreshAppcues: boolean): Promise<any> => {
   const isSignedIn = Storage.userIsLogged();
   const isRegistered = isSignedIn && Storage.getCurrentUser();
 
