@@ -12,6 +12,15 @@ const duosUser = {
 };
 
 describe('User Profile', () => {
+  // Intercept configuration calls
+  beforeEach(() => {
+    cy.intercept({
+      method: 'GET',
+      url: '/config.json',
+      hostname: 'localhost',
+    }, {'env': 'ci'});
+  });
+
   it('Renders the user profile page', () => {
     cy.stub(Storage, 'getCurrentUser').returns(duosUser);
     cy.stub(Institution, 'list').returns([]);
