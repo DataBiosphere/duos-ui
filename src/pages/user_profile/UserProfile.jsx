@@ -27,6 +27,7 @@ export default function UserProfile(props) {
   const [profile, setProfile] = useState({
     profileName: '',
     email: undefined,
+    emailPreference: false,
     id: undefined
   });
 
@@ -54,6 +55,19 @@ export default function UserProfile(props) {
     }
   };
 
+  const updateEmailPreference = (value) => {
+    const payload = {
+      emailPreference: value
+    };
+
+    User.updateSelf(payload).then((response) => {
+      setUserRoleStatuses(response, Storage);
+      Notifications.showSuccess({ text: 'Email preference updated successfully!' });
+    }, () => {
+      Notifications.showError({ text: 'Some errors occurred, the user\'s email preference was not updated.' });
+    });
+  }
+
 
   useEffect(() => {
     const init = async () => {
@@ -64,6 +78,7 @@ export default function UserProfile(props) {
         setProfile({
           profileName: user.displayName,
           email: user.email,
+          emailPreference: user.emailPreference,
           id: user.userId
         });
         setName(user.displayName);
@@ -179,7 +194,22 @@ export default function UserProfile(props) {
       defaultValue={profile.email}
       disabled={true}
     />
-    <div style={{ marginTop: '60px' }} />
+    <div style={{ marginTop: '10px' }} />
+    <p
+      style={{
+        color: '#000',
+        fontSize: '16px',
+        fontWeight: '400',
+      }}
+    >
+      Send me email notifications
+    </p>
+    <FormField
+        type={FormFieldTypes.YESNORADIOGROUP}
+        id='profileEmailEnabled'
+        defaultValue={profile.emailPreference}
+        onChange={(field) => updateEmailPreference(field.value)}
+      />
     <div style={{ 'marginTop': '60px' }} />
     <ControlledAccessGrants />
     <div style={{ 'marginTop': '60px' }} />
