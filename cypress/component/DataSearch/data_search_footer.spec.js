@@ -6,24 +6,18 @@ import {DatasetSearchFooter} from '../../../src/components/data_search/DatasetSe
 const datasets = [
   {
     datasetId: 123456,
-    datasetIdentifier: `DUOS-123456`,
-    datasetName: 'Some Dataset 1',
     study: {
       studyId: 1,
     }
   },
   {
     datasetId: 234567,
-    datasetIdentifier: `DUOS-234567`,
-    datasetName: 'Some Dataset 2',
     study: {
       studyId: 1,
     }
   },
   {
     datasetId: 345678,
-    datasetIdentifier: `DUOS-345678`,
-    datasetName: 'Some Dataset 3',
     study: {
       studyId: 2,
     }
