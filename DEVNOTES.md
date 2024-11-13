@@ -69,6 +69,8 @@ docker build . -t duos
 docker compose up -d
 ```
 
+Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running under docker.
+
 # Testing
 
 ## Cypress Tests
