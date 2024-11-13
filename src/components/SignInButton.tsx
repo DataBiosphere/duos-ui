@@ -15,6 +15,8 @@ import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
+import {ActionableAlert} from '../components/ActionableAlert';
+import {detectBrowser} from 'browser-version-detection/src/browser-detection';
 
 interface SignInButtonProps {
   history: History;
@@ -38,6 +40,13 @@ export const SignInButton = (props: SignInButtonProps) => {
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
   const {history} = props;
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const browser = detectBrowser(window.navigator);
+  const browserName = browser.name;
+  const checkBrowser = () => {
+    return (!isEmpty(browserName) && browserName !== 'Chrome' && browserName !== 'Firefox');
+  };
+  const [showUnsupported, setShowUnsupported] = useState<boolean>(checkBrowser());
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
@@ -205,19 +214,27 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   return (
     <div>
-      {isEmpty(errorDisplay)
-        ? <div>
+      {showUnsupported ?
+        <ActionableAlert
+          id="dialog"
+          type="danger"
+          title={'DUOS may not function correctly in this browser.'}
+          description={'If you are experiencing issues, please try using Google Chrome.'}
+          onClose={() => setShowUnsupported(false)}
+          actionText={'Download Chrome now'}
+          onClick={() => window.open('https://www.google.com/chrome/')}/> :
+        isEmpty(errorDisplay) ? <div>
           {signInElement()}
         </div>
-        : <div className="dialog-alert">
-          <Alert
-            id="dialog"
-            type="danger"
-            title={(errorDisplay as ErrorInfo).title || 'Error'}
-            description={(errorDisplay as ErrorInfo).description || ''}
-            onClose={() => setErrorDisplay({})}
-          />
-        </div>
+          : <div className="dialog-alert">
+            <Alert
+              id="dialog"
+              type="danger"
+              title={(errorDisplay as ErrorInfo).title || 'Error'}
+              description={(errorDisplay as ErrorInfo).description || ''}
+              onClose={() => setErrorDisplay({})}
+            />
+          </div>
       }
     </div>
   );

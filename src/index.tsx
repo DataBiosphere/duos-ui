@@ -7,7 +7,6 @@ import {Auth} from './libs/auth/auth';
 import {OidcBroker} from './libs/auth/oidcBroker';
 import {unregister} from './registerServiceWorker';
 import {BrowserRouter} from 'react-router-dom';
-import './outdated-browser-message.js';
 
 const load = async () => {
   unregister();
