@@ -10,12 +10,18 @@ import {Metrics} from '../../../src/libs/ajax/Metrics';
 import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
 import {ToS} from '../../../src/libs/ajax/ToS';
 import {mockOidcUser} from '../Auth/mockOidcUser';
-
 const signInText = 'Sign In';
 
 const duosUser = {
   displayName: 'display name',
   email: 'test@user.com',
+  isAdmin: true,
+  isAlumni: false,
+  isChairPerson: false,
+  isDataSubmitter: false,
+  isMember: false,
+  isResearcher: false,
+  isSigningOfficial: false,
   roles: [{
     name: 'Admin'
   }]
@@ -33,6 +39,11 @@ const notAcceptedUserStatus = Object.assign({}, userStatus, {'tosAccepted': fals
 
 describe('Sign In: Component Loads', function () {
 
+  // Intercept configuration calls
+  beforeEach(() => {
+    cy.initApplicationConfig();
+  });
+
   it('Sign In Button Loads', function () {
     cy.viewport(600, 300);
     mount(<SignInButton history={undefined}/>);
@@ -42,14 +53,15 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: On Success', function () {
     cy.viewport(600, 300);
     cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
-    cy.stub(User, 'getMe').returns(duosUser);
+    cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     cy.stub(ToS, 'getStatus').returns(userStatus);
     mount(<SignInButton history={[]}/>);
-    cy.get('button').click().then(() => {
+    cy.get('button').click();
+    cy.wait('@getMe').then(() => {
       expect(Storage.getCurrentUser()).to.deep.equal(duosUser);
       expect(Storage.getAnonymousId()).to.not.be.null;
       expect(StackdriverReporter.report).to.not.be.called;
@@ -63,14 +75,15 @@ describe('Sign In: Component Loads', function () {
     const bareUser = {email: 'test@user.com'};
     cy.viewport(600, 300);
     cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
-    cy.stub(User, 'getMe').returns(bareUser);
+    cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: bareUser}).as('getMe');
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     cy.stub(ToS, 'getStatus').returns(userStatus);
     mount(<SignInButton history={[]}/>);
-    cy.get('button').click().then(() => {
+    cy.get('button').click();
+    cy.wait('@getMe').then(() => {
       expect(StackdriverReporter.report).to.be.called;
     });
   });
@@ -78,14 +91,15 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: Redirects to ToS if not accepted', function () {
     cy.viewport(600, 300);
     cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
-    cy.stub(User, 'getMe').returns(duosUser);
+    cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     let history = [];
     mount(<SignInButton history={history}/>);
-    cy.get('button').click().then(() => {
+    cy.get('button').click();
+    cy.wait('@getMe').then(() => {
       expect(history).to.not.be.empty;
       expect(history[0].includes('tos_acceptance')).to.be.true;
     });
@@ -96,15 +110,15 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
     // Simulate user not found
     cy.stub(User, 'getMe').throws();
-    cy.stub(User, 'registerUser').returns(duosUser);
+    cy.intercept({method: 'POST', url: '**/api/user'}, {statusCode: 200, body: duosUser}).as('registerUser');
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
     let history = [];
     mount(<SignInButton history={history}/>);
-    cy.get('button').click().then(() => {
-      expect(User.registerUser).to.be.called;
+    cy.get('button').click();
+    cy.wait('@registerUser').then(() => {
       expect(history).to.not.be.empty;
       expect(history[0].includes('tos_acceptance')).to.be.true;
     });
