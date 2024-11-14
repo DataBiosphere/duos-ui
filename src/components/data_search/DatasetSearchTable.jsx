@@ -234,7 +234,7 @@ export const DatasetSearchTable = (props) => {
                 fontSize: '1.5rem'
               }}
               value={searchTerm}
-              onChange={() => {
+              onChange={(event) => {
                 setSearchTerm(event.target.value);
               }}
             />
