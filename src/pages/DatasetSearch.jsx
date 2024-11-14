@@ -242,6 +242,15 @@ export const DatasetSearch = (props) => {
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
     },
+    'stanleycenter': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Stanley Center'
+        }
+      },
+      icon: stanleyIcon,
+      title: 'Stanley Center Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
