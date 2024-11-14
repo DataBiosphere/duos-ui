@@ -42,7 +42,7 @@ const defaultFilters = {
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [exportableDatasets, setExportableDatasets] = useState({});
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState(_.clone(defaultFilters));
   const [filtered, setFiltered] = useState([]);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
@@ -167,8 +167,20 @@ export const DatasetSearchTable = (props) => {
     };
   };
 
+  const search = (searchFilters) => {
+    const fullQuery = assembleFullQuery(searchFilters);
+    try {
+      DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+        var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
+        setFiltered(newFiltered);
+      });
+    } catch (error) {
+      Notifications.showError({ text: 'Failed to load Elasticsearch index' });
+    }
+  }
+
   const filterHandler = (event, data, category, filter) => {
-    var newFilters = defaultFilters;
+    var newFilters = _.clone(filters);
     if (category === 'search') {
       newFilters[category] = [];
       setSearchTerm(filter);
@@ -180,18 +192,7 @@ export const DatasetSearchTable = (props) => {
     }
     setFilters(newFilters);
 
-    const fullQuery = assembleFullQuery(newFilters);
-    const doSearch = async () => {
-      try {
-        await DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-          var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
-          setFiltered(newFiltered);
-        });
-      } catch (error) {
-        Notifications.showError({ text: 'Failed to load Elasticsearch index' });
-      }
-    };
-    doSearch();
+    search(newFilters);
   };
   const applyForAccess = async () => {
     try {
@@ -270,7 +271,11 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered}/>
+            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} onClear={() => {
+              const newFilters = { ...defaultFilters, search: filters.search }
+              setFilters(newFilters)
+              search(newFilters);
+            }}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {

@@ -6,7 +6,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material'
 import { Checkbox } from '@mui/material';
 import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
 
@@ -43,7 +43,7 @@ export const FilterItemList = (props) => {
 };
 
 export const DatasetFilterList = (props) => {
-  const { datasets, filters, filterHandler, isFiltered } = props;
+  const { datasets, filters, filterHandler, isFiltered, onClear } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
@@ -51,9 +51,14 @@ export const DatasetFilterList = (props) => {
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
-      <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
-        Filters
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
+          Filters
+        </Typography>
+        <Button onClick={onClear}>
+          Clear Filters
+        </Button>
+      </Box>
       <Divider />
       <FilterItemHeader title="Access Type" />
       <FilterItemList
