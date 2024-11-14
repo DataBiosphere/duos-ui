@@ -79,7 +79,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
   return [
     {
-      label: <Checkbox checked={datasets.length === selected.length}
+      label: <Checkbox id='header-checkbox' checked={datasets.length === selected.length}
         indeterminate={selected.length > 0 && selected.length < selectableDatasetIds.length}
         onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
