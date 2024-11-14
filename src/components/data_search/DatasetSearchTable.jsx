@@ -206,7 +206,7 @@ export const DatasetSearchTable = (props) => {
     const fullQuery = assembleFullQuery();
     try {
       DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        var newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
+        const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
         setFiltered(newFiltered);
       });
     } catch (error) {
