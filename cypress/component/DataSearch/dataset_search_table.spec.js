@@ -40,5 +40,4 @@ describe('Dataset Search Table tests', () => {
     });
 
   });
-
 });
