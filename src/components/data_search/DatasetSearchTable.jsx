@@ -1,6 +1,6 @@
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import useOnMount from '@mui/utils/useOnMount'
+import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,7 @@ import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import * as _ from 'lodash';
+import {DatasetSearchFooter} from './DatasetSearchFooter';
 
 const styles = {
   subTab: {
@@ -140,7 +141,7 @@ export const DatasetSearchTable = (props) => {
                   'dac.dacName': term
                 }
               }))
-            }
+        }
       });
 
       if (filterTerms.length > 0) {
@@ -288,14 +289,8 @@ export const DatasetSearchTable = (props) => {
             })()}
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', padding: '2em 4em' }}>
-          {
-            !isEmpty(datasets) &&
-          <Button variant='contained' onClick={applyForAccess} sx={{ transform: 'scale(1.5)' }} >
-            Apply for Access
-          </Button>
-          }
-        </Box>
+        <Box sx={{padding: '1em'}}/>
+        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={applyForAccess}/>}
       </Box>
     </>
   );
