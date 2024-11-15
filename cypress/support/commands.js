@@ -35,3 +35,25 @@ Cypress.Commands.add('auth', async (roleName) => {
   await client.request({ url });
   return client.credentials;
 });
+
+Cypress.Commands.add('initApplicationConfig', () => {
+  cy.intercept({
+    method: 'GET',
+    url: '/config.json',
+    hostname: 'localhost',
+  }, {
+    'env': 'ci',
+    'hash': '',
+    'tag': '',
+    'bardApiUrl': '',
+    'apiUrl': '',
+    'ontologyApiUrl': '',
+    'terraUrl': '',
+    'tdrApiUrl': '',
+    'errorApiKey': '',
+    'profileUrl': '',
+    'nihUrl': '',
+    'gaId': '',
+    'features': {}
+  });
+});

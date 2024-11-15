@@ -242,6 +242,15 @@ export const DatasetSearch = (props) => {
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
     },
+    'stanleycenter': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Stanley Center'
+        }
+      },
+      icon: stanleyIcon,
+      title: 'Stanley Center Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
@@ -275,9 +284,10 @@ export const DatasetSearch = (props) => {
 
   useEffect(() => {
     const init = async () => {
+      // noinspection ES6MissingAwait
       key === '/datalibrary' ?
-        await Metrics.captureEvent(eventList.dataLibrary) :
-        await Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
+        Metrics.captureEvent(eventList.dataLibrary) :
+        Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
     };
     init();
   }, [key]);
