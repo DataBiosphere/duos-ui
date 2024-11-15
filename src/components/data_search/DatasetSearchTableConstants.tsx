@@ -350,7 +350,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellStyle: makeHeaderStyle(cellWidths.accessType),
       cellDataFn: (dataset: DatasetTerm) => ({
         data: dataset.accessManagement === 'external' ?
-            tooltipIconDisplay(externalAccessIcon, 'external', 'External access request required') :
+          tooltipIconDisplay(externalAccessIcon, 'external', 'External access request required') :
             dataset.accessManagement === 'open' ?
                 tooltipIconDisplay(openAccessIcon, 'open', 'Open access') :
                 dataset.accessManagement === 'controlled' ?
