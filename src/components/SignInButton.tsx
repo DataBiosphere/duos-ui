@@ -9,7 +9,7 @@ import {Storage} from '../libs/storage';
 import {Navigation, setUserRoleStatuses} from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 import ReactTooltip from 'react-tooltip';
-import eventList from '../libs/events';
+import eventList, {MetricsEventName} from '../libs/events';
 import {StackdriverReporter} from '../libs/stackdriverReporter';
 import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
@@ -107,10 +107,10 @@ export const SignInButton = (props: SignInButtonProps) => {
     history.push(`/tos_acceptance${shouldRedirect ? `?redirectTo=${redirectTo}` : ''}`);
   };
 
-  const syncSignInOrRegistrationEvent = async (event: String) => {
+  const syncSignInOrRegistrationEvent = async (event: MetricsEventName) => {
     Storage.setAnonymousId();
     // noinspection ES6MissingAwait
-    Metrics.identify(Storage.getAnonymousId());
+    Metrics.identify(`${Storage.getAnonymousId()}`);
     // noinspection ES6MissingAwait
     Metrics.syncProfile();
     // noinspection ES6MissingAwait
@@ -198,10 +198,10 @@ export const SignInButton = (props: SignInButtonProps) => {
           className='navbar-duos-icon-help'
           style={{color: 'white', height: 16, width: 16, marginLeft: 5}}
           href='https://support.terra.bio/hc/en-us/articles/28504837523995-How-to-Register-for-DUOS'
-          data-for="tip_google-help"
-          data-tip="Need account help? Click here!"
+          data-for='tip_google-help'
+          data-tip='Need account help? Click here!'
         />
-        <ReactTooltip id="tip_google-help" place="top" effect="solid" multiline={true} className="tooltip-wrapper"/>
+        <ReactTooltip id='tip_google-help' place='top' effect='solid' multiline={true} className='tooltip-wrapper'/>
       </div>
     );
   };
@@ -212,10 +212,10 @@ export const SignInButton = (props: SignInButtonProps) => {
         ? <div>
           {signInElement()}
         </div>
-        : <div className="dialog-alert">
+        : <div className='dialog-alert'>
           <Alert
-            id="dialog"
-            type="danger"
+            id='dialog'
+            type='danger'
             title={(errorDisplay as ErrorInfo).title || 'Error'}
             description={(errorDisplay as ErrorInfo).description || ''}
             onClose={() => setErrorDisplay({})}
