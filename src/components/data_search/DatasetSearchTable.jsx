@@ -36,6 +36,7 @@ const styles = {
 const defaultFilters = {
   accessManagement: [],
   dataUse: [],
+  dataType: [],
   dac: []
 };
 
@@ -127,6 +128,17 @@ export const DatasetSearchTable = (props) => {
               filters.dataUse.map(term => ({
                 'match': {
                   'dataUse.primary.code': term
+                }
+              }))
+        }
+      });
+
+      filterTerms.push({
+        'bool': {
+          'should':
+              filters.dataType.map(term => ({
+                'match': {
+                  'study.dataTypes': term
                 }
               }))
         }
