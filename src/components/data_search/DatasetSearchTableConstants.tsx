@@ -8,6 +8,9 @@ import DatasetExportButton from './DatasetExportButton';
 import ReactTooltip from 'react-tooltip';
 import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
 import './DatasetSearch.css';
+import externalAccessIcon from '../../images/external_access.svg';
+import openAccessIcon from '../../images/open_access.svg';
+import controlledAccessIcon from '../../images/controlled_access.svg';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
@@ -250,10 +253,28 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
   };
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
+  const tooltipIconDisplay = (src: string | undefined, accessType: string, tooltipText: string) => {
+    return <>
+      <div
+          data-tip='Full details'
+          data-for={`${accessType}-access-tooltip`}
+          style={{display: 'flex', justifyContent: 'center', marginRight: 20}}
+      >
+        <img src={src}/>
+      </div>
+      <ReactTooltip
+          place={'bottom'}
+          effect={'solid'}
+          disable={false}
+          scrollHide={true}
+          id={`${accessType}-access-tooltip`}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+    </>
+  };
+
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
-        indeterminate={selected.length > 0 && selected.length < datasets.length}
+                       indeterminate={selected.length > 0 && selected.length < datasets.length}
         onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(cellWidths.selected),
@@ -329,9 +350,12 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellStyle: makeHeaderStyle(cellWidths.accessType),
       cellDataFn: (dataset: DatasetTerm) => ({
         data: dataset.accessManagement === 'external' ?
-          'External to DUOS' :
-          dataset.accessManagement === 'open' ?
-            'Open Access' : dataset.dac?.dacName,
+            tooltipIconDisplay(externalAccessIcon, 'external', 'External access request required') :
+            dataset.accessManagement === 'open' ?
+                tooltipIconDisplay(openAccessIcon, 'open', 'Open access') :
+                dataset.accessManagement === 'controlled' ?
+                    tooltipIconDisplay(controlledAccessIcon, 'controlled', 'Controlled access') :
+                    '',
         value: dataset.accessManagement,
         id: `${dataset.datasetId}-participant-count`,
         style: makeRowStyle(cellWidths.accessType),
