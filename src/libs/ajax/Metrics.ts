@@ -102,11 +102,7 @@ const identify = async (anonId: String, signal: AbortSignal): Promise<any> => {
       dateJoined: createDate,
       app: 'DUOS'
     };
-    if (user.userStatusInfo?.userSubjectId) {
-      window.Appcues.identify(user.userStatusInfo.userSubjectId, appcuesProps);
-    } else {
-      window.Appcues.identify(`${user.userId}`, appcuesProps);
-    }
+    window.Appcues.identify(`${Storage.getAnonymousId()}`, appcuesProps);
   }
 
   const config: AxiosRequestConfig = {
