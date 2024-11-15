@@ -97,12 +97,13 @@ const identify = async (anonId: String, signal: AbortSignal): Promise<any> => {
 
   if (window.Appcues) {
     const user = Storage.getCurrentUser();
+    const oidcSub = Storage.getOidcUser()?.profile?.sub || Storage.getAnonymousId();
     const createDate = user.createDate ? user.createDate : new Date().getTime();
     const appcuesProps = {
       dateJoined: createDate,
       app: 'DUOS'
     };
-    window.Appcues.identify(`${Storage.getAnonymousId()}`, appcuesProps);
+    window.Appcues.identify(oidcSub, appcuesProps);
   }
 
   const config: AxiosRequestConfig = {
