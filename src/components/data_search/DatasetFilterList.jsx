@@ -47,6 +47,7 @@ export const DatasetFilterList = (props) => {
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
+  const dataTypeFilters = uniq(flatten(datasets.map((dataset) => dataset.study.dataTypes)));
   const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
 
   return (
@@ -85,6 +86,15 @@ export const DatasetFilterList = (props) => {
         category='dac'
         datasets={datasets}
         filter={dacFilters}
+        filterHandler={filterHandler}
+        isFiltered={isFiltered}
+        filterNameFn={(filter) => filter}
+      />
+      <FilterItemHeader title="Data Type" />
+      <FilterItemList
+        category="dataType"
+        datasets={datasets}
+        filter={dataTypeFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
         filterNameFn={(filter) => filter}
