@@ -256,25 +256,25 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
   const tooltipIconDisplay = (src: string | undefined, accessType: string, tooltipText: string) => {
     return <>
       <div
-          data-tip='Full details'
-          data-for={`${accessType}-access-tooltip`}
-          style={{display: 'flex', justifyContent: 'center', marginRight: 20}}
+        data-tip='Full details'
+        data-for={`${accessType}-access-tooltip`}
+        style={{display: 'flex', justifyContent: 'center', marginRight: 20}}
       >
         <img src={src}/>
       </div>
       <ReactTooltip
-          place={'bottom'}
-          effect={'solid'}
-          disable={false}
-          scrollHide={true}
-          id={`${accessType}-access-tooltip`}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
-    </>
+        place={'bottom'}
+        effect={'solid'}
+        disable={false}
+        scrollHide={true}
+        id={`${accessType}-access-tooltip`}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
+    </>;
   };
 
   return [
     {
       label: <Checkbox checked={datasets.length === selected.length}
-                       indeterminate={selected.length > 0 && selected.length < datasets.length}
+        indeterminate={selected.length > 0 && selected.length < datasets.length}
         onClick={() => onSelect(selectableDatasetIds.length === selected.length ? [] : selectableDatasetIds)}/>,
       sortable: false,
       cellStyle: makeHeaderStyle(cellWidths.selected),
@@ -351,11 +351,11 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       cellDataFn: (dataset: DatasetTerm) => ({
         data: dataset.accessManagement === 'external' ?
           tooltipIconDisplay(externalAccessIcon, 'external', 'External access request required') :
-            dataset.accessManagement === 'open' ?
-                tooltipIconDisplay(openAccessIcon, 'open', 'Open access') :
-                dataset.accessManagement === 'controlled' ?
-                    tooltipIconDisplay(controlledAccessIcon, 'controlled', 'Controlled access') :
-                    '',
+          dataset.accessManagement === 'open' ?
+            tooltipIconDisplay(openAccessIcon, 'open', 'Open access') :
+            dataset.accessManagement === 'controlled' ?
+              tooltipIconDisplay(controlledAccessIcon, 'controlled', 'Controlled access') :
+              '',
         value: dataset.accessManagement,
         id: `${dataset.datasetId}-participant-count`,
         style: makeRowStyle(cellWidths.accessType),
