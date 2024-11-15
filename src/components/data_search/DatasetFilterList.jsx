@@ -6,18 +6,18 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
 import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
 
 export const FilterItemHeader = (props) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
   return (
-    <Typography variant="h6" gutterBottom component="div" sx={headerStyle}>
+    <Typography variant='h6' gutterBottom component='div' sx={headerStyle}>
       {title}
     </Typography>
   );
-}
+};
 
 export const FilterItemList = (props) => {
   const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
@@ -43,7 +43,7 @@ export const FilterItemList = (props) => {
 };
 
 export const DatasetFilterList = (props) => {
-  const { datasets, filters, filterHandler, isFiltered } = props;
+  const { datasets, filters, filterHandler, isFiltered, onClear } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
@@ -51,21 +51,26 @@ export const DatasetFilterList = (props) => {
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
-      <Typography variant="h5" gutterBottom component="div" sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
-        Filters
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant='h5' gutterBottom component='div' sx={{ fontFamily: 'Montserrat', fontWeight: '600' }}>
+          Filters
+        </Typography>
+        <Button onClick={onClear}>
+          Clear Filters
+        </Button>
+      </Box>
       <Divider />
-      <FilterItemHeader title="Access Type" />
+      <FilterItemHeader title='Access Type' />
       <FilterItemList
-        category="accessManagement"
+        category='accessManagement'
         datasets={datasets}
         filter={accessManagementFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
         filterNameFn={capitalize} />
-      <FilterItemHeader title="Data Use" />
+      <FilterItemHeader title='Data Use' />
       <FilterItemList
-        category="dataUse"
+        category='dataUse'
         datasets={datasets}
         filter={dataUseFilters}
         filterHandler={filterHandler}
@@ -77,7 +82,7 @@ export const DatasetFilterList = (props) => {
         headerStyle={{ fontFamily: 'Montserrat', marginTop: '1em' }}
       />
       <FilterItemList
-        category="dac"
+        category='dac'
         datasets={datasets}
         filter={dacFilters}
         filterHandler={filterHandler}
