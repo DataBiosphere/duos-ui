@@ -42,7 +42,7 @@ export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [exportableDatasets, setExportableDatasets] = useState({});
   const [filters, setFilters] = useState(_.clone(defaultFilters));
-  const [filtered, setFiltered] = useState([]);
+  const [filtered, setFiltered] = useState(datasets);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +83,7 @@ export const DatasetSearchTable = (props) => {
       const searchModifier = [
         {
           'multi_match': {
-            'query': searchTerm[searchTerm.length - 1],
+            'query': searchTerm,
             'type':'phrase_prefix',
             'fields': [
               'datasetName',
@@ -199,10 +199,6 @@ export const DatasetSearchTable = (props) => {
   });
 
   useEffect(() => {
-    setFiltered(datasets);
-  }, [datasets]);
-
-  useEffect(() => {
     const fullQuery = assembleFullQuery();
     try {
       DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
@@ -211,7 +207,7 @@ export const DatasetSearchTable = (props) => {
       });
     } catch (error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' });
-    }  }, [filters, assembleFullQuery, searchTerm, datasets]);
+    }  }, [filters, searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
