@@ -217,7 +217,7 @@ export const DatasetSearchTable = (props) => {
         const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
         setFiltered(newFiltered);
       });
-    }, 250));
+    }, 150));
 
   useEffect(() => {
     const fullQuery = assembleFullQuery();
