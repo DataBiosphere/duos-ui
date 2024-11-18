@@ -1,7 +1,6 @@
-import {checkEnv, envGroups} from './EnvironmentUtils';
-
 export const DAAUtils = {
   isEnabled: (): boolean => {
-    return checkEnv(envGroups.NON_PROD);
+    // TODO: When we get back to working on this, enable with `checkEnv(envGroups.NON_PROD);`
+    return false;
   }
 };
