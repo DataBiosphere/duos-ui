@@ -1,15 +1,15 @@
 import { Config } from '../config';
 import {getApiUrl, fetchOk, getECMUrl, reportError} from '../ajax';
 import axios from 'axios';
-import {mergeAll, getOr, isNil} from 'lodash/fp';
+import {get, isNil, merge} from 'lodash';
 
 
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
   // Default to a 502 when we can't get a real response object.
-  const status = getOr(502)('response.status')(error);
-  const reportUrl = getOr(null)('response.config.url')(error);
+  const status = get(error, 'response.status', 502);
+  const reportUrl = get(error, 'response.config.url', null);
   if (!isNil(reportUrl) && status >= 500) {
     reportError(reportUrl, status);
   }
@@ -19,13 +19,13 @@ axios.interceptors.response.use(function (response) {
 export const AuthenticateNIH = {
   saveNihUsr: async (decodedData) => {
     const url = `${await getApiUrl()}/api/nih`;
-    const res = await fetchOk(url, mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
+    const res = await fetchOk(url, merge([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
     return await res.json();
   },
 
   deleteAccountLinkage: async () => {
     const url = `${await getApiUrl()}/api/nih`;
-    const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, merge([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
 
@@ -39,33 +39,13 @@ export const AuthenticateNIH = {
   },
 
   getECMeRACommonsAuthUrl: async (redirectUri, redirectTo) => {
-    const url = `${await getECMUrl()}/api/oauth/v1/era-commons/authorization-url`;
-    const parameterBlock = {
-      params: {
-        scopes: ['openid', 'email', 'profile'],
-        redirectUri: redirectUri,
-        redirectTo: redirectTo
-      },
-      paramsSerializer: {
-        indexes: null,
-      }
-    };
-    const config = Object.assign({}, Config.authOpts(), parameterBlock);
-    const res = await axios.get(url, config);
+    const url = `${await getECMUrl()}/api/oauth/v1/era-commons/authorization-url?redirectUri=${redirectUri}`;
+    console.log('url', url);
+    const res = await axios.post(url, {redirectTo: redirectTo}, Config.authOpts());
     if (res.status === 200) {
       return res.data;
     }
     return undefined;
   },
-
-  postECMeRACommonsOauthcode: async (state, oauthcode) => {
-    const url = `${await getECMUrl()}/api/oauth/v1/era-commons/oauthcode`;
-    const data = {
-      state: state,
-      oauthcode: oauthcode
-    };
-    const res = await axios.post(url, data,  Config.authOpts());
-    return res.data;
-  }
 
 };

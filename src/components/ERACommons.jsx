@@ -65,7 +65,7 @@ export default function ERACommons(props) {
       // TODO Testing code to replace old functionality with:
       try {
         const ecmResponse = AuthenticateNIH.getECMeRACommonsStatus();
-        console.log(ecmResponse);
+        console.log('ecmResponse', ecmResponse);
       } catch (err) {
         console.log(err);
       }
@@ -76,9 +76,12 @@ export default function ERACommons(props) {
   const redirectToNihLogin = async () => {
     // TODO Testing code to replace old functionality with:
     try {
-      const redirectURI = window.location.origin;
+      let redirectURI = window.location.origin;
+      if (!origin.endsWith('/')) {
+        redirectURI = redirectURI + '/';
+      }
       const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(redirectURI, destination);
-      console.log(authUrl);
+      console.log('authUrl', authUrl);
     } catch (err) {
       console.log(err);
     }
@@ -101,7 +104,7 @@ export default function ERACommons(props) {
       const eraAuthState = extractEraAuthenticationState(response.researcherProperties);
       setAuthorized(eraAuthState.isAuthorized);
       setExpirationCount(eraAuthState.expirationCount);
-      setEraCommonsId(researcherProfile.eraCommonsId);
+      setEraCommonsId(undefined);
       onNihStatusUpdate(eraAuthState.nihValid);
       setSearch('');
     } else {
