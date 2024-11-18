@@ -9,6 +9,9 @@ import Divider from '@mui/material/Divider';
 import { Button, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
 import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
+import externalAccessIcon from '../../images/external_access.svg';
+import openAccessIcon from '../../images/open_access.svg';
+import controlledAccessIcon from '../../images/controlled_access.svg';
 
 export const FilterItemHeader = (props) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
@@ -42,6 +45,38 @@ export const FilterItemList = (props) => {
   );
 };
 
+export const AccessManagementFilterItemList = (props) => {
+  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
+  return (
+    <List sx={{ margin: '-0.5em -0.5em' }}>
+      {
+        filter.map((filter) => {
+          const filterName = filterNameFn(filter);
+          return (
+            <ListItem disablePadding key={filter}>
+              <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
+                <ListItemIcon>
+                  <Checkbox checked={isFiltered(filter, category)} />
+                </ListItemIcon>
+                <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
+                  { filterName === 'Open' ? <div style={{display: 'flex', alignItems: 'center'}}>
+                    <img src={openAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
+                    filterName === 'Controlled' ? <div style={{display: 'flex', alignItems: 'center'}}>
+                      <img src={controlledAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
+                      filterName === 'External' ? <div style={{display: 'flex', alignItems: 'center'}}>
+                        <img src={externalAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
+                        filterName
+                  }
+                </ListItemText>
+              </ListItemButton>
+            </ListItem>
+          );
+        })
+      }
+    </List>
+  );
+};
+
 export const DatasetFilterList = (props) => {
   const { datasets, filters, filterHandler, isFiltered, onClear } = props;
 
@@ -61,7 +96,7 @@ export const DatasetFilterList = (props) => {
       </Box>
       <Divider />
       <FilterItemHeader title='Access Type' />
-      <FilterItemList
+      <AccessManagementFilterItemList
         category='accessManagement'
         datasets={datasets}
         filter={accessManagementFilters}
