@@ -1,6 +1,6 @@
 import React from 'react';
 import style from '../../pages/DACDatasets.module.css';
-import {styles} from './DACDatasetsTable';
+import {styles} from './DACDatasetConstants';
 import DACDatasetApprovalStatus from './DACDatasetApprovalStatus';
 import ReactTooltip from 'react-tooltip';
 

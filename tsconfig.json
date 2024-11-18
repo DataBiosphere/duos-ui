@@ -21,7 +21,8 @@
     }
   },
   "include": [
-    "src"
+    "src",
+    "types/index.d.ts"
   ],
   "plugins": ["@typescript-eslint", "import"]
 }

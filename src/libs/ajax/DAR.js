@@ -19,7 +19,8 @@ export const DAR = {
 
   //v2, v3 Draft DAR Update
   updateDarDraft: async (dar, referenceId) => {
-    await Metrics.captureEvent(eventList.dar, {'action': 'update'});
+    // noinspection ES6MissingAwait
+    Metrics.captureEvent(eventList.dar, {'action': 'update'});
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3/draft/${referenceId}` :
       `${await getApiUrl()}/api/dar/v2/draft/${referenceId}`;
@@ -29,7 +30,8 @@ export const DAR = {
 
   //v2, v3 Draft DAR Creation
   postDarDraft: async (dar) => {
-    await Metrics.captureEvent(eventList.dar, {'action': 'draft'});
+    // noinspection ES6MissingAwait
+    Metrics.captureEvent(eventList.dar, {'action': 'draft'});
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3/draft` :
       `${await getApiUrl()}/api/dar/v2/draft`;
@@ -46,7 +48,8 @@ export const DAR = {
 
   //v2, v3 DAR Creation
   postDar: async (dar) => {
-    await Metrics.captureEvent(eventList.dar, {'action': 'submit'});
+    // noinspection ES6MissingAwait
+    Metrics.captureEvent(eventList.dar, {'action': 'submit'});
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3` :
