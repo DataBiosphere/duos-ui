@@ -33,7 +33,6 @@ Ensure that you have access to the required team resources. If you encounter a p
 DUOS and [Terra](https://terra.bio/) use [Sam](https://github.com/broadinstitute/sam) to abstract identity and access management. To gain access to these services, first create a non-Broad email address through Gmail. This email address will specifically be used for development purposes in our non-prod environments. Next, to register as a new user, click the `Sign in with Google` button in each of the environments with the newly created email address and follow the prompts:
 
 - [Dev](https://bvdp-saturn-dev.appspot.com/)
-- [Alpha](https://bvdp-saturn-alpha.appspot.com/)
 - [Staging](https://bvdp-saturn-staging.appspot.com/)
 
 For [production](https://app.terra.bio/), you will need to register using a `firecloud.org` email. In order to get an account, you must become suitable, which requires following [these steps](https://docs.google.com/document/d/1DRftlTe-9Q4H-R0jxanVojvyNn1IzbdIOhNKiIj9IpI/edit?usp=sharing).
@@ -53,28 +52,17 @@ brew bundle --no-lock install
 Running the `brew` command above will install the following tools:
 
 1. [Git](https://git-scm.com/) is a version control tool for tracking changes in projects and code.
-2. [git-secrets](https://github.com/awslabs/git-secrets) prevents developers from committing passwords and secrets to git.
 3. [jq](https://stedolan.github.io/jq/) is a command line JSON processing tool.
 4. [Docker](https://www.docker.com/) is a tool to deliver software in packages called containers. Docker for MacOS also includes [Kubernetes](https://kubernetes.io/), which deploys groups of containers together in clusters.
-5. [Vault](https://www.vaultproject.io/) is an encrypted database used to store many of the team's secrets such as keys and passwords.
 6. [Volta](https://volta.sh/) is a tool to manage installations of [`nodejs`](https://nodejs.org/en/) and its dependencies. The DUOS user interface is built using `nodejs`.
 7. [Google Cloud SDK](https://cloud.google.com/sdk) is a command-line interface to Google Cloud services. Once it is installed, you'll need to allow auth access and configure Docker to connect to the appropriate Google Cloud endpoint when necessary, which is done with the configuration below.
 8. [IntelliJ IDEA](https://www.jetbrains.com/idea/) is an integrated development environment (IDE) for Java. There are two versions available: **Ultimate** (paid) and **Community** (open-source). We recommend the Ultimate Edition to Broad employees for its database navigation capabilities. Alternatively, the Community Edition has all the features needed for development, and this version can be installed by switching `intellij-idea` with `intellij-idea-ce` in the Brewfile.
-9. [Postgres](https://www.postgresql.org/) is an advanced open-source database.
 
 Unfortunately, some manual configuration is also necessary:
 
 ```
-# configure vault
-export VAULT_ADDR=https://clotho.broadinstitute.org:8200
-
 # launch docker desktop - this installs docker in /usr/local/bin
 open -a docker
-
-# launch postgres.app
-# 1. click the sidebar icon (bottom left-hand corner) and then click the plus sign
-# 2. name the new server, making sure to select version 11 and then initialize it
-open -a postgres
 
 # configure google-cloud-sdk
 gcloud auth login
@@ -88,7 +76,7 @@ volta setup && volta install ${NODE_VERSION}
 
 ## 6. Create GitHub token
 
-The GitHub token verifies team permissions. This token is necessary for the next step, [Login to Vault](#9-login-to-vault). To create a token:
+The GitHub token verifies team permissions. To create a token:
 
 1. Go to the [GitHub Personal Access Token](https://github.com/settings/tokens) page and click **Generate new token**.
 2. Give the token a descriptive name, **only** give it the following two scopes and then click **Generate token**.
@@ -101,17 +89,7 @@ GITHUB_TOKEN=<<GITHUB TOKEN VALUE>>
 echo $GITHUB_TOKEN > ~/.github-token
 ```
 
-## 7. Login to Vault
-
-Vault access tokens can be obtained using the GitHub token from earlier as follows:
-
-```
-vault login -method=github token=$(cat ~/.github-token)
-```
-
-> Vault access tokens expire after 30 days, so if you get a `403` error trying to use `vault`, re-run the `vault login` command to refresh your access token.
-
-## 8. Code Checkout
+## 7. Code Checkout
 
 > It may be useful to create a folder for Broad projects in your home directory.
 
