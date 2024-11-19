@@ -8,10 +8,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import { Button, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
-import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
-import externalAccessIcon from '../../images/external_access.svg';
-import openAccessIcon from '../../images/open_access.svg';
-import controlledAccessIcon from '../../images/controlled_access.svg';
+import {flatten, uniq, compact, orderBy} from 'lodash';
+import {getAccessManagementSummary} from '../../types/model';
 
 export const FilterItemHeader = (props) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
@@ -23,30 +21,7 @@ export const FilterItemHeader = (props) => {
 };
 
 export const FilterItemList = (props) => {
-  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
-  return (
-    <List sx={{ margin: '-0.5em -0.5em' }}>
-      {
-        filter.map((filter) => {
-          const filterName = filterNameFn(filter);
-          return (
-            <ListItem disablePadding key={filter}>
-              <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
-                <ListItemIcon>
-                  <Checkbox checked={isFiltered(filter, category)} />
-                </ListItemIcon>
-                <ListItemText primary={filterName} sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })
-      }
-    </List>
-  );
-};
-
-export const AccessManagementFilterItemList = (props) => {
-  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
+  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn, filterDisplayFn } = props;
   return (
     <List sx={{ margin: '-0.5em -0.5em' }}>
       {
@@ -59,14 +34,7 @@ export const AccessManagementFilterItemList = (props) => {
                   <Checkbox checked={isFiltered(filter, category)} />
                 </ListItemIcon>
                 <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
-                  { filterName === 'Open' ? <div style={{display: 'flex', alignItems: 'center'}}>
-                    <img src={openAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
-                    filterName === 'Controlled' ? <div style={{display: 'flex', alignItems: 'center'}}>
-                      <img src={controlledAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
-                      filterName === 'External' ? <div style={{display: 'flex', alignItems: 'center'}}>
-                        <img src={externalAccessIcon} style={{width: '10px', marginRight: 6}} /> {filterName} </div> :
-                        filterName
-                  }
+                  {filterDisplayFn ? filterDisplayFn(filter) : filterName}
                 </ListItemText>
               </ListItemButton>
             </ListItem>
@@ -96,14 +64,22 @@ export const DatasetFilterList = (props) => {
       </Box>
       <Divider />
       <FilterItemHeader title='Access Type' />
-      <AccessManagementFilterItemList
+      <FilterItemList
         category='accessManagement'
         datasets={datasets}
         filter={accessManagementFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
-        filterNameFn={capitalize} />
-      <FilterItemHeader title='Data Use' />
+        filterNameFn={(filter) => getAccessManagementSummary(filter).name}
+        filterDisplayFn={(filter) => {
+          const accessManagementSummary = getAccessManagementSummary(filter);
+          return (
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{width: '10px', marginRight: 6}}/>
+              {accessManagementSummary.name}
+            </div>);}
+        }/>
+      <FilterItemHeader title='Data Use'/>
       <FilterItemList
         category='dataUse'
         datasets={datasets}
