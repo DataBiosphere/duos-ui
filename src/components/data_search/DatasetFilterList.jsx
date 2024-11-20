@@ -8,7 +8,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import { Button, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
-import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
+import {flatten, uniq, compact, orderBy} from 'lodash';
+import {getAccessManagementSummary} from '../../types/model';
 
 export const FilterItemHeader = (props) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
@@ -20,7 +21,7 @@ export const FilterItemHeader = (props) => {
 };
 
 export const FilterItemList = (props) => {
-  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
+  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn, filterDisplayFn } = props;
   return (
     <List sx={{ margin: '-0.5em -0.5em' }}>
       {
@@ -32,7 +33,9 @@ export const FilterItemList = (props) => {
                 <ListItemIcon>
                   <Checkbox checked={isFiltered(filter, category)} />
                 </ListItemIcon>
-                <ListItemText primary={filterName} sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }} />
+                <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
+                  {filterDisplayFn ? filterDisplayFn(filter) : filterName}
+                </ListItemText>
               </ListItemButton>
             </ListItem>
           );
@@ -68,8 +71,16 @@ export const DatasetFilterList = (props) => {
         filter={accessManagementFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
-        filterNameFn={capitalize} />
-      <FilterItemHeader title='Data Use' />
+        filterNameFn={(filter) => getAccessManagementSummary(filter).name}
+        filterDisplayFn={(filter) => {
+          const accessManagementSummary = getAccessManagementSummary(filter);
+          return (
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <img src={accessManagementSummary.icon} alt={accessManagementSummary.name} style={{width: '10px', marginRight: 6}}/>
+              {accessManagementSummary.name}
+            </div>);}
+        }/>
+      <FilterItemHeader title='Data Use'/>
       <FilterItemList
         category='dataUse'
         datasets={datasets}
