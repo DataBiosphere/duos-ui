@@ -8,6 +8,9 @@ jobs:
         run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
       - name: NPM Install
         run: npm ci
       - name : Cypress run component tests
