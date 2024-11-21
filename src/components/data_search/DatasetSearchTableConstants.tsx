@@ -243,7 +243,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     duosId: '10%',
     accessType: '10%',
     dataType: '15%',
-    donorSize: '7%',
+    donorSize: '10%',
     dataLocation: '13%',
     dataUse: '10%',
     exportToTerra: 100,
