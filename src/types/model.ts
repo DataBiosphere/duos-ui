@@ -1,4 +1,7 @@
 import { DuosUserResponse } from './responseTypes';
+import externalAccessIcon from '../images/external_access.svg';
+import openAccessIcon from '../images/open_access.svg';
+import controlledAccessIcon from '../images/controlled_access.svg';
 
 export type UserRoleName =
   | 'Admin'
@@ -175,6 +178,41 @@ export interface DatasetTerm {
   updateUser: UserTerm;
   dac: DacTerm;
 }
+
+export interface AccessManagementSummary {
+  name: string;
+  icon: any;
+  description: string;
+}
+
+export const getAccessManagementSummary = (accessManagement: string): AccessManagementSummary => {
+  switch (accessManagement) {
+    case 'external':
+      return {
+        name: 'External',
+        icon: externalAccessIcon,
+        description: 'External access request required'
+      };
+    case 'open':
+      return {
+        name: 'Open',
+        icon: openAccessIcon,
+        description: 'Open access'
+      };
+    case 'controlled':
+      return {
+        name: 'Controlled',
+        icon: controlledAccessIcon,
+        description: 'Controlled access'
+      };
+    default:
+      return {
+        name: '',
+        icon: '',
+        description: 'Unknown access management'
+      };
+  }
+};
 
 interface DataUseRequirements {
   required: string[];
