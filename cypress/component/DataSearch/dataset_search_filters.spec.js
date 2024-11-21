@@ -2,7 +2,6 @@
 
 import { mount } from 'cypress/react';
 import React from 'react';
-import {Storage} from '../../../src/libs/storage';
 import DatasetFilterList from '../../../src/components/data_search/DatasetFilterList';
 
 const duosUser = {
@@ -10,13 +9,8 @@ const duosUser = {
 };
 
 describe('Data Library Filters', () => {
-    // Intercept configuration calls
     beforeEach(() => {
-        cy.intercept({
-            method: 'GET',
-            url: '/config.json',
-            hostname: 'localhost',
-        }, { 'env': 'ci' });
+        cy.initApplicationConfig();
     });
 
     it('Renders the data library filters', () => {

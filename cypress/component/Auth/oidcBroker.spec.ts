@@ -24,11 +24,7 @@ describe('OidcBroker Failure', function () {
 describe('OidcBroker Success', function () {
   // Intercept configuration calls
   beforeEach(() => {
-    cy.intercept({
-      method: 'GET',
-      url: '/config.json',
-      hostname: 'localhost',
-    }, {'env': 'ci'});
+    cy.initApplicationConfig();
     cy.stub(OAuth2, 'getConfig').returns({
       'authorityEndpoint': Cypress.config().baseUrl,
       'clientId': 'clientId'
