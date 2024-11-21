@@ -43,18 +43,18 @@ export const FilterItemList = (props) => {
 };
 
 export const FilterItemRange = (props) => {
-  const { min, max,  filterHandler } = props;
+  const { min, max, minCategory, maxCategory, filterHandler } = props;
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField id='minimum-range-input' size='small' margin='dense' variant='outlined' defaultValue={min}
         helperText={'minimum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
-        onChange={(event) => filterHandler('participantCountMin', event.target.value === '' ? min : event.target.value)}/>
+        onChange={(event) => filterHandler(minCategory, event.target.value === '' ? min : event.target.value)}/>
       <Box padding={'0rem 1rem 1rem'}> - </Box>
       <TextField id='maximum-range-input' size='small' margin='dense' variant='outlined' defaultValue={max}
         helperText={'maximum'}
         FormHelperTextProps={{style: {transform: 'scale(1.5)'}}}
-        onChange={(event) => filterHandler('participantCountMax', event.target.value === '' ? max : event.target.value)}
+        onChange={(event) => filterHandler(maxCategory, event.target.value === '' ? max : event.target.value)}
       />
     </Box>
   );
@@ -124,6 +124,8 @@ export const DatasetFilterList = (props) => {
       <FilterItemRange
         min={participantCountMin}
         max={participantCountMax}
+        minCategory='participantCountMin'
+        maxCategory='participantCountMax'
         datasets={datasets}
         filterHandler={filterHandler}
       />
