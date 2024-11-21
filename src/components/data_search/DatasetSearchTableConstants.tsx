@@ -25,6 +25,7 @@ interface DatasetSearchTableTabs {
 
 const makeHeaderStyle = (width: string | number): React.CSSProperties => ({
   width,
+  marginRight: 5
 });
 
 const makeRowStyle = (width: string | number): React.CSSProperties => ({
@@ -32,7 +33,7 @@ const makeRowStyle = (width: string | number): React.CSSProperties => ({
   textOverflow: 'ellipsis',
   textWrap: 'nowrap',
   overflow: 'hidden',
-  paddingRight: 5
+  marginRight: 5
 });
 
 const trimNewlineCharacters = (str: string): string => str?.replace( /[\r\n]+/gm, '');
