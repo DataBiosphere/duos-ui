@@ -6,7 +6,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Button, Typography } from '@mui/material';
+import { Button, TextField, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
 import { flatten, uniq, compact, capitalize, orderBy } from 'lodash';
 
@@ -20,7 +20,7 @@ export const FilterItemHeader = (props) => {
 };
 
 export const FilterItemList = (props) => {
-  const { category, datasets, filter, filterHandler, isFiltered, filterNameFn } = props;
+  const { category, filter, filterHandler, isFiltered, filterNameFn } = props;
   return (
     <List sx={{ margin: '-0.5em -0.5em' }}>
       {
@@ -28,7 +28,7 @@ export const FilterItemList = (props) => {
           const filterName = filterNameFn(filter);
           return (
             <ListItem disablePadding key={filter}>
-              <ListItemButton sx={{ padding: '0' }} onClick={(event) => filterHandler(event, datasets, category, filter)}>
+              <ListItemButton sx={{ padding: '0' }} onClick={() => filterHandler(category, filter)}>
                 <ListItemIcon>
                   <Checkbox checked={isFiltered(filter, category)} />
                 </ListItemIcon>
@@ -42,13 +42,34 @@ export const FilterItemList = (props) => {
   );
 };
 
+export const FilterItemRange = (props) => {
+  const { min, max,  filterHandler } = props;
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+      <TextField id='minimum-range-input' size='small' margin='dense' variant='outlined' defaultValue={min}
+        helperText={'minimum'}
+        FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
+        onChange={(event) => filterHandler('participantCountMin', event.target.value === '' ? min : event.target.value)}/>
+      <Box padding={'0rem 1rem 1rem'}> - </Box>
+      <TextField id='maximum-range-input' size='small' margin='dense' variant='outlined' defaultValue={max}
+        helperText={'maximum'}
+        FormHelperTextProps={{style: {transform: 'scale(1.5)'}}}
+        onChange={(event) => filterHandler('participantCountMax', event.target.value === '' ? max : event.target.value)}
+      />
+    </Box>
+  );
+};
+
 export const DatasetFilterList = (props) => {
-  const { datasets, filters, filterHandler, isFiltered, onClear } = props;
+  const { datasets, filterHandler, isFiltered, onClear } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
   const dataTypeFilters = uniq(flatten(datasets.map((dataset) => dataset.study.dataTypes)));
   const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
+  // some participantCounts are undefined, so filter them out before calculating min and max
+  const participantCountMax = Math.max(...datasets.filter((dataset) => dataset.participantCount).map((dataset) => dataset.participantCount));
+  const participantCountMin = Math.min(...datasets.filter((dataset) => dataset.participantCount).map((dataset) => dataset.participantCount));
 
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
@@ -90,14 +111,21 @@ export const DatasetFilterList = (props) => {
         isFiltered={isFiltered}
         filterNameFn={(filter) => filter}
       />
-      <FilterItemHeader title="Data Type" />
+      <FilterItemHeader title='Data Type' />
       <FilterItemList
-        category="dataType"
+        category='dataType'
         datasets={datasets}
         filter={dataTypeFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
         filterNameFn={(filter) => filter}
+      />
+      <FilterItemHeader title='Participant Count' />
+      <FilterItemRange
+        min={participantCountMin}
+        max={participantCountMax}
+        datasets={datasets}
+        filterHandler={filterHandler}
       />
     </Box>
   );
