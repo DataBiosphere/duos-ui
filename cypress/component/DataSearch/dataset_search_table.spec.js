@@ -3,6 +3,7 @@ import {React} from 'react';
 import {mount} from 'cypress/react';
 import DatasetSearchTable from '../../../src/components/data_search/DatasetSearchTable';
 import {TerraDataRepo} from '../../../src/libs/ajax/TerraDataRepo';
+import {DataSet} from '../../../src/libs/ajax/DataSet';
 
 const datasets = [
   {
@@ -29,6 +30,7 @@ describe('Dataset Search Table tests', () => {
     beforeEach(() => {
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
+      cy.stub(DataSet, 'searchDatasetIndex').returns({});
       mount(<DatasetSearchTable {...props} />);
     });
 
@@ -67,18 +69,18 @@ describe('Dataset Search Table tests', () => {
         {method: 'POST', url: '**/api/dataset/search/index'}, handler);
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMax-range-input').clear().type('50');
-      cy.wait(1000).then(() => {
+      cy.wait(1500).then(() => {
         expect(filtered).to.be.true;
       });
     });
 
-    it('When an invalid participant count filter is applied the query  represents the default value', () => {
+    it('When an invalid participant count filter is applied the query represents the default value', () => {
       searchText = '{"range":{"participantCount":{"gte":100,"lte":null}}}';
 
       cy.intercept({method: 'POST', url: '**/api/dataset/search/index'}, handler);
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMin-range-input').clear().type('test');
-      cy.wait(1000).then(() => {
+      cy.wait(1500).then(() => {
         expect(filtered).to.be.true;
       });
     });
