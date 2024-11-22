@@ -1,11 +1,11 @@
 # Local Development
 
-1. We use [node@22.6.0](https://github.com/nvm-sh/nvm#installing-and-updating):
+1. We use [node@22.11.0](https://docs.volta.sh/guide/understanding):
 
 ```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install 22.6.0
+volta install 22.11.0
 ```
+
 2. Install deps:
 
 ```
