@@ -53,18 +53,14 @@ export const DatasetSearchTable = (props) => {
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1;
 
-  const numSelectedFilters = (filters) => {
-    var sum = 0;
-    for (const category in filters) {
+  const anyFiltersSelected = (filters) => {
+    return Object.keys(filters).some((category) => {
       if (isArray(filters[category])) {
-        sum += filters[category].length;
+        return filters[category].length > 0;
       } else {
-        if (filters[category]) {
-          sum += 1;
-        }
+        return filters[category] !== null;
       }
-    }
-    return sum;
+    });
   };
 
   const getExportableDatasets = async (datasets) => {
@@ -123,7 +119,7 @@ export const DatasetSearchTable = (props) => {
     }
 
     let filterQuery = {};
-    if (numSelectedFilters(filters) > 0) {
+    if (anyFiltersSelected(filters)) {
       const filterTerms = [];
 
       filterTerms.push({
