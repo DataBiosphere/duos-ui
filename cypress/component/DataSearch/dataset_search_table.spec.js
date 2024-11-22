@@ -30,7 +30,7 @@ describe('Dataset Search Table tests', () => {
     beforeEach(() => {
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
-      cy.stub(DataSet, 'searchDatasetIndex').returns({});
+      cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([]));
       mount(<DatasetSearchTable {...props} />);
     });
 
