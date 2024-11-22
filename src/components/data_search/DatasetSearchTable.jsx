@@ -200,16 +200,18 @@ export const DatasetSearchTable = (props) => {
   };
 
   const filterHandler = (category, filter) => {
-    var newFilters = _.clone(filters);
-    if (isArray(newFilters[category])) {
+    let newFilter;
+    if (isArray(filters[category])) {
       if (!isFilteredArray(filter, category) && filter !== '') {
-        newFilters[category] = filters[category].concat(filter);
+        newFilter = filters[category].concat(filter);
       } else {
-        newFilters[category] = filters[category].filter((f) => f !== filter);
+        newFilter = filters[category].filter((f) => f !== filter);
       }
     } else {
-      newFilters[category] = filter;
+      newFilter = filter;
     }
+    const newFilters = _.clone(filters);
+    newFilters[category] = newFilter;
     setFilters(newFilters);
   };
 
