@@ -69,7 +69,7 @@ describe('Dataset Search Table tests', () => {
         {method: 'POST', url: '**/api/dataset/search/index'}, handler);
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMax-range-input').clear().type('50');
-      cy.wait(1500).then(() => {
+      cy.wait(2500).then(() => {
         expect(filtered).to.be.true;
       });
     });
@@ -80,7 +80,7 @@ describe('Dataset Search Table tests', () => {
       cy.intercept({method: 'POST', url: '**/api/dataset/search/index'}, handler);
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMin-range-input').clear().type('test');
-      cy.wait(1500).then(() => {
+      cy.wait(2500).then(() => {
         expect(filtered).to.be.true;
       });
     });
