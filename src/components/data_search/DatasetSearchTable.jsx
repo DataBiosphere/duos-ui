@@ -54,11 +54,11 @@ export const DatasetSearchTable = (props) => {
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1;
 
   const anyFiltersSelected = (filters) => {
-    return Object.keys(filters).some((category) => {
-      if (isArray(filters[category])) {
-        return filters[category].length > 0;
+    return Object.values(filters).some((filter) => {
+      if (isArray(filter)) {
+        return filter.length > 0;
       } else {
-        return filters[category] !== null;
+        return filter !== null;
       }
     });
   };
