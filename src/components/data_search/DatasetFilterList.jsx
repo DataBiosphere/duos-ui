@@ -48,13 +48,13 @@ export const FilterItemList = (props) => {
 export const FilterItemRange = (props) => {
   const { min, max, minCategory, maxCategory, filterHandler } = props;
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <TextField id='minimum-range-input' size='small' margin='dense' variant='outlined' defaultValue={min}
+    <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+      <TextField id={minCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={min}
         helperText={'minimum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
         onChange={(event) => filterHandler(minCategory, event.target.value === '' ? min : event.target.value)}/>
       <Box padding={'0rem 1rem 1rem'}> - </Box>
-      <TextField id='maximum-range-input' size='small' margin='dense' variant='outlined' defaultValue={max}
+      <TextField id={maxCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={max}
         helperText={'maximum'}
         FormHelperTextProps={{style: {transform: 'scale(1.5)'}}}
         onChange={(event) => filterHandler(maxCategory, event.target.value === '' ? max : event.target.value)}
