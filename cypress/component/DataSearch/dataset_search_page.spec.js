@@ -10,13 +10,8 @@ const duosUser = {
 };
 
 describe('Data Library', () => {
-    // Intercept configuration calls
     beforeEach(() => {
-        cy.intercept({
-            method: 'GET',
-            url: '/config.json',
-            hostname: 'localhost',
-        }, { 'env': 'ci' });
+        cy.initApplicationConfig();
     });
 
     it('Renders the data library without a query', () => {

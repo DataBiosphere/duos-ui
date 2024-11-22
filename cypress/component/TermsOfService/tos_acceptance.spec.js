@@ -20,11 +20,7 @@ const mocks = {
 describe('Terms of Service Acceptance Page', function () {
   // Intercept configuration calls
   beforeEach(async () => {
-    cy.intercept({
-      method: 'GET',
-      url: '/config.json',
-      hostname: 'localhost',
-    }, {'env': 'ci'});
+    cy.initApplicationConfig();
     cy.stub(OAuth2, 'getConfig').returns({
       'authorityEndpoint': 'authorityEndpoint',
       'clientId': 'clientId'

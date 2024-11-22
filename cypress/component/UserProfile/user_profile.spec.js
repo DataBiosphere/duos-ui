@@ -12,13 +12,8 @@ const duosUser = {
 };
 
 describe('User Profile', () => {
-  // Intercept configuration calls
   beforeEach(() => {
-    cy.intercept({
-      method: 'GET',
-      url: '/config.json',
-      hostname: 'localhost',
-    }, {'env': 'ci'});
+    cy.initApplicationConfig();
   });
 
   it('Renders the user profile page', () => {
