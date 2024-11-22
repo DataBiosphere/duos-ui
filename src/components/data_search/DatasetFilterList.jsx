@@ -8,8 +8,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
 import { Button, TextField, Typography } from '@mui/material';
 import { Checkbox } from '@mui/material';
-import {flatten, uniq, compact, orderBy} from 'lodash';
-import {getAccessManagementSummary} from '../../types/model';
+import { flatten, uniq, compact, orderBy } from 'lodash';
+import { getAccessManagementSummary } from '../../types/model';
 
 export const FilterItemHeader = (props) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
@@ -70,10 +70,11 @@ export const DatasetFilterList = (props) => {
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
   const dataTypeFilters = uniq(flatten(datasets.map((dataset) => dataset.study.dataTypes)));
   const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
-  // some participantCounts are undefined, so filter them out before calculating min and max
-  const participantCountMax = Math.max(...datasets.filter((dataset) => dataset.participantCount).map((dataset) => dataset.participantCount));
-  const participantCountMin = Math.min(...datasets.filter((dataset) => dataset.participantCount).map((dataset) => dataset.participantCount));
-
+  const defaultValues = datasets.reduce((acc, dataset) => {
+    return {
+      max: Math.max(acc.max, dataset.participantCount ? dataset.participantCount : 0),
+      min: Math.min(acc.min, dataset.participantCount ? dataset.participantCount : Infinity) };
+  }, {max: 0, min: Infinity});
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -133,8 +134,8 @@ export const DatasetFilterList = (props) => {
       />
       <FilterItemHeader title='Participant Count' />
       <FilterItemRange
-        min={participantCountMin}
-        max={participantCountMax}
+        min={defaultValues.min}
+        max={defaultValues.max}
         minCategory='participantCountMin'
         maxCategory='participantCountMax'
         datasets={datasets}
