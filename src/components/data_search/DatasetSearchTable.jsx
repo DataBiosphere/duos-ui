@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isArray, isEmpty } from 'lodash';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
@@ -237,18 +237,21 @@ export const DatasetSearchTable = (props) => {
     getExportableDatasets(datasets);
   });
 
-  const searchAndFilter = useRef(
-    _.debounce((fullQuery) => {
-      DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
-        setFiltered(newFiltered);
-      });
-    }, 150));
+  // const searchAndFilter = useRef(
+  //   _.debounce((fullQuery) => {
+  //     DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+  //       const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
+  //       setFiltered(newFiltered);
+  //     });
+  //   }, 150));
 
   useEffect(() => {
     const fullQuery = assembleFullQuery();
     try {
-      searchAndFilter.current(fullQuery);
+      DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
+        const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
+        setFiltered(newFiltered);
+      });
     } catch (error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' });
     }  }, [filters, searchTerm]); // eslint-disable-line
