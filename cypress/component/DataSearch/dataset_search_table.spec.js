@@ -48,6 +48,7 @@ describe('Dataset Search Table tests', () => {
   describe('Data library filter by participant count tests', () => {
 
     beforeEach(() => {
+      cy.clock();
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
     });
@@ -65,16 +66,19 @@ describe('Dataset Search Table tests', () => {
       cy.intercept(
         {method: 'POST', url: '**/search/index'}, (req) => {
           return handler(req, '{"range":{"participantCount":{"gte":null,"lte":50}}}');
-        }).as('searchIndex');
+        }).as('searchIndex1');
       mount(<DatasetSearchTable {...props} />);
       // first clear the default value (100), without clearing first, type('50') would result in input of 10050
       cy.get('#participantCountMax-range-input').clear().type('50');
-      // ignore first call, caused by .clear()
-      cy.wait('@searchIndex');
+      cy.tick(150);
+      // ignore first call (why are there two? even without clear())
+      cy.wait('@searchIndex1');
       // this api call, caused by .type('50'), should have had a request that contained the searchText
-      cy.wait('@searchIndex').then((response) => {
+      cy.wait('@searchIndex1').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
       });
+      // should be 1?
+      cy.get('@searchIndex1.all').should('have.length', 2);
     });
 
     it('When an invalid participant count filter is applied the query represents the default value', () => {
@@ -82,12 +86,14 @@ describe('Dataset Search Table tests', () => {
       cy.intercept({method: 'POST', url: '**/search/index'}, (req) => {
         // when non-numeric input is entered, the default value (in this case, 100) is used
         return handler(req, '{"range":{"participantCount":{"gte":100,"lte":null}}}');
-      }).as('searchIndex');
+      }).as('searchIndex2');
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMin-range-input').type('test');
-      cy.wait('@searchIndex').then((response) => {
+      cy.tick(150);
+      cy.wait('@searchIndex2').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
       });
+      cy.get('@searchIndex2.all').should('have.length', 1);
     });
 
   });
