@@ -63,7 +63,7 @@ describe('Dataset Search Table tests', () => {
 
     it('When a participant count filter is applied the query is updated', () => {
       cy.intercept(
-        {method: 'POST', url: '**/api/dataset/search/index'}, (req) => {
+        {method: 'POST', url: '**/search/index'}, (req) => {
           return handler(req, '{"range":{"participantCount":{"gte":null,"lte":50}}}');
         }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
@@ -79,7 +79,7 @@ describe('Dataset Search Table tests', () => {
 
     it('When an invalid participant count filter is applied the query represents the default value', () => {
 
-      cy.intercept({method: 'POST', url: '**/api/dataset/search/index'}, (req) => {
+      cy.intercept({method: 'POST', url: '**/search/index'}, (req) => {
         // when non-numeric input is entered, the default value (in this case, 100) is used
         return handler(req, '{"range":{"participantCount":{"gte":100,"lte":null}}}');
       }).as('searchIndex');

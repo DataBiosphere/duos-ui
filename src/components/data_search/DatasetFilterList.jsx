@@ -25,16 +25,16 @@ export const FilterItemList = (props) => {
   return (
     <List sx={{ margin: '-0.5em -0.5em' }}>
       {
-        filter.map((filter) => {
-          const filterName = filterNameFn(filter);
+        filter.map((filterOption) => {
+          const filterName = filterNameFn(filterOption);
           return (
-            <ListItem disablePadding key={filter}>
-              <ListItemButton sx={{ padding: '0' }} onClick={() => filterHandler(category, filter)}>
+            <ListItem disablePadding key={filterOption}>
+              <ListItemButton sx={{ padding: '0' }} onClick={() => filterHandler(category, filterOption)}>
                 <ListItemIcon>
-                  <Checkbox checked={isFiltered(filter, category)} />
+                  <Checkbox checked={isFiltered(filterOption, category)} />
                 </ListItemIcon>
                 <ListItemText sx={{ fontFamily: 'Montserrat', transform: 'scale(1.2)' }}>
-                  {filterDisplayFn ? filterDisplayFn(filter) : filterName}
+                  {filterDisplayFn ? filterDisplayFn(filterOption) : filterName}
                 </ListItemText>
               </ListItemButton>
             </ListItem>
