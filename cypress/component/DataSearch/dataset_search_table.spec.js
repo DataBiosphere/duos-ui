@@ -46,42 +46,47 @@ describe('Dataset Search Table tests', () => {
   });
 
   describe('Data library filter by participant count tests', () => {
-    let searchText;
-    let filtered;
 
     beforeEach(() => {
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
-      filtered = false;
     });
 
-    function handler(request) {
+    function handler(request, searchText) {
       if (JSON.stringify(request.body).includes(searchText)) {
-        filtered = true;
+        request.reply(['filtered']);
+      } else {
+        request.reply([]);
       }
-      request.reply({statusCode: 200, body:[]});
     }
 
-    it('When a participant count filter is applied the query is updated', () => {
-      searchText ='{"range":{"participantCount":{"gte":null,"lte":"50"}}}';
 
+    it('When a participant count filter is applied the query is updated', () => {
       cy.intercept(
-        {method: 'POST', url: '**/api/dataset/search/index'}, handler);
+        {method: 'POST', url: '**/api/dataset/search/index'}, (req) => {
+          return handler(req, '{"range":{"participantCount":{"gte":null,"lte":50}}}');
+        }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
+      // first clear the default value (100), without clearing first, type('50') would result in input of 10050
       cy.get('#participantCountMax-range-input').clear().type('50');
-      cy.wait(3000).then(() => {
-        expect(filtered).to.be.true;
+      // ignore first call, caused by .clear()
+      cy.wait('@searchIndex');
+      // this api call, caused by .type('50'), should have had a request that contained the searchText
+      cy.wait('@searchIndex').then((response) => {
+        expect(response.response.body[0]).to.equal('filtered');
       });
     });
 
     it('When an invalid participant count filter is applied the query represents the default value', () => {
-      searchText = '{"range":{"participantCount":{"gte":100,"lte":null}}}';
 
-      cy.intercept({method: 'POST', url: '**/api/dataset/search/index'}, handler);
+      cy.intercept({method: 'POST', url: '**/api/dataset/search/index'}, (req) => {
+        // when non-numeric input is entered, the default value (in this case, 100) is used
+        return handler(req, '{"range":{"participantCount":{"gte":100,"lte":null}}}');
+      }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
-      cy.get('#participantCountMin-range-input').clear().type('test');
-      cy.wait(3000).then(() => {
-        expect(filtered).to.be.true;
+      cy.get('#participantCountMin-range-input').type('test');
+      cy.wait('@searchIndex').then((response) => {
+        expect(response.response.body[0]).to.equal('filtered');
       });
     });
 

@@ -47,17 +47,18 @@ export const FilterItemList = (props) => {
 
 export const FilterItemRange = (props) => {
   const { min, max, minCategory, maxCategory, filterHandler } = props;
+  const getValue = (val, defaultVal) => isNaN(Number(val)) ? defaultVal : Number(val);
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField id={minCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={min}
         helperText={'minimum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
-        onChange={(event) => filterHandler(minCategory, isNaN(parseInt(event.target.value)) ? min : event.target.value)}/>
+        onChange={(event) => filterHandler(minCategory, getValue(event.target.value, min))}/>
       <Box padding={'0rem 1rem 1rem'}> - </Box>
       <TextField id={maxCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={max}
         helperText={'maximum'}
         FormHelperTextProps={{style: {transform: 'scale(1.5)'}}}
-        onChange={(event) => filterHandler(maxCategory, isNaN(parseInt(event.target.value)) ? max : event.target.value)}
+        onChange={(event) => filterHandler(maxCategory, getValue(event.target.value, max))}
       />
     </Box>
   );
