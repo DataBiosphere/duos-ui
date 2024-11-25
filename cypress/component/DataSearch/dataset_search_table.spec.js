@@ -64,12 +64,13 @@ describe('Dataset Search Table tests', () => {
     it('When a participant count filter is applied the query is updated', () => {
       cy.intercept(
         {method: 'POST', url: '**/api/dataset/search/index'}, (req) => {
-          // without clearing the default input, type('50') results in input of 10050
-          return handler(req, '{"range":{"participantCount":{"gte":null,"lte":10050}}}');
+          return handler(req, '{"range":{"participantCount":{"gte":null,"lte":50}}}');
         }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
-      cy.get('#participantCountMax-range-input').type('50');
+      // first clear the default value (100), without clearing first, type('50') would result in input of 10050
+      cy.get('#participantCountMax-range-input').clear().type('50');
       // ignore first call, caused by .clear()
+      cy.wait('@searchIndex');
       // this api call, caused by .type('50'), should have had a request that contained the searchText
       cy.wait('@searchIndex').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
