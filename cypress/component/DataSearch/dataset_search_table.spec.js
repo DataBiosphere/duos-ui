@@ -3,7 +3,6 @@ import {React} from 'react';
 import {mount} from 'cypress/react';
 import DatasetSearchTable from '../../../src/components/data_search/DatasetSearchTable';
 import {TerraDataRepo} from '../../../src/libs/ajax/TerraDataRepo';
-import {DataSet} from '../../../src/libs/ajax/DataSet';
 
 const datasets = [
   {
@@ -30,7 +29,7 @@ describe('Dataset Search Table tests', () => {
     beforeEach(() => {
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
-      cy.stub(DataSet, 'searchDatasetIndex').returns(Promise.resolve([]));
+      cy.clock();
       mount(<DatasetSearchTable {...props} />);
     });
 
@@ -45,12 +44,13 @@ describe('Dataset Search Table tests', () => {
     });
   });
 
+
   describe('Data library filter by participant count tests', () => {
 
     beforeEach(() => {
-      cy.clock();
       cy.initApplicationConfig();
       cy.stub(TerraDataRepo, 'listSnapshotsByDatasetIds').returns({});
+      cy.clock();
     });
 
     function handler(request, searchText) {
@@ -71,18 +71,15 @@ describe('Dataset Search Table tests', () => {
       // first clear the default value (100), without clearing first, type('50') would result in input of 10050
       cy.get('#participantCountMax-range-input').clear().type('50');
       cy.tick(150);
-      // ignore first call (why are there two? even without clear())
-      cy.wait('@searchIndex1');
-      // this api call, caused by .type('50'), should have had a request that contained the searchText
+      // this api call should have had a request that contained the searchText
       cy.wait('@searchIndex1').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
       });
-      // should be 1?
-      cy.get('@searchIndex1.all').should('have.length', 2);
+      cy.get('@searchIndex1.all').should('have.length', 1);
+
     });
 
     it('When an invalid participant count filter is applied the query represents the default value', () => {
-
       cy.intercept({method: 'POST', url: '**/search/index'}, (req) => {
         // when non-numeric input is entered, the default value (in this case, 100) is used
         return handler(req, '{"range":{"participantCount":{"gte":100,"lte":null}}}');
