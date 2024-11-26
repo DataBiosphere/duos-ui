@@ -53,15 +53,10 @@ export const DatasetSearchTable = (props) => {
 
   const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1;
 
-  const anyFiltersSelected = (filters) => {
-    return Object.values(filters).some((filter) => {
-      if (isArray(filter)) {
-        return filter.length > 0;
-      } else {
-        return filter !== null;
-      }
+  const anyFiltersSelected = (filters) =>
+    Object.values(filters).some(filter => {
+      return isArray(filter) ? filter.length > 0 : filter !== null;
     });
-  };
 
   const getExportableDatasets = async (datasets) => {
     // Note the dataset identifier is in each sub-table row.
