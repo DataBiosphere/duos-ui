@@ -3,8 +3,8 @@ import Tabs from '@mui/material/Tabs';
 import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
-import { isEmpty } from 'lodash';
+import {useEffect, useRef, useState} from 'react';
+import { isArray, isEmpty } from 'lodash';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
@@ -37,7 +37,9 @@ const defaultFilters = {
   accessManagement: [],
   dataUse: [],
   dataType: [],
-  dac: []
+  dac: [],
+  participantCountMin: null,
+  participantCountMax: null,
 };
 
 export const DatasetSearchTable = (props) => {
@@ -49,8 +51,12 @@ export const DatasetSearchTable = (props) => {
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const isFiltered = (filter, category) => (filters[category]).indexOf(filter) > -1;
-  const numSelectedFilters = (filters) => Object.values(filters).reduce((sum, array) => sum + array.length, 0);
+  const isFilteredArray = (filter, category) => (filters[category]).indexOf(filter) > -1;
+
+  const anyFiltersSelected = (filters) =>
+    Object.values(filters).some(filter => {
+      return isArray(filter) ? filter.length > 0 : filter !== null;
+    });
 
   const getExportableDatasets = async (datasets) => {
     // Note the dataset identifier is in each sub-table row.
@@ -108,7 +114,7 @@ export const DatasetSearchTable = (props) => {
     }
 
     let filterQuery = {};
-    if (numSelectedFilters(filters) > 0) {
+    if (anyFiltersSelected(filters)) {
       const filterTerms = [];
 
       filterTerms.push({
@@ -155,6 +161,15 @@ export const DatasetSearchTable = (props) => {
         }
       });
 
+      filterTerms.push({
+        'range': {
+          'participantCount': {
+            'gte': filters.participantCountMin,
+            'lte': filters.participantCountMax,
+          }
+        }
+      });
+
       if (filterTerms.length > 0) {
         filterQuery = [
           {
@@ -179,13 +194,19 @@ export const DatasetSearchTable = (props) => {
     };
   };
 
-  const filterHandler = (event, data, category, filter) => {
-    var newFilters = _.clone(filters);
-    if (!isFiltered(filter, category) && filter !== '') {
-      newFilters[category] = filters[category].concat(filter);
+  const filterHandler = (category, filter) => {
+    let newFilter;
+    if (isArray(filters[category])) {
+      if (!isFilteredArray(filter, category) && filter !== '') {
+        newFilter = filters[category].concat(filter);
+      } else {
+        newFilter = filters[category].filter((f) => f !== filter);
+      }
     } else {
-      newFilters[category] = filters[category].filter((f) => f !== filter);
+      newFilter = filter;
     }
+    const newFilters = _.clone(filters);
+    newFilters[category] = newFilter;
     setFilters(newFilters);
   };
 
@@ -280,7 +301,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filters={filters} filterHandler={filterHandler} isFiltered={isFiltered} onClear={() => setFilters(defaultFilters)}/>
+            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters)}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
