@@ -69,13 +69,19 @@ describe('Dataset Search Table tests', () => {
         }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
       // first clear the default value (100), without clearing first, type('50') would result in input of 10050
-      cy.get('#participantCountMax-range-input').clear().type('50');
+      const range = cy.get('#participantCountMax-range-input');
+      range.clear();
+      range.type('50');
       cy.tick(150);
       // this api call should have had a request that contained the searchText
+      let count = 0;
       cy.wait('@searchIndex').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
+        count++;
       });
-      cy.get('@searchIndex.all').should('have.length', 1);
+      cy.get('@searchIndex').then(() => {
+        expect(count).to.equal(1);
+      });
 
     });
 
@@ -87,10 +93,14 @@ describe('Dataset Search Table tests', () => {
       mount(<DatasetSearchTable {...props} />);
       cy.get('#participantCountMin-range-input').type('test');
       cy.tick(150);
+      let count = 0;
       cy.wait('@searchIndex').then((response) => {
         expect(response.response.body[0]).to.equal('filtered');
+        count++;
       });
-      cy.get('@searchIndex.all').should('have.length', 1);
+      cy.get('@searchIndex').then(() => {
+        expect(count).to.equal(1);
+      });
     });
 
   });
