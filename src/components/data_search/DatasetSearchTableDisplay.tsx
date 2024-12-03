@@ -7,7 +7,7 @@ import {Styles} from '../../libs/theme';
 import {
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
-import {SnapshotSummaryModel} from "src/types/tdrModel";
+import {SnapshotSummaryModel} from '../../types/tdrModel';
 
 const styles = {
   baseStyle: {

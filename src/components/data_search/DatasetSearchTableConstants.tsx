@@ -118,9 +118,9 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       sortable: true,
       cellStyle: makeHeaderStyle(studyCellWidths.studyName),
       cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.studyName} id={`${datasets[0].study.studyId}-study-name-data`}>
+        data: <Link key={datasets[0].study.studyId} id='link_study' href={`/studies/${datasets[0].study.studyId}`}>
           {trimNewlineCharacters(datasets[0].study.studyName)}
-        </OverflowTooltip>,
+        </Link>,
         value: datasets[0].study.studyName,
         id: `${datasets[0].study.studyId}-study-name`,
         style: makeRowStyle(studyCellWidths.selected),
