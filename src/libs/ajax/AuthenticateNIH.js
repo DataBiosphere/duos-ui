@@ -1,5 +1,5 @@
-import { Config } from '../config';
-import {getApiUrl, fetchOk, getECMUrl, reportError} from '../ajax';
+import {Config} from '../config';
+import {getApiUrl, getECMUrl, reportError} from '../ajax';
 import axios from 'axios';
 import {get, isNil, merge} from 'lodash';
 
@@ -19,14 +19,13 @@ axios.interceptors.response.use(function (response) {
 export const AuthenticateNIH = {
   saveNihUsr: async (decodedData) => {
     const url = `${await getApiUrl()}/api/nih`;
-    const res = await fetchOk(url, merge([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
-    return await res.json();
+    const res = await axios.post(url, JSON.stringify(decodedData), merge(Config.authOpts(), {headers: {'Content-Type': 'application/json'}}));
+    return await res.data;
   },
 
   deleteAccountLinkage: async () => {
     const url = `${await getApiUrl()}/api/nih`;
-    const res = await fetchOk(url, merge([Config.authOpts(), { method: 'DELETE' }]));
-    return await res;
+    return await axios.delete(url, Config.authOpts());
   },
 
   getECMeRACommonsStatus: async () => {
