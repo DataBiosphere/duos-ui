@@ -18,18 +18,21 @@ environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.
 `dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment 
 will simulate it for local development. The installation steps outlined in this step can also be completed using the 
 [render-configs.sh](scripts/render-configs.sh) script which can generate all required files for local development.
+
 ```
 cp config/base_config.json public/config.json
 ```
 
 Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
+
 ```properties
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
 Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics). Cert files are regenerated on a 3-month rotation so these will need to be updated when they are expired. The following commands need to be done on the Broad VPN.
+
 ```shell
-gcloud container clusters get-credentials --zone us-central1-a --project <project> terra-dev
+gcloud container clusters get-credentials --zone us-central1-a --project broad-dsde-dev terra-dev
 kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > server.crt
 kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > server.key
 kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > ca-bundle.crt
@@ -38,12 +41,14 @@ kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .d
 Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
 
 Create a local environment file, `.env.local`
+
 ```properties
 HOST=local.dsde-dev.broadinstitute.org
 HTTPS=true
 SSL_CRT_FILE=server.crt
 SSL_KEY_FILE=server.key
 ```
+
 Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
 
 4. Start development server:
@@ -51,6 +56,7 @@ Ensure that HOST is not set in your shell environment, as it will override the v
 ```shell
 npm start
 ```
+
 ### Running under Docker
 
 Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes. Remember to set
@@ -82,11 +88,13 @@ testing can be run headless or viewed interactively.
 Cypress integration (e2e) tests run locally require a different `baseUrl` than those
 run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
+
 ```json
 {
   "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"
 }
 ```
+
 Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`
 files instead of the default values.
 
