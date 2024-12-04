@@ -73,27 +73,18 @@ export default function ERACommons(props) {
     initResearcherProfile();
   }, [researcherProfile, onNihStatusUpdate]);
 
+  // eslint-disable-next-line no-unused-vars
   const redirectToNihLogin = async () => {
-    // TODO Testing code to replace old functionality with:
-    try {
-      let redirectURI = window.location.origin;
-      if (!origin.endsWith('/')) {
-        redirectURI = redirectURI + '/';
-      }
-      const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(redirectURI, destination);
-      console.log('authUrl', authUrl);
-    } catch (err) {
-      console.log(err);
-    }
     const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>';
     window.location.href = `${ await Config.getNihUrl() }?${queryString.stringify({ 'return-url': returnUrl })}`;
   };
 
   // eslint-disable-next-line no-unused-vars
   const redirectToECMAuthUrl = async () => {
-    const redirectURI = window.location.origin;
-    const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(redirectURI, destination);
-    console.log(authUrl);
+    let origin = window.location.origin;
+    const redirectTo = origin + '/' + destination;
+    const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(origin, redirectTo);
+    console.log('authUrl', authUrl);
     window.location.href = authUrl;
   };
 
@@ -127,7 +118,7 @@ export default function ERACommons(props) {
           <a
             data-cy='era-commons-authenticate-link'
             className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
-            onClick={redirectToNihLogin}
+            onClick={redirectToECMAuthUrl}
             target='_blank'>
             <div className={'era-logo-style'}/>
             <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
