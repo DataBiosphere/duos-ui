@@ -3,6 +3,7 @@
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Storage} from '../../../src/libs/storage';
+import {AuthenticateNIH} from '../../../src/libs/ajax/AuthenticateNIH';
 import {User} from '../../../src/libs/ajax/User';
 import {Institution} from '../../../src/libs/ajax/Institution';
 import UserProfile from '../../../src/pages/user_profile/UserProfile';
@@ -32,6 +33,7 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(User, 'getApprovedDatasets').returns([]);
     cy.stub(User, 'getAcknowledgements').returns({});
+    cy.stub(AuthenticateNIH, 'getECMeRACommonsStatus').returns(undefined);
     cy.intercept(
       {method: 'PUT', url: '**/user'},
       {statusCode: 200, body: duosUser}

@@ -50,6 +50,7 @@ Cypress.Commands.add('initApplicationConfig', () => {
     'ontologyApiUrl': '',
     'terraUrl': '',
     'tdrApiUrl': '',
+    'ecmApiUrl': '',
     'errorApiKey': '',
     'profileUrl': '',
     'nihUrl': '',
