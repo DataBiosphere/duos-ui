@@ -16,7 +16,7 @@ npm install
 connection to the Broad VPN. By default, this points the DUOS UI to the dev environment. 
 ```
 cd scripts
-./render-configs.sh --env true --config true
+./render-configs.sh --write_env true --write_config true
 ```
 
 #### Notes on render-configs:
