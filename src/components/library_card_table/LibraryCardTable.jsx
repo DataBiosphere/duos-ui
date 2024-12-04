@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactTooltip from 'react-tooltip';
 import { Notifications, searchOnFilteredList, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
@@ -77,7 +77,7 @@ const eraCommonsCell = (eraCommonsId, id) => {
 
 const createDateCell = (createDate, id) => {
   return {
-    data: !isNil(createDate) ? moment(createDate).format('YYYY-MM-DD') : '- -',
+    data: !isNil(createDate) ? dayjs(createDate).format('YYYY-MM-DD') : '- -',
     id,
     style: { width: styles.cellWidths.createDate },
     label: 'create-date',
