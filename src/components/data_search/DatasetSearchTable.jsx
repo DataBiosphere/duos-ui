@@ -319,8 +319,10 @@ export const DatasetSearchTable = (props) => {
                   <>
                     {Object.values(datasetSearchTableTabs).map((tab) =>
                       <div key={tab.key} style={{ display: tab.key === selectedTable.key ? 'block' : 'none' }}>
-                        <DatasetSearchTableDisplay tab={tab} onSelect={setSelected} filteredData={filtered}
-                          selected={selected} exportableDatasets={exportableDatasets}/>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <DatasetSearchTableDisplay tab={tab} onSelect={setSelected} filteredData={filtered}
+                            selected={selected} exportableDatasets={exportableDatasets}/>
+                        </Suspense>
                       </div>
                     )}
                   </>
