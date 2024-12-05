@@ -14,6 +14,7 @@ npm install
 
 3. Generate configuration files and populate certificates by running the [render-configs.sh](scripts/render-configs.sh) script. This requires 
 connection to the Broad VPN. By default, this points the DUOS UI to the dev environment. 
+
 ```
 cd scripts
 ./render-configs.sh --write_env true --write_config true
@@ -28,12 +29,14 @@ environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.
 will simulate it for local development.
 * **Refresh certs on rotation**: render-config.sh populates local certificate files. The certificates are rotated every 
 3 months and can be repopulated by re-running the script. Again, you'll need to be on the broad VPN.
+
 ```shell
 cd scripts
 ./render-configs.sh
 ```
 
 4. Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
+
 ```properties
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
@@ -78,6 +81,7 @@ testing can be run headless or viewed interactively.
 Cypress integration (e2e) tests run locally require a different `baseUrl` than those
 run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
+
 ```json
 {
   "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"
