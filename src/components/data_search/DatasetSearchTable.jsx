@@ -3,7 +3,7 @@ import Tabs from '@mui/material/Tabs';
 import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
-import {useEffect, useRef, useState} from 'react';
+import {Suspense, useEffect, useRef, useState} from 'react';
 import { isArray, isEmpty } from 'lodash';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
@@ -309,12 +309,22 @@ export const DatasetSearchTable = (props) => {
                 return (
                   <Box sx={{
                     display: 'flex',
-                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%'
+                  }}>
                     <h1>No datasets registered for this library.</h1>
                   </Box>
                 );
               } else {
-                return <DatasetSearchTableDisplay tab={selectedTable} onSelect={setSelected} filteredData={filtered} selected={selected} exportableDatasets={exportableDatasets}/>;
+                return (
+                  <>
+                    {Object.values(datasetSearchTableTabs).map((tab) =>
+                      <div key={tab.key} style={{ display: tab.key === selectedTable.key ? 'block' : 'none' }}>
+                        <DatasetSearchTableDisplay tab={tab} onSelect={setSelected} filteredData={filtered}
+                          selected={selected} exportableDatasets={exportableDatasets}/>
+                      </div>
+                    )}
+                  </>
+                );
               }
             })()}
           </Box>
