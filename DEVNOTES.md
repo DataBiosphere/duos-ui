@@ -12,41 +12,40 @@ volta install 22.11.0
 npm install
 ```
 
-3. Install configs for an environment. This example is for the `alpha` environment, but you can use values from any 
+3. Generate configuration files and populate certificates by running the [render-configs.sh](scripts/render-configs.sh) script. This requires 
+connection to the Broad VPN. By default, this points the DUOS UI to the dev environment. 
+
+```
+cd scripts
+./render-configs.sh --write_env true --write_config true
+```
+
+#### Notes on render-configs:
+* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
+* **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any 
 environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where 
 {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
 `dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment 
-will simulate it for local development. The installation steps outlined in this step can also be completed using the 
-[render-configs.sh](scripts/render-configs.sh) script which can generate all required files for local development.
-```
-cp config/base_config.json public/config.json
+will simulate it for local development.
+* **Refresh certs on rotation**: render-config.sh populates local certificate files. The certificates are rotated every 
+3 months and can be repopulated by re-running the script. Again, you'll need to be on the broad VPN.
+
+```shell
+cd scripts
+./render-configs.sh
 ```
 
-Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
+4. Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
+
 ```properties
 127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-Download cert files from dev project (requires access to correct project - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics). Cert files are regenerated on a 3-month rotation so these will need to be updated when they are expired. The following commands need to be done on the Broad VPN.
-```shell
-gcloud container clusters get-credentials --zone us-central1-a --project <project> terra-dev
-kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.crt" | base64decode }}' > server.crt
-kubectl -n local-dev get secrets local-dev-cert -o 'go-template={{ index .data "tls.key" | base64decode }}' > server.key
-kubectl -n local-dev get configmaps kube-root-ca.crt -o 'go-template={{ index .data "ca.crt" }}' > ca-bundle.crt
-```
+5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
 
-Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
 
-Create a local environment file, `.env.local`
-```properties
-HOST=local.dsde-dev.broadinstitute.org
-HTTPS=true
-SSL_CRT_FILE=server.crt
-SSL_KEY_FILE=server.key
-```
-Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
 
-4. Start development server:
+6. Start development server:
 
 ```shell
 npm start
@@ -82,6 +81,7 @@ testing can be run headless or viewed interactively.
 Cypress integration (e2e) tests run locally require a different `baseUrl` than those
 run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
+
 ```json
 {
   "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"

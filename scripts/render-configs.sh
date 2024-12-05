@@ -15,8 +15,8 @@ usage() {
 Usage: $0 [OPTION]...
 Generate cert files for local development
   --project PROJECT     Google project where cert files are stored
-  --env ENV             Write an .env.local file to project root. true|false. Defaults to false
-  --config CONFIG       Write a config.json file in public. true|false. Defaults to false
+  --write_env WRITE_ENV             Write an .env.local file to project root. true|false. Defaults to false
+  --write_config WRITE_CONFIG       Write a config.json file in public. true|false. Defaults to false
   --help                Display this help and exit
 EOF
     exit 0
@@ -29,8 +29,8 @@ error() {
 
 # default values that may be overridden by command line arguments
 PROJECT="broad-dsde-dev"
-ENV="false"
-CONFIG="false"
+WRITE_ENV="false"
+WRITE_CONFIG="false"
 
 parse_cli_args() {
     while [ $# -gt 0 ]; do
@@ -39,12 +39,12 @@ parse_cli_args() {
                 PROJECT=$2
                 shift 2
                 ;;
-            --env)
-                ENV=$2
+            --write_env)
+                WRITE_ENV=$2
                 shift 2
                 ;;
-            --config)
-                CONFIG=$2
+            --write_config)
+                WRITE_CONFIG=$2
                 shift 2
                 ;;
             --help)
@@ -90,11 +90,11 @@ write_config() {
 parse_cli_args "$@"
 auth_gcloud
 write_certs
-if [ "$ENV" == "true" ]
+if [ "$WRITE_ENV" == "true" ]
 then
   write_env
 fi
-if [ "$CONFIG" == "true" ]
+if [ "$WRITE_CONFIG" == "true" ]
 then
   write_config
 fi
