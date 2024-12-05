@@ -119,4 +119,10 @@ To run cypress component tests in a browser:
 ```shell
 npm run cypress:open:component
 ```
+
+To run a single test suite:
+
+```shell
+npm run cypress:open:component --spec "**/data_access_governance.spec.js"
+```
  

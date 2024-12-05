@@ -31,6 +31,21 @@ const styles = {
   },
 };
 
+export const applyForAccess = async (selected, history) => {
+  try {
+    const draftResponse = await DAR.postDarDraft({ datasetId: selected });
+    if (draftResponse.referenceId) {
+      history.push(`/dar_application/${draftResponse.referenceId}`);
+    } else if (draftResponse.message) {
+      Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+    } else {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
+  } catch (error) {
+    Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+  }
+};
+
 
 
 const defaultFilters = {
@@ -210,20 +225,7 @@ export const DatasetSearchTable = (props) => {
     setFilters(newFilters);
   };
 
-  const applyForAccess = async () => {
-    try {
-      const draftResponse = await DAR.postDarDraft({ datasetId: selected  });
-      if (draftResponse.referenceId) {
-        history.push(`/dar_application/${draftResponse.referenceId}`);
-      } else if (draftResponse.message) {
-        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
-      } else {
-        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-      }
-    } catch (error) {
-      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-    }
-  };
+
 
   useOnMount(() => {
     if (isEmpty(datasets)) {
@@ -320,7 +322,7 @@ export const DatasetSearchTable = (props) => {
           </Box>
         </Box>
         <Box sx={{padding: '1em'}}/>
-        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={applyForAccess}/>}
+        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, history)}/>}
       </Box>
     </>
   );

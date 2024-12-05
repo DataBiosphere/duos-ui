@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 import {Button} from '@mui/material';
 import * as React from 'react';
-import {Dataset} from 'src/types/model';
+import {DatasetTerm} from 'src/types/model';
 
 interface DatasetSearchFooterProps {
   selectedDatasets: number[];
-  datasets: Dataset[];
+  datasets: DatasetTerm[];
   onClick: () => void;
 }
 export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
