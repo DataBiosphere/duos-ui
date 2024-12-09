@@ -6,12 +6,15 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Button, TextField, Typography } from '@mui/material';
-import { Checkbox } from '@mui/material';
+import { Button, Checkbox, TextField, Typography } from '@mui/material';
 import { flatten, uniq, compact, orderBy } from 'lodash';
-import { getAccessManagementSummary } from '../../types/model';
+import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
 
-export const FilterItemHeader = (props) => {
+interface FilterItemHeaderProps {
+  title: React.ReactNode;
+  headerStyle?: React.CSSProperties;
+}
+export const FilterItemHeader = (props: FilterItemHeaderProps) => {
   const { title, headerStyle = { fontFamily: 'Montserrat', fontWeight: '600', marginTop: '1em' } } = props;
   return (
     <Typography variant='h6' gutterBottom component='div' sx={headerStyle}>
@@ -20,7 +23,15 @@ export const FilterItemHeader = (props) => {
   );
 };
 
-export const FilterItemList = (props) => {
+interface FilterItemListProps {
+  category: string;
+  filter: string[];
+  filterHandler: (category: string, filter: string) => void;
+  isFiltered: (filter: string, category: string) => boolean;
+  filterNameFn: (filter: string) => string;
+  filterDisplayFn?: (filter: string) => React.ReactNode;
+}
+export const FilterItemList = (props: FilterItemListProps) => {
   const { category, filter, filterHandler, isFiltered, filterNameFn, filterDisplayFn } = props;
   return (
     <List sx={{ margin: '-0.5em -0.5em' }}>
@@ -45,9 +56,17 @@ export const FilterItemList = (props) => {
   );
 };
 
-export const FilterItemRange = (props) => {
+interface FilterItemRangeProps {
+  min: number;
+  max: number;
+  minCategory: string;
+  maxCategory: string;
+  filterHandler: (category: string, filter: string) => void;
+}
+
+export const FilterItemRange = (props: FilterItemRangeProps) => {
   const { min, max, minCategory, maxCategory, filterHandler } = props;
-  const getValue = (val, defaultVal) => isNaN(Number(val)) ? defaultVal : Number(val);
+  const getValue = (val: any, defaultVal: any) => isNaN(Number(val)) ? defaultVal : Number(val);
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <TextField id={minCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={min}
@@ -64,7 +83,13 @@ export const FilterItemRange = (props) => {
   );
 };
 
-export const DatasetFilterList = (props) => {
+interface DatasetFilterListProps {
+  datasets: DatasetTerm[];
+  filterHandler: (category: string, filter: string) => void;
+  isFiltered: (filter: string, category: string) => boolean;
+  onClear: () => void;
+}
+export const DatasetFilterList = (props: DatasetFilterListProps) => {
   const { datasets, filterHandler, isFiltered, onClear } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
@@ -90,7 +115,6 @@ export const DatasetFilterList = (props) => {
       <FilterItemHeader title='Access Type' />
       <FilterItemList
         category='accessManagement'
-        datasets={datasets}
         filter={accessManagementFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -106,7 +130,6 @@ export const DatasetFilterList = (props) => {
       <FilterItemHeader title='Data Use'/>
       <FilterItemList
         category='dataUse'
-        datasets={datasets}
         filter={dataUseFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -118,7 +141,6 @@ export const DatasetFilterList = (props) => {
       />
       <FilterItemList
         category='dac'
-        datasets={datasets}
         filter={dacFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -127,7 +149,6 @@ export const DatasetFilterList = (props) => {
       <FilterItemHeader title='Data Type' />
       <FilterItemList
         category='dataType'
-        datasets={datasets}
         filter={dataTypeFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -139,7 +160,6 @@ export const DatasetFilterList = (props) => {
         max={defaultValues.max}
         minCategory='participantCountMin'
         maxCategory='participantCountMax'
-        datasets={datasets}
         filterHandler={filterHandler}
       />
     </Box>
