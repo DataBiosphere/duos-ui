@@ -6,8 +6,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Button, TextField, Typography } from '@mui/material';
-import { Checkbox } from '@mui/material';
+import { Button, Checkbox, TextField, Typography } from '@mui/material';
 import { flatten, uniq, compact, orderBy } from 'lodash';
 import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
 
@@ -26,7 +25,6 @@ export const FilterItemHeader = (props: FilterItemHeaderProps) => {
 
 interface FilterItemListProps {
   category: string;
-  datasets: DatasetTerm[]
   filter: string[];
   filterHandler: (category: string, filter: string) => void;
   isFiltered: (filter: string, category: string) => boolean;
@@ -63,7 +61,6 @@ interface FilterItemRangeProps {
   max: number;
   minCategory: string;
   maxCategory: string;
-  datasets: DatasetTerm[];
   filterHandler: (category: string, filter: string) => void;
 }
 
@@ -118,7 +115,6 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       <FilterItemHeader title='Access Type' />
       <FilterItemList
         category='accessManagement'
-        datasets={datasets}
         filter={accessManagementFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -134,7 +130,6 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       <FilterItemHeader title='Data Use'/>
       <FilterItemList
         category='dataUse'
-        datasets={datasets}
         filter={dataUseFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -146,7 +141,6 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       />
       <FilterItemList
         category='dac'
-        datasets={datasets}
         filter={dacFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -155,7 +149,6 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       <FilterItemHeader title='Data Type' />
       <FilterItemList
         category='dataType'
-        datasets={datasets}
         filter={dataTypeFilters}
         filterHandler={filterHandler}
         isFiltered={isFiltered}
@@ -167,7 +160,6 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
         max={defaultValues.max}
         minCategory='participantCountMin'
         maxCategory='participantCountMax'
-        datasets={datasets}
         filterHandler={filterHandler}
       />
     </Box>
