@@ -15,7 +15,7 @@ export const TableHeaderSection = (props) => {
               src={icon}
               style={{
                 width: icon.width,
-                height: icon.height,
+                height: icon.height || 64,
                 maxWidth: 200,
                 maxHeight: 64,
               }}
