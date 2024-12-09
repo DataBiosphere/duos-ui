@@ -1,7 +1,8 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from 'cypress/react';
+import { mount } from 'cypress/react18';
 import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
+import dayjs from 'dayjs';
 
 let props;
 const baseProps = {
@@ -9,6 +10,84 @@ const baseProps = {
 };
 
 describe('FormField - Tests', () => {
+  describe('Calendar Picker', () => {
+    it('should render a required calendar picker control', () => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.CALENDAR,
+        id:'releaseDate',
+        title:'Release Date',
+        defaultValue: dayjs(),
+        validators: [FormValidators.REQUIRED, FormValidators.DATE]
+      };
+      mount(<FormField {...props}/>);
+      cy.get('#lbl_releaseDate').contains('Release Date*');
+    });
+
+    it('should render am optional calendar picker control', () => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.CALENDAR,
+        id:'optionalDate',
+        title:'Optional Date',
+        defaultValue: dayjs('2024-11-15'),
+        validators: [FormValidators.DATEJS]
+      };
+      mount(<FormField {...props}/>);
+      cy.get('#lbl_optionalDate').contains('Optional Date');
+      cy.get('#lbl_optionalDate').should('not.contain', '*');
+    });
+
+    it('should render a calendar picker control with an error', () => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.CALENDAR,
+        id:'optionalDate',
+        title:'Optional Date',
+        defaultValue:null,
+        validators: [FormValidators.DATEJS]
+      };
+      mount(<FormField {...props}/>);
+      cy.get('#lbl_optionalDate').contains('Optional Date');
+      cy.get('#lbl_optionalDate').should('not.contain', '*');
+      cy.get('input').type('2024-11-31');
+      cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg);
+    });
+    it('should render a calendar picker control initialized with an error', () => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.CALENDAR,
+        id:'optionalDate',
+        title:'Optional Date',
+        defaultValue:dayjs('Hello World!'),
+        validators: [FormValidators.DATEJS]
+      };
+      mount(<FormField {...props}/>);
+      cy.get('#lbl_optionalDate').contains('Optional Date');
+      cy.get('#lbl_optionalDate').should('not.contain', '*');
+      cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg);
+    });
+    it('initialized with an error, gone after proper date picked.', () => {
+      props = {
+        ...baseProps,
+        type: FormFieldTypes.CALENDAR,
+        id:'fixedDate',
+        title:'Fixed Date',
+        defaultValue:dayjs('Hello World'),
+        validators: [FormValidators.DATEJS]
+      };
+      cy.spy(props,'onChange').as('onChange');
+      mount(<FormField {...props}/>);
+      cy.get('#lbl_fixedDate').contains('Fixed Date');
+      cy.get('#lbl_fixedDate').should('not.contain', '*');
+      cy.get('.formField-fixedDate .error-message').contains(FormValidators.DATEJS.msg);
+      cy.get('svg').click();
+      cy.get('button').contains('5').click();
+      cy.get('button').contains('Select').click();
+      cy.get('.formField-fixedDate .error-message').should('not.exist');
+      cy.get('@onChange').should('be.calledOnce');
+    });
+  });
   describe('Validation', () => {
     it('should render required indicator', () => {
       props = {
