@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import { SpinnerComponent } from './SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList } from 'react-window';
 
 // Renders spinning circle while table loading
@@ -100,7 +101,7 @@ const Row = ({ data, index, style }) => {
     baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#F7F8F9';
   }
   const renderedRow = (
-    <div style={[style, Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle)]} key={`row-data-${mapKey}`} role='row' className={`row-data-${index}`}>
+    <div style={{...style, ...baseStyle}} key={`row-data-${mapKey}`} role='row' className={`row-data-${index}`}>
       {row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
@@ -154,16 +155,19 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle, containerOverride} = styles;
   const columnRow = <ColumnRow key='column-row-container' columnHeaders={columnHeaders} baseStyle={baseStyle} columnStyle={columnStyle} sort={sort} onSort={onSort} />;
-  const tableTemplate = [columnRow, <FixedSizeList
-    height={150}
-    itemCount={1000}
-    itemSize={35}
-    width={300}
-    key={'table-data-rows'}
-    itemData={{ rowData: rowData, baseStyle: baseStyle, columnHeaders: columnHeaders, rowWrapper: rowWrapper }}
-  >
-    {Row}
-  </FixedSizeList>];
+  const tableTemplate = [columnRow,  <AutoSizer  key={'table-data-rows-autosizer'}>
+    {({ height, width }) => (
+      <FixedSizeList
+        height={1500}
+        itemCount={rowData.length}
+        itemSize={50}
+        width={width}
+        key={'table-data-rows'}
+        itemData={{ rowData: rowData, baseStyle: baseStyle, columnHeaders: columnHeaders, rowWrapper: rowWrapper }}
+      >
+        {Row}
+      </FixedSizeList>)}
+  </AutoSizer>];
   const output = isLoading ? <TableLoading /> : tableTemplate;
   return (
     <div>
