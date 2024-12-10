@@ -44,7 +44,7 @@ describe('FormField - Tests', () => {
         type: FormFieldTypes.CALENDAR,
         id:'optionalDate',
         title:'Optional Date',
-        defaultValue:null,
+        defaultValue:dayjs(),
         validators: [FormValidators.DATEJS]
       };
       mount(<FormField {...props}/>);
