@@ -1,7 +1,12 @@
 import React from 'react';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import {LocalizationProvider, PickersActionBarProps, PickersDay, PickersDayProps} from '@mui/x-date-pickers';
+import {
+  DesktopDatePicker,
+  LocalizationProvider,
+  PickersActionBarProps,
+  PickersDay,
+  PickersDayProps
+} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {Button} from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
@@ -171,7 +176,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
 
   return <ThemeProvider theme={theme}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DatePicker
+      <DesktopDatePicker
         closeOnSelect={false}
         label={'Select a date'}
         format={inputFormat}
