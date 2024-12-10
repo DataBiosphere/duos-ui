@@ -50,7 +50,7 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       cy.get('#lbl_optionalDate').contains('Optional Date');
       cy.get('#lbl_optionalDate').should('not.contain', '*');
-      cy.get('input').type('2024-11-31');
+      cy.get('input').type('{end}{del}99');
       cy.get('.formField-optionalDate .error-message').contains(FormValidators.DATEJS.msg);
     });
     it('should render a calendar picker control initialized with an error', () => {
