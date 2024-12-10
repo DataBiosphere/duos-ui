@@ -1,12 +1,13 @@
 /* eslint-disable no-undef */
 import React from 'react';
-import { mount } from 'cypress/react18';
-import { FormField, FormFieldTypes, FormTable, FormValidators } from '../../../src/components/forms/forms';
+import {mount} from 'cypress/react18';
+import {FormField, FormFieldTypes, FormTable, FormValidators} from '../../../src/components/forms/forms';
 import dayjs from 'dayjs';
 
 let props;
 const baseProps = {
-  onChange: () => {}
+  onChange: () => {
+  }
 };
 
 describe('FormField - Tests', () => {
@@ -114,13 +115,11 @@ describe('FormField - Tests', () => {
       cy.spy(props.validators[0], 'isValid');
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a')
-        .then(() => {
-          cy.get('#dataCustodianEmail').should('have.value', 'a');
-          expect(props.validators[0].isValid).to.be.calledWith('a');
-          expect(props.onChange).to.be.calledWith({ key: 'dataCustodianEmail', value: 'a', isValid: false });
-        });
+      cy.get('#dataCustodianEmail').type('a');
+      cy.get('#dataCustodianEmail').should('have.value', 'a').then(() => {
+        expect(props.validators[0].isValid).to.be.calledWith('a');
+        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: 'a', isValid: false});
+      });
     });
 
     it('should show error message with validator error message', () => {
@@ -133,12 +132,10 @@ describe('FormField - Tests', () => {
         ]
       };
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a')
-        .then(() => {
-          cy.get('#dataCustodianEmail').should('have.value', 'a');
-          cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
-        });
+      cy.get('#dataCustodianEmail').type('a');
+      cy.get('#dataCustodianEmail').should('have.value', 'a').then(() => {
+        cy.get('.formField-dataCustodianEmail .error-message').contains(FormValidators.EMAIL.msg);
+      });
     });
 
     it('updates external validation', () => {
@@ -147,24 +144,30 @@ describe('FormField - Tests', () => {
         id: 'dataCustodianEmail',
         title: 'Data Custodian Email',
         validators: [FormValidators.EMAIL, FormValidators.REQUIRED],
-        onValidationChange: () => {},
+        onValidationChange: () => {
+        },
       };
       cy.spy(props, 'onValidationChange');
       mount(<FormField {...props}/>);
 
-      cy.get('#dataCustodianEmail')
-        .type('a')
-        .then(() => {
-          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email'] }});
-        })
-        .type('@gmail.com')
-        .then(() => {
-          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: true }});
-        })
-        .type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
-        .then(() => {
-          expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: { valid: false, failed: ['email', 'required'] }});
+      cy.get('#dataCustodianEmail').type('a');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onValidationChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          validation: {valid: false, failed: ['email']}
         });
+      });
+      cy.get('#dataCustodianEmail').type('@gmail.com');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onValidationChange).to.be.calledWith({key: 'dataCustodianEmail', validation: {valid: true}});
+      });
+      cy.get('#dataCustodianEmail').type('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onValidationChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          validation: {valid: false, failed: ['email', 'required']}
+        });
+      });
     });
 
     it('can take external validation control', () => {
@@ -204,36 +207,33 @@ describe('FormField - Tests', () => {
       const textToType = 'Dangerous Study';
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#studyName')
-        .type(textToType)
-        .then(() => {
-          cy.get('#studyName').should('have.value', textToType);
-          expect(props.onChange).to.be.calledWith({key: 'studyName', value: textToType, isValid: true}); // code value
-        });
+      cy.get('#studyName').type(textToType);
+      cy.get('#studyName').then(() => {
+        cy.get('#studyName').should('have.value', textToType);
+        expect(props.onChange).to.be.calledWith({key: 'studyName', value: textToType, isValid: true}); // code value
+      });
     });
 
     it('should display error when text input is required, value is blank', () => {
       mount(<FormField {...props}/>);
-      cy.get('#studyName')
-        .type('hello')
-        .clear()
-        .then(() => {
-          cy.get('#studyName').should('have.value', '');
-          cy.get('#studyName').should('have.class', 'errored');
-          cy.get('#lbl_studyName').should('have.class', 'errored');
-        });
+      cy.get('#studyName').type('hello');
+      cy.get('#studyName').clear();
+      cy.get('#studyName').then(() => {
+        cy.get('#studyName').should('have.value', '');
+        cy.get('#studyName').should('have.class', 'errored');
+        cy.get('#lbl_studyName').should('have.class', 'errored');
+      });
     });
 
     it('should display error when text input is required, but is dirty', () => {
       mount(<FormField {...props}/>);
-      cy.get('#studyName')
-        .click()
-        .blur()
-        .then(() => {
-          cy.get('#studyName').should('have.value', '');
-          cy.get('#studyName').should('have.class', 'errored');
-          cy.get('#lbl_studyName').should('have.class', 'errored');
-        });
+      cy.get('#studyName').click();
+      cy.get('#studyName').blur();
+      cy.get('#studyName').then(() => {
+        cy.get('#studyName').should('have.value', '');
+        cy.get('#studyName').should('have.class', 'errored');
+        cy.get('#lbl_studyName').should('have.class', 'errored');
+      });
     });
 
     it('should be disabled with the config declares it', () => {
@@ -285,7 +285,8 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
 
-      cy.get('#radioGroup_opt1').click().then(() => {
+      cy.get('#radioGroup_opt1').click();
+      cy.get('#radioGroup_opt1').then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
           value: 'opt1',
@@ -297,7 +298,8 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt2').should('not.be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
 
-      cy.get('#radioGroup_opt2').click().then(() => {
+      cy.get('#radioGroup_opt2').click();
+      cy.get('#radioGroup_opt2').then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
           value: 'opt2',
@@ -309,7 +311,8 @@ describe('FormField - Tests', () => {
       cy.get('#radioGroup_opt2').should('be.checked');
       cy.get('#radioGroup_opt3').should('not.be.checked');
 
-      cy.get('#radioGroup_opt3').click().then(() => {
+      cy.get('#radioGroup_opt3').click();
+      cy.get('#radioGroup_opt3').then(() => {
         expect(props.onChange).to.be.calledWith({
           key: 'radioGroup',
           value: 'opt3',
@@ -351,7 +354,8 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail').type('a@a.com');
-      cy.get('#dataCustodianEmail').type('{enter}').then(() => {
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com'], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com'); // ui element exists
       });
@@ -360,49 +364,59 @@ describe('FormField - Tests', () => {
     it('should add multiple email addresses', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a@a.com').type('{enter}')
-        .type('b@b.com').type('{enter}')
-        .type('c@c.com').type('{enter}')
-        .then(() => {
-          expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com', 'c@c.com'], isValid: true}); // code value
-          cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
-          cy.get('.formField-dataCustodianEmail .pill').first().next().contains('b@b.com');
-          cy.get('.formField-dataCustodianEmail .pill').first().next().next().contains('c@c.com');
-        });
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('b@b.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('c@c.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          value: ['a@a.com', 'b@b.com', 'c@c.com'],
+          isValid: true
+        }); // code value
+        cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
+        cy.get('.formField-dataCustodianEmail .pill').first().next().contains('b@b.com');
+        cy.get('.formField-dataCustodianEmail .pill').first().next().next().contains('c@c.com');
+      });
     });
 
     it('should not add duplicate emails', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a@a.com').type('{enter}')
-        .type('a@a.com').type('{enter}')
-        .then(() => {
-          expect(props.onChange).to.be.callCount(1); // only calls onChange once
-          cy.get('#dataCustodianEmail').should('have.value', ''); // clear input on duplicate text
-          cy.get('.formField-dataCustodianEmail .pill').should('have.length', 1); // only have one pill
-        });
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onChange).to.be.callCount(1); // only calls onChange once
+        cy.get('#dataCustodianEmail').should('have.value', ''); // clear input on duplicate text
+        cy.get('.formField-dataCustodianEmail .pill').should('have.length', 1); // only have one pill
+      });
     });
 
     it('should not add invalid emails', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('not an email haha').type('{enter}')
-        .then(() => {
-          expect(props.onChange).to.be.callCount(0);
-          cy.get('#dataCustodianEmail').should('have.value', 'not an email haha');
-          cy.get('#dataCustodianEmail').should('have.class', 'errored');
-        });
+      cy.get('#dataCustodianEmail').type('not an email haha');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').then(() => {
+        expect(props.onChange).to.be.callCount(0);
+        cy.get('#dataCustodianEmail').should('have.value', 'not an email haha');
+        cy.get('#dataCustodianEmail').should('have.class', 'errored');
+      });
     });
 
     it('should remove single on click', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail').type('a@a.com').type('{enter}');
-      cy.get('.formField-dataCustodianEmail .pill').first().should('exist');
-      cy.get('.formField-dataCustodianEmail .pill').first().click().then(() => {
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      const firstPill = cy.get('.formField-dataCustodianEmail .pill').first();
+      firstPill.should('exist');
+      firstPill.click();
+      firstPill.then(() => {
         expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: [], isValid: true}); // code value
         cy.get('.formField-dataCustodianEmail .pill').should('not.exist');
       });
@@ -411,12 +425,19 @@ describe('FormField - Tests', () => {
     it('should remove [x, 1, 2] from array on click', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a@a.com').type('{enter}')
-        .type('b@b.com').type('{enter}')
-        .type('c@c.com').type('{enter}');
-      cy.get('.formField-dataCustodianEmail .pill').eq(0).click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['b@b.com', 'c@c.com'], isValid: true}); // code value
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('b@b.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('c@c.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('.formField-dataCustodianEmail .pill').eq(0).click();
+      cy.get('.formField-dataCustodianEmail .pill').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          value: ['b@b.com', 'c@c.com'],
+          isValid: true
+        }); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('b@b.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('c@c.com');
       });
@@ -425,12 +446,19 @@ describe('FormField - Tests', () => {
     it('should remove [0, x, 2] from array on click', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a@a.com').type('{enter}')
-        .type('b@b.com').type('{enter}')
-        .type('c@c.com').type('{enter}');
-      cy.get('.formField-dataCustodianEmail .pill').eq(1).click().then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'c@c.com'], isValid: true}); // code value
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('b@b.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('c@c.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('.formField-dataCustodianEmail .pill').eq(1).click();
+      cy.get('.formField-dataCustodianEmail .pill').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          value: ['a@a.com', 'c@c.com'],
+          isValid: true
+        }); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('c@c.com');
       });
@@ -439,12 +467,18 @@ describe('FormField - Tests', () => {
     it('should remove [0, 1, x] from array on click', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#dataCustodianEmail')
-        .type('a@a.com').type('{enter}')
-        .type('b@b.com').type('{enter}')
-        .type('c@c.com').type('{enter}');
+      cy.get('#dataCustodianEmail').type('a@a.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('b@b.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
+      cy.get('#dataCustodianEmail').type('c@c.com');
+      cy.get('#dataCustodianEmail').type('{enter}');
       cy.get('.formField-dataCustodianEmail .pill').eq(2).then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: ['a@a.com', 'b@b.com'], isValid: true}); // code value
+        expect(props.onChange).to.be.calledWith({
+          key: 'dataCustodianEmail',
+          value: ['a@a.com', 'b@b.com'],
+          isValid: true
+        }); // code value
         cy.get('.formField-dataCustodianEmail .pill').first().contains('a@a.com');
         cy.get('.formField-dataCustodianEmail .pill').first().next().contains('b@b.com');
       });
@@ -476,12 +510,11 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
       cy.get(selector).should('not.be.checked');
-      cy.get(selector)
-        .click()
-        .then(() => {
-          cy.get(selector).should('be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
-        });
+      cy.get(selector).click();
+      cy.get(selector).then(() => {
+        cy.get(selector).should('be.checked'); // visual
+        expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: true, isValid: true}); // code value
+      });
     });
 
     it('should run onChange event when user toggles the slider true', () => {
@@ -489,13 +522,12 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       const selector = '#publicVisibility';
       cy.get(selector).should('not.be.checked');
-      cy.get(selector)
-        .click()
-        .click()
-        .then(() => {
-          cy.get(selector).should('not.be.checked'); // visual
-          expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
-        });
+      cy.get(selector).click();
+      cy.get(selector).click();
+      cy.get(selector).then(() => {
+        cy.get(selector).should('not.be.checked'); // visual
+        expect(props.onChange).to.be.calledWith({key: 'publicVisibility', value: false, isValid: true}); // code value
+      });
     });
   });
 
@@ -512,7 +544,9 @@ describe('FormField - Tests', () => {
           'Analytical', 'Prospective', 'Retrospective',
           'Case report', 'Case series', 'Cross-sectional',
           'Cohort study'
-        ].map((opt) => {return {displayName: opt, displayText: opt};})
+        ].map((opt) => {
+          return {displayName: opt, displayText: opt};
+        })
       };
     });
 
@@ -526,8 +560,13 @@ describe('FormField - Tests', () => {
     it('should allow user to search options', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {displayName: 'Observational', displayText: 'Observational'}, isValid: true});
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: {displayName: 'Observational', displayText: 'Observational'},
+          isValid: true
+        });
       });
 
     });
@@ -535,7 +574,8 @@ describe('FormField - Tests', () => {
     it('should not allow user to select by entering a new option as freetext if creatable not set', () => {
       cy.spy(props, 'onChange');
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('asdf{enter}').then(() => {
+      cy.get('#studyType').type('asdf{enter}');
+      cy.get('#studyType').then(() => {
         expect(props.onChange).to.not.be.called;
       });
     });
@@ -544,8 +584,13 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       props.isCreatable = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: {key: 'asdf', displayText: 'asdf'}, isValid: true});
+      cy.get('#studyType').type('asdf{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: {key: 'asdf', displayText: 'asdf'},
+          isValid: true
+        });
       });
     });
 
@@ -554,11 +599,13 @@ describe('FormField - Tests', () => {
       props.selectOptions = ['Observational', 'Other'];
       props.isCreatable = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('Obs{enter}').then(() => {
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'Observational', isValid: true});
       });
 
-      cy.get('#studyType').type('asdf{enter}').then(() => {
+      cy.get('#studyType').type('asdf{enter}');
+      cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: 'asdf', isValid: true});
       });
     });
@@ -567,12 +614,25 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       props.isMulti = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'}],
+          isValid: true
+        });
       });
 
-      cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
+      cy.get('#studyType').type('Prosp{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'}, {
+            displayName: 'Prospective',
+            displayText: 'Prospective'
+          }],
+          isValid: true
+        });
       });
 
     });
@@ -582,16 +642,37 @@ describe('FormField - Tests', () => {
       props.isMulti = true;
       props.isCreatable = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('Obs{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}], isValid: true});
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'}],
+          isValid: true
+        });
       });
 
-      cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}], isValid: true});
+      cy.get('#studyType').type('Prosp{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'}, {
+            displayName: 'Prospective',
+            displayText: 'Prospective'
+          }],
+          isValid: true
+        });
       });
 
-      cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: [{displayName: 'Observational', displayText: 'Observational'}, {displayName: 'Prospective', displayText: 'Prospective'}, {key: 'asdf', displayText: 'asdf'}], isValid: true});
+      cy.get('#studyType').type('asdf{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'}, {
+            displayName: 'Prospective',
+            displayText: 'Prospective'
+          }, {key: 'asdf', displayText: 'asdf'}],
+          isValid: true
+        });
       });
 
     });
@@ -603,16 +684,27 @@ describe('FormField - Tests', () => {
       props.isMulti = true;
       props.isCreatable = true;
       mount(<FormField {...props}/>);
-      cy.get('#studyType').type('Obs{enter}').then(() => {
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational'], isValid: true});
       });
 
-      cy.get('#studyType').type('Prosp{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational', 'Prospective'], isValid: true});
+      cy.get('#studyType').type('Prosp{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: ['Observational', 'Prospective'],
+          isValid: true
+        });
       });
 
-      cy.get('#studyType').type('asdf{enter}').then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'studyType', value: ['Observational', 'Prospective', 'asdf'], isValid: true});
+      cy.get('#studyType').type('asdf{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: ['Observational', 'Prospective', 'asdf'],
+          isValid: true
+        });
       });
 
     });
@@ -658,13 +750,16 @@ describe('FormField - Tests', () => {
     it('should update a row field', () => {
       cy.spy(props, 'onChange');
       mount(<FormTable {...props}/>);
-      cy.get('#fileTypes-0-functionalEquivalence').type('hello').then(() => {
+      cy.get('#fileTypes-0-functionalEquivalence').type('hello');
+      cy.get('#fileTypes-0-functionalEquivalence').then(() => {
         cy.get('#fileTypes-0-functionalEquivalence').should('have.value', 'hello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
-          {
-            'functionalEquivalence': 'hello'
-          }
-        ], isValid: true}); // code value
+        expect(props.onChange).to.be.calledWith({
+          key: 'fileTypes', value: [
+            {
+              'functionalEquivalence': 'hello'
+            }
+          ], isValid: true
+        }); // code value
       });
     });
 
@@ -672,34 +767,37 @@ describe('FormField - Tests', () => {
       cy.spy(props, 'onChange');
       mount(<FormTable {...props}/>);
       cy.get('.control-label').should('have.length', 3);
-      cy.get('#add-new-table-row-fileTypes')
-        .click()
-        .then(() => {
-          expect(props.onChange).to.be.calledWith({ key: 'fileTypes', value: [{}, {}], isValid: true }); // code value
-          cy.get('.formTable-row').should('have.length', 3);
-          cy.get('.control-label').should('have.length', 3); // still only 3 column headers
-        });
+      cy.get('#add-new-table-row-fileTypes').click();
+      cy.get('#add-new-table-row-fileTypes').then(() => {
+        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [{}, {}], isValid: true}); // code value
+        cy.get('.formTable-row').should('have.length', 3);
+        cy.get('.control-label').should('have.length', 3); // still only 3 column headers
+      });
     });
 
     it('should be able to update the follow up rows', () => {
       cy.spy(props, 'onChange');
       mount(<FormTable {...props}/>);
       cy.get('#add-new-table-row-fileTypes').click();
-      cy.get('#fileTypes-1-functionalEquivalence').type('jello').then(() => {
+      cy.get('#fileTypes-1-functionalEquivalence').type('jello');
+      cy.get('#fileTypes-1-functionalEquivalence').then(() => {
         cy.get('#fileTypes-1-functionalEquivalence').should('have.value', 'jello');
-        expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [
-          {},
-          {
-            'functionalEquivalence': 'jello'
-          }
-        ], isValid: true }); // code value
+        expect(props.onChange).to.be.calledWith({
+          key: 'fileTypes', value: [
+            {},
+            {
+              'functionalEquivalence': 'jello'
+            }
+          ], isValid: true
+        }); // code value
       });
     });
 
     it('should be able to delete rows', () => {
       cy.spy(props, 'onChange');
       mount(<FormTable {...props}/>);
-      cy.get('#delete-table-row-fileTypes-0').click().then(() => {
+      cy.get('#delete-table-row-fileTypes-0').click();
+      cy.get('.formTable-row').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [], isValid: true}); // code value
         cy.get('.formTable-row.formTable-data-row').should('have.length', 0); // only columns left
       });
@@ -710,7 +808,8 @@ describe('FormField - Tests', () => {
       props.minLength = 1;
       props.defaultValue = [{}, {}];
       mount(<FormTable {...props}/>);
-      cy.get('#delete-table-row-fileTypes-0').click().then(() => {
+      cy.get('#delete-table-row-fileTypes-0').click();
+      cy.get('#delete-table-row-fileTypes-0').then(() => {
         expect(props.onChange).to.be.calledWith({key: 'fileTypes', value: [{}], isValid: true}); // code value
         cy.get('.formTable-row.formTable-data-row').should('have.length', 1); // only columns left
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
