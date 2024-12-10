@@ -5,14 +5,15 @@ import ReactTooltip from 'react-tooltip';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
 import { SpinnerComponent } from './SpinnerComponent';
 import loadingImage from '../images/loading-indicator.svg';
+import { FixedSizeList } from 'react-window';
 
 // Renders spinning circle while table loading
 const TableLoading = () => {
   return (
-    <div className="table-loading-placeholder">
+    <div className='table-loading-placeholder'>
       <SpinnerComponent
         show={true}
-        name="loadingSpinner"
+        name='loadingSpinner'
         loadingImage={loadingImage}
       />
     </div>
@@ -23,7 +24,7 @@ const TableLoading = () => {
 const SimpleTextCell = ({ text, style }) => {
   text = isNil(text) ? '- -' : text;
   return (
-    <div style={style} role="cell">
+    <div style={style} role='cell'>
       {text}
     </div>
   );
@@ -33,7 +34,7 @@ const SimpleTextCell = ({ text, style }) => {
 const OnClickTextCell = ({ text, style, onClick }) => {
   text = isNil(text) ? '- -' : text;
   return (
-    <div style={style} onClick={onClick} role="cell">
+    <div style={style} onClick={onClick} role='cell'>
       {text}
     </div>
   );
@@ -43,19 +44,19 @@ const OnClickTextCell = ({ text, style, onClick }) => {
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
   return (
-    <div style={rowStyle} key="column-row-container" role="row">
+    <div style={rowStyle} key='column-row-container' role='row'>
       {columnHeaders.map((header, colIndex) => {
         const { cellStyle, label, data } = header;
         //style here pertains to styling for individual cells
         //should be used to set dimensions of specific columns
         return (
-          <div style={cellStyle} key={`column-row-${label}`} className="column-header">
+          <div style={cellStyle} key={`column-row-${label}`} className='column-header'>
             {(() => {
               if (header.sortable && onSort) {
                 return (<div
                   style={Styles.TABLE.HEADER_SORT}
-                  key="data_id_cell"
-                  className="cell-sort"
+                  key='data_id_cell'
+                  className='cell-sort'
                   onClick={() => {
                     onSort({
                       colIndex: colIndex,
@@ -64,17 +65,17 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
                   }}
                 >
                   {label}
-                  <div className="sort-container">
+                  <div className='sort-container'>
                     <ArrowDropUp className={`sort-icon sort-icon-up ${sort.colIndex === colIndex && sort.dir === -1 ? 'active' : ''}`} />
                     <ArrowDropDown className={`sort-icon sort-icon-down ${sort.colIndex === colIndex && sort.dir === 1 ? 'active' : ''}`} />
                   </div>
                 </div>);
               } else if (header.data) {
-                return (<li className="dropdown" style={{ listStyleType: 'none' }}>
-                  <div role="button" data-toggle="dropdown">
-                    <div id="dacUser">
+                return (<li className='dropdown' style={{ listStyleType: 'none' }}>
+                  <div role='button' data-toggle='dropdown'>
+                    <div id='dacUser'>
                       {label}
-                      <span className="caret caret-margin" style={{color: '#337ab7'}}></span>
+                      <span className='caret caret-margin' style={{color: '#337ab7'}}></span>
                     </div>
                   </div>
                   {data}
@@ -90,49 +91,47 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle, sort, onSort}) => {
   );
 };
 
-//Row component that renders out rows for each element in the provided data collection
-const DataRows = ({rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow}) => renderedRow}) => {
-  return rowData.map((row, index) => {
-    const id = rowData[index][0].id;
-    const mapKey = id || `noId-index-${index}`;
-    if (rowData[index][0].striped) {
-      baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#F7F8F9';
-    }
-    const renderedRow = (
-      <div style={Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle)} key={`row-data-${mapKey}`} role="row" className={`row-data-${index}`}>
-        {row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
-          let output;
-          //columnHeaders determine width of the columns,
-          //therefore extract width from columnHeader and apply to cell style
-          const columnWidthStyle = { width: columnHeaders[cellIndex].cellStyle.width };
-          const appliedStyle = Object.assign({}, style, columnWidthStyle);
-          //assume component is in hyperscript format
-          //wrap component in dive with columnWidth applied
-          if (isComponent) {
-            output = (
-              <div role="cell" style={columnWidthStyle} key={`${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}>
-                {data}
-              </div>
-            );
+const Row = ({ data, index, style }) => {
+  const {rowData, baseStyle, columnHeaders, rowWrapper = ({renderedRow}) => renderedRow} = data;
+  const row = rowData[index];
+  const id = rowData[index][0].id;
+  const mapKey = id || `noId-index-${index}`;
+  if (rowData[index][0].striped) {
+    baseStyle.backgroundColor = index % 2 === 0 ? 'white' : '#F7F8F9';
+  }
+  const renderedRow = (
+    <div style={[style, Object.assign({borderTop: '1px solid #f3f6f7'}, baseStyle)]} key={`row-data-${mapKey}`} role='row' className={`row-data-${index}`}>
+      {row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
+        let output;
+        //columnHeaders determine width of the columns,
+        //therefore extract width from columnHeader and apply to cell style
+        const columnWidthStyle = { width: columnHeaders[cellIndex].cellStyle.width };
+        const appliedStyle = Object.assign({}, style, columnWidthStyle);
+        //assume component is in hyperscript format
+        //wrap component in dive with columnWidth applied
+        if (isComponent) {
+          output = (
+            <div role='cell' style={columnWidthStyle} key={`${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}>
+              {data}
+            </div>
+          );
           //if there is no onClick function, render as simple cell
-          } else if (isNil(onClick)) {
-            output = (
-              <SimpleTextCell text={data} style={appliedStyle} key={`filtered-list-simple-${id}-${label}-${cellIndex}`} />
-            );
-          } else {
-            //otherwise render as on click cell
-            output = (
-              <OnClickTextCell text={data} style={appliedStyle} onClick={() => onClick(index)} key={`filtered-list-click-${id}-${label}-${cellIndex}`} />
-            );
-          }
-          return output;
-        })}
-      </div>
-    );
+        } else if (isNil(onClick)) {
+          output = (
+            <SimpleTextCell text={data} style={appliedStyle} key={`filtered-list-simple-${id}-${label}-${cellIndex}`} />
+          );
+        } else {
+          //otherwise render as on click cell
+          output = (
+            <OnClickTextCell text={data} style={appliedStyle} onClick={() => onClick(index)} key={`filtered-list-click-${id}-${label}-${cellIndex}`} />
+          );
+        }
+        return output;
+      })}
+    </div>
+  );
 
-    return rowWrapper({renderedRow, rowData: row});
-  });
-
+  return rowWrapper({renderedRow, rowData: row});
 };
 
 //Simple table component, can be used alone, can be built on top of (like with LibraryCardTable)
@@ -154,20 +153,29 @@ export default function SimpleTable(props) {
   } = props;
 
   const {baseStyle, columnStyle, containerOverride} = styles;
-  const columnRow = <ColumnRow key="column-row-container" columnHeaders={columnHeaders} baseStyle={baseStyle} columnStyle={columnStyle} sort={sort} onSort={onSort} />;
-  const tableTemplate = [columnRow, <DataRows rowData={rowData} baseStyle={baseStyle} columnHeaders={columnHeaders} rowWrapper={rowWrapper} key="table-data-rows" />];
+  const columnRow = <ColumnRow key='column-row-container' columnHeaders={columnHeaders} baseStyle={baseStyle} columnStyle={columnStyle} sort={sort} onSort={onSort} />;
+  const tableTemplate = [columnRow, <FixedSizeList
+    height={150}
+    itemCount={1000}
+    itemSize={35}
+    width={300}
+    key={'table-data-rows'}
+    itemData={{ rowData: rowData, baseStyle: baseStyle, columnHeaders: columnHeaders, rowWrapper: rowWrapper }}
+  >
+    {Row}
+  </FixedSizeList>];
   const output = isLoading ? <TableLoading /> : tableTemplate;
   return (
     <div>
-      <div className="table-data" style={containerOverride || Styles.TABLE.CONTAINER} role="table">
+      <div className='table-data' style={containerOverride || Styles.TABLE.CONTAINER} role='table'>
         {output}
         {isNil(paginationBar) ? <div /> : paginationBar}
       </div>
       <ReactTooltip
-        place="left"
-        effect="solid"
+        place='left'
+        effect='solid'
         multiline={true}
-        className="tooltip-wrapper"
+        className='tooltip-wrapper'
       />
     </div>
   );
