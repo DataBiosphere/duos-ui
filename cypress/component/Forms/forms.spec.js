@@ -81,7 +81,7 @@ describe('FormField - Tests', () => {
       cy.get('#lbl_fixedDate').contains('Fixed Date');
       cy.get('#lbl_fixedDate').should('not.contain', '*');
       cy.get('.formField-fixedDate .error-message').contains(FormValidators.DATEJS.msg);
-      cy.get('svg').click();
+      cy.get('button').click();
       cy.get('button').contains('5').click();
       cy.get('button').contains('Select').click();
       cy.get('.formField-fixedDate .error-message').should('not.exist');
