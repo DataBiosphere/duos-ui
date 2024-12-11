@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import {useEffect, useRef, useState} from 'react';
 import { isArray, isEmpty } from 'lodash';
+import { defaultFilters } from './DatasetFilterConstants';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
@@ -46,21 +47,10 @@ export const applyForAccess = async (selected, history) => {
   }
 };
 
-
-
-const defaultFilters = {
-  accessManagement: [],
-  dataUse: [],
-  dataType: [],
-  dac: [],
-  participantCountMin: null,
-  participantCountMax: null,
-};
-
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [exportableDatasets, setExportableDatasets] = useState({});
-  const [filters, setFilters] = useState(_.clone(defaultFilters));
+  const [filters, setFilters] = useState(defaultFilters(datasets));
   const [filtered, setFiltered] = useState(datasets);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
@@ -303,7 +293,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters)}/>
+            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} filters={filters} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters(datasets))}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {

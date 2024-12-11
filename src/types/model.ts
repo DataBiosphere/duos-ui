@@ -127,7 +127,7 @@ interface InstitutionTerm {
   name: string;
 }
 
-interface UserTerm {
+export interface UserTerm {
   userId: number;
   displayName: string;
   institution: InstitutionTerm;
