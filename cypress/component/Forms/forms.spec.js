@@ -19,7 +19,7 @@ describe('FormField - Tests', () => {
         id:'releaseDate',
         title:'Release Date',
         defaultValue: dayjs(),
-        validators: [FormValidators.REQUIRED, FormValidators.DATE]
+        validators: [FormValidators.REQUIRED, FormValidators.DATEJS]
       };
       mount(<FormField {...props}/>);
       cy.get('#lbl_releaseDate').contains('Release Date*');

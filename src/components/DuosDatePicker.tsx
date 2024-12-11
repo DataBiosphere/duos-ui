@@ -17,8 +17,8 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 interface DUOSDatePickerProps {
     inputFormat: string;
     value: Dayjs;
-    onChange: Function;
-    onError: Function;
+    onChange: any;
+    onError: any;
     readOnly: boolean;
 }
 
@@ -41,7 +41,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             fontFamily: 'Montserrat',
             fontSize: '13px',
             fontWeight: '400',
-            padding: '7px 20px 7px 20px',
+            padding: '7px 20px',
           },
         },
       },
@@ -56,10 +56,10 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         styleOverrides:{
           weekDayLabel:{
             fontFamily: 'Montserrat',
-            color: '#000',
+            color: 'black',
             fontSize: '13px',
             fontWeight: '400',
-            padding: '7px 20px 7px 20px',
+            padding: '7px 20px',
             '&:first-of-type': {
               color: 'red',
             },
@@ -82,10 +82,10 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             '--weekend': 'red',
             borderRadius: '8px',
             fontFamily: 'Montserrat',
-            color: '#000',
+            color: 'black',
             fontSize: '13px',
             fontWeight: '400',
-            padding: '7px 20px 7px 20px',
+            padding: '7px 20px',
             '&.Mui-selected': {
               backgroundColor: '#216FB4',
               '&:hover': {
@@ -102,10 +102,10 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         styleOverrides: {
           yearButton: {
             fontFamily: 'Montserrat',
-            color: '#000',
+            color: 'black',
             fontSize: '13px',
             fontWeight: '400',
-            padding: '7px 20px 7px 20px',
+            padding: '7px 20px',
             '&.Mui-selected': {
               backgroundColor: '#216FB4',
               '&:hover': {
@@ -128,10 +128,10 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
           label:{
             fontFamily: 'Montserrat',
-            color: '#000',
+            color: 'black',
             fontSize: '13px',
             fontWeight: '400',
-            padding: '7px 20px 7px 20px',
+            padding: '7px 20px',
           },
         }
       },
@@ -181,8 +181,8 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         label={'Select a date'}
         format={inputFormat}
         value={value}
-        onAccept={(value)=>{onChange(value);}}
-        onError={(error, value)=> onError(error, value)}
+        onAccept={onChange}
+        onError={onError}
         dayOfWeekFormatter={(day) => (`${day.format('ddd')}`)}
         readOnly={readOnly}
         slotProps={{
