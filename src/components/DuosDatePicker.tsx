@@ -24,14 +24,16 @@ interface DUOSDatePickerProps {
 
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
   const {inputFormat, value, onChange, onError, readOnly} = props;
+  const duosColorBlue='#216FB4';
+
   const theme = createTheme({
     palette: {
       primary:{
-        main:'#216FB4',
+        main:duosColorBlue,
       },
       secondary:{
         main:'#ffffff',
-        contrastText:'#216FB4'
+        contrastText:duosColorBlue
       },
     },
     components: {
@@ -48,7 +50,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
       MuiIconButton: {
         styleOverrides: {
           sizeMedium: {
-            color:'#216FB4',
+            color: duosColorBlue,
           },
         },
       },
@@ -87,12 +89,12 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             fontWeight: '400',
             padding: '7px 20px',
             '&.Mui-selected': {
-              backgroundColor: '#216FB4',
+              backgroundColor: duosColorBlue,
               '&:hover': {
-                backgroundColor: '#216FB4',
+                backgroundColor: duosColorBlue,
               },
               '&:focus': {
-                backgroundColor: '#216FB4',
+                backgroundColor: duosColorBlue,
               },
             },
           },
@@ -107,12 +109,12 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
             fontWeight: '400',
             padding: '7px 20px',
             '&.Mui-selected': {
-              backgroundColor: '#216FB4',
+              backgroundColor: duosColorBlue,
               '&:hover': {
-                backgroundColor: '#216FB4',
+                backgroundColor: duosColorBlue,
               },
               '&:focus': {
-                backgroundColor: '#216FB4',
+                backgroundColor: duosColorBlue,
               },
             },
           },
