@@ -9,6 +9,7 @@ import Divider from '@mui/material/Divider';
 import { Button, Checkbox, TextField, Typography } from '@mui/material';
 import { flatten, uniq, compact, orderBy } from 'lodash';
 import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
+import {FiltersTypes, generateDefaultParticipantCountValues} from './DatasetFilterConstants';
 
 interface FilterItemHeaderProps {
   title: React.ReactNode;
@@ -26,7 +27,7 @@ export const FilterItemHeader = (props: FilterItemHeaderProps) => {
 interface FilterItemListProps {
   category: string;
   filter: string[];
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
   isFiltered: (filter: string, category: string) => boolean;
   filterNameFn: (filter: string) => string;
   filterDisplayFn?: (filter: string) => React.ReactNode;
@@ -57,50 +58,52 @@ export const FilterItemList = (props: FilterItemListProps) => {
 };
 
 interface FilterItemRangeProps {
-  min: number;
-  max: number;
+  allowableMin: number;
+  allowableMax: number;
+  min?: number;
+  max?: number;
   minCategory: string;
   maxCategory: string;
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
 }
 
 export const FilterItemRange = (props: FilterItemRangeProps) => {
-  const { min, max, minCategory, maxCategory, filterHandler } = props;
-  const getValue = (val: any, defaultVal: any) => isNaN(Number(val)) ? defaultVal : Number(val);
+  const { allowableMin, allowableMax, min, max, minCategory, maxCategory, filterHandler } = props;
+  const inputProps = { max: allowableMax, min: allowableMin };
   return (
     <Box key={minCategory + '-' + maxCategory} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-      <TextField id={minCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={min}
+      <TextField type={'number'} value={min} id={minCategory + '-range-input'}
+        size='small' margin='dense' variant='outlined'
         helperText={'minimum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
-        onChange={(event) => filterHandler(minCategory, getValue(event.target.value, min))}/>
+        inputProps={inputProps}
+        onChange={(event) => filterHandler(minCategory, Number(event.target.value))}/>
       <Box padding={'0rem 1rem 1rem'}> - </Box>
-      <TextField id={maxCategory + '-range-input'} size='small' margin='dense' variant='outlined' defaultValue={max}
+      <TextField type={'number'} value={max} id={maxCategory + '-range-input'}
+        size='small' margin='dense' variant='outlined'
         helperText={'maximum'}
-        FormHelperTextProps={{style: {transform: 'scale(1.5)'}}}
-        onChange={(event) => filterHandler(maxCategory, getValue(event.target.value, max))}
-      />
+        FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
+        inputProps={inputProps}
+        onChange={(event) => filterHandler(maxCategory, Number(event.target.value))}/>
     </Box>
   );
 };
 
 interface DatasetFilterListProps {
   datasets: DatasetTerm[];
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
   isFiltered: (filter: string, category: string) => boolean;
+  filters: FiltersTypes
   onClear: () => void;
 }
 export const DatasetFilterList = (props: DatasetFilterListProps) => {
-  const { datasets, filterHandler, isFiltered, onClear } = props;
+  const { datasets, filterHandler, filters, isFiltered, onClear } = props;
 
   const accessManagementFilters = uniq(compact(datasets.map((dataset) => dataset.accessManagement)));
   const dataUseFilters = uniq(compact(flatten(datasets.map((dataset) => dataset.dataUse?.primary))).map((dataUse) => dataUse.code));
   const dataTypeFilters = uniq(flatten(datasets.map((dataset) => dataset.study.dataTypes)));
   const dacFilters = orderBy(uniq(compact(datasets.map((dataset) => dataset.dac?.dacName))), (dac) => dac.toLowerCase(), 'asc');
-  const defaultValues = datasets.reduce((acc, dataset) => {
-    return {
-      max: Math.max(acc.max, dataset.participantCount ? dataset.participantCount : 0),
-      min: Math.min(acc.min, dataset.participantCount ? dataset.participantCount : Infinity) };
-  }, {max: 0, min: Infinity});
+  const defaultValues = generateDefaultParticipantCountValues(datasets);
   return (
     <Box sx={{ bgcolor: 'background.paper' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -156,8 +159,10 @@ export const DatasetFilterList = (props: DatasetFilterListProps) => {
       />
       <FilterItemHeader title='Participant Count' />
       <FilterItemRange
-        min={defaultValues.min}
-        max={defaultValues.max}
+        allowableMin={defaultValues.min}
+        allowableMax={defaultValues.max}
+        min={filters.participantCountMin}
+        max={filters.participantCountMax}
         minCategory='participantCountMin'
         maxCategory='participantCountMax'
         filterHandler={filterHandler}
