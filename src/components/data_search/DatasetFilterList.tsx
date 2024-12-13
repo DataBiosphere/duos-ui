@@ -27,7 +27,7 @@ export const FilterItemHeader = (props: FilterItemHeaderProps) => {
 interface FilterItemListProps {
   category: string;
   filter: string[];
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
   isFiltered: (filter: string, category: string) => boolean;
   filterNameFn: (filter: string) => string;
   filterDisplayFn?: (filter: string) => React.ReactNode;
@@ -64,7 +64,7 @@ interface FilterItemRangeProps {
   max?: number;
   minCategory: string;
   maxCategory: string;
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
 }
 
 export const FilterItemRange = (props: FilterItemRangeProps) => {
@@ -77,21 +77,21 @@ export const FilterItemRange = (props: FilterItemRangeProps) => {
         helperText={'minimum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
         inputProps={inputProps}
-        onChange={(event) => filterHandler(minCategory, event.target.value)}/>
+        onChange={(event) => filterHandler(minCategory, Number(event.target.value))}/>
       <Box padding={'0rem 1rem 1rem'}> - </Box>
       <TextField type={'number'} value={max} id={maxCategory + '-range-input'}
         size='small' margin='dense' variant='outlined'
         helperText={'maximum'}
         FormHelperTextProps={{style: { transform: 'scale(1.5)' }}}
         inputProps={inputProps}
-        onChange={(event) => filterHandler(maxCategory, event.target.value)}/>
+        onChange={(event) => filterHandler(maxCategory, Number(event.target.value))}/>
     </Box>
   );
 };
 
 interface DatasetFilterListProps {
   datasets: DatasetTerm[];
-  filterHandler: (category: string, filter: string) => void;
+  filterHandler: (category: string, filter: string | number) => void;
   isFiltered: (filter: string, category: string) => boolean;
   filters: FiltersTypes
   onClear: () => void;

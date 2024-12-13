@@ -61,9 +61,9 @@ describe('Data Library Filters', () => {
     const filterHandlerStub = cy.stub();
     const props = { datasets, filters: { ...defaultFilters(datasets), participantCountMin: 2, participantCountMax: 5 }, filterHandler: filterHandlerStub, isFiltered: () => {}};
     mount(<DatasetFilterList {...props} />);
-    cy.get('#participantCountMax-range-input').type('3').trigger('change');
+    cy.get('#participantCountMax-range-input').type('3');
     filterHandlerStub.calledWith('participantCountMax', 53);
-    cy.get('#participantCountMin-range-input').type('3').trigger('change');
+    cy.get('#participantCountMin-range-input').type('3');
     filterHandlerStub.calledWith('participantCountMin', 23);
   });
 });
