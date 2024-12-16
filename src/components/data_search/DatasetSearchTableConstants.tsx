@@ -71,7 +71,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
     participants: '10%',
     phenotype: '20%',
     species: '15%',
-    piName: '15%',
+    piName: '10%',
     dataCustodians: '20%'
   };
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
