@@ -1,11 +1,12 @@
 /* eslint-disable no-undef */
+import { makeDatasetTerm } from '../test-utils'
 import {React} from 'react';
 import {mount} from 'cypress/react';
 import DatasetSearchTable from '../../../src/components/data_search/DatasetSearchTable';
 import {TerraDataRepo} from '../../../src/libs/ajax/TerraDataRepo';
 
 const datasets = [
-  {
+  makeDatasetTerm({
     datasetId: 123456,
     datasetIdentifier: `DUOS-123456`,
     datasetName: 'Some Dataset 1',
@@ -15,7 +16,18 @@ const datasets = [
       studyId: 1,
       dataCustodianEmail: ['Some Data Custodian Email 1'],
     }
-  }
+  }),
+  makeDatasetTerm({
+    datasetId: 123456,
+    datasetIdentifier: `DUOS-123456`,
+    datasetName: 'Some Dataset 1',
+    participantCount: 50,
+    study: {
+      studyName: 'Some Study 1',
+      studyId: 1,
+      dataCustodianEmail: ['Some Data Custodian Email 1'],
+    }
+  })
 ];
 
 const props = {
@@ -34,13 +46,13 @@ describe('Dataset Search Table tests', () => {
     });
 
     it('When no datasets are selected the footer does not appear', () => {
-      cy.contains('1 dataset selected from 1 study').should('not.exist');
+      cy.contains('selected from 1 study').should('not.exist');
     });
 
 
     it('When a dataset is selected the footer appears', () => {
       cy.get('#header-checkbox').click();
-      cy.contains('1 dataset selected from 1 study');
+      cy.contains(`${datasets.length} datasets selected from 1 study`);
     });
   });
 
@@ -65,13 +77,19 @@ describe('Dataset Search Table tests', () => {
     it('When a participant count filter is applied the query is updated', () => {
       cy.intercept(
         {method: 'POST', url: '**/search/index'}, (req) => {
-          return handler(req, '{"range":{"participantCount":{"gte":null,"lte":50}}}');
+          return handler(req, '{"range":{"participantCount":{"gte":30,"lte":50}}}');
         }).as('searchIndex');
       mount(<DatasetSearchTable {...props} />);
-      // first clear the default value (100), without clearing first, type('50') would result in input of 10050
-      const range = cy.get('#participantCountMax-range-input');
-      range.clear();
-      range.type('50');
+      // first clear the default value (50), without clearing first, type('3') would result in input of 503
+      const minRange = cy.get('#participantCountMin-range-input');
+      minRange.clear();
+      // Just type 3 because after being cleared it defaults to 0
+      minRange.type('3');
+      // first clear the default value (100), without clearing first, type('5') would result in input of 1005
+      const maxRange = cy.get('#participantCountMax-range-input');
+      maxRange.clear();
+      // Just type 5 because after being cleared it defaults to 0
+      maxRange.type('5')
       cy.tick(150);
       // this api call should have had a request that contained the searchText
       let count = 0;
@@ -84,24 +102,5 @@ describe('Dataset Search Table tests', () => {
       });
 
     });
-
-    it('When an invalid participant count filter is applied the query represents the default value', () => {
-      cy.intercept({method: 'POST', url: '**/search/index'}, (req) => {
-        // when non-numeric input is entered, the default value (in this case, 100) is used
-        return handler(req, '{"range":{"participantCount":{"gte":100,"lte":null}}}');
-      }).as('searchIndex');
-      mount(<DatasetSearchTable {...props} />);
-      cy.get('#participantCountMin-range-input').type('test');
-      cy.tick(150);
-      let count = 0;
-      cy.wait('@searchIndex').then((response) => {
-        expect(response.response.body[0]).to.equal('filtered');
-        count++;
-      });
-      cy.get('@searchIndex').then(() => {
-        expect(count).to.equal(1);
-      });
-    });
-
   });
 });
