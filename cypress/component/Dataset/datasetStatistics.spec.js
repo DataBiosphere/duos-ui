@@ -164,4 +164,23 @@ describe('Dataset Statistics Tests', () => {
     cy.contains('and can be accessed directly').should('not.exist');
   });
 
+  it('displays with no additional properties', () => {
+    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
+    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(dataset));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: dataset.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains(dataset.datasetIdentifier).should('exist');
+  });
 });
