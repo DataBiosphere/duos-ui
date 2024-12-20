@@ -8,6 +8,7 @@ import {
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
 import {SnapshotSummaryModel} from '../../types/tdrModel';
+import * as _ from 'lodash';
 
 const styles = {
   baseStyle: {
@@ -62,13 +63,16 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     </Box>
   )
     : (
-      <SimpleTable
-        rowData={rowData}
-        columnHeaders={headers}
-        selected={selected}
-        styles={styles}
-        tableSize={10}
-        summary='faceted dataset search table'
-      />
+      <>
+        <div style={{ fontWeight: 600, borderBottom: '1px solid black' }}>{rowData.length} {_.capitalize(rowData.length > 1 ? tab.plural : tab.singular)}</div>
+        <SimpleTable
+          rowData={rowData}
+          columnHeaders={headers}
+          selected={selected}
+          styles={styles}
+          tableSize={10}
+          summary='faceted dataset search table'
+        />
+      </>
     );
 };
