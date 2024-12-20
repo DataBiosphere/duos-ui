@@ -9,15 +9,32 @@ import {find} from 'lodash/fp';
 import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
-import {AccessManagement} from '../libs/Models.ts';
+import {History} from 'history';
+import {Dataset, DatasetProperty} from '../types/model';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
-export default function DatasetStatistics(props) {
+enum AccessManagement {
+  OPEN = 'open',
+  CONTROLLED = 'controlled',
+  EXTERNAL = 'external'
+}
+
+
+interface DatasetStatisticsProps {
+  history: History,
+  match: {
+    params: {
+      datasetIdentifier: string;
+    }
+  }
+}
+
+export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [datasetId, setDatasetId] = useState();
-  const [dataset, setDataset] = useState();
-  const [dars, setDars] = useState();
+  const [datasetId, setDatasetId] = useState<number>();
+  const [dataset, setDataset] = useState<Dataset>();
+  const [dars, setDars] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
 
   const applyForAccess = async () => {
@@ -43,12 +60,12 @@ export default function DatasetStatistics(props) {
     });
   }, [datasetIdentifier]);
 
-  const extract = useCallback((propertyName) => {
-    const property = find({propertyName})(dataset.properties);
+  const extract = useCallback((propertyName: string) => {
+    const property = find({propertyName})(dataset?.properties) as DatasetProperty;
     return property?.propertyValue;
   }, [dataset]);
 
-  const setData = async (datasetId) => {
+  const setData = async (datasetId: number) => {
     try {
       setIsLoading(true);
       const metrics = await DatasetMetrics.getDatasetStats(datasetId);
@@ -64,7 +81,7 @@ export default function DatasetStatistics(props) {
   };
 
   const accessInstructions = () => {
-    const accessManagement = extract('Access Management').toLowerCase();
+    const accessManagement = extract('Access Management')?.toLowerCase();
     const locationUrl = extract('URL');
     switch (accessManagement) {
       case AccessManagement.CONTROLLED:
@@ -111,11 +128,11 @@ export default function DatasetStatistics(props) {
           </div>
           <div style={Styles.SUB_HEADER}>Dataset Information</div>
           <div style={{display: 'flex'}}>
-            <div style={Styles.DESCRIPTION_BOX}>
+            <div style={Styles.DESCRIPTION_BOX as React.CSSProperties}>
               <div style={{...Styles.MINOR_HEADER, paddingLeft: '10px'}}>Dataset Description:</div>
               {LINE}
               <div style={{fontSize: Theme.font.size.small, padding: '1rem'}}>
-                {extract('Dataset Description') || dataset?.description || dataset?.study?.description || 'N/A'}
+                {extract('Dataset Description') || dataset?.study?.description || 'N/A'}
               </div>
             </div>
             <div>
@@ -140,9 +157,10 @@ export default function DatasetStatistics(props) {
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
-          {dars?.map((dar) => (
-            <div style={Styles.READ_MORE} id={`${dar.darCode}`} key={`${dar.darCode}`}>
+          {dars?.map((dar: any) => (
+            <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
+                // @ts-ignore next-line props for non ts component
                 props={props}
                 readLessText='Show less'
                 readMoreText='Show More'
