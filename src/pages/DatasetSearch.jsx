@@ -15,6 +15,7 @@ import cfdeIcon from '../images/cfde-logo.png';
 import firecloudIcon from '../images/firecloud-logo.png';
 import aouIcon from '../images/aou-logo.png';
 import stanleyIcon from '../images/stanley-center-logo.png';
+import getzLabIcon from '../images/getz-lab-logo.svg';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
@@ -250,6 +251,15 @@ export const DatasetSearch = (props) => {
       },
       icon: stanleyIcon,
       title: 'Stanley Center Data Library',
+    },
+    'getzlab': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Getz Lab'
+        }
+      },
+      icon: getzLabIcon,
+      title: 'Getz Lab Data Library',
     },
     '/custom': {
       query: {

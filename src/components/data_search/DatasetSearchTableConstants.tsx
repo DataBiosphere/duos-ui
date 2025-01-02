@@ -58,7 +58,6 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
   interface StudyCellWidths{
     selected: number;
     studyName: string;
-    description: string;
     participants: string;
     phenotype: string;
     species: string;
@@ -69,10 +68,9 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
     selected: 50,
     // subtract the selected column width
     studyName: 'calc(25% - 50px)',
-    description: '20%',
     participants: '10%',
-    phenotype: '15%',
-    species: '10%',
+    phenotype: '20%',
+    species: '15%',
     piName: '10%',
     dataCustodians: '20%'
   };
@@ -118,27 +116,13 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       sortable: true,
       cellStyle: makeHeaderStyle(studyCellWidths.studyName),
       cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.studyName} id={`${datasets[0].study.studyId}-study-name-data`}>
+        data: <Link key={datasets[0].study.studyId} id='link_study' href={`/studies/${datasets[0].study.studyId}`}>
           {trimNewlineCharacters(datasets[0].study.studyName)}
-        </OverflowTooltip>,
+        </Link>,
         value: datasets[0].study.studyName,
         id: `${datasets[0].study.studyId}-study-name`,
         style: makeRowStyle(studyCellWidths.selected),
         label: datasets[0].study.studyName
-      })
-    },
-    {
-      label: 'Description',
-      sortable: true,
-      cellStyle: makeHeaderStyle(studyCellWidths.description),
-      cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.description} id={`${datasets[0].study.studyId}-study-description-data`}>
-          {trimNewlineCharacters(datasets[0].study.description)}
-        </OverflowTooltip>,
-        value: datasets[0].study.description,
-        id: `${datasets[0].study.studyId}-study-description`,
-        style: makeRowStyle(studyCellWidths.description),
-        label: datasets[0].study.description
       })
     },
     {

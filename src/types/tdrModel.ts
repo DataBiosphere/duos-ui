@@ -29,3 +29,10 @@ export interface SnapshotSummaryModel {
   resourceLocks: ResourceLocks;
   duosId: string;
 }
+
+export interface EnumerateSnapshotModel {
+  items: SnapshotSummaryModel[];
+  roleMap: { [key: string]: string[] };
+  filteredTotal: number;
+  total: number;
+}

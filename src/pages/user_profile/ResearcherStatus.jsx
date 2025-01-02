@@ -7,7 +7,7 @@ import { DAA } from '../../libs/ajax/DAA';
 import { isNil } from 'lodash';
 import LibraryCard from './LibraryCard';
 import DAAs from './DAAs';
-import { checkEnv, envGroups } from '../../utils/EnvironmentUtils';
+import {DAAUtils} from '../../utils/DAAUtils';
 
 export default function ResearcherStatus(props) {
 
@@ -97,7 +97,7 @@ export default function ResearcherStatus(props) {
     </p>
     <div style={{ marginTop: '15px' }} />
     {hasCard ?
-      (checkEnv(envGroups.DEV) ?
+      (DAAUtils.isEnabled() ?
         (
           <DAAs
             issuedOn={issuedOn}

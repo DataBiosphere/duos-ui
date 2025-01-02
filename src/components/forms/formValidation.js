@@ -1,5 +1,6 @@
 import { isEmailAddress } from '../../libs/utils';
 import { isString, isEmpty, isNil, isArray } from 'lodash';
+import dayjs from 'dayjs';
 
 export const requiredValidator = {
   id: 'required',
@@ -30,13 +31,19 @@ export const dateValidator = {
   msg: 'Please enter a date (YYYY-MM-DD), e.g. 2018-11-13',
 };
 
+export const dayJSValidator = {
+  id: 'dayjs',
+  isValid: (val) => isValidDayjsDate(val),
+  msg: 'Please select a valid date.',
+};
+
 export const uniqueValidator = {
   id: 'unique',
   isValid: (val, list) => !list.includes(val),
   msg: 'Please enter a unique value that doesn\'t exist in the system'
 };
 
-const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, uniqueValidator];
+const validators = [requiredValidator, urlValidator, emailValidator, dateValidator, dayJSValidator, uniqueValidator];
 
 /**
  * Validates the form value
@@ -127,3 +134,6 @@ const isValidDate = (val) => {
   return dateRegex.test(val);
 };
 
+const isValidDayjsDate = (val) => {
+  return dayjs(val, 'YYYY-MM-DD', true).isValid();
+};

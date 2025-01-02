@@ -17,11 +17,19 @@ import {
   FormInputTextarea,
   FormInputRadioButton,
   FormInputFile,
-  getKey
+  getKey, FormDatePicker
 } from './formComponents';
 
 import './forms.css';
-import { dateValidator, emailValidator, isValid, requiredValidator, urlValidator } from './formValidation';
+import {
+  dateValidator,
+  dayJSValidator,
+  emailValidator,
+  isValid,
+  requiredValidator,
+  urlValidator
+} from './formValidation';
+import dayjs from 'dayjs';
 
 export const commonRequiredProps = [
   'id',
@@ -191,6 +199,12 @@ export const FormFieldTypes = {
       'rows',
       'maxLength',
     ]
+  },
+  CALENDAR: {
+    defaultValue: dayjs(),
+    component: FormDatePicker,
+    requiredProps: [],
+    optionalProps: ['readOnly']
   }
 };
 
@@ -202,6 +216,7 @@ export const FormValidators = {
   URL: urlValidator,
   EMAIL: emailValidator,
   DATE: dateValidator,
+  DATEJS: dayJSValidator,
 };
 
 // ----------------------------------------------------------------------------------------------------- //

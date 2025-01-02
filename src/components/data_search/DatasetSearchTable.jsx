@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import {useEffect, useRef, useState} from 'react';
 import { isArray, isEmpty } from 'lodash';
+import { defaultFilters } from './DatasetFilterConstants';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
 import { datasetSearchTableTabs } from './DatasetSearchTableConstants';
@@ -31,21 +32,25 @@ const styles = {
   },
 };
 
-
-
-const defaultFilters = {
-  accessManagement: [],
-  dataUse: [],
-  dataType: [],
-  dac: [],
-  participantCountMin: null,
-  participantCountMax: null,
+export const applyForAccess = async (selected, history) => {
+  try {
+    const draftResponse = await DAR.postDarDraft({ datasetId: selected });
+    if (draftResponse.referenceId) {
+      history.push(`/dar_application/${draftResponse.referenceId}`);
+    } else if (draftResponse.message) {
+      Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+    } else {
+      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+    }
+  } catch (error) {
+    Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
+  }
 };
 
 export const DatasetSearchTable = (props) => {
   const { datasets, history, icon, title } = props;
   const [exportableDatasets, setExportableDatasets] = useState({});
-  const [filters, setFilters] = useState(_.clone(defaultFilters));
+  const [filters, setFilters] = useState(defaultFilters(datasets));
   const [filtered, setFiltered] = useState(datasets);
   const [selected, setSelected] = useState([]);
   const [selectedTable, setSelectedTable] = useState(datasetSearchTableTabs.study);
@@ -210,20 +215,7 @@ export const DatasetSearchTable = (props) => {
     setFilters(newFilters);
   };
 
-  const applyForAccess = async () => {
-    try {
-      const draftResponse = await DAR.postDarDraft({ datasetId: selected  });
-      if (draftResponse.referenceId) {
-        history.push(`/dar_application/${draftResponse.referenceId}`);
-      } else if (draftResponse.message) {
-        Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
-      } else {
-        Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-      }
-    } catch (error) {
-      Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
-    }
-  };
+
 
   useOnMount(() => {
     if (isEmpty(datasets)) {
@@ -301,7 +293,7 @@ export const DatasetSearchTable = (props) => {
         </Box>
         <Box sx={{display: 'flex', flexDirection: 'row', paddingTop: '2em'}}>
           <Box sx={{width: '14%', padding: '0 1em'}}>
-            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters)}/>
+            <DatasetFilterList datasets={datasets} filterHandler={filterHandler} filters={filters} isFiltered={isFilteredArray} onClear={() => setFilters(defaultFilters(datasets))}/>
           </Box>
           <Box sx={{width: '85%', padding: '0 1em'}}>
             {(() => {
@@ -320,7 +312,7 @@ export const DatasetSearchTable = (props) => {
           </Box>
         </Box>
         <Box sx={{padding: '1em'}}/>
-        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={applyForAccess}/>}
+        {!isEmpty(selected) && <DatasetSearchFooter selectedDatasets={selected} datasets={datasets} onClick={() => applyForAccess(selected, history)}/>}
       </Box>
     </>
   );
