@@ -63,14 +63,14 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     </div>
     {
       isEmpty(filteredData) ?
-        <div style={{fontWeight: 600, marginTop: '0.5rem'}}>There are no datasets that fit these criteria.</div> :
+        <div style={{fontWeight: 600, marginTop: '0.5rem'}}>There are no {tab.plural} that fit these criteria.</div> :
         <SimpleTable
           rowData={rowData}
           columnHeaders={headers}
           selected={selected}
           styles={styles}
           tableSize={10}
-          summary='faceted dataset search table' />
+          summary={`faceted ${tab.singular} search table`} />
     }
   </>;
 };
