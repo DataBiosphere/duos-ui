@@ -37,8 +37,7 @@
     "react-tooltip": "4.5.1",
     "stackdriver-errors-js": "0.12.0",
     "tss-react": "4.9.14",
-    "uuid": "11.0.4",
-    "voca": "1.4.1"
+    "uuid": "11.0.4"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",

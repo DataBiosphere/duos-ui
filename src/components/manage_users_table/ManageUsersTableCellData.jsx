@@ -3,7 +3,6 @@ import {isNil, isEmpty, map, sortedUniq} from 'lodash';
 import {styles} from './ManageUsersTable';
 import {Link} from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
-import voca from 'voca';
 
 export function usernameCellData({displayName, userId, label= 'user-name'}) {
   return {
@@ -57,7 +56,7 @@ export function permissionsCellData({userId, roles, libraryCards, label = 'permi
   const perms = (hasLibraryCard ? roleNames.concat('LibraryCard') : roleNames);
 
   // need to split, e.g., SigningOfficial -> Signing Official
-  const formattedPerms = perms.map((perm) => voca.words(perm).join(' '));
+  const formattedPerms = perms.map((perm) => perm.replace(/([A-Z])/g, ' $1').trim());
 
   return {
     isComponent: true,
