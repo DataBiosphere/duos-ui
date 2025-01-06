@@ -11,7 +11,8 @@ import './DatasetSearch.css';
 
 export interface DatasetSearchTableTab<T> {
   key: string;
-  label: string;
+  singular: string;
+  plural: string;
   makeHeaders: (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }) => HeaderData<T>[];
   makeRows: (datasets: DatasetTerm[], headers: HeaderData<T>[]) => CellData[][];
 }
@@ -442,13 +443,15 @@ export const makeDatasetTableRows = (datasets: DatasetTerm[], headers: HeaderDat
 export const datasetSearchTableTabs: DatasetSearchTableTabs = {
   study: {
     key: 'study-table-tab',
-    label: 'View By Studies',
+    singular: 'study',
+    plural: 'studies',
     makeHeaders: makeStudyTableHeaders,
     makeRows: makeStudyTableRowData,
   },
   dataset: {
     key: 'datasets-table-tab',
-    label: 'View By Datasets',
+    singular: 'dataset',
+    plural: 'datasets',
     makeHeaders: makeDatasetTableHeader,
     makeRows: makeDatasetTableRows,
   }

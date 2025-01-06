@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {Box} from '@mui/material';
 import {isEmpty} from 'lodash';
 import {DatasetTerm} from 'src/types/model';
 import SimpleTable from '../SimpleTable';
@@ -8,6 +7,7 @@ import {
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
 import {SnapshotSummaryModel} from '../../types/tdrModel';
+import * as _ from 'lodash';
 
 const styles = {
   baseStyle: {
@@ -54,21 +54,23 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
   const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets);
   const rowData = tab.makeRows(filteredData, headers);
 
-  return isEmpty(filteredData) ? (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <h1>There are no datasets that fit these criteria.</h1>
-    </Box>
-  )
-    : (
-      <SimpleTable
-        rowData={rowData}
-        columnHeaders={headers}
-        selected={selected}
-        styles={styles}
-        tableSize={10}
-        summary='faceted dataset search table'
-      />
-    );
+  return <>
+    <div style={{
+      fontWeight: 600,
+      borderBottom: '1px solid black'
+    }}>
+      {rowData.length} {_.capitalize(rowData.length !== 1 ? tab.plural : tab.singular)}
+    </div>
+    {
+      isEmpty(filteredData) ?
+        <div style={{fontWeight: 600, marginTop: '0.5rem'}}>There are no {tab.plural} that fit these criteria.</div> :
+        <SimpleTable
+          rowData={rowData}
+          columnHeaders={headers}
+          selected={selected}
+          styles={styles}
+          tableSize={10}
+          summary={`faceted ${tab.singular} search table`} />
+    }
+  </>;
 };

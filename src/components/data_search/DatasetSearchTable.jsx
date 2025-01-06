@@ -281,7 +281,7 @@ export const DatasetSearchTable = (props) => {
           >
             {Object.values(datasetSearchTableTabs).map((tab) => <Tab
               key={tab.key}
-              label={tab.label}
+              label={`View By ${_.capitalize(tab.plural)}`}
               style={{
                 ...styles.subTab,
                 ...(tab.key === selectedTable.key ? styles.subTabActive : {})
