@@ -19,7 +19,6 @@
     "dompurify": "3.2.3",
     "js-file-download": "0.4.12",
     "lodash": "4.17.21",
-    "mixin-deep": "2.0.1",
     "noty": "3.2.0-beta",
     "oidc-client-ts": "3.1.0",
     "query-string": "9.1.1",
