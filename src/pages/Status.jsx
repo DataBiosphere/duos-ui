@@ -3,8 +3,7 @@ import { getOr, isNil, map, uniq } from 'lodash/fp';
 import { Component } from 'react';
 import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
 import DiameterVariant from 'react-material-icon-svg/dist/DiameterVariant';
-import { getApiUrl, getOntologyUrl } from '../libs/ajax';
-
+import { getApiUrl, getConsentStatus, getOntologyStatus } from '../libs/ajax';
 
 class Status extends Component {
 
@@ -12,7 +11,8 @@ class Status extends Component {
     super(props);
     this.state = {
       consentStatus: {},
-      ontologyStatus: {}
+      ontologyStatus: {},
+      samStatus: {}
     };
   }
 
@@ -33,14 +33,11 @@ class Status extends Component {
   };
 
   async componentDidMount() {
-    const consentStatusUrl = `${ await getApiUrl() }/status`;
-    const ontologyStatusUrl = `${ await getOntologyUrl() }/status`;
-    fetch(consentStatusUrl, { method: 'GET' })
-      .then(response => response.json())
-      .then(data => this.setState({ consentStatus: data }));
-    fetch(ontologyStatusUrl, { method: 'GET' })
-      .then(response => response.json())
-      .then(data => this.setState({ ontologyStatus: data }));
+    await getConsentStatus().then(data => {
+      this.setState({ consentStatus: data });
+      this.setState({ samStatus: data.systems.sam.details });
+    });
+    await getOntologyStatus().then(data => this.setState({ ontologyStatus: data }));
   }
 
   render() {
@@ -48,12 +45,14 @@ class Status extends Component {
     const unhealthyState = <DiameterVariant fill={ 'red' } style={ { marginLeft: '2rem', verticalAlign: 'middle', height: '24px' } }/>;
     const consentHealthy = this.isConsentHealthy(this.state.consentStatus) ? healthyState : unhealthyState;
     const ontologyHealthy = this.isOntologyHealthy(this.state.ontologyStatus) ? healthyState : unhealthyState;
+    const samHealthy = this.isConsentHealthy(this.state.samStatus) ? healthyState : unhealthyState;
 
     return (
       <div style={{ margin: '2rem' }}>
         <ul style={{ marginTop: '2rem', listStyle: 'none', fontSize: 'x-large' }}>
           <li><a href="#consent">Consent</a> {consentHealthy}</li>
           <li><a href="#ontology">Ontology</a> {ontologyHealthy}</li>
+          <li><a href="#sam">Sam</a> {samHealthy}</li>
         </ul>
         <hr />
         <h2><a id="consent">Consent Status</a></h2>
