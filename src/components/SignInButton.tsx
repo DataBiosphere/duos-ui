@@ -16,7 +16,7 @@ import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
 import {tooltipStyle} from '../components/Tooltips';
-import {isSamHealthy} from '../libs/ajax';
+import {ServiceStatus} from '../libs/ajax/ServiceStatus';
 
 interface SignInButtonProps {
   history: History;
@@ -178,7 +178,7 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   useEffect(() => {
     const init = async () => {
-      setIsSamDown(!(await isSamHealthy()));
+      setIsSamDown(!(await ServiceStatus.isSamHealthy()));
     };
     init();
   }, []);

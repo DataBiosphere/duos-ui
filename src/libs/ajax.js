@@ -42,23 +42,6 @@ export const getOntologyUrl = async() => {
   return await Config.getOntologyApiUrl();
 };
 
-export const getConsentStatus = async() => {
-  const url = `${ await getApiUrl() }/status`;
-  const result = await axios.get(url);
-  return result.data;
-}
-
-export const getOntologyStatus = async() => {
-  const url = `${ await getOntologyUrl() }/status`;
-  const result = await axios.get(url);
-  return result.data;
-}
-
-export const isSamHealthy = async() => {
-  const status = await getConsentStatus();
-  return getOr(false)('ok')(status.systems.sam.details);
-}
-
 export const sleep = (ms) => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
