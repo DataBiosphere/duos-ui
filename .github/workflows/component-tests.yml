@@ -8,6 +8,8 @@ jobs:
         run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22.11.0'
