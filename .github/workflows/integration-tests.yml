@@ -5,8 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
-      - name: Log Actor
-        run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v4
         with:

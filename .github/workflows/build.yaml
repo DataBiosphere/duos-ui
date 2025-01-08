@@ -47,8 +47,6 @@ jobs:
         -t ${{ steps.construct-tags.outputs.sha-tag }} \
         -t ${{ steps.construct-tags.outputs.environment-tag }} \
         .
-    - name: Log Github Actor
-      run: echo "${{ github.actor }}"
     - id: 'auth'
       if: github.actor != 'dependabot[bot]'
       name: 'Authenticate to Google Cloud'
