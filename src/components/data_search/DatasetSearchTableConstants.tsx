@@ -2,10 +2,9 @@ import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
 import _, {groupBy} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
-import {OverflowTooltip, tooltipStyle} from '../Tooltips';
+import {OverflowTooltip} from '../Tooltips';
 import {SnapshotSummaryModel} from 'src/types/tdrModel';
 import DatasetExportButton from './DatasetExportButton';
-import ReactTooltip from 'react-tooltip';
 import {dataUseCellData} from '../dac_dataset_table/DACDatasetTableCellData';
 import './DatasetSearch.css';
 
@@ -93,18 +92,12 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
         const isSelectableStudy = datasets.filter(isSelectable).length === datasets.length;
         const tooltipText = 'This study contains one or more dataset that is either open access or whose requests are managed outside DUOS. Go to the datasets tab for additional information per dataset.';
         return {
-          data: <>
-            <ReactTooltip
-              place={'top'}
-              disable={isSelectableStudy}
-              effect={'solid'}
-              scrollHide={true}
-              id={checkboxId}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
-            <div data-for={checkboxId} data-tip={true}>
-              <Checkbox checked={fullySelected} indeterminate={indeterminate} disabled={!isSelectableStudy}
-                onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
-            </div>
-          </>,
+          data: <div data-for={checkboxId}>
+              <span title={isSelectableStudy ? '' : tooltipText}>
+                  <Checkbox checked={fullySelected} indeterminate={indeterminate} disabled={!isSelectableStudy}
+                            onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
+              </span>
+          </div>,
           value: fullySelected ? 'Selected' : indeterminate ? 'Partially Selected' : 'Not Selected',
           id: `${datasets[0].study.studyId}-is-selected`,
           style: makeRowStyle(studyCellWidths.selected),
@@ -146,7 +139,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       sortable: true,
       cellStyle: makeHeaderStyle(studyCellWidths.phenotype),
       cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.phenotype} id={`${datasets[0].study.studyId}-study-phenotype-data`}>
+        data: <OverflowTooltip tooltipText={datasets[0].study.phenotype} id={`${datasets[0].study.studyId}-study-phenotype-data`}>
           {trimNewlineCharacters(datasets[0].study.phenotype)}
         </OverflowTooltip>,
         value: datasets[0].study.phenotype,
@@ -160,7 +153,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       sortable: true,
       cellStyle: makeHeaderStyle(studyCellWidths.species),
       cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.species} id={`${datasets[0].study.studyId}-study-species-data`}>
+        data: <OverflowTooltip tooltipText={datasets[0].study.species} id={`${datasets[0].study.studyId}-study-species-data`}>
           {trimNewlineCharacters(datasets[0].study.species)}
         </OverflowTooltip>,
         style: makeRowStyle(studyCellWidths.species),
@@ -174,7 +167,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       sortable: true,
       cellStyle: makeHeaderStyle(studyCellWidths.piName),
       cellDataFn: (datasets) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={datasets[0].study.piName} id={`${datasets[0].study.piName}-study-pi-name-data`}>
+        data: <OverflowTooltip tooltipText={datasets[0].study.piName} id={`${datasets[0].study.piName}-study-pi-name-data`}>
           {trimNewlineCharacters(datasets[0].study.piName)}
         </OverflowTooltip>,
         value: datasets[0].study.piName,
@@ -190,7 +183,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       cellDataFn: (datasets) => {
         const custodians = datasets[0].study.dataCustodianEmail.join(', ');
         return {
-          data: <OverflowTooltip place={'top'} tooltipText={custodians} id={`${datasets[0].study.studyId}-study-custodian-data`}>
+          data: <OverflowTooltip tooltipText={custodians} id={`${datasets[0].study.studyId}-study-custodian-data`}>
             {custodians}
           </OverflowTooltip>,
           value: custodians,
@@ -237,19 +230,11 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
   const tooltipIconDisplay = (src: string | undefined, accessType: string, tooltipText: string) => {
-    return <>
-      <div
-        data-tip='Full details'
+    return <div
         data-for={`${accessType}-access-tooltip`}
-        style={{display: 'flex', justifyContent: 'center', marginRight: 20}}
-      >
-        <img src={src} alt={accessType}/>
-      </div>
-      <ReactTooltip
-        place={'bottom'}
-        effect={'solid'}
-        id={`${accessType}-access-tooltip`}><div style={tooltipStyle}>{tooltipText}</div></ReactTooltip>
-    </>;
+        style={{display: 'flex', justifyContent: 'center', marginRight: 20}}>
+      <span title={tooltipText}><img src={src} alt={accessType}/></span>
+    </div>;
   };
 
   return [
@@ -264,21 +249,13 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
         const checkboxId = `${dataset.datasetId}-is-selected-checkbox`;
         const tooltipText = `${dataset.accessManagement == 'open' ? 'Open access data doesn’t require a request, go to the link in the data location column to proceed.' : 'Data access is managed outside DUOS, follow the link in the data location column to proceed'}`;
         return {
-          data: <>
-            <ReactTooltip
-              place={'top'}
-              disable={isSelectable(dataset)}
-              effect={'solid'}
-              scrollHide={true}
-              id={checkboxId}>
-              <div style={tooltipStyle}>{tooltipText}</div>
-            </ReactTooltip>
-            <div data-for={checkboxId} data-tip={true}>
+          data: <div data-for={checkboxId}>
+              <span title={isSelectable(dataset) ? '' : tooltipText}>
               <Checkbox checked={isSelected}
-                disabled={!isSelectable(dataset)}
-                onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
-            </div>
-          </>,
+                        disabled={!isSelectable(dataset)}
+                        onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
+                </span>
+          </div>,
           value: isSelected ? 'Selected' : 'Not Selected',
           id: `${dataset.datasetId}-is-selected`,
           style: makeRowStyle(cellWidths.selected),
@@ -291,7 +268,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.datasetName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
+        data: <OverflowTooltip tooltipText={dataset.datasetName} id={`${dataset.datasetId}-dataset-name`}>
           {trimNewlineCharacters(dataset.datasetName)}
         </OverflowTooltip>,
         value: dataset.datasetName,
@@ -305,7 +282,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.studyName),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.study.studyName}
+        data: <OverflowTooltip tooltipText={dataset.study.studyName}
           id={`${dataset.datasetId}-study-name`}>
           {trimNewlineCharacters(dataset.study.studyName)}
         </OverflowTooltip>,
@@ -348,7 +325,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.dataType),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data: <OverflowTooltip place={'top'} tooltipText={dataset.study.dataTypes?.join(', ')}
+        data: <OverflowTooltip tooltipText={dataset.study.dataTypes?.join(', ')}
           id={`${dataset.datasetId}-dataset-data-types`}>
           {dataset.study.dataTypes?.join(', ')}
         </OverflowTooltip>,
