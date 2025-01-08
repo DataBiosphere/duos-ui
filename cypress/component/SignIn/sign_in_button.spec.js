@@ -9,6 +9,7 @@ import {Storage} from '../../../src/libs/storage';
 import {Metrics} from '../../../src/libs/ajax/Metrics';
 import {StackdriverReporter} from '../../../src/libs/stackdriverReporter';
 import {ToS} from '../../../src/libs/ajax/ToS';
+import {ServiceStatus} from '../../../src/libs/ajax/ServiceStatus';
 import {mockOidcUser} from '../Auth/mockOidcUser';
 const signInText = 'Sign In';
 
@@ -35,24 +36,35 @@ const userStatus = {
   'tosAccepted': true
 };
 
+const consentStatus = {
+  systems: {
+    sam: {
+      details: {
+        ok: true
+      }
+    }
+  }
+};
+
 const notAcceptedUserStatus = Object.assign({}, userStatus, {'tosAccepted': false});
 
 describe('Sign In: Component Loads', function () {
 
-  // Intercept configuration calls
   beforeEach(() => {
     cy.initApplicationConfig();
+    cy.stub(ServiceStatus, 'getConsentStatus').resolves(consentStatus);
   });
 
   it('Sign In Button Loads', function () {
     cy.viewport(600, 300);
     mount(<SignInButton history={undefined}/>);
     cy.contains(signInText).should('exist');
+    cy.get('button').should('exist').and('not.be.disabled');
   });
 
   it('Sign In: On Success', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
+    cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
@@ -74,7 +86,7 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: No Roles Error Reporter Is Called', function () {
     const bareUser = {email: 'test@user.com'};
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
+    cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: bareUser}).as('getMe');
     cy.stub(StackdriverReporter, 'report');
     cy.stub(Metrics, 'identify');
@@ -90,7 +102,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: Redirects to ToS if not accepted', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
+    cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
     cy.stub(Metrics, 'identify');
@@ -107,7 +119,7 @@ describe('Sign In: Component Loads', function () {
 
   it('Sign In: Registers user if not found and redirects to ToS', function () {
     cy.viewport(600, 300);
-    cy.stub(Auth, 'signIn').returns(Promise.resolve(mockOidcUser));
+    cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     // Simulate user not found
     cy.stub(User, 'getMe').throws();
     cy.intercept({method: 'POST', url: '**/api/user'}, {statusCode: 200, body: duosUser}).as('registerUser');
@@ -124,4 +136,10 @@ describe('Sign In: Component Loads', function () {
     });
   });
 
+  it('Sign In: Button is disabled when SAM is unhealthy', function () {
+    cy.viewport(600, 300);
+    cy.stub(ServiceStatus, 'isSamHealthy').resolves(false);
+    mount(<SignInButton history={[]}/>);
+    cy.get('button').should('exist').and('be.disabled');
+  });
 });
