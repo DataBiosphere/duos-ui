@@ -17,6 +17,7 @@ import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
 import {tooltipStyle} from '../components/Tooltips';
 import {ServiceStatus} from '../libs/ajax/ServiceStatus';
+import '../styles/tooltip.css';
 
 interface SignInButtonProps {
   history: History;
@@ -213,10 +214,13 @@ export const SignInButton = (props: SignInButtonProps) => {
           place={'top'}
           disable={!isSamDown}
           effect={'solid'}
-          scrollHide={true}
           id={'sam-disabled-sign-in-tooltip'}
+          className='interactiveTooltip'
+          delayHide={1000}
         >
-          <div style={tooltipStyle}>{'Sam is currently offline, cannot use DUOS. Please try again later.'}</div>
+          <div style={tooltipStyle}>
+            <span>DUOS is currently unavailable. Please check the <a href="status">status page</a> for more details.</span>
+          </div>
         </ReactTooltip>
         <a
           className='navbar-duos-icon-help'
