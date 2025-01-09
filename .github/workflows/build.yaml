@@ -22,6 +22,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: Get Short Sha
       id: short-sha
       run: echo "sha=$(git rev-parse --short=12 HEAD)" >> $GITHUB_OUTPUT
@@ -30,23 +32,22 @@ jobs:
     - name: Construct tags
       id: construct-tags
       run: |
-        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
+        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${SHORT_SHA}"
         ENVIRONMENT_TAG=""
         if ${{ github.event_name == 'pull_request'}}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${{ steps.short-sha.outputs.sha }}"
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${SHORT_SHA}"
         elif ${{github.event_name == 'push' }}; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
         fi
         echo "sha-tag=$SHA_TAG" >> $GITHUB_OUTPUT
         echo "environment-tag=$ENVIRONMENT_TAG" >> $GITHUB_OUTPUT
+      env:
+        SHORT_SHA: ${{ steps.short-sha.outputs.sha }}
     - name: Build Image
-      run: |
-        docker build \
-        -t ${{ steps.construct-tags.outputs.sha-tag }} \
-        -t ${{ steps.construct-tags.outputs.environment-tag }} \
-        .
-    - name: Log Github Actor
-      run: echo "${{ github.actor }}"
+      run: docker build -t "${SHA_TAG}" -t "${ENVIRONMENT_TAG}" .
+      env:
+        SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
+        ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
     - id: 'auth'
       if: github.actor != 'dependabot[bot]'
       name: 'Authenticate to Google Cloud'
@@ -59,8 +60,11 @@ jobs:
       if: github.actor != 'dependabot[bot]'
       run: |
         gcloud auth configure-docker --quiet
-        docker push ${{ steps.construct-tags.outputs.sha-tag }}
-        docker push ${{ steps.construct-tags.outputs.environment-tag }}
+        docker push "${SHA_TAG}"
+        docker push "${ENVIRONMENT_TAG}"
+      env:
+        SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
+        ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [tag-build-push]
