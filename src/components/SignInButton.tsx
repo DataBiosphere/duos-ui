@@ -15,7 +15,6 @@ import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
-import {tooltipStyle} from '../components/Tooltips';
 import {ServiceStatus} from '../libs/ajax/ServiceStatus';
 import '../styles/tooltip.css';
 
@@ -176,6 +175,8 @@ export const SignInButton = (props: SignInButtonProps) => {
       </span>
     );
   };
+
+  const tooltipStyle: React.CSSProperties = {maxWidth: '30vw', textWrap: 'wrap'};
 
   useEffect(() => {
     const init = async () => {
