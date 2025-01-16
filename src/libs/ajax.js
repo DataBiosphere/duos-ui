@@ -74,11 +74,6 @@ export const fetchAny = async (...args) => {
   return res;
 };
 
-export const getFileNameFromHttpResponse = (response) => {
-  const respHeaders = response.headers;
-  return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
-};
-
 export const reportError = async (url, status) => {
   const msg = 'Error fetching response: '
     .concat(JSON.stringify(url))
