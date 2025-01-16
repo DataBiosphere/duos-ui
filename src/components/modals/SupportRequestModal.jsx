@@ -63,10 +63,11 @@ export const SupportRequestModal = (props) => {
       const results = [];
       for (let i = 0; i < modalState.attachment.length; i++) {
         try {
-          results.push(Support.uploadAttachment(modalState.attachment[i]));
-        } catch (e) {
+          const response = await Support.uploadAttachment(modalState.attachment[i]);
+          results.push(response);
+        } catch (response) {
           Notifications.showError({
-            text: 'Unable to add attachment',
+            text: `ERROR ${response.status}: Unable to add attachment: ${response.data?.message}`,
             layout: 'topRight',
           });
           setModalState({
@@ -99,8 +100,8 @@ export const SupportRequestModal = (props) => {
     if (modalState.validAttachment) {
       const ticket = Support.createTicket(modalState.name, modalState.type, modalState.email,
         modalState.subject, modalState.description, attachmentToken, props.url);
-      const response = await Support.createSupportRequest(ticket);
-      if (response.status === 201) {
+      try {
+        await Support.createSupportRequest(ticket);
         Notifications.showSuccess({ text: 'Sent Successfully', layout: 'topRight', timeout: 1500 });
         setModalState({
           ...modalState,
@@ -110,9 +111,9 @@ export const SupportRequestModal = (props) => {
           attachment: ''
         });
         props.onOKRequest('support');
-      } else {
+      } catch (response) {
         Notifications.showError({
-          text: `ERROR ${response.status} : Unable To Send`,
+          text: `ERROR ${response.status} : Unable To Send: ${response.data?.message}`,
           layout: 'topRight',
         });
       }
