@@ -1,9 +1,9 @@
 import React from 'react';
-import { useState } from 'react';
-import { Support } from '../../libs/ajax/Support';
-import { Notifications } from '../../libs/utils';
-import { isNil } from 'lodash';
-import { FormField, FormFieldTypes } from '../../components/forms/forms';
+import {useState} from 'react';
+import {Support} from '../../libs/ajax/Support';
+import {Notifications} from '../../libs/utils';
+import {isNil} from 'lodash';
+import {FormField, FormFieldTypes} from '../../components/forms/forms';
 
 export default function SupportRequestsPage(props) {
 
@@ -47,8 +47,8 @@ export default function SupportRequestsPage(props) {
     await props.history.push('/profile');
   };
 
-  const handleSupportRequestsChange = ({ key, value }) => {
-    let newSupportRequests = Object.assign({}, supportRequests, { [key]: value });
+  const handleSupportRequestsChange = ({key, value}) => {
+    let newSupportRequests = Object.assign({}, supportRequests, {[key]: value});
     setSupportRequests(newSupportRequests);
     const hasAnyRequests = possibleSupportRequests.some(request => newSupportRequests[request.key]);
     setHasSupportRequests(hasAnyRequests);
@@ -91,7 +91,9 @@ export default function SupportRequestsPage(props) {
       };
 
       const ticket = Support.createTicket(
-        profile.profileName, ticketInfo.type, profile.email,
+        profile.profileName,
+        ticketInfo.type,
+        profile.email,
         ticketInfo.subject,
         ticketInfo.description,
         ticketInfo.attachmentToken,
@@ -101,7 +103,7 @@ export default function SupportRequestsPage(props) {
       const response = await Support.createSupportRequest(ticket);
       if (response.status === 201) {
         Notifications.showSuccess(
-          { text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500 }
+          {text: 'Sent Requests Successfully', layout: 'topRight', timeout: 1500}
         );
       } else {
         Notifications.showError({
@@ -111,7 +113,7 @@ export default function SupportRequestsPage(props) {
       }
     };
 
-  return <div style={{ padding: '25px 270px 0px 270px' }}>
+  return <div style={{padding: '25px 270px 0px 270px'}}>
     <p
       style={{
         color: '#01549F',
@@ -130,7 +132,7 @@ export default function SupportRequestsPage(props) {
       }}>
       <h2
         id='lbl_supportRequests'
-        style={{ ...headerStyle, marginTop: 0 }}>
+        style={{...headerStyle, marginTop: 0}}>
         Which of the following are you looking to do?*
       </h2>
       {possibleSupportRequests.map((supportRequest) => {
@@ -141,9 +143,9 @@ export default function SupportRequestsPage(props) {
           type={FormFieldTypes.CHECKBOX}
           key={supportRequest.key}
           id={supportRequest.key}
-          onChange={handleSupportRequestsChange} />;
+          onChange={handleSupportRequestsChange}/>;
       })}
-      <div style={{ margin: '15px 0 10px' }}>
+      <div style={{margin: '15px 0 10px'}}>
         Is there anything else you would like to request?
       </div>
       <FormField
@@ -152,13 +154,13 @@ export default function SupportRequestsPage(props) {
         placeholder='Enter your request'
         maxLength='512'
         rows='3'
-        onChange={handleSupportRequestsChange} />
+        onChange={handleSupportRequestsChange}/>
     </div>
     <button
       id='btn_save'
       onClick={goToPrevPage}
       className='f-left btn-primary btn-back'
-      style={{ marginTop: '50px' }}>
+      style={{marginTop: '50px'}}>
       Back
     </button>
     <button
