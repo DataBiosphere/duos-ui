@@ -6,11 +6,11 @@
     "@databiosphere/bard-client": "0.1.0",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
-    "@mui/icons-material": "5.16.13",
-    "@mui/material": "5.16.13",
-    "@mui/utils": "5.16.13",
-    "@mui/x-date-pickers": "^7.23.3",
-    "@types/node": "22.10.5",
+    "@mui/icons-material": "5.16.14",
+    "@mui/material": "5.16.14",
+    "@mui/utils": "5.16.14",
+    "@mui/x-date-pickers": "^7.24.0",
+    "@types/node": "22.10.7",
     "@types/react-dom": "18.3.1",
     "ajv": "8.17.1",
     "ajv-formats": "3.0.1",
@@ -37,7 +37,7 @@
     "react-tooltip": "4.5.1",
     "stackdriver-errors-js": "0.12.0",
     "tss-react": "4.9.14",
-    "uuid": "11.0.4"
+    "uuid": "11.0.5"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
-    "@babel/eslint-parser": "7.25.9",
+    "@babel/eslint-parser": "7.26.5",
     "@babel/eslint-plugin": "7.25.9",
     "@babel/plugin-proposal-class-properties": "7.18.6",
     "@babel/preset-react": "7.26.3",
@@ -72,7 +72,7 @@
     "cypress": "13.17.0",
     "eslint": "8.56.0",
     "eslint-plugin-flowtype": "8.0.3",
-    "eslint-plugin-react": "7.37.3",
+    "eslint-plugin-react": "7.37.4",
     "google-auth-library": "9.15.0",
     "history": "5.3.0",
     "html-webpack-plugin": "5.6.3",
