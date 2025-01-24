@@ -42,10 +42,6 @@ export const getOntologyUrl = async() => {
   return await Config.getOntologyApiUrl();
 };
 
-export const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 export const fetchOk = async (...args) => {
   //TODO: Remove spinnerService calls
   spinnerService.showAll();
