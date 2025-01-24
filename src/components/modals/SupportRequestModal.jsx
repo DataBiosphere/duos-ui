@@ -64,7 +64,7 @@ export const SupportRequestModal = (props) => {
       for (let i = 0; i < modalState.attachment.length; i++) {
         try {
           const response = await Support.uploadAttachment(modalState.attachment[i]);
-          results.push(response);
+          results.push(response.data);
         } catch (response) {
           Notifications.showError({
             text: `ERROR ${response.status}: Unable to add attachment: ${response.data?.message}`,

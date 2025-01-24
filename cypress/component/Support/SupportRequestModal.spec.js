@@ -62,6 +62,14 @@ describe('Support Request Modal Tests', () => {
       // Form is complete:
       cy.get('[data-cy="supportFormSubmit"]').should('not.be.disabled');
       cy.get('[data-cy="supportFormCancel"]').should('not.be.disabled');
+      cy.intercept({method: 'POST', url: '**/support/request'}, {statusCode: 201}).as('request');
+      cy.intercept({method: 'POST', url: '**/support/upload'}, {statusCode: 201, body: {'token': 'token_string'}}).as('upload');
+      // {force: true} is necessary here due to the surrounding div that covers the input.
+      cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json'], {force: true});
+      cy.get('[data-cy="supportFormSubmit"]').click();
+      cy.wait(['@request', '@upload']).then((interceptions) => {
+        assert(interceptions.length === 2);
+      });
     });
 
   });
@@ -112,6 +120,14 @@ describe('Support Request Modal Tests', () => {
       // Form is complete:
       cy.get('[data-cy="supportFormSubmit"]').should('not.be.disabled');
       cy.get('[data-cy="supportFormCancel"]').should('not.be.disabled');
+      cy.intercept({method: 'POST', url: '**/support/request'}, {statusCode: 201}).as('request');
+      cy.intercept({method: 'POST', url: '**/support/upload'}, {statusCode: 201, body: {'token': 'token_string'}}).as('upload');
+      // {force: true} is necessary here due to the surrounding div that covers the input.
+      cy.get('[data-cy="supportFormAttachment"]').selectFile(['cypress/fixtures/example.json'], {force: true});
+      cy.get('[data-cy="supportFormSubmit"]').click();
+      cy.wait(['@request', '@upload']).then((interceptions) => {
+        assert(interceptions.length === 2);
+      });
     });
 
   });
