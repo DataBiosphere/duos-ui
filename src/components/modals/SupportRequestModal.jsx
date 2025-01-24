@@ -246,6 +246,7 @@ export const SupportRequestModal = (props) => {
             style={{ position: 'absolute', top: '20px', right: '20px' }}
             className='close'
             onClick={closeHandler}
+            data-cy={'closeButton'}
           >
             <span className='glyphicon glyphicon-remove default-color' />
           </button>
@@ -278,6 +279,7 @@ export const SupportRequestModal = (props) => {
             name = 'zendeskTicketForm'
             noValidate = {true}
             encType= 'multipart/form-data'
+            data-cy={'supportForm'}
           >
             {!modalState.isLogged && (
               <div className='form-group first-form-group'>
@@ -289,6 +291,7 @@ export const SupportRequestModal = (props) => {
                   className='form-control col-lg-12'
                   onChange={nameChangeHandler}
                   required={true}
+                  data-cy={'supportFormName'}
                 />
               </div>
             )}
@@ -301,6 +304,7 @@ export const SupportRequestModal = (props) => {
                 value={modalState.type}
                 onChange={typeChangeHandler}
                 required={true}
+                data-cy={'supportFormType'}
               >
                 <option value='question'>Question</option>
                 <option value='bug'>Bug</option>
@@ -313,10 +317,10 @@ export const SupportRequestModal = (props) => {
               <input
                 id='txt_subject'
                 placeholder='Enter a subject'
-                rows='5'
                 className='form-control col-lg-12 vote-input'
                 onChange={subjectChangeHandler}
                 required={true}
+                data-cy={'supportFormSubject'}
               />
               <textarea
                 id='txt_description'
@@ -325,6 +329,7 @@ export const SupportRequestModal = (props) => {
                 className='form-control col-lg-12 vote-input'
                 onChange={descriptionChangeHandler}
                 required={true}
+                data-cy={'supportFormDescription'}
               />
             </div>
 
@@ -341,8 +346,10 @@ export const SupportRequestModal = (props) => {
                     alignItems: 'center',
                     border: modalState.attachment.length === 0 ? '1px dashed' : 'none',
                   }}>
-                    <div {...getRootProps()}>
-                      <input {...getInputProps()} />
+                    <div {...getRootProps()}
+                      data-cy={'supportFormAttachmentContainer'}>
+                      <input {...getInputProps()}
+                        data-cy={'supportFormAttachment'}/>
                       <p>
                         {modalState.attachment.length === 0 ? 'Drag or Click to attach a files' :
                           modalState.attachment.length === 1 ? modalState.attachment[0].name :
@@ -385,6 +392,7 @@ export const SupportRequestModal = (props) => {
                   value={modalState.email}
                   onChange={emailChangeHandler}
                   required={true}
+                  data-cy={'supportFormEmail'}
                 />
               </div>
             )}
@@ -396,6 +404,7 @@ export const SupportRequestModal = (props) => {
             className='btn common-background'
             onClick={OKHandler}
             disabled={disableOkBtn}
+            data-cy={'supportFormSubmit'}
           >
             Submit
           </button>
@@ -403,6 +412,7 @@ export const SupportRequestModal = (props) => {
             id='btn_cancel'
             className='btn dismiss-background'
             onClick={closeHandler}
+            data-cy={'supportFormCancel'}
           >
             Cancel
           </button>
