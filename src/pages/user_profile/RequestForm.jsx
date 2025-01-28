@@ -5,7 +5,7 @@ import {Notifications} from '../../libs/utils';
 import {isNil} from 'lodash';
 import {FormField, FormFieldTypes} from '../../components/forms/forms';
 
-export default function SupportRequestsPage(props) {
+export default function RequestForm(props) {
 
   const profile = props.location.state?.data || undefined;
   const headerStyle = {
@@ -113,7 +113,10 @@ export default function SupportRequestsPage(props) {
       }
     };
 
-  return <div style={{padding: '25px 270px 0px 270px'}}>
+  return <div
+    style={{padding: '25px 270px 0px 270px'}}
+    data-cy={'supportRequestForm'}
+  >
     <p
       style={{
         color: '#01549F',
@@ -160,7 +163,8 @@ export default function SupportRequestsPage(props) {
       id='btn_save'
       onClick={goToPrevPage}
       className='f-left btn-primary btn-back'
-      style={{marginTop: '50px'}}>
+      style={{marginTop: '50px'}}
+      data-cy={'backButton'}>
       Back
     </button>
     <button
@@ -170,7 +174,8 @@ export default function SupportRequestsPage(props) {
       style={{
         marginTop: '50px',
       }}
-      disabled={!hasSupportRequests}>
+      disabled={!hasSupportRequests}
+      data-cy={'submitButton'}>
       Submit
     </button>
   </div>;
