@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {isEmpty, isNil} from 'lodash/fp';
 import {Alert} from './Alert';
 import {Auth} from '../libs/auth/auth';
@@ -15,6 +15,8 @@ import {History} from 'history';
 import {OidcUser} from '../libs/auth/oidcBroker';
 import {DuosUser} from '../types/model';
 import {DuosUserResponse} from '../types/responseTypes';
+import {ServiceStatus} from '../libs/ajax/ServiceStatus';
+import '../styles/tooltip.css';
 
 interface SignInButtonProps {
   history: History;
@@ -38,6 +40,7 @@ export const SignInButton = (props: SignInButtonProps) => {
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
   const {history} = props;
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSamDown, setIsSamDown] = useState<boolean>(false);
 
   // Utility function called in the normal success case and in the undocumented 409 case
   // Check for ToS Acceptance - redirect user if not set.
@@ -173,27 +176,53 @@ export const SignInButton = (props: SignInButtonProps) => {
     );
   };
 
+  const tooltipStyle: React.CSSProperties = {maxWidth: '30vw', textWrap: 'wrap'};
+
+  useEffect(() => {
+    const init = async () => {
+      setIsSamDown(!(await ServiceStatus.isSamHealthy()));
+    };
+    init();
+  }, []);
+
   const signInElement = (): React.JSX.Element => {
     return (
       <div style={{display: 'flex', marginRight: 30}}>
-        <button
-          style={{
-            height: 50,
-            width: 200,
-            fontSize: 18,
-            fontWeight: 500,
-            color: 'rgb(77, 114, 170)',
-            borderRadius: 5
-          }}
-          onClick={async () => {
-            setIsLoading(true);
-            Auth.signIn().then(onSuccess, onFailure);
-            setIsLoading(false);
-          }}
-          disabled={isLoading}
+        <div
+          data-tip='Full details'
+          data-for={'sam-disabled-sign-in-tooltip'}
         >
-          {isLoading ? loadingElement() : 'Sign In'}
-        </button>
+          <button
+            style={{
+              height: 50,
+              width: 200,
+              fontSize: 18,
+              fontWeight: 500,
+              color: 'rgb(77, 114, 170)',
+              borderRadius: 5
+            }}
+            onClick={async () => {
+              setIsLoading(true);
+              Auth.signIn().then(onSuccess, onFailure);
+              setIsLoading(false);
+            }}
+            disabled={isLoading || isSamDown}
+          >
+            {isLoading ? loadingElement() : 'Sign In'}
+          </button>
+        </div>
+        <ReactTooltip
+          place={'top'}
+          disable={!isSamDown}
+          effect={'solid'}
+          id={'sam-disabled-sign-in-tooltip'}
+          className='interactiveTooltip'
+          delayHide={1000}
+        >
+          <div style={tooltipStyle}>
+            <span>DUOS is currently unavailable. Please check the <a href="status">status page</a> for more details.</span>
+          </div>
+        </ReactTooltip>
         <a
           className='navbar-duos-icon-help'
           style={{color: 'white', height: 16, width: 16, marginLeft: 5}}
