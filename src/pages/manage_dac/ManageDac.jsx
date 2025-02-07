@@ -13,7 +13,7 @@ import ManageEditDac from './ManageEditDac';
 import {Link} from 'react-router-dom';
 import EditDac from './EditDac';
 import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
-import {DAAUtils} from 'src/utils/DAAUtils';
+import {DAAUtils} from '../../utils/DAAUtils';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
