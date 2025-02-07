@@ -12,7 +12,6 @@ import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import ManageEditDac from './ManageEditDac';
 import {Link} from 'react-router-dom';
 import EditDac from './EditDac';
-import {checkEnv, envGroups} from '../../utils/EnvironmentUtils';
 import {DAAUtils} from '../../utils/DAAUtils';
 
 const CHAIR = 'Chairperson';
@@ -165,7 +164,7 @@ export const ManageDac = function ManageDac() {
         />
       )}
       {showEditPage && (
-        checkEnv(envGroups.DEV) ?
+        DAAUtils.isEnabled() ?
           <EditDac/> :
           <ManageEditDac/>
       )}
