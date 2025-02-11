@@ -6,14 +6,14 @@ import {FormFieldTitle} from '../../components/forms/forms';
 import {FileStorageObject} from 'src/types/model';
 
 export type DraftFileUploadProps = {
-  description: string,
-  draftId: string,
-  defaultValue: FileStorageObject,
-  id: string,
-  onAddFile: Function,
-  onDeleteFile: Function,
-  required?: boolean,
-  title: string
+    description: string,
+    draftId: string,
+    defaultValue: FileStorageObject,
+    id: string,
+    onAddFile: Function,
+    onDeleteFile: Function,
+    required?: boolean,
+    title: string
 }
 
 export const DraftFileUpload = (props: DraftFileUploadProps) => {
@@ -21,8 +21,12 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState<boolean>(false);
   const spinnerRef = useRef<HTMLDivElement>(null);
-  const handleClose = () => {setOpen(false);};
-  const handleDeleteClick = () => {setOpen(true);};
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleDeleteClick = () => {
+    setOpen(true);
+  };
 
   const handleAddFile = async (event: ChangeEvent<HTMLInputElement>, id: string) => {
     await onAddFile(event, id);
@@ -48,7 +52,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         action={() => {
           setOpen(false);
           toggleSpinnerRef(true);
-          handleDeleteFile().then(()=>{
+          handleDeleteFile().then(() => {
             toggleSpinnerRef(false);
             if (inputRef.current) {
               inputRef.current.value = '';
@@ -57,7 +61,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         }}
         description={`Are you sure you want to delete the file '${defaultValue.fileName}'?`}
       />
-    </div>:<div/>;
+    </div> : <div/>;
 
   const handleUploadButtonClick = () => {
     inputRef.current?.click();
@@ -79,15 +83,15 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
       title={title}
       description={description}
       required={required}
-    /><input type={'file'} ref={inputRef} style={{ display: 'none' }} onChange={(event)=> {
+    /><input type={'file'} ref={inputRef} style={{display: 'none'}} onChange={(event) => {
       toggleSpinnerRef(true);
-      handleAddFile(event, id).then(()=>{
+      handleAddFile(event, id).then(() => {
         toggleSpinnerRef(false);
       });
     }}/>
     <button disabled={defaultValue != null} onClick={handleUploadButtonClick}>Upload a file</button>
     {defaultValue && <span>{defaultValue.fileName} {deleteButton}</span>}
-    <div ref={spinnerRef} style={{display:'none', textAlign: 'center', height: '44', width: '180'}}>
+    <div ref={spinnerRef} style={{display: 'none', textAlign: 'center', height: '44', width: '180'}}>
       <img src={loadingIndicator} alt={'Loading'}/>
     </div>
   </div>;
