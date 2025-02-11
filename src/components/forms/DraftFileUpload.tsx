@@ -37,7 +37,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
   };
 
   const deleteButton = (defaultValue) ?
-    <div>
+    <>
       <Link
         style={{marginLeft: '15px'}}
         id={`${defaultValue.fileStorageObjectId}_delete`}
@@ -61,7 +61,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         }}
         description={`Are you sure you want to delete the file '${defaultValue.fileName}'?`}
       />
-    </div> : <div/>;
+    </> : <div/>;
 
   const handleUploadButtonClick = () => {
     inputRef.current?.click();
@@ -89,10 +89,12 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         toggleSpinnerRef(false);
       });
     }}/>
-    <button disabled={defaultValue != null} onClick={handleUploadButtonClick}>Upload a file</button>
-    {defaultValue && <span>{defaultValue.fileName} {deleteButton}</span>}
-    <div ref={spinnerRef} style={{display: 'none', textAlign: 'center', height: '44', width: '180'}}>
-      <img src={loadingIndicator} alt={'Loading'}/>
+    <div style={{display:'inline', margin:'auto'}}>
+      <button disabled={defaultValue != null} onClick={handleUploadButtonClick}>Upload a file</button>
+      {defaultValue && <span style={{marginLeft:'15px'}}>{defaultValue.fileName} {deleteButton}</span>}
+      <div ref={spinnerRef} style={{display: 'none', textAlign: 'center', height: '44', width: '180'}}>
+        <img src={loadingIndicator} alt={'Loading'}/>
+      </div>
     </div>
   </div>;
 };
