@@ -3,6 +3,11 @@ import {getApiUrl, getECMUrl, reportError} from '../ajax';
 import axios from 'axios';
 import {get, isNil, merge} from 'lodash';
 
+/**
+ * ECM has several different providers such as `era-commons`, `ras`, `github`, `fence`, and others.
+ * @type {string}
+ */
+const provider = 'ras';
 
 axios.interceptors.response.use(function (response) {
   return response;
@@ -28,8 +33,8 @@ export const AuthenticateNIH = {
     return await axios.delete(url, Config.authOpts());
   },
 
-  getECMeRACommonsStatus: async () => {
-    const url = `${await getECMUrl()}/api/oauth/v1/era-commons`;
+  getECMAccountStatus: async () => {
+    const url = `${await getECMUrl()}/api/oauth/v1/${provider}`;
     const res = await axios.get(url, Config.authOpts());
     if (res.status === 200) {
       return res.data;
@@ -37,8 +42,8 @@ export const AuthenticateNIH = {
     return undefined;
   },
 
-  getECMeRACommonsAuthUrl: async (redirectUri, redirectTo) => {
-    const url = `${await getECMUrl()}/api/oauth/v1/era-commons/authorization-url?redirectUri=${redirectUri}`;
+  getECMProviderAuthUrl: async (redirectUri, redirectTo) => {
+    const url = `${await getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`;
     console.log('url', url);
     const res = await axios.post(url, {redirectTo: redirectTo}, Config.authOpts());
     if (res.status === 200) {

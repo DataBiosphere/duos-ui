@@ -64,7 +64,7 @@ export default function ERACommons(props) {
       onNihStatusUpdate(eraAuthState.nihValid);
       // TODO Testing code to replace old functionality with:
       try {
-        const ecmResponse = AuthenticateNIH.getECMeRACommonsStatus();
+        const ecmResponse = AuthenticateNIH.getECMAccountStatus();
         console.log('ecmResponse', ecmResponse);
       } catch (err) {
         console.log(err);
@@ -83,7 +83,7 @@ export default function ERACommons(props) {
   const redirectToECMAuthUrl = async () => {
     let origin = window.location.origin;
     const redirectTo = origin + '/' + destination;
-    const authUrl = await AuthenticateNIH.getECMeRACommonsAuthUrl(origin, redirectTo);
+    const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo);
     console.log('authUrl', authUrl);
     window.location.href = authUrl;
   };
