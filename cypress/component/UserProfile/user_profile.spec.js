@@ -33,7 +33,7 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(User, 'getApprovedDatasets').returns([]);
     cy.stub(User, 'getAcknowledgements').returns({});
-    cy.stub(AuthenticateNIH, 'getECMeRACommonsStatus').returns(undefined);
+    cy.stub(AuthenticateNIH, 'getECMAccountStatus').returns(undefined);
     cy.intercept(
       {method: 'PUT', url: '**/user'},
       {statusCode: 200, body: duosUser}
