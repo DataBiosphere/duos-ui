@@ -339,11 +339,11 @@ export const FormTable = (config) => {
 
   return <div id={id} className={`formField-table formField-${id}`}>
     {/* generate columns */}
-    <div className="formTable-row formTable-cols">
+    <div className='formTable-row formTable-cols'>
       {formFields.map(({ validators, title }) => {
         const required = (validators || []).includes(FormValidators.REQUIRED);
         return (
-          <label className="control-label" key={`${id}-${title}`} id={`${id}-${title}`}>
+          <label className='control-label' key={`${id}-${title}`} id={`${id}-${title}`}>
             {title}
             {required && '*'}
           </label>
@@ -352,7 +352,7 @@ export const FormTable = (config) => {
     </div>
     {/* generate form rows */}
     {formValue?.map((formRow, i) => (
-      <div className="formTable-row formTable-data-row" key={`formtable-${id}-${i}`}>
+      <div className='formTable-row formTable-data-row' key={`formtable-${id}-${i}`}>
         {formFields.map(formCol => (
           <FormField
             {...formCol}
@@ -379,8 +379,8 @@ export const FormTable = (config) => {
         <button
           id={`delete-table-row-${id}-${i}`}
           key={`delete-table-row-${id}-${i}`}
-          className="btn-formTable-delete btn-xs"
-          type="button"
+          className='btn-formTable-delete btn-xs'
+          type='button'
           disabled={disabled || formValue.length <= minLength}
           onClick={() => {
             const formValueClone = cloneDeep(formValue);
@@ -393,7 +393,7 @@ export const FormTable = (config) => {
               onValidationChange({ key: getKey(config), validation: validationClone });
             }
           }}>
-          <span className="glyphicon glyphicon-remove" />
+          <span className='glyphicon glyphicon-remove' />
         </button>
       </div>
     ))}
@@ -403,8 +403,8 @@ export const FormTable = (config) => {
         <button
           id={`add-new-table-row-${id}`}
           key={`add-new-table-row-${id}`}
-          className="pill form-btn btn-xs"
-          type="button"
+          className='pill form-btn btn-xs'
+          type='button'
           onClick={() => {
             const formValueClone = cloneDeep(formValue);
             formValueClone.push({});
@@ -414,7 +414,7 @@ export const FormTable = (config) => {
           style={{ marginTop: 10 }}
         >
           {addRowLabel || 'Add New'}
-          <span className="glyphicon glyphicon-plus" style={{ marginLeft: '8px' }} />
+          <span className='glyphicon glyphicon-plus' style={{ marginLeft: '8px' }} />
         </button>
       </div>
     )}

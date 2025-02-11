@@ -85,7 +85,7 @@ export const FormInputGeneric = (config) => {
       type={type?.inputType || 'text'}
       className={`form-control ${!isValid(validation) ? 'errored' : ''}`}
       placeholder={placeholder || title}
-      value={formValue?.toString()}
+      defaultValue={formValue?.toString()}
       readOnly={readOnly}
       style={{ ...styles.inputStyle, ...inputStyle }}
       disabled={disabled}
@@ -531,7 +531,7 @@ export const FormDatePicker = (config) => {
       label={label}
       onChange={(value) => {onFormInputChange(config, value);}}
       onError={(error, value) => {updateValidation(config, value);}}
-      value={formValue}
+      defaultValue={formValue}
       inputFormat={'YYYY-MM-DD'}
       highlightWeekends={true}
       readOnly={readOnly}

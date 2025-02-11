@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {
   DesktopDatePicker,
@@ -10,22 +10,29 @@ import {
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {Button} from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
-import {Dayjs} from 'dayjs';
+import dayjs, {Dayjs} from 'dayjs';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
 
 
 interface DUOSDatePickerProps {
     inputFormat: string;
-    value: Dayjs;
+    defaultValue: Dayjs;
     onChange: any;
     onError: any;
     readOnly: boolean;
 }
 
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
-  const {inputFormat, value, onChange, onError, readOnly} = props;
+  const {inputFormat, defaultValue, onChange, onError, readOnly} = props;
   const duosColorBlue='#216FB4';
-
+  //Required to display the error on initialization with an invalid value when letting the date picker manage the value.
+  //onError must be excluded as a dependency of the hook because of change detection looping.
+  const checkInitialValue = useMemo(()=>{  if (defaultValue != null && defaultValue.toString() === 'Invalid Date') {
+    onError('Invalid Date', defaultValue.toString());
+  }
+  return true;},
+  // eslint-disable-next-line
+  [defaultValue]);
   const theme = createTheme({
     palette: {
       primary:{
@@ -178,12 +185,13 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
 
   return <ThemeProvider theme={theme}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DesktopDatePicker
+      {checkInitialValue && <DesktopDatePicker
         closeOnSelect={false}
         label={'Select a date'}
         format={inputFormat}
-        value={value}
-        onAccept={onChange}
+        defaultValue={defaultValue?dayjs(defaultValue): null}
+        onChange={(value)=>{onChange(value?value.format(inputFormat):null);}}
+        onAccept={(value)=>{onChange(value?value.format(inputFormat):null);}}
         onError={onError}
         dayOfWeekFormatter={(day) => (`${day.format('ddd')}`)}
         readOnly={readOnly}
@@ -193,7 +201,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         }}
         slots={{day: WeekendFormattedDay, actionBar: CancelSelectActionBar}}
-      />
+      />}
     </LocalizationProvider>
   </ThemeProvider>;
 };
