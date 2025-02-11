@@ -19,8 +19,6 @@ export const Config = {
 
   getNihUrl: async () => (await getConfig()).nihUrl,
 
-  getGoogleClientId: async () => (await getConfig()).clientId,
-
   getGAId: async () => (await getConfig()).gaId,
 
   getErrorApiKey: async () => (await getConfig()).errorApiKey,
@@ -65,11 +63,6 @@ export const Config = {
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: {'Content-Type': 'application/json'},
-  }),
-
-  attachmentBody: body => ({
-    body: body,
-    headers: {'Content-Type': 'application/binary'}
   }),
 
 };

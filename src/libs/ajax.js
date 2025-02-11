@@ -46,10 +46,6 @@ export const getECMUrl = async() => {
   return await Config.getECMUrl();
 };
 
-export const sleep = (ms) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 export const fetchOk = async (...args) => {
   //TODO: Remove spinnerService calls
   spinnerService.showAll();
@@ -76,11 +72,6 @@ export const fetchAny = async (...args) => {
   }
   spinnerService.hideAll();
   return res;
-};
-
-export const getFileNameFromHttpResponse = (response) => {
-  const respHeaders = response.headers;
-  return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
 };
 
 export const reportError = async (url, status) => {
