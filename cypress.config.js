@@ -11,7 +11,7 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:3000/',
   },
   component: {
-    specPattern: ['**/*.spec.js', '**/*.spec.ts', '**/*.spec.tsx'],
+    specPattern: ['**/*.spec.js', '**/*.spec.jsx', '**/*.spec.ts', '**/*.spec.tsx'],
     devServer: {
       framework: 'create-react-app',
       bundler: 'webpack',
