@@ -1,6 +1,6 @@
-const { defineConfig } = require('cypress');
+import { defineConfig } from 'cypress';
 
-module.exports = defineConfig({
+export default defineConfig({
   chromeWebSecurity: false,
   env: {
     baseUrl: 'http://localhost:3000/',
@@ -13,8 +13,8 @@ module.exports = defineConfig({
   component: {
     specPattern: ['**/*.spec.js', '**/*.spec.jsx', '**/*.spec.ts', '**/*.spec.tsx'],
     devServer: {
-      framework: 'create-react-app',
-      bundler: 'webpack',
+      framework: 'react',
+      bundler: 'vite',
     },
   },
 });
