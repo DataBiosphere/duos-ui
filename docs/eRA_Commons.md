@@ -13,20 +13,21 @@ see if a researcher is an NIH user.
 sequenceDiagram
     User ->> DUOS: clicks the eRA Commons button
     DUOS ->> ECM: Get authorization url
-    Note over DUOS, ECM: GET /api/oauth/v1/{provider}/authorization-url
-    Note over DUOS, ECM: include a redirectTo parameter
+    Note over DUOS, ECM: POST /api/oauth/v1/{provider}/authorization-url
+    Note over DUOS, ECM: include a redirectUri query parameter
+    Note over DUOS, ECM: include a { "redirectTo": "url" } request body
     ECM ->> DUOS: return auth url
     DUOS ->> User: send user new url to follow
     User ->> NIH: User is forwarded to NIH
     NIH ->> NIH: User Auths
     NIH ->> DUOS: Return with user state
-    Note over DUOS, NIH: get the oauth code
+    Note over DUOS, NIH: Gets the oauth code from NIH
     DUOS ->> ECM: Post oauthcode to ECM
     Note over DUOS, ECM: POST /api/oauth/v1/{provider}/oauthcode
-    Note over DUOS, ECM: include state, code
-    ECM ->> DUOS: return oauth state
-    Note over ECM, DUOS: response includes redirectTo
-    DUOS ->> DUOS: Decode/validate ECM response url
+    Note over DUOS, ECM: include state, oauthcode
+    ECM ->> DUOS: return LinkInfo
+    Note over ECM, DUOS: response includes externalUserId redirectTo
+    DUOS ->> DUOS: Decode/validate ECM response
     DUOS ->> Consent: Save eRA Commons state to Consent for local purposes
     DUOS ->> User: Redirect user to original redirectTo
     User ->> DUOS: Original page is refreshed
