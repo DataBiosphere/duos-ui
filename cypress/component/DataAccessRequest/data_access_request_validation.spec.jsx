@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
 import {React} from 'react';
 import {mount} from 'cypress/react';
-import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication';
+import DataAccessRequestApplication from '../../../src/pages/dar_application/DataAccessRequestApplication.jsx';
 import { MemoryRouter } from 'react-router-dom';
-import { DAR } from '../../../src/libs/ajax/DAR';
-import { DataSet } from '../../../src/libs/ajax/DataSet';
+import { DAR } from '../../../src/libs/ajax/DAR.js';
+import { DataSet } from '../../../src/libs/ajax/DataSet.js';
 import { Metrics } from '../../../src/libs/ajax/Metrics';
 import { Navigation } from '../../../src/libs/utils.js';
-import { NotificationService } from '../../../src/libs/notificationService';
+import { NotificationService } from '../../../src/libs/notificationService.js';
 import { Storage } from '../../../src/libs/storage.js';
 import { User } from '../../../src/libs/ajax/User';
 
