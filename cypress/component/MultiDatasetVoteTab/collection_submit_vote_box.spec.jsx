@@ -18,6 +18,11 @@ const votesMixed = [
 
 
 describe('CollectionSubmitVoteBox - Tests', function() {
+  // Intercept configuration calls
+  beforeEach(() => {
+    cy.initApplicationConfig();
+  });
+
   it('renders yes vote button as selected if all vote values are true and voting is not final', function() {
     mount(
       <CollectionSubmitVoteBox
