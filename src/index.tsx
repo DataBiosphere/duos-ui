@@ -5,11 +5,9 @@ import './styles/bootstrap_replacement.css';
 import App from './App';
 import {Auth} from './libs/auth/auth';
 import {OidcBroker} from './libs/auth/oidcBroker';
-import {unregister} from './registerServiceWorker';
 import {BrowserRouter} from 'react-router-dom';
 
 const load = async () => {
-  unregister();
   await Auth.initialize();
   // The following handles the OIDC post-authentication flow.
   // 1. User clicks Sign In button
