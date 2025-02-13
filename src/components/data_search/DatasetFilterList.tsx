@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Button, Checkbox, TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -6,7 +7,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import { Button, Checkbox, TextField, Typography } from '@mui/material';
 import { flatten, uniq, compact, orderBy } from 'lodash';
 import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
 import {FiltersTypes, generateDefaultParticipantCountValues} from './DatasetFilterConstants';
