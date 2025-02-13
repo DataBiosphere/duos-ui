@@ -17,7 +17,7 @@ COPY package.json /usr/src/app/package.json
 COPY package-lock.json /usr/src/app/package-lock.json
 COPY index.html /usr/src/app/index.html
 COPY tsconfig.json /usr/src/app/tsconfig.json
-COPY vite.config.js /usr/src/app/vite.config.js
+COPY vite.config.ts /usr/src/app/vite.config.ts
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm config set update-notifier false
 RUN npm install --silent

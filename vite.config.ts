@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     host: 'local.dsde-dev.broadinstitute.org',
     port: 3000,
-    https: process.env.CI ? false : {
+    https: process.env.CI ? undefined : {
       key: 'server.key',
       cert: 'server.crt',
     },
