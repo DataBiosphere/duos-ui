@@ -12,6 +12,11 @@ export default defineConfig({
     target: 'es2022'
   },
   server: {
+    host: 'local.dsde-dev.broadinstitute.org',
     port: 3000,
+    https: {
+      key: 'server.key',
+      cert: 'server.crt',
+    },
   },
 });
