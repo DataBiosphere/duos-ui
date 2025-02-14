@@ -399,7 +399,7 @@ export default function SigningOfficialTable(props) {
               Issue or Remove Library Card privileges to allow researchers to submit DARs.
               <a
                 rel="noopener noreferrer"
-                href="https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide"
+                href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
                 target="_blank"
                 id="so-console-info-link"
                 style={{ verticalAlign: 'super' }}>

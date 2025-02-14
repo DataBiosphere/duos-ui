@@ -13,8 +13,8 @@ import {includes} from 'lodash/fp';
  * @type {{NON_STAGING: string[], NON_PROD: string[]}}
  */
 export const envGroups = {
-  NON_PROD: ['local', 'dev', 'alpha', 'staging'],
-  NON_STAGING: ['local', 'dev', 'alpha'],
+  NON_PROD: ['local', 'dev', 'staging'],
+  NON_STAGING: ['local', 'dev'],
   DEV: ['local', 'dev'],
 };
 

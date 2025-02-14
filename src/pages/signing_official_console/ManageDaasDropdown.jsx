@@ -45,6 +45,23 @@ export default function ManageDaasDropdown(props) {
     }
   };
 
+  const ConditionalDownloadLink = ({ id, fileName }) => {
+    if (id === 0 && fileName === '') {
+      return (
+        <DownloadLink
+          label={`Download agreement`}
+          onDownload={() => {DAA.getDaaFileById(17, 'DUOS Uniform Data Access Agreement');}}
+        />
+      );
+    }
+    return (
+      <DownloadLink
+        label={`Download agreement`}
+        onDownload={() => {DAA.getDaaFileById(id, fileName);}}
+      />
+    );
+  };
+
   return (
     <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
       <div id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
@@ -52,7 +69,7 @@ export default function ManageDaasDropdown(props) {
       </div>
       <form>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
-          <DownloadLink label={`Download agreement`} onDownload={() => {DAA.getDaaFileById(download.id, download.fileName);}}/>
+          <ConditionalDownloadLink id={download.id} fileName={download.fileName} />
         </li>
         <li style={{paddingTop: '5px', paddingBottom: '5px'}}>
           <label style={{fontWeight: 'normal', whiteSpace: 'nowrap'}}>

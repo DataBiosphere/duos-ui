@@ -5,12 +5,16 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <script src="https://accounts.google.com/gsi/client" async defer id="gsiClient"></script>
   <title>Components App</title>
+  <!-- AppCues Requirements  -->
+  <script type="text/javascript">
+    window.AppcuesSettings = { enableURLDetection: true };
+  </script>
 </head>
 
 <body>
-  <div data-cy-root></div>
+  <!-- id="root" is necessary for any component that uses BaseModal.jsx since it calls: Modal.setAppElement('#root');-->
+  <div data-cy-root id="root"></div>
 </body>
 
 </html>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="29px" height="29px" viewBox="0 0 29 29" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <g id="DAC-View" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Edit-My-DAC" transform="translate(-32, -176)" fill="#4D72AA">
+            <g id="Group" transform="translate(32, 176)">
+                <circle id="Oval" fill-opacity="0.2" cx="14.5" cy="14.5" r="14.5"></circle>
+                <path d="M17.2724965,22.1051094 L18.0694841,21.3081219 C18.3985581,20.9790478 18.3992448,20.4460749 18.0708917,20.1163141 L12.6561555,14.6758974 L18.071235,9.23582402 C18.3992448,8.9060633 18.3989015,8.37309033 18.0698617,8.04405059 L17.2728398,7.24706305 C16.9434568,6.91764565 16.4090762,6.91764565 16.0796588,7.24706305 L9.2470373,14.0793069 C8.91765423,14.4087243 8.91765423,14.9430705 9.2470373,15.2724879 L16.0793155,22.1051094 C16.4087329,22.4345268 16.9430791,22.4345268 17.2724965,22.1051094 Z" id="" fill-rule="nonzero"></path>
+            </g>
+        </g>
+    </g>
+</svg>

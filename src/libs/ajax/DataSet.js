@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
-import { getApiUrl, fetchOk, getFileNameFromHttpResponse, fetchAny } from '../ajax';
+import { getApiUrl, fetchOk } from '../ajax';
 
 
 export const DataSet = {
@@ -17,22 +17,10 @@ export const DataSet = {
     return await res.data;
   },
 
-  postDatasetForm: async (form) => {
-    const url = `${await getApiUrl()}/api/dataset/v2`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(form), { method: 'POST' }]));
-    return await res.json();
-  },
-
   registerDataset: async (registration) => {
     const url = `${await getApiUrl()}/api/dataset/v3`;
     const res = await axios.post(url, registration, Config.multiPartOpts());
     return res.data;
-  },
-
-  getDatasets: async () => {
-    const url = `${await getApiUrl()}/api/dataset/v2`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   },
 
   getDatasetsByIds: async (ids) => {
@@ -53,25 +41,10 @@ export const DataSet = {
     return res.data;
   },
 
-  getDataSetsByDatasetId: async (dataSetId) => {
-    const url = `${await getApiUrl()}/api/dataset/v2/${dataSetId}`;
+  getDataSetsByDatasetId: async (datasetId) => {
+    const url = `${await getApiUrl()}/api/dataset/v2/${datasetId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-  },
-
-  downloadDataSets: async (objectIdList, fileName) => {
-    const url = `${await getApiUrl()}/api/dataset/download`;
-    const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(objectIdList), Config.fileOpts(), { method: 'POST' }]));
-
-    fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
-    const responseObj = await res.json();
-
-    let blob = new Blob([responseObj.datasets], { type: 'text/plain' });
-    const urlBlob = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = fileName;
-    a.click();
   },
 
   deleteDataset: async (datasetObjectId) => {
@@ -80,30 +53,10 @@ export const DataSet = {
     return await res;
   },
 
-  updateDataset: async (datasetId, dataSetObject) => {
-    const url = `${await getApiUrl()}/api/dataset/${datasetId}`;
-    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
-  },
-
   updateDatasetV3: async (datasetId, datasetAndFiles) => {
     const url = `${await getApiUrl()}/api/dataset/v3/${datasetId}`;
     const res = await axios.put(url, datasetAndFiles, Config.multiPartOpts());
     return res.data;
-  },
-
-  validateDatasetName: async (name) => {
-    const url = `${await getApiUrl()}/api/dataset/validate?name=${name}`;
-    try {
-      // We expect a 404 in the case where the dataset name does not exist
-      const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-      if (res.status === 404) {
-        return -1;
-      }
-      return await res.json();
-    }
-    catch (err) {
-      return -1;
-    }
   },
 
   getStudyById: async (studyId) => {

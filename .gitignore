@@ -44,3 +44,6 @@ ca-bundle.crt
 server.crt
 server.key
 site.conf
+
+## GHA Credentials
+gha-creds-*.json

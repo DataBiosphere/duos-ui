@@ -31,7 +31,7 @@ services:
   proxy:
     image: us.gcr.io/broad-dsp-gcr-public/httpd-terra-proxy:v0.1.16
     container_name: duos-proxy
-    hostname: local.broadinstitute.org
+    hostname: local.dsde-dev.broadinstitute.org
     links:
       - app:app
     ports:
@@ -48,7 +48,7 @@ services:
       OIDC_CLAIM: Require all granted
       PROXY_PATH: /
       PROXY_URL: http://app:8080/
-      SERVER_NAME: local.broadinstitute.org
-      SERVER_NAME_INT: local.broadinstitute.org
+      SERVER_NAME: local.dsde-dev.broadinstitute.org
+      SERVER_NAME_INT: local.dsde-dev.broadinstitute.org
       ENABLE_TCELL: 'no'
     restart: always

@@ -13,7 +13,7 @@ import {
 } from '../../libs/utils';
 import {User} from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
-import ManageUsersDropdown from './ManageUsersDropdown';
+import DisplayNameCell from './DisplayNameCell';
 import ManageDaasDropdown from './ManageDaasDropdown';
 import DAACell from './DAACell';
 
@@ -53,32 +53,12 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 
 const refreshResearchers = async (setResearchers) => {
   const researcherList = await User.list(USER_ROLES.signingOfficial);
-  // the construction of this list is currently a work-around because our endpoint in the backend
-  // does not currently populate the DAA IDs on the each researcher's libary card
-  const researcherObjectList = await Promise.all(
-    researcherList.map(async (researcher) => {
-      return await User.getById(researcher.userId);
-    })
-  );
-  setResearchers(researcherObjectList);
+  setResearchers(researcherList);
 };
 
 const displayNameCell = (displayName, email, id, daas, setResearchers) => {
   return {
-    data: (
-      <>
-        <li className="dropdown" style={{ listStyleType: 'none' }}>
-          <div role="button" data-toggle="dropdown">
-            <div id="dacUser" style={{ color: 'black' }}>
-              {displayName || 'Invite sent, pending registration'}
-              <span className="caret caret-margin" style={{color: '#337ab7', float: 'right', marginTop: '15px'}}></span>
-              <small><a href={`mailto:${email}`}>{email || '- -'}</a></small>
-            </div>
-          </div>
-          <ManageUsersDropdown daas={daas} refreshResearchers={refreshResearchers} setResearchers={setResearchers} moreData={{id: id, name: displayName}}/>
-        </li>
-      </>
-    ),
+    data: (<DisplayNameCell key={id} displayName={displayName} email={email} id={id} daas={daas} setResearchers={setResearchers} refreshResearchers={refreshResearchers} />),
     id,
     style: {},
     label: 'display-names',
@@ -101,9 +81,15 @@ export default function ManageResearcherDAAsTable(props) {
     columnHeaderFormat = {
       ...columnHeaderFormat,
       ...dacs.reduce((acc, dac) => {
-        const daa = daas.find(daa => daa.dacs.some(d => d.dacId === dac.dacId));
-        const id = daa.daaId;
-        const fileName = daa.file.fileName;
+        const matchingDaas = daas.filter(daa => daa.dacs?.some(d => d.dacId === dac.dacId));
+        let daa;
+        if (matchingDaas.length > 0) {
+          daa = matchingDaas.reduce((latestDaa, currentDaa) => {
+            return latestDaa.updateDate > currentDaa.updateDate ? latestDaa : currentDaa;
+          });
+        }
+        const id = daa ? daa.daaId : 0;
+        const fileName = daa ? daa.file.fileName : '';
         acc[dac.name] = { label: dac.name, cellStyle: { width: `${dacColumnWidth}%` }, data: <ManageDaasDropdown actionsTitle={`${dac.name} Actions`} download={{id: id, fileName: fileName}} moreData={{id: id, name: dac.name}} researchers={props.researchers} refreshResearchers={refreshResearchers} setResearchers={setResearchers}/>};
         return acc;
       }, {}),
@@ -203,10 +189,10 @@ export default function ManageResearcherDAAsTable(props) {
               fontSize: '16px',
               maxWidth: '60%',
             })}>
-              Issue, Update, or Deactivate for User&apos;s ability to request access to datasets, by agreeing to
-              Data Access Committee&apos;s (DAC&apos;s) Data Access Agreements (DAAs) in the table below.
-              Issuing a checkmark in a cell for a researcher denotes your approval of that researcher
-              to request data from the listed DAC, according to its linked DAA.
+              The table below allows you to <a href="https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS"
+                id="terra-support-pre-auth-link" target="_blank" rel="noreferrer">pre-authorize</a> your Institution&apos;s users to request access to datasets,
+              known as issuing them a Library Card. Issuing a checkmark in a cell for a researcher issues them a Library
+              Card for that DAA and denotes your approval of that researcher to request data from DACs operating under the respective DAA(s).
             </div>
           </div>
         </div>

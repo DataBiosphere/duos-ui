@@ -45,7 +45,7 @@ export default function ManageUsersDropdown(props) {
   };
 
   return (
-    <ul className="dropdown-menu" role="menu" style={{ padding: '20px', textTransform:'none'}}>
+    <ul className="dropdown-menu" role="menu" style={{ display: 'block', padding: '20px', textTransform:'none'}}>
       <div id="link_signOut" style={{display:'flex', padding: '5px', textAlign: 'left'}}>
         <strong>Agreement Actions</strong>
       </div>

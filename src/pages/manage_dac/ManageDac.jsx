@@ -1,16 +1,18 @@
 import React from 'react';
 import ManageDacTable from '../../components/manage_dac_table/ManageDacTable';
-import {useState, useEffect, useCallback} from 'react';
-import { Styles } from '../../libs/theme';
+import {useState, useEffect} from 'react';
+import {Styles} from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
-import { DAC } from '../../libs/ajax/DAC';
-import {contains, filter, map} from 'lodash/fp';
+import {DAC} from '../../libs/ajax/DAC';
 import {Storage} from '../../libs/storage';
 import {Notifications} from '../../libs/utils';
-import {AddDacModal} from './AddDacModal';
 import DacDatasetsModal from '../../components/modals/DacDatasetsModal';
 import {DacMembersModal} from './DacMembersModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
+import ManageEditDac from './ManageEditDac';
+import {Link} from 'react-router-dom';
+import EditDac from './EditDac';
+import {DAAUtils} from '../../utils/DAAUtils';
 
 const CHAIR = 'Chairperson';
 const ADMIN = 'Admin';
@@ -19,54 +21,41 @@ export const ManageDac = function ManageDac() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [dacs, setDacs] = useState([]);
-  const [dacIDs, setDacIDs] = useState([]);
   const [userRole, setUserRole] = useState();
 
   // modal state
-  const [showDacModal, setShowDacModal] = useState(false);
+  const [showEditPage, setShowEditPage] = useState(false);
+  const [showAddPage, setShowAddPage] = useState(false);
   const [showDatasetsModal, setShowDatasetsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
 
   // modal data
   const [selectedDac, setSelectedDac] = useState({});
   const [selectedDatasets, setSelectedDatasets] = useState([]);
 
-
-  const reloadUserRole = useCallback(async () => {
-    setIsLoading(true);
+  const initializeDACs = async () => {
     const currentUser = Storage.getCurrentUser();
     const roles = (currentUser.roles) ? currentUser.roles.map(r => r.name) : [];
-    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
-    let dacIDs = filter({name: CHAIR})(currentUser.roles);
-    dacIDs = map('dacId')(dacIDs);
-    if (role === CHAIR) {
-      setDacIDs(dacIDs);
-    }
+    const role = roles.includes(ADMIN) ? ADMIN : CHAIR;
     setUserRole(role);
-    setIsLoading(false);
-  }, []);
-
-  const reloadDacList = useCallback(async () => {
+    let chairDACIds = currentUser.roles.filter(r => r.name === CHAIR).map(r => r.dacId);
     setIsLoading(true);
-    DAC.list().then(
-      dacs => {
-        if (userRole === CHAIR) {
-          dacs = dacs.filter((dac) => dacIDs.includes(dac.dacId));
-        }
-        setDacs(dacs);
-        setIsLoading(false);
-      }
-    );
-  }, [dacIDs, userRole]);
+    const allDacs = await DAC.list();
+    if (roles.includes(ADMIN)) {
+      setDacs(allDacs);
+    } else {
+      setDacs(allDacs.filter((dac) => chairDACIds.includes(dac.dacId)));
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    Promise.all([
-      reloadUserRole(),
-      reloadDacList()
-    ]);
-  }, [reloadDacList, reloadUserRole]);
+    const init = async () => {
+      await initializeDACs();
+    };
+    init();
+  }, []);
 
   const handleDeleteDac = async () => {
     let status;
@@ -76,7 +65,7 @@ export const ManageDac = function ManageDac() {
     if (status === 200) {
       Notifications.showSuccess({text: 'DAC successfully deleted.'});
       setShowConfirmationModal(false);
-      await reloadDacList();
+      await initializeDACs();
     } else {
       Notifications.showError({text: 'DAC could not be deleted.'});
     }
@@ -91,22 +80,8 @@ export const ManageDac = function ManageDac() {
     setShowConfirmationModal(false);
   };
 
-
-  const closeAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
-  };
-
   const addDac = () => {
-    setShowDacModal(true);
-    setIsEditMode(false);
-  };
-
-  const okAddDacModal = async () => {
-    await reloadDacList();
-
-    setShowDacModal(false);
+    setShowAddPage(true);
   };
 
   const closeViewDatasetsModal = () => {
@@ -118,48 +93,52 @@ export const ManageDac = function ManageDac() {
 
   return (
     <div style={Styles.PAGE}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%' }}>
-        <div className="left-header-section" style={Styles.LEFT_HEADER_SECTION}>
+      <div
+        style={{display: 'flex', justifyContent: 'space-between', width: '112%', marginLeft: '-6%', padding: '0 2.5%'}}>
+        <div className='left-header-section' style={Styles.LEFT_HEADER_SECTION}>
           <div style={Styles.ICON_CONTAINER}>
-            <img id="lock-icon" src={lockIcon} style={Styles.HEADER_IMG} />
+            <img id='lock-icon' src={lockIcon} style={Styles.HEADER_IMG} alt={'Manage Data Access Committee'}/>
           </div>
           <div style={Styles.HEADER_CONTAINER}>
-            <div style={{ fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem' }}>
+            <div style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: '2.8rem'}}>
               Manage Data Access Committee
             </div>
-            <div style={{ fontFamily: 'Montserrat', fontSize: '1.6rem' }}>
+            <div style={{fontFamily: 'Montserrat', fontSize: '1.6rem'}}>
               Create and manage Data Access Committee
             </div>
           </div>
         </div>
-        <div className="right-header-section">
-          <a
-            id="btn_addDAC"
-            className="col-md-12 btn-primary btn-add common-background"
-            style={{ marginTop: '30%', display: 'flex' }}
+        <div className='right-header-section'>
+          <Link
+            id='btn_addDAC'
+            className='btn-primary btn-add common-background'
+            style={{marginTop: '30%', display: 'flex'}}
             onClick={addDac}
+            to={{
+              pathname: DAAUtils.isEnabled() ? `/manage_add_dac_daa` : `/manage_add_dac`,
+              state: {userRole: userRole}
+            }}
           >
             <span>Add DAC</span>
-          </a>
+          </Link>
         </div>
       </div>
       <ManageDacTable
         isLoading={isLoading}
         dacs={dacs}
         userRole={userRole}
-        setShowDacModal={setShowDacModal}
         setShowDatasetsModal={setShowDatasetsModal}
         setShowMembersModal={setShowMembersModal}
         setShowConfirmationModal={setShowConfirmationModal}
-        setIsEditMode={setIsEditMode}
         setSelectedDac={setSelectedDac}
         setSelectedDatasets={setSelectedDatasets}
+        setShowEditPage={setShowEditPage}
       />
       <ConfirmationModal
         showConfirmation={showConfirmationModal}
         closeConfirmation={closeConfirmation}
-        title="Delete DAC?"
-        message="Are you sure you want to delete this Data Access Committee?"
+        title='Delete DAC?'
+        message='Are you sure you want to delete this Data Access Committee?'
         header={selectedDac.name}
         onConfirm={handleDeleteDac}
       />
@@ -180,15 +159,14 @@ export const ManageDac = function ManageDac() {
           datasets={selectedDatasets}
         />
       )}
-      {showDacModal && (
-        <AddDacModal
-          showModal={showDacModal}
-          isEditMode={isEditMode}
-          onOKRequest={okAddDacModal}
-          onCloseRequest={closeAddDacModal}
-          dac={selectedDac}
-          userRole={userRole}
+      {showAddPage && (
+        <ManageEditDac
         />
+      )}
+      {showEditPage && (
+        DAAUtils.isEnabled() ?
+          <EditDac/> :
+          <ManageEditDac/>
       )}
     </div>
   );

@@ -8,10 +8,11 @@ import { FormField, FormValidators, FormFieldTypes } from '../../components/form
 import './dar_application.css';
 
 const linkStyle = {color: '#2FA4E7'};
+const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
 const profileLink = <Link to="/profile" style={linkStyle}>Your Profile</Link>;
 const profileUnsubmitted = <span>Please submit {profileLink} to be able to create a Data Access Request</span>;
 const profileSubmitted = <span>Please make sure {profileLink} is updated as it will be used to pre-populate parts of the Data Access Request</span>;
-const libraryCardLink = <a href="https://broad-duos.zendesk.com/hc/en-us/articles/4402736994971-Researcher-FAQs" style={linkStyle} target="_blank" rel="noopener noreferrer">Library Card</a>;
+const libraryCardLink = <a href="https://support.terra.bio/hc/en-us/articles/28510945983003-How-to-Submit-a-Data-Access-Request-DAR-in-DUOS" style={linkStyle} target="_blank" rel="noopener noreferrer">Library Card</a>;
 
 
 export default function ResearcherInfo(props) {
@@ -82,6 +83,7 @@ export default function ResearcherInfo(props) {
             id='researcherName'
             placeholder='Enter Firstname Lastname'
             title='1.1 Researcher'
+            titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={researcher.displayName}
@@ -150,6 +152,7 @@ export default function ResearcherInfo(props) {
             description='I certify that the principal investigator listed below is aware of this study'
             placeholder='Firstname Lastname'
             title='1.3 Principal Investigator'
+            titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             validation={validation.piName}
@@ -209,6 +212,7 @@ export default function ResearcherInfo(props) {
             type={FormFieldTypes.SELECT}
             description='I certify that the individual listed below is my Institutional Signing official'
             title='1.6 Institutional Signing Official'
+            titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             defaultValue={formData.signingOfficial}
@@ -231,6 +235,7 @@ export default function ResearcherInfo(props) {
             description='I certify that the individual listed below is my IT Director'
             placeholder='Enter Firstname Lastname'
             title='1.7 Information Technology (IT) Director'
+            titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
             validation={validation.itDirector}
@@ -247,6 +252,7 @@ export default function ResearcherInfo(props) {
               disabled={readOnlyMode}
               type={FormFieldTypes.RADIOGROUP}
               title='1.8 Cloud Use Statement'
+              titleStyle={titleStyle}
               description={[
                 <span key='anvil-use-description'>
                   Will you perform all of your data storage and analysis for this project on the

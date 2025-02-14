@@ -14,13 +14,15 @@
     "strict": true,
     "target": "es2022",
     "useUnknownInCatchVariables": true,
+    "resolveJsonModule": true,
     "paths": {
       "src/*": ["./src/*"],
       "@/*": ["./*"]
     }
   },
   "include": [
-    "src"
+    "src",
+    "types/index.d.ts"
   ],
   "plugins": ["@typescript-eslint", "import"]
 }

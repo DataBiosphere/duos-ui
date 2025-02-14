@@ -208,6 +208,10 @@ export default function AffiliationAndRole(props) {
       }}
     >
       <p>Institution</p>
+      {!(profile.institutionId) && <div className={'alert-danger alert'} style={{fontWeight: 'normal'}}>
+        Please select an existing Institution. If you don&apos;t see your institution listed, please select the Contact
+        Us link to request that your institution be added.
+      </div>}
       <div style={{ marginTop: '15px' }} />
       {generateInstitutionSelectionDisplay()}
       {formIsValid() ? (

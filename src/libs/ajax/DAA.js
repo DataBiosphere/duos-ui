@@ -1,6 +1,7 @@
 import fileDownload from 'js-file-download';
 import { getApiUrl } from '../ajax';
 import { Config } from '../config';
+import { isFileEmpty } from '../utils';
 import axios from 'axios';
 
 
@@ -64,4 +65,43 @@ export const DAA = {
       fileDownload(response.data, daaFileName);
     });
   },
+
+  createDaa: async (file, dacId) => {
+    if (isFileEmpty(file)) {
+      return Promise.resolve({ data: null });
+    } else {
+      let authOpts = Config.authOpts();
+      authOpts.headers['Content-Type'] = 'multipart/form-data';
+      let formData = new FormData();
+      formData.append('file', file);
+      const url = `${await getApiUrl()}/api/daa/dac/${dacId}`;
+      return axios.post(url, formData, authOpts);
+    }
+  },
+
+  addDaaToDac: async (daaId, dacId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
+    const res = await axios.put(url, {}, Config.authOpts());
+    return res.status;
+  },
+
+  deleteDaa: async (daaId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}`;
+    const res = await axios.delete(url, Config.authOpts());
+    return res;
+  },
+
+  deleteDacDaaRelationship: async (daaId, dacId) => {
+    const url = `${await getApiUrl()}/api/daa/${daaId}/dac/${dacId}`;
+    const res = await axios.delete(url, Config.authOpts());
+    return res;
+  },
+
+  // NOTE: In the future, this functionality should be handled in the backend and should not be
+  // dependent on the UI.
+  sendDaaUpdateEmails: async (dacId, oldDaaId, newDaaName) => {
+    const url = `${await getApiUrl()}/api/daa/${dacId}/updated/${oldDaaId}/${newDaaName}`;
+    const res = await axios.post(url, {}, Config.authOpts());
+    return res.status;
+  }
 };

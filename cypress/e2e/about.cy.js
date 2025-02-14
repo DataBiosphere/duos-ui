@@ -9,7 +9,7 @@ describe('About', function() {
     cy.get('#link_about').should(
       'have.attr',
       'href',
-      'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS'
+      'https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS'
     );
   });
 
@@ -20,7 +20,7 @@ describe('About', function() {
     cy.get('#link_about').should(
       'have.attr',
       'href',
-      'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS'
+      'https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS'
     );
   });
 });

@@ -16,8 +16,10 @@ import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import {checkEnv, envGroups} from '../utils/EnvironmentUtils';
 import {isFunction, isNil} from 'lodash/fp';
+import {DAAUtils} from '../utils/DAAUtils';
+import {Auth} from '../libs/auth/auth';
+import SignInButton from '../components/SignInButton';
 
 const styles = {
   drawerPaper: {
@@ -82,7 +84,7 @@ export const headerTabsConfig = [
     link: '/admin_manage_dar_collections',
     children: [
       { label: 'DAR Requests', link: '/admin_manage_dar_collections' },
-      { label: 'Dataset Catalog', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DACs', link: '/manage_dac' },
       { label: 'Users', link: '/admin_manage_users' },
       { label: 'Institutions', link: '/admin_manage_institutions' },
@@ -96,9 +98,9 @@ export const headerTabsConfig = [
     children: [
       { label: 'Researchers', link: '/signing_official_console/researchers' },
       { label: 'DAR Requests', link: '/signing_official_console/dar_requests' },
-      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => checkEnv(envGroups.NON_STAGING) },
+      { label: 'Data Submitters', link: '/signing_official_console/data_submitters', isRendered: () => DAAUtils.isEnabled() },
       { label: 'My Datasets', link: '/datalibrary/myinstitution' },
-      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => checkEnv(envGroups.DEV) }
+      { label: 'DAA Associations', link: '/signing_official_console/researchers_daa_associations', isRendered: () => DAAUtils.isEnabled() }
     ],
     isRendered: (user) => user.isSigningOfficial
   },
@@ -119,16 +121,15 @@ export const headerTabsConfig = [
     search: 'member_console',
     children: [
       { label: 'DAR Requests', link: '/member_console' },
-      { label: 'Datasets', link: '/dataset_catalog' },
+      { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' }
     ],
     isRendered: (user) => user.isMember
   },
   {
     label: 'Researcher Console',
-    link: '/dataset_catalog',
-    search: 'dataset_catalog',
+    link: '/datalibrary',
+    search: 'datalibrary',
     children: [
-      { label: 'Data Catalog', link: '/dataset_catalog' },
       { label: 'Data Library', link: '/datalibrary', search: 'datalibrary' },
       { label: 'DAR Requests', link: '/researcher_console' },
       { label: 'Data Submissions', link: '/dataset_submissions', isRenderedForUser: (user) => user?.isDataSubmitter }
@@ -139,13 +140,14 @@ export const headerTabsConfig = [
 
 const NavigationTabsComponent = (props) => {
   const {
+    history,
     orientation,
     makeNotifications,
     navbarDuosIcon, duosLogoImage, DuosLogo, navbarDuosText,
     currentUser, signOut, isLogged,
     contactUsButton, showRequestModal, supportrequestModal,
     tabs, initialTab, initialSubTab,
-    onSubtabChange
+    onSubtabChange, showProfileLinks, profileState
   } = props;
   const [selectedMenuTab, setSelectedMenuTab] = useState(false);
   const [selectedSubTab, setSelectedSubTab] = useState(false);
@@ -158,26 +160,26 @@ const NavigationTabsComponent = (props) => {
   return (
     <div className={`navbar-logged ${orientation === 'vertical' ? 'navbar-vertical' : ''}`}>
       {makeNotifications()}
-      <ul className="navbar-main">
+      <ul className='navbar-main'>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           {
             orientation === 'horizontal' && (
               <Link
-                id="link_logo"
-                to="/home"
-                className="navbar-brand"
+                id='link_logo'
+                to='/home'
+                className='navbar-brand'
               >
-                <img style={duosLogoImage} src={DuosLogo} alt="DUOS Logo" />
+                <img style={duosLogoImage} src={DuosLogo} alt='DUOS Logo' />
               </Link>
             )
           }
           {
             isLogged && (
-              <Box className="duos-navigation-box">
+              <Box className='duos-navigation-box'>
                 <Tabs
                   value={selectedMenuTab}
-                  variant="scrollable"
-                  scrollButtons="auto"
+                  variant='scrollable'
+                  scrollButtons='auto'
                   orientation={orientation}
                   TabIndicatorProps={{ style: { background: '#2BBD9B' } }}
                 >
@@ -196,59 +198,89 @@ const NavigationTabsComponent = (props) => {
           }
           {
             !isLogged && (
-              <ul className="navbar-public">
+              <ul className='navbar-public'>
                 <li>
                   <a
-                    id="link_about"
-                    className="navbar-duos-link"
-                    href="https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS"
-                    target="_blank"
-                    rel="noreferrer"
+                    id='link_about'
+                    className='navbar-duos-link'
+                    href='https://support.terra.bio/hc/en-us/articles/28485372215579-About-DUOS'
+                    target='_blank'
+                    rel='noreferrer'
                   >
-                    <div className="navbar-duos-icon-about" style={navbarDuosIcon}></div>
+                    <div className='navbar-duos-icon-about' style={navbarDuosIcon}></div>
                     <span style={navbarDuosText}>About</span>
                   </a>
                 </li>
                 <li>
                   <a
-                    id="link_help"
-                    className="navbar-duos-link"
-                    href="https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-"
-                    target="_blank" rel="noreferrer"
+                    id='link_help'
+                    className='navbar-duos-link'
+                    href='https://support.terra.bio/hc/en-us/articles/28486067349531-Frequently-Asked-Questions-about-DUOS'
+                    target='_blank' rel='noreferrer'
                   >
-                    <div className="navbar-duos-icon-help" style={navbarDuosIcon}></div>
+                    <div className='navbar-duos-icon-help' style={navbarDuosIcon}></div>
                     <span style={navbarDuosText}>FAQs</span>
                   </a>
                 </li>
                 {contactUsButton}
                 {supportrequestModal}
+                {/* Sign-in button location when window is narrow and menu is vertical */}
+                {!isLogged && orientation === 'vertical' && <li style={{marginRight: 0}}>
+                  <SignInButton
+                    props={props}
+                    history={history}/>
+                </li>}
               </ul>
             )
-          };
+          }
         </div>
         {/* Navbar right side */}
+        {/* Sign-in button location when window is wider and menu is not vertical */}
+        {!isLogged && orientation !== 'vertical' &&
+          <div
+            style={{
+              minWidth: '185px',
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: orientation === 'vertical' ? 'column' : 'row'
+            }}>
+            <SignInButton
+              props={props}
+              history={history}/>
+          </div>
+        }
         {isLogged && (
           <div
-            style={{ display: 'flex', alignItems: 'center', flexDirection: orientation === 'vertical' ? 'column' : 'row' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              flexDirection: orientation === 'vertical' ? 'column' : 'row'
+            }}
           >
+            <a href='https://support.terra.bio/hc/en-us/categories/28485138480539-Managing-Data-Access-with-DUOS'
+              id='terra-support-docs-link' target='_blank' rel='noreferrer'
+              style={{color: 'white', paddingTop: 30, paddingBottom: 30, paddingLeft: 2, paddingRight: 2, marginRight: 20}}>Help</a>
             <button onClick={showRequestModal} style={styles.navButton}>
-              <div id="help" style={{ whiteSpace: 'nowrap' }}>Contact Us</div>
+              <div id='help' style={{whiteSpace: 'nowrap'}}>Contact Us</div>
             </button>
             {supportrequestModal}
-            <li className="dropdown user-li" style={{ listStyleType: 'none' }}>
-              <a id="sel_user" role="button" className="dropdown-toggle" data-toggle="dropdown">
-                <div id="dacUser">
+            <li className='dropdown user-li' onClick={showProfileLinks} style={{listStyleType: 'none'}}>
+              <a id='sel_user' role='button' className='dropdown-toggle' data-toggle='dropdown'>
+                <div id='dacUser'>
                   {currentUser.displayName}
-                  <span className="caret caret-margin"></span>
+                  <span className='caret caret-margin'></span>
                 </div>
-                <small id="dacUserMail">{currentUser.email}</small>
+                <small id='dacUserMail'>{currentUser.email}</small>
               </a>
-              <ul className="dropdown-menu navbar-dropdown" role="menu" style={{ top: orientation === 'vertical' ? '-100%' : '100%' }}>
+              <ul className='dropdown-menu navbar-dropdown' role='menu' style={{
+                display: `${profileState ? 'block' : 'none'}`,
+                top: orientation === 'vertical' ? '-100%' : '100%'
+              }}>
                 <li>
-                  <Link id="link_profile" to="/profile" onClick={onSubtabChange}>Your Profile</Link>
+                  <Link id='link_profile' to='/profile' onClick={onSubtabChange}>Your Profile</Link>
                 </li>
                 <li>
-                  <a id="link_signOut" onClick={signOut}>Sign out</a>
+                  <a id='link_signOut' onClick={signOut}>Sign out</a>
                 </li>
               </ul>
             </li>
@@ -258,11 +290,11 @@ const NavigationTabsComponent = (props) => {
 
       {/* Sub Tabs */}
       {tabs[selectedMenuTab]?.children && (
-        <Box className="duos-navigation-box navbar-sub">
+        <Box className='duos-navigation-box navbar-sub'>
           <Tabs
             value={selectedSubTab}
-            variant="scrollable"
-            scrollButtons="auto"
+            variant='scrollable'
+            scrollButtons='auto'
             orientation={orientation}
             TabIndicatorProps={{ style: { background: '#00609f' } }}
             onChange={onSubtabChange}
@@ -311,12 +343,13 @@ const navbarDuosText = {
 };
 
 const DuosHeader = (props) => {
-  const { location, classes } = props;
+  const {location, classes, history} = props;
   const [state, setState] = useState({
     showSupportRequestModal: false,
     hover: false,
     notificationData: [],
-    openDrawer: false
+    openDrawer: false,
+    showProfileLinks: false
   });
 
   useEffect(() => {
@@ -340,7 +373,7 @@ const DuosHeader = (props) => {
   const signOut = () => {
     props.history.push('/home');
     toggleDrawer(false);
-    props.onSignOut();
+    Auth.signOut();
   };
 
   const supportRequestModal = () => {
@@ -348,6 +381,14 @@ const DuosHeader = (props) => {
       ...state,
       showSupportRequestModal: true,
       openDrawer: false
+    });
+  };
+
+  const profileLinks = () => {
+    const profileState = state.showProfileLinks;
+    setState({
+      ...state,
+      showProfileLinks: !profileState
     });
   };
 
@@ -393,7 +434,7 @@ const DuosHeader = (props) => {
   const contactUsText = isLogged ? 'Contact Us' : <span style={{ display: 'inline', verticalAlign: 'text-bottom' }}>Contact Us</span>;
   const contactUsButton = (
     <button
-      id="btn_applyAcces"
+      id='btn_applyAcces'
       style={{
         color: state.hover ? '#2FA4E7' : '#ffffff',
         fontSize: '14px',
@@ -407,8 +448,8 @@ const DuosHeader = (props) => {
       onMouseEnter={toggleHover}
       onMouseLeave={toggleHover}
       onClick={supportRequestModal}
-      data-tip="Need help? Contact us for some assistance"
-      data-for="tip_requestAccess"
+      data-tip='Need help? Contact us for some assistance'
+      data-for='tip_requestAccess'
     >
       {contactUsIcon}
       {contactUsText}
@@ -465,11 +506,12 @@ const DuosHeader = (props) => {
   }
 
   return (
-    <nav className="navbar-duos" role="navigation">
+    <nav className='navbar-duos' role='navigation'>
       <Hidden mdDown={true}>
-        <div className="row no-margin" style={{ width: '100%' }}>
+        <div className='row no-margin' style={{ width: '100%' }}>
           {/* Standard navbar for medium sized displays and higher (pre-existing navbar) */}
           <NavigationTabsComponent
+            history={history}
             goToLink={goToLink}
             makeNotifications={makeNotifications}
             duosLogoImage={duosLogoImage}
@@ -485,7 +527,9 @@ const DuosHeader = (props) => {
             tabs={tabs}
             initialTab={initialTab}
             initialSubTab={initialSubTab}
-            orientation="horizontal"
+            orientation='horizontal'
+            showProfileLinks={profileLinks}
+            profileState={state.showProfileLinks}
           />
         </div>
       </Hidden>
@@ -497,24 +541,25 @@ const DuosHeader = (props) => {
       }
       <Hidden mdUp={true}>
         {makeNotifications()}
-        <div className="navbar-main" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className='navbar-main' style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <img
             style={duosLogoImage}
             src={DuosLogo}
-            alt="DUOS Logo"
+            alt='DUOS Logo'
             onClick={() => goToLink('/home')}
           />
-          <IconButton  id='collapsed-navigation-icon-button' size="small" onClick={() => toggleDrawer(true)}>
+          <IconButton  id='collapsed-navigation-icon-button' size='small' onClick={() => toggleDrawer(true)}>
             <MenuIcon id='navbar-menu-icon' style={{ color: 'white', fontSize: '6rem', flex: 1 }} anchor='right' />
           </IconButton>
           <Drawer
-            anchor="right"
+            anchor='right'
             open={state.openDrawer}
             PaperProps={{ className: classes.drawerPaper }}
-            className="navbar-duos"
+            className='navbar-duos'
             onClose={() => toggleDrawer(false)}
           >
             <NavigationTabsComponent
+              history={history}
               goToLink={goToLink}
               // Notifications are already displayed underneath the expanded drawer, no need to render them twice.
               makeNotifications={() => {}}
@@ -531,8 +576,10 @@ const DuosHeader = (props) => {
               tabs={tabs}
               initialTab={initialTab}
               initialSubTab={initialSubTab}
-              orientation="vertical"
+              orientation='vertical'
               onSubtabChange={() => toggleDrawer(false)}
+              showProfileLinks={profileLinks}
+              profileState={state.showProfileLinks}
             />
           </Drawer>
         </div>

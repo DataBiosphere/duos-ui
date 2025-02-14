@@ -220,12 +220,11 @@ export const AdminEditUser = (props) => {
                   onSelection={(selection) => {
                     setState({
                       ...state,
-                      institutionId: selection
+                      institutionId: selection?.value?.institutionId
                     });
                   }}
                   options={institutionOptions || []}
                   placeholder='Please Select an Institution'
-                  searchPlaceholder='Search for Institution...'
                   value={institutionId}
                   className='form-control'
                 />

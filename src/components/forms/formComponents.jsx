@@ -1,6 +1,7 @@
 import React from 'react';
 import { cloneDeep, isNil, isEmpty, isString } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
+import { DuosDatePicker } from '../DuosDatePicker';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/async';
 import AsyncCreatable from 'react-select/async-creatable';
@@ -59,8 +60,8 @@ const onFormInputChange = (config, value) => {
 
 const errorMessages = (validation) => {
   return !isValid(validation) &&
-  <div className="error-message fadein">
-    <span className="glyphicon glyphicon-play" />
+  <div className='error-message fadein'>
+    <span className='glyphicon glyphicon-play' />
     {validation.failed.map((err, idx) => <div key={'error_message_'+idx}>{validationMessage(err)}</div>)}
   </div>;
 };
@@ -173,11 +174,11 @@ export const FormInputMultiText = (config) => {
   };
 
   return <div>
-    <div className="formControl-group flex-row">
+    <div className='formControl-group flex-row'>
       <input
         id={id}
         name={name || id}
-        type="text"
+        type='text'
         className={`form-control ${!isValid(validation) || !isValid(inputValidation) ? 'errored' : ''}`}
         placeholder={placeholder || title}
         style={{ ...styles.inputStyle, ...inputStyle }}
@@ -187,8 +188,8 @@ export const FormInputMultiText = (config) => {
         onFocus={() => setValidation({ valid: true })}
       />
       <button
-        className="form-btn btn-xs"
-        type="button"
+        className='form-btn btn-xs'
+        type='button'
         disabled={disabled}
         style={{
           marginTop: 0,
@@ -197,26 +198,26 @@ export const FormInputMultiText = (config) => {
         onClick={() => pushValue(document.getElementById(id))}
       >
         {!disabled && <span
-          className="glyphicon glyphicon-plus"
-          aria-label="Add"
+          className='glyphicon glyphicon-plus'
+          aria-label='Add'
           style={{margin: '0 8px'}}
         />}
       </button>
     </div>
     {errorMessages(inputValidation)}
     {errorMessages(validation)}
-    <div className="flex-row" style={{ justifyContent: 'flex-start' }}>
+    <div className='flex-row' style={{ justifyContent: 'flex-start' }}>
       {formValue.map((val, i) => (
         <button
           key={val}
-          className="pill btn-xs"
-          type="button"
+          className='pill btn-xs'
+          type='button'
           disabled={disabled}
           onClick={() => removePill(i)}
         >
           {val}
           {!disabled && <span
-            className="glyphicon glyphicon-remove"
+            className='glyphicon glyphicon-remove'
             style={{marginLeft: '8px'}}
           />}
         </button>
@@ -425,13 +426,13 @@ export const FormInputCheckbox = (config) => {
     formValue, ariaDescribedby
   } = config;
 
-  return <div className="checkbox">
+  return <div className='checkbox'>
     <input
-      type="checkbox"
+      type='checkbox'
       id={id}
       name={name || id}
       checked={formValue}
-      className="checkbox-inline"
+      className='checkbox-inline'
       aria-describedby={ariaDescribedby}
       onChange={(event) => onFormInputChange(config, event.target.checked)}
       disabled={disabled}
@@ -451,18 +452,18 @@ export const FormInputSlider = (config) => {
     id, name, disabled, toggleText, formValue
   } = config;
 
-  return <div className="flex-row" style={{ justifyContent: 'unset' }}>
-    <label className="switch" htmlFor={id}>
+  return <div className='flex-row' style={{ justifyContent: 'unset' }}>
+    <label className='switch' htmlFor={id}>
       <input
-        type="checkbox"
+        type='checkbox'
         id={id}
         name={name || id}
         checked={formValue}
-        className="checkbox-inline"
+        className='checkbox-inline'
         onChange={(event) => onFormInputChange(config, event.target.checked)}
         disabled={disabled}
       />
-      <div className="slider round"/>
+      <div className='slider round'/>
     </label>
     <div style={{ marginLeft: 15, fontStyle: 'italic' }}>
       {toggleText}
@@ -486,11 +487,11 @@ export const FormInputFile = (config) => {
 
   return <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
     {hideInput === false && (
-      <div className="form-file-upload">
+      <div className='form-file-upload'>
         <input
           id={id}
           name={name || id}
-          type="file"
+          type='file'
           multiple={multiple}
           accept={accept}
           style={{ display: 'none' }}
@@ -523,3 +524,18 @@ export const FormInputFile = (config) => {
   </div>;
 };
 
+export const FormDatePicker = (config) => {
+  const {label, formValue, validation, readOnly} = config;
+  return <div className={`form-calendar ${!isValid(validation) ? 'errored' : ''}`}>
+    <DuosDatePicker
+      label={label}
+      onChange={(value) => {onFormInputChange(config, value);}}
+      onError={(error, value) => {updateValidation(config, value);}}
+      value={formValue}
+      inputFormat={'YYYY-MM-DD'}
+      highlightWeekends={true}
+      readOnly={readOnly}
+    />
+    {errorMessages(validation)}
+  </div>;
+};

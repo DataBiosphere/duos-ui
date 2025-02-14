@@ -3,7 +3,7 @@ We use [Cypress](https://docs.cypress.io/) for testing.
 
 Update an environment config file to test against:
 ```
-cp config/alpha.json public/config.json
+cp config/base_config.json public/config.json
 ``` 
 
 ## Run All Tests
@@ -16,7 +16,7 @@ npm test
 Create a .local.env with the following
 
 ```
-HOST=local.broadinstitute.org
+HOST=local.dsde-dev.broadinstitute.org
 HTTPS=true
 SSL_CRT_FILE=server.crt
 SSL_KEY_FILE=server.key
@@ -24,7 +24,7 @@ SSL_KEY_FILE=server.key
 
 Update `baseUrl` in `cypress.config.js` and `url` in `cypress/support/commands.js` to 
 ```
-https://local.broadinstitute.org:3000
+https://local.dsde-dev.broadinstitute.org:3000
 ```
 
 Set `env` to `local` in `config.json`

@@ -207,7 +207,7 @@ export const StudyUpdateForm = (props) => {
     const multiPartFormData = createMultiPartFormData(update);
 
     DataSet.updateStudy(studyId, multiPartFormData).then(() => {
-      history.push('/dataset_catalog');
+      history.push('/datalibrary');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });
     }, (e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });

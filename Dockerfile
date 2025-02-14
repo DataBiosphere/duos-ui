@@ -1,5 +1,5 @@
 # builder image
-FROM node:22.1.0 AS builder
+FROM node:22.13.1 AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory
@@ -11,10 +11,13 @@ ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
 COPY src /usr/src/app/src
+COPY types /usr/src/app/types
 COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
 COPY package-lock.json /usr/src/app/package-lock.json
+COPY index.html /usr/src/app/index.html
 COPY tsconfig.json /usr/src/app/tsconfig.json
+COPY vite.config.ts /usr/src/app/vite.config.ts
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm config set update-notifier false
 RUN npm install --silent

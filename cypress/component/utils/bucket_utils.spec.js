@@ -16,7 +16,7 @@ const dar_collection = {
           'electionId': 1,
           'electionType': 'DataAccess',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 1,
+          'datasetId': 1,
           'votes': {
             '1': {
               'voteId': 1,
@@ -48,7 +48,7 @@ const dar_collection = {
           'electionId': 2,
           'electionType': 'RP',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 1,
+          'datasetId': 1,
           'votes': {
             '4': {
               'voteId': 4,
@@ -80,7 +80,7 @@ const dar_collection = {
           'electionId': 3,
           'electionType': 'DataAccess',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 2,
+          'datasetId': 2,
           'votes': {
             '11': {
               'voteId': 11,
@@ -112,7 +112,7 @@ const dar_collection = {
           'electionId': 4,
           'electionType': 'RP',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 2,
+          'datasetId': 2,
           'votes': {
             '44': {
               'voteId': 44,
@@ -144,7 +144,7 @@ const dar_collection = {
           'electionId': 5,
           'electionType': 'DataAccess',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 3,
+          'datasetId': 3,
           'votes': {
             '111': {
               'voteId': 111,
@@ -176,7 +176,7 @@ const dar_collection = {
           'electionId': 6,
           'electionType': 'RP',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 3,
+          'datasetId': 3,
           'votes': {
             '444': {
               'voteId': 444,
@@ -208,7 +208,7 @@ const dar_collection = {
           'electionId': 7,
           'electionType': 'DataAccess',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 4,
+          'datasetId': 4,
           'votes': {
             '1111': {
               'voteId': 1111,
@@ -240,7 +240,7 @@ const dar_collection = {
           'electionId': 8,
           'electionType': 'RP',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 4,
+          'datasetId': 4,
           'votes': {
             '4444': {
               'voteId': 4444,
@@ -272,7 +272,7 @@ const dar_collection = {
           'electionId': 9,
           'electionType': 'DataAccess',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 5,
+          'datasetId': 5,
           'votes': {
             '11111': {
               'voteId': 11111,
@@ -304,7 +304,7 @@ const dar_collection = {
           'electionId': 10,
           'electionType': 'RP',
           'referenceId': 'dar-reference-id-1',
-          'dataSetId': 5,
+          'datasetId': 5,
           'votes': {
             '44444': {
               'voteId': 44444,
@@ -338,35 +338,35 @@ const dar_collection = {
   },
   'datasets': [
     {
-      'dataSetId': 1,
+      'datasetId': 1,
       'datasetName': 'ds 1',
       'datasetIdentifier': 'DUOS-000001',
       'dataUse': {'generalUse': true},
       'dacId': 1
     },
     {
-      'dataSetId': 2,
+      'datasetId': 2,
       'datasetName': 'ds 2',
       'datasetIdentifier': 'DUOS-000002',
       'dataUse': {'generalUse': true},
       'dacId': 2
     },
     {
-      'dataSetId': 3,
+      'datasetId': 3,
       'datasetName': 'ds 3',
       'datasetIdentifier': 'DUOS-000003',
       'dataUse': {'generalUse': false, 'other': 'other restrictions'},
       'dacId': 3
     },
     {
-      'dataSetId': 4,
+      'datasetId': 4,
       'datasetName': 'ds 4',
       'datasetIdentifier': 'DUOS-000004',
       'dataUse': {'generalUse': false, 'secondaryOther': 'secondary other restrictions'},
       'dacId': 4
     },
     {
-      'dataSetId': 5,
+      'datasetId': 5,
       'datasetName': 'ds 5',
       'datasetIdentifier': 'DUOS-000005',
       'dacId': 5
@@ -465,7 +465,7 @@ describe('BucketUtils', () => {
     expect(dataAccessBuckets[0].datasetIds.length).to.eq(1);
     forEach(b => {
       forEach(e => {
-        expect(b.datasetIds).to.contain(e.dataSetId);
+        expect(b.datasetIds).to.contain(e.datasetId);
       })(b.elections);
     })(buckets);
   });
@@ -478,7 +478,7 @@ describe('BucketUtils', () => {
     expect(dataAccessBuckets.length).to.eq(2);
     forEach(b => {
       forEach(e => {
-        expect(b.datasetIds).to.contain(e.dataSetId);
+        expect(b.datasetIds).to.contain(e.datasetId);
       })(b.elections);
     })(buckets);
   });
@@ -617,7 +617,7 @@ describe('BucketUtils', () => {
               'electionId': 1,
               'electionType': 'DataAccess',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 1,
+              'datasetId': 1,
               'votes': {
                 '1': {
                   'voteId': 1,
@@ -649,7 +649,7 @@ describe('BucketUtils', () => {
               'electionId': 2,
               'electionType': 'RP',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 1,
+              'datasetId': 1,
               'votes': {
                 '4': {
                   'voteId': 4,
@@ -681,7 +681,7 @@ describe('BucketUtils', () => {
               'electionId': 3,
               'electionType': 'DataAccess',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 2,
+              'datasetId': 2,
               'votes': {
                 '11': {
                   'voteId': 11,
@@ -713,7 +713,7 @@ describe('BucketUtils', () => {
               'electionId': 4,
               'electionType': 'RP',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 2,
+              'datasetId': 2,
               'votes': {
                 '44': {
                   'voteId': 44,
@@ -745,7 +745,7 @@ describe('BucketUtils', () => {
               'electionId': 5,
               'electionType': 'DataAccess',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 3,
+              'datasetId': 3,
               'votes': {
                 '111': {
                   'voteId': 111,
@@ -777,7 +777,7 @@ describe('BucketUtils', () => {
               'electionId': 6,
               'electionType': 'RP',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 3,
+              'datasetId': 3,
               'votes': {
                 '444': {
                   'voteId': 444,
@@ -809,7 +809,7 @@ describe('BucketUtils', () => {
               'electionId': 7,
               'electionType': 'DataAccess',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 4,
+              'datasetId': 4,
               'votes': {
                 '1111': {
                   'voteId': 1111,
@@ -841,7 +841,7 @@ describe('BucketUtils', () => {
               'electionId': 8,
               'electionType': 'RP',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 4,
+              'datasetId': 4,
               'votes': {
                 '4444': {
                   'voteId': 4444,
@@ -873,7 +873,7 @@ describe('BucketUtils', () => {
               'electionId': 9,
               'electionType': 'DataAccess',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 5,
+              'datasetId': 5,
               'votes': {
                 '11111': {
                   'voteId': 11111,
@@ -905,7 +905,7 @@ describe('BucketUtils', () => {
               'electionId': 10,
               'electionType': 'RP',
               'referenceId': 'dar-reference-id-1',
-              'dataSetId': 5,
+              'datasetId': 5,
               'votes': {
                 '44444': {
                   'voteId': 44444,
@@ -939,35 +939,35 @@ describe('BucketUtils', () => {
       },
       'datasets': [
         {
-          'dataSetId': 1,
+          'datasetId': 1,
           'datasetName': 'ds 1',
           'datasetIdentifier': 'DUOS-000001',
           'dataUse': {'hmbResearch': true, 'other': 'Samples and information may not be sold for profit.'},
           'dacId': 1
         },
         {
-          'dataSetId': 2,
+          'datasetId': 2,
           'datasetName': 'ds 2',
           'datasetIdentifier': 'DUOS-000002',
           'dataUse': {'generalUse': true},
           'dacId': 2
         },
         {
-          'dataSetId': 3,
+          'datasetId': 3,
           'datasetName': 'ds 3',
           'datasetIdentifier': 'DUOS-000003',
           'dataUse': {'hmbResearch': true},
           'dacId': 3
         },
         {
-          'dataSetId': 4,
+          'datasetId': 4,
           'datasetName': 'ds 4',
           'datasetIdentifier': 'DUOS-000004',
           'dataUse': {'generalUse': true},
           'dacId': 4
         },
         {
-          'dataSetId': 5,
+          'datasetId': 5,
           'datasetName': 'ds 5',
           'datasetIdentifier': 'DUOS-000005',
           'dataUse': {'hmbResearch': true},

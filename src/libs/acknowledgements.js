@@ -12,7 +12,7 @@ const acknowledgementStorageKey = (ackKey) => {
 
 export const hasAccepted = async (...acknowledgements) => {
 
-  // check if the acknowledgements are int he cache
+  // check if the acknowledgements are in the cache
   const allAcknowledgementsInStorage = acknowledgements.every(
     (ackKey) => Storage.getCurrentUserSettings(acknowledgementStorageKey(ackKey)) || false
   );

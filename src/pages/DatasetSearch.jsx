@@ -12,10 +12,16 @@ import anvilIcon from '../images/anvil-logo.svg';
 import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
+import firecloudIcon from '../images/firecloud-logo.png';
+import aouIcon from '../images/aou-logo.png';
+import stanleyIcon from '../images/stanley-center-logo.png';
+import getzLabIcon from '../images/getz-lab-logo.svg';
 import homeIcon from '../images/icon_dataset_.png';
 import { Storage } from '../libs/storage';
 import { Box, CircularProgress } from '@mui/material';
 import { toLower } from 'lodash';
+import {Metrics} from '../libs/ajax/Metrics';
+import eventList from '../libs/events';
 
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
@@ -82,6 +88,7 @@ const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
 export const DatasetSearch = (props) => {
   const { match: { params: { query } } } = props;
   const [datasets, setDatasets] = useState([]);
+  const [queryState, setQueryState] = useState(query);
   const [loading, setLoading] = useState(true);
   const user = Storage.getCurrentUser();
 
@@ -194,6 +201,66 @@ export const DatasetSearch = (props) => {
       icon: cfdeIcon,
       title: 'CFDE Data Library',
     },
+    'firecloud': {
+      query: {
+        'match_phrase': {
+          'study.description': 'FireCloud'
+        }
+      },
+      icon: firecloudIcon,
+      title: 'FireCloud Data Library',
+    },
+    'allofus': {
+      query: {
+        'match_phrase': {
+          'study.description': 'All of Us'
+        }
+      },
+      icon: aouIcon,
+      title: 'All of Us Data Library',
+    },
+    'openaccess': {
+      query: {
+        'bool': {
+          'should': [
+            {
+              'term': {
+                'accessManagement': 'open'
+              }
+            }
+          ]
+        }
+      },
+      icon: duosIcon,
+      title: 'DUOS Open Access Data Library',
+    },
+    'stanley': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Stanley Center'
+        }
+      },
+      icon: stanleyIcon,
+      title: 'Stanley Center Data Library',
+    },
+    'stanleycenter': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Stanley Center'
+        }
+      },
+      icon: stanleyIcon,
+      title: 'Stanley Center Data Library',
+    },
+    'getzlab': {
+      query: {
+        'match_phrase': {
+          'study.description': 'Getz Lab'
+        }
+      },
+      icon: getzLabIcon,
+      title: 'Getz Lab Data Library',
+    },
     '/custom': {
       query: {
         'bool': {
@@ -223,9 +290,21 @@ export const DatasetSearch = (props) => {
   const fullQuery = assembleFullQuery(isSigningOfficial, isInstitutionQuery, version.query);
   const isInstitutionSet = institutionId === undefined && isInstitutionQuery;
 
+  const hasChangedPage = query !== queryState;
+
   useEffect(() => {
     const init = async () => {
-      if (loading) {
+      // noinspection ES6MissingAwait
+      key === '/datalibrary' ?
+        Metrics.captureEvent(eventList.dataLibrary) :
+        Metrics.captureEvent(eventList.dataLibrary, {'brand': key.replaceAll('/', '').toLowerCase()});
+    };
+    init();
+  }, [key]);
+
+  useEffect(() => {
+    const init = async () => {
+      if (loading || hasChangedPage) {
         if (isInstitutionSet) {
           Notifications.showError({ text: 'You must set an institution in your profile to view the `myinstitution` data library' });
           props.history.push('/profile');
@@ -235,6 +314,7 @@ export const DatasetSearch = (props) => {
           await DataSet.searchDatasetIndex(fullQuery).then((datasets) => {
             setDatasets(datasets);
             setLoading(false);
+            setQueryState(query);
           });
         } catch (error) {
           Notifications.showError({ text: 'Failed to load Elasticsearch index' });
@@ -242,7 +322,7 @@ export const DatasetSearch = (props) => {
       }
     };
     init();
-  }, [loading, isInstitutionSet, fullQuery, props.history]);
+  }, [loading, isInstitutionSet, fullQuery, props.history, hasChangedPage]);
 
   return (
     loading ?

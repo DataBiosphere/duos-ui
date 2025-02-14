@@ -4,10 +4,13 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
-      - name: Log Actor
-        run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
       - name: NPM Install
         run: npm ci
       - name : Cypress run component tests
@@ -16,3 +19,15 @@ jobs:
           install: false
           component: true
           browser: chrome
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`

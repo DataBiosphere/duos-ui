@@ -5,14 +5,17 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'dependabot[bot]'
     steps:
-      - name: Log Actor
-        run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
       - name: NPM Install
         run: npm ci
       - name: Copy Configs
-        run: cp config/alpha.json public/config.json
+        run: cp config/base_config.json public/config.json
       - name: NPM Build
         run: CI=false npm run build --silent
       - name: Cypress run integration tests

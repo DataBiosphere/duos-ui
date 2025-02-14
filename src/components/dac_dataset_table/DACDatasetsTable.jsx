@@ -1,65 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Styles } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import SimpleTable from '../SimpleTable';
 import cellData from './DACDatasetTableCellData';
+import {styles} from './DACDatasetConstants';
 import {isNil} from 'lodash/fp';
 import {goToPage as updatePage, recalculateVisibleTable} from '../../libs/utils';
 import {useCallback} from 'react';
 
-export const styles = {
-  baseStyle: {
-    fontFamily: 'Montserrat',
-    fontSize: '1.6rem',
-    fontWeight: 400,
-    display: 'flex',
-    padding: '1rem 2%',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    whiteSpace: 'pre-wrap',
-    backgroundColor: 'white',
-    border: '1px solid #DEDEDE',
-    borderRadius: '4px',
-    margin: '0.5% 0'
-  },
-  columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
-    justifyContent: 'space-between',
-    color: '#7B7B7B',
-    fontFamily: 'Montserrat',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    letterSpacing: '0.2px',
-    textTransform: 'uppercase',
-    backgroundColor: 'B8CDD3',
-    border: 'none'
-  }),
-  cellWidths: {
-    duosId: '15%',
-    dataSubmitter: '15%',
-    datasetName: '25%',
-    dataCustodian: '15%',
-    dataUse: '15%',
-    status: '15%'
-  },
-  color: {
-    dataUseGroup: '#000000',
-    votes: '#000000',
-    numberOfDatasets: '#000000',
-    datasets: '#000000',
-  },
-  fontSize: {
-    dataUseGroup: '1.4rem',
-    votes: '1.4rem',
-    numberOfDatasets: '1.4rem',
-    datasets: '1.4rem',
-  },
-};
-
 export const DACDatasetTableColumnOptions = {
   DUOS_ID: 'duosId',
-  DATA_SUBMITTER: 'dataSubmitter',
+  PHS_ID: 'phsId',
   DATASET_NAME: 'datasetName',
+  STUDY_NAME: 'studyName',
+  DATA_SUBMITTER: 'dataSubmitter',
   DATA_CUSTODIAN: 'dataCustodian',
   DATA_USE: 'dataUse',
   STATUS: 'status',
@@ -67,8 +21,10 @@ export const DACDatasetTableColumnOptions = {
 
 const columnHeaderConfig = {
   duosId: {label: 'DUOS ID', cellStyle: {width: styles.cellWidths.duosId}, cellDataFn: cellData.duosIdCellData, sortable: true},
-  dataSubmitter: {label: 'Data Submitter', cellStyle: {width: styles.cellWidths.dataSubmitter}, cellDataFn: cellData.dataSubmitterCellData, sortable: true},
+  phsId: {label: 'PHS ID', cellStyle: {width: styles.cellWidths.phsId}, cellDataFn: cellData.duosPhsIdCellData, sortable: true},
   datasetName: {label: 'Dataset Name', cellStyle: {width: styles.cellWidths.datasetName}, cellDataFn: cellData.datasetNameCellData, sortable: true},
+  studyName: {label: 'Study Name', cellStyle: {width: styles.cellWidths.studyName}, cellDataFn: cellData.studyNameCellData, sortable: true},
+  dataSubmitter: {label: 'Data Submitter', cellStyle: {width: styles.cellWidths.dataSubmitter}, cellDataFn: cellData.dataSubmitterCellData, sortable: true},
   dataCustodian: {label: 'Data Custodian', cellStyle: {width: styles.cellWidths.dataCustodian}, cellDataFn: cellData.dataCustodianCellData, sortable: true},
   dataUse: {label: 'Data Use', cellStyle: {width: styles.cellWidths.dataUse}, cellDataFn: cellData.dataUseCellData, sortable: false},
   status: {label: 'Status', cellStyle: {width: styles.cellWidths.status}, cellDataFn: cellData.statusCellData, sortable: false},

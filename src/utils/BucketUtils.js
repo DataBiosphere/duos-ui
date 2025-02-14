@@ -71,7 +71,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       key: '',
       label: '',
       datasets: [dataset],
-      datasetIds: [dataset.dataSetId],
+      datasetIds: [dataset.datasetId],
       dataUse: dataset.dataUse,
       dataUses: [],
       elections: [],
@@ -87,7 +87,7 @@ export const binCollectionToBuckets = async (collection, dacIds = []) => {
       forEach(b => {
         if (isEqualDataUse(b.dataUse, dataset.dataUse)) {
           b.datasets.push(dataset);
-          b.datasetIds.push(dataset.dataSetId);
+          b.datasetIds.push(dataset.datasetId);
           added = true;
         }
       })(buckets);
@@ -166,7 +166,7 @@ const findElectionsForDatasets = (collection, datasetIds) => {
     values, // List of DARs
     flatMap(dar => get('elections')(dar)), // List of maps of election id -> election
     flatMap(eMap => values(eMap)), // List of election objects
-    filter(e => includes(get('dataSetId')(e))(datasetIds))
+    filter(e => includes(get('datasetId')(e))(datasetIds))
   )(darMap);
 };
 

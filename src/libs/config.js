@@ -17,8 +17,6 @@ export const Config = {
 
   getNihUrl: async () => (await getConfig()).nihUrl,
 
-  getGoogleClientId: async () => (await getConfig()).clientId,
-
   getGAId: async () => (await getConfig()).gaId,
 
   getErrorApiKey: async () => (await getConfig()).errorApiKey,
@@ -26,11 +24,6 @@ export const Config = {
   getHash: async () => (await getConfig()).hash,
 
   getTag: async () => (await getConfig()).tag,
-
-  getFeatureFlag: async (featureName) => {
-    const feature = _.get(await getConfig(), 'features', {});
-    return _.get(feature, featureName, false);
-  },
 
   getProject: async () => {
     const env = await Config.getEnv();
@@ -65,36 +58,16 @@ export const Config = {
     },
   }),
 
-  fileOpts: (token = Token.getToken()) => ({
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: 'application/json',
-    },
-  }),
-
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: {'Content-Type': 'application/json'},
   }),
 
-  attachmentBody: body => ({
-    body: body,
-    headers: {'Content-Type': 'application/binary'}
-  }),
-
-  fileBody: (token = Token.getToken()) => ({
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: '*/*',
-    },
-  }),
 };
 
-const Token = {
+export const Token = {
   getToken: () => {
-    return Storage.getGoogleData() !== null ?
-      Storage.getGoogleData().accessToken :
-      'token';
+    return Storage.getOidcUser()?.id_token;
   },
 };
 

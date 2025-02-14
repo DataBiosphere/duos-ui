@@ -1,55 +1,60 @@
 # Local Development
 
-1. We use [node@16](https://github.com/nvm-sh/nvm#installing-and-updating):
+1. We use [node@22.11.0](https://docs.volta.sh/guide/understanding):
 
 ```
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-nvm install 16
+volta install 22.11.0
 ```
+
 2. Install deps:
 
 ```
 npm install
 ```
 
-3. Install configs for an environment. This example is for the perf environment, but you can use values from any environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where {%ENV%} is any of `dev`, `staging`, `alpha`, or `prod` 
-Remember to set the `env` value appropriately. We use `local` for running via npm, but under docker, we use a real env like `dev` 
+3. Generate configuration files and populate certificates by running the [render-configs.sh](scripts/render-configs.sh) script. This requires 
+connection to the Broad VPN. By default, this points the DUOS UI to the dev environment. 
+
 ```
-cp config/alpha.json public/config.json
+cd scripts
+./render-configs.sh --write_env true --write_config true
 ```
 
-Ensure that your `/etc/hosts` file has an entry for `local.broadinstitute.org`
-```properties
-127.0.0.1	local.broadinstitute.org
-```
+#### Notes on render-configs:
+* Ensure that HOST is not set in your shell environment, as it will override the value in `.env.local`.
+* **Development against other envs**: If you want to point to other envs, you can populate public/config.json with the values from any 
+environment by looking at the deployed configs in https://duos-k8s.dsde-{%ENV%}.broadinstitute.org/config.json where 
+{%ENV%} is any of `dev`, `staging`, `alpha`, or `prod`. Remember to set the `env` value appropriately, for example,
+`dev`. Certain features are available only in specific environments. Setting the `env` value to the desired environment 
+will simulate it for local development.
+* **Refresh certs on rotation**: render-config.sh populates local certificate files. The certificates are rotated every 
+3 months and can be repopulated by re-running the script. Again, you'll need to be on the broad VPN.
 
-Download cert files from vault (requires vault access - see [DUOS team members](https://github.com/orgs/DataBiosphere/teams/duos) for more specifics):
 ```shell
-vault login -method=github token=$(cat ~/.github-token)
-vault read --format=json <vault path>/server.key | jq -r .data.value > server.key
-vault read --format=json <vault path>/server.crt | jq -r .data.value > server.crt
-vault read --format=json <vault path>/ca-bundle.crt | jq -r .data.chain > ca-bundle.crt
+cd scripts
+./render-configs.sh
 ```
 
-Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
+4. Ensure that your `/etc/hosts` file has an entry for `local.dsde-dev.broadinstitute.org`
 
-Create a local environment file, `.env.local`
 ```properties
-HOST=local.broadinstitute.org
-HTTPS=true
-SSL_CRT_FILE=server.crt
-SSL_KEY_FILE=server.key
+127.0.0.1	local.dsde-dev.broadinstitute.org
 ```
 
-4. Start development server:
+5. Create a `site.conf` file in the project root directory using https://github.com/broadinstitute/terra-helmfile/blob/master/charts/duos/templates/_site.conf.tpl as a model. 
+
+
+
+6. Start development server:
 
 ```shell
 npm start
 ```
 ### Running under Docker
 
-Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes.
-Remember to set the `env` value appropriately in `config.json`. We use `local` for running via npm, but under docker, we use a real env like `dev`
+Update your local `docker-compose.yaml` file to mount the preferred `config.json` file in app volumes. Remember to set
+the `env` value appropriately, for example, `dev`. Certain features are available only in specific environments. Setting
+the `env` value to the desired environment will simulate it for local development.
 
 ```yaml
     volumes:
@@ -63,6 +68,8 @@ docker build . -t duos
 docker compose up -d
 ```
 
+Visit https://local.dsde-dev.broadinstitute.org/ to see the instance running under docker.
+
 # Testing
 
 ## Cypress Tests
@@ -74,9 +81,10 @@ testing can be run headless or viewed interactively.
 Cypress integration (e2e) tests run locally require a different `baseUrl` than those
 run in GitHub Actions. Create a `cypress.env.json` file in the root of your
 local repo that looks like this:
+
 ```json
 {
-  "baseUrl": "https://local.broadinstitute.org:3000/"
+  "baseUrl": "https://local.dsde-dev.broadinstitute.org:3000/"
 }
 ```
 Cypress will use these values in `cypress.config.js` and `cypress/support/commands.js`
@@ -110,5 +118,11 @@ To run cypress component tests in a browser:
 
 ```shell
 npm run cypress:open:component
+```
+
+To run a single test suite:
+
+```shell
+npm run cypress:open:component --spec "**/data_access_governance.spec.js"
 ```
  

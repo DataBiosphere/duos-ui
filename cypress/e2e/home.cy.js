@@ -12,21 +12,21 @@ describe('Home', function() {
     cy.contains('Looking for data');
     cy.contains('Overview of DUOS');
     cy.contains('Machine Readable Consent Guidance.');
-    cy.get('#zendesk-dac-link').should(
+    cy.get('#terra-support-dac-link').should(
       'have.attr',
       'href',
-      'https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide'
+      'https://support.terra.bio/hc/en-us/articles/28513346337179-Overview-DUOS-for-Data-Access-Committees-DACs'
     );
-    cy.get('#zendesk-so-link').should(
+    cy.get('#terra-support-so-link').should(
       'have.attr',
       'href',
-      'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide'
+      'https://support.terra.bio/hc/en-us/articles/28512587249051-How-to-Pre-Authorize-Researchers-to-Submit-Data-Access-Requests-in-DUOS'
     );
 
-    cy.get('#zendesk-researcher-link').should(
+    cy.get('#terra-support-researcher-link').should(
       'have.attr',
       'href',
-      'https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide'
+      'https://support.terra.bio/hc/en-us/articles/28510385779099-Overview-DUOS-for-Researchers'
     );
   });
 

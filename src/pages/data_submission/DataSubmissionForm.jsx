@@ -150,7 +150,7 @@ export const DataSubmissionForm = (props) => {
     const multiPartFormData = createMultiPartFormData(registration);
 
     DataSet.registerDataset(multiPartFormData).then(() => {
-      history.push('/dataset_catalog');
+      history.push('/datalibrary');
       Notifications.showSuccess({ text: 'Submitted succesfully!' });
     }, (e) => {
       Notifications.showError({ text: 'Could not submit: ' + e?.response?.data?.message || e.message });

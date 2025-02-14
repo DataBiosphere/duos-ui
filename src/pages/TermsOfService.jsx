@@ -1,12 +1,13 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
-import { Storage } from '../libs/storage';
-import { TosService } from '../libs/tosService';
+import {useEffect, useState} from 'react';
+import {Auth} from '../libs/auth/auth';
+import {Storage} from '../libs/storage';
+import {TosService} from '../libs/tosService';
 import SimpleButton from '../components/SimpleButton';
 
 export default function TermsOfService(props) {
   const [tosText, setTosText] = useState('');
-  const { history } = props;
+  const {history} = props;
   const isLogged = Storage.userIsLogged();
 
   useEffect(() => {
@@ -22,19 +23,18 @@ export default function TermsOfService(props) {
     await TosService.rejectTos();
 
     // log user out and send them back home.
-    await Storage.setUserIsLogged(false);
-    await Storage.clearStorage();
+    await Auth.signOut();
     history.push('/');
   };
 
   return (
     <div style={TosService.getBackgroundStyle()}>
       <div style={TosService.getContainerStyle()}>
-        <h1 style={{ color: '#00609f', marginLeft: '25px' }}>DUOS Terms of Service</h1>
+        <h1 style={{color: '#00609f', marginLeft: '25px'}}>DUOS Terms of Service</h1>
         <div style={TosService.getScrollableStyle()} className="markdown-body">
           {tosText}
         </div>
-        {isLogged && <div style={{ display: 'flex', justifyContent: 'right', paddingRight: '5rem' }}>
+        {isLogged && <div style={{display: 'flex', justifyContent: 'right', paddingRight: '5rem'}}>
           <SimpleButton
             keyProp="tos-accept"
             label="Reject Terms of Service"
