@@ -1,4 +1,4 @@
-name: DSP GAR - Tag, Build and Push Image
+name: Tag, Build and Push Image
 
 on:
   push:
