@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 declare namespace Cypress {
     interface Chainable {
         /**
@@ -7,5 +5,10 @@ declare namespace Cypress {
          * @example cy.auth('admin')
          */
         auth(roleName: string): Chainable<Element>
+        /**
+         * Custom command to initialize application configuration
+         * @example cy.initApplicationConfig()
+         */
+        initApplicationConfig(): Chainable<void>
     }
 }
