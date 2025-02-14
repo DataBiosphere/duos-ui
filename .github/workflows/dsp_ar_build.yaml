@@ -75,8 +75,6 @@ jobs:
         SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
         ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
-    # When we have cut over the deployment to point to DSP GAR, we can enable this
-    if: false
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
     needs: [ tag-build-push ]
     with:
@@ -86,8 +84,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
   set-version-in-dev:
-    # When we have cut over the deployment to point to DSP GAR, we can enable this
-    if: false # if: github.event_name == 'push'
+    if: github.event_name == 'push'
     uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
     needs: [ tag-build-push, report-to-sherlock ]
     with:
