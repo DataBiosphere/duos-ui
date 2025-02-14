@@ -34,15 +34,16 @@ jobs:
       run: |
         SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:${SHORT_SHA}"
         ENVIRONMENT_TAG=""
-        if ${{ github.event_name == 'pull_request'}}; then
+        if [ "$GITHUB_EVENT" = "pull_request" ]; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:pr-${SHORT_SHA}"
-        elif ${{github.event_name == 'push' }}; then
+        elif [ "$GITHUB_EVENT" = "push" ]; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:dev"
         fi
         echo "sha-tag=$SHA_TAG" >> $GITHUB_OUTPUT
         echo "environment-tag=$ENVIRONMENT_TAG" >> $GITHUB_OUTPUT
       env:
         SHORT_SHA: ${{ steps.short-sha.outputs.sha }}
+        GITHUB_EVENT: ${{ github.event_name }}
     - name: Build Image
       run: |
         docker build -t "${SHA_TAG}" -t "${ENVIRONMENT_TAG}" .
