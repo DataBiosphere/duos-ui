@@ -6,6 +6,21 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import cypress from 'eslint-plugin-cypress/flat'
 
+/*
+This config is a combination of the basic recommended React configs from Vite:
+
+- https://github.com/vitejs/vite/blob/main/packages/create-vite/template-react/eslint.config.js
+- https://github.com/vitejs/vite/blob/main/packages/create-vite/template-react-ts/eslint.config.js
+
+This is required since the project uses both JSX and TSX. The only other settings that are configured are:
+
+- setting the ecmaVersion to match the one in the tsconfig.json
+- setting the react version to match the one in package.json
+- adding the cypress plugin
+- matching the typescript behavior for unused variables ( https://typescript-eslint.io/rules/no-unused-vars/ )
+- disabling the react/prop-types rule
+
+*/
 export default ts.config(
   { ignores: ['build'] },
   {
