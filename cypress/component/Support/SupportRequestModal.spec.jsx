@@ -1,7 +1,7 @@
-/* eslint-disable no-undef */
+ 
 
 import React from 'react';
-import {mount} from 'cypress/react18';
+import {mount} from 'cypress/react';
 import {SupportRequestModal} from '../../../src/components/modals/SupportRequestModal';
 import {Storage} from '../../../src/libs/storage';
 

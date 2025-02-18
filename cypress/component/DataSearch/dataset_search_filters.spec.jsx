@@ -1,7 +1,7 @@
-/* eslint-disable no-undef */
+ 
 
 import { makeDatasetTerm, makeStudyTerm } from '../test-utils';
-import { mount } from 'cypress/react18';
+import { mount } from 'cypress/react';
 import React from 'react';
 import { defaultFilters } from '../../../src/components/data_search/DatasetFilterConstants';
 import DatasetFilterList from '../../../src/components/data_search/DatasetFilterList';

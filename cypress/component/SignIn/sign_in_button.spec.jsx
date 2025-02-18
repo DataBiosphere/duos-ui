@@ -1,7 +1,7 @@
-/* eslint-disable no-undef */
+ 
 
 import React from 'react';
-import {mount} from 'cypress/react18';
+import {mount} from 'cypress/react';
 import SignInButton from '../../../src/components/SignInButton';
 import {User} from '../../../src/libs/ajax/User';
 import {Auth} from '../../../src/libs/auth/auth';
@@ -108,7 +108,7 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
-    let history = [];
+    const history = [];
     mount(<SignInButton history={history}/>);
     cy.get('button').click();
     cy.wait('@getMe').then(() => {
@@ -127,7 +127,7 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Metrics, 'identify');
     cy.stub(Metrics, 'syncProfile');
     cy.stub(Metrics, 'captureEvent');
-    let history = [];
+    const history = [];
     mount(<SignInButton history={history}/>);
     cy.get('button').click();
     cy.wait('@registerUser').then(() => {

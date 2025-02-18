@@ -1,6 +1,6 @@
-/* eslint-disable no-undef */
+ 
 import { React } from 'react';
-import { mount } from 'cypress/react18';
+import { mount } from 'cypress/react';
 import DarCollectionReview from '../../../src/pages/dar_collection_review/DarCollectionReview';
 import { Collections } from '../../../src/libs/ajax/Collections';
 import { Match } from '../../../src/libs/ajax/Match';
