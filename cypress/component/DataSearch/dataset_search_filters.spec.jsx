@@ -1,4 +1,4 @@
- 
+/* eslint-disable no-undef */
 
 import { makeDatasetTerm, makeStudyTerm } from '../test-utils';
 import { mount } from 'cypress/react';

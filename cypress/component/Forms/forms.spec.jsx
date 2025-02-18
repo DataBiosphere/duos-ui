@@ -1,4 +1,5 @@
- 
+/* eslint-disable no-undef */
+
 import React from 'react';
 import {mount} from 'cypress/react';
 import {FormField, FormFieldTypes, FormTable, FormValidators} from '../../../src/components/forms/forms';
