@@ -268,7 +268,9 @@ export type FileStorageCategory =
   | 'irbCollaborationLetter'
   | 'dataUseLetter'
   | 'alternativeDataSharingPlan'
-  | 'nihInstitutionalCertification';
+  | 'nihInstitutionalCertification'
+  | 'dataAccessAgreement'
+  | 'draftUploadedFile';
 
 export interface FileStorageObject {
   fileStorageObjectId: number;

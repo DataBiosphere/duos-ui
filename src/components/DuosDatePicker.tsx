@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {
   DesktopDatePicker,
@@ -10,36 +10,45 @@ import {
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {Button} from '@mui/material';
 import DialogActions from '@mui/material/DialogActions';
-import {Dayjs} from 'dayjs';
+import dayjs, {Dayjs} from 'dayjs';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
 
 
 interface DUOSDatePickerProps {
     inputFormat: string;
-    value: Dayjs;
+    defaultValue: Dayjs;
     onChange: any;
     onError: any;
     readOnly: boolean;
 }
 
 export const DuosDatePicker = (props: DUOSDatePickerProps) => {
-  const {inputFormat, value, onChange, onError, readOnly} = props;
-  const duosColorBlue='#216FB4';
-
+  const {inputFormat, defaultValue, onChange, onError, readOnly} = props;
+  const duosColorBlue = '#216FB4';
+  //Required to display the error on initialization with an invalid value when letting the date picker manage the value.
+  //onError must be excluded as a dependency of the hook because of change detection looping.
+  const checkInitialValue = useMemo(() => {
+    if (defaultValue != null && defaultValue.toString() === 'Invalid Date') {
+      onError('Invalid Date', defaultValue.toString());
+    }
+    return true;
+  },
+  // eslint-disable-next-line
+        [defaultValue]);
   const theme = createTheme({
     palette: {
-      primary:{
-        main:duosColorBlue,
+      primary: {
+        main: duosColorBlue,
       },
-      secondary:{
-        main:'#ffffff',
-        contrastText:duosColorBlue
+      secondary: {
+        main: '#ffffff',
+        contrastText: duosColorBlue
       },
     },
     components: {
-      MuiButton:{
-        styleOverrides:{
-          text:{
+      MuiButton: {
+        styleOverrides: {
+          text: {
             fontFamily: 'Montserrat',
             fontSize: '13px',
             fontWeight: '400',
@@ -54,9 +63,9 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         },
       },
-      MuiDayCalendar:{
-        styleOverrides:{
-          weekDayLabel:{
+      MuiDayCalendar: {
+        styleOverrides: {
+          weekDayLabel: {
             fontFamily: 'Montserrat',
             color: 'black',
             fontSize: '13px',
@@ -71,10 +80,10 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
           },
         },
       },
-      MuiPickersArrowSwitcher:{
-        styleOverrides:{
-          button:{
-            fontSize:'2.5rem',
+      MuiPickersArrowSwitcher: {
+        styleOverrides: {
+          button: {
+            fontSize: '2.5rem',
           },
         },
       },
@@ -123,12 +132,12 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
       MuiPickersCalendarHeader: {
         styleOverrides: {
           root: {
-            fontSize:'2.5rem',
+            fontSize: '2.5rem',
           },
-          switchViewIcon:{
-            fontSize:'2.5rem',
+          switchViewIcon: {
+            fontSize: '2.5rem',
           },
-          label:{
+          label: {
             fontFamily: 'Montserrat',
             color: 'black',
             fontSize: '13px',
@@ -140,7 +149,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     },
   });
 
-  const CancelSelectActionBar = (props:PickersActionBarProps) => {
+  const CancelSelectActionBar = (props: PickersActionBarProps) => {
     // Quirk of this control's usage pattern is the need to destructure the unused onSetToday and onClear from 'other'
     // props.  This is in part because per mockup, this control does not support 'clear' or 'go to today' style buttons.
     // eslint-disable-next-line no-unused-vars
@@ -173,17 +182,22 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
     const weekendStyle = isWeekendDay
       ? {color: 'var(--weekend)',}
       : {};
-    return <PickersDay {...props} sx={{...weekendStyle}} />;
+    return <PickersDay {...props} sx={{...weekendStyle}}/>;
   };
 
   return <ThemeProvider theme={theme}>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DesktopDatePicker
+      {checkInitialValue && <DesktopDatePicker
         closeOnSelect={false}
         label={'Select a date'}
         format={inputFormat}
-        value={value}
-        onAccept={onChange}
+        defaultValue={defaultValue ? dayjs(defaultValue) : null}
+        onChange={(value) => {
+          onChange(value ? value.format(inputFormat) : null);
+        }}
+        onAccept={(value) => {
+          onChange(value ? value.format(inputFormat) : null);
+        }}
         onError={onError}
         dayOfWeekFormatter={(day) => (`${day.format('ddd')}`)}
         readOnly={readOnly}
@@ -194,6 +208,7 @@ export const DuosDatePicker = (props: DUOSDatePickerProps) => {
         }}
         slots={{day: WeekendFormattedDay, actionBar: CancelSelectActionBar}}
       />
+      }
     </LocalizationProvider>
   </ThemeProvider>;
 };
