@@ -51,7 +51,7 @@ jobs:
         SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
         ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
     - id: 'auth'
-      if: github.actor != 'dependabot[bot]'
+#      if: github.actor != 'dependabot[bot]'
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v2'
       with:
@@ -61,13 +61,14 @@ jobs:
         service_account: 'dsp-artifact-registry-push@dsp-artifact-registry.iam.gserviceaccount.com'
     # authenticate to GAR docker repo
     - name: Docker Login
+#      if: github.actor != 'dependabot[bot]'
       uses: 'docker/login-action@v3'
       with:
         registry: 'us-central1-docker.pkg.dev'
         username: 'oauth2accesstoken'
         password: '${{ steps.auth.outputs.access_token }}'
     - name: Push Image to DSP GAR
-      if: github.actor != 'dependabot[bot]'
+#      if: github.actor != 'dependabot[bot]'
       run: |
         gcloud auth configure-docker "$GOOGLE_PROJECT" --quiet
         docker push "${SHA_TAG}"
