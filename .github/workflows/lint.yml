@@ -1,0 +1,17 @@
+on: [pull_request]
+name: changed files lint
+jobs:
+  scan:
+    name: npm lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.11.0'
+      - name: install dependencies
+        run: npm ci
+      - name: npm lint
+        run: npx eslint $(git diff ${{ github.event.pull_request.base.ref }} --name-only | xargs)
