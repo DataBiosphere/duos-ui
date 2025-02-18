@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
-import {mount} from 'cypress/react18';
+
+import {mount} from 'cypress/react';
 import React from 'react';
 import {DraftFileUpload} from '../../../src/components/forms/DraftFileUpload';
 import {BrowserRouter} from 'react-router-dom';
@@ -39,7 +40,7 @@ describe('Draft File Upload - Tests', () => {
     cy.get('button').contains('Upload a file');
   });
   it('should render a draft file upload control with a required indicator', () => {
-    let customProps = {...baseProps};
+    const customProps = {...baseProps};
     customProps.required = true;
     mount( <DraftFileUpload {...customProps}/>);
     cy.get('#lbl_testFileUpload').contains('File Upload Test*');
@@ -47,7 +48,7 @@ describe('Draft File Upload - Tests', () => {
   });
 
   it('should trigger onAddFile when file is added.', () => {
-    let customProps = {...baseProps};
+    const customProps = {...baseProps};
     customProps.onAddFile = cy.spy().as('onAddFileSpy');
     mount(<DraftFileUpload {...customProps}/>);
     cy.get('input[type="file"]').as('fileUpload');
@@ -59,7 +60,7 @@ describe('Draft File Upload - Tests', () => {
   });
 
   it('should display file name when defaultValue is FSO.', () => {
-    let customProps = {...baseProps};
+    const customProps = {...baseProps};
     customProps.defaultValue = baseFso;
     mount(<BrowserRouter><DraftFileUpload {...customProps}/></BrowserRouter>);
     cy.get('button').should('be.disabled');
@@ -68,7 +69,7 @@ describe('Draft File Upload - Tests', () => {
   });
 
   it('should trigger onDelete when file is removed.', () => {
-    let customProps = {...baseProps};
+    const customProps = {...baseProps};
     customProps.defaultValue = baseFso;
     customProps.onDeleteFile = cy.spy().as('onDeleteFileSpy');
     mount(<BrowserRouter><DraftFileUpload {...customProps}/></BrowserRouter>);
