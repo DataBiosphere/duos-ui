@@ -14,7 +14,7 @@ jobs:
           NODE_VERSION: $(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}')
       - uses: actions/setup-node@v4
         with:
-          node-version: "$NODE_VERSION"
+          node-version: $NODE_VERSION
       - name: install dependencies
         run: npm ci
       - name: npm lint
