@@ -9,10 +9,11 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+          fetch-tags: true
       - uses: actions/setup-node@v4
         with:
           node-version: '22.11.0'
       - name: install dependencies
         run: npm ci
       - name: npm lint
-        run: npx eslint $(git diff ${{ github.event.pull_request.base.ref }} ${{ github.ref }} --name-only | xargs)
+        run: npx eslint $(git diff ${{ github.event.pull_request.base.ref }} --name-only | xargs)
