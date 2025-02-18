@@ -10,9 +10,11 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
           fetch-tags: true
+        env:
+          NODE_VERSION: $(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}')
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.11.0'
+          node-version: "$NODE_VERSION"
       - name: install dependencies
         run: npm ci
       - name: npm lint
