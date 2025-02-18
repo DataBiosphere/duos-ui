@@ -20,4 +20,4 @@ jobs:
       - name: npm lint
         run: npx eslint $(git diff "origin/$GITHUB_REF" --name-only | xargs)
         env:
-                GITHUB_REF: ${{ github.event.pull_request.base.ref }}
+          GITHUB_REF: ${{ github.event.pull_request.base.ref }}
