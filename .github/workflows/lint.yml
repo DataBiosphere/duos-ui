@@ -1,0 +1,22 @@
+on: [pull_request]
+name: changed files lint
+jobs:
+  scan:
+    name: npm lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      -  run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $GITHUB_ENV
+      -  run: echo $NODE_VERSION
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: install dependencies
+        run: npm ci
+      - name: npm lint
+        run: npx eslint $(git diff "origin/$DESTINATION_REF" --name-only | xargs)
+        env:
+          DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
