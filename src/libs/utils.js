@@ -91,8 +91,7 @@ export const goToPage = (value, pageCount, setCurrentPage) => {
 };
 
 export const findPropertyValue = (propName, researcher) => {
-  // The user object, confusingly, sometimes has a list of `properties` and sometimes has a list of `researcherProperties`.
-  const props = researcher.properties || researcher.researcherProperties;
+  const props = researcher.properties;
   const prop = isNil(props) ?
     null
     : find({propertyKey: propName})(props);
