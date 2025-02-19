@@ -10,8 +10,8 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
           fetch-tags: true
-      -  run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $env:GITHUB_ENV
-      -  run: echo ${{ env.NODE_VERSION }}
+      -  run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $GITHUB_ENV
+      -  run: echo $NODE_VERSION
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
