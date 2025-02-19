@@ -10,14 +10,12 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
           fetch-tags: true
-        env:
-          NODE_VERSION: $(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')
+      -  run: echo "NODE_VERSION=$(cat Dockerfile | awk 'NR==2 {gsub(":","@",$2); print $2}' | awk '{split($0, array, "@"); print array[2]}')" >> $env:GITHUB_ENV
+      -  run: echo ${{ env.NODE_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: install dependencies
         run: npm ci
       - name: npm lint
-        run: npx eslint $(git diff "origin/$GITHUB_REF" --name-only | xargs)
-        env:
-          GITHUB_REF: ${{ github.event.pull_request.base.ref }}
+        run: npx eslint $(git diff "origin/${{ github.event.pull_request.base.ref }}" --name-only | xargs)
