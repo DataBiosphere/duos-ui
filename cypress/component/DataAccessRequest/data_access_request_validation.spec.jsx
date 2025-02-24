@@ -23,7 +23,7 @@ const user = {
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
   libraryCards: [{}],
-  researcherProperties: [
+  properties: [
     {
       propertyId: 10350,
       userId: 5,
@@ -45,7 +45,7 @@ const userNoLibraryCard = {
   email: 'janedoe@gmail.com',
   eraCommonsId: 'asdg',
   libraryCards: [],
-  researcherProperties: [
+  properties: [
     {
       propertyId: 10350,
       userId: 5,

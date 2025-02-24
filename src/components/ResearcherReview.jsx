@@ -8,23 +8,23 @@ export const ResearcherReview = (props) => {
     value: '',
     user: {},
     institution: {},
-    researcherProperties: {
+    properties: {
       eraCommonsId: ''
     }
   });
 
   useEffect(() => {
     const user = props.user;
-    let researcherProps = getPropertyValuesFromUser(user);
+    let userProps = getPropertyValuesFromUser(user);
     setState((prev) => ({
       ...prev,
       user: user,
       institution: !isEmpty(user.institution) ? user.institution : null,
-      researcherProperties: researcherProps
+      properties: userProps
     }));
   }, [props.user]);
 
-  const { researcherProperties, user, institution } = state;
+  const { properties, user, institution } = state;
 
   return (
     <div className="container">
@@ -49,7 +49,7 @@ export const ResearcherReview = (props) => {
             <div className="col-lg-6 col-md-6 col-sm-6 col-xs-12">
               <label className="control-label">NIH User Name</label>
               <div id="lbl_profileeraCommonsId" className="control-data" name="profileeraCommonsId" readOnly={true}>
-                {researcherProperties.eraCommonsId}
+                {properties.eraCommonsId}
               </div>
             </div>
             <div className="col-lg-6 col-md-6 col-sm-6 col-xs-12">

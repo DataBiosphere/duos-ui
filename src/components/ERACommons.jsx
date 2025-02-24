@@ -75,7 +75,7 @@ export default function ERACommons(props) {
     const deleteResponse = await AuthenticateNIH.deleteAccountLinkage();
     if (deleteResponse) {
       const response = await User.getMe();
-      const eraAuthState = extractEraAuthenticationState(response.researcherProperties);
+      const eraAuthState = extractEraAuthenticationState(response.properties);
       setAuthorized(eraAuthState.isAuthorized);
       setExpirationCount(eraAuthState.expirationCount);
       setEraCommonsId(researcherProfile.eraCommonsId);
