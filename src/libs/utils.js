@@ -91,9 +91,10 @@ export const goToPage = (value, pageCount, setCurrentPage) => {
 };
 
 export const findPropertyValue = (propName, researcher) => {
-  const prop = isNil(researcher.researcherProperties) ?
+  const props = researcher.properties;
+  const prop = isNil(props) ?
     null
-    : find({propertyKey: propName})(researcher.researcherProperties);
+    : find({propertyKey: propName})(props);
   return isNil(prop) ? '' : prop.propertyValue;
 };
 

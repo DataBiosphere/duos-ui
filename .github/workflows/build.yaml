@@ -8,8 +8,8 @@ on:
     branches:
     - develop
 env:
-  REGISTRY_HOST: gcr.io
-  GOOGLE_PROJECT: broad-dsp-gcr-public
+  REGISTRY_HOST: us-central1-docker.pkg.dev
+  GOOGLE_PROJECT: dsp-artifact-registry
   SERVICE_NAME: ${{ github.event.repository.name }}
 jobs:
   tag-build-push:
@@ -32,34 +32,42 @@ jobs:
     - name: Construct tags
       id: construct-tags
       run: |
-        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${SHORT_SHA}"
+        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:${SHORT_SHA}"
         ENVIRONMENT_TAG=""
-        if ${{ github.event_name == 'pull_request'}}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${SHORT_SHA}"
-        elif ${{github.event_name == 'push' }}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
+        if [ "$GITHUB_EVENT" = "pull_request" ]; then
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:pr-${SHORT_SHA}"
+        elif [ "$GITHUB_EVENT" = "push" ]; then
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}/${SERVICE_NAME}:dev"
         fi
         echo "sha-tag=$SHA_TAG" >> $GITHUB_OUTPUT
         echo "environment-tag=$ENVIRONMENT_TAG" >> $GITHUB_OUTPUT
       env:
         SHORT_SHA: ${{ steps.short-sha.outputs.sha }}
+        GITHUB_EVENT: ${{ github.event_name }}
     - name: Build Image
-      run: docker build -t "${SHA_TAG}" -t "${ENVIRONMENT_TAG}" .
+      run: |
+        docker build -t "${SHA_TAG}" -t "${ENVIRONMENT_TAG}" .
       env:
         SHA_TAG: ${{ steps.construct-tags.outputs.sha-tag }}
         ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
     - id: 'auth'
-      if: github.actor != 'dependabot[bot]'
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v2'
       with:
         # Centralized in dsp-tools-k8s; ask in #dsp-devops-champions for help troubleshooting
+        token_format: 'access_token'
         workload_identity_provider: 'projects/1038484894585/locations/global/workloadIdentityPools/github-wi-pool/providers/github-wi-provider'
-        service_account: 'gcr-publish@broad-dsp-gcr-public.iam.gserviceaccount.com'
-    - name: Push Image to GCR
-      if: github.actor != 'dependabot[bot]'
+        service_account: 'dsp-artifact-registry-push@dsp-artifact-registry.iam.gserviceaccount.com'
+    # authenticate to GAR docker repo
+    - name: Docker Login
+      uses: 'docker/login-action@v3'
+      with:
+        registry: 'us-central1-docker.pkg.dev'
+        username: 'oauth2accesstoken'
+        password: '${{ steps.auth.outputs.access_token }}'
+    - name: Push Image to DSP GAR
       run: |
-        gcloud auth configure-docker --quiet
+        gcloud auth configure-docker "$GOOGLE_PROJECT" --quiet
         docker push "${SHA_TAG}"
         docker push "${ENVIRONMENT_TAG}"
       env:
@@ -67,7 +75,7 @@ jobs:
         ENVIRONMENT_TAG: ${{ steps.construct-tags.outputs.environment-tag }}
   report-to-sherlock:
     uses: broadinstitute/sherlock/.github/workflows/client-report-app-version.yaml@main
-    needs: [tag-build-push]
+    needs: [ tag-build-push ]
     with:
       new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
       chart-name: 'duos'
@@ -77,7 +85,7 @@ jobs:
   set-version-in-dev:
     if: github.event_name == 'push'
     uses: broadinstitute/sherlock/.github/workflows/client-set-environment-app-version.yaml@main
-    needs: [tag-build-push, report-to-sherlock]
+    needs: [ tag-build-push, report-to-sherlock ]
     with:
       new-version: ${{ needs.tag-build-push.outputs.sherlock-version }}
       chart-name: 'duos'

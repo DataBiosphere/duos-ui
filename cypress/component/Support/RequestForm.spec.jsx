@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 
 import React from 'react';
-import {mount} from 'cypress/react18';
+import {mount} from 'cypress/react';
 import RequestForm from '../../../src/pages/user_profile/RequestForm';
 
 describe('SupportRequestsPage Tests', () => {

@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
+
 import React from 'react';
-import {mount} from 'cypress/react18';
+import {mount} from 'cypress/react';
 import {FormField, FormFieldTypes, FormTable, FormValidators} from '../../../src/components/forms/forms';
 import dayjs from 'dayjs';
 
