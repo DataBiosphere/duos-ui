@@ -330,9 +330,14 @@ export const FormTable = (config) => {
     id, formFields,
     enableAddingRow, addRowLabel,
     disabled, onChange, minLength,
-    validation, onValidationChange, defaultValue
+    validation, onValidationChange, defaultValue, styleProps = {}
   } = config;
-
+  const {
+    enableAddingRowStyle = { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },
+    addingRowButtonClassName = 'pill form-btn btn-xs',
+    addRowButtonIconClassName = 'glyphicon glyphicon-plus',
+    removeRowButtonIconClassName = 'glyphicon glyphicon-remove'
+  } = styleProps
   const [formValue, setFormValue] = useState(defaultValue || [{}]);
 
   const key = getKey(config);
@@ -393,28 +398,29 @@ export const FormTable = (config) => {
               onValidationChange({ key: getKey(config), validation: validationClone });
             }
           }}>
-          <span className='glyphicon glyphicon-remove' />
+          <span className={removeRowButtonIconClassName} />
         </button>
       </div>
     ))}
     {/* add new row to table button */}
     {enableAddingRow && (
-      <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 }}>
+      <div style={enableAddingRowStyle}>
         <button
-          id={`add-new-table-row-${id}`}
-          key={`add-new-table-row-${id}`}
-          className='pill form-btn btn-xs'
-          type='button'
-          onClick={() => {
-            const formValueClone = cloneDeep(formValue);
-            formValueClone.push({});
-            setFormValue(formValueClone);
-            onChange({key: key, value: formValueClone, isValid: true });
-          }}
-          style={{ marginTop: 10 }}
+            id={`add-new-table-row-${id}`}
+            key={`add-new-table-row-${id}`}
+            className={addingRowButtonClassName}
+            type='button'
+            onClick={() => {
+              const formValueClone = cloneDeep(formValue);
+              formValueClone.push({});
+              setFormValue(formValueClone);
+              onChange({key: key, value: formValueClone, isValid: true});
+            }}
+            style={{marginTop: 10}}
         >
           {addRowLabel || 'Add New'}
-          <span className='glyphicon glyphicon-plus' style={{ marginLeft: '8px' }} />
+          <span className={addRowButtonIconClassName}
+                style={{marginLeft: '8px'}}/>
         </button>
       </div>
     )}

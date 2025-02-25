@@ -10,8 +10,8 @@ export type DraftFileUploadProps = {
     draftId: string,
     defaultValue: FileStorageObject,
     id: string,
-    onAddFile: Function,
-    onDeleteFile: Function,
+    onAddFile: (event: ChangeEvent<HTMLInputElement>, id: string) => Promise<void>,
+    onDeleteFile: (draftId:string, fileId: number, id:string) => Promise<void>,
     required?: boolean,
     title: string
 }
