@@ -356,7 +356,7 @@ export const FormTable = (config) => {
       })}
     </div>
     {/* generate form rows */}
-    {formValue?.map((formRow, i) => (
+    {formValue?.map((_, i) => (
       <div className='formTable-row formTable-data-row' key={`formtable-${id}-${i}`}>
         {formFields.map(formCol => (
           <FormField
