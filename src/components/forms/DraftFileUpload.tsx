@@ -11,90 +11,92 @@ export type DraftFileUploadProps = {
     defaultValue: FileStorageObject,
     id: string,
     onAddFile: (event: ChangeEvent<HTMLInputElement>, id: string) => Promise<void>,
-    onDeleteFile: (draftId:string, fileId: number, id:string) => Promise<void>,
+    onDeleteFile: (draftId: string, fileId: number, id: string) => Promise<void>,
     required?: boolean,
     title: string
 }
 
 export const DraftFileUpload = (props: DraftFileUploadProps) => {
-  const {id, draftId, title, description, onAddFile, onDeleteFile, defaultValue, required} = props;
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState<boolean>(false);
-  const spinnerRef = useRef<HTMLDivElement>(null);
-  const handleClose = () => {
-    setOpen(false);
-  };
-  const handleDeleteClick = () => {
-    setOpen(true);
-  };
+    const {id, draftId, title, description, onAddFile, onDeleteFile, defaultValue, required} = props;
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [open, setOpen] = useState<boolean>(false);
+    const spinnerRef = useRef<HTMLDivElement>(null);
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const handleDeleteClick = () => {
+        setOpen(true);
+    };
 
-  const handleAddFile = async (event: ChangeEvent<HTMLInputElement>, id: string) => {
-    await onAddFile(event, id);
-  };
+    const handleAddFile = async (event: ChangeEvent<HTMLInputElement>, id: string) => {
+        await onAddFile(event, id);
+    };
 
-  const handleDeleteFile = async () => {
-    await onDeleteFile(draftId, defaultValue?.fileStorageObjectId, id);
-  };
+    const handleDeleteFile = async () => {
+        await onDeleteFile(draftId, defaultValue?.fileStorageObjectId, id);
+    };
 
-  const deleteButton = (defaultValue) ?
-    <>
-      <Link
-        style={{marginLeft: '15px'}}
-        id={`${defaultValue.fileStorageObjectId}_delete`}
-        className={'glyphicon glyphicon-trash'}
-        onClick={() => handleDeleteClick()}
-        to={`#`}
-      />
-      <ConfirmationDialog
-        title='Delete Attachment'
-        openState={open}
-        close={handleClose}
-        action={() => {
-          setOpen(false);
-          toggleSpinnerRef(true);
-          handleDeleteFile().then(() => {
-            toggleSpinnerRef(false);
-            if (inputRef.current) {
-              inputRef.current.value = '';
+    const deleteButton = (defaultValue) ?
+        <>
+            <Link
+                style={{marginLeft: '15px'}}
+                id={`${defaultValue.fileStorageObjectId}_delete`}
+                className={'glyphicon glyphicon-trash'}
+                onClick={() => handleDeleteClick()}
+                to={`#`}
+            />
+            <ConfirmationDialog
+                title='Delete Attachment'
+                openState={open}
+                close={handleClose}
+                action={() => {
+                    setOpen(false);
+                    toggleSpinnerRef(true);
+                    handleDeleteFile().then(() => {
+                        toggleSpinnerRef(false);
+                        if (inputRef.current) {
+                            inputRef.current.value = '';
+                        }
+                    });
+                }}
+                description={`Are you sure you want to delete the file '${defaultValue.fileName}'?`}
+            />
+        </> : <div/>;
+
+    const handleUploadButtonClick = () => {
+        inputRef.current?.click();
+    };
+
+    const toggleSpinnerRef = (visible: boolean) => {
+        if (spinnerRef?.current) {
+            if (visible) {
+                spinnerRef.current.style.display = 'inline';
+            } else {
+                spinnerRef.current.style.display = 'none';
             }
-          });
-        }}
-        description={`Are you sure you want to delete the file '${defaultValue.fileName}'?`}
-      />
-    </> : <div/>;
+        }
+    };
 
-  const handleUploadButtonClick = () => {
-    inputRef.current?.click();
-  };
-
-  const toggleSpinnerRef = (visible: boolean) => {
-    if (spinnerRef?.current) {
-      if (visible) {
-        spinnerRef.current.style.display = 'inline';
-      } else {
-        spinnerRef.current.style.display = 'none';
-      }
-    }
-  };
-
-  return <div>
-    <FormFieldTitle
-      formId={id}
-      title={title}
-      description={description}
-      required={required}
-    /><input type={'file'} ref={inputRef} style={{display: 'none'}} onChange={(event) => {
-      toggleSpinnerRef(true);
-      handleAddFile(event, id).then(() => {
-        toggleSpinnerRef(false);
-      });
+    return <div>
+        <FormFieldTitle
+            formId={id}
+            title={title}
+            description={description}
+            required={required}
+        /><input type={'file'} ref={inputRef} style={{display: 'none'}} onChange={(event) => {
+        toggleSpinnerRef(true);
+        handleAddFile(event, id).then(() => {
+            toggleSpinnerRef(false);
+        });
     }}/>
-    <div style={{display:'inline', margin:'auto'}}>
-      <button disabled={defaultValue != null} onClick={handleUploadButtonClick}>Upload a file</button>
-      {defaultValue && <span style={{marginLeft:'15px'}}>{defaultValue.fileName} {deleteButton}</span>}
-      <div ref={spinnerRef} style={{display: 'none', textAlign: 'center', height: '44', width: '180'}}>
-        <img src={loadingIndicator} alt={'Loading'}/>
-      </div>
-    </div>
-  </div>;
+        <div style={{display: 'inline', margin: 'auto'}}>
+            <button className={'button-complex-submission'} disabled={defaultValue != null}
+                    onClick={handleUploadButtonClick}>Upload a file<span
+                className={'button-icon button-icon-file-upload'} style={{marginLeft: '8px'}}/></button>
+            {defaultValue && <span style={{marginLeft: '15px'}}>{defaultValue.fileName} {deleteButton}</span>}
+            <div ref={spinnerRef} style={{display: 'none', textAlign: 'center', height: '44', width: '180'}}>
+                <img src={loadingIndicator} alt={'Loading'}/>
+            </div>
+        </div>
+    </div>;
 };
