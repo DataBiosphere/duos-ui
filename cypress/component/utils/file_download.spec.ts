@@ -13,20 +13,22 @@ describe('FileDownload', () => {
             fileDownload(testData, filename, mime);
 
             // verify blob creation
-            expect(createObjectURLSpy).to.be.calledOnce;
+            cy.wrap(createObjectURLSpy).should('be.calledOnce');
             const blob = createObjectURLSpy.firstCall.args[0];
-            expect(blob).to.be.instanceOf(Blob);
-            expect(blob.type).to.equal(mime);
+            cy.wrap(blob).should('be.instanceOf', Blob);
+            cy.wrap(blob.type).should('equal', mime);
 
             // verify anchor element
             const anchor = win.document.querySelector('a');
-            expect(anchor).to.have.attr('download', filename);
-            expect(anchor?.style.display).to.equal('none');
+            cy.wrap(anchor).should('not.be.null');
+            cy.wrap(anchor).should('have.attr', 'download', filename);
+            cy.wrap(anchor?.style.display).should('equal', 'none');
 
             // verify cleanup
+            // eslint-disable-next-line cypress/no-unnecessary-waiting
             cy.wait(200).then(() => {
-                expect(revokeObjectURLSpy).to.be.calledOnce;
-                expect(win.document.querySelector('a')).to.be.null;
+                cy.wrap(revokeObjectURLSpy).should('be.calledOnce');
+                cy.wrap(win.document.querySelector('a')).should('be.null');
             });
         });
     });
@@ -41,7 +43,7 @@ describe('FileDownload', () => {
             fileDownload(testData, filename, '');
 
             const blob = createObjectURLSpy.firstCall.args[0];
-            expect(blob.type).to.equal('application/octet-stream');
+            cy.wrap(blob.type).should('be.equal', 'application/octet-stream');
         });
     });
 });
