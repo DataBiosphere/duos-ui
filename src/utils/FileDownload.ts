@@ -8,10 +8,9 @@ export const fileDownload = (data: string | ArrayBuffer | ArrayBufferView | Blob
     a.href = blobUrl;
 
     document.body.appendChild(a);
-    a.click();
 
-    setTimeout(() => {
+    Promise.resolve(a.click()).then(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
-    }, 100);
+    });
 }

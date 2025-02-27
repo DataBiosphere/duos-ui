@@ -9,6 +9,7 @@ describe('FileDownload', () => {
         cy.window().then((win) => {
             const createObjectURLSpy = cy.spy(win.URL, 'createObjectURL');
             const revokeObjectURLSpy = cy.spy(win.URL, 'revokeObjectURL');
+            const clickSpy = cy.spy(HTMLAnchorElement.prototype, 'click');
 
             fileDownload(testData, filename, mime);
 
@@ -19,16 +20,17 @@ describe('FileDownload', () => {
             cy.wrap(blob.type).should('equal', mime);
 
             // verify anchor element
-            const anchor = win.document.querySelector('a');
-            cy.wrap(anchor).should('not.be.null');
-            cy.wrap(anchor).should('have.attr', 'download', filename);
-            cy.wrap(anchor?.style.display).should('equal', 'none');
+            cy.get('a').should('exist')
+                .and('have.attr', 'download', filename)
+                .and('have.css', 'display', 'none')
+                .then(() => {
+                    cy.wrap(clickSpy).should('be.calledOnce');
+                });
 
             // verify cleanup
-            // eslint-disable-next-line cypress/no-unnecessary-waiting
-            cy.wait(200).then(() => {
+            cy.wrap(clickSpy).then(() => {
                 cy.wrap(revokeObjectURLSpy).should('be.calledOnce');
-                cy.wrap(win.document.querySelector('a')).should('be.null');
+                cy.get('a').should('not.exist');
             });
         });
     });
@@ -40,10 +42,31 @@ describe('FileDownload', () => {
         cy.window().then((win) => {
             const createObjectURLSpy = cy.spy(win.URL, 'createObjectURL');
 
-            fileDownload(testData, filename, '');
+            fileDownload(testData, filename);
 
             const blob = createObjectURLSpy.firstCall.args[0];
             cy.wrap(blob.type).should('be.equal', 'application/octet-stream');
+        });
+    });
+
+    it('should handle different input types', () => {
+        const testCases = [
+            { data: new Uint8Array([1, 2, 3]), type: 'ArrayBufferView' },
+            { data: new Blob(['test']), type: 'Blob' },
+            { data: new ArrayBuffer(8), type: 'ArrayBuffer' }
+        ];
+
+        cy.window().then((win) => {
+            const createObjectURLSpy = cy.spy(win.URL, 'createObjectURL');
+
+            testCases.forEach(({ data, type }, index) => {
+                fileDownload(data, `test.${type}`);
+
+                const blob = createObjectURLSpy.getCall(index).args[0];
+                cy.wrap(blob).should('be.instanceOf', Blob);
+            });
+
+            cy.wrap(createObjectURLSpy).should('have.callCount', testCases.length);
         });
     });
 });
