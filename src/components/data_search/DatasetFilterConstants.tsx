@@ -24,5 +24,5 @@ export const defaultFilters = (datasets: DatasetTerm[]): FiltersTypes => {
 export const generateDefaultParticipantCountValues = (datasets: DatasetTerm[]) => datasets.reduce((acc, dataset) => {
   return {
     max: Math.max(acc.max, dataset.participantCount ? dataset.participantCount : 0),
-    min: Math.min(acc.min, dataset.participantCount ? dataset.participantCount : Infinity) };
+    min: 0 };
 }, {max: 0, min: Infinity});
