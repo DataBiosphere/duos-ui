@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getOr, isNil, map, uniq } from 'lodash/fp';
-import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
-import DiameterVariant from 'react-material-icon-svg/dist/DiameterVariant';
+import { TaskAltOutlined, ErrorOutline } from '@mui/icons-material';
 import { ServiceStatus } from '../libs/ajax/ServiceStatus';
 
 const Status = () => {
@@ -35,8 +34,8 @@ const Status = () => {
     fetchStatus();
   }, []);
 
-  const healthyState = <CheckboxMarkedCircleOutline fill={'green'} style={{ marginLeft: '2rem', verticalAlign: 'middle', height: '24px' }} />;
-  const unhealthyState = <DiameterVariant fill={'red'} style={{ marginLeft: '2rem', verticalAlign: 'middle', height: '24px' }} />;
+  const healthyState = <TaskAltOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'green' }} />;
+  const unhealthyState = <ErrorOutline sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />;
 
   const consentHealthy = isConsentHealthy(consentStatus) ? healthyState : unhealthyState;
   const ontologyHealthy = isOntologyHealthy(ontologyStatus) ? healthyState : unhealthyState;
