@@ -33,6 +33,7 @@ yarn-debug.log*
 yarn-error.log*
 
 public/config.json
+/cypress/downloads/
 /cypress/videos/
 /cypress/fixtures/duos-automation*.json
 /cypress/screenshots
