@@ -35,7 +35,7 @@
     "uuid": "11.1.0"
   },
   "scripts": {
-    "analyze": "npm run build; source-map-explorer build/static/js/main.*",
+    "analyze": "VISUALIZER_PLUGIN=true vite build",
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -48,8 +48,9 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
+    "@emotion/styled": "11.14.0",
     "@eslint/js": "9.21.0",
-    "@types/node": "^22.13.5",
+    "@types/node": "22.13.5",
     "@types/react-router-dom": "5.3.3",
     "@vitejs/plugin-react": "4.3.4",
     "buffer": "6.0.3",
@@ -63,7 +64,7 @@
     "google-auth-library": "9.15.1",
     "history": "5.3.0",
     "prop-types": "15.8.1",
-    "source-map-explorer": "2.5.3",
+    "rollup-plugin-visualizer": "5.14.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.24.0",
     "vite": "6.1.1"
