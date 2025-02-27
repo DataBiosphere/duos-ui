@@ -1,5 +1,4 @@
 import {styles} from './DarDatasetTable';
-import {filter, flatMap, flow, get, isEmpty, isUndefined, map, values} from 'lodash/fp';
 
 export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
   return {
@@ -8,36 +7,6 @@ export function dataUseGroupCellData({dataUseGroup, label= 'data-use'}) {
     style : {
       color: '#354052',
       fontSize: styles.fontSize.dataUseGroup,
-      fontWeight: 'bold',
-      paddingRight: '2%'
-    },
-    label
-  };
-}
-
-export function votesCellData({elections, dataUseGroup, label= 'votes'}) {
-  let displayValue = '-/-';
-  if (!isEmpty(elections)) {
-    const darElections = filter(e => e.electionType === 'DataAccess')(elections);
-    const memberVotes = flow(
-      flatMap(e => values(e.votes)),
-      filter(v => v.type === 'DAC')
-    )(darElections);
-    const voteValues = flow(
-      filter(v => !isUndefined(v.vote)),
-      map(v => get('vote')(v))
-    )(memberVotes);
-    const numerator = voteValues.length;
-    const denominator = memberVotes.length;
-    displayValue = numerator + '/' + denominator;
-  }
-
-  return {
-    data: displayValue,
-    id: dataUseGroup,
-    style : {
-      color: '#354052',
-      fontSize: styles.fontSize.votes,
       fontWeight: 'bold',
       paddingRight: '2%'
     },
@@ -74,7 +43,6 @@ export function datasetsCellData({datasets = [], dataUseGroup, label= 'datasets'
 
 export default {
   dataUseGroupCellData,
-  votesCellData,
   numberOfDatasetsCellData,
   datasetsCellData,
 };
