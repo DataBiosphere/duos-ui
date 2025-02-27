@@ -62,7 +62,6 @@ export const styles = {
 
 export const DarDatasetTableColumnOptions = {
   DATA_USE_GROUP: 'dataUseGroup',
-  VOTES: 'votes',
   NUMBER_OF_DATASETS: 'numberOfDatasets',
   DATASETS: 'datasets',
 };
@@ -73,12 +72,6 @@ const columnHeaderConfig = {
     cellStyle: { width: styles.cellWidth.dataUseGroup },
     cellDataFn: cellData.dataUseGroupCellData,
     sortable: true
-  },
-  votes: {
-    label: 'Votes',
-    cellStyle: { width: styles.cellWidth.votes },
-    cellDataFn: cellData.votesCellData,
-    sortable: false
   },
   numberOfDatasets: {
     label: '# of Datasets',
@@ -170,7 +163,7 @@ export const DarDatasetTable = (props) => {
       );
       setBuckets(dataAccessBuckets);
       setTableSize(dataAccessBuckets.length);
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
       });
@@ -181,7 +174,7 @@ export const DarDatasetTable = (props) => {
   useEffect(() => {
     try {
       init();
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({ text: 'Failed to initialize collection' });
     }
   }, [init]);
