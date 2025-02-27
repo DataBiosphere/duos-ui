@@ -1,4 +1,4 @@
-import fileDownload from 'js-file-download';
+import { fileDownload } from '../../utils/FileDownload';
 import { getApiUrl } from '../ajax';
 import { Config } from '../config';
 import { isFileEmpty } from '../utils';

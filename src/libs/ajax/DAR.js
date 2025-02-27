@@ -1,4 +1,4 @@
-import fileDownload from 'js-file-download';
+import { fileDownload } from '../../utils/FileDownload';
 import * as fp from 'lodash/fp';
 import { isNil } from 'lodash/fp';
 import { Config } from '../config';
