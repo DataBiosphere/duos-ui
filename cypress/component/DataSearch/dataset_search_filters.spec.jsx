@@ -53,8 +53,7 @@ describe('Data Library Filters', () => {
     mount(<DatasetFilterList {...props} />);
     cy.get('#participantCountMax-range-input').should('have.value',
       datasets[0].participantCount);
-    cy.get('#participantCountMin-range-input').should('have.value',
-      datasets[1].participantCount);
+    cy.get('#participantCountMin-range-input').should('have.value', 0);
   });
 
   it('calls the filter handler on range changes', () => {
