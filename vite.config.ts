@@ -18,5 +18,6 @@ export default defineConfig({
       key: 'server.key',
       cert: 'server.crt',
     },
+    open: true
   },
 });
