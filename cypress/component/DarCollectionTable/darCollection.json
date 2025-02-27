@@ -4,7 +4,7 @@
   "createDate": 1730825497654,
   "createUser": {
     "userId": 3351,
-    "email": "grushton@broadinstitute.org",
+    "email": "grushton@test.com",
     "displayName": "Greg Rushton Admin",
     "createDate": 1452101967000,
     "properties": [
@@ -12,7 +12,7 @@
         "propertyId": 8873,
         "userId": 3351,
         "propertyKey": "academicEmail",
-        "propertyValue": "grushton@broadinstitute.org"
+        "propertyValue": "grushton@test.com"
       },
       {
         "propertyId": 8864,
@@ -81,12 +81,6 @@
         "propertyValue": "true"
       },
       {
-        "propertyId": 8868,
-        "userId": 3351,
-        "propertyKey": "linkedIn",
-        "propertyValue": "https://www.linkedin.com/in/greg-rushton-a6105b1/"
-      },
-      {
         "propertyId": 1983,
         "userId": 3351,
         "propertyKey": "nameDAA",
@@ -99,16 +93,10 @@
         "propertyValue": "grushton"
       },
       {
-        "propertyId": 8866,
-        "userId": 3351,
-        "propertyKey": "orcid",
-        "propertyValue": "https://orcid.org/0000-0002-4648-4229"
-      },
-      {
         "propertyId": 8863,
         "userId": 3351,
         "propertyKey": "piEmail",
-        "propertyValue": "grushton@broadinstitute.org"
+        "propertyValue": "grushton@test.com"
       },
       {
         "propertyId": 8874,
@@ -135,12 +123,6 @@
         "propertyValue": "PUBMed ID"
       },
       {
-        "propertyId": 8875,
-        "userId": 3351,
-        "propertyKey": "researcherGate",
-        "propertyValue": "https://www.researchgate.net/profile/Gregory_Rushton2"
-      },
-      {
         "propertyId": 8880,
         "userId": 3351,
         "propertyKey": "scientificURL",
@@ -165,12 +147,6 @@
         "propertyValue": ""
       },
       {
-        "propertyId": 1982,
-        "userId": 3351,
-        "propertyKey": "urlDAA",
-        "propertyValue": "https://storage.googleapis.com/broad-dsde-dev-consent/51040815-8ba2-41c0-9605-6e7ad319cfeb.pdf"
-      },
-      {
         "propertyId": 8872,
         "userId": 3351,
         "propertyKey": "zipcode",
@@ -193,7 +169,7 @@
         "institutionId": 150,
         "eraCommonsId": "GREGORYRUSHTON",
         "userName": "Gregory Rushton",
-        "userEmail": "grushton@broadinstitute.org",
+        "userEmail": "grushton@test.com",
         "createDate": 1694797680476,
         "createUserId": 3351,
         "daaIds": []
@@ -243,13 +219,13 @@
         "irbDocumentName": "",
         "irbProtocolExpiration": "",
         "itDirector": "Export Testing: DUOS_2807",
-        "signingOfficial": "Greg Rushton Admin (grushton@broadinstitute.org)",
+        "signingOfficial": "Greg Rushton Admin (grushton@test.com)",
         "collaborationLetterLocation": "",
         "collaborationLetterName": "",
         "labCollaborators": [
           {
             "approverStatus": false,
-            "email": "ccai@broadinstitute.org",
+            "email": "ccai@test.com",
             "eraCommonsId": "Export Testing: DUOS_2807",
             "name": "Cinye",
             "title": "Export Testing: DUOS_2807",
@@ -257,42 +233,42 @@
           },
           {
             "approverStatus": false,
-            "email": "monster.pshapiro.dev@gmail.com",
-            "eraCommonsId": "monster.pshapiro.dev@gmail.com",
+            "email": "monster.pshapiro.dev@test.com",
+            "eraCommonsId": "monster.pshapiro.dev@test.com",
             "name": "Phil",
-            "title": "monster.pshapiro.dev@gmail.com",
+            "title": "monster.pshapiro.dev@test.com",
             "uuid": "f1123c97-47d3-47d3-91ce-cd2c802de8fc"
           },
           {
             "approverStatus": false,
-            "email": "rjohanek@broadinstitute.org",
-            "eraCommonsId": "rjohanek@broadinstitute.org",
+            "email": "rjohanek@test.com",
+            "eraCommonsId": "rjohanek@test.com",
             "name": "Rae",
-            "title": "rjohanek@broadinstitute.org",
+            "title": "rjohanek@test.com",
             "uuid": "a7e2bb55-fd14-49fa-afab-28c322d6def5"
           },
           {
             "approverStatus": false,
-            "email": "fboulnois.dev@gmail.com",
-            "eraCommonsId": "fboulnois.dev@gmail.com",
+            "email": "fboulnois.dev@test.com",
+            "eraCommonsId": "fboulnois.dev@test.com",
             "name": "Florian",
-            "title": "fboulnois.dev@gmail.com",
+            "title": "fboulnois.dev@test.com",
             "uuid": "d681ad93-973d-4e16-bac2-be8c79a87901"
           },
           {
             "approverStatus": false,
-            "email": "vsliwa@broadinstitute.org",
-            "eraCommonsId": "vsliwa@broadinstitute.org",
+            "email": "vsliwa@test.com",
+            "eraCommonsId": "vsliwa@test.com",
             "name": "Victoria",
-            "title": "vsliwa@broadinstitute.org",
+            "title": "vsliwa@test.com",
             "uuid": "1ef31bd4-0862-4dc3-9a82-9b8445c46e6a"
           },
           {
             "approverStatus": false,
-            "email": "brubensttest@gmail.com",
-            "eraCommonsId": "brubensttest@gmail.com",
+            "email": "brubensttest@test.com",
+            "eraCommonsId": "brubensttest@test.com",
             "name": "Sky",
-            "title": "brubensttest@gmail.com",
+            "title": "brubensttest@test.com",
             "uuid": "baa1f85a-65ce-4fc2-8c7e-344eb7bdd96c"
           }
         ],
@@ -499,7 +475,7 @@
           "propertyId": 11509,
           "datasetId": 2352,
           "propertyName": "URL",
-          "propertyValue": "https://jade.datarepo-dev.broadinstitute.org/datasets/3cc377ae-c07c-4059-8dee-b56be8e3a5c2",
+          "propertyValue": "https://jade.datarepo-dev.test.com/datasets/1234",
           "schemaProperty": "url",
           "propertyType": "String"
         },
