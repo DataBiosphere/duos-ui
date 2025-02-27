@@ -163,8 +163,7 @@ export const DarDatasetTable = (props) => {
       );
       setBuckets(dataAccessBuckets);
       setTableSize(dataAccessBuckets.length);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error initializing DAR Collection Dataset summary.',
       });
@@ -175,8 +174,7 @@ export const DarDatasetTable = (props) => {
   useEffect(() => {
     try {
       init();
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({ text: 'Failed to initialize collection' });
     }
   }, [init]);
