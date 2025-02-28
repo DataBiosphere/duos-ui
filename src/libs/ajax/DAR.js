@@ -1,4 +1,4 @@
-import fileDownload from 'js-file-download';
+import { fileDownload } from '../../utils/FileDownload';
 import * as fp from 'lodash/fp';
 import { isNil } from 'lodash/fp';
 import { Config } from '../config';
@@ -93,9 +93,9 @@ export const DAR = {
     if (isFileEmpty(file)) {
       return Promise.resolve({ data: null });
     } else {
-      let authOpts = Config.authOpts();
+      const authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append('file', file);
       const url = `${await getApiUrl()}/api/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);
