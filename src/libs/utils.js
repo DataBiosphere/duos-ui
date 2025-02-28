@@ -1,11 +1,9 @@
-import Noty from 'noty';
-import 'noty/lib/noty.css';
-import 'noty/lib/themes/bootstrap-v3.css';
 import {forEach as lodashForEach, isArray, map as lodashMap} from 'lodash';
 import { DAR } from './ajax/DAR';
 import {Theme} from './theme';
 import {capitalize, cloneDeep, concat, each, every, filter, find, first, flatten, flow, forEach as lodashFPForEach, get, getOr, includes, isEmpty, isNil, join, map, toLower, uniq} from 'lodash/fp';
 import {headerTabsConfig} from '../components/DuosHeader';
+import { ToastNotifications } from './ToastNotifications';
 
 export const UserProperties = {
   SUGGESTED_SIGNING_OFFICIAL: 'suggestedSigningOfficial',
@@ -231,53 +229,8 @@ export const download = (fileName, text) => {
 };
 
 export const Notifications = {
-  defaultNotification: {
-    layout: 'bottomRight',
-    timeout: '3500',
-    progressBar: false,
-    type: 'error',
-    theme: 'bootstrap-v3',
-  },
-  /**
-   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
-   * See https://ned.im/noty/#/options for more customization options.
-   */
-  showError: props => {
-    return new Noty({
-      text: 'Something went wrong. Please try again.',
-      ...Notifications.defaultNotification,
-      ...props,
-    }).show();
-  },
-  /**
-   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
-   * See https://ned.im/noty/#/options for more customization options.
-   */
-  showSuccess: props => {
-    return new Noty({
-      text: 'Congratulations',
-      ...Notifications.defaultNotification,
-      ...props,
-      type: 'success',
-    }).show();
-  },
-  showWarning: props => {
-    return new Noty({
-      text: 'Warning!',
-      ...Notifications.defaultNotification,
-      ...props,
-      type: 'warning',
-    }).show();
-  },
-  showInformation: props => {
-    return new Noty({
-      text: 'Information',
-      ...Notifications.defaultNotification,
-      ...props,
-      type: 'information',
-    }).show();
-  },
-};
+  ...ToastNotifications
+}
 
 /**
  * Serialize the execution of an array of promise functions
