@@ -97,7 +97,7 @@ export const findPropertyValue = (propName, researcher) => {
 };
 
 export const getPropertyValuesFromUser = (user) => {
-  let researcherProps = {
+  const researcherProps = {
     institutionId: findPropertyValue(UserProperties.INSTITUTION_ID, user),
     suggestedInstitution: findPropertyValue(UserProperties.SUGGESTED_INSTITUTION, user),
     selectedSigningOfficialId: findPropertyValue(UserProperties.SELECTED_SIGNING_OFFICIAL_ID, user),
@@ -130,11 +130,11 @@ export const formatDate = (dateval) => {
     return dateval;
   }
 
-  let dateFormat = new Date(dateval);
-  let year = dateFormat.getFullYear();
-  let month = ('0' + (dateFormat.getMonth() + 1)).slice(-2);
-  let day = ('0' + dateFormat.getDate()).slice(-2);
-  let datestr = year + '-' + month + '-' + day;
+  const dateFormat = new Date(dateval);
+  const year = dateFormat.getFullYear();
+  const month = ('0' + (dateFormat.getMonth() + 1)).slice(-2);
+  const day = ('0' + dateFormat.getDate()).slice(-2);
+  const datestr = year + '-' + month + '-' + day;
   return datestr;
 };
 
@@ -199,8 +199,8 @@ export const setUserRoleStatuses = (user, Storage) => {
 export const Navigation = {
   back: async (user, history) => {
     const queryParams = new URLSearchParams(window.location.search);
-    let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    let page =
+    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
+    const page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
@@ -208,8 +208,8 @@ export const Navigation = {
   },
   console: async (user, history) => {
     const queryParams = new URLSearchParams(window.location.search);
-    let firstConsole = headerTabsConfig.find(config => config.isRendered(user));
-    let page =
+    const firstConsole = headerTabsConfig.find(config => config.isRendered(user));
+    const page =
       queryParams.get('redirectTo') ? queryParams.get('redirectTo')
         : firstConsole ? firstConsole.link
           : '/';
@@ -220,9 +220,9 @@ export const Navigation = {
 export const download = (fileName, text) => {
   const break_line = '\r\n \r\n';
   text = break_line + text;
-  let blob = new Blob([text], {type: 'text/plain'});
+  const blob = new Blob([text], {type: 'text/plain'});
   const url = window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
+  const a = document.createElement('a');
   a.href = url;
   a.download = fileName + '-restriction';
   a.click();
@@ -418,7 +418,7 @@ export const getSearchFilterFunctions = () => {
         : 'yes no';
       const studyName = dataset.study?.studyName;
       const phsId = dataset.study?.phsId;
-      let dataUse = [];
+      const dataUse = [];
       dataUse.push(dataset.dataUse?.primary?.flatMap(du => [du.code, du.description]));
       dataUse.push(dataset.dataUse?.secondary?.flatMap(du => [du.code, du.description]));
       return includes(loweredTerm, toLower(alias)) ||
@@ -507,10 +507,10 @@ export const searchOntologies = (query, callback) => {
 };
 
 export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
-  let appliedStyle = disabled ? {[targetColorAttribute]: Theme.palette.disabled} : {};
+  const appliedStyle = disabled ? {[targetColorAttribute]: Theme.palette.disabled} : {};
   try {
     return Object.assign(baseStyle, appliedStyle);
-  } catch (e) {
+  } catch (_e) {
     return baseStyle;
   }
 };
@@ -573,7 +573,7 @@ export const recalculateVisibleTable = async ({
       filteredList
     );
     setVisibleList(visibleList);
-  } catch (error) {
+  } catch (_error) {
     Notifications.showError({text: 'Error updating table'});
   }
 };
