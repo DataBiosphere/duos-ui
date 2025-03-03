@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { kebabCase } from 'lodash';
 import React from 'react';
 import { Theme } from '../libs/theme';
 
@@ -11,7 +11,7 @@ export const DownloadLink = props => {
   const { label, onDownload } = props;
   return (
     <div>
-      <a id={_.kebabCase(label)} onClick={onDownload}>
+      <a id={kebabCase(label)} onClick={onDownload}>
         <i className='glyphicon glyphicon-download-alt' style={ICON} />
         <span style={{ fontSize: Theme.font.size.small }}>{label}</span>
       </a>
