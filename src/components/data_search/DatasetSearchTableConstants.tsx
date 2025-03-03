@@ -1,5 +1,5 @@
 import {DatasetTerm, getAccessManagementSummary} from '../../types/model';
-import _, {groupBy} from 'lodash';
+import {groupBy, intersection, without, xor} from 'lodash';
 import {Checkbox, Link} from '@mui/material';
 import * as React from 'react';
 import {OverflowTooltip} from '../Tooltips';
@@ -53,7 +53,6 @@ interface HeaderData<T>{
   cellDataFn: (datasets: T) => CellData;
 }
 
-// eslint-disable-next-line no-unused-vars
 export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[], onSelect: (datasetIds: number[]) => void, _exportableDatasets: { [duosId: string]: SnapshotSummaryModel[] }): HeaderData<DatasetTerm[]>[] => {
   interface StudyCellWidths{
     selected: number;
@@ -85,7 +84,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
       cellStyle: makeHeaderStyle(studyCellWidths.selected),
       cellDataFn: datasets => {
         const studyDatasetIds = datasets.map(dataset => dataset.datasetId);
-        const numberSelected = _.intersection(studyDatasetIds, selected).length;
+        const numberSelected = intersection(studyDatasetIds, selected).length;
         const fullySelected = numberSelected === studyDatasetIds.length;
         const indeterminate = numberSelected > 0 && numberSelected < studyDatasetIds.length;
         const checkboxId = `${datasets[0].study.studyId}-is-selected-checkbox`;
@@ -95,7 +94,7 @@ export const makeStudyTableHeaders = (datasets: DatasetTerm[], selected: number[
           data: <div data-for={checkboxId}>
               <span title={isSelectableStudy ? '' : tooltipText}>
                   <Checkbox checked={fullySelected} indeterminate={indeterminate} disabled={!isSelectableStudy}
-                            onClick={() => onSelect(fullySelected ? _.without(selected, ...studyDatasetIds) : indeterminate ? _.xor(_.without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
+                            onClick={() => onSelect(fullySelected ? without(selected, ...studyDatasetIds) : indeterminate ? xor(without(selected, ...studyDatasetIds), studyDatasetIds) : [...selected, ...studyDatasetIds])}/>
               </span>
           </div>,
           value: fullySelected ? 'Selected' : indeterminate ? 'Partially Selected' : 'Not Selected',
@@ -253,7 +252,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
               <span title={isSelectable(dataset) ? '' : tooltipText}>
               <Checkbox checked={isSelected}
                         disabled={!isSelectable(dataset)}
-                        onClick={() => onSelect(_.xor([dataset.datasetId], selected))}/>
+                        onClick={() => onSelect(xor([dataset.datasetId], selected))}/>
                 </span>
           </div>,
           value: isSelected ? 'Selected' : 'Not Selected',
