@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {isEmpty} from 'lodash';
+import {isEmpty, capitalize} from 'lodash';
 import {DatasetTerm} from 'src/types/model';
 import SimpleTable from '../SimpleTable';
 import {Styles} from '../../libs/theme';
@@ -7,7 +7,6 @@ import {
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
 import {SnapshotSummaryModel} from '../../types/tdrModel';
-import * as _ from 'lodash';
 
 const styles = {
   baseStyle: {
@@ -59,7 +58,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       fontWeight: 600,
       borderBottom: '1px solid black'
     }}>
-      {rowData.length} {_.capitalize(rowData.length !== 1 ? tab.plural : tab.singular)}
+      {rowData.length} {capitalize(rowData.length !== 1 ? tab.plural : tab.singular)}
     </div>
     {
       isEmpty(filteredData) ?
