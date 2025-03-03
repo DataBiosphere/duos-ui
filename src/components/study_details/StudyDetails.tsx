@@ -10,7 +10,7 @@ import {
 import SimpleTable from '../SimpleTable';
 import {Styles} from '../../libs/theme';
 import {TerraDataRepo} from '../../libs/ajax/TerraDataRepo';
-import * as _ from 'lodash';
+import {chain, intersection, isEmpty, Dictionary} from 'lodash';
 import {EnumerateSnapshotModel, SnapshotSummaryModel} from '../../types/tdrModel';
 import {DatasetSearchFooter} from '../data_search/DatasetSearchFooter';
 import {applyForAccess} from '../data_search/DatasetSearchTable';
@@ -64,7 +64,7 @@ export const StudyDetails = (props: StudyDetailsProps) => {
   const { studyId } = props.match.params;
   const [loading, setLoading] = useState(true);
   const [datasets, setDatasets] = useState<DatasetTerm[]>([]);
-  const [exportableDatasets, setExportableDatasets] = useState<_.Dictionary<SnapshotSummaryModel[]>>({});
+  const [exportableDatasets, setExportableDatasets] = useState<Dictionary<SnapshotSummaryModel[]>>({});
   const [selectedDatasets, setSelectedDatasets] = useState<number[]>([]);
 
   const study: StudyTerm | undefined = datasets.length > 0 ? datasets[0].study : undefined;
@@ -74,11 +74,11 @@ export const StudyDetails = (props: StudyDetailsProps) => {
   const getExportableDatasets = async (datasets: DatasetTerm[]) => {
     // Note the dataset identifier is in each sub-table row.
     const datasetIdentifiers = datasets.map((row) => row.datasetIdentifier);
-    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as any as EnumerateSnapshotModel;
+    const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers) as EnumerateSnapshotModel;
     if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = _.chain(snapshots.items)
+      const datasetIdToSnapshot = chain(snapshots.items)
         // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot: { id: string }) => _.intersection(snapshots.roleMap[snapshot.id] as string[], ['steward', 'reader']).length > 0)
+        .filter((snapshot: { id: string }) => intersection(snapshots.roleMap[snapshot.id] as string[], ['steward', 'reader']).length > 0)
         .groupBy('duosId')
         .value();
       setExportableDatasets(datasetIdToSnapshot);
@@ -186,6 +186,6 @@ export const StudyDetails = (props: StudyDetailsProps) => {
         />
       </div>
     </div>
-    {!_.isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, history)}/>}
+    {!isEmpty(selectedDatasets) && <DatasetSearchFooter selectedDatasets={selectedDatasets} datasets={datasets} onClick={() => applyForAccess(selectedDatasets, history)}/>}
   </div> : <div>Loading</div>;
 };
