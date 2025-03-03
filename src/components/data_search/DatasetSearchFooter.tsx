@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import {uniq, filter} from 'lodash';
 import {Button} from '@mui/material';
 import * as React from 'react';
 import {DatasetTerm} from 'src/types/model';
@@ -10,8 +10,8 @@ interface DatasetSearchFooterProps {
 }
 export const DatasetSearchFooter = (props: DatasetSearchFooterProps) => {
   const { selectedDatasets, datasets, onClick } = props;
-  const selectedStudies = _.uniq(
-    _.filter(datasets, dataset => selectedDatasets.includes(dataset.datasetId))
+  const selectedStudies = uniq(
+    filter(datasets, dataset => selectedDatasets.includes(dataset.datasetId))
       .map(dataset => dataset.study.studyId));
   const datasetText = selectedDatasets.length > 1 ? 'datasets' : 'dataset';
   const studyText = selectedStudies.length > 1 ? 'studies' : 'study';
