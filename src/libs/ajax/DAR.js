@@ -1,6 +1,5 @@
 import { fileDownload } from '../../utils/FileDownload';
-import * as fp from 'lodash/fp';
-import { isNil } from 'lodash/fp';
+import { isNil, mergeAll, omit } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { isFileEmpty } from '../utils';
@@ -42,7 +41,7 @@ export const DAR = {
   //v2 delete dar
   deleteDar: async (darId) => {
     const url = `${await getApiUrl()}/api/dar/v2/${darId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
 
@@ -50,7 +49,7 @@ export const DAR = {
   postDar: async (dar) => {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, {'action': 'submit'});
-    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
+    const filteredDar = omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3` :
       `${await getApiUrl()}/api/dar/v2`;

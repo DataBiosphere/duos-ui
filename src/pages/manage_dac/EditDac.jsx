@@ -1,4 +1,4 @@
-import * as ld from 'lodash';
+import {filter, isEmpty, difference, union, map} from 'lodash';
 import React, {useEffect, useState} from 'react';
 import AsyncSelect from 'react-select/async';
 import {DAC} from '../../libs/ajax/DAC';
@@ -61,7 +61,7 @@ export default function EditDac(props) {
           setMatchingDaas(matchingDaas);
           const daa = fetchedDac?.associatedDaa ? fetchedDac.associatedDaa : null;
           setSelectedDaa(daa?.daaId ? daa : null);
-        } catch (e) {
+        } catch (_e) {
           Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
         }
       } else {
@@ -69,7 +69,7 @@ export default function EditDac(props) {
           const daas = await DAA.getDaas();
           const broadDaa = daas.find(daa => daa.broadDaa === true);
           setBroadDaa(broadDaa);
-        } catch (e) {
+        } catch (_e) {
           Notifications.showError({text: 'Error: Unable to retrieve current DAC from server'});
         }
       }
@@ -113,8 +113,8 @@ export default function EditDac(props) {
       const ops5 = newDaaId !== null && selectedDaa !== undefined ? [() => DAA.addDaaToDac(newDaaId, currentDac.dacId)] : [];
       const allOperations = ops0.concat(ops1, ops2, ops3, ops4, ops5);
       const responses = await PromiseSerial(allOperations);
-      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
-      if (!ld.isEmpty(errorCodes)) {
+      const errorCodes = filter(responses, r => JSON.stringify(r) !== '200' && JSON.stringify(r.status) !== '201');
+      if (!isEmpty(errorCodes)) {
         handleErrors('There was an error saving DAC information. Please verify that the DAC is correct by viewing the current information.');
       } else {
         closeHandler();
@@ -138,10 +138,10 @@ export default function EditDac(props) {
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
 
-    const invalidChairs = ld.difference(
-      ld.union(
-        ld.map(state.dac.chairpersons, 'userId'),
-        ld.map(state.dac.members, 'userId'),
+    const invalidChairs = difference(
+      union(
+        map(state.dac.chairpersons, 'userId'),
+        map(state.dac.members, 'userId'),
         state.memberIdsToAdd),
       state.memberIdsToRemove,
       state.chairIdsToRemove);
@@ -156,10 +156,10 @@ export default function EditDac(props) {
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
 
-    const invalidMembers = ld.difference(
-      ld.union(
-        ld.map(state.dac.members, 'userId'),
-        ld.map(state.dac.chairpersons, 'userId'),
+    const invalidMembers = difference(
+      union(
+        map(state.dac.members, 'userId'),
+        map(state.dac.chairpersons, 'userId'),
         state.chairIdsToAdd),
       state.memberIdsToRemove,
       state.chairIdsToRemove);
@@ -169,7 +169,7 @@ export default function EditDac(props) {
   const userSearch = (invalidUserIds, query, callback) => {
     DAC.autocompleteUsers(query).then(
       items => {
-        const filteredUsers = ld.filter(items, item => {
+        const filteredUsers = filter(items, item => {
           return !invalidUserIds.includes(item.userId);
         });
         const options = filteredUsers.map(function (item) {
@@ -190,7 +190,7 @@ export default function EditDac(props) {
   const onChairSearchChange = (data) => {
     setState(prev => ({
       ...prev,
-      chairIdsToAdd: ld.map(data, 'item.userId'),
+      chairIdsToAdd: map(data, 'item.userId'),
       chairsSelectedOptions: data,
       dirtyFlag: true
     }));
@@ -199,7 +199,7 @@ export default function EditDac(props) {
   const onMemberSearchChange = (data) => {
     setState(prev => ({
       ...prev,
-      memberIdsToAdd: ld.map(data, 'item.userId'),
+      memberIdsToAdd: map(data, 'item.userId'),
       membersSelectedOptions: data,
       dirtyFlag: true
     }));
@@ -225,7 +225,7 @@ export default function EditDac(props) {
     const name = target.name;
 
     setState(prev => {
-      let newDac = Object.assign({}, prev.dac);
+      const newDac = Object.assign({}, prev.dac);
       newDac[name] = value;
       return {
         ...prev,
@@ -235,19 +235,19 @@ export default function EditDac(props) {
     });
   };
 
-  const removeDacMember = (dacId, userId, role) => {
+  const removeDacMember = (_dacId, userId, role) => {
     switch (role) {
       case CHAIR:
         if (state.chairIdsToRemove.includes(userId)) {
           setState(prev => ({
             ...prev,
-            chairIdsToRemove: ld.difference(prev.chairIdsToRemove, [userId]),
+            chairIdsToRemove: difference(prev.chairIdsToRemove, [userId]),
             dirtyFlag: true
           }));
         } else {
           setState(prev => ({
             ...prev,
-            chairIdsToRemove: ld.union(prev.chairIdsToRemove, [userId]),
+            chairIdsToRemove: union(prev.chairIdsToRemove, [userId]),
             dirtyFlag: true
           }));
         }
@@ -256,13 +256,13 @@ export default function EditDac(props) {
         if (state.memberIdsToRemove.includes(userId)) {
           setState(prev => ({
             ...prev,
-            memberIdsToRemove: ld.difference(prev.memberIdsToRemove, [userId]),
+            memberIdsToRemove: difference(prev.memberIdsToRemove, [userId]),
             dirtyFlag: true
           }));
         } else {
           setState(prev => ({
             ...prev,
-            memberIdsToRemove: ld.union(prev.memberIdsToRemove, [userId]),
+            memberIdsToRemove: union(prev.memberIdsToRemove, [userId]),
             dirtyFlag: true
           }));
         }

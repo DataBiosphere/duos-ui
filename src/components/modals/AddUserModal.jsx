@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {concat, filter, isEmpty, matches} from 'lodash';
 import React, { Fragment, useState, useRef, useEffect } from 'react';
 import { User } from '../../libs/ajax/User';
 import { USER_ROLES } from '../../libs/utils';
@@ -27,8 +27,8 @@ export const AddUserModal = (props) => {
 
   useEffect(() => {
     if (!props.showModal) return;
-    let r1 = nameRef.current;
-    let r2 = emailRef.current;
+    const r1 = nameRef.current;
+    const r2 = emailRef.current;
     if (r1 && r2) {
       setState((prev) => ({
         ...prev,
@@ -91,9 +91,9 @@ export const AddUserModal = (props) => {
     // False? remove admin role from state.updatedRoles
     let newRoles = [researcherRole];
     if (checkState) {
-      newRoles = _.concat(state.updatedRoles, adminRole);
+      newRoles = concat(state.updatedRoles, adminRole);
     } else {
-      newRoles = _.filter(state.updatedRoles, (r) => r.roleId !== adminRole.roleId);
+      newRoles = filter(state.updatedRoles, (r) => r.roleId !== adminRole.roleId);
     }
     setState({
       ...state,
@@ -119,8 +119,8 @@ export const AddUserModal = (props) => {
   };
 
   const isAdmin = () => {
-    const admins = _.filter(state.updatedRoles, _.matches(adminRole));
-    return !_.isEmpty(admins);
+    const admins = filter(state.updatedRoles, matches(adminRole));
+    return !isEmpty(admins);
   };
 
 

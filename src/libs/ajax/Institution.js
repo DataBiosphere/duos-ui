@@ -1,4 +1,4 @@
-import * as fp from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk } from '../ajax';
@@ -31,6 +31,6 @@ export const Institution = {
 
   deleteInstitution: async (id) => {
     const url = `${await getApiUrl()}/api/institutions/${id}`;
-    return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
   }
 };

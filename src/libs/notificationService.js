@@ -1,4 +1,4 @@
-import * as fp from 'lodash/fp';
+import {find, isEmpty} from 'lodash/fp';
 import { filter } from 'lodash';
 import {Config} from './config';
 import axios from 'axios';
@@ -31,7 +31,7 @@ export const NotificationService = {
     try {
       const banners = await NotificationService.getBanners();
       return filter(banners, {active: true});
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   },
@@ -44,10 +44,10 @@ export const NotificationService = {
   getBannerObjectById: async (id) => {
     try {
       const banners = await NotificationService.getBanners();
-      if (!fp.isEmpty(banners)) {
-        return fp.find({active: true, id: id})(banners);
+      if (!isEmpty(banners)) {
+        return find({active: true, id: id})(banners);
       }
-    } catch(error) {
+    } catch(_error) {
       return null;
     }
   },

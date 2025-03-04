@@ -7,7 +7,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
-import * as fp from 'lodash/fp';
+import {hasIn} from 'lodash/fp';
 import addHelpIcon from '../../images/icon_add_help.png';
 
 try {
@@ -81,7 +81,7 @@ export const SupportRequestModal = (props) => {
       const allToken = await Promise.all(results);
 
       for (let t = 0; t < allToken.length; t++) {
-        if (!fp.hasIn('token')(allToken[t])) {
+        if (!hasIn('token')(allToken[t])) {
           Notifications.showError({
             text: 'Unable to add attachment',
             layout: 'topRight',

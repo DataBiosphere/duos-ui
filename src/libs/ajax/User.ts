@@ -1,5 +1,4 @@
-import * as fp from 'lodash/fp';
-import { cloneDeep, flow, unset } from 'lodash/fp';
+import { cloneDeep, flow, unset, mergeAll } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk, fetchAny } from '../ajax';
@@ -31,7 +30,7 @@ export const User = {
     try {
       const res = await fetchOk(
         url,
-        fp.mergeAll([
+        mergeAll([
           Config.authOpts(),
           Config.jsonBody(request),
           { method: 'POST' },
@@ -40,7 +39,7 @@ export const User = {
       if (res.ok) {
         return res.json();
       }
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   },
@@ -51,7 +50,7 @@ export const User = {
     try {
       const res = await fetchOk(
         url,
-        fp.mergeAll([
+        mergeAll([
           Config.authOpts(),
           Config.jsonBody(payload),
           { method: 'PUT' },
@@ -60,7 +59,7 @@ export const User = {
       if (res.ok) {
         return res.json();
       }
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   },
@@ -81,7 +80,7 @@ export const User = {
     try {
       const res = await fetchOk(
         url,
-        fp.mergeAll([
+        mergeAll([
           Config.authOpts(),
           Config.jsonBody(filteredUser),
           { method: 'PUT' },
@@ -90,7 +89,7 @@ export const User = {
       if (res.ok) {
         return res.json();
       }
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   },
@@ -99,7 +98,7 @@ export const User = {
     const url = `${await getApiUrl()}/api/user`;
     const res = await fetchOk(
       url,
-      fp.mergeAll([Config.authOpts(), { method: 'POST' }])
+      mergeAll([Config.authOpts(), { method: 'POST' }])
     );
     return res.json();
   },
@@ -108,7 +107,7 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/signing-officials`;
     const res = await fetchOk(
       url,
-      fp.mergeAll([Config.authOpts(), { method: 'GET' }])
+      mergeAll([Config.authOpts(), { method: 'GET' }])
     );
     return res.json();
   },
@@ -123,7 +122,7 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(
       url,
-      fp.mergeAll([Config.authOpts(), { method: 'PUT' }])
+      mergeAll([Config.authOpts(), { method: 'PUT' }])
     );
     return res.json();
   },
@@ -132,7 +131,7 @@ export const User = {
     const url = `${await getApiUrl()}/api/user/${userId}/${roleId}`;
     const res = await fetchAny(
       url,
-      fp.mergeAll([Config.authOpts(), { method: 'DELETE' }])
+      mergeAll([Config.authOpts(), { method: 'DELETE' }])
     );
     return res.json();
   },

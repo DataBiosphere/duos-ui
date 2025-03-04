@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {map as lodashMap, concat, filter, matches as lodashMatches} from 'lodash';
 import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {useState, useEffect, useRef} from 'react';
 import { Institution } from '../libs/ajax/Institution';
@@ -40,7 +40,7 @@ export const AdminEditUser = (props) => {
             displayText: institution.name
           };
         });
-        const currentRoles = _.map(user.roles, (ur) => {
+        const currentRoles = lodashMap(user.roles, (ur) => {
           return {'roleId': ur.roleId, 'name': ur.name};
         });
         const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
@@ -56,7 +56,7 @@ export const AdminEditUser = (props) => {
         }));
         setFetchingComplete(true);
       }
-      catch(e) {
+      catch(_e) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
       }
     };
@@ -79,7 +79,7 @@ export const AdminEditUser = (props) => {
       return;
     }
     const userId = state.user.userId;
-    let user = {
+    const user = {
       userId: userId,
       displayName: state.displayName,
       emailPreference: state.emailPreference,
@@ -90,7 +90,7 @@ export const AdminEditUser = (props) => {
       await User.update(user, userId);
       await updateRolesIfDifferent(userId, state.updatedRoles);
       props.history.push('/admin_manage_users');
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({ text: 'Error: Failed to update user' });
     }
   };
@@ -101,13 +101,13 @@ export const AdminEditUser = (props) => {
     // Always make sure researcher is a role we already have or need to add.
     const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles));
 
-    _.map(updatedRoleIds, roleId => {
+    lodashMap(updatedRoleIds, roleId => {
       if (!contains(roleId)(currentRoleIds)) {
         User.addRoleToUser(userId, roleId);
       }
     });
 
-    _.map(currentRoleIds, roleId => {
+    lodashMap(currentRoleIds, roleId => {
       if (!contains(roleId)(updatedRoleIds)) {
         // Safety check ... never delete the researcher role!!!
         if (roleId !== researcherRole.roleId) {
@@ -133,10 +133,10 @@ export const AdminEditUser = (props) => {
     // False? remove role from state.updatedRoles
     let newRoles = [researcherRole];
     if (checkState) {
-      newRoles = _.concat(state.updatedRoles, role);
+      newRoles = concat(state.updatedRoles, role);
     }
     else {
-      newRoles = _.filter(state.updatedRoles, (r) => {
+      newRoles = filter(state.updatedRoles, (r) => {
         return r.roleId !== role.roleId;
       });
     }
@@ -147,7 +147,7 @@ export const AdminEditUser = (props) => {
   };
 
   const userHasRole = (role) => {
-    const matches = _.filter(state.updatedRoles, _.matches(role));
+    const matches = filter(state.updatedRoles, lodashMatches(role));
     return !isEmpty(matches);
   };
 

@@ -1,4 +1,4 @@
-import * as fp from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import { Config } from '../config';
 import { getApiUrl, fetchOk } from '../ajax';
 
@@ -10,8 +10,8 @@ export const Votes = {
     voteUpdate.rationale = vote.rationale;
     voteUpdate.voteIds = voteIds;
 
-    let url = `${await getApiUrl()}/api/votes`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(voteUpdate), { method: 'PUT' }]));
+    const url = `${await getApiUrl()}/api/votes`;
+    const res = await fetchOk(url, mergeAll([Config.authOpts(), Config.jsonBody(voteUpdate), { method: 'PUT' }]));
     return await res.json();
   },
 
@@ -20,8 +20,8 @@ export const Votes = {
     rationaleUpdate.rationale = rationale;
     rationaleUpdate.voteIds = voteIds;
 
-    let url = `${await getApiUrl()}/api/votes/rationale`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(rationaleUpdate), { method: 'PUT' }]));
+    const url = `${await getApiUrl()}/api/votes/rationale`;
+    const res = await fetchOk(url, mergeAll([Config.authOpts(), Config.jsonBody(rationaleUpdate), { method: 'PUT' }]));
     return await res.json();
   }
 };

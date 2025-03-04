@@ -1,4 +1,4 @@
-import * as ld from 'lodash';
+import {difference, union, flatMap} from 'lodash';
 import React, {useState} from 'react';
 import {CHAIR, MEMBER} from './AddDacModal';
 
@@ -18,12 +18,12 @@ export const DacUsers = (props) => {
     if (state.removedIds.includes(userId)) {
       setState(prev => ({
         ...prev,
-        removedIds: ld.difference(prev.removedIds, [userId])
+        removedIds: difference(prev.removedIds, [userId])
       }));
     } else {
       setState(prev => ({
         ...prev,
-        removedIds: ld.union(prev.removedIds, [userId])
+        removedIds: union(prev.removedIds, [userId])
       }));
     }
     state.removeHandler(dacId, userId, role);
@@ -78,8 +78,8 @@ export const DacUsers = (props) => {
           <div style={{...headerStyle, ...buttonPadding}} className={columnClass()}></div>
         }
       </div>
-      {ld.flatMap(state.dac.chairpersons, (u) => makeRow(u, CHAIR))}
-      {ld.flatMap(state.dac.members, (u) => makeRow(u, MEMBER))}
+      {flatMap(state.dac.chairpersons, (u) => makeRow(u, CHAIR))}
+      {flatMap(state.dac.members, (u) => makeRow(u, MEMBER))}
     </div>
   );
 };
