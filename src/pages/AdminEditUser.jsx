@@ -1,4 +1,4 @@
-import {map as ldmap, concat, filter, matches as ldmatches} from 'lodash';
+import {map as lodashMap, concat, filter, matches as lodashMatches} from 'lodash';
 import {union, contains, map, isEmpty} from 'lodash/fp';
 import React, {useState, useEffect, useRef} from 'react';
 import { Institution } from '../libs/ajax/Institution';
@@ -40,7 +40,7 @@ export const AdminEditUser = (props) => {
             displayText: institution.name
           };
         });
-        const currentRoles = ldmap(user.roles, (ur) => {
+        const currentRoles = lodashMap(user.roles, (ur) => {
           return {'roleId': ur.roleId, 'name': ur.name};
         });
         const updatedRoles = isEmpty(currentRoles) ? [researcherRole] : currentRoles;
@@ -101,13 +101,13 @@ export const AdminEditUser = (props) => {
     // Always make sure researcher is a role we already have or need to add.
     const updatedRoleIds = union([researcherRole.roleId])(map('roleId')(updatedRoles));
 
-    ldmap(updatedRoleIds, roleId => {
+    lodashMap(updatedRoleIds, roleId => {
       if (!contains(roleId)(currentRoleIds)) {
         User.addRoleToUser(userId, roleId);
       }
     });
 
-    ldmap(currentRoleIds, roleId => {
+    lodashMap(currentRoleIds, roleId => {
       if (!contains(roleId)(updatedRoleIds)) {
         // Safety check ... never delete the researcher role!!!
         if (roleId !== researcherRole.roleId) {
@@ -147,7 +147,7 @@ export const AdminEditUser = (props) => {
   };
 
   const userHasRole = (role) => {
-    const matches = filter(state.updatedRoles, ldmatches(role));
+    const matches = filter(state.updatedRoles, lodashMatches(role));
     return !isEmpty(matches);
   };
 
