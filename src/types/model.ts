@@ -2,6 +2,7 @@ import { DuosUserResponse } from './responseTypes';
 import externalAccessIcon from '../images/external_access.svg';
 import openAccessIcon from '../images/open_access.svg';
 import controlledAccessIcon from '../images/controlled_access.svg';
+import {b} from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export type UserRoleName =
   | 'Admin'
@@ -118,7 +119,7 @@ export interface Dataset {
 
 export interface DatasetMetric {
   dataset: Dataset;
-  dars: Array<unknown>;
+  dars: Array<DataAccessRequest>;
   elections: Array<unknown>;
 }
 
@@ -187,7 +188,7 @@ export interface DatasetTerm {
 
 export interface AccessManagementSummary {
   name: string;
-  icon: any;
+  icon: unknown;
   description: string;
 }
 
@@ -321,7 +322,7 @@ export interface DataAccessRequest {
   updateDate: string;
   draft: boolean;
   darCode: string;
-  elections: Array<unknown>;
+  elections: Array<Election>;
   projectTitle: string;
   datasetIds: number[];
   rus: string;
@@ -410,4 +411,37 @@ export interface Collaborator {
   name: string;
   title: number;
   uuid: number;
+}
+
+export interface Election {
+  electionId: number;
+  electionType: string;
+  finalVote: boolean;
+  status:	string;
+  createDate: string;
+  lastUpdate: string;
+  finalVoteDate: string;
+  referenceId: string;
+  finalRationale: string;
+  finalAccessVote: boolean;
+  datasetId: number;
+  displayId: string;
+  dulName: string;
+  version: number;
+  archived: boolean;
+  votes: Map<number, Vote>;
+}
+
+export interface Vote {
+  voteId: number;
+  vote: boolean;
+  userId: number;
+  createDate: string;
+  updateDate: string;
+  electionId: number;
+  rationale: string;
+  type: string;
+  isReminderSent: boolean;
+  hasConcerns: boolean;
+  displayName: string;
 }
