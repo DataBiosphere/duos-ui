@@ -172,7 +172,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
           {dars?.map((dar: any) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
-                // @ts-ignore next-line props for non ts component
+                // @ts-expect-error next-line props for non ts component
                 props={props}
                 readLessText='Show less'
                 readMoreText='Show More'
