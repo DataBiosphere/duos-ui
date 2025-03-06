@@ -201,6 +201,8 @@ describe('Dataset Statistics Tests', () => {
     cy.contains(dataset.datasetIdentifier).should('exist');
     cy.contains('Data Custodian').should('exist');
     const dataCustodians = dataset.study.properties.find((property) => property.key === 'dataCustodianEmail').value;
+    expect(dataCustodians).to.be.an('array');
+    expect(dataCustodians.length).to.be.greaterThan(0);
     dataCustodians.forEach((dataCustodian) => {
       cy.contains(dataCustodian).should('exist');
     });
