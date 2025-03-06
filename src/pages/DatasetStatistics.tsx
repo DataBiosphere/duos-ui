@@ -10,7 +10,7 @@ import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {Dataset, DatasetProperty, StudyProperty} from '../types/model';
+import {DataAccessRequest, Dataset, DatasetProperty, StudyProperty} from '../types/model';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -34,7 +34,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
   const [datasetId, setDatasetId] = useState<number>();
   const [dataset, setDataset] = useState<Dataset>();
-  const [dars, setDars] = useState<any>();
+  const [dars, setDars] = useState<Array<DataAccessRequest>>();
   const [isLoading, setIsLoading] = useState(true);
 
   const showError = (message: string) => {
@@ -177,7 +177,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
-          {dars?.map((dar: any) => (
+          {dars?.map((dar: DataAccessRequest) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
                 // @ts-expect-error next-line props for non ts component

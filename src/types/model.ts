@@ -116,6 +116,12 @@ export interface Dataset {
   alternativeDataSharingPlanFile: FileStorageObject;
 }
 
+export interface DatasetMetric {
+  dataset: Dataset;
+  dars: Array<unknown>;
+  elections: Array<unknown>;
+}
+
 interface DacTerm {
   dacId: number;
   dacName: string;
@@ -304,4 +310,71 @@ export interface Acknowledgement {
   ackKey: string;
   firstAcknowledged: number;
   lastAcknowledged: number;
+}
+
+export interface DataAccessRequest {
+  referenceId: string;
+  userId: number;
+  createDate: string;
+  sortDate: string;
+  submissionDate: string;
+  updateDate: string;
+  draft: boolean;
+  darCode: string;
+  elections: Array<unknown>;
+  projectTitle: string;
+  datasetIds: number[];
+  rus: string;
+  nonTechRus: string;
+  diseases: boolean;
+  methods: boolean;
+  controls: boolean;
+  population: boolean;
+  other: boolean;
+  otherText: string;
+  ontologies: string[];
+  forProfit: boolean;
+  oneGender: boolean;
+  gender: string;
+  pediatric: boolean;
+  illegalBehavior: boolean;
+  addiction: boolean;
+  sexualDiseases: boolean;
+  stigmatizedDiseases: boolean;
+  vulnerablePopulation: boolean;
+  populationMigration: boolean;
+  psychiatricTraits: boolean;
+  notHealth: boolean;
+  hmb: boolean;
+  poa: boolean;
+  anvilUse: boolean;
+  cloudUse: boolean;
+  localUse: boolean;
+  cloudProvider: string;
+  cloudProviderType: string;
+  cloudProviderDescription: string;
+  geneticStudiesOnly: boolean;
+  irb: boolean;
+  irbDocumentLocation: string;
+  irbProtocolExpiration: string;
+  dsAcknowledgement: boolean;
+  gsoAcknowledgement: boolean;
+  pubAcknowledgement: boolean;
+  itDirector: string;
+  signingOfficial: string;
+  publication: boolean;
+  collaboration: boolean;
+  collaborationLetterLocation: string;
+  forensicActivities: boolean;
+  sharingDistribution: boolean;
+  externalCollaborators: Array<unknown>;
+  internalCollaborators: Array<unknown>;
+  labCollaborators: Array<unknown>;
+  progressReportSummary: string;
+  intellectualPropertySummary: string;
+  publications: Array<unknown>;
+  presentations: Array<unknown>;
+  dataManagementIncident: unknown;
+  researchPlans: string;
+  clouseOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
 }
