@@ -50,7 +50,6 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Controlled Access Dataset Apply Button', () => {
     const controlled = Object.assign(dataset, {properties: [controlledProp]});
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(controlled));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(controlled));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -72,7 +71,6 @@ describe('Dataset Statistics Tests', () => {
   it('Displays External Access Language With Location', () => {
     const external = Object.assign(dataset, {properties: [externalProp, location]});
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(external));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -95,7 +93,6 @@ describe('Dataset Statistics Tests', () => {
   it('Displays External Access Language Without Location', () => {
     const external = Object.assign(dataset, {properties: [externalProp]});
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(external));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -118,7 +115,6 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Open Access Language With Location', () => {
     const open = Object.assign(dataset, {properties: [openProp, location]});
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(open));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -141,7 +137,6 @@ describe('Dataset Statistics Tests', () => {
   it('Displays Open Access Language Without Location', () => {
     const open = Object.assign(dataset, {properties: [openProp]});
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(open));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -163,7 +158,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('displays with no additional properties', () => {
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(dataset));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {
@@ -183,7 +177,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays All Data Custodian Emails', () => {
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
-    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(dataset));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
 
     const props = {

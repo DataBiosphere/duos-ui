@@ -32,7 +32,6 @@ interface DatasetStatisticsProps {
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [datasetId, setDatasetId] = useState<number>();
   const [dataset, setDataset] = useState<Dataset>();
   const [dars, setDars] = useState<Array<DataAccessRequest>>();
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +50,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
 
   const applyForAccess = async () => {
     try {
-      const draftResponse = await DAR.postDarDraft({datasetId: [datasetId]});
+      const draftResponse = await DAR.postDarDraft({datasetId: [dataset?.datasetId]});
       if (draftResponse.referenceId) {
         history.push(`/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
@@ -65,11 +64,19 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   };
 
   useEffect(() => {
-    DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
-      setData(dataset.datasetId);
-    }).catch(() => {
-      showError('Error: Unable to retrieve dataset from server');
-    });
+    const init = async () => {
+      try {
+        const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
+        const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
+        setDataset(dataset);
+        setDars(metrics.dars);
+        setIsLoading(false);
+      } catch (_error) {
+        showError('Unable to retrieve dataset statistics from server');
+        setIsLoading(false);
+      }
+    }
+    init();
   }, [datasetIdentifier]);
 
   const extract = useCallback((propertyName: string) => {
@@ -84,21 +91,6 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     }
     return property?.value;
   }, [dataset]);
-
-  const setData = async (datasetId: number) => {
-    try {
-      setIsLoading(true);
-      const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetId);
-      const dataset = await DataSet.getDataSetsByDatasetId(datasetId);
-      setDatasetId(datasetId);
-      setDataset(dataset);
-      setDars(metrics.dars);
-      setIsLoading(false);
-    } catch (_error) {
-      showError('Error: Unable to retrieve dataset statistics from server')
-      setIsLoading(false);
-    }
-  };
 
   const accessInstructions = () => {
     const accessManagement = extract('Access Management')?.toLowerCase();
