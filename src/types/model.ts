@@ -367,14 +367,47 @@ export interface DataAccessRequest {
   collaborationLetterLocation: string;
   forensicActivities: boolean;
   sharingDistribution: boolean;
-  externalCollaborators: Array<unknown>;
-  internalCollaborators: Array<unknown>;
-  labCollaborators: Array<unknown>;
+  externalCollaborators: Array<Collaborator>;
+  internalCollaborators: Array<Collaborator>;
+  labCollaborators: Array<Collaborator>;
   progressReportSummary: string;
   intellectualPropertySummary: string;
-  publications: Array<unknown>;
-  presentations: Array<unknown>;
-  dataManagementIncident: unknown;
+  publications: Array<Publication>;
+  presentations: Array<Presentation>;
+  dataManagementIncident: DataManagementIncident;
   researchPlans: string;
-  clouseOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+  closeOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+}
+
+export interface DataManagementIncident {
+  incidents: string[];
+  description: string;
+}
+
+export interface Presentation {
+  title: string;
+  link: string;
+  date: string;
+  authors: string;
+  datasetCitation: string;
+  citation: string;
+}
+
+export interface Publication {
+  title: string;
+  pubmedId: string;
+  date: string;
+  authors: string;
+  bibliographicCitation: string;
+  datasetCitation: string;
+  citation: string;
+}
+
+export interface Collaborator {
+  approverStatus: boolean;
+  email: string;
+  eraCommonsId: string;
+  name: string;
+  title: number;
+  uuid: number;
 }
