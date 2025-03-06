@@ -1,7 +1,7 @@
 import { Storage } from './storage';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Config } from './config';
-import * as ld from 'lodash';
+import { get } from 'lodash';
 import { isNil } from 'lodash/fp';
 
 const errorHandler = new StackdriverErrorReporter();
@@ -27,7 +27,7 @@ export const StackdriverReporter = {
       version: version,
       reportUncaughtExceptions: false,
       reportUnhandledPromiseRejections: false,
-      context: {user: ld.get(user, 'email', 'anonymous')},
+      context: {user: get(user, 'email', 'anonymous')},
     };
   },
 
@@ -41,10 +41,10 @@ export const StackdriverReporter = {
   report: async (msg) => {
     const user = Storage.getCurrentUser();
     const formattedMsg = await StackdriverReporter.format(msg);
-    errorHandler.setUser(ld.get(user, 'email', 'anonymous'));
+    errorHandler.setUser(get(user, 'email', 'anonymous'));
     try {
       await errorHandler.report(formattedMsg);
-    } catch (error) {
+    } catch (_error) {
       // swallow error to avoid user visible errors
     }
   },

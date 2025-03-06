@@ -1,4 +1,4 @@
-import * as fp from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { getApiUrl, fetchOk } from '../ajax';
@@ -49,7 +49,7 @@ export const DataSet = {
 
   deleteDataset: async (datasetObjectId) => {
     const url = `${await getApiUrl()}/api/dataset/${datasetObjectId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
 

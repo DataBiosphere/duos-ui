@@ -410,17 +410,14 @@ describe('FormField - Tests', () => {
     });
 
     it('should remove single on click', () => {
-      cy.spy(props, 'onChange');
+      cy.spy(props, 'onChange').as('onChange');
       mount(<FormField {...props}/>);
       cy.get('#dataCustodianEmail').type('a@a.com');
       cy.get('#dataCustodianEmail').type('{enter}');
-      const firstPill = cy.get('.formField-dataCustodianEmail .pill').first();
-      firstPill.should('exist');
-      firstPill.click();
-      firstPill.then(() => {
-        expect(props.onChange).to.be.calledWith({key: 'dataCustodianEmail', value: [], isValid: true}); // code value
-        cy.get('.formField-dataCustodianEmail .pill').should('not.exist');
-      });
+      cy.get('.formField-dataCustodianEmail .pill').first().should('exist');
+      cy.get('.formField-dataCustodianEmail .pill').first().click();
+      cy.get('.formField-dataCustodianEmail .pill').should('not.exist');
+      cy.get('@onChange').should('have.been.called.with', {key: 'dataCustodianEmail', value: [], isValid: true});
     });
 
     it('should remove [x, 1, 2] from array on click', () => {
@@ -577,7 +574,7 @@ describe('FormField - Tests', () => {
       mount(<FormField {...props}/>);
       cy.get('#studyType').type('asdf{enter}');
       cy.get('#studyType').then(() => {
-        expect(props.onChange).to.not.be.called;
+        expect(props.onChange).to.have.callCount(0);
       });
     });
 
@@ -815,6 +812,28 @@ describe('FormField - Tests', () => {
         cy.get('.formTable-row.formTable-data-row').should('have.length', 1); // only columns left
         cy.get('#delete-table-row-fileTypes-0').should('be.disabled');
       });
+    });
+
+    it('should be able to override some style elements', ()=>{
+      const customProps = {
+        ...props,
+        styleProps: {
+          enableAddingRowStyle: {
+            display: 'flex',
+            width: '100%',
+            justifyContent: 'flex-start',
+            marginTop: 10
+          },
+          addingRowButtonClassName: 'button-complex-submission',
+          addRowButtonIconClassName: 'button-icon button-icon-circle-plus-outline',
+          removeRowButtonIconClassName: 'button-icon button-icon-close'
+        }
+      };
+      mount(<FormTable {...customProps} />);
+      cy.get('#fileTypes-0-functionalEquivalence').type('hello');
+      cy.get('#add-new-table-row-fileTypes').should('have.class','button-complex-submission');
+      cy.get('#add-new-table-row-fileTypes').find('span').should('have.class','button-icon-circle-plus-outline');
+      cy.get('#delete-table-row-fileTypes-0').find('span').should('have.class', 'button-icon-close');
     });
   });
   describe('Prop validation', () => {

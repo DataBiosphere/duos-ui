@@ -1,6 +1,5 @@
-import fileDownload from 'js-file-download';
-import * as fp from 'lodash/fp';
-import { isNil } from 'lodash/fp';
+import { fileDownload } from '../../utils/FileDownload';
+import { isNil, mergeAll, omit } from 'lodash/fp';
 import { Config } from '../config';
 import axios from 'axios';
 import { isFileEmpty } from '../utils';
@@ -42,7 +41,7 @@ export const DAR = {
   //v2 delete dar
   deleteDar: async (darId) => {
     const url = `${await getApiUrl()}/api/dar/v2/${darId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
 
@@ -50,7 +49,7 @@ export const DAR = {
   postDar: async (dar) => {
     // noinspection ES6MissingAwait
     Metrics.captureEvent(eventList.dar, {'action': 'submit'});
-    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
+    const filteredDar = omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3` :
       `${await getApiUrl()}/api/dar/v2`;
@@ -93,9 +92,9 @@ export const DAR = {
     if (isFileEmpty(file)) {
       return Promise.resolve({ data: null });
     } else {
-      let authOpts = Config.authOpts();
+      const authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append('file', file);
       const url = `${await getApiUrl()}/api/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);

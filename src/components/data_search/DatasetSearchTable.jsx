@@ -4,7 +4,7 @@ import useOnMount from '@mui/utils/useOnMount';
 import * as React from 'react';
 import { Box, Button } from '@mui/material';
 import {useEffect, useRef, useState} from 'react';
-import { isArray, isEmpty } from 'lodash';
+import { isArray, isEmpty, chain, intersection, clone, capitalize, debounce, isEqual } from 'lodash';
 import { defaultFilters } from './DatasetFilterConstants';
 import { TerraDataRepo } from '../../libs/ajax/TerraDataRepo';
 import { DatasetSearchTableDisplay } from './DatasetSearchTableDisplay';
@@ -15,7 +15,6 @@ import { DAR } from '../../libs/ajax/DAR';
 import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import * as _ from 'lodash';
 import {DatasetSearchFooter} from './DatasetSearchFooter';
 
 const styles = {
@@ -42,7 +41,7 @@ export const applyForAccess = async (selected, history) => {
     } else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
     }
-  } catch (error) {
+  } catch (_error) {
     Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
   }
 };
@@ -68,9 +67,9 @@ export const DatasetSearchTable = (props) => {
     const datasetIdentifiers = datasets.map((row) => row.datasetIdentifier);
     const snapshots = await TerraDataRepo.listSnapshotsByDatasetIds(datasetIdentifiers);
     if (snapshots.filteredTotal > 0) {
-      const datasetIdToSnapshot = _.chain(snapshots.items)
+      const datasetIdToSnapshot = chain(snapshots.items)
         // Ignore any snapshots that a user does not have export (steward or reader) to
-        .filter((snapshot) => _.intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
+        .filter((snapshot) => intersection(snapshots.roleMap[snapshot.id], ['steward', 'reader']).length > 0)
         .groupBy('duosId')
         .value();
       setExportableDatasets(datasetIdToSnapshot);
@@ -210,7 +209,7 @@ export const DatasetSearchTable = (props) => {
     } else {
       newFilter = filter;
     }
-    const newFilters = _.clone(filters);
+    const newFilters = clone(filters);
     newFilters[category] = newFilter;
     setFilters(newFilters);
   };
@@ -225,9 +224,9 @@ export const DatasetSearchTable = (props) => {
   });
 
   const searchAndFilter = useRef(
-    _.debounce((fullQuery) => {
+    debounce((fullQuery) => {
       DataSet.searchDatasetIndex(fullQuery).then((filteredDatasets) => {
-        const newFiltered = datasets.filter(value => filteredDatasets.some(item => _.isEqual(item, value)));
+        const newFiltered = datasets.filter(value => filteredDatasets.some(item => isEqual(item, value)));
         setFiltered(newFiltered);
       });
     }, 150));
@@ -236,7 +235,7 @@ export const DatasetSearchTable = (props) => {
     const fullQuery = assembleFullQuery();
     try {
       searchAndFilter.current(fullQuery);
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({ text: 'Failed to load Elasticsearch index' });
     }  }, [filters, searchTerm]); // eslint-disable-line
 
@@ -281,7 +280,7 @@ export const DatasetSearchTable = (props) => {
           >
             {Object.values(datasetSearchTableTabs).map((tab) => <Tab
               key={tab.key}
-              label={`View By ${_.capitalize(tab.plural)}`}
+              label={`View By ${capitalize(tab.plural)}`}
               style={{
                 ...styles.subTab,
                 ...(tab.key === selectedTable.key ? styles.subTabActive : {})

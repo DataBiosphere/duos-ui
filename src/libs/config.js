@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {memoize} from 'lodash';
 import {Storage} from './storage';
 
 export const Config = {
@@ -73,7 +73,7 @@ export const Token = {
   },
 };
 
-const loadConfig = _.memoize(async () => {
+const loadConfig = memoize(async () => {
   const res = await fetch('/config.json');
   return res.json();
 });

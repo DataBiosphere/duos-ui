@@ -1,6 +1,6 @@
 import React from 'react';
 import LibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import DownloadIcon from 'react-material-icon-svg/dist/Download';
+import { Download } from '@mui/icons-material';
 
 export const LibraryCardAgreementTermsDownload = () => (
   <div>
@@ -12,7 +12,7 @@ export const LibraryCardAgreementTermsDownload = () => (
       rel="noreferrer"
       style={{marginLeft: '.5rem'}}
     >
-      <DownloadIcon fill={'black'} style={{verticalAlign: 'middle', height: '24px'}}/>
+      <Download sx={{ verticalAlign: 'middle', fontSize: '24px' }}/>
     </a>
   </div>
 );

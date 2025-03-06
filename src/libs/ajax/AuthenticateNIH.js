@@ -1,6 +1,6 @@
-import {Config} from '../config';
-import {getApiUrl, getECMUrl, reportError} from '../ajax';
 import axios from 'axios';
+import {Config} from '../config';
+import {getECMUrl, getApiUrl, reportError} from '../ajax';
 import {get, isNil, merge} from 'lodash';
 
 /**
@@ -31,15 +31,6 @@ export const AuthenticateNIH = {
   deleteAccountLinkage: async () => {
     const url = `${await getApiUrl()}/api/nih`;
     return await axios.delete(url, Config.authOpts());
-  },
-
-  getECMAccountStatus: async () => {
-    const url = `${await getECMUrl()}/api/oauth/v1/${provider}`;
-    const res = await axios.get(url, Config.authOpts());
-    if (res.status === 200) {
-      return res.data;
-    }
-    return undefined;
   },
 
   getECMProviderAuthUrl: async (redirectUri, redirectTo) => {

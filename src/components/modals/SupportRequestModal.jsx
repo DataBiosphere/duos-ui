@@ -7,12 +7,12 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
-import * as fp from 'lodash/fp';
+import {hasIn} from 'lodash/fp';
 import addHelpIcon from '../../images/icon_add_help.png';
 
 try {
   Modal.setAppElement('#root');
-} catch (error) {
+} catch (_error) {
   // trycatch for unit testing purposes, since #root may not always exist
   // when testing a component in isolation
 }
@@ -81,7 +81,7 @@ export const SupportRequestModal = (props) => {
       const allToken = await Promise.all(results);
 
       for (let t = 0; t < allToken.length; t++) {
-        if (!fp.hasIn('token')(allToken[t])) {
+        if (!hasIn('token')(allToken[t])) {
           Notifications.showError({
             text: 'Unable to add attachment',
             layout: 'topRight',
@@ -110,7 +110,7 @@ export const SupportRequestModal = (props) => {
           description: '',
           attachment: ''
         });
-        props.onOKRequest('support');
+        props.onOkRequest('support');
       } catch (response) {
         Notifications.showError({
           text: `ERROR ${response.status} : Unable To Send: ${response.data?.message}`,
@@ -167,7 +167,7 @@ export const SupportRequestModal = (props) => {
   };
 
   const emailChangeHandler = (e) => {
-    let emailText = e.target.value;
+    const emailText = e.target.value;
     setModalState({
       ...modalState,
       email: emailText,
@@ -336,7 +336,7 @@ export const SupportRequestModal = (props) => {
             <div className='form-group first-form-group'>
               <label id='lbl_attachment' className='common-color'>Attachment</label>
               <Dropzone onDrop={(acceptedFiles) => attachmentChangeHandler(acceptedFiles)}>
-                {({ isDragActive, openUploader, getRootProps, getInputProps }) => ( //eslint-disable-line no-unused-vars
+                {({ isDragActive, getRootProps, getInputProps }) => (
                   <section style={{
                     backgroundColor: modalState.attachment.length !== 0 ? 'transparent' : (isDragActive ? '#6898c1' : '#ebecee'),
                     fontSize: 14,

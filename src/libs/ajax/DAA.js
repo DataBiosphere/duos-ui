@@ -1,4 +1,4 @@
-import fileDownload from 'js-file-download';
+import { fileDownload } from '../../utils/FileDownload';
 import { getApiUrl } from '../ajax';
 import { Config } from '../config';
 import { isFileEmpty } from '../utils';
@@ -70,9 +70,9 @@ export const DAA = {
     if (isFileEmpty(file)) {
       return Promise.resolve({ data: null });
     } else {
-      let authOpts = Config.authOpts();
+      const authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
-      let formData = new FormData();
+      const formData = new FormData();
       formData.append('file', file);
       const url = `${await getApiUrl()}/api/daa/dac/${dacId}`;
       return axios.post(url, formData, authOpts);

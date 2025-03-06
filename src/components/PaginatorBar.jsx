@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import Pagination from 'react-paginating';
-import _ from 'lodash/fp';
 import './PaginatorBar.css';
 
 const PaginatorButton = ({ props, label }) => (
@@ -34,8 +33,7 @@ export const PaginatorBar = (props) => {
       pageCount={pageCount} // How many pages number you want to display in pagination zone.
       currentPage={props.currentPage} // Current page number
     >
-      {/* eslint-disable-next-line no-unused-vars */}
-      {({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps }) => (
+      {({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, _totalPages, getPageItemProps }) => (
         <div className="controls-wrapper">
           <div className="show-results-wrapper">
             Showing {firstItem(currentPage, props.total)} to {lastItem(hasNextPage)} of {props.total} entries
@@ -50,15 +48,14 @@ export const PaginatorBar = (props) => {
                 </>
               }
             />
-            {_.map(
+            {pages.map(
               num => (
                 <PaginatorButton
                   key={num}
                   props={{ className: `pagination-btn ${currentPage === num ? 'active' : ''}`, ...getPageItemProps({ pageValue: num, onPageChange: props.onPageChange }) }}
                   label={num}
                 />
-              ),
-              pages
+              )
             )}
             <PaginatorButton
               props={{ disabled: !hasNextPage, style: { marginLeft: '1rem' }, ...getPageItemProps({ pageValue: nextPage, onPageChange: props.onPageChange }) }}
