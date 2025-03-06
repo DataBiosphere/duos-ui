@@ -116,12 +116,6 @@ export interface Dataset {
   alternativeDataSharingPlanFile: FileStorageObject;
 }
 
-export interface DatasetMetric {
-  dataset: Dataset;
-  dars: Array<DataAccessRequest>;
-  elections: Array<unknown>;
-}
-
 interface DacTerm {
   dacId: number;
   dacName: string;
@@ -310,6 +304,12 @@ export interface Acknowledgement {
   ackKey: string;
   firstAcknowledged: number;
   lastAcknowledged: number;
+}
+
+export interface DatasetMetric {
+  dataset: Dataset;
+  dars: Array<DataAccessRequest>;
+  elections: Array<Election>;
 }
 
 export interface DataAccessRequest {
