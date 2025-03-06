@@ -2,7 +2,6 @@ import { DuosUserResponse } from './responseTypes';
 import externalAccessIcon from '../images/external_access.svg';
 import openAccessIcon from '../images/open_access.svg';
 import controlledAccessIcon from '../images/controlled_access.svg';
-import {b} from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export type UserRoleName =
   | 'Admin'
