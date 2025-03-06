@@ -10,7 +10,7 @@ import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {Dataset, DatasetProperty} from '../types/model';
+import {DataAccessRequest, Dataset, DatasetStats, DatasetProperty, StudyProperty} from '../types/model';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -32,32 +32,51 @@ interface DatasetStatisticsProps {
 
 export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const {history, match: {params: {datasetIdentifier}}} = props;
-  const [datasetId, setDatasetId] = useState<number>();
   const [dataset, setDataset] = useState<Dataset>();
-  const [dars, setDars] = useState<any>();
+  const [dars, setDars] = useState<Array<DataAccessRequest>>();
   const [isLoading, setIsLoading] = useState(true);
+
+  const showError = (message: string) => {
+    Notifications.showError({
+      severity: 'error',
+      text: `Error: ${message}`,
+      timeout: 3500,
+      layout: {
+        vertical: 'bottom',
+        horizontal: 'right'
+      }
+    });
+  };
 
   const applyForAccess = async () => {
     try {
-      const draftResponse = await DAR.postDarDraft({datasetId: [datasetId]});
+      const draftResponse = await DAR.postDarDraft({datasetId: [dataset?.datasetId]});
       if (draftResponse.referenceId) {
         history.push(`/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
-        Notifications.showError({text: draftResponse.message + ' Please contact customer support for help.'});
+        showError(draftResponse.message + ' Please contact customer support for help.');
       } else {
-        Notifications.showError({text: 'Error: Unable to create a Draft Data Access Request'});
+        showError('Unable to create a Draft Data Access Request');
       }
-    } catch (error) {
-      Notifications.showError({text: 'Error: Unable to create a Draft Data Access Request'});
+    } catch (_error) {
+      showError('Unable to create a Draft Data Access Request');
     }
   };
 
   useEffect(() => {
-    DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
-      setData(dataset.datasetId);
-    }).catch(() => {
-      Notifications.showError({text: 'Error: Unable to retrieve dataset from server'});
-    });
+    const init = async () => {
+      try {
+        const dataset: Dataset = await DataSet.getDatasetByDatasetIdentifier(datasetIdentifier);
+        const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(dataset.datasetId);
+        setDataset(dataset);
+        setDars(metrics.dars);
+        setIsLoading(false);
+      } catch (_error) {
+        showError('Unable to retrieve dataset statistics from server');
+        setIsLoading(false);
+      }
+    }
+    init();
   }, [datasetIdentifier]);
 
   const extract = useCallback((propertyName: string) => {
@@ -65,20 +84,13 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     return property?.propertyValue;
   }, [dataset]);
 
-  const setData = async (datasetId: number) => {
-    try {
-      setIsLoading(true);
-      const metrics = await DatasetMetrics.getDatasetStats(datasetId);
-      const dataset = await DataSet.getDataSetsByDatasetId(datasetId);
-      setDatasetId(datasetId);
-      setDataset(dataset);
-      setDars(metrics.dars);
-      setIsLoading(false);
-    } catch (error) {
-      Notifications.showError({text: 'Error: Unable to retrieve dataset statistics from server'});
-      setIsLoading(false);
+  const extractStudyProp = useCallback((key: string) => {
+    const property = find({key})(dataset?.study?.properties) as StudyProperty;
+    if (Array.isArray(property?.value)) {
+      return property.value.join(', ');
     }
-  };
+    return property?.value;
+  }, [dataset]);
 
   const accessInstructions = () => {
     const accessManagement = extract('Access Management')?.toLowerCase();
@@ -148,19 +160,19 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                   {extract('Principal Investigator(PI)') || dataset?.study?.piName}
                 </div>
               </div>}
-              {(extract('Data Depositor') || dataset?.createUser?.displayName) && <div style={{display: 'flex'}}>
+              {(extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName) && <div style={{display: 'flex'}}>
                 <div style={Styles.SMALL_BOLD}>Data Custodian:</div>
                 <div style={Styles.SMALL_BOLD}>
-                  {extract('Data Depositor') || dataset?.createUser?.displayName}
+                  {extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName}
                 </div>
               </div>}
             </div>
           </div>
           <div style={Styles.SUB_HEADER}>Data Access Requests - Research Statements</div>
-          {dars?.map((dar: any) => (
+          {dars?.map((dar: DataAccessRequest) => (
             <div style={Styles.READ_MORE as React.CSSProperties} id={`${dar.darCode}`} key={`${dar.darCode}`}>
               <ReadMore
-                // @ts-ignore next-line props for non ts component
+                // @ts-expect-error next-line props for non ts component
                 props={props}
                 readLessText='Show less'
                 readMoreText='Show More'
