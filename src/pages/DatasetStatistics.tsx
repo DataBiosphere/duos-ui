@@ -37,18 +37,30 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const [dars, setDars] = useState<any>();
   const [isLoading, setIsLoading] = useState(true);
 
+  const showError = (message: string) => {
+    Notifications.showError({
+      severity: 'error',
+      text: `Error: ${message}`,
+      timeout: 3500,
+      layout: {
+        vertical: 'bottom',
+        horizontal: 'right'
+      }
+    });
+  };
+
   const applyForAccess = async () => {
     try {
       const draftResponse = await DAR.postDarDraft({datasetId: [datasetId]});
       if (draftResponse.referenceId) {
         history.push(`/dar_application/${draftResponse.referenceId}`);
       } else if (draftResponse.message) {
-        Notifications.showError({text: draftResponse.message + ' Please contact customer support for help.'});
+        showError(draftResponse.message + ' Please contact customer support for help.');
       } else {
-        Notifications.showError({text: 'Error: Unable to create a Draft Data Access Request'});
+        showError('Unable to create a Draft Data Access Request');
       }
-    } catch (error) {
-      Notifications.showError({text: 'Error: Unable to create a Draft Data Access Request'});
+    } catch (_error) {
+      showError('Unable to create a Draft Data Access Request');
     }
   };
 
@@ -56,7 +68,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
     DataSet.getDatasetByDatasetIdentifier(datasetIdentifier).then((dataset) => {
       setData(dataset.datasetId);
     }).catch(() => {
-      Notifications.showError({text: 'Error: Unable to retrieve dataset from server'});
+      showError('Error: Unable to retrieve dataset from server');
     });
   }, [datasetIdentifier]);
 
@@ -74,8 +86,8 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
       setDataset(dataset);
       setDars(metrics.dars);
       setIsLoading(false);
-    } catch (error) {
-      Notifications.showError({text: 'Error: Unable to retrieve dataset statistics from server'});
+    } catch (_error) {
+      showError('Error: Unable to retrieve dataset statistics from server')
       setIsLoading(false);
     }
   };
