@@ -306,7 +306,7 @@ export interface Acknowledgement {
   lastAcknowledged: number;
 }
 
-export interface DatasetMetric {
+export interface DatasetStats {
   dataset: Dataset;
   dars: Array<DataAccessRequest>;
   elections: Array<Election>;

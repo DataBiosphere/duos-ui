@@ -10,7 +10,7 @@ import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {DataAccessRequest, Dataset, DatasetMetric, DatasetProperty, StudyProperty} from '../types/model';
+import {DataAccessRequest, Dataset, DatasetStats, DatasetProperty, StudyProperty} from '../types/model';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -88,7 +88,7 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const setData = async (datasetId: number) => {
     try {
       setIsLoading(true);
-      const metrics: DatasetMetric = await DatasetMetrics.getDatasetStats(datasetId);
+      const metrics: DatasetStats = await DatasetMetrics.getDatasetStats(datasetId);
       const dataset = await DataSet.getDataSetsByDatasetId(datasetId);
       setDatasetId(datasetId);
       setDataset(dataset);
