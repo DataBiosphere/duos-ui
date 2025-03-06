@@ -1,5 +1,9 @@
 import {Buffer} from 'buffer';
-import {find, getOr, isNil} from 'lodash/fp';
+import EnvironmentUtils, {envGroups} from '../utils/EnvironmentUtils.js';
+
+export const rasEnabled = () => {
+  return EnvironmentUtils.checkEnv(envGroups.DEV);
+}
 
 /**
  * This function is used to verify the raw NIH token and return the decoded data.
@@ -27,7 +31,7 @@ export const decodeNihToken = async (token) => {
       return null;
     }
     return JSON.parse(parts[1]);
-  } catch (err) {
+  } catch (_error) {
     return null;
   }
 };
@@ -56,7 +60,7 @@ export const expirationCountFromDate = (expDate) => {
  * @returns {Date}
  */
 export const treatAsUTC = (date) => {
-  let result = new Date(date);
+  const result = new Date(date);
   result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
   return result;
 };
@@ -67,12 +71,11 @@ export const treatAsUTC = (date) => {
  * @param user The user to derive era authentication state from
  */
 export const extractEraAuthenticationState = (user) => {
-  // The user object, confusingly, sometimes has a list of `properties` and sometimes has a list of `researcherProperties`.
-  const properties = user.properties || user.researcherProperties;
-  const authProp = find({'propertyKey':'eraAuthorized'})(properties);
-  const expProp = find({'propertyKey':'eraExpiration'})(properties);
-  const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-  const expirationCount = isNil(expProp) ? 0 : expirationCountFromDate(getOr(0,'propertyValue')(expProp));
+  const properties = user.properties;
+  const authProp = properties?.find(p => p.propertyKey === 'eraAuthorized');
+  const expProp = properties?.find(p => p.propertyKey === 'eraExpiration');
+  const isAuthorized = authProp?.propertyValue ?? false;
+  const expirationCount = expProp?.propertyValue ? expirationCountFromDate(expProp.propertyValue) : 0;
   const nihValid = isAuthorized && expirationCount > 0;
   return {
     isAuthorized,

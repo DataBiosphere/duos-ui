@@ -7,7 +7,7 @@ import { AuthenticateNIH } from '../libs/ajax/AuthenticateNIH';
 import { User } from '../libs/ajax/User';
 import {Config} from '../libs/config';
 import './Animations.css';
-import {decodeNihToken, extractEraAuthenticationState} from '../../src/utils/ERACommonsUtils';
+import {decodeNihToken, extractEraAuthenticationState, rasEnabled} from '../../src/utils/ERACommonsUtils';
 import ReactTooltip from 'react-tooltip';
 
 export default function ERACommons(props) {
@@ -73,15 +73,13 @@ export default function ERACommons(props) {
     initResearcherProfile();
   }, [researcherProfile, onNihStatusUpdate]);
 
-  // eslint-disable-next-line no-unused-vars
   const redirectToNihLogin = async () => {
     const returnUrl = window.location.origin + '/' + destination + '?nih-username-token=<token>';
     window.location.href = `${ await Config.getNihUrl() }?${queryString.stringify({ 'return-url': returnUrl })}`;
   };
 
-  // eslint-disable-next-line no-unused-vars
   const redirectToECMAuthUrl = async () => {
-    let origin = window.location.origin;
+    const origin = window.location.origin;
     const redirectTo = origin + '/' + destination;
     const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo);
     console.log('authUrl', authUrl);
@@ -118,7 +116,7 @@ export default function ERACommons(props) {
           <a
             data-cy='era-commons-authenticate-link'
             className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
-            onClick={redirectToECMAuthUrl}
+            onClick={rasEnabled() ? redirectToECMAuthUrl : redirectToNihLogin}
             target='_blank'>
             <div className={'era-logo-style'}/>
             <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
