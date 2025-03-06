@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
 import './App.css';
@@ -12,12 +12,13 @@ import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
 import Routes from './Routes';
+import {AuthenticateNIH} from '../src/libs/ajax/AuthenticateNIH.js';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [env, setEnv] = useState('');
-  let history = useHistory();
-  let location = useLocation();
+  const history = useHistory();
+  const location = useLocation();
 
   const trackPageView = (location) => {
     ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
@@ -63,6 +64,34 @@ function App() {
       setIsLoggedIn(isLogged);
     };
     setUserIsLogged();
+  });
+
+  // Check for NIH Authentication URL params that need to be parsed
+  useEffect(() => {
+    const checkNIHAuth = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get('code')
+      const state = queryParams.get('state')
+      if (code && state) {
+        const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state);
+        console.log(linkInfo);
+        if (linkInfo?.externalUserId) {
+          // TODO: Construct a {
+          //   "nihUsername": "string",
+          //   "datasetPermissions": [
+          //     "string"
+          //   ],
+          //   "status": "string",
+          //   "eraExpiration": "string"
+          // }
+          // and post to AuthenticateNIH.saveNihUsr(nihPayload);
+        }
+        if (linkInfo?.additionalState?.redirectTo) {
+          window.location.href = linkInfo.additionalState.redirectTo;
+        }
+      }
+    };
+    checkNIHAuth();
   });
 
   return (
