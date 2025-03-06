@@ -10,7 +10,7 @@ import {ReadMore} from '../components/ReadMore';
 import {formatDate} from '../libs/utils';
 import {Button} from '@mui/material';
 import {History} from 'history';
-import {Dataset, DatasetProperty} from '../types/model';
+import {Dataset, DatasetProperty, StudyProperty} from '../types/model';
 
 const LINE = <div style={{borderTop: '1px solid #BABEC1', height: 0}}/>;
 
@@ -75,6 +75,14 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
   const extract = useCallback((propertyName: string) => {
     const property = find({propertyName})(dataset?.properties) as DatasetProperty;
     return property?.propertyValue;
+  }, [dataset]);
+
+  const extractStudyProp = useCallback((key: string) => {
+    const property = find({key})(dataset?.study?.properties) as StudyProperty;
+    if (Array.isArray(property?.value)) {
+      return property.value.join(', ');
+    }
+    return property?.value;
   }, [dataset]);
 
   const setData = async (datasetId: number) => {
@@ -160,10 +168,10 @@ export default function DatasetStatistics(props: DatasetStatisticsProps) {
                   {extract('Principal Investigator(PI)') || dataset?.study?.piName}
                 </div>
               </div>}
-              {(extract('Data Depositor') || dataset?.createUser?.displayName) && <div style={{display: 'flex'}}>
+              {(extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName) && <div style={{display: 'flex'}}>
                 <div style={Styles.SMALL_BOLD}>Data Custodian:</div>
                 <div style={Styles.SMALL_BOLD}>
-                  {extract('Data Depositor') || dataset?.createUser?.displayName}
+                  {extractStudyProp('dataCustodianEmail') || dataset?.createUser?.displayName}
                 </div>
               </div>}
             </div>

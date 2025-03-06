@@ -51,7 +51,7 @@
   ],
   "createUser": {
     "userId": 3396,
-    "email": "jlawson@broadinstitute.org",
+    "email": "jlawson@test.com",
     "displayName": "Jonathan Lawson (Admin \u0026 DAC Member)",
     "createDate": 1526056488000,
     "emailPreference": false,
@@ -93,7 +93,8 @@
         "key": "dataCustodianEmail",
         "type": "Json",
         "value": [
-          "geraldg@spurs.bb"
+          "user_1@test.com",
+          "user_2@test.com"
         ]
       },
       {

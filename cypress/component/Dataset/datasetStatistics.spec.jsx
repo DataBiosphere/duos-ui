@@ -1,5 +1,3 @@
-/* eslint-disable no-undef,no-console */
-
 import React from 'react';
 import {mount} from 'cypress/react';
 import DatasetStatistics from '../../../src/pages/DatasetStatistics';
@@ -45,9 +43,12 @@ const location = {
 
 describe('Dataset Statistics Tests', () => {
 
+  beforeEach(() => {
+    cy.viewport(600, 800);
+  });
+
   it('Displays Controlled Access Dataset Apply Button', () => {
     const controlled = Object.assign(dataset, {properties: [controlledProp]});
-    cy.viewport(600, 800);
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(controlled));
     cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(controlled));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -70,7 +71,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays External Access Language With Location', () => {
     const external = Object.assign(dataset, {properties: [externalProp, location]});
-    cy.viewport(600, 800);
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
     cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(external));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -94,7 +94,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays External Access Language Without Location', () => {
     const external = Object.assign(dataset, {properties: [externalProp]});
-    cy.viewport(600, 800);
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(external));
     cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(external));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -118,7 +117,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays Open Access Language With Location', () => {
     const open = Object.assign(dataset, {properties: [openProp, location]});
-    cy.viewport(600, 800);
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
     cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(open));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -142,7 +140,6 @@ describe('Dataset Statistics Tests', () => {
 
   it('Displays Open Access Language Without Location', () => {
     const open = Object.assign(dataset, {properties: [openProp]});
-    cy.viewport(600, 800);
     cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(open));
     cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(open));
     cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
@@ -182,5 +179,30 @@ describe('Dataset Statistics Tests', () => {
     };
     mount(<DatasetStatistics {...props}/>);
     cy.contains(dataset.datasetIdentifier).should('exist');
+  });
+
+  it('Displays All Data Custodian Emails', () => {
+    cy.stub(DataSet, 'getDatasetByDatasetIdentifier').returns(Promise.resolve(dataset));
+    cy.stub(DataSet, 'getDataSetsByDatasetId').returns(Promise.resolve(dataset));
+    cy.stub(DatasetMetrics, 'getDatasetStats').returns(Promise.resolve({}));
+
+    const props = {
+      match: {
+        params: {
+          datasetIdentifier: dataset.datasetIdentifier
+        }
+      },
+      history: {
+        push() {
+        }
+      }
+    };
+    mount(<DatasetStatistics {...props}/>);
+    cy.contains(dataset.datasetIdentifier).should('exist');
+    cy.contains('Data Custodian').should('exist');
+    const dataCustodians = dataset.study.properties.find((property) => property.key === 'dataCustodianEmail').value;
+    dataCustodians.forEach((dataCustodian) => {
+      cy.contains(dataCustodian).should('exist');
+    });
   });
 });
