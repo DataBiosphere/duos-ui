@@ -74,17 +74,13 @@ function App() {
       const state = queryParams.get('state')
       if (code && state) {
         const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state);
-        console.log(linkInfo);
-        if (linkInfo?.externalUserId) {
-          // TODO: Construct a {
-          //   "nihUsername": "string",
-          //   "datasetPermissions": [
-          //     "string"
-          //   ],
-          //   "status": "string",
-          //   "eraExpiration": "string"
-          // }
-          // and post to AuthenticateNIH.saveNihUsr(nihPayload);
+        if (linkInfo?.externalUserId && linkInfo?.expirationTimestamp) {
+          const nihUser = {
+            linkedNihUsername: linkInfo.externalUserId,
+            linkExpireTime: `${new Date(linkInfo.expirationTimestamp).getTime()}`,
+            status: 'true',
+          }
+          await AuthenticateNIH.saveNihUsr(nihUser);
         }
         if (linkInfo?.additionalState?.redirectTo) {
           window.location.href = linkInfo.additionalState.redirectTo;
