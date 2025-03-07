@@ -35,15 +35,6 @@ export const AuthenticateNIH = {
     return await axios.delete(url, Config.authOpts());
   },
 
-  getECMAccountStatus: async () => {
-    const url = `${await getECMUrl()}/api/oauth/v1/${provider}`;
-    const res = await axios.get(url, Config.authOpts());
-    if (res.status === 200) {
-      return res.data;
-    }
-    return undefined;
-  },
-
   getECMProviderAuthUrl: async (redirectUri, redirectTo) => {
     const url = `${await getECMUrl()}/api/oauth/v1/${provider}/authorization-url?redirectUri=${redirectUri}`;
     const res = await axios.post(url, {redirectTo: redirectTo}, Config.authOpts());

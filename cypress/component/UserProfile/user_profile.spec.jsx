@@ -21,7 +21,6 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(User, 'getApprovedDatasets').returns([]);
     cy.stub(User, 'getAcknowledgements').returns({});
-    cy.stub(AuthenticateNIH, 'getECMAccountStatus').returns(undefined);
     mount(<UserProfile/>);
     cy.get('h2').should('contain', 'Your Profile');
   });
@@ -32,7 +31,6 @@ describe('User Profile', () => {
     cy.stub(User, 'getMe').returns(duosUser);
     cy.stub(User, 'getApprovedDatasets').returns([]);
     cy.stub(User, 'getAcknowledgements').returns({});
-    cy.stub(AuthenticateNIH, 'getECMAccountStatus').returns(undefined);
     cy.intercept(
       {method: 'PUT', url: '**/user'},
       {statusCode: 200, body: duosUser}
