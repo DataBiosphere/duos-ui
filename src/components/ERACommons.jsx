@@ -127,29 +127,29 @@ export default function ERACommons(props) {
 
   return (
     <div id={'era-commons-id'} style={{minHeight: 65}}>
-      {header && <label className="era-control-label">
-        <span data-cy="era-commons-header">NIH {accountLabel} ID
-          {required ? <span data-cy="era-commons-required">*</span> : ''}
+      {header && <label className='era-control-label'>
+        <span data-cy='era-commons-header'>NIH {accountLabel} ID
+          {required ? <span data-cy='era-commons-required'>*</span> : ''}
         </span>
       </label>}
       {(!isAuthorized || expirationCount < 0) && (!readOnly &&
         <a
-          data-cy="era-commons-authenticate-link"
+          data-cy='era-commons-authenticate-link'
           className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
           onClick={rasEnabled() ? redirectToECMAuthUrl : redirectToNihLogin}
-          target="_blank">
+          target='_blank'>
           <div className={'era-logo-style'}/>
           <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
         </a>
       )}
-      {nihError && <span className="era-cancel-color era-required-field-error-span">{nihErrorMessage}</span>}
+      {nihError && <span className='era-cancel-color era-required-field-error-span'>{nihErrorMessage}</span>}
       {isAuthorized && <div>
-        {expirationCount >= 0 && <div className="era-commons-id-value">
-          <span data-cy="era-commons-id-value">{eraCommonsId}</span>
+        {expirationCount >= 0 && <div className='era-commons-id-value'>
+          <span data-cy='era-commons-id-value'>{eraCommonsId}</span>
           {!readOnly &&
-            <button className="era-delete-icon" type="button" onClick={deleteNihAccount}>
-              <span className="glyphicon glyphicon-remove-circle" data-tip="Clear account"
-                    data-for="tip_clear_era_commons_link"/>
+            <button className='era-delete-icon' type='button' onClick={deleteNihAccount}>
+              <span className='glyphicon glyphicon-remove-circle' data-tip='Clear account'
+                    data-for='tip_clear_era_commons_link'/>
             </button>
           }
           {!readOnly &&
@@ -159,11 +159,11 @@ export default function ERACommons(props) {
               id={`tip_clear_era_commons_link`}>Clear {accountLabel} Account Link</ReactTooltip>
           }
         </div>}
-        <div className="era-expiration-value">
+        <div className='era-expiration-value'>
           {expirationCount >= 0 && <div
-            className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
+            className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
           {expirationCount < 0 &&
-            <div className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
+            <div className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
         </div>
       </div>}
     </div>
