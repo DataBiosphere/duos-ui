@@ -131,7 +131,7 @@ export default function ERACommons(props) {
           className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
           onClick={rasEnabled() ? redirectToECMAuthUrl : redirectToNihLogin}
           target='_blank'>
-          <div className={'era-logo-style'}/>
+          <div className={rasEnabled() ? 'nih-logo-style' : 'era-logo-style'}/>
           <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
         </a>
       )}
