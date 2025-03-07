@@ -4,7 +4,9 @@ import {getECMUrl, getApiUrl, reportError} from '../ajax';
 import {get, isNil, merge} from 'lodash';
 
 /**
- * ECM has several different providers such as `era-commons`, `ras`, `github`, `fence`, and others.
+ * ECM has several different providers such as `era-commons`, `ras`, `github`, `fence`, and others. DUOS has
+ * historically used eRA Commons, but RAS is the new standard that Terra will be using. DUOS is moving in that direction
+ * and will update as it is released to higher environments.
  * @type {string}
  */
 const provider = 'ras';
