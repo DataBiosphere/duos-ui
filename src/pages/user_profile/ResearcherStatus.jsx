@@ -7,7 +7,7 @@ import {isNil} from 'lodash';
 import LibraryCard from './LibraryCard';
 import DAAs from './DAAs';
 import {DAAUtils} from '../../utils/DAAUtils';
-import {nihAccountLabel} from '../../utils/ERACommonsUtils.js';
+import {nihAccountInstructions, nihAccountLabel} from '../../utils/ERACommonsUtils.js';
 
 export default function ResearcherStatus(props) {
 
@@ -22,6 +22,7 @@ export default function ResearcherStatus(props) {
   const [daaObjects, setDaaObjects] = useState([]);
   const nihStatusUpdate = useCallback(() => {}, []);
   const accountLabel = nihAccountLabel();
+  const accountLink = nihAccountInstructions();
 
   useEffect(() => {
     const init = async () => {
@@ -73,7 +74,7 @@ export default function ResearcherStatus(props) {
     </p>
     <p>
       An&nbsp;
-      <a href='https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'>
+      <a href={accountLink}>
         {accountLabel} Account
       </a>
       &nbsp;is required to submit a dar.

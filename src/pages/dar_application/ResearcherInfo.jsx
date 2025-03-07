@@ -6,7 +6,7 @@ import CollaboratorList from './collaborator/CollaboratorList';
 import {isEmpty, isNil, get} from 'lodash/fp';
 import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
 import './dar_application.css';
-import {nihAccountLabel} from '../../utils/ERACommonsUtils.js';
+import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils.js';
 
 const linkStyle = {color: '#2FA4E7'};
 const titleStyle = {fontSize: '24px', fontWeight: 500, color: '#333333'};
@@ -41,6 +41,7 @@ export default function ResearcherInfo(props) {
     ariaLevel = 2
   } = props;
   const accountLabel = nihAccountLabel();
+  const accountLink = nihAccountInstructions();
 
   const formatSOString = (name, email) => {
     if (isEmpty(name)) {
@@ -103,7 +104,7 @@ export default function ResearcherInfo(props) {
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
               {'Please authenticate with '}
               <a target="_blank" rel="noreferrer"
-                 href="https://www.era.nih.gov/register-accounts/create-and-edit-an-account.htm">{accountLabel}</a>
+                 href={accountLink}>{accountLabel}</a>
               {' in order to proceed.'}
             </span>
           )}

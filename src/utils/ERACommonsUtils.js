@@ -9,6 +9,10 @@ export const nihAccountLabel = () => {
   return rasEnabled() ? 'RAS' : 'eRA Commons';
 }
 
+export const nihAccountInstructions = () => {
+  return rasEnabled() ? 'https://datascience.nih.gov/researcher-auth-service-initiative' : 'https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm';
+}
+
 /**
  * This function is used to verify the raw NIH token and return the decoded data.
  * It takes in a base64 encoded token, splits it into the following components:
