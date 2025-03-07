@@ -162,7 +162,7 @@ export default function CollaboratorForm(props) {
             className="collaborator-form-add-save-button f-left btn"
             role="button"
             onClick={() => {
-              let newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
+              const newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
               const errors = computeCollaboratorErrors({
                 collaborator: newCollaborator,
                 needsApproverStatus: props.showApproval
