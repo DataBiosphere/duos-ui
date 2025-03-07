@@ -102,10 +102,9 @@ export default function ResearcherInfo(props) {
           <h3>{'1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')}</h3>
           {(!readOnlyMode && formData.checkCollaborator !== true) && (
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
-              {'Please authenticate with '}
-              <a target='_blank' rel='noreferrer'
-                 href={accountLink}>{accountLabel}</a>
-              {' in order to proceed.'}
+              Please authenticate with&nbsp;
+              <a target='_blank' rel='noreferrer' href={accountLink}>{accountLabel}</a>
+              &nbsp;in order to proceed.
             </span>
           )}
           <div className='flex-row' style={{justifyContent: 'flex-start', alignItems: 'flex-start'}}>
