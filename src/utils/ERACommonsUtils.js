@@ -5,6 +5,10 @@ export const rasEnabled = () => {
   return EnvironmentUtils.checkEnv(envGroups.DEV);
 }
 
+export const nihAccountLabel = () => {
+  return rasEnabled() ? 'RAS' : 'eRA Commons';
+}
+
 /**
  * This function is used to verify the raw NIH token and return the decoded data.
  * It takes in a base64 encoded token, splits it into the following components:
