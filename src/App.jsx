@@ -91,7 +91,7 @@ function App() {
       }
     };
     checkRASAuthentication();
-  });
+  }, []);
 
   return (
     <div className="body">
