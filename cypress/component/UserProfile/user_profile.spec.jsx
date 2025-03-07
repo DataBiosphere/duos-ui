@@ -1,7 +1,6 @@
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Storage} from '../../../src/libs/storage';
-import {AuthenticateNIH} from '../../../src/libs/ajax/AuthenticateNIH';
 import {User} from '../../../src/libs/ajax/User';
 import {Institution} from '../../../src/libs/ajax/Institution';
 import UserProfile from '../../../src/pages/user_profile/UserProfile';
