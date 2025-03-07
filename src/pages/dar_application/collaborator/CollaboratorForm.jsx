@@ -51,16 +51,16 @@ export default function CollaboratorForm(props) {
   };
 
   return (
-    <div className="form-group row no-margin">
-      <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card" key={`collaborator-item-${uuid}`}>
-        <div className="row">
+    <div className='form-group row no-margin'>
+      <div className='col-lg-12 col-md-12 col-sm-12 col-xs-12 collaborator-form-card' key={`collaborator-item-${uuid}`}>
+        <div className='row'>
           <h2>{`${isNil(collaborator) ? 'New' : 'Edit'} ${props.collaboratorLabel} Information`}</h2>
           <FormField
             id={`${index}_collaboratorName`}
-            name="name"
+            name='name'
             title={`${props.collaboratorLabel} Name`}
             defaultValue={name}
-            placeholder="Firstname Lastname"
+            placeholder='Firstname Lastname'
             validators={[FormValidators.REQUIRED]}
             validation={validation.name}
             onValidationChange={onValidationChange}
@@ -68,7 +68,7 @@ export default function CollaboratorForm(props) {
           />
           <FormField
             id={`${index}_collaboratorEraCommonsId`}
-            name="eraCommonsId"
+            name='eraCommonsId'
             title={`${props.collaboratorLabel} ${accountLabel} Account`}
             defaultValue={eraCommonsId}
             placeholder={`${accountLabel} Account`}
@@ -79,13 +79,13 @@ export default function CollaboratorForm(props) {
           />
         </div>
         {/* title and email */}
-        <div className="row">
+        <div className='row'>
           <FormField
             id={`${index}_collaboratorTitle`}
-            name="title"
+            name='title'
             title={`${props.collaboratorLabel} Title`}
             defaultValue={title}
-            placeholder="Title"
+            placeholder='Title'
             validators={[FormValidators.REQUIRED]}
             validation={validation.title}
             onValidationChange={onValidationChange}
@@ -93,10 +93,10 @@ export default function CollaboratorForm(props) {
           />
           <FormField
             id={`${index}_collaboratorEmail`}
-            name="email"
+            name='email'
             title={`${props.collaboratorLabel} Email`}
             defaultValue={email}
-            placeholder="Email"
+            placeholder='Email'
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             validation={validation.email}
             onValidationChange={onValidationChange}
@@ -104,11 +104,11 @@ export default function CollaboratorForm(props) {
           />
         </div>
         {props.showApproval && (
-          <div className="row" style={{marginTop: 25}}>
+          <div className='row' style={{marginTop: 25}}>
             <FormField
               id={`${index}_collaboratorApproval`}
               type={FormFieldTypes.RADIOGROUP}
-              name="approverStatus"
+              name='approverStatus'
               description={`Are you requesting permission for this member of the Internal Lab Staff to be given
                 Designated Download/Approval' status? This indication should be limited to individuals who
                 the PI designates to download data and/or share the requested data with other Internal Lab Staff
@@ -118,7 +118,7 @@ export default function CollaboratorForm(props) {
                 {name: 'no', text: 'No'}
               ]}
               validators={[FormValidators.REQUIRED]}
-              orientation="horizontal"
+              orientation='horizontal'
               defaultValue={
                 (approverStatus === true || approverStatus === 'yes') ? 'yes'
                   : (approverStatus === false || approverStatus === 'no') ? 'no'
@@ -128,13 +128,13 @@ export default function CollaboratorForm(props) {
               onValidationChange={onValidationChange}
               onChange={({value}) => setApproverStatus(value)}
             />
-            <p className="control-label rp-choice-questions" style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
+            <p className='control-label rp-choice-questions' style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
               Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as
               their Internal Lab Staff.
             </p>
           </div>
         )}
-        <div className="row" style={{marginTop: 20}}>
+        <div className='row' style={{marginTop: 20}}>
           {/* Toggle Delete Buttons Cancel/Delete */}
           {(!isNil(props.collaborator) && !props.deleteMode) && (
             <a
@@ -146,10 +146,10 @@ export default function CollaboratorForm(props) {
               style={{verticalAlign: 'middle', lineHeight: '4rem', float: 'right'}}
             >
               <span
-                className="collaborator-delete-icon glyphicon glyphicon-trash"
-                aria-hidden="true"
-                data-tip="Delete dataset"
-                data-for="tip_delete"
+                className='collaborator-delete-icon glyphicon glyphicon-trash'
+                aria-hidden='true'
+                data-tip='Delete dataset'
+                data-for='tip_delete'
               />
               <span style={{marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle'}}>
                 Delete this entry
@@ -159,8 +159,8 @@ export default function CollaboratorForm(props) {
           {/* Add/Save Button */}
           <div
             id={`collaborator-${collaboratorKey}-add-save`}
-            className="collaborator-form-add-save-button f-left btn"
-            role="button"
+            className='collaborator-form-add-save-button f-left btn'
+            role='button'
             onClick={() => {
               const newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
               const errors = computeCollaboratorErrors({
@@ -177,8 +177,8 @@ export default function CollaboratorForm(props) {
             {`${isNil(collaborator) ? 'Add' : 'Save'}`}
           </div>
           <div
-            className="collaborator-form-cancel-button f-left btn"
-            role="button"
+            className='collaborator-form-cancel-button f-left btn'
+            role='button'
             onClick={() => props.updateEditState(false)}
           >
             Cancel
@@ -187,7 +187,7 @@ export default function CollaboratorForm(props) {
           <DeleteCollaboratorModal
             showDelete={showDeleteCollaboratorModal}
             closeDelete={closeDelete}
-            header="Delete Entry"
+            header='Delete Entry'
             title={<div>Are you sure you want to delete <strong>{name}</strong>?</div>}
             message={<div><i>This action is permanent and cannot be undone.</i></div>}
             onConfirm={() => props.deleteCollaborator()}
