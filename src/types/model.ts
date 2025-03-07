@@ -181,7 +181,7 @@ export interface DatasetTerm {
 
 export interface AccessManagementSummary {
   name: string;
-  icon: any;
+  icon: unknown;
   description: string;
 }
 
@@ -304,4 +304,143 @@ export interface Acknowledgement {
   ackKey: string;
   firstAcknowledged: number;
   lastAcknowledged: number;
+}
+
+export interface DatasetStats {
+  dataset: Dataset;
+  dars: Array<DataAccessRequest>;
+  elections: Array<Election>;
+}
+
+export interface DataAccessRequest {
+  referenceId: string;
+  userId: number;
+  createDate: string;
+  sortDate: string;
+  submissionDate: string;
+  updateDate: string;
+  draft: boolean;
+  darCode: string;
+  elections: Array<Election>;
+  projectTitle: string;
+  datasetIds: number[];
+  rus: string;
+  nonTechRus: string;
+  diseases: boolean;
+  methods: boolean;
+  controls: boolean;
+  population: boolean;
+  other: boolean;
+  otherText: string;
+  ontologies: string[];
+  forProfit: boolean;
+  oneGender: boolean;
+  gender: string;
+  pediatric: boolean;
+  illegalBehavior: boolean;
+  addiction: boolean;
+  sexualDiseases: boolean;
+  stigmatizedDiseases: boolean;
+  vulnerablePopulation: boolean;
+  populationMigration: boolean;
+  psychiatricTraits: boolean;
+  notHealth: boolean;
+  hmb: boolean;
+  poa: boolean;
+  anvilUse: boolean;
+  cloudUse: boolean;
+  localUse: boolean;
+  cloudProvider: string;
+  cloudProviderType: string;
+  cloudProviderDescription: string;
+  geneticStudiesOnly: boolean;
+  irb: boolean;
+  irbDocumentLocation: string;
+  irbProtocolExpiration: string;
+  dsAcknowledgement: boolean;
+  gsoAcknowledgement: boolean;
+  pubAcknowledgement: boolean;
+  itDirector: string;
+  signingOfficial: string;
+  publication: boolean;
+  collaboration: boolean;
+  collaborationLetterLocation: string;
+  forensicActivities: boolean;
+  sharingDistribution: boolean;
+  externalCollaborators: Array<Collaborator>;
+  internalCollaborators: Array<Collaborator>;
+  labCollaborators: Array<Collaborator>;
+  progressReportSummary: string;
+  intellectualPropertySummary: string;
+  publications: Array<Publication>;
+  presentations: Array<Presentation>;
+  dataManagementIncident: DataManagementIncident;
+  researchPlans: string;
+  closeOutSupplement: 'PROJECT_COMPLETED' | 'REQUESTOR_MOVED_INSTITUTION' | 'PROJECT_TRANSFERRED' | 'PROJECT_SUPERSEDED';
+}
+
+export interface DataManagementIncident {
+  incidents: string[];
+  description: string;
+}
+
+export interface Presentation {
+  title: string;
+  link: string;
+  date: string;
+  authors: string;
+  datasetCitation: string;
+  citation: string;
+}
+
+export interface Publication {
+  title: string;
+  pubmedId: string;
+  date: string;
+  authors: string;
+  bibliographicCitation: string;
+  datasetCitation: string;
+  citation: string;
+}
+
+export interface Collaborator {
+  approverStatus: boolean;
+  email: string;
+  eraCommonsId: string;
+  name: string;
+  title: number;
+  uuid: number;
+}
+
+export interface Election {
+  electionId: number;
+  electionType: string;
+  finalVote: boolean;
+  status:	string;
+  createDate: string;
+  lastUpdate: string;
+  finalVoteDate: string;
+  referenceId: string;
+  finalRationale: string;
+  finalAccessVote: boolean;
+  datasetId: number;
+  displayId: string;
+  dulName: string;
+  version: number;
+  archived: boolean;
+  votes: Map<number, Vote>;
+}
+
+export interface Vote {
+  voteId: number;
+  vote: boolean;
+  userId: number;
+  createDate: string;
+  updateDate: string;
+  electionId: number;
+  rationale: string;
+  type: string;
+  isReminderSent: boolean;
+  hasConcerns: boolean;
+  displayName: string;
 }
