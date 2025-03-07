@@ -82,13 +82,6 @@ export default function ERACommons(props) {
       setExpirationCount(eraAuthState.expirationCount);
       setEraCommonsId(eraAuthState.eraCommonsId);
       onNihStatusUpdate(eraAuthState.nihValid);
-      // TODO Testing code to replace old functionality with:
-      try {
-        const ecmResponse = AuthenticateNIH.getECMAccountStatus();
-        console.log('ecmResponse', ecmResponse);
-      } catch (err) {
-        console.log(err);
-      }
     };
     initResearcherProfile();
   }, [researcherProfile, onNihStatusUpdate]);
