@@ -73,7 +73,7 @@ export default function ResearcherStatus(props) {
       {accountLabel} Account
     </p>
     <p>
-      An&nbsp;
+      A&nbsp;
       <a href={accountLink}>
         {accountLabel} Account
       </a>
