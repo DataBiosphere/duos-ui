@@ -1,13 +1,13 @@
-import React, {useCallback} from 'react';
-import { useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import ERACommons from '../../components/ERACommons';
-import { Notifications } from '../../libs/utils';
-import { User } from '../../libs/ajax/User';
-import { DAA } from '../../libs/ajax/DAA';
-import { isNil } from 'lodash';
+import {Notifications} from '../../libs/utils';
+import {User} from '../../libs/ajax/User';
+import {DAA} from '../../libs/ajax/DAA';
+import {isNil} from 'lodash';
 import LibraryCard from './LibraryCard';
 import DAAs from './DAAs';
 import {DAAUtils} from '../../utils/DAAUtils';
+import {nihAccountInstructions, nihAccountLabel} from '../../utils/ERACommonsUtils.js';
 
 export default function ResearcherStatus(props) {
 
@@ -21,6 +21,8 @@ export default function ResearcherStatus(props) {
   const [hasCard, setHasCard] = useState(true);
   const [daaObjects, setDaaObjects] = useState([]);
   const nihStatusUpdate = useCallback(() => {}, []);
+  const accountLabel = nihAccountLabel();
+  const accountLink = nihAccountInstructions();
 
   useEffect(() => {
     const init = async () => {
@@ -42,7 +44,7 @@ export default function ResearcherStatus(props) {
             setDaaObjects(daaObjects);
           }
         }
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
     };
@@ -68,12 +70,12 @@ export default function ResearcherStatus(props) {
         fontWeight: '600',
         lineHeight: 'normal'
       }} >
-      eRA Commons ID
+      {accountLabel} Account
     </p>
     <p>
-      An&nbsp;
-      <a href='https://www.era.nih.gov/register-accounts/understanding-era-commons-accounts.htm'>
-        eRA Commons ID
+      A&nbsp;
+      <a href={accountLink}>
+        {accountLabel} Account
       </a>
       &nbsp;is required to submit a dar.
     </p>

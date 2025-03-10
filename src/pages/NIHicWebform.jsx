@@ -1,4 +1,3 @@
-
 import {RadioButton} from '../components/RadioButton';
 import Select from 'react-select';
 import {PageHeading} from '../components/PageHeading';
@@ -10,6 +9,7 @@ import React, {useState, useEffect} from 'react';
 import { searchOntologies } from '../libs/utils';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import eraIcon from '../images/era-commons-logo.png';
+import {nihAccountLabel} from '../utils/ERACommonsUtils.js';
 
 export default function NIHICWebform() {
   const [multicenter, setMulticenter] = useState();
@@ -39,6 +39,7 @@ export default function NIHICWebform() {
   const [submissionThreeMonths, setSubmissionThreeMonths] = useState();
   const [submissionBatches, setSubmissionBatches] = useState();
   const [meetTimelines, setMeetTimelines] = useState();
+  const accountLabel = nihAccountLabel();
 
   useEffect(() => {
   });
@@ -127,7 +128,7 @@ export default function NIHICWebform() {
 
   const createConsent = () => {
     const getPrimaryUse = () => {
-      var primaryUse = '';
+      let primaryUse = '';
       if (currentConsentGeneral) {
         primaryUse = primaryUse.concat('General Research Use: use is permitted for any research purpose');
       }
@@ -150,7 +151,7 @@ export default function NIHICWebform() {
     };
 
     const getSecondaryUse = () => {
-      var secondaryUse = [];
+      let secondaryUse = [];
       if (currentConsentNMDS) {
         secondaryUse.push('No methods development or validation studies (NMDS)');
       }
@@ -335,7 +336,7 @@ export default function NIHICWebform() {
 
               <div className='form-group'>
                 <div className='col-xs-12 rp-group'>
-                  <label className='control-label rp-title-question common-color'>Authenticate with eRA Commons</label>
+                  <label className='control-label rp-title-question common-color'>Authenticate with {accountLabel}</label>
                 </div>
                 <div className='col-xs-12 rp-group'>
                   <a className='btn-secondary' target='_blank'>

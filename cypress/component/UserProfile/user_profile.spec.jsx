@@ -1,5 +1,3 @@
-/* eslint-disable no-undef */
-
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Storage} from '../../../src/libs/storage';

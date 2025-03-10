@@ -1,11 +1,12 @@
-import { FormFieldTypes, FormField, FormValidators } from '../../../components/forms/forms';
-import React, { useEffect, useState } from 'react';
-import { isEmpty, isNil } from 'lodash/fp';
-import { v4 as uuidV4} from 'uuid';
-import { computeCollaboratorErrors } from '../../../utils/darFormUtils';
+import {FormFieldTypes, FormField, FormValidators} from '../../../components/forms/forms';
+import React, {useEffect, useState} from 'react';
+import {isEmpty, isNil} from 'lodash/fp';
+import {v4 as uuidV4} from 'uuid';
+import {computeCollaboratorErrors} from '../../../utils/darFormUtils';
 import DeleteCollaboratorModal from './DeleteCollaboratorModal';
+import {nihAccountLabel} from '../../../utils/ERACommonsUtils.js';
 
-export default function CollaboratorForm (props) {
+export default function CollaboratorForm(props) {
   const {
     index,
     collaborator,
@@ -21,9 +22,10 @@ export default function CollaboratorForm (props) {
   const [approverStatus, setApproverStatus] = useState('');
   const [uuid, setUuid] = useState('');
   const [showDeleteCollaboratorModal, setShowDeleteCollaboratorModal] = useState(false);
+  const accountLabel = nihAccountLabel();
 
-  const onValidationChange = ({ key, validation }) => {
-    onCollaboratorValidationChange({ index, key, validation });
+  const onValidationChange = ({key, validation}) => {
+    onCollaboratorValidationChange({index, key, validation});
   };
 
   useEffect(() => {
@@ -62,18 +64,18 @@ export default function CollaboratorForm (props) {
             validators={[FormValidators.REQUIRED]}
             validation={validation.name}
             onValidationChange={onValidationChange}
-            onChange={({ value }) => setName(value)}
+            onChange={({value}) => setName(value)}
           />
           <FormField
             id={`${index}_collaboratorEraCommonsId`}
             name='eraCommonsId'
-            title={`${props.collaboratorLabel} eRA Commons ID`}
+            title={`${props.collaboratorLabel} ${accountLabel} Account`}
             defaultValue={eraCommonsId}
-            placeholder='eRA Commons ID'
+            placeholder={`${accountLabel} Account`}
             validators={[FormValidators.REQUIRED]}
             validation={validation.eraCommonsId}
             onValidationChange={onValidationChange}
-            onChange={({ value }) => setEraCommonsId(value)}
+            onChange={({value}) => setEraCommonsId(value)}
           />
         </div>
         {/* title and email */}
@@ -87,7 +89,7 @@ export default function CollaboratorForm (props) {
             validators={[FormValidators.REQUIRED]}
             validation={validation.title}
             onValidationChange={onValidationChange}
-            onChange={({ value }) => setTitle(value)}
+            onChange={({value}) => setTitle(value)}
           />
           <FormField
             id={`${index}_collaboratorEmail`}
@@ -98,11 +100,11 @@ export default function CollaboratorForm (props) {
             validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
             validation={validation.email}
             onValidationChange={onValidationChange}
-            onChange={({ value }) => setEmail(value)}
+            onChange={({value}) => setEmail(value)}
           />
         </div>
         {props.showApproval && (
-          <div className='row' style={{ marginTop: 25 }}>
+          <div className='row' style={{marginTop: 25}}>
             <FormField
               id={`${index}_collaboratorApproval`}
               type={FormFieldTypes.RADIOGROUP}
@@ -112,8 +114,8 @@ export default function CollaboratorForm (props) {
                 the PI designates to download data and/or share the requested data with other Internal Lab Staff
                 (ie., staff members and trainees under the direct supervision of the PI).`}
               options={[
-                { name: 'yes', text: 'Yes' },
-                { name: 'no', text: 'No' }
+                {name: 'yes', text: 'Yes'},
+                {name: 'no', text: 'No'}
               ]}
               validators={[FormValidators.REQUIRED]}
               orientation='horizontal'
@@ -124,14 +126,15 @@ export default function CollaboratorForm (props) {
               }
               validation={validation.approverStatus}
               onValidationChange={onValidationChange}
-              onChange={({ value }) => setApproverStatus(value)}
+              onChange={({value}) => setApproverStatus(value)}
             />
-            <p className='control-label rp-choice-questions' style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-              Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as their Internal Lab Staff.
+            <p className='control-label rp-choice-questions' style={{fontSize: 14, marginTop: 5, marginBottom: 5}}>
+              Please note: the terms of the Library Card Agreement are applicable to the Library Card Holder as well as
+              their Internal Lab Staff.
             </p>
           </div>
         )}
-        <div className='row' style={{ marginTop: 20 }}>
+        <div className='row' style={{marginTop: 20}}>
           {/* Toggle Delete Buttons Cancel/Delete */}
           {(!isNil(props.collaborator) && !props.deleteMode) && (
             <a
@@ -140,7 +143,7 @@ export default function CollaboratorForm (props) {
                 setShowDeleteCollaboratorModal(true);
                 props.toggleDeleteBool(false);
               }}
-              style={{ verticalAlign: 'middle', lineHeight: '4rem', float: 'right' }}
+              style={{verticalAlign: 'middle', lineHeight: '4rem', float: 'right'}}
             >
               <span
                 className='collaborator-delete-icon glyphicon glyphicon-trash'
@@ -148,7 +151,7 @@ export default function CollaboratorForm (props) {
                 data-tip='Delete dataset'
                 data-for='tip_delete'
               />
-              <span style={{ marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle' }}>
+              <span style={{marginLeft: '1rem', color: '#0948B7', verticalAlign: 'middle'}}>
                 Delete this entry
               </span>
             </a>
@@ -159,10 +162,13 @@ export default function CollaboratorForm (props) {
             className='collaborator-form-add-save-button f-left btn'
             role='button'
             onClick={() => {
-              let newCollaborator = { name, eraCommonsId, title, email, approverStatus, uuid };
-              const errors = computeCollaboratorErrors({ collaborator: newCollaborator, needsApproverStatus: props.showApproval });
+              const newCollaborator = {name, eraCommonsId, title, email, approverStatus, uuid};
+              const errors = computeCollaboratorErrors({
+                collaborator: newCollaborator,
+                needsApproverStatus: props.showApproval
+              });
               const valid = Object.keys(errors).length === 0;
-              onCollaboratorValidationChange({ index, validation: errors });
+              onCollaboratorValidationChange({index, validation: errors});
               if (valid) {
                 saveUpdate();
               }

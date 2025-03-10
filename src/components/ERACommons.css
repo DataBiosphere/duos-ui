@@ -7,6 +7,15 @@
     display: inline-block;
 }
 
+.nih-logo-style {
+    height: 27px;
+    width: 38px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(../images/nih-2012-logo.png);
+    display: inline-block;
+}
+
 .era-button-state:hover {
     box-shadow: 1px 1px 3px #00609f;
 }

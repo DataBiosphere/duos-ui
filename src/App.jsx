@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactGA from 'react-ga4';
 import Modal from 'react-modal';
 import './App.css';
+import {AuthenticateNIH} from './libs/ajax/AuthenticateNIH.js';
 import {Config} from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory, useLocation} from 'react-router-dom';
 import loadingImage from './images/loading-indicator.svg';
-
 import {SpinnerComponent as Spinner} from './components/SpinnerComponent';
 import {StackdriverReporter} from './libs/stackdriverReporter';
 import {Storage} from './libs/storage';
@@ -16,11 +16,11 @@ import Routes from './Routes';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [env, setEnv] = useState('');
-  let history = useHistory();
-  let location = useLocation();
+  const history = useHistory();
+  const location = useLocation();
 
   const trackPageView = (location) => {
-    ReactGA.send({ hitType: 'pageview', page: location.pathname+location.search });
+    ReactGA.send({hitType: 'pageview', page: location.pathname + location.search});
   };
 
   useEffect(() => {
@@ -58,23 +58,51 @@ function App() {
   });
 
   useEffect(() => {
-    const setUserIsLogged = async () => {
-      const isLogged = await Storage.userIsLogged();
+    const setUserIsLogged = () => {
+      const isLogged = Storage.userIsLogged();
       setIsLoggedIn(isLogged);
     };
     setUserIsLogged();
   });
+
+  /**
+   * Check for RAS Authentication URL params. If we have a code and state, we will call ECM APIs to get redirect
+   * information and user linkage information. With that, we can save the updated NIH username and expiration time,
+   * and then redirect the user to the original page they authenticated from.
+   */
+  useEffect(() => {
+    const checkRASAuthentication = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const code = queryParams.get('code')
+      const state = queryParams.get('state')
+      if (code && state) {
+        const linkInfo = await AuthenticateNIH.getECMProviderLinkInfo(code, state);
+        if (linkInfo?.externalUserId && linkInfo?.expirationTimestamp) {
+          const nihUser = {
+            linkedNihUsername: linkInfo.externalUserId,
+            linkExpireTime: `${new Date(linkInfo.expirationTimestamp).getTime()}`,
+            status: 'true',
+          }
+          await AuthenticateNIH.saveNihUsr(nihUser);
+        }
+        if (linkInfo?.additionalState?.redirectTo) {
+          window.location.href = linkInfo.additionalState.redirectTo;
+        }
+      }
+    };
+    checkRASAuthentication();
+  }, []);
 
   return (
     <div className="body">
       <div className="wrap">
         <div className="main">
           <DuosHeader/>
-          <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage} />
-          <Routes isLogged={isLoggedIn} env={env} />
+          <Spinner name="mainSpinner" group="duos" loadingImage={loadingImage}/>
+          <Routes isLogged={isLoggedIn} env={env}/>
         </div>
       </div>
-      <DuosFooter />
+      <DuosFooter/>
     </div>
   );
 }

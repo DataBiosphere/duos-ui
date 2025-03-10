@@ -42,6 +42,10 @@ export const getOntologyUrl = async() => {
   return await Config.getOntologyApiUrl();
 };
 
+export const getECMUrl = async() => {
+  return await Config.getECMUrl();
+};
+
 export const fetchOk = async (...args) => {
   //TODO: Remove spinnerService calls
   spinnerService.showAll();
