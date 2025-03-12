@@ -675,6 +675,33 @@ describe('FormField - Tests', () => {
 
     });
 
+    it('default value can allow second entry of the same type', () => {
+      cy.spy(props, 'onChange');
+      props.defaultValue=[{displayName: 'Observational', displayText:'Observational'}];
+      props.isMulti = true;
+      props.isCreatable = true;
+      mount(<FormField {...props}/>);
+      //IMHO, I don't expect this to be possible because it's the default value
+      //It's unclear what happens down stream if we fix this.
+      cy.get('#studyType').type('Obs{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'},
+            {displayName: 'Observational', displayText: 'Observational'}],
+          isValid: true
+        });
+      });
+      cy.get('#studyType').type('ObS{enter}');
+      cy.get('#studyType').then(() => {
+        expect(props.onChange).to.be.calledWith({
+          key: 'studyType',
+          value: [{displayName: 'Observational', displayText: 'Observational'},
+            {displayName: 'Observational', displayText: 'Observational'}],
+          isValid: true
+        });
+      });
+    });
 
     it('allows multiple selection with string array', () => {
       cy.spy(props, 'onChange');
