@@ -2,10 +2,6 @@ import {
     asIdAndDisplayText, getFormattedName,
     SelectOptionWithKeyNameAndAbbreviation
 } from '../../../src/components/forms/SelectOptionInterface';
-import {StudyType} from '../../../src/components/forms/StudyType';
-import {SecondaryDataUseTerms} from '../../../src/components/forms/SecondaryDataUseTerms';
-import {NIHInstitutesAndCenters} from '../../../src/components/forms/NIHInstitutesAndCenters';
-import {DataTypes} from '../../../src/components/forms/DataTypes';
 
 describe('SelectOptions tests', () => {
     describe('getFormattedName tests',()=>{
