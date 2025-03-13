@@ -11,7 +11,7 @@ export class StudyType {
     static CAS: SelectOptionWithKeyNameAndAbbreviation = {key: 'CAS', name: 'Case series'};
     static CRS: SelectOptionWithKeyNameAndAbbreviation = {key: 'CRS', name: 'Cross-sectional'};
     static COS: SelectOptionWithKeyNameAndAbbreviation = {key: 'COS', name: 'Cohort study'};
-    static studyTypeList = [
+    static studyTypeList:SelectOptionWithKeyNameAndAbbreviation[] = [
         StudyType.OBS,
         StudyType.INT,
         StudyType.DES,

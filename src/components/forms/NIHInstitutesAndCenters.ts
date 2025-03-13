@@ -133,7 +133,7 @@ export class NIHInstitutesAndCenters {
         name: 'National Center for Complementary and Integrative Health',
         abbreviation: 'NCCIH'
     };
-    static nihInstitutesAndCentersList = [
+    static nihInstitutesAndCentersList:SelectOptionWithKeyNameAndAbbreviation[] = [
         NIHInstitutesAndCenters.NCI,
         NIHInstitutesAndCenters.NEI,
         NIHInstitutesAndCenters.NHLBI,
