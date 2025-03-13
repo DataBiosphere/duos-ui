@@ -40,7 +40,7 @@ export class SecondaryDataUseTerms {
     static NPU: SelectOptionWithKeyNameAndAbbreviation = {key: 'NPU', name: 'Non-profit Use Only', abbreviation: 'NPU'};
     static OTH: SelectOptionWithKeyNameAndAbbreviation = {key: 'OTH', name: 'Other'};
 
-    static secondaryDataUseTermsList:SelectOptionWithKeyNameAndAbbreviation[] = [
+    static VALUES:SelectOptionWithKeyNameAndAbbreviation[] = [
         SecondaryDataUseTerms.NMDS,
         SecondaryDataUseTerms.GSO,
         SecondaryDataUseTerms.PUB,

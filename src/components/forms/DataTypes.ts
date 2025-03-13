@@ -37,7 +37,7 @@ export class DataTypes {
         name: 'Whole Exome'
     }
 
-    static dataTypesList:SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
+    static VALUES:SelectOptionWithKeyNameAndAbbreviation[] = [DataTypes.CITE,
     DataTypes.HYB,
     DataTypes.RNA,
     DataTypes.SCRNA,
