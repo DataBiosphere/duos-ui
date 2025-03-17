@@ -228,11 +228,11 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
   };
   const isSelectable = (dataset: DatasetTerm) => dataset.accessManagement != 'open' && dataset.accessManagement != 'external';
   const selectableDatasetIds = datasets.filter(isSelectable).map(dataset => dataset.datasetId);
-  const tooltipIconDisplay = (src: string | undefined, accessType: string, tooltipText: string) => {
+  const tooltipIconDisplay = (src: string | unknown, accessType: string, tooltipText: string) => {
     return <div
         data-for={`${accessType}-access-tooltip`}
         style={{display: 'flex', justifyContent: 'center', marginRight: 20}}>
-      <span title={tooltipText}><img src={src} alt={accessType}/></span>
+      <span title={tooltipText}><img src={src as string} alt={accessType}/></span>
     </div>;
   };
 
@@ -309,8 +309,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.accessType),
       cellDataFn: (dataset: DatasetTerm) => ({
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        data: // @ts-expect-error
+        data:
           tooltipIconDisplay(getAccessManagementSummary(dataset.accessManagement).icon,
             getAccessManagementSummary(dataset.accessManagement).name,
             getAccessManagementSummary(dataset.accessManagement).description),
