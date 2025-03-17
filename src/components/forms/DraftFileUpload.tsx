@@ -90,7 +90,7 @@ export const DraftFileUpload = (props: DraftFileUploadProps) => {
         });
     }}/>
         <div style={{display: 'inline', margin: 'auto'}}>
-            <button className={'button-complex-submission'} disabled={defaultValue != null}
+            <button className={'button-complex-outlined-secondary'} disabled={defaultValue != null}
                     onClick={handleUploadButtonClick}>Upload a file<span
                 className={'button-icon button-icon-file-upload'} style={{marginLeft: '8px'}}/></button>
             {defaultValue && <span style={{marginLeft: '15px'}}>{defaultValue.fileName} {deleteButton}</span>}

@@ -823,14 +823,14 @@ describe('FormField - Tests', () => {
             justifyContent: 'flex-start',
             marginTop: 10
           },
-          addingRowButtonClassName: 'button-complex-submission',
+          addingRowButtonClassName: 'button-complex-outlined-secondary',
           addRowButtonIconClassName: 'button-icon button-icon-circle-plus-outline',
           removeRowButtonIconClassName: 'button-icon button-icon-close'
         }
       };
       mount(<FormTable {...customProps} />);
       cy.get('#fileTypes-0-functionalEquivalence').type('hello');
-      cy.get('#add-new-table-row-fileTypes').should('have.class','button-complex-submission');
+      cy.get('#add-new-table-row-fileTypes').should('have.class','button-complex-outlined-secondary');
       cy.get('#add-new-table-row-fileTypes').find('span').should('have.class','button-icon-circle-plus-outline');
       cy.get('#delete-table-row-fileTypes-0').find('span').should('have.class', 'button-icon-close');
     });

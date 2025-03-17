@@ -36,7 +36,7 @@ export const FileTypesWithFunctionalEquivalents = (props: FileTypesWithFunctiona
         minLength={1}
         onChange={onChange}
         styleProps={{enableAddingRowStyle:{ display: 'flex', width: '100%', justifyContent: 'flex-start', marginTop: 10 },
-            addingRowButtonClassName:'button-complex-submission',
+            addingRowButtonClassName:'button-complex-outlined-secondary',
             addRowButtonIconClassName:'button-icon button-icon-circle-plus-outline',
             removeRowButtonIconClassName:'button-icon button-icon-close'
             }}

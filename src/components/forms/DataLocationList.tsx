@@ -35,7 +35,7 @@ export const DataLocationList = (props: DataLocationsProps) => {
             return <DataLocation key={index} idx={index} location={dataLocation} onChange={onChangeLocation}
                                  onDelete={onDeleteLocation}/>;
         })}
-        <button className={'button-complex-submission'}
+        <button className={'button-complex-outlined-secondary'}
                 onClick={onAddLocation}>{locations?.length > 0 ? 'Add another location' : 'Add location'}<span
             className={'button-icon button-icon-circle-plus-outline'} style={{marginLeft: '8px'}}/></button>
     </div>);

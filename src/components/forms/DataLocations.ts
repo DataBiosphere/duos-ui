@@ -9,5 +9,4 @@ export class DataLocations {
         DataLocations.TERRA,
         DataLocations.ONPREM
     ]
-
 }
