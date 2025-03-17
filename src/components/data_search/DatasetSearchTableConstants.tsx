@@ -339,13 +339,13 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.participantCount),
       cellDataFn: (dataset: DatasetTerm) => {
-        const donorSize = isNaN(dataset.participantCount) ? '' : dataset.participantCount.toString();
+        const participantCount = isNaN(dataset.participantCount) ? '' : dataset.participantCount.toString();
         return {
-          data: donorSize,
+          data: participantCount,
           style: makeRowStyle(cellWidths.participantCount),
-          value: donorSize,
+          value: participantCount,
           id: `${dataset.datasetId}-participant-count`,
-          label: `Participant Count for dataset ${dataset.datasetId}: ${donorSize}`
+          label: `Participant Count for dataset ${dataset.datasetId}: ${participantCount}`
         };
       }
     },
