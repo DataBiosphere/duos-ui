@@ -208,7 +208,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     duosId: string;
     accessType: string;
     dataType: string;
-    donorSize: string;
+    participantCount: string;
     dataLocation: string;
     dataUse: string;
     exportToTerra: number;
@@ -221,7 +221,7 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
     duosId: '10%',
     accessType: '10%',
     dataType: '15%',
-    donorSize: '10%',
+    participantCount: '10%',
     dataLocation: '13%',
     dataUse: '10%',
     exportToTerra: 100,
@@ -335,14 +335,14 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       })
     },
     {
-      label: 'Donor Size',
+      label: 'Participant Count',
       sortable: true,
-      cellStyle: makeHeaderStyle(cellWidths.donorSize),
+      cellStyle: makeHeaderStyle(cellWidths.participantCount),
       cellDataFn: (dataset: DatasetTerm) => {
         const donorSize = isNaN(dataset.participantCount) ? '' : dataset.participantCount.toString();
         return {
           data: donorSize,
-          style: makeRowStyle(cellWidths.donorSize),
+          style: makeRowStyle(cellWidths.participantCount),
           value: donorSize,
           id: `${dataset.datasetId}-participant-count`,
           label: `Participant Count for dataset ${dataset.datasetId}: ${donorSize}`
