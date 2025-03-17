@@ -309,7 +309,8 @@ export const makeDatasetTableHeader = (datasets: DatasetTerm[], selected: number
       sortable: true,
       cellStyle: makeHeaderStyle(cellWidths.accessType),
       cellDataFn: (dataset: DatasetTerm) => ({
-        data:
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        data: // @ts-expect-error
           tooltipIconDisplay(getAccessManagementSummary(dataset.accessManagement).icon,
             getAccessManagementSummary(dataset.accessManagement).name,
             getAccessManagementSummary(dataset.accessManagement).description),
