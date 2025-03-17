@@ -675,7 +675,6 @@ describe('FormField - Tests', () => {
 
     });
 
-
     it('allows multiple selection with string array', () => {
       cy.spy(props, 'onChange');
       props.selectOptions = ['Observational', 'Prospective', 'Other'];
