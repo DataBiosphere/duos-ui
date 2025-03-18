@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from './forms';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash';
 import {set} from 'lodash';
 import {Link} from 'react-router-dom';
 import {Styles} from '../../libs/theme';
