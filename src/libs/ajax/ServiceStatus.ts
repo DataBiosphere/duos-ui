@@ -39,7 +39,7 @@ interface SamSystemStatus {
     ok: boolean;
 }
 
-interface SamDetails {
+export interface SamDetails {
     ok: boolean;
     systems: {
         GoogleGroups: SamSystemStatus;
@@ -80,6 +80,11 @@ export const ServiceStatus = {
         const url = `${await getOntologyUrl()}/status`;
         const result = await axios.get(url);
         return result.data;
+    },
+
+    isConsentHealthy: async (): Promise<boolean> => {
+        const status = await ServiceStatus.getConsentStatus();
+        return status.ok || false;
     },
 
     isSamHealthy: async (): Promise<boolean> => {

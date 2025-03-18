@@ -1,33 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { getOr, isNil, map, uniq } from 'lodash/fp';
 import { TaskAltOutlined, ErrorOutline } from '@mui/icons-material';
 import { ServiceStatus } from '../libs/ajax/ServiceStatus';
+import { ConsentStatus, OntologyStatus, SamDetails } from '../libs/ajax/ServiceStatus';
 
 const Status = () => {
-  const [consentStatus, setConsentStatus] = useState({});
-  const [ontologyStatus, setOntologyStatus] = useState({});
-  const [samStatus, setSamStatus] = useState({});
-
-  const isConsentHealthy = (elements) => {
-    return getOr(false)('ok')(elements);
-  };
-
-  const isOntologyHealthy = (elements) => {
-    const ok = getOr(undefined)('ok')(elements);
-    if (!isNil(ok)) {
-      return ok;
-    } else {
-      const bools = uniq(map('healthy')(elements));
-      return bools.length === 1 && bools[0];
-    }
-  };
+  const [consentStatus, setConsentStatus] = useState<ConsentStatus | undefined>(undefined);
+  const [ontologyStatus, setOntologyStatus] = useState<OntologyStatus | undefined>(undefined);
+  const [samStatus, setSamStatus] = useState<SamDetails | undefined>(undefined);
 
   useEffect(() => {
     const fetchStatus = async () => {
       const consentData = await ServiceStatus.getConsentStatus();
       setConsentStatus(consentData);
-      setSamStatus(consentData.systems.sam.details);
-
+      setSamStatus(consentData?.systems?.sam?.details);
       const ontologyData = await ServiceStatus.getOntologyStatus();
       setOntologyStatus(ontologyData);
     };
@@ -37,9 +22,9 @@ const Status = () => {
   const healthyState = <TaskAltOutlined sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'green' }} />;
   const unhealthyState = <ErrorOutline sx={{ marginLeft: '2rem', verticalAlign: 'middle', fontSize: '24px', color: 'red' }} />;
 
-  const consentHealthy = isConsentHealthy(consentStatus) ? healthyState : unhealthyState;
-  const ontologyHealthy = isOntologyHealthy(ontologyStatus) ? healthyState : unhealthyState;
-  const samHealthy = isConsentHealthy(samStatus) ? healthyState : unhealthyState;
+  const consentHealthy = consentStatus?.ok ? healthyState : unhealthyState;
+  const ontologyHealthy = ontologyStatus?.ok ? healthyState : unhealthyState;
+  const samHealthy = samStatus?.ok ? healthyState : unhealthyState;
 
   return (
     <div style={{ margin: '2rem' }}>
