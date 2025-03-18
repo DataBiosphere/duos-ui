@@ -65,20 +65,20 @@ describe('Sign In: Component Loads', function () {
   it('Sign In: On Success', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
-    cy.stub(StackdriverReporter, 'report');
-    cy.stub(Metrics, 'identify');
-    cy.stub(Metrics, 'syncProfile');
-    cy.stub(Metrics, 'captureEvent');
+    cy.stub(StackdriverReporter, 'report').as('report');
+    cy.stub(Metrics, 'identify').as('identify');
+    cy.stub(Metrics, 'syncProfile').as('syncProfile');
+    cy.stub(Metrics, 'captureEvent').as('captureEvent');
     cy.stub(ToS, 'getStatus').returns(userStatus);
     mount(<SignInButton history={[]}/>);
     cy.get('button').click();
     cy.wait('@getMe').then(() => {
       expect(Storage.getCurrentUser()).to.deep.equal(duosUser);
-      expect(Storage.getAnonymousId()).to.not.be.null;
-      expect(StackdriverReporter.report).to.not.be.called;
-      expect(Metrics.identify).to.be.called;
-      expect(Metrics.syncProfile).to.be.called;
-      expect(Metrics.captureEvent).to.be.called;
+      assert.isNotNull(Storage.getAnonymousId(), 'Anonymous ID should not be null');
+      cy.get('@report').should('not.be.called');
+      cy.get('@identify').should('be.called');
+      cy.get('@syncProfile').should('be.called');
+      cy.get('@captureEvent').should('be.called');
     });
   });
 
@@ -86,15 +86,12 @@ describe('Sign In: Component Loads', function () {
     const bareUser = {email: 'test@user.com'};
     cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: bareUser}).as('getMe');
-    cy.stub(StackdriverReporter, 'report');
-    cy.stub(Metrics, 'identify');
-    cy.stub(Metrics, 'syncProfile');
-    cy.stub(Metrics, 'captureEvent');
+    cy.stub(StackdriverReporter, 'report').as('report');
     cy.stub(ToS, 'getStatus').returns(userStatus);
     mount(<SignInButton history={[]}/>);
     cy.get('button').click();
     cy.wait('@getMe').then(() => {
-      expect(StackdriverReporter.report).to.be.called;
+      cy.get('@report').should('be.called');
     });
   });
 
@@ -102,15 +99,12 @@ describe('Sign In: Component Loads', function () {
     cy.stub(Auth, 'signIn').resolves(mockOidcUser);
     cy.intercept({method: 'GET', url: '**/api/user/me'}, {statusCode: 200, body: duosUser}).as('getMe');
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
-    cy.stub(Metrics, 'identify');
-    cy.stub(Metrics, 'syncProfile');
-    cy.stub(Metrics, 'captureEvent');
     const history = [];
     mount(<SignInButton history={history}/>);
     cy.get('button').click();
     cy.wait('@getMe').then(() => {
-      expect(history).to.not.be.empty;
-      expect(history[0].includes('tos_acceptance')).to.be.true;
+      assert.isNotEmpty(history, 'History should not be empty');
+      assert.isTrue(history[0].includes('tos_acceptance'), 'History should contain tos_acceptance');
     });
   });
 
@@ -120,15 +114,12 @@ describe('Sign In: Component Loads', function () {
     cy.stub(User, 'getMe').throws();
     cy.intercept({method: 'POST', url: '**/api/user'}, {statusCode: 200, body: duosUser}).as('registerUser');
     cy.stub(ToS, 'getStatus').returns(notAcceptedUserStatus);
-    cy.stub(Metrics, 'identify');
-    cy.stub(Metrics, 'syncProfile');
-    cy.stub(Metrics, 'captureEvent');
     const history = [];
     mount(<SignInButton history={history}/>);
     cy.get('button').click();
     cy.wait('@registerUser').then(() => {
-      expect(history).to.not.be.empty;
-      expect(history[0].includes('tos_acceptance')).to.be.true;
+      assert.isNotEmpty(history, 'History should not be empty');
+      assert.isTrue(history[0].includes('tos_acceptance'), 'History should contain tos_acceptance');
     });
   });
 
