@@ -79,11 +79,6 @@ export const DatasetSearchTable = (props) => {
   const assembleFullQuery = () => {
     const queryChunks = [
       {
-        'match': {
-          '_type': 'dataset'
-        }
-      },
-      {
         'exists': {
           'field': 'study'
         }

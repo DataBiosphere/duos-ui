@@ -26,11 +26,6 @@ import eventList from '../libs/events';
 const assembleFullQuery = (isSigningOfficial, isInstitutionQuery, subQuery) => {
   const queryChunks = [
     {
-      'match': {
-        '_type': 'dataset'
-      }
-    },
-    {
       'exists': {
         'field': 'study'
       }

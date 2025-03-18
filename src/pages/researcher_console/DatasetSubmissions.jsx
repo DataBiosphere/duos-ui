@@ -30,11 +30,6 @@ export default function DatasetSubmissions(props) {
           'bool': {
             'must': [
               {
-                'match': {
-                  '_type': 'dataset'
-                }
-              },
-              {
                 'bool': {
                   'should': [
                     {

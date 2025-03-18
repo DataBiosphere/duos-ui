@@ -94,11 +94,6 @@ export const StudyDetails = (props: StudyDetailsProps) => {
           'must': [
             {
               'match': {
-                '_type': 'dataset'
-              }
-            },
-            {
-              'match': {
                 'study.studyId': studyId
               }
             },
