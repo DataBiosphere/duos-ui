@@ -32,13 +32,7 @@ describe('Data Locations List Component - Tests', () => {
             researchStage: null,
             dataLocation: null
         }];
-        const onChange = (value: { key: string, value: DataLocationInfo[] }) => {
-            console.error(value.value);
-            locations.length = 0;
-            locations.push(...value.value);
-            console.error("locations", locations);
-        };
-        mount(<BrowserRouter><DataLocationList locations={locations} onChange={onChange}/></BrowserRouter>)
+        mount(<BrowserRouter><DataLocationList locations={locations} onChange={props.onChange}/></BrowserRouter>)
         cy.get('button').contains('Add another location');
     });
 });
