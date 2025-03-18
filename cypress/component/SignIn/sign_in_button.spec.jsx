@@ -35,6 +35,8 @@ const userStatus = {
 };
 
 const consentStatus = {
+  ok: true,
+  degraded: false,
   systems: {
     sam: {
       details: {
