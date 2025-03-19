@@ -40,6 +40,7 @@ export const SignInButton = (props: SignInButtonProps) => {
   const [errorDisplay, setErrorDisplay] = useState<ErrorDisplay>({});
   const {history} = props;
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isConsentDown, setIsConsentDown] = useState<boolean>(false);
   const [isSamDown, setIsSamDown] = useState<boolean>(false);
 
   // Utility function called in the normal success case and in the undocumented 409 case
@@ -83,7 +84,7 @@ export const SignInButton = (props: SignInButtonProps) => {
       } else {
         await handleRegistration(redirectTo, shouldRedirect);
       }
-    } catch (err) {
+    } catch (_error) {
       await handleRegistration(redirectTo, shouldRedirect);
     }
   };
@@ -152,11 +153,12 @@ export const SignInButton = (props: SignInButtonProps) => {
   const handleConflictError = async (redirectTo: string, shouldRedirect: boolean) => {
     try {
       await checkToSAndRedirect(shouldRedirect ? redirectTo : null);
-    } catch (error) {
+    } catch (_error) {
       await Auth.signOut();
     }
   };
 
+  // eslint-disable-next-line
   const onFailure = (response: any) => {
     Storage.clearStorage();
     // Known error case from oidc-client-ts PopupWindow: "new Error("Popup closed by user")"
@@ -180,6 +182,7 @@ export const SignInButton = (props: SignInButtonProps) => {
 
   useEffect(() => {
     const init = async () => {
+      setIsConsentDown(!(await ServiceStatus.isConsentHealthy()));
       setIsSamDown(!(await ServiceStatus.isSamHealthy()));
     };
     init();
@@ -206,14 +209,14 @@ export const SignInButton = (props: SignInButtonProps) => {
               Auth.signIn().then(onSuccess, onFailure);
               setIsLoading(false);
             }}
-            disabled={isLoading || isSamDown}
+            disabled={isLoading || isConsentDown || isSamDown}
           >
             {isLoading ? loadingElement() : 'Sign In'}
           </button>
         </div>
         <ReactTooltip
           place={'top'}
-          disable={!isSamDown}
+          disable={!isConsentDown && !isSamDown}
           effect={'solid'}
           id={'sam-disabled-sign-in-tooltip'}
           className='interactiveTooltip'
