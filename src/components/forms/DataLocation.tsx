@@ -1,7 +1,6 @@
 import React, {useCallback} from 'react';
 import {FormField, FormFieldTypes, FormValidators} from './forms';
-import {cloneDeep} from 'lodash';
-import {set} from 'lodash';
+import {cloneDeep, set} from 'lodash';
 import {Link} from 'react-router-dom';
 import {Styles} from '../../libs/theme';
 import {asIdAndDisplayText, SelectEntry} from './SelectOptionInterface';
@@ -32,16 +31,10 @@ export const DataLocation = (props: DataLocationComponentProps) => {
         onChange({idx: idx, location: newDataLocation});
     }, [location, idx, onChange]);
 
-    const deleteButton = <Link
-        style={{marginLeft: '15px'}}
-        id={`${idx}_deleteDataLocation`}
-        className={'glyphicon glyphicon-trash'}
-        onClick={() => onDelete(idx)}
-        to={`#`}
-    />
-
     return (<div style={Styles.REPEATING_SECTION}>
-        <h4>Data Location {idx + 1} {deleteButton}</h4>
+        <h4>Data Location {idx + 1} <Link style={{marginLeft: '15px'}} id={`${idx}_deleteDataLocation`}
+                                          className={'glyphicon glyphicon-trash'} onClick={() => onDelete(idx)}
+                                          to={`#`}/></h4>
         <FormField
             style={{width: '50%', paddingBottom: '10px'}}
             id={'researchStage'}
