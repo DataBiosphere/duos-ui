@@ -31,12 +31,14 @@ export const DataLocation = (props: DataLocationComponentProps) => {
         onChange({idx: idx, location: newDataLocation});
     }, [location, idx, onChange]);
 
+    const commonFieldStyle = {width: '50%', paddingBottom: '10px'};
+
     return (<div style={Styles.REPEATING_SECTION}>
         <h4>Data Location {idx + 1} <Link style={{marginLeft: '15px'}} id={`${idx}_deleteDataLocation`}
                                           className={'glyphicon glyphicon-trash'} onClick={() => onDelete(idx)}
                                           to={`#`}/></h4>
         <FormField
-            style={{width: '50%', paddingBottom: '10px'}}
+            style={commonFieldStyle}
             id={'researchStage'}
             type={FormFieldTypes.SELECT}
             selectOptions={asIdAndDisplayText(ResearchStage.VALUES)}
@@ -44,7 +46,7 @@ export const DataLocation = (props: DataLocationComponentProps) => {
             placeholder={'Research stage (pre/post/intra-analysis)'}
             defaultValue={location.researchStage}/>
         <FormField
-            style={{width: '50%', paddingBottom: '10px'}}
+            style={commonFieldStyle}
             id={'dataLocation'}
             type={FormFieldTypes.SELECT}
             selectOptions={asIdAndDisplayText(DataLocations.VALUES)}
@@ -54,7 +56,7 @@ export const DataLocation = (props: DataLocationComponentProps) => {
             onChange={onDataLocationChange}
         />
         <FormField
-            style={{width: '50%', paddingBottom: '10px'}}
+            style={commonFieldStyle}
             id={'locationUrl'}
             name='locationUrl'
             validators={[FormValidators.URL]}
@@ -63,7 +65,7 @@ export const DataLocation = (props: DataLocationComponentProps) => {
             onChange={onDataLocationChange}
         />
         <FormField
-            style={{width: '50%', paddingBottom: '10px'}}
+            style={commonFieldStyle}
             id={'cloudProvider'}
             type={FormFieldTypes.SELECT}
             selectOptions={asIdAndDisplayText(CloudProviders.VALUES)}
