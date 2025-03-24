@@ -1,9 +1,12 @@
-import {SelectEntry} from "src/components/forms/SelectOptions";
-
 export interface SelectOptionWithKeyNameAndAbbreviation {
     key: string,
     name: string,
     abbreviation?: string
+}
+
+export type SelectEntry = {
+    key: string;
+    displayText: string;
 }
 
 export function getFormattedName(entry: SelectOptionWithKeyNameAndAbbreviation): string {

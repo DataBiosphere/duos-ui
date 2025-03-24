@@ -25,7 +25,7 @@
   background-color: #094887;
 }
 
-.button-complex-submission {
+.button-complex-outlined-secondary {
   font-family: Montserrat, serif;
   font-size: 14px;
   line-height: 24px;
@@ -38,6 +38,40 @@
   left: 67px;
   border-radius: 4px;
   border: 1px solid #4D72AA;
+  padding: 4px 8px;
+  gap: 4px;
+}
+
+.button-complex-primary {
+  font-family: Montserrat, serif;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  text-align: center;
+  color: white;
+  background-color: #005D9A;
+  min-width: 120px;
+  top: 3733px;
+  left: 67px;
+  border-radius: 4px;
+  border: 1px solid #4D72AA;
+  padding: 4px 8px;
+  gap: 4px;
+}
+
+.button-complex-secondary-minor {
+  font-family: Montserrat, serif;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  text-align: center;
+  color: #005D9A;
+  background-color: white;
+  min-width: 120px;
+  top: 3733px;
+  left: 67px;
+  border-radius: 4px;
+  border: 0;
   padding: 4px 8px;
   gap: 4px;
 }
