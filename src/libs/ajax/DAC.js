@@ -1,5 +1,5 @@
 import {mergeAll, isEmpty} from 'lodash/fp';
-import { getApiUrl, fetchOk } from '../ajax';
+import {getApiUrl, fetchOk, quietFetchOk} from '../ajax';
 import { Config } from '../config';
 
 
@@ -78,5 +78,17 @@ export const DAC = {
     const url = `${await getApiUrl()}/api/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.status;
+  },
+
+  fetchDACbotRules: async(dacId) => {
+    const url = `${await getApiUrl()}/api/dac/${dacId}/rules`;
+    const res = await quietFetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  toggleDACbotRule: async(dacId, ruleId) => {
+    const url = `${await getApiUrl()}/api/dac/${dacId}/rules/${ruleId}/toggle`
+    const res = await quietFetchOk(url, mergeAll([Config.authOpts()], {method: 'PUT'}));
+    return res.json();
   }
 };
