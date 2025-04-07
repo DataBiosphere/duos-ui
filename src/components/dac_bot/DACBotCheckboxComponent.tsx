@@ -8,6 +8,7 @@ import {Notifications} from "../../libs/utils";
 export type DACBotCheckboxComponentProps = {
     dacId: number,
     rule: DACbotRule,
+    disableEdit: boolean,
 }
 
 export type DACBotToggleResult = {
@@ -19,8 +20,8 @@ export type DACBotToggleResult = {
 }
 
 export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => {
-    const {dacId, rule} = props;
-    const [submitting, setSubmitting] = useState(false);
+    const {dacId, rule, disableEdit} = props;
+    const [isReadOnly, setIsReadOnly] = useState(disableEdit);
     const [isRuleEnabled, setIsRuleEnabled] = useState(!!rule.enabledByUserId)
     const [enabledTime, setEnabledTime] = useState(rule.activationDate);
     const [displayName, setDisplayName] = useState(rule.displayName);
@@ -28,7 +29,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
 
 
     const onCheckboxChange = async () => {
-        setSubmitting(true);
+        setIsReadOnly(true);
         try {
             const toggleResult: DACBotToggleResult = await DAC.toggleDACbotRule(dacId, rule.id)
             Notifications.showSuccess(
@@ -41,7 +42,7 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
                         horizontal: 'right'
                     }
                 });
-            setSubmitting(false);
+            setIsReadOnly(false);
             setIsRuleEnabled(toggleResult.isRuleEnabled);
             setEnabledTime(toggleResult.enabledTime);
             setDisplayName(toggleResult.displayName);
@@ -68,6 +69,6 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
                 <span>Enabled by: <Link href={`mailto:${emailAddress}`}>{displayName}</Link>  ({ new Date(enabledTime).toDateString()})</span>: ``}</>}
             defaultValue={rule.enabledByUserId != null}
             onChange={onCheckboxChange}
-            disabled={submitting}
+            disabled={isReadOnly}
         />);
 }

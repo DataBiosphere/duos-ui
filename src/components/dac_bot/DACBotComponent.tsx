@@ -1,8 +1,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {DAC} from '../../libs/ajax/DAC';
 import {Notifications} from '../../libs/utils';
-import {FormField, FormFieldTypes} from "../forms/forms";
 import {DACBotCheckboxComponent} from "./DACBotCheckboxComponent";
+import {Storage} from "../../libs/storage";
 
 export type DACBotComponentProps = {
     dacId: number
@@ -34,7 +34,9 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
     const {dacId} = props;
     const [DACbotRules, setDACbotRules] = useState<Array<DACbotRule>>([]);
     const [isLoading, setIsLoading] = useState(true);
-
+    const userIsChair = Storage.getCurrentUser().roles.filter((r: { dacId: number; name: string; }) => {
+       return  r.dacId == dacId && r.name == "Chairperson"
+    }).length > 0;
     const fetchData = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -70,7 +72,7 @@ export const DACBotComponent = (props: DACBotComponentProps) => {
         you would like DUOS to automate your Data Access Request decisions.
         <h5>Rules</h5>
         {!isLoading && DACbotRules.map((rule) => {
-            return <DACBotCheckboxComponent dacId={dacId} rule={rule} key={rule.id}/>
+            return <DACBotCheckboxComponent dacId={dacId} rule={rule} key={rule.id} disableEdit={!userIsChair}/>
         })}
     </div>);
 }
