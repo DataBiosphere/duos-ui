@@ -4,6 +4,7 @@ import {FormField, FormFieldTypes} from "../forms/forms";
 import {DAC} from "../../libs/ajax/DAC";
 import {Link} from "@mui/material";
 import {Notifications} from "../../libs/utils";
+import ReactMarkdown from "react-markdown";
 
 export type DACBotCheckboxComponentProps = {
     dacId: number,
@@ -65,7 +66,10 @@ export const DACBotCheckboxComponent = (props: DACBotCheckboxComponentProps) => 
         <FormField
             type={FormFieldTypes.CHECKBOX}
             id={`${rule.id}_checkbox`}
-            toggleText={<>{rule.description} {isRuleEnabled ?
+            toggleText={<><span style={{display:'table'}}><ReactMarkdown components={{
+                // Map `p` to use `span`s to align with the checkbox.
+                p: 'span'
+            }}>{rule.description}</ReactMarkdown></span> {isRuleEnabled ?
                 <span>Enabled by: <Link href={`mailto:${emailAddress}`}>{displayName}</Link>  ({ new Date(enabledTime).toDateString()})</span>: ``}</>}
             defaultValue={rule.enabledByUserId != null}
             onChange={onCheckboxChange}
