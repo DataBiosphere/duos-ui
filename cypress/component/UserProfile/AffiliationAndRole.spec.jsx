@@ -17,9 +17,9 @@ const user = {
 };
 
 const institution = {
-  "id": 1,
-  "name": "Test Institution",
-  "signingOfficials": []
+  id: 1,
+  name: 'Test Institution',
+  signingOfficials: []
 }
 
 describe('Affiliation And Role', () => {
