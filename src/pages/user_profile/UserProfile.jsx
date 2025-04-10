@@ -6,7 +6,7 @@ import { Notification } from '../../components/Notification';
 import { User } from '../../libs/ajax/User';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
-import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
+import { Notifications } from '../../libs/utils';
 import AffiliationAndRoles from './AffiliationAndRoles';
 import ResearcherStatus from './ResearcherStatus';
 import AcceptedAcknowledgements from './AcceptedAcknowledgements';
@@ -18,7 +18,6 @@ import {setUserRoleStatuses} from '../../libs/utils';
 export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
-  const [userProps, setUserProps] = useState({});
   const [name, setName] = useState('');
   const [updatedName, setUpdatedName] = useState('');
 
@@ -71,7 +70,6 @@ export default function UserProfile(props) {
       try {
         const user = Storage.getCurrentUser();
         setUser(user);
-        setUserProps(getPropertyValuesFromUser(user));
         setProfile({
           profileName: user.displayName,
           email: user.email,
