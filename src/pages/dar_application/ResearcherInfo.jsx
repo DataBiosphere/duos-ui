@@ -99,8 +99,8 @@ export default function ResearcherInfo(props) {
         </div>
 
         <div className='dar-application-row'>
-          <h3>{'1.2 Researcher Identification' + (formData.checkCollaborator ? ' (optional)' : '')}</h3>
-          {(!readOnlyMode && formData.checkCollaborator !== true) && (
+          <h3>{'1.2 Researcher Identification'}</h3>
+          {!readOnlyMode && (
             <span className={`${showNihValidationError ? 'errored' : 'default-color'}`}>
               Please authenticate with&nbsp;
               <a target='_blank' rel='noreferrer' href={accountLink}>{accountLabel}</a>
@@ -117,7 +117,7 @@ export default function ResearcherInfo(props) {
               validationError={showNihValidationError}
               readOnly={readOnlyMode}
               header={true}
-              required={formData.checkCollaborator !== true}
+              required={true}
             />
           </div>
           <fieldset>
@@ -136,20 +136,6 @@ export default function ResearcherInfo(props) {
               )
             }
           </fieldset>
-          <div className='flex-row' style={{justifyContent: 'flex-start'}}>
-            <h4 style={{marginRight: 30}}>1.2.2</h4>
-            <FormField
-              id='checkCollaborator'
-              disabled={readOnlyMode}
-              toggleText={<span style={{fontSize: 14, fontWeight: 'bold'}}>I am an NIH intramural researcher (NIH email required)</span>}
-              type={FormFieldTypes.CHECKBOX}
-              ariaLevel={ariaLevel + 2}
-              validation={validation.checkCollaborator}
-              onValidationChange={onValidationChange}
-              onChange={({key, value}) => formFieldChange({key, value})}
-              defaultValue={formData.checkCollaborator}
-            />
-          </div>
         </div>
 
         <div className='dar-application-row'>

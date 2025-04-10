@@ -59,7 +59,6 @@ const DataAccessRequestApplication = (props) => {
     labCollaborators: [],
     internalCollaborators: [],
     externalCollaborators: [],
-    checkCollaborator: false,
     checkNihDataOnly: false,
     rus: '',
     nonTechRus: '',
@@ -365,15 +364,13 @@ const DataAccessRequestApplication = (props) => {
 
     setFormValidation(validation);
 
-    const eraCommonsIdValid = nihValid === true || formData.checkCollaborator === true;
-
     const hasLibraryCard = !isEmpty(researcher.libraryCards);
 
-    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid || !hasLibraryCard;
-    setShowNihValidationError(!eraCommonsIdValid);
+    const isInvalidForm = validationFailed(validation) || !nihValid || !hasLibraryCard;
+    setShowNihValidationError(!nihValid);
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, eraCommonsIdValid, hasLibraryCard);
+      scrollToFormErrors(validation, nihValid, hasLibraryCard);
     } else {
       // noinspection ES6MissingAwait
       Metrics.captureEvent(eventList.dar, {'action': 'attest'});

@@ -845,21 +845,6 @@ export default function NIHICWebform() {
               <div className='col-xs-12 rp-group'>
                 <div className='checkbox'>
                   <input
-                    id='checkCollaboration'
-                    type='checkbox'
-                    className='checkbox-inline rp-checkbox'
-                    name='collaboration'
-                    checked={currentConsentCOL}
-                    onClick={() => setCurrentConsentCOL(!currentConsentCOL)}
-                  />
-                  <label className='regular-checkbox rp-choice-questions' htmlFor='checkCollaboration'>
-                    <span style={{ color: Theme.palette.primary }}>Collaboration Required (COL)</span>
-                  </label>
-                </div>
-              </div>
-              <div className='col-xs-12 rp-group'>
-                <div className='checkbox'>
-                  <input
                     id='checkEthics'
                     type='checkbox'
                     className='checkbox-inline rp-checkbox'
