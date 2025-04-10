@@ -241,7 +241,7 @@ export default function SigningOfficialTable(props) {
     const init = async() => {
       try{
         setResearchers(props.researchers);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };
@@ -327,7 +327,7 @@ export default function SigningOfficialTable(props) {
       const listCopy = cloneDeep(researchers);
       const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
       const {userEmail, userName, userId} = newLibraryCard;
-      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+      const targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to top of list
         const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
@@ -350,7 +350,7 @@ export default function SigningOfficialTable(props) {
       setShowConfirmation(false);
       setShowModal(false);
       Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error issuing library card to ${messageName}`});
     }
   };
@@ -374,7 +374,7 @@ export default function SigningOfficialTable(props) {
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
     }
   };
