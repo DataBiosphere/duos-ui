@@ -210,7 +210,6 @@ export default function UserProfile(props) {
     <div style={{ 'marginTop': '60px' }} />
     <AffiliationAndRoles
       user={user}
-      userProps={userProps}
     />
     <button
       className='f-left btn-primary common-background'

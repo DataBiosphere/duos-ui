@@ -1,68 +1,31 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { Institution } from '../../libs/ajax/Institution';
-import { isNil } from 'lodash';
 import { Notifications } from '../../libs/utils';
 
 export default function AffiliationAndRole(props) {
 
-  const {
-    user,
-    userProps,
-  } = props;
-
-  const [profile, setProfile] = useState({
-    roles: '',
-    institutionId: undefined,
-    selectedSigningOfficialId: undefined,
-    id: undefined
-  });
-
+  const { user } = props;
   const [institution, setInstitution] = useState(undefined);
+  const [roles, setRoles] = useState([]);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const rolesList = [];
-        if (!isNil(user) && !isNil(user.roles)) {
-          for (let i = 0; i < user.roles.length; i++) {
-            const newRole = user.roles[i].name;
-            rolesList.push(newRole);
+        const allRoles = user?.roles?.map((role) => role.name).join(', ');
+        setRoles(allRoles);
+        if (user?.institutionId) {
+          const institution = await Institution.getById(user.institutionId);
+          if (institution) {
+            setInstitution(institution);
           }
-          const allRoles = rolesList.join(', ');
-          setProfile({
-            roles: allRoles,
-            institutionId: user.institutionId || userProps.institutionId,
-            selectedSigningOfficialId: parseInt(userProps.selectedSigningOfficialId),
-            id: user.userId
-          });
         }
       } catch (_error) {
-        Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
+        Notifications.showError({ text: 'Error: Unable to retrieve user information' });
       }
     };
     init();
-
-  }, [user, userProps]);
-
-  useEffect(() => {
-    if (profile.institutionId) {
-      Institution.getById(profile.institutionId).then((institution) => {
-        if (!institution) {
-          return;
-        }
-        setInstitution(institution);
-      });
-    } else {
-      setInstitution(null);
-    }
-  }, [profile.institutionId]);
-
-  const generateInstitutionSelectionDisplay = () => {
-    return institution ?
-        <div>{institution?.name}</div>
-      : <div>Please use the Contact Us form to request an institutional affiliation</div>
-  };
+  }, [user]);
 
   const subHeadStyle = {
     color: '#000',
@@ -86,12 +49,13 @@ export default function AffiliationAndRole(props) {
     <div>
       <p style={subHeadStyle}>Institution</p>
       <div style={{ marginTop: '15px' }} />
-      {generateInstitutionSelectionDisplay()}
+      {institution
+        ? <div data-cy='institutional-affiliation'>{institution?.name}</div>
+        : <div data-cy='institutional-affiliation'>Please use the Contact Us form to request an institutional affiliation</div>
+      }
       <div style={{ marginTop: '15px' }} />
       <p style={subHeadStyle}>Role</p>
     </div>
-    <p>
-      {profile.roles}
-    </p>
+    <p data-cy='user-roles'>{roles}</p>
   </div>;
 }
