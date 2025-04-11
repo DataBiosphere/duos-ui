@@ -41,6 +41,7 @@ export interface DuosUser {
   displayName: string;
   email: string;
   emailPreference: boolean;
+  institutionId?: number;
   isAdmin: boolean;
   isAlumni: boolean;
   isChairPerson: boolean;
@@ -48,11 +49,11 @@ export interface DuosUser {
   isMember: boolean;
   isResearcher: boolean;
   isSigningOfficial: boolean;
-  libraryCards: LibraryCard[];
-  researcherProperties: UserProperty[];
+  libraryCards?: LibraryCard[];
+  researcherProperties?: UserProperty[];
   roles: UserRole[];
   userId: number;
-  userStatusInfo: UserStatusInfo;
+  userStatusInfo?: UserStatusInfo;
 }
 
 export interface SimplifiedDuosUser {

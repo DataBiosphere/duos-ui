@@ -3,11 +3,10 @@ import { useState, useEffect } from 'react';
 import { FormField, FormFieldTypes } from '../../components/forms/forms';
 import { PageHeading } from '../../components/PageHeading';
 import { Notification } from '../../components/Notification';
-import { Institution } from '../../libs/ajax/Institution';
 import { User } from '../../libs/ajax/User';
 import { Storage } from '../../libs/storage';
 import { NotificationService } from '../../libs/notificationService';
-import { Notifications, getPropertyValuesFromUser } from '../../libs/utils';
+import { Notifications } from '../../libs/utils';
 import AffiliationAndRoles from './AffiliationAndRoles';
 import ResearcherStatus from './ResearcherStatus';
 import AcceptedAcknowledgements from './AcceptedAcknowledgements';
@@ -19,8 +18,6 @@ import {setUserRoleStatuses} from '../../libs/utils';
 export default function UserProfile(props) {
 
   const [user, setUser] = useState({});
-  const [userProps, setUserProps] = useState({});
-  const [institutions, setInstitutions] = useState([]);
   const [name, setName] = useState('');
   const [updatedName, setUpdatedName] = useState('');
 
@@ -33,7 +30,7 @@ export default function UserProfile(props) {
 
   const [notificationData, setNotificationData] = useState({});
 
-  const updateRef = ({key, value}) => {
+  const updateRef = ({_key, value}) => {
     setName(value);
     setUpdatedName(value);
   };
@@ -68,13 +65,11 @@ export default function UserProfile(props) {
     });
   }
 
-
   useEffect(() => {
     const init = async () => {
       try {
         const user = Storage.getCurrentUser();
         setUser(user);
-        setUserProps(getPropertyValuesFromUser(user));
         setProfile({
           profileName: user.displayName,
           email: user.email,
@@ -82,10 +77,8 @@ export default function UserProfile(props) {
           id: user.userId
         });
         setName(user.displayName);
-        const institutions = await Institution.list();
-        setInstitutions(institutions);
         setNotificationData(await NotificationService.getBannerObjectById('eRACommonsOutage'));
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error: Unable to retrieve user data from server' });
       }
     };
@@ -215,8 +208,6 @@ export default function UserProfile(props) {
     <div style={{ 'marginTop': '60px' }} />
     <AffiliationAndRoles
       user={user}
-      userProps={userProps}
-      institutions={institutions}
     />
     <button
       className='f-left btn-primary common-background'
