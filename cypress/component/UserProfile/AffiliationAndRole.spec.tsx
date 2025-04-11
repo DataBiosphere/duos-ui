@@ -1,17 +1,35 @@
 import {mount} from 'cypress/react';
 import React from 'react';
 import {Institution} from '../../../src/libs/ajax/Institution';
-import AffiliationAndRole from '../../../src/pages/user_profile/AffiliationAndRoles.jsx';
+import AffiliationAndRole from '../../../src/pages/user_profile/AffiliationAndRoles';
+import {DuosUser} from "src/types/model";
 
-const user = {
+const user: DuosUser = {
+  createDate: new Date(),
+  displayName: 'Test User',
+  email: 'email',
+  emailPreference: false,
   userId: 1,
   institutionId: 1,
+  isAdmin: false,
+  isAlumni: false,
+  isChairPerson: false,
+  isDataSubmitter: false,
+  isMember: false,
+  isResearcher: true,
+  isSigningOfficial: true,
   roles: [
     {
+      roleId: 1,
+      userId: 1,
+      userRoleId: 1,
       name: 'Researcher'
     },
     {
-      name: 'Signing Official'
+      roleId: 2,
+      userId: 1,
+      userRoleId: 2,
+      name: 'SigningOfficial'
     }
   ],
 };
