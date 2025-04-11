@@ -50,7 +50,7 @@ export default function AffiliationAndRole(props) {
       <p style={subHeadStyle}>Institution</p>
       <div style={{ marginTop: '15px' }} />
       {institution
-        ? <div data-cy='institutional-affiliation'>{institution?.name}</div>
+        ? <div data-cy='institutional-affiliation'>{institution.name}</div>
         : <div data-cy='institutional-affiliation'>Please use the Contact Us form to request an institutional affiliation</div>
       }
       <div style={{ marginTop: '15px' }} />
