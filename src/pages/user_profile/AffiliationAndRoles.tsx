@@ -60,7 +60,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
       }
       <div style={{marginTop: '15px'}}/>
       <p style={subHeadStyle}>Role</p>
+      <p data-cy='user-roles'>{roles}</p>
     </div>
-    <p data-cy='user-roles'>{roles}</p>
   </div>;
 }
