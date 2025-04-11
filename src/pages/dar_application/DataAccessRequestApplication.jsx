@@ -287,7 +287,7 @@ const DataAccessRequestApplication = (props) => {
     formData.userId = researcher.userId;
 
     batchFormFieldChange(formData);
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }, [onScroll, props.match.params, researcher]);
 
   useEffect(() => {
