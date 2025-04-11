@@ -221,7 +221,7 @@ const DataAccessRequestApplication = (props) => {
     const scrollPos = window.scrollY;
     const scrollBuffer = window.innerHeight * .25;
     const sectionIndex = ApplicationTabs
-      .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
+      .map((_tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
       .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
     let newStep;
@@ -249,7 +249,7 @@ const DataAccessRequestApplication = (props) => {
           setResearcher(response);
           setAllSigningOfficials(signingOfficials);
         }
-      } catch (error) {
+      } catch (_error) {
         setShowDialogSave(false);
         NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
       }
