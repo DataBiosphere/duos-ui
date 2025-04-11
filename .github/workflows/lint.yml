@@ -17,6 +17,6 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: npm lint
-        run: npx eslint $(git diff "origin/$DESTINATION_REF" --name-only | xargs)
+        run: npx eslint $(git diff "origin/$DESTINATION_REF" --diff-filter=d --name-only | xargs)
         env:
           DESTINATION_REF: ${{ github.event.pull_request.base.ref }}
