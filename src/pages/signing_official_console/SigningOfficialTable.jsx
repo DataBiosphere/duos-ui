@@ -241,7 +241,7 @@ export default function SigningOfficialTable(props) {
     const init = async() => {
       try{
         setResearchers(props.researchers);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };
@@ -327,7 +327,7 @@ export default function SigningOfficialTable(props) {
       const listCopy = cloneDeep(researchers);
       const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
       const {userEmail, userName, userId} = newLibraryCard;
-      let targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
+      const targetIndex = findIndex((researcher) => userId === researcher.userId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to top of list
         const targetUnregisteredResearcher = find((researcher) => userId === researcher.userId)(props.unregisteredResearchers);
@@ -350,7 +350,7 @@ export default function SigningOfficialTable(props) {
       setShowConfirmation(false);
       setShowModal(false);
       Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error issuing library card to ${messageName}`});
     }
   };
@@ -374,7 +374,7 @@ export default function SigningOfficialTable(props) {
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
-    } catch(error) {
+    } catch(_error) {
       Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
     }
   };
@@ -384,8 +384,8 @@ export default function SigningOfficialTable(props) {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
-        <div style={Styles.LEFT_HEADER_SECTION}>
-          <div style={{ ...Styles.HEADER_CONTAINER, marginRight: '-7%' }}>
+        <div style={{ ...Styles.LEFT_HEADER_SECTION, maxWidth: '60%' }}>
+          <div style={{ ...Styles.HEADER_CONTAINER }}>
             <div style={{ ...Styles.SUB_HEADER,
               marginTop: '0',
               fontFamily: 'Montserrat',
@@ -409,7 +409,7 @@ export default function SigningOfficialTable(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>NHGRI</a> Library Card Agreements.
+              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>NHGRI</a> Library Card Agreements and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
             </div>
           </div>
         </div>
