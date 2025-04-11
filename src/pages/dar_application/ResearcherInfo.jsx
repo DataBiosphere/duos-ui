@@ -108,7 +108,6 @@ export default function ResearcherInfo(props) {
             </span>
           )}
           <div className='flex-row' style={{justifyContent: 'flex-start', alignItems: 'flex-start'}}>
-            <h4 style={{marginRight: 30, marginTop: 30}}>1.2.1</h4>
             <ERACommons
               destination={eRACommonsDestination}
               researcherProfile={researcher}
