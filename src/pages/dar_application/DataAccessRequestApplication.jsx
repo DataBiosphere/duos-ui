@@ -59,7 +59,6 @@ const DataAccessRequestApplication = (props) => {
     labCollaborators: [],
     internalCollaborators: [],
     externalCollaborators: [],
-    checkCollaborator: false,
     checkNihDataOnly: false,
     rus: '',
     nonTechRus: '',
@@ -222,7 +221,7 @@ const DataAccessRequestApplication = (props) => {
     const scrollPos = window.scrollY;
     const scrollBuffer = window.innerHeight * .25;
     const sectionIndex = ApplicationTabs
-      .map((tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
+      .map((_tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
       .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
     let newStep;
@@ -250,7 +249,7 @@ const DataAccessRequestApplication = (props) => {
           setResearcher(response);
           setAllSigningOfficials(signingOfficials);
         }
-      } catch (error) {
+      } catch (_error) {
         setShowDialogSave(false);
         NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
       }
@@ -307,9 +306,8 @@ const DataAccessRequestApplication = (props) => {
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
   const saveDARDocuments = async (uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
-    let irbUpdate, collaborationUpdate;
-    irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
-    collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
+    const irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+    const collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
     return assign(irbUpdate.data, collaborationUpdate.data);
   };
 
@@ -365,15 +363,13 @@ const DataAccessRequestApplication = (props) => {
 
     setFormValidation(validation);
 
-    const eraCommonsIdValid = nihValid === true || formData.checkCollaborator === true;
-
     const hasLibraryCard = !isEmpty(researcher.libraryCards);
 
-    const isInvalidForm = validationFailed(validation) || !eraCommonsIdValid || !hasLibraryCard;
-    setShowNihValidationError(!eraCommonsIdValid);
+    const isInvalidForm = validationFailed(validation) || !nihValid || !hasLibraryCard;
+    setShowNihValidationError(!nihValid);
 
     if (isInvalidForm) {
-      scrollToFormErrors(validation, eraCommonsIdValid, hasLibraryCard);
+      scrollToFormErrors(validation, nihValid, hasLibraryCard);
     } else {
       // noinspection ES6MissingAwait
       Metrics.captureEvent(eventList.dar, {'action': 'attest'});
@@ -393,9 +389,9 @@ const DataAccessRequestApplication = (props) => {
 
   const submitDARFormData = async () => {
     const userId = Storage.getCurrentUser().userId;
-    let formattedFormData = cloneDeep(formData);
+    const formattedFormData = cloneDeep(formData);
 
-    for (var key in formattedFormData) {
+    for (const key in formattedFormData) {
       if (isString(formattedFormData[key]) && formattedFormData[key].trim() && formattedFormData[key].length === 0) {
         formattedFormData[key] = undefined;
       }
@@ -410,12 +406,12 @@ const DataAccessRequestApplication = (props) => {
       if (!isNil(uploadedIrbDocument) || !isNil(uploadedCollaborationLetter)) {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
-      let updatedFormData = assign(formattedFormData, darPartialResponse);
+      const updatedFormData = assign(formattedFormData, darPartialResponse);
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
-    } catch (error) {
+    } catch (_error) {
       setShowDialogSubmit(false);
       NotyUtil.showError({
         text: 'Data Access Request submission failed. Please save and try submitting again.'
@@ -447,7 +443,7 @@ const DataAccessRequestApplication = (props) => {
 
 
   const saveDarDraft = async () => {
-    let formattedFormData = cloneDeep(formData);
+    const formattedFormData = cloneDeep(formData);
     // DAR datasetIds needs to be a list of ids
     if (DAAUtils.isEnabled()) {
       formattedFormData.datasetIds = selectedDatasets.map(d => d.datasetId);
@@ -471,7 +467,7 @@ const DataAccessRequestApplication = (props) => {
       batchFormFieldChange(darPartialResponse);
       setShowDialogSave(false);
       setDisableOkButton(false);
-    } catch (error) {
+    } catch (_error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
       NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
@@ -522,7 +518,7 @@ const DataAccessRequestApplication = (props) => {
               TabIndicatorProps={{
                 style: { background: '#2BBD9B' }
               }}
-              onChange={(event, step) => {
+              onChange={(_event, step) => {
                 goToStep(step);
               }}
             >

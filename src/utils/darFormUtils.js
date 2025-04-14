@@ -101,7 +101,7 @@ const calcResearcherInfoErrors = (formData, labCollaboratorsCompleted, internalC
     errors.researcher = requiredError;
   }
 
-  if (formData.checkCollaborator !== true && formData.nihValid === false) {
+  if (formData.nihValid === false) {
     errors.nihEraId = requiredError;
   }
 
@@ -264,6 +264,6 @@ export const validateDARFormData = ({
     researcherInfoErrors: calcResearcherInfoErrors(formData, labCollaboratorsCompleted, internalCollaboratorsCompleted, externalCollaboratorsCompleted),
     darErrors: calcDarErrors(formData, datasets, dataUseTranslations, irbDocument, collaborationLetter),
     rusErrors: calcRusErrors(formData),
-    nihValid: isNil(researcher.eraCommonsId) || formData.checkCollaborator === true,
+    nihValid: isNil(researcher.eraCommonsId),
   };
 };

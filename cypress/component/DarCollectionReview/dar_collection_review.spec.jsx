@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable cypress/no-assigning-return-values */
 import { React } from 'react';
 import { mount } from 'cypress/react';
 import DarCollectionReview from '../../../src/pages/dar_collection_review/DarCollectionReview';
@@ -228,7 +228,6 @@ const dar = {
         'referenceId': 'dars-id-123',
         'institution': 'Ace Industries',
         'projectTitle': 'Collection of sleep apnea samples',
-        'checkCollaborator': false,
         'researcher': 'Bob Jones',
         'rus': 'One good RUS\n',
         'nonTechRus': 'One non-technical RUS\n',
