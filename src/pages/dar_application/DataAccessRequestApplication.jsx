@@ -412,11 +412,11 @@ const DataAccessRequestApplication = (props) => {
       setShowDialogSubmit({
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
-    } catch (_error) {
+    } catch (error) {
       setShowDialogSubmit(false);
       Notifications.showError(
           {
-            text: <ReactMarkdown>{_error.response.data.message}</ReactMarkdown>,
+            text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
             severity: 'error',
             timeout: 6000,
             layout: {
