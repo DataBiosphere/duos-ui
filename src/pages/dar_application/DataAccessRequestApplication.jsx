@@ -479,7 +479,6 @@ const DataAccessRequestApplication = (props) => {
     } catch (error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
-      console.error(error);
       if (error.response.data.code && error.response.data.code === 422){
         Notifications.showError({text:'Please register in DUOS with your institution\'s email and obtain approval from your Signing Official in order to submit a data access request.',
           severity: 'error',
