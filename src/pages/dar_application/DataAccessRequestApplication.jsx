@@ -252,7 +252,7 @@ const DataAccessRequestApplication = (props) => {
         }
       } catch (_error) {
         setShowDialogSave(false);
-        NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
+        Notifications({text:'Error displaying user information. Please try again in a few moments.', });
       }
     };
     fetchData();
@@ -476,10 +476,28 @@ const DataAccessRequestApplication = (props) => {
       batchFormFieldChange(darPartialResponse);
       setShowDialogSave(false);
       setDisableOkButton(false);
-    } catch (_error) {
+    } catch (error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
-      NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
+      console.error(error);
+      if (error.response.data.code && error.response.data.code === 422){
+        Notifications.showError({text:'Please register in DUOS with your institution\'s email and obtain approval from your Signing Official in order to submit a data access request.',
+          severity: 'error',
+          timeout: 6000,
+          layout: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }});
+      } else {
+        Notifications.showError({text:'Error saving Data Access Request. Please try again in a few moments.',
+          severity: 'error',
+          timeout: 3500,
+          layout: {
+            vertical: 'bottom',
+            horizontal: 'right'
+          }});
+      }
+
     }
   };
 
