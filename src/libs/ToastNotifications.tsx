@@ -81,6 +81,7 @@ export const ToastNotifications = {
           {...props}
         >
           <Alert
+            data-cy='notification-alert'
             onClose={handleClose}
             severity={severity}
             variant="filled"
