@@ -16,6 +16,8 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
   useEffect(() => {
     const init = async () => {
       try {
+        // Note that although user is a required prop and roles is a required property, the parent JSX component may
+        // not honor that and pass an undefined entity during load.
         const allRoles = user?.roles?.map((role) => role.name).join(', ');
         setRoles(allRoles);
         if (user.institutionId) {
