@@ -44,25 +44,34 @@ describe('Affiliation And Role', () => {
   beforeEach(() => {
     cy.viewport(600, 600);
     cy.initApplicationConfig();
-    cy.stub(Institution, 'getById').returns(institution);
   });
 
   it('Displays institution name when institution is present', () => {
+    cy.stub(Institution, 'getById').returns(institution);
     mount(<AffiliationAndRole user={user} />);
     cy.get('[ data-cy="institutional-affiliation"]').contains(institution.name);
   });
 
   it('Displays contact us text when no institution present', () => {
+    cy.stub(Institution, 'getById').returns(institution);
     const {institutionId, ...userWithoutInstitution} = user;
     mount(<AffiliationAndRole user={userWithoutInstitution} />);
     cy.get('[ data-cy="institutional-affiliation"]').contains('Please use the Contact Us form to request an institutional affiliation');
   });
 
   it('Displays all role names for user', () => {
+    cy.stub(Institution, 'getById').returns(institution);
     mount(<AffiliationAndRole user={user} />);
     user.roles.forEach((role) => {
       cy.get('[ data-cy="user-roles"]').contains(role.name);
     });
+  });
+
+  it('Displays error when error is thrown loading user information', () => {
+    const error = new Error('Error: Unable to retrieve user information');
+    cy.stub(Institution, 'getById').throws(error);
+    mount(<AffiliationAndRole user={user} />);
+    cy.get('[ data-cy="notification-alert"]').contains(error.message);
   });
 
 });
