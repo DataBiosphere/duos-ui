@@ -7,8 +7,8 @@ import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 import {
-  Navigation,
-  Notifications as NotyUtil
+  Navigation, Notifications,
+  Notifications as NotyUtil,
 } from '../../libs/utils';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
 import { Notification } from '../../components/Notification';
@@ -33,6 +33,7 @@ import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
+import ReactMarkdown from 'react-markdown';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -412,10 +413,19 @@ const DataAccessRequestApplication = (props) => {
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
     } catch (_error) {
+      console.log("error", _error);
       setShowDialogSubmit(false);
-      NotyUtil.showError({
-        text: 'Data Access Request submission failed. Please save and try submitting again.'
-      });
+      Notifications.showError(
+          {
+            text: <ReactMarkdown>{_error.response.data.message}</ReactMarkdown>,
+            severity: 'error',
+            timeout: 6000,
+            layout: {
+              vertical: 'bottom',
+              horizontal: 'center'
+            }
+          }
+      );
     }
   };
 
