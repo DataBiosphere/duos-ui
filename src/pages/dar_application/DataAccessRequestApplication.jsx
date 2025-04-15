@@ -408,12 +408,12 @@ const DataAccessRequestApplication = (props) => {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       const updatedFormData = assign(formattedFormData, darPartialResponse);
+      //const responseData = await DAR.postDar(updatedFormData);
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
     } catch (_error) {
-      console.log("error", _error);
       setShowDialogSubmit(false);
       Notifications.showError(
           {
@@ -422,7 +422,7 @@ const DataAccessRequestApplication = (props) => {
             timeout: 6000,
             layout: {
               vertical: 'bottom',
-              horizontal: 'center'
+              horizontal: 'right'
             }
           }
       );

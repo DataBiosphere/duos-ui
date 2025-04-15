@@ -45,7 +45,7 @@ export const applyForAccess = async (selected, history) => {
             timeout: 6000,
             layout: {
               vertical: 'bottom',
-              horizontal: 'center'
+              horizontal: 'right'
             }
           }
       );
