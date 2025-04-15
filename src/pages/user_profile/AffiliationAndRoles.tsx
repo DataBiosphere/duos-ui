@@ -16,7 +16,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
   useEffect(() => {
     const init = async () => {
       try {
-        const allRoles = user.roles.map((role) => role.name).join(', ');
+        const allRoles = user?.roles?.map((role) => role.name).join(', ');
         setRoles(allRoles);
         if (user.institutionId) {
           const institution: Institution = await InstitutionAPI.getById(user.institutionId);
