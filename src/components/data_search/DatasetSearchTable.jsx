@@ -48,7 +48,6 @@ export const applyForAccess = async (selected, history) => {
             }
           }
       );
-     // Notifications.showError({ text: <ReactMarkdown>${draftResponse.message}</ReactMarkdown> + ' Please contact customer support for help.' });
     } else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
     }
