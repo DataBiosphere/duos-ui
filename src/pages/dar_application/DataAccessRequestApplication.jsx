@@ -408,7 +408,6 @@ const DataAccessRequestApplication = (props) => {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       const updatedFormData = assign(formattedFormData, darPartialResponse);
-      //const responseData = await DAR.postDar(updatedFormData);
       await DAR.postDar(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
