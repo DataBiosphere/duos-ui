@@ -74,4 +74,14 @@ describe('Affiliation And Role', () => {
     cy.get('[ data-cy="notification-alert"]').contains(error.message);
   });
 
+  it('Handles non-TS compliant user argument', () => {
+    // cy.stub(Institution, 'getById').returns(institution);
+    [{}, undefined, null].forEach((value) => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      mount(<AffiliationAndRole user={value} />);
+      cy.get('[ data-cy="notification-alert"]').should('not.exist');
+    })
+  });
+
 });

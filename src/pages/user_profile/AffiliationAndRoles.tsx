@@ -20,7 +20,7 @@ export default function AffiliationAndRole(props: AffiliationAndRoleProps) {
         // not honor that and pass an undefined entity during load.
         const allRoles = user?.roles?.map((role) => role.name).join(', ');
         setRoles(allRoles);
-        if (user.institutionId) {
+        if (user?.institutionId) {
           const institution: Institution = await InstitutionAPI.getById(user.institutionId);
           if (institution) {
             setInstitution(institution);
