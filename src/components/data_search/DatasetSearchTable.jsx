@@ -40,14 +40,8 @@ export const applyForAccess = async (selected, history) => {
       Notifications.showError(
           {
             text: "Please register in DUOS with your institution's email and obtain approval from your Signing Official in order to submit a data access request.",
-            severity: 'error',
-            timeout: 6000,
-            layout: {
-              vertical: 'bottom',
-              horizontal: 'right'
-            }
-          }
-      );
+            timeout: 6000
+            });
     } else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
     }

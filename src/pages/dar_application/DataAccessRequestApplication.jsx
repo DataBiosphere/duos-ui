@@ -417,14 +417,8 @@ const DataAccessRequestApplication = (props) => {
       Notifications.showError(
           {
             text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
-            severity: 'error',
-            timeout: 6000,
-            layout: {
-              vertical: 'bottom',
-              horizontal: 'right'
-            }
-          }
-      );
+            timeout: 6000
+          });
     }
   };
 
@@ -482,19 +476,12 @@ const DataAccessRequestApplication = (props) => {
       if (error.response.data.code && error.response.data.code === 422){
         Notifications.showError({text:'Please register in DUOS with your institution\'s email and obtain approval from your Signing Official in order to submit a data access request.',
           severity: 'error',
-          timeout: 6000,
-          layout: {
-            vertical: 'bottom',
-            horizontal: 'right'
-          }});
+          timeout: 6000
+          });
       } else {
         Notifications.showError({text:'Error saving Data Access Request. Please try again in a few moments.',
           severity: 'error',
-          timeout: 3500,
-          layout: {
-            vertical: 'bottom',
-            horizontal: 'right'
-          }});
+          });
       }
 
     }
