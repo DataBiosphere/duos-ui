@@ -8,7 +8,6 @@ import ResearchPurposeStatement from './ResearchPurposeStatement';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 import {
   Navigation, Notifications,
-  Notifications as NotyUtil,
 } from '../../libs/utils';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
 import { Notification } from '../../components/Notification';
