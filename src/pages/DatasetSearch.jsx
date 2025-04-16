@@ -11,7 +11,7 @@ import nhgriIcon from '../images/nhgri-logo-color.svg';
 import anvilIcon from '../images/anvil-logo.svg';
 import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
-import ifgcIcon from '../images/ifgc-logo.png';
+import ifgcIcon from '../images/IFGC-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
 import firecloudIcon from '../images/firecloud-logo.png';
 import aouIcon from '../images/aou-logo.png';
