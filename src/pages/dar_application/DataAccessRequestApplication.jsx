@@ -413,11 +413,19 @@ const DataAccessRequestApplication = (props) => {
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
     } catch (error) {
       setShowDialogSubmit(false);
-      Notifications.showError(
-          {
-            text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
-            timeout: 6000
-          });
+      if (error.response.data.code && error.response.data.message) {
+        Notifications.showError(
+            {
+              text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
+              timeout: 6000
+            });
+      } else {
+        Notifications.showError(
+            {
+              text: 'Error saving Data Access Request. Please try again in a few moments.',
+              timeout: 6000
+            });
+      }
     }
   };
 
@@ -472,8 +480,8 @@ const DataAccessRequestApplication = (props) => {
     } catch (error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
-      if (error.response.data.code && error.response.data.code === 422){
-        Notifications.showError({text:'Please register in DUOS with your institution\'s email and obtain approval from your Signing Official in order to submit a data access request.',
+      if (error.response.data.code && error.response.data.message){
+        Notifications.showError({text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
           severity: 'error',
           timeout: 6000
           });

@@ -16,6 +16,7 @@ import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import {DatasetSearchFooter} from './DatasetSearchFooter';
+import ReactMarkdown from 'react-markdown';
 
 const styles = {
   subTab: {
@@ -36,10 +37,10 @@ export const applyForAccess = async (selected, history) => {
     const draftResponse = await DAR.postDarDraft({ datasetId: selected });
     if (draftResponse.referenceId) {
       history.push(`/dar_application/${draftResponse.referenceId}`);
-    } else if (draftResponse.code && draftResponse.code === 422) {
+    } else if (draftResponse.code && draftResponse.message) {
       Notifications.showError(
           {
-            text: "Please register in DUOS with your institution's email and obtain approval from your Signing Official in order to submit a data access request.",
+            text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
             timeout: 6000
             });
     } else {
