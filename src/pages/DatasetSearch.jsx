@@ -11,6 +11,7 @@ import nhgriIcon from '../images/nhgri-logo-color.svg';
 import anvilIcon from '../images/anvil-logo.svg';
 import terraIcon from '../images/terra-logo.svg';
 import hcaIcon from '../images/human-cell-atlas-logo.png';
+import ifgcIcon from '../images/ifgc-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
 import firecloudIcon from '../images/firecloud-logo.png';
 import aouIcon from '../images/aou-logo.png';
@@ -233,6 +234,15 @@ export const DatasetSearch = (props) => {
       },
       icon: duosIcon,
       title: 'DUOS Open Access Data Library',
+    },
+    'ifgc': {
+      query: {
+        'match_phrase': {
+          'study.description': 'International Fetal Genomics Consortium'
+        }
+      },
+      icon: ifgcIcon,
+      title: 'International Fetal Genomics Consortium Data Library',
     },
     'stanley': {
       query: {
