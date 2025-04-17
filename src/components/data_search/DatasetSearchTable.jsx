@@ -16,6 +16,7 @@ import DatasetFilterList from './DatasetFilterList';
 import { Notifications } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import {DatasetSearchFooter} from './DatasetSearchFooter';
+import ReactMarkdown from 'react-markdown';
 
 const styles = {
   subTab: {
@@ -36,8 +37,12 @@ export const applyForAccess = async (selected, history) => {
     const draftResponse = await DAR.postDarDraft({ datasetId: selected });
     if (draftResponse.referenceId) {
       history.push(`/dar_application/${draftResponse.referenceId}`);
-    } else if (draftResponse.message) {
-      Notifications.showError({ text: draftResponse.message + ' Please contact customer support for help.' });
+    } else if (draftResponse.code && draftResponse.message) {
+      Notifications.showError(
+          {
+            text: <ReactMarkdown>{draftResponse.message}</ReactMarkdown>,
+            timeout: 6000
+            });
     } else {
       Notifications.showError({ text: 'Error: Unable to create a Draft Data Access Request' });
     }

@@ -7,8 +7,7 @@ import DataAccessRequest from './DataAccessRequest';
 import ResearchPurposeStatement from './ResearchPurposeStatement';
 import { translateDataUseRestrictionsFromDataUseArray } from '../../libs/dataUseTranslation';
 import {
-  Navigation,
-  Notifications as NotyUtil
+  Navigation, Notifications,
 } from '../../libs/utils';
 import { ConfirmationDialog } from '../../components/ConfirmationDialog_new';
 import { Notification } from '../../components/Notification';
@@ -33,6 +32,7 @@ import UsgOmbText from '../../components/UsgOmbText';
 import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
+import ReactMarkdown from 'react-markdown';
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -251,7 +251,7 @@ const DataAccessRequestApplication = (props) => {
         }
       } catch (_error) {
         setShowDialogSave(false);
-        NotyUtil.showError('Error displaying user information. Please try again in a few moments.');
+        Notifications({text:'Error displaying user information. Please try again in a few moments.', });
       }
     };
     fetchData();
@@ -411,11 +411,21 @@ const DataAccessRequestApplication = (props) => {
       setShowDialogSubmit({
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);
-    } catch (_error) {
+    } catch (error) {
       setShowDialogSubmit(false);
-      NotyUtil.showError({
-        text: 'Data Access Request submission failed. Please save and try submitting again.'
-      });
+      if (error.response.data.code && error.response.data.message) {
+        Notifications.showError(
+            {
+              text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
+              timeout: 6000
+            });
+      } else {
+        Notifications.showError(
+            {
+              text: 'Error saving Data Access Request. Please try again in a few moments.',
+              timeout: 6000
+            });
+      }
     }
   };
 
@@ -467,10 +477,20 @@ const DataAccessRequestApplication = (props) => {
       batchFormFieldChange(darPartialResponse);
       setShowDialogSave(false);
       setDisableOkButton(false);
-    } catch (_error) {
+    } catch (error) {
       setShowDialogSave(false);
       setDisableOkButton(false);
-      NotyUtil.showError('Error saving Data Access Request. Please try again in a few moments.');
+      if (error.response.data.code && error.response.data.message){
+        Notifications.showError({text: <ReactMarkdown>{error.response.data.message}</ReactMarkdown>,
+          severity: 'error',
+          timeout: 6000
+          });
+      } else {
+        Notifications.showError({text:'Error saving Data Access Request. Please try again in a few moments.',
+          severity: 'error',
+          });
+      }
+
     }
   };
 
