@@ -330,7 +330,8 @@ export const FormTable = (config) => {
     id, formFields,
     enableAddingRow, addRowLabel,
     disabled, onChange, minLength,
-    validation, onValidationChange, defaultValue, styleProps = {}
+    validation, onValidationChange, defaultValue, styleProps = {},
+    hideCloseButton = false
   } = config;
   const {
     enableAddingRowStyle = { display: 'flex', width: '100%', justifyContent: 'flex-end', marginTop: 10 },
@@ -342,9 +343,11 @@ export const FormTable = (config) => {
 
   const key = getKey(config);
 
+  const colStyle = hideCloseButton ? 'formTable-cols-full' : 'formTable-cols';
+
   return <div id={id} className={`formField-table formField-${id}`}>
     {/* generate columns */}
-    <div className='formTable-row formTable-cols'>
+    <div className={'formTable-row ' + colStyle}>
       {formFields.map(({ validators, title }) => {
         const required = (validators || []).includes(FormValidators.REQUIRED);
         return (
@@ -381,6 +384,7 @@ export const FormTable = (config) => {
             }}
           />
         ))}
+        {!hideCloseButton &&
         <button
           id={`delete-table-row-${id}-${i}`}
           key={`delete-table-row-${id}-${i}`}
@@ -400,6 +404,7 @@ export const FormTable = (config) => {
           }}>
           <span className={removeRowButtonIconClassName} />
         </button>
+        }
       </div>
     ))}
     {/* add new row to table button */}

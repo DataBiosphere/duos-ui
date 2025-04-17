@@ -82,6 +82,10 @@
   width: calc(100% - 35px);
 }
 
+.formTable-row.formTable-cols-full {
+  width: 100%;
+}
+
 .formTable-row .control-label {
   width: 100%;
   text-align: left;
