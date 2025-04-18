@@ -84,12 +84,16 @@ const DataAccessRequestApplication = (props) => {
     psychiatricTraits: null,
     notHealth: null,
     researcher: '',
+    piName: '',
+    piEmail: '',
     projectTitle: '',
     profileName: '',
     pubmedId: '',
     scientificUrl: '',
     signingOfficial: '',
+    signingOfficialEmail: '',
     itDirector: '',
+    itDirectorEmail: '',
     anvilUse: null,
     localUse: null,
     cloudUse: null,
@@ -407,7 +411,8 @@ const DataAccessRequestApplication = (props) => {
         darPartialResponse = await saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       }
       const updatedFormData = assign(formattedFormData, darPartialResponse);
-      await DAR.postDar(updatedFormData);
+      //await DAR.postDar(updatedFormData);
+      console.log(updatedFormData);
       setShowDialogSubmit({
         showDialogSubmit: false
       }, Navigation.console(Storage.getCurrentUser(), props.history).response);

@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom';
 import ERACommons from '../../components/ERACommons';
 import CollaboratorList from './collaborator/CollaboratorList';
 import {isEmpty, isNil, get} from 'lodash/fp';
-import {FormField, FormValidators, FormFieldTypes} from '../../components/forms/forms';
+import {FormField, FormValidators, FormFieldTypes, FormTable} from '../../components/forms/forms';
 import './dar_application.css';
 import {nihAccountLabel, nihAccountInstructions} from '../../utils/ERACommonsUtils.js';
 
@@ -152,6 +152,42 @@ export default function ResearcherInfo(props) {
             onChange={({key, value}) => formFieldChange({key, value})}
             defaultValue={formData.piName}
           />
+          <h3>1.3 Principal Investigator</h3>
+          <div>I certify that the principal investigator listed below is aware of this study</div>
+          <FormTable
+            id='piDual'
+            formFields={[
+              {
+                id: 'piName',
+                disabled: readOnlyMode,
+                name: 'piName',
+                title: 'Principal Investigator Name',
+                ariaLevel: ariaLevel + 1,
+                validators: [FormValidators.REQUIRED],
+              },
+              {
+                id: 'piEmail',
+                disabled: readOnlyMode,
+                name: 'piEmail',
+                title: 'Principal Investigator Email',
+                ariaLevel: ariaLevel + 1,
+                validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+              }
+            ]}
+            onValidationChange={onValidationChange}
+            onChange={({key, value}) => {
+              for(const [formKey, formValue] of Object.entries(value)) {
+                formFieldChange({key: formKey, value: formValue});
+              }
+            }}
+            defaultValue={[
+              {
+                piName: formData.piName || '',
+                piEmail: formData.piEmail || ''
+              }
+            ]}
+            hideCloseButton={true}
+          />
         </div>
 
         <div className='dar-application-row' data-cy='internal-lab-staff'>
@@ -216,11 +252,13 @@ export default function ResearcherInfo(props) {
             validation={validation.signingOfficial}
             onValidationChange={onValidationChange}
             disabled={readOnlyMode}
-            onChange={({key, value}) => {
-              formFieldChange({key, value});
+            onChange={({key, value: {displayText, email}}) => {
+              formFieldChange({key, value: displayText});
+              formFieldChange({key: 'signingOfficialEmail', value: email});
             }}
             selectOptions={(allSigningOfficials?.map((so) => {
-              return formatSOString(so.displayName, so.email);
+              const displayText = formatSOString(so.displayName, so.email);
+              return {displayText, email: so.email}
             }) || [''])}
           />
         </div>
@@ -239,6 +277,42 @@ export default function ResearcherInfo(props) {
             onValidationChange={onValidationChange}
             onChange={({key, value}) => formFieldChange({key, value})}
             defaultValue={formData.itDirector}
+          />
+          <h3>1.7 Information Technology (IT) Director</h3>
+          <div>I certify that the individual listed below is my IT Director</div>
+          <FormTable
+            id='itDirectorDual'
+            formFields={[
+              {
+                id: 'itDirector',
+                disabled: readOnlyMode,
+                name: 'itDirector',
+                title: 'IT Director Name',
+                ariaLevel: ariaLevel + 1,
+                validators: [FormValidators.REQUIRED],
+              },
+              {
+                id: 'itDirectorEmail',
+                disabled: readOnlyMode,
+                name: 'itDirectorEmail',
+                title: 'IT Director Email',
+                ariaLevel: ariaLevel + 1,
+                validators: [FormValidators.REQUIRED, FormValidators.EMAIL],
+              }
+            ]}
+            onValidationChange={onValidationChange}
+            onChange={({key, value}) => {
+              for(const [formKey, formValue] of Object.entries(value)) {
+                formFieldChange({key: formKey, value: formValue});
+              }
+            }}
+            defaultValue={[
+              {
+                itDirector: formData.itDirector || '',
+                itDirectorEmail: formData.itDirectorEmail || ''
+              }
+            ]}
+            hideCloseButton={true}
           />
         </div>
 
