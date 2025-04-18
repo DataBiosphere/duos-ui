@@ -138,20 +138,36 @@ export default function ResearcherInfo(props) {
         </div>
 
         <div className='dar-application-row'>
-          <FormField
-            id='piName'
-            disabled={readOnlyMode}
-            description='I certify that the principal investigator listed below is aware of this study'
-            placeholder='Firstname Lastname'
-            title='1.3 Principal Investigator'
-            titleStyle={titleStyle}
-            validators={[FormValidators.REQUIRED]}
-            ariaLevel={ariaLevel + 1}
-            validation={validation.piName}
-            onValidationChange={onValidationChange}
-            onChange={({key, value}) => formFieldChange({key, value})}
-            defaultValue={formData.piName}
-          />
+          <h3>1.3 Principal Investigator</h3>
+          <div>I certify that the principal investigator listed below is aware of this study</div>
+          <div className="formTable-row formTable-cols-full">
+            <label className="control-label" id="principal-investigator-name">Principal Investigator Name*</label>
+            <label className="control-label" id="principal-investigator-email">Principal Investigator Email*</label>
+          </div>
+          <div className="formTable-row formTable-data-row">
+            <FormField
+              id='piName'
+              disabled={readOnlyMode}
+              placeholder='Principal Investigator Name'
+              validators={[FormValidators.REQUIRED]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.piName}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.piName}
+            />
+            <FormField
+              id='piEmail'
+              disabled={readOnlyMode}
+              placeholder='Principal Investigator Email'
+              validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.piEmail}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.piEmail}
+            />
+          </div>
         </div>
 
         <div className='dar-application-row' data-cy='internal-lab-staff'>
@@ -212,34 +228,55 @@ export default function ResearcherInfo(props) {
             titleStyle={titleStyle}
             validators={[FormValidators.REQUIRED]}
             ariaLevel={ariaLevel + 1}
-            defaultValue={formData.signingOfficial}
+            defaultValue={{
+              displayText: formData.signingOfficial,
+              email: formData.signingOfficialEmail
+            }}
             validation={validation.signingOfficial}
             onValidationChange={onValidationChange}
             disabled={readOnlyMode}
-            onChange={({key, value}) => {
-              formFieldChange({key, value});
+            onChange={({key, value: {displayText, email}}) => {
+              formFieldChange({key, value: displayText});
+              formFieldChange({key: 'signingOfficialEmail', value: email});
             }}
             selectOptions={(allSigningOfficials?.map((so) => {
-              return formatSOString(so.displayName, so.email);
+              const displayText = formatSOString(so.displayName, so.email);
+              return {displayText, email: so.email}
             }) || [''])}
           />
         </div>
 
         <div className='dar-application-row'>
-          <FormField
-            id='itDirector'
-            disabled={readOnlyMode}
-            description='I certify that the individual listed below is my IT Director'
-            placeholder='Enter Firstname Lastname'
-            title='1.7 Information Technology (IT) Director'
-            titleStyle={titleStyle}
-            validators={[FormValidators.REQUIRED]}
-            ariaLevel={ariaLevel + 1}
-            validation={validation.itDirector}
-            onValidationChange={onValidationChange}
-            onChange={({key, value}) => formFieldChange({key, value})}
-            defaultValue={formData.itDirector}
-          />
+          <h3>1.7 Information Technology (IT) Director</h3>
+          <div>I certify that the individual listed below is my IT Director</div>
+          <div className="formTable-row formTable-cols-full">
+            <label className="control-label" id="it-director-name">IT Director Name*</label>
+            <label className="control-label" id="it-director-email">IT Director Email*</label>
+          </div>
+          <div className="formTable-row formTable-data-row">
+            <FormField
+              id='itDirector'
+              disabled={readOnlyMode}
+              placeholder='IT Director Name'
+              validators={[FormValidators.REQUIRED]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.itDirector}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.itDirector}
+            />
+            <FormField
+              id='itDirectorEmail'
+              disabled={readOnlyMode}
+              placeholder='IT Director Email'
+              validators={[FormValidators.REQUIRED, FormValidators.EMAIL]}
+              ariaLevel={ariaLevel + 1}
+              validation={validation.itDirectorEmail}
+              onValidationChange={onValidationChange}
+              onChange={({key, value}) => formFieldChange({key, value})}
+              defaultValue={formData.itDirectorEmail}
+            />
+          </div>
         </div>
 
         <div className='dar-application-row'>
