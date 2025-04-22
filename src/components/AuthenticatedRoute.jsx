@@ -7,7 +7,7 @@ import Home from '../pages/Home';
 
 const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) => {
 
-  const { path, location } = rest;
+  const { path, location, requiresLibraryCard } = rest;
 
   return (
     <Route
@@ -15,7 +15,7 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
       location={ location }
       render={
         props =>
-          verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps)
+          verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps, requiresLibraryCard)
             ? <Component { ...props } { ...componentProps } />
             : !Storage.userIsLogged()
               ? <Home { ...props } { ...componentProps } />
@@ -26,7 +26,8 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
 };
 
 // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
-const verifyUser = (allowedComponentRoles, usrRoles) => {
+const verifyUser = (allowedComponentRoles, usrRoles, _componentProps, requiresLibraryCard) => {
+  if (requiresLibraryCard && (!usrRoles || !usrRoles.libraryCards || !usrRoles.libraryCards.length > 0)) {return false;}
   if (Storage.userIsLogged() && usrRoles !== undefined) {
     const currentUserRoles = (usrRoles.roles) ? usrRoles.roles.map(roles => roles.name) : [];
     return allowedComponentRoles.some(

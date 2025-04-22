@@ -84,11 +84,11 @@ const Routes = (props) => (
     <AuthenticatedRoute path='/dar_vote_review/:collectionId' component={DarCollectionReview} props={Object.assign({readOnly: true}, props)}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.member]}/>
     <AuthenticatedRoute path='/dar_application_review/:collectionId' component={DataAccessRequestApplication} props={Object.assign({}, props, {readOnlyMode: true})}
-      rolesAllowed={[USER_ROLES.researcher]} />
+      rolesAllowed={[USER_ROLES.researcher]}  />
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true})}
       rolesAllowed={[USER_ROLES.researcher]} />
-    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} requiresLibraryCard={true} />
     <AuthenticatedRoute path='/signing_official_console/researchers' component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/signing_official_console/researchers_daa_associations' component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
     <AuthenticatedRoute path='/signing_official_console/dar_requests' component={ensureSoHasDaaAcknowledgement(SigningOfficialDarRequests)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
