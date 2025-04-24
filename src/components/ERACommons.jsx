@@ -7,6 +7,7 @@ import {AuthenticateNIH} from '../libs/ajax/AuthenticateNIH';
 import {User} from '../libs/ajax/User';
 import {Config} from '../libs/config';
 import './Animations.css';
+import {Storage} from '../libs/storage';
 import {
   decodeNihToken,
   extractEraAuthenticationState,
@@ -30,7 +31,9 @@ export default function ERACommons(props) {
   const [expirationCount, setExpirationCount] = useState(0);
   const [eraCommonsId, setEraCommonsId] = useState('');
   const [nihError, setNihError] = useState(false);
+  const [nihErrorMessage, setNihErrorMessage] = useState();
   const accountLabel = nihAccountLabel();
+  const currentUser = Storage.getCurrentUser();
 
   /**
    * This hook is called only when the user is redirected back to the original page after authenticating with NIH.
@@ -94,9 +97,12 @@ export default function ERACommons(props) {
   const redirectToECMAuthUrl = async () => {
     const origin = window.location.origin;
     const redirectTo = origin + '/' + destination;
-    const authUrl = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo);
-    console.log('authUrl', authUrl);
-    window.location.href = authUrl;
+    try {
+      window.location.href = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo);
+    } catch (error) {
+      setNihErrorMessage('Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email);
+      setNihError(true);
+    }
   };
 
   const deleteNihAccount = async () => {
@@ -116,7 +122,6 @@ export default function ERACommons(props) {
   };
 
   const validationErrorState = get(props, 'validationError', false);
-  const nihErrorMessage = 'Something went wrong. Please try again.';
 
   return (
     <div id={'era-commons-id'} style={{minHeight: 65}}>
@@ -135,7 +140,7 @@ export default function ERACommons(props) {
           <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
         </a>
       )}
-      {nihError && <span className='era-cancel-color era-required-field-error-span'>{nihErrorMessage}</span>}
+      {nihError && <span data-cy='era-commons-error-span' className='era-cancel-color era-required-field-error-span'>{nihErrorMessage}</span>}
       {isAuthorized && <div>
         {expirationCount >= 0 && <div className='era-commons-id-value'>
           <span data-cy='era-commons-id-value'>{eraCommonsId}</span>
