@@ -53,8 +53,7 @@ export const DAR = {
     const url = DAAUtils.isEnabled() ?
       `${await getApiUrl()}/api/dar/v3` :
       `${await getApiUrl()}/api/dar/v2`;
-    const res = axios.post(url, filteredDar, Config.authOpts());
-    return await res.data;
+    return axios.post(url, filteredDar, Config.authOpts());
   },
 
   getAutoCompleteOT: async (partial) => {
