@@ -189,7 +189,6 @@ export const DatasetSearch = (props) => {
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
     },
-    },
     'zoonomics': {
       query: {
         'match_phrase': {
