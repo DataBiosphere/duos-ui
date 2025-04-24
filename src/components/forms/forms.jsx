@@ -185,7 +185,8 @@ export const FormFieldTypes = {
       'exclusiveValues', // e.g., ['Not Determined'], if not determined is selected, everything else will be cleared
       'loadOptions',
       'optionsAreString',
-      'selectOptions'
+      'selectOptions',
+      'isClearable'
     ],
     customPropValidation: customSelectPropValidation,
   },
