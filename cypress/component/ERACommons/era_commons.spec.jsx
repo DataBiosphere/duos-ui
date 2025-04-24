@@ -111,7 +111,6 @@ describe('ERA Commons Component', function () {
     // Enable RAS
     cy.stub(Storage, 'getEnv').returns('dev');
     cy.stub(Storage, 'getCurrentUser').returns(researcher);
-    cy.stub(User, 'getMe').returns(researcher);
     mount(<ERACommons
       isAuthorized={false}
       className={''}
