@@ -258,7 +258,7 @@ export const FormInputSelect = (config) => {
   const {
     id, title, disabled, required, validation, setValidation,
     selectOptions, placeholder, ariaDescribedby,
-    formValue, isCreatable = false, isMulti = false,
+    formValue, isCreatable = false, isMulti = false, isClearable = true,
     isAsync = false, setFormValue,
     exclusiveValues, loadOptions,
     selectConfig = {}
@@ -277,7 +277,7 @@ export const FormInputSelect = (config) => {
       <Component
         key={id}
         id={id}
-        isClearable={true} //ensures that selections can be cleared from dropdown, adds an 'x' within input box
+        isClearable={isClearable}
         isMulti={isMulti}
         required={required}
         isDisabled={disabled}
@@ -530,7 +530,7 @@ export const FormDatePicker = (config) => {
     <DuosDatePicker
       label={label}
       onChange={(value) => {onFormInputChange(config, value);}}
-      onError={(error, value) => {updateValidation(config, value);}}
+      onError={(_error, value) => {updateValidation(config, value);}}
       defaultValue={formValue}
       inputFormat={'YYYY-MM-DD'}
       highlightWeekends={true}
