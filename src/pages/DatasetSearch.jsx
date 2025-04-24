@@ -14,6 +14,7 @@ import hcaIcon from '../images/human-cell-atlas-logo.png';
 import ifgcIcon from '../images/IFGC-logo.png';
 import cfdeIcon from '../images/cfde-logo.png';
 import firecloudIcon from '../images/firecloud-logo.png';
+import zoonomicsIcon from '../images/ZoonomicsLogoColor.png';
 import aouIcon from '../images/aou-logo.png';
 import stanleyIcon from '../images/stanley-center-logo.png';
 import getzLabIcon from '../images/getz-lab-logo.svg';
@@ -187,6 +188,15 @@ export const DatasetSearch = (props) => {
       },
       icon: hcaIcon,
       title: 'Human Cell Atlas Data Library',
+    },
+    'zoonomics': {
+      query: {
+        'match_phrase': {
+          'study.description': 'zoonomics'
+        }
+      },
+      icon: zoonomicsIcon,
+      title: 'Center for Zoonomics Data Library',
     },
     'terra': {
       query: null,
