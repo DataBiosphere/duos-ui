@@ -24,7 +24,7 @@
     "react-markdown": "10.1.0",
     "react-modal": "3.16.3",
     "react-paginating": "1.4.0",
-    "react-router-dom": "5.3.0",
+    "react-router-dom": "7.5.2",
     "react-select": "5.10.1",
     "react-tooltip": "4.5.1",
     "stackdriver-errors-js": "0.12.0",
