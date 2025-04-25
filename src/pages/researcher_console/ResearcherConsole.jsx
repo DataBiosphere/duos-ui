@@ -12,7 +12,7 @@ import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROL
 import SearchBar from '../../components/SearchBar';
 import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihibraryCardAgreementLink from '../../assets/‎NIH_Library_Card_Agreement_08.01.24 version.docx.pdf';
+import NihLibraryCardAgreementLink from '../../assets/‎NIH_Library_Card_Agreement_08.01.24 version.docx.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
