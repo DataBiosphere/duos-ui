@@ -19,7 +19,7 @@ import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihibraryCardAgreementLink from '../../assets/‎NIH_Library_Card_Agreement_08.01.24 version.docx.pdf';
+import NihLibraryCardAgreementLink from '../../assets/‎NIH_Library_Card_Agreement_08.01.24 version.docx.pdf';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 
 //Styles specific to this table
