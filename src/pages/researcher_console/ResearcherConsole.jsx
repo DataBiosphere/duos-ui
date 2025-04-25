@@ -12,7 +12,7 @@ import { getSearchFilterFunctions, Notifications, searchOnFilteredList, USER_ROL
 import SearchBar from '../../components/SearchBar';
 import { consoleTypes } from '../../components/dar_collection_table/DarCollectionTableCellData';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import NihibraryCardAgreementLink from '../../assets/‎NIH_Library_Card_Agreement_08.01.24 version.docx.pdf';
 
 const filterFn = getSearchFilterFunctions().darCollections;
 
@@ -153,8 +153,8 @@ export default function ResearcherConsole() {
               {' '}
               and
               {' '}
-              <a target="_blank" rel="noreferrer" href={NhgriLibraryCardAgreementLink}>
-                NHGRI
+              <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>
+                NIH
               </a>
               {' '}
               Library Card Agreements.
