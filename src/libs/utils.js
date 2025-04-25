@@ -158,6 +158,7 @@ export const USER_ROLES = {
   alumni: 'Alumni',
   signingOfficial: 'SigningOfficial',
   dataSubmitter: 'DataSubmitter',
+  serviceAccount: 'ServiceAccount',
   all: 'All'
 };
 
@@ -192,6 +193,7 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
   user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
   user.isDataSubmitter = currentUserRoles.indexOf(USER_ROLES.dataSubmitter) > -1;
+  user.isServiceAccount = currentUserRoles.indexOf(USER_ROLES.serviceAccount) > -1;
   Storage.setCurrentUser(user);
   return user;
 };
