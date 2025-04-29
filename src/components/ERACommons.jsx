@@ -45,7 +45,7 @@ export default function ERACommons(props) {
         const rawToken = queryString.parse(search);
         const decodedToken = await decodeNihToken(rawToken);
         if (isNil(decodedToken)) {
-          setNihError(true);
+          displayError('The system received an invalid token, please try again or submit an error report using the "Contact Us" form.');
           return;
         }
         // Rewrite the payload to match the expected format in Consent, so we can save the values on the back end.
@@ -100,14 +100,14 @@ export default function ERACommons(props) {
     try {
       window.location.href = await AuthenticateNIH.getECMProviderAuthUrl(origin, redirectTo);
     } catch (error) {
-      setNihErrorMessage('Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email);
-      setNihError(true);
+      const errorMessage = 'Error from Authentication Provider: ' + error?.response?.data?.message + ': ' + currentUser.email;
+      displayError(errorMessage);
     }
   };
 
   const deleteNihAccount = async () => {
-    const deleteResponse = await AuthenticateNIH.deleteAccountLinkage();
-    if (deleteResponse) {
+    try {
+      await AuthenticateNIH.deleteAccountLinkage();
       const response = await User.getMe();
       const eraAuthState = extractEraAuthenticationState(response.properties);
       setAuthorized(eraAuthState.isAuthorized);
@@ -115,39 +115,46 @@ export default function ERACommons(props) {
       setEraCommonsId(undefined);
       onNihStatusUpdate(eraAuthState.nihValid);
       setSearch('');
-    } else {
-      setNihError(true);
-      document.getElementById('era-commons-id').scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
+    } catch (_error) {
+      const errorMessage = 'Something went wrong removing your account, please submit an error report using the "Contact Us" form.';
+      displayError(errorMessage);
     }
   };
+
+  const displayError = (message) => {
+    setNihErrorMessage(message);
+    setNihError(true);
+    document.getElementById('era-commons-id').scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
+  }
 
   const validationErrorState = get(props, 'validationError', false);
 
   return (
     <div id={'era-commons-id'} style={{minHeight: 65}}>
-      {header && <label className='era-control-label'>
-        <span data-cy='era-commons-header'>NIH {accountLabel} ID
-          {required ? <span data-cy='era-commons-required'>*</span> : ''}
+      {header && <label className="era-control-label">
+        <span data-cy="era-commons-header">NIH {accountLabel} ID
+          {required ? <span data-cy="era-commons-required">*</span> : ''}
         </span>
       </label>}
       {(!isAuthorized || expirationCount < 0) && (!readOnly &&
         <a
-          data-cy='era-commons-authenticate-link'
+          data-cy="era-commons-authenticate-link"
           className={validationErrorState ? 'era-button-state-error' : 'era-button-state'}
           onClick={rasEnabled() ? redirectToECMAuthUrl : redirectToNihLogin}
-          target='_blank'>
+          target="_blank">
           <div className={rasEnabled() ? 'nih-logo-style' : 'era-logo-style'}/>
           <span style={{verticalAlign: '50%'}}>Authenticate your account</span>
         </a>
       )}
-      {nihError && <span data-cy='era-commons-error-span' className='era-cancel-color era-required-field-error-span'>{nihErrorMessage}</span>}
+      {nihError && <span data-cy="era-commons-error-span"
+                         className="era-cancel-color era-required-field-error-span">{nihErrorMessage}</span>}
       {isAuthorized && <div>
-        {expirationCount >= 0 && <div className='era-commons-id-value'>
-          <span data-cy='era-commons-id-value'>{eraCommonsId}</span>
+        {expirationCount >= 0 && <div className="era-commons-id-value">
+          <span data-cy="era-commons-id-value">{eraCommonsId}</span>
           {!readOnly &&
-            <button className='era-delete-icon' type='button' onClick={deleteNihAccount}>
-              <span className='glyphicon glyphicon-remove-circle' data-tip='Clear account'
-                    data-for='tip_clear_era_commons_link'/>
+            <button data-cy="era-delete-icon" className="era-delete-icon" type="button" onClick={deleteNihAccount}>
+              <span className="glyphicon glyphicon-remove-circle" data-tip="Clear account"
+                    data-for="tip_clear_era_commons_link"/>
             </button>
           }
           {!readOnly &&
@@ -157,11 +164,11 @@ export default function ERACommons(props) {
               id={`tip_clear_era_commons_link`}>Clear {accountLabel} Account Link</ReactTooltip>
           }
         </div>}
-        <div className='era-expiration-value'>
+        <div className="era-expiration-value">
           {expirationCount >= 0 && <div
-            className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
+            className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication will expire in ${expirationCount} days`}</div>}
           {expirationCount < 0 &&
-            <div className='era-fadein'>{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
+            <div className="era-fadein">{`${readOnly ? 'This user\'s' : 'Your'} NIH authentication has expired`}</div>}
         </div>
       </div>}
     </div>
