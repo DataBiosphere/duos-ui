@@ -70,7 +70,7 @@ export default function ResearcherConsole() {
       clonedCollections[targetIndex] = updatedCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({ text: `Deleted Data Access Request ${darCode}` });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error: Cannot cancel target Data Access Request'
       });
@@ -92,7 +92,7 @@ export default function ResearcherConsole() {
       clonedCollections[targetIndex] = draftCollection;
       setResearcherCollections(clonedCollections);
       Notifications.showSuccess({ text: `Revising Data Access Request ${darCode}` });
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: 'Error: Cannot revise target Data Access Request'
       });
@@ -124,7 +124,7 @@ export default function ResearcherConsole() {
       } else {
         Notifications.showSuccess({ text: `Deleted Data Access Request Draft ${darCode}` });
       }
-    } catch (error) {
+    } catch (_error) {
       Notifications.showError({
         text: `Failed to delete Data Access Request Draft ${darCode}`,
       });

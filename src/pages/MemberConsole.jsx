@@ -35,7 +35,7 @@ export default function MemberConsole(props) {
         setRelevantDatasets(datasets);
         setFilteredList(collections);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({
           text: 'Error initializing Collections table',
         });

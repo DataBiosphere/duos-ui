@@ -18,7 +18,7 @@ export default function SigningOfficialDarRequests() {
         const collectionList = await Collections.getCollectionSummariesByRoleName(USER_ROLES.signingOfficial);
         setCollectionList(collectionList);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error: Unable to retrieve current user from server' });
         setIsLoading(false);
       }

@@ -174,9 +174,7 @@ export function statusCellData({status = '- -', darCollectionId, label = 'status
 }
 
 export function consoleActionsCellData({collection, reviewCollection, goToVote, showConfirmationModal, consoleType, resumeCollection, actions, status}) {
-  let actionComponent;
-
-  actionComponent = <Actions
+  const actionComponent = <Actions
     collection={collection}
     consoleType={consoleType}
     showConfirmationModal={showConfirmationModal}
