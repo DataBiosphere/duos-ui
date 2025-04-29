@@ -30,8 +30,7 @@ export default function ERACommons(props) {
   const [isAuthorized, setAuthorized] = useState(false);
   const [expirationCount, setExpirationCount] = useState(0);
   const [eraCommonsId, setEraCommonsId] = useState('');
-  const [nihError, setNihError] = useState(false);
-  const [nihErrorMessage, setNihErrorMessage] = useState();
+  const [nihError, setNihError] = useState(undefined);
   const accountLabel = nihAccountLabel();
   const currentUser = Storage.getCurrentUser();
 
@@ -122,8 +121,7 @@ export default function ERACommons(props) {
   };
 
   const displayError = (message) => {
-    setNihErrorMessage(message);
-    setNihError(true);
+    setNihError(message);
     document.getElementById('era-commons-id').scrollIntoView({block: 'start', inline: 'nearest', behavior: 'smooth'});
   }
 
@@ -147,7 +145,7 @@ export default function ERACommons(props) {
         </a>
       )}
       {nihError && <span data-cy="era-commons-error-span"
-                         className="era-cancel-color era-required-field-error-span">{nihErrorMessage}</span>}
+                         className="era-cancel-color era-required-field-error-span">{nihError}</span>}
       {isAuthorized && <div>
         {expirationCount >= 0 && <div className="era-commons-id-value">
           <span data-cy="era-commons-id-value">{eraCommonsId}</span>
