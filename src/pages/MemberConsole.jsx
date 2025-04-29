@@ -73,6 +73,7 @@ export default function MemberConsole(props) {
           DarCollectionTableColumnOptions.RESEARCHER,
           DarCollectionTableColumnOptions.INSTITUTION,
           DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.EXPIRES_AT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,
         ]}

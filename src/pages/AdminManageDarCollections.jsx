@@ -69,6 +69,7 @@ export default function AdminManageDarCollections() {
           DarCollectionTableColumnOptions.RESEARCHER,
           DarCollectionTableColumnOptions.INSTITUTION,
           DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.EXPIRES_AT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,
         ]}

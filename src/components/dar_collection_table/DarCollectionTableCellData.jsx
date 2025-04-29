@@ -147,6 +147,19 @@ export function datasetCountCellData({collection, darCollectionId, label = 'data
   };
 }
 
+export function expiresAtCellData({collection, darCollectionId, label = 'expiration-date'}) {
+  const dateString = isNil(collection.expiresAt) ? '- -' : formatDate(collection.expiresAt);
+  return {
+    data: dateString,
+    id: darCollectionId,
+    style: {
+      color: '#354052',
+      fontSize: styles.fontSize.expirationDate,
+    },
+    label,
+  };
+}
+
 export function statusCellData({status = '- -', darCollectionId, label = 'status'}) {
   return {
     data: status,
@@ -194,6 +207,7 @@ export default {
   researcherCellData,
   institutionCellData,
   datasetCountCellData,
+  expiresAtCellData,
   statusCellData,
   consoleActionsCellData,
 };

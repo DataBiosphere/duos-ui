@@ -50,6 +50,7 @@ export default function SigningOfficialDarRequests() {
             DarCollectionTableColumnOptions.SUBMISSION_DATE,
             DarCollectionTableColumnOptions.RESEARCHER,
             DarCollectionTableColumnOptions.INSTITUTION,
+            DarCollectionTableColumnOptions.EXPIRES_AT,
             DarCollectionTableColumnOptions.DATASET_COUNT,
             DarCollectionTableColumnOptions.STATUS,
           ]}

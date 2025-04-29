@@ -171,6 +171,7 @@ export default function ResearcherConsole() {
             DarCollectionTableColumnOptions.NAME,
             DarCollectionTableColumnOptions.SUBMISSION_DATE,
             DarCollectionTableColumnOptions.DATASET_COUNT,
+            DarCollectionTableColumnOptions.EXPIRES_AT,
             DarCollectionTableColumnOptions.STATUS,
             DarCollectionTableColumnOptions.ACTIONS,
           ]}
