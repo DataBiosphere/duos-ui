@@ -226,6 +226,7 @@ export const AdminEditUser = (props) => {
                   options={institutionOptions || []}
                   placeholder='Please Select an Institution'
                   value={institutionId}
+                  isClearable={false}
                   className='form-control'
                 />
               </div>
