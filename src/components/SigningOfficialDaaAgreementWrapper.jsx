@@ -1,6 +1,6 @@
 import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
+import NihLibraryCardAgreementLink from '../assets/NIHLibraryCardAgreement08012024.pdf';
 import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import React, { useEffect, useState } from 'react';
