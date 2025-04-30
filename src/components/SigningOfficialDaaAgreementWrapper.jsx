@@ -25,7 +25,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         setIsLoading(true);
         setHasAccepted(await hasSOAcceptedDAAs());
         setIsLoading(false);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Error: Unable to retrieve user acknowledgements from server'});
         setIsLoading(false);
       }

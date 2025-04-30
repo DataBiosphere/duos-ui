@@ -1,7 +1,7 @@
 import React from 'react';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NihLibraryCardAgreementLink from '../../assets/‎NIHLibraryCardAgreement08012024.pdf';
+import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
 import './dar_application.css';
