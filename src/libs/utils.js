@@ -256,7 +256,7 @@ export const outputCommaSeperatedElectionStatuses = (elections) => {
     elections.map((e) => processElectionStatus(e, e.votes, false))
   ).filter((status) => !isEmpty(status));
   if (isEmpty(statuses)) {
-    return 'Unreviewed';
+    return 'Submitted';
   }
   return statuses.join(', ');
 };
@@ -288,7 +288,7 @@ export const processElectionStatus = (election, votes, showVotes) => {
   let output;
   const electionStatus = !isNil(get('status')(election)) ? toLower(election.status) : null;
   if (isNil(electionStatus)) {
-    output = 'Unreviewed';
+    output = 'Submitted';
   } else if (electionStatus === 'open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if (!isEmpty(votes) && !isNil(election)) {
