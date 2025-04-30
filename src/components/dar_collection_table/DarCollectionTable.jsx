@@ -5,7 +5,7 @@ import { Storage } from '../../libs/storage';
 import PaginationBar from '../PaginationBar';
 import { recalculateVisibleTable, goToPage as updatePage } from '../../libs/utils';
 import SimpleTable from '../SimpleTable';
-import cellData, {consoleTypes} from './DarCollectionTableCellData';
+import cellData, { consoleTypes } from './DarCollectionTableCellData'
 import CollectionConfirmationModal from './CollectionConfirmationModal';
 import { cloneDeep } from 'lodash';
 import './dar_collection_table.css';
@@ -41,15 +41,16 @@ export const styles = {
     border: 'none'
   }),
   cellWidth: {
-    darCode: '11%',
-    dacNames: '9%',
-    projectTitle: '14%',
-    submissionDate: '10.5%',
-    researcher: '10%',
-    institution: '12.5%',
-    datasetCount: '7.5%',
-    status: '10%',
-    actions: '9.5%'
+    darCode: '10%',
+    dacNames: '8%',
+    projectTitle: '13%',
+    submissionDate: '9.5%',
+    researcher: '9%',
+    institution: '11.5%',
+    datasetCount: '6.5%',
+    expirationDate: '10%',
+    status: '9%',
+    actions: '8.5%'
   },
   color: {
     darCode: '#000000',
@@ -83,6 +84,7 @@ export const DarCollectionTableColumnOptions = {
   RESEARCHER: 'researcher',
   INSTITUTION: 'institution',
   DATASET_COUNT: 'datasetCount',
+  EXPIRES_AT: 'expiresAt',
   STATUS: 'status',
   ACTIONS: 'actions'
 };
@@ -127,6 +129,12 @@ const columnHeaderConfig = {
     label: 'Datasets',
     cellStyle: { width: styles.cellWidth.datasetCount },
     cellDataFn: cellData.datasetCountCellData,
+    sortable: true
+  },
+  expiresAt: {
+    label: 'Expiration Date',
+    cellStyle: { width: styles.cellWidth.expirationDate },
+    cellDataFn: cellData.expiresAtCellData,
     sortable: true
   },
   status: {

@@ -35,7 +35,7 @@ export default function MemberConsole(props) {
         setRelevantDatasets(datasets);
         setFilteredList(collections);
         setIsLoading(false);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({
           text: 'Error initializing Collections table',
         });
@@ -73,6 +73,7 @@ export default function MemberConsole(props) {
           DarCollectionTableColumnOptions.RESEARCHER,
           DarCollectionTableColumnOptions.INSTITUTION,
           DarCollectionTableColumnOptions.DATASET_COUNT,
+          DarCollectionTableColumnOptions.EXPIRES_AT,
           DarCollectionTableColumnOptions.STATUS,
           DarCollectionTableColumnOptions.ACTIONS,
         ]}

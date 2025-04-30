@@ -363,12 +363,13 @@ export const getSearchFilterFunctions = () => {
     darCollections: (term, targetList) =>
       isEmpty(term) ? targetList :
         filter(collection => {
-          const {darCode, datasetCount, institutionName, name, researcherName, status, submissionDate} = collection;
+          const {darCode, datasetCount, institutionName, name, researcherName, status, submissionDate, expiresAt} = collection;
           const formattedSubmissionDate = formatDate(submissionDate);
+          const formattedExpiresAt = formatDate(expiresAt);
           const matched = find((phrase) => {
             const termArr = term.split(' ');
             return find(term => includes(toLower(term), toLower(phrase)))(termArr);
-          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate]);
+          })([darCode, datasetCount, institutionName, name, researcherName, status, formattedSubmissionDate, formattedExpiresAt]);
           return !isNil(matched);
         })(targetList),
     users: (term, targetList) => {
