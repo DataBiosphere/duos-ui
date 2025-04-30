@@ -41,7 +41,7 @@ export const AuthenticateNIH = {
     if (res.status === 200) {
       return res.data;
     }
-    return undefined;
+    return new Error(res);
   },
 
   getECMProviderLinkInfo: async (code, state) => {

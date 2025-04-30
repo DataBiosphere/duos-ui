@@ -23,9 +23,9 @@ export default function TermsOfServiceAcceptance(props) {
     await Storage.setUserIsLogged(true);
 
     // if there is a redirectTo, we should go to that. otherwise, just go to the appropriate
-    // user's profile.
+    // data library.
     const queryParams = new URLSearchParams(window.location.search);
-    const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/profile';
+    const redirect = queryParams.get('redirectTo') ? queryParams.get('redirectTo') : '/datalibrary';
 
     history.push(redirect);
   }, [history]);
