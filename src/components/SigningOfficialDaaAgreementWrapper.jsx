@@ -1,6 +1,6 @@
 import { Notifications } from '../libs/utils';
 import BroadLibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NIHLibraryCardAgreementLink from '../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import NihLibraryCardAgreementLink from '../assets/NIHLibraryCardAgreement08012024.pdf';
 import DataSubmitterAgreementLink from '../assets/Data_Registrant_Agreement_7.2.24.22.pdf';
 import Acknowledgments, {acceptAcknowledgments, hasSOAcceptedDAAs} from '../libs/acknowledgements';
 import React, { useEffect, useState } from 'react';
@@ -25,7 +25,7 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
         setIsLoading(true);
         setHasAccepted(await hasSOAcceptedDAAs());
         setIsLoading(false);
-      } catch(error) {
+      } catch(_error) {
         Notifications.showError({text: 'Error: Unable to retrieve user acknowledgements from server'});
         setIsLoading(false);
       }
@@ -80,8 +80,8 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
             </div>
             <div>
               {isDataSubmitterTab === true ? isNull :
-                <a target='_blank' rel='noreferrer' href={NIHLibraryCardAgreementLink} className='button button-white'>
-                  <span className='glyphicon glyphicon-download'/> NHGRI Library Card Agreement
+                <a target='_blank' rel='noreferrer' href={NihLibraryCardAgreementLink} className='button button-white'>
+                  <span className='glyphicon glyphicon-download'/> NIH Library Card Agreement
                 </a>
               }
             </div>

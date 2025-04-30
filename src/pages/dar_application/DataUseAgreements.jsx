@@ -1,7 +1,7 @@
 import React from 'react';
 import {isNil} from 'lodash/fp';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
-import NhgriLibraryCardAgreementLink from '../../assets/NIH_Library_Card_Agreement_11_17_22_version.pdf';
+import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
 import './dar_application.css';
@@ -50,10 +50,10 @@ export default function DataUseAgreements(props) {
           </a>
         </div>
         <div>
-          <a target='_blank' rel='noreferrer' href={NhgriLibraryCardAgreementLink} className='button button-white'>
+          <a target='_blank' rel='noreferrer' href={NihLibraryCardAgreementLink} className='button button-white'>
             <span className='glyphicon glyphicon-download'></span>
             {' '}
-            NHGRI Library Card Agreement
+            NIH Library Card Agreement
           </a>
         </div>
       </div>
