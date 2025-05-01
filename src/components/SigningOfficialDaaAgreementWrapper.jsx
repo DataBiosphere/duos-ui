@@ -8,6 +8,9 @@ import { spinnerService } from '../libs/spinner-service';
 import { isNil, isNull } from 'lodash';
 import { Styles } from '../libs/theme';
 import UsgOmbText from './UsgOmbText';
+import {
+  NIHDataUseCertificationAgreement
+} from '../components/external_docs/NIHDataUseCertificationAgreement.js';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {
@@ -80,9 +83,14 @@ export const SigningOfficialDaaAgreementWrapper = (props) => {
             </div>
             <div>
               {isDataSubmitterTab === true ? isNull :
-                <a target='_blank' rel='noreferrer' href={NihLibraryCardAgreementLink} className='button button-white'>
-                  <span className='glyphicon glyphicon-download'/> NIH Library Card Agreement
-                </a>
+                  <div>
+                    <div style={{ marginBottom: '25px' }}>
+                      <a target='_blank' rel='noreferrer' href={NihLibraryCardAgreementLink} className='button button-white'>
+                        <span className='glyphicon glyphicon-download'/> NIH Library Card Agreement
+                      </a>
+                    </div>
+                  <NIHDataUseCertificationAgreement className={'button button-white'} showDownloadIcon={true}/>
+                  </div>
               }
             </div>
             <div className='flex flex-row' style={{ justifyContent: 'flex-end' }}>

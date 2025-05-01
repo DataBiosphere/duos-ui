@@ -5,6 +5,9 @@ import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement080
 import ModelDucLink from '../../assets/Model_DUC.pdf';
 
 import './dar_application.css';
+import {
+  NIHDataUseCertificationAgreement
+} from '../../components/external_docs/NIHDataUseCertificationAgreement.js';
 
 export default function DataUseAgreements(props) {
 
@@ -41,7 +44,7 @@ export default function DataUseAgreements(props) {
       <div>
         By submitting this DAR you agree to all terms in the agreement(s) below, and you attest you are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{fontWeight: 600}}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students.</div>
 
-      <div className='flex flex-row' style={{ justifyContent: 'flex-start', marginTop: '3rem' }}>
+      <div className='flex flex-row' style={{ justifyContent: 'left', marginTop: '3rem' }}>
         <div>
           <a target='_blank' rel='noreferrer' href={BroadLibraryCardAgreementLink} className='button button-white' style={{ marginRight: '2rem' }}>
             <span className='glyphicon glyphicon-download'></span>
@@ -57,6 +60,10 @@ export default function DataUseAgreements(props) {
           </a>
         </div>
       </div>
+      <div className='flex flex-row' style={{jusifiyConent: 'left', marginTop: '3rem'}}>
+          <NIHDataUseCertificationAgreement className={'button button-white'} showDownloadIcon={true}/>
+      </div>
+
 
       <div className='flex flex-row' style={{ justifyContent: 'around', paddingTop: '4rem' }}>
         <div className='flex flex-row' style={{ justifyContent: 'flex-start' }}>

@@ -21,6 +21,9 @@ import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgr
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
 import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
+import {
+  NIHDataUseCertificationAgreement
+} from '../../components/external_docs/NIHDataUseCertificationAgreement.js';
 
 //Styles specific to this table
 const styles = {
@@ -409,7 +412,7 @@ export default function SigningOfficialTable(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH</a> Library Card Agreements and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
+              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>, <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>, and <NIHDataUseCertificationAgreement/> and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
             </div>
           </div>
         </div>

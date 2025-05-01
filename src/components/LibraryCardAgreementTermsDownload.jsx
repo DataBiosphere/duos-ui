@@ -1,6 +1,9 @@
 import React from 'react';
 import LibraryCardAgreementLink from '../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import { Download } from '@mui/icons-material';
+import {
+  NIHDataUseCertificationAgreement
+} from '../../src/components/external_docs/NIHDataUseCertificationAgreement';
 
 export const LibraryCardAgreementTermsDownload = () => (
   <div>
@@ -14,5 +17,8 @@ export const LibraryCardAgreementTermsDownload = () => (
     >
       <Download sx={{ verticalAlign: 'middle', fontSize: '24px' }}/>
     </a>
+    <div style={{marinTop:'.5rem'}}>
+    <NIHDataUseCertificationAgreement/>
+    </div>
   </div>
 );
