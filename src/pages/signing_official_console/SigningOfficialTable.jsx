@@ -19,7 +19,6 @@ import { LibraryCard } from '../../libs/ajax/LibraryCard';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
-import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
 import {
   NIHDataUseCertificationAgreement
 } from '../../components/external_docs/NIHDataUseCertificationAgreement.js';

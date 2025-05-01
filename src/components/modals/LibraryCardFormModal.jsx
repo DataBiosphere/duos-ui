@@ -67,6 +67,7 @@ const FormFieldRow = (props) => {
           options={dropdownOptions}
           placeholder='Select or type a new user email'
           isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+          /* eslint-disable-next-line no-constant-binary-expression */
           getOptionLabel={(option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email}
         />
       </div>;
