@@ -16,7 +16,6 @@ import {
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax/LibraryCard';
-import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
@@ -96,7 +95,7 @@ const IssueLibraryCardButton = (props) => {
     <div>
       {/* LCA Terms Download */}
       <LibraryCardAgreementTermsDownload />
-      {'Are you sure you want to issue this library card?'}
+      {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to issue this library card?'}
     </div>
   );
   const title = 'Issue Library Card';
@@ -382,8 +381,6 @@ export default function SigningOfficialTable(props) {
     }
   };
 
-  const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
-
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
@@ -446,7 +443,7 @@ export default function SigningOfficialTable(props) {
         users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
         institutions={[]} //pass in empty array to force modal to hide institution dropdown
         modalType="add"
-        lcaContent={lcaContent} />
+        lcaContent={null} />
       <ConfirmationModal
         showConfirmation={showConfirmation}
         closeConfirmation={() => setShowConfirmation(false)}
@@ -456,7 +453,7 @@ export default function SigningOfficialTable(props) {
         message={confirmType === confirmModalType.delete
           ? <div>{confirmationModalMsg}</div>
           // Library Card Agreement Text
-          : <div>{lcaContent}{confirmationModalMsg}</div>}
+          : <div>{confirmationModalMsg}</div>}
         header={`${selectedCard.userName || selectedCard.userEmail} - ${
           !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
         }`}
