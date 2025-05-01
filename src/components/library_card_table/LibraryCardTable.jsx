@@ -433,7 +433,6 @@ export default function LibraryCardTable(props) {
         users={users}
         card={currentCard}
         modalType={modalType}
-        lcaContent=''
       />
       <ConfirmationModal
         showConfirmation={showConfirmation}
