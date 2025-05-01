@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   NIHDataUseCertificationAgreement
-} from '../../src/components/external_docs/NIHDataUseCertificationAgreement';
+} from '../components/external_docs/NIHDataUseCertificationAgreement';
 import NihLibraryCardAgreementLink
   from '../assets/NIHLibraryCardAgreement08012024.pdf';
 import BroadLibraryCardAgreementLink

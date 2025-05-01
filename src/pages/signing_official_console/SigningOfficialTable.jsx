@@ -21,7 +21,7 @@ import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
 import {
   NIHDataUseCertificationAgreement
-} from '../../components/external_docs/NIHDataUseCertificationAgreement.js';
+} from '../../components/external_docs/NIHDataUseCertificationAgreement';
 
 //Styles specific to this table
 const styles = {
@@ -441,8 +441,7 @@ export default function SigningOfficialTable(props) {
         card={selectedCard}
         users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
         institutions={[]} //pass in empty array to force modal to hide institution dropdown
-        modalType="add"
-        lcaContent={null} />
+        modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}
         closeConfirmation={() => setShowConfirmation(false)}

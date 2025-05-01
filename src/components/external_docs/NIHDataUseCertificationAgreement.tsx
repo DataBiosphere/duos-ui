@@ -1,8 +1,8 @@
 import React from 'react';
 
 export type NIHDataUseCertificationAgreementProps = {
-    className: string | null
-    showDownloadIcon: boolean | null
+    className: string | undefined
+    showDownloadIcon: boolean | undefined
 }
 export const NIHDataUseCertificationAgreement = (props: NIHDataUseCertificationAgreementProps) => {
     const {className, showDownloadIcon} = props;
@@ -11,6 +11,6 @@ export const NIHDataUseCertificationAgreement = (props: NIHDataUseCertificationA
         href={'https://sharing.nih.gov/accessing-data/accessing-genomic-data/using-genomic-data-responsibly/nih-data-use-certification-agreement'}
         target={'_blank'}
         rel={'noreferrer'}
-        className={className ? className : ''}
+        className={className ?? className }
         >{showDownloadIcon && (<span className={'glyphicon glyphicon-download'}/>)} NIH Data Use Certification Agreement</a>)
 }

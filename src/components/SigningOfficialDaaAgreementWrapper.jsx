@@ -10,7 +10,7 @@ import { Styles } from '../libs/theme';
 import UsgOmbText from './UsgOmbText';
 import {
   NIHDataUseCertificationAgreement
-} from '../components/external_docs/NIHDataUseCertificationAgreement.js';
+} from '../components/external_docs/NIHDataUseCertificationAgreement';
 
 export const SigningOfficialDaaAgreementWrapper = (props) => {
   const {

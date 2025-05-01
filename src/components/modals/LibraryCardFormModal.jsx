@@ -80,7 +80,7 @@ const FormFieldRow = (props) => {
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
+  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType } = props;
 
   const [card, setCard] = useState(props.card);
 
