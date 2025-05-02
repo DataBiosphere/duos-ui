@@ -16,11 +16,12 @@ import {
 import LibraryCardFormModal from '../../components/modals/LibraryCardFormModal';
 import ConfirmationModal from '../../components/modals/ConfirmationModal';
 import { LibraryCard } from '../../libs/ajax/LibraryCard';
-import LcaMarkdown from '../../assets/LCA.md';
 import {LibraryCardAgreementTermsDownload} from '../../components/LibraryCardAgreementTermsDownload';
 import BroadLibraryCardAgreementLink from '../../assets/Library_Card_Agreement_2023_ApplicationVersion.pdf';
 import NihLibraryCardAgreementLink from '../../assets/NIHLibraryCardAgreement08012024.pdf';
-import ScrollableMarkdownContainer from '../../components/ScrollableMarkdownContainer';
+import {
+  NIHDataUseCertificationAgreement
+} from '../../components/external_docs/NIHDataUseCertificationAgreement';
 
 //Styles specific to this table
 const styles = {
@@ -93,7 +94,7 @@ const IssueLibraryCardButton = (props) => {
     <div>
       {/* LCA Terms Download */}
       <LibraryCardAgreementTermsDownload />
-      {'Are you sure you want to issue this library card?'}
+      {'By clicking \'Confirm\' you agree to the terms of the agreements above for this user. Are you sure you want to issue this library card?'}
     </div>
   );
   const title = 'Issue Library Card';
@@ -379,8 +380,6 @@ export default function SigningOfficialTable(props) {
     }
   };
 
-  const lcaContent = ScrollableMarkdownContainer({markdown: LcaMarkdown});
-
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '112%', marginLeft: '-6%' }}>
@@ -409,7 +408,7 @@ export default function SigningOfficialTable(props) {
             <div style={Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
               fontSize: '16px',
             })}>
-              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad</a> and <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH</a> Library Card Agreements and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
+              Issuing Library Card privileges is done in accordance with the <a target="_blank" rel="noreferrer" href={BroadLibraryCardAgreementLink}>Broad Library Card Agreement</a>, <a target="_blank" rel="noreferrer" href={NihLibraryCardAgreementLink}>NIH Library Card Agreement</a>, and <NIHDataUseCertificationAgreement/> and attests that researchers are a permanent employee of your institution at a level equivalent to, at a minimum, a tenure-track professor or senior researcher. This does <span style={{ fontWeight: 600 }}>not</span> include lab technicians or trainees, e.g., post-docs or graduate students. You also attest this Researcher will have oversight responsibility for others named on their DARs who will be granted access to the data.
             </div>
           </div>
         </div>
@@ -442,8 +441,7 @@ export default function SigningOfficialTable(props) {
         card={selectedCard}
         users={filter(onlyResearchersWithoutCardFilter(signingOfficial.institutionId))(researchers)}
         institutions={[]} //pass in empty array to force modal to hide institution dropdown
-        modalType="add"
-        lcaContent={lcaContent} />
+        modalType="add" />
       <ConfirmationModal
         showConfirmation={showConfirmation}
         closeConfirmation={() => setShowConfirmation(false)}
@@ -453,7 +451,7 @@ export default function SigningOfficialTable(props) {
         message={confirmType === confirmModalType.delete
           ? <div>{confirmationModalMsg}</div>
           // Library Card Agreement Text
-          : <div>{lcaContent}{confirmationModalMsg}</div>}
+          : <div>{confirmationModalMsg}</div>}
         header={`${selectedCard.userName || selectedCard.userEmail} - ${
           !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
         }`}

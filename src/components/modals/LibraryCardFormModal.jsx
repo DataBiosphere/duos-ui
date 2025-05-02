@@ -67,6 +67,7 @@ const FormFieldRow = (props) => {
           options={dropdownOptions}
           placeholder='Select or type a new user email'
           isOptionSelected={() => false} //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
+          /* eslint-disable-next-line no-constant-binary-expression */
           getOptionLabel={(option) => `${option.displayName || 'New User'} (${option.email || 'No email provided'})` || option.email}
         />
       </div>;
@@ -79,7 +80,7 @@ const FormFieldRow = (props) => {
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType, lcaContent} = props;
+  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType } = props;
 
   const [card, setCard] = useState(props.card);
 
@@ -140,10 +141,8 @@ export default function LibraryCardFormModal(props) {
           {modalType === 'add' ? 'Add Library Card' : 'Update Library Card'}
         </div>
         <div style={{ borderBottom: '1px solid #1FB50' }} />
-        {/* Library Card Agreement Text */}
-        {lcaContent}
         {/* LCA Terms Download */}
-        {LibraryCardAgreementTermsDownload}
+        <LibraryCardAgreementTermsDownload/>
         {/* users dropdown */}
         <FormFieldRow
           card={card}
@@ -163,11 +162,14 @@ export default function LibraryCardFormModal(props) {
             />
           )
         }
+        <div style={{ display:'inline-block' }}>
+          By clicking {modalType === 'add'? "'ADD'" : "'UPDATE'" } you agree to the terms of the agreements above for this user.
+        </div>
         <div
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
         >
           <SimpleButton
             onClick={modalType === 'add' ? () => createOnClick(card) : () => updateOnClick(card)}

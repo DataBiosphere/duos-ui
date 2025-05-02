@@ -120,7 +120,7 @@ const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfir
     libraryCardsCopy.splice(targetIndex, 1);
     setLibraryCards(libraryCardsCopy);
     setShowConfirmation(false);
-  } catch(error) {
+  } catch(_error) {
     Notifications.showError('Error: Failed to delete library card');
   }
 };
@@ -211,7 +211,7 @@ export default function LibraryCardTable(props) {
           filteredCards
         );
         setVisibleCards(visibleList);
-      } catch (error) {
+      } catch (_error) {
         Notifications.showError({ text: 'Error updating Library Card table' });
       }
     };
@@ -293,10 +293,10 @@ export default function LibraryCardTable(props) {
         (institution) => institution.id === payload.institutionId
       )(institutions);
       updatedCard.institution = institution;
-      let filteredCopy = cloneDeep(filteredCards);
-      let libraryCopy = cloneDeep(libraryCards);
-      let filteredIndex = findIndex((card) => card.id === id)(filteredCards);
-      let originalIndex = findIndex((card) => card.id === id)(libraryCopy);
+      const filteredCopy = cloneDeep(filteredCards);
+      const libraryCopy = cloneDeep(libraryCards);
+      const filteredIndex = findIndex((card) => card.id === id)(filteredCards);
+      const originalIndex = findIndex((card) => card.id === id)(libraryCopy);
       filteredCopy[filteredIndex] = updatedCard;
       libraryCopy[originalIndex] = updatedCard;
       setFilteredCards(filteredCopy);
@@ -307,7 +307,7 @@ export default function LibraryCardTable(props) {
           updatedCard.userName || updatedCard.userEmail
         }'s library card successfully updated`,
       });
-    } catch (error) {
+    } catch (_error) {
       setShowModal(false);
       Notifications.showError({ text: 'Error: Failed to update library card' });
     }
@@ -343,7 +343,7 @@ export default function LibraryCardTable(props) {
         setLibraryCards(updatedList);
         setShowModal(false);
       }
-    } catch (error) {
+    } catch (_error) {
       setShowModal(false);
       Notifications.showError({
         text: 'Error: Failed to create new library card',
@@ -433,7 +433,6 @@ export default function LibraryCardTable(props) {
         users={users}
         card={currentCard}
         modalType={modalType}
-        lcaContent=''
       />
       <ConfirmationModal
         showConfirmation={showConfirmation}
