@@ -21,6 +21,7 @@ const duosUser = {
   isMember: false,
   isResearcher: false,
   isSigningOfficial: false,
+  isServiceAccount: false,
   roles: [{
     name: 'Admin'
   }]
