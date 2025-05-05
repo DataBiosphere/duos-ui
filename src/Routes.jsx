@@ -7,6 +7,7 @@ import ManageDac from './pages/manage_dac/ManageDac';
 import ManageEditDac from './pages/manage_dac/ManageEditDac';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/dar_application/DataAccessRequestApplication';
+import ProgressReportApplication from './pages/dar_progress_report/ProgressReportApplication.jsx';
 import DACDatasets from './pages/DACDatasets';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
@@ -88,6 +89,8 @@ const Routes = (props) => (
     {/* Order is important for processing links with embedded dataRequestIds */}
     <AuthenticatedRoute path='/dar_application/:dataRequestId' component={DataAccessRequestApplication} props={Object.assign({}, props, {draftDar: true})}
       rolesAllowed={[USER_ROLES.researcher]} />
+    <AuthenticatedRoute path='/progress_report/:dataRequestId' component={ProgressReportApplication} props={Object.assign({}, props)}
+        rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path='/signing_official_console/researchers' component={ensureSoHasDaaAcknowledgement(SigningOfficialResearchers, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     {DAAUtils.isEnabled() && <AuthenticatedRoute path='/signing_official_console/researchers_daa_associations' component={ensureSoHasDaaAcknowledgement(ManageResearcherDAAs, true)} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />}
