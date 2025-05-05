@@ -1,55 +1,6 @@
-/* eslint-disable no-undef */
-import {getSearchFilterFunctions, formatDate, darCollectionUtils, processElectionStatus} from '../../../src/libs/utils';
+import {getSearchFilterFunctions, formatDate, processElectionStatus} from '../../../src/libs/utils';
 import {toLower} from 'lodash/fp';
 import { forEach } from 'lodash';
-const { determineCollectionStatus } = darCollectionUtils;
-
-const collectionWithMixedElectionStatuses = {
-  dars: {
-    0: {
-      elections: {
-        0: {
-          status: 'Closed',
-          electionType: 'DataAccess',
-          datasetId: 100
-        }
-      }
-    },
-    1: {
-      elections: {
-        1: {
-          status: 'Open',
-          electionType: 'DataAccess',
-          datasetId: 200,
-          votes: {0: {type: 'DAC'}}
-        }
-      }
-    }
-  }
-};
-
-const collectionWithSameElectionStatus = {
-  dars: {
-    0: {
-      elections: {
-        0: {
-          status: 'Closed',
-          electionType: 'DataAccess',
-          datasetId: 100
-        }
-      }
-    },
-    1: {
-      elections: {
-        1: {
-          status: 'Closed',
-          electionType: 'DataAccess',
-          datasetId: 200
-        }
-      }
-    }
-  }
-};
 
 const sampleLCList = [
   {
@@ -143,7 +94,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(darCollectionSummaryOne.name, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on institution', () => {
@@ -151,7 +102,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(institutionTerm, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on dar code', () => {
@@ -159,7 +110,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(darTerm, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on submission date', () => {
@@ -168,7 +119,7 @@ describe('Dar Collection Search Filter', () => {
     expect(filteredList.length).to.equal(1);
     expect(formatDate(filteredList[0].submissionDate)).to.equal(formattedSubmissionDate);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on researcher name', () => {
@@ -177,7 +128,7 @@ describe('Dar Collection Search Filter', () => {
     expect(filteredList.length).to.equal(1);
     expect(filteredList[0].researcherName).to.equal(researcherTerm);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 });
 
@@ -352,107 +303,6 @@ describe('Researcher Search Filter (SO Console)', () => {
     forEach(originalResearcher, (value, key) => {
       expect(filteredResearcher[key]).equals(value);
     });
-  });
-});
-
-describe('Dar Collection determineCollectionStatus', () => {
-  it('Returns an Unreviewed status when there are no elections but the collection contains relevant datasets', () => {
-    const collection = {
-      dars: {
-        0: {data: {datasetIds: [100]}}
-      }
-    };
-    const relevantDatasets = [{datasetId: 100}];
-    const status = determineCollectionStatus(collection, relevantDatasets);
-    expect(toLower(status)).equals('unreviewed');
-  });
-
-  it('Returns empty string when there are no elections and the collection does not contains relevant datasets', () => {
-    const collection = {
-      dars: {
-        0: {
-          data: {datasetIds: [100]},
-          datasetIds: [100]
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection);
-    expect(toLower(status)).equals('');
-  });
-
-  it('Filters out RP elections when determining collection status and relevant datasets is null', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Closed',
-              electionType: 'DataAccess',
-              datasetId: 100
-            },
-            1: {
-              status: 'Open',
-              electionType: 'RP',
-              datasetId: 100
-            },
-          }
-        }
-      }
-    };
-    const status = determineCollectionStatus(collection);
-    expect(toLower(status)).equals('closed: 1');
-  });
-
-  it('Filters out RP elections when determining collection status and relevant datasets is non-null', () => {
-    const collection = {
-      dars: {
-        0: {
-          elections: {
-            0: {
-              status: 'Closed',
-              electionType: 'DataAccess',
-              datasetId: 100
-            },
-            1: {
-              status: 'Open',
-              electionType: 'RP',
-              datasetId: 100
-            },
-          }
-        }
-      }
-    };
-    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
-    const status = determineCollectionStatus(collection, relevantDatasets);
-    expect(toLower(status)).equals('denied');
-  });
-
-  it('Only considers DARs for relevant datasets when determining collection status', () => {
-    const relevantDatasets = [{datasetId: 100}];
-    const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
-    expect(toLower(status)).equals('denied');
-  });
-
-  it('Does not limit DARs used to determine collection status when relevant datasets is null', () => {
-    const status = determineCollectionStatus(collectionWithMixedElectionStatuses);
-    expect(toLower(status)).equals('closed: 1\nopen: 1');
-  });
-
-  it('Increases status count when relevant datasets is null and multiple elections have the same status', () => {
-    const status = determineCollectionStatus(collectionWithSameElectionStatus);
-    expect(toLower(status)).equals('closed: 2');
-  });
-
-  it('Appends together statuses when relevant datasets is non-null and elections have different statuses', () => {
-    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
-    const status = determineCollectionStatus(collectionWithMixedElectionStatuses, relevantDatasets);
-    expect(toLower(status)).equals('denied, open');
-  });
-
-  it('Only returns unique statuses when relevant datasets is non-null and multiple elections have the same status', () => {
-    const relevantDatasets = [{datasetId: 100}, {datasetId: 200}];
-    const status = determineCollectionStatus(collectionWithSameElectionStatus, relevantDatasets);
-    expect(toLower(status)).equals('denied');
   });
 });
 
