@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import {getSearchFilterFunctions, formatDate, processElectionStatus} from '../../../src/libs/utils';
 import {toLower} from 'lodash/fp';
 import { forEach } from 'lodash';
@@ -95,7 +94,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(darCollectionSummaryOne.name, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on institution', () => {
@@ -103,7 +102,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(institutionTerm, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on dar code', () => {
@@ -111,7 +110,7 @@ describe('Dar Collection Search Filter', () => {
     const filteredList = collectionSearchFn(darTerm, summaryList);
     expect(filteredList.length).to.equal(1);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on submission date', () => {
@@ -120,7 +119,7 @@ describe('Dar Collection Search Filter', () => {
     expect(filteredList.length).to.equal(1);
     expect(formatDate(filteredList[0].submissionDate)).to.equal(formattedSubmissionDate);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 
   it('filters on researcher name', () => {
@@ -129,7 +128,7 @@ describe('Dar Collection Search Filter', () => {
     expect(filteredList.length).to.equal(1);
     expect(filteredList[0].researcherName).to.equal(researcherTerm);
     const emptyList = collectionSearchFn('invalid', summaryList);
-    expect(emptyList).to.be.empty;
+    expect(emptyList.length).to.equal(0);
   });
 });
 
