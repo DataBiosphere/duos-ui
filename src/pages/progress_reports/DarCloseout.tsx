@@ -79,7 +79,7 @@ export default function DarCloseout(_props: DarCloseoutProps): React.JSX.Element
                         {formState.closeoutOther === true &&
                             <div style={{ marginTop: '20px' }}>
                                 <FormField
-                                    id='dmiDescription'
+                                    id='closeoutOtherContext'
                                     type={FormFieldTypes.TEXTAREA}
                                     placeholder='Please provide context for the other reason.'
                                     rows={6}
