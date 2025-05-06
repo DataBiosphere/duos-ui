@@ -310,15 +310,20 @@ const DataAccessRequestApplication = (props) => {
 
   useEffect(() => {
     if (props.readOnlyMode) {
-      setApplicationTabs(
-          reverseOrderedDARs.map((_dar, index) => {
+      let appTabs = []
+      if(props.createProgressReport){
+        appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, showStep: false}]
+      }
+      setApplicationTabs([...appTabs,
+          ...reverseOrderedDARs.map((_dar, index) => {
             const whichPRIsThis = reverseOrderedDARs.length - index - 1;
             const isLast = index === reverseOrderedDARs.length - 1;
             const itemLabel = isLast ? formData?.darCode : 'DAR Update ' + whichPRIsThis;
             return {name: itemLabel, showStep: false};
-          }));
+          })]);
     }
-  }, [reverseOrderedDARs, formData?.darCode, props.readOnlyMode])
+  }, [reverseOrderedDARs, formData?.darCode, props.readOnlyMode, props.createProgressReport]);
+
   useEffect(() => {
     init();
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
@@ -605,6 +610,16 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
+            {props.createProgressReport && (
+                <div className={'dar-steps'}>
+                  <h3>{'DAR Update ' + reverseOrderedDARs?.length}</h3>
+                  <div className='step-container'>
+                    <h4>Submit a progress report</h4>
+                    <br/>
+                    <h4>PLACEHOLDER FORM</h4>
+                  </div>
+                </div>
+            )}
             {reverseOrderedDARs.length > 1  && (
                 <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
                   <h3>Previous Updates</h3>
