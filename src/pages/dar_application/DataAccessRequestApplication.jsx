@@ -605,6 +605,33 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
+            {reverseOrderedDARs.length > 1  && (
+                <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
+                  <h3>Previous Updates</h3>
+                  {reverseOrderedDARs.map((dar, index) => {
+                    if ((index + 1 !== reverseOrderedDARs.length)) {
+                      return (
+                          <ConditionalAccordian
+                              key={`dar-${index}`}
+                              condition={props.readOnlyMode}
+                              title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}>
+                            <div className='step-container'>
+                              <div>
+                                <h4>Progress Report Summary</h4>
+                                {dar.data.progressReportSummary}
+                              </div>
+                              <div>
+                                <h4>Intellectual Property Summary</h4>
+                                {dar.data.intellectualPropertySummary}
+                              </div>
+                            </div>
+                          </ConditionalAccordian>);
+                    }
+                  })
+                  }
+                </div>
+            )}
+
             <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {props.readOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
               <div className='step-container'>
