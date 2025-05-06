@@ -192,6 +192,7 @@ const DataAccessRequestApplication = (props) => {
     setUploadedIrbDocument(document);
   };
 
+  const [reverseOrderedDARs, setReverseOrderedDARs] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [selectedDatasets, setSelectedDatasets] = useState([]);
   const [dataUseTranslations, setDataUseTranslations] = useState([]);
@@ -271,10 +272,28 @@ const DataAccessRequestApplication = (props) => {
       // Besides the datasets, DARs split off from the collection should have the same formData
       const collection = await Collections.getCollectionById(collectionId);
       const { dars, datasets } = collection;
+      // TS thinks that collection.dars is an object, but it is a map
+      const darMap = new Map(Object.entries(dars));
+      setReverseOrderedDARs(
+          [...darMap.values()].sort((a, b) => b.id - a.id)
+      );
       const darReferenceId = head(keys(dars));
+      // TODO - future improvement
+      //  in theory, we should be able to replace this call with the info returned from the collection
+      // form data = the first DAR's data
       formData = await DAR.getPartialDarRequest(darReferenceId);
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
+
+      if (props.readOnlyMode) {
+        setApplicationTabs(
+          reverseOrderedDARs.map((_dar, index) => {
+            const whichPRIsThis = reverseOrderedDARs.length - index - 1;
+            const isLast = index === reverseOrderedDARs.length - 1;
+            const itemLabel = isLast ? collection?.darCode : 'DAR Update ' + whichPRIsThis;
+            return {"name": itemLabel, "showStep": false};
+          }));
+      }
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
