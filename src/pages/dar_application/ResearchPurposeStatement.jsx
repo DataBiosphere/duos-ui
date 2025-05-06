@@ -64,7 +64,6 @@ export default function ResearchPurposeStatement(props) {
   return (
     <div className="dar-step-card">
       <fieldset disabled={!isEmpty(darCode)}>
-        <h2>Step 3: Research Purpose Statement</h2>
 
         <div className="form-group">
           <h3>In order to ensure appropriate review, please answer the questions below:</h3>

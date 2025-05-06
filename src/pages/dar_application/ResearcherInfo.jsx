@@ -83,8 +83,6 @@ export default function ResearcherInfo(props) {
           </div>
         )}
 
-        <h2>Step 1: Researcher Information</h2>
-
         <div className='dar-application-row'>
           <FormField
             id='researcherName'

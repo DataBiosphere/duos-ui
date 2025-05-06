@@ -33,6 +33,7 @@ import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
+import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -51,6 +52,9 @@ const fetchAllDatasets = async (dsIds) => {
 const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
+
+const ConditionalAccordian = ({ condition, title, children }) => (
+    condition ? ( <Accordion><AccordionSummary><h2>{title}</h2></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
 
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
@@ -136,7 +140,7 @@ const DataAccessRequestApplication = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAttested, setIsAttested] = useState(false);
 
-  const [applicationTabs, setApplicationTabs] = useState(ApplicationTabs);
+  const [applicationTabs, setApplicationTabs] = useState([]);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formFieldChange = useCallback(({ key, value }) => {
@@ -601,6 +605,9 @@ const DataAccessRequestApplication = (props) => {
 
             <div className='dar-steps'>
               <div className='step-container'>
+                <ConditionalAccordian
+                    condition={props.readOnlyMode}
+                    title="Step 1: Researcher Information">
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
@@ -621,38 +628,47 @@ const DataAccessRequestApplication = (props) => {
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
                   setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
                 />
+                  </ConditionalAccordian>
               </div>
 
               <div className='step-container'>
-                <DataAccessRequest
-                  formData={formData}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  includeInstructions={!props.readOnlyMode}
-                  datasets={datasets}
-                  validation={formValidation.darErrors}
-                  formValidationChange={(val) => formValidationChange('darErrors', val)}
-                  dataUseTranslations={dataUseTranslations}
-                  formFieldChange={formFieldChange}
-                  batchFormFieldChange={batchFormFieldChange}
-                  uploadedCollaborationLetter={uploadedCollaborationLetter}
-                  updateCollaborationLetter={updateCollaborationLetter}
-                  uploadedIrbDocument={uploadedIrbDocument}
-                  updateUploadedIrbDocument={updateIrbDocument}
-                  setDatasets={setDatasets}
-                  setSelectedDatasets={setSelectedDatasets}
-                  draftDar={props.draftDar}
-                />
+                <ConditionalAccordian
+                    condition={props.readOnlyMode}
+                    title="Step 2: Data Access Request">
+                  <DataAccessRequest
+                    formData={formData}
+                    readOnlyMode={props.readOnlyMode || isAttested}
+                    includeInstructions={!props.readOnlyMode}
+                    datasets={datasets}
+                    validation={formValidation.darErrors}
+                    formValidationChange={(val) => formValidationChange('darErrors', val)}
+                    dataUseTranslations={dataUseTranslations}
+                    formFieldChange={formFieldChange}
+                    batchFormFieldChange={batchFormFieldChange}
+                    uploadedCollaborationLetter={uploadedCollaborationLetter}
+                    updateCollaborationLetter={updateCollaborationLetter}
+                    uploadedIrbDocument={uploadedIrbDocument}
+                    updateUploadedIrbDocument={updateIrbDocument}
+                    setDatasets={setDatasets}
+                    setSelectedDatasets={setSelectedDatasets}
+                    draftDar={props.draftDar}
+                  />
+                </ConditionalAccordian>
               </div>
 
               <div className='step-container'>
-                <ResearchPurposeStatement
-                  darCode={formData.darCode}
-                  readOnlyMode={props.readOnlyMode || isAttested}
-                  validation={formValidation.rusErrors}
-                  formValidationChange={(val) => formValidationChange('rusErrors', val)}
-                  formFieldChange={formFieldChange}
-                  formData={formData}
-                />
+                <ConditionalAccordian
+                    condition={props.readOnlyMode}
+                    title="Step 3: Research Purpose Statement">
+                  <ResearchPurposeStatement
+                    darCode={formData.darCode}
+                    readOnlyMode={props.readOnlyMode || isAttested}
+                    validation={formValidation.rusErrors}
+                    formValidationChange={(val) => formValidationChange('rusErrors', val)}
+                    formFieldChange={formFieldChange}
+                    formData={formData}
+                  />
+                </ConditionalAccordian>
               </div>
 
               {!props.readOnlyMode ?
