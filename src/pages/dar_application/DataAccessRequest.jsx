@@ -142,7 +142,6 @@ export default function DataAccessRequest(props) {
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
       <div className={'dar-step-card'}>
-        <h2>Step 2: Data Access Request</h2>
 
         {DAAUtils.isEnabled() ?
           <div>
