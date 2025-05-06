@@ -291,7 +291,7 @@ const DataAccessRequestApplication = (props) => {
             const whichPRIsThis = reverseOrderedDARs.length - index - 1;
             const isLast = index === reverseOrderedDARs.length - 1;
             const itemLabel = isLast ? collection?.darCode : 'DAR Update ' + whichPRIsThis;
-            return {"name": itemLabel, "showStep": false};
+            return {name: itemLabel, showStep: false};
           }));
       }
     }
