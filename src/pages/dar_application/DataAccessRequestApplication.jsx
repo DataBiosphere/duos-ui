@@ -22,6 +22,7 @@ import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } fro
 import './DataAccessRequestApplication.css';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {
   validateDARFormData
@@ -54,7 +55,7 @@ const validationFailed = (validation) => {
 };
 
 const ConditionalAccordian = ({ condition, title, children }) => (
-    condition ? ( <Accordion><AccordionSummary><h2>{title}</h2></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
+    condition ? ( <Accordion sx={{ 'backgroundColor': '#b8cdd326', 'margin': '16px 0' }}><AccordionSummary expandIcon={<ExpandMoreIcon fontSize="medium"/>}><h3>{title}</h3></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
 
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
@@ -288,16 +289,6 @@ const DataAccessRequestApplication = (props) => {
       formData = await DAR.getPartialDarRequest(darReferenceId);
       // This is a collection, so we need to get the datasets and datasetIds from the collection
       formData.datasetIds = map(ds => get('datasetId')(ds))(datasets);
-
-      if (props.readOnlyMode) {
-        setApplicationTabs(
-          reverseOrderedDARs.map((_dar, index) => {
-            const whichPRIsThis = reverseOrderedDARs.length - index - 1;
-            const isLast = index === reverseOrderedDARs.length - 1;
-            const itemLabel = isLast ? collection?.darCode : 'DAR Update ' + whichPRIsThis;
-            return {name: itemLabel, showStep: false};
-          }));
-      }
     }
     else if (!isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
@@ -317,6 +308,17 @@ const DataAccessRequestApplication = (props) => {
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
   }, [onScroll, props.match.params, researcher]);
 
+  useEffect(() => {
+    if (props.readOnlyMode) {
+      setApplicationTabs(
+          reverseOrderedDARs.map((_dar, index) => {
+            const whichPRIsThis = reverseOrderedDARs.length - index - 1;
+            const isLast = index === reverseOrderedDARs.length - 1;
+            const itemLabel = isLast ? formData?.darCode : 'DAR Update ' + whichPRIsThis;
+            return {name: itemLabel, showStep: false};
+          }));
+    }
+  }, [reverseOrderedDARs, formData?.darCode, props.readOnlyMode])
   useEffect(() => {
     init();
     NotificationService.getBannerObjectById('eRACommonsOutage').then((notificationData) => {
@@ -538,8 +540,8 @@ const DataAccessRequestApplication = (props) => {
               className={(formData.darCode !== null ?
                 'col-lg-12 col-md-12 col-sm-9 ' : 'col-lg-12 col-md-12 col-sm-12 ')}>
               <PageHeading
-                title='Data Access Request Application'
-                description={props.readOnlyMode ? '' : 'Please complete the fields below to request access to data.'}
+                title={props.readOnlyMode ? formData.darCode : 'Data Access Request Application'}
+                description={props.readOnlyMode ? formData.projectTitle : 'Please complete the fields below to request access to data.'}
               />
             </div>
             {formData.darCode !== null &&
@@ -603,7 +605,8 @@ const DataAccessRequestApplication = (props) => {
               </div>
             </ConfirmationDialog>
 
-            <div className='dar-steps'>
+            <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
+              {props.readOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
               <div className='step-container'>
                 <ConditionalAccordian
                     condition={props.readOnlyMode}
