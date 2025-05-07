@@ -36,6 +36,7 @@ import ReactMarkdown from 'react-markdown';
 import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
 import loadingImage from "../../images/loading-indicator.svg";
 import {ConditionalAccordian} from "../../components/forms/ConditionalAccordian";
+import {ProgressReportApplication} from "./ProgressReportApplication";
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -617,36 +618,26 @@ const DataAccessRequestApplication = (props) => {
             </ConfirmationDialog>
 
             {props.createProgressReport && (
-                <div className={'dar-steps'}>
-                  <h3>{'DAR Update ' + reverseOrderedDARs?.length}</h3>
-                  <div className='step-container'>
-                    <h4>Submit a progress report</h4>
-                    <br/>
-                    <h4>PLACEHOLDER FORM</h4>
-                  </div>
+                <div className='dar-steps'>
+                  <ConditionalAccordian
+                      condition={false}
+                      title={`DAR Report ${reverseOrderedDARs.length}`}>
+                    <ProgressReportApplication readOnlyMode={false}/>
+                  </ConditionalAccordian>
                 </div>
             )}
-            {reverseOrderedDARs.length > 1  && (
-                <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
+            {props.readOnlyMode && reverseOrderedDARs.length > 1  && (
+                <div className='dar-summary'>
                   <h3>Previous Updates</h3>
                   {reverseOrderedDARs.map((dar, index) => {
                     if ((index + 1 !== reverseOrderedDARs.length)) {
                       return (
                           <ConditionalAccordian
                               key={`dar-${index}`}
-                              condition={props.readOnlyMode}
+                              condition={true}
                               title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                               defaultExpanded={index === 0}>
-                            <div className='step-container'>
-                              <div>
-                                <h4>Progress Report Summary</h4>
-                                {dar.data.progressReportSummary}
-                              </div>
-                              <div>
-                                <h4>Intellectual Property Summary</h4>
-                                {dar.data.intellectualPropertySummary}
-                              </div>
-                            </div>
+                            <ProgressReportApplication readOnlyMode={true} dar={dar}  />
                           </ConditionalAccordian>);
                     }
                   })
