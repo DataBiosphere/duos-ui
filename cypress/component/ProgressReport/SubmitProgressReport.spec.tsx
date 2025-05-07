@@ -49,27 +49,6 @@ describe('SubmitProgressReport tests', () => {
     });
   });
 
-  it('Submit should succeed', () => {
-    cy.intercept('POST', '/api/dar/v2/progress_report/1', {
-      statusCode: 200,
-      body: {},
-    }).as('submitProgressReport');
-    mount(
-        <SubmitProgressReport
-            progressReport={{}}
-            parentReferenceId="1"
-            onSuccess={() => {
-            }}
-            onCancel={() => {
-            }}
-        />
-    );
-    cy.get('[data-cy=pr-submit-button]').click();
-    cy.wait('@submitProgressReport').then((interception) => {
-      assert(interception?.response?.statusCode === 200, 'Submit was successful');
-    });
-  });
-
   it('On Submit handler should be called after successful submit', () => {
     const functionSpy = {
       successHandler: () => {console.log('successHandler')}
