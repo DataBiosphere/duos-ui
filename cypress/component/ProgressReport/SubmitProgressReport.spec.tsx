@@ -51,7 +51,9 @@ describe('SubmitProgressReport tests', () => {
 
   it('On Submit handler should be called after successful submit', () => {
     const functionSpy = {
-      successHandler: () => {console.log('successHandler')}
+      successHandler: () => {
+        console.log('successHandler')
+      }
     }
     cy.spy(functionSpy, 'successHandler').as('successHandler');
     cy.intercept('POST', '/api/dar/v2/progress_report/1', {
@@ -63,7 +65,8 @@ describe('SubmitProgressReport tests', () => {
             progressReport={{}}
             parentReferenceId="1"
             onSuccess={functionSpy.successHandler}
-            onCancel={() => {}}
+            onCancel={() => {
+            }}
         />
     );
     cy.get('[data-cy=pr-submit-button]').should('exist');
@@ -73,14 +76,17 @@ describe('SubmitProgressReport tests', () => {
 
   it('On Cancel handler should be called after cancel button clicked', () => {
     const functionSpy = {
-      cancelHandler: () => {console.log('cancelHandler')}
+      cancelHandler: () => {
+        console.log('cancelHandler')
+      }
     }
     cy.spy(functionSpy, 'cancelHandler').as('cancelHandler');
     mount(
         <SubmitProgressReport
             progressReport={{}}
             parentReferenceId="1"
-            onSuccess={() => {}}
+            onSuccess={() => {
+            }}
             onCancel={functionSpy.cancelHandler}
         />
     );
@@ -112,6 +118,4 @@ describe('SubmitProgressReport tests', () => {
       cy.get('[data-cy=notification-alert]').contains('Test Error');
     });
   });
-
-
 });

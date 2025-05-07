@@ -53,5 +53,4 @@ export default function SubmitProgressReport(props: SubmitProgressReportProps) {
         </button>
       </div>
   )
-
 }
