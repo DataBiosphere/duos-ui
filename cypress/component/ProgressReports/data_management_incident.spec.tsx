@@ -2,9 +2,13 @@ import React from 'react';
 import { mount } from 'cypress/react';
 import DataManagementIncident from '../../../src/pages/progress_reports/DataManagementIncident';
 
+const props = {
+  state: 'step3',
+};
+
 describe('Data Management Incident - Component Tests', () => {
   beforeEach(() => {
-    mount(<DataManagementIncident />);
+    mount(<DataManagementIncident {...props}/>);
   });
 
   it('renders the component correctly', () => {
