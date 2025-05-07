@@ -22,7 +22,6 @@ import { assign, cloneDeep, get, head, isEmpty, isNil, isString, keys, map } fro
 import './DataAccessRequestApplication.css';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import {
   validateDARFormData
@@ -34,9 +33,9 @@ import {DAAUtils} from '../../utils/DAAUtils';
 import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
-import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
 import loadingImage from "../../images/loading-indicator.svg";
+import {ConditionalAccordian} from "../../components/forms/ConditionalAccordian";
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -55,9 +54,6 @@ const fetchAllDatasets = async (dsIds) => {
 const validationFailed = (validation) => {
   return Object.keys(validation).some((key) => !isEmpty(validation[key]));
 };
-
-const ConditionalAccordian = ({ condition, title, children }) => (
-    condition ? ( <Accordion sx={{ 'backgroundColor': '#b8cdd326', 'margin': '16px 0' }} defaultExpanded={true}><AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: 40 }}/>}><h3 style={{margin:'5px'}}>{title}</h3></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
 
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
@@ -639,7 +635,8 @@ const DataAccessRequestApplication = (props) => {
                           <ConditionalAccordian
                               key={`dar-${index}`}
                               condition={props.readOnlyMode}
-                              title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}>
+                              title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
+                              defaultExpanded={index === 0}>
                             <div className='step-container'>
                               <div>
                                 <h4>Progress Report Summary</h4>
@@ -662,7 +659,8 @@ const DataAccessRequestApplication = (props) => {
               <div className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
                 <ConditionalAccordian
                     condition={props.readOnlyMode}
-                    title="Step 1: Researcher Information">
+                    title="Step 1: Researcher Information"
+                    defaultExpanded={reverseOrderedDARs.length === 1}>
                 <ResearcherInfo
                   completed={!isNil(get('institutionId', researcher))}
                   readOnlyMode={props.readOnlyMode || isAttested}
