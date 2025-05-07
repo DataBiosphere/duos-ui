@@ -243,7 +243,7 @@ const DataAccessRequestApplication = (props) => {
     }
 
     setStep(newStep);
-  }, []);
+  }, [applicationTabs]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -637,7 +637,7 @@ const DataAccessRequestApplication = (props) => {
                               condition={true}
                               title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                               defaultExpanded={index === 0}>
-                            <ProgressReportApplication readOnlyMode={true} dar={dar}  />
+                            <ProgressReportApplication readOnlyMode={true} dar={dar?.data}  />
                           </ConditionalAccordian>);
                     }
                   })

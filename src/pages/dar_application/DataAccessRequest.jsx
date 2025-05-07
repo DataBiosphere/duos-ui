@@ -61,7 +61,7 @@ const searchDatasets = (query, callback, currentDatasets) => {
         ... ds
       };
     });
-    let options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
+    const options = processedDatasets.filter((ds) => !currentDatasetIds.includes(ds.datasetId)).map(function (item) {
       return formatSearchDataset(item);
     });
     callback(options);
@@ -98,7 +98,7 @@ export default function DataAccessRequest(props) {
     includeInstructions,
     formValidationChange,
     ariaLevel = 2,
-    draftDar
+    _draftDar
   } = props;
 
   const irbProtocolExpiration = formData.irbProtocolExpiration || newIrbDocumentExpirationDate();
@@ -113,7 +113,7 @@ export default function DataAccessRequest(props) {
   };
 
   const primaryChange = ({key, value}) => {
-    let newFormData = {
+    const newFormData = {
       diseases: null,
       hmb: null,
       poa: null,
@@ -122,7 +122,7 @@ export default function DataAccessRequest(props) {
     };
 
     // ensure that non visible fields are unselected
-    for (var key0 in newFormData) {
+    for (const key0 in newFormData) {
       if (key === key0) {
         newFormData[key0] = value;
         break;
