@@ -62,11 +62,11 @@ export default function ResearchPurposeStatement(props) {
   };
 
   return (
-    <div className="dar-step-card">
+    <div className={readOnlyMode ? 'dar-accordian-step-card' : 'dar-step-card'}>
       <fieldset disabled={!isEmpty(darCode)}>
 
         <div className="form-group">
-          <h3>In order to ensure appropriate review, please answer the questions below:</h3>
+          <h3 style={{'marginTop': 0}}>In order to ensure appropriate review, please answer the questions below:</h3>
 
           <h4>I am proposing to:</h4>
 

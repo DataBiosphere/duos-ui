@@ -21,6 +21,10 @@
   padding: 20px 0px;
 }
 
+.dar-accordian-step-card {
+  margin-bottom: '2rem';
+}
+
 .rp-row {
   margin: 2rem 1rem;
   max-width: 80%;

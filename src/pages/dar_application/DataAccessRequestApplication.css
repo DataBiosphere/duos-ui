@@ -81,7 +81,7 @@ fieldset {
 fieldset[disabled] .btn-download-pdf {
   background: #eeeeee;
   color: #cccccc !important;
-  box-shadow: none;  
+  box-shadow: none;
 }
 
 fieldset[disabled] .btn-download-pdf,
@@ -113,6 +113,11 @@ fieldset[disabled] .regular-checkbox:before {
 
 .step-container {
   clear: both;
+}
+
+.accordian-step-container {
+  clear: both;
+  margin-top: 16px;
 }
 
 /* ------------------------------------- */

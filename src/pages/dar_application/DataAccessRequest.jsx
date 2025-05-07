@@ -14,6 +14,7 @@ import SelectableDatasets from './SelectableDatasets';
 import {DAAUtils} from '../../utils/DAAUtils';
 
 const titleStyle = { fontSize: '24px', fontWeight: 500, color: '#333333' };
+const noTopMarginStyle = { marginTop: '0', paddingTop: '0' };
 
 const formatOntologyForSelect = (ontology) => {
   return {
@@ -141,7 +142,7 @@ export default function DataAccessRequest(props) {
   return (
     // eslint-disable-next-line react/no-unknown-property
     <div datacy={'data-access-request'}>
-      <div className={'dar-step-card'}>
+      <div className={readOnlyMode ? 'dar-accordian-step-card' : 'dar-step-card'}>
 
         {DAAUtils.isEnabled() ?
           <div>
@@ -161,7 +162,7 @@ export default function DataAccessRequest(props) {
             isAsync={true}
             isMulti={true}
             title={'2.1 Select Dataset(s)'}
-            titleStyle={titleStyle}
+            titleStyle={readOnlyMode ? {...titleStyle, ...noTopMarginStyle} : titleStyle}
             validators={[FormValidators.REQUIRED]}
             validation={validation.datasetIds}
             onValidationChange={onValidationChange}

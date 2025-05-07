@@ -35,6 +35,8 @@ import {Metrics} from '../../libs/ajax/Metrics';
 import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
 import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
+import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
+import loadingImage from "../../images/loading-indicator.svg";
 const ApplicationTabs = [
   { name: 'Researcher Information' },
   { name: 'Data Access Request' },
@@ -55,7 +57,7 @@ const validationFailed = (validation) => {
 };
 
 const ConditionalAccordian = ({ condition, title, children }) => (
-    condition ? ( <Accordion sx={{ 'backgroundColor': '#b8cdd326', 'margin': '16px 0' }}><AccordionSummary expandIcon={<ExpandMoreIcon fontSize="medium"/>}><h3>{title}</h3></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
+    condition ? ( <Accordion sx={{ 'backgroundColor': '#b8cdd326', 'margin': '16px 0' }} defaultExpanded={true}><AccordionSummary expandIcon={<ExpandMoreIcon sx={{ fontSize: 40 }}/>}><h3 style={{margin:'5px'}}>{title}</h3></AccordionSummary><AccordionDetails>{children}</AccordionDetails></Accordion>) : (<div><h2>{title}</h2>{children}</div>));
 
 const DataAccessRequestApplication = (props) => {
   const [formData, setFormData] = useState({
@@ -230,7 +232,7 @@ const DataAccessRequestApplication = (props) => {
 
     const scrollPos = window.scrollY;
     const scrollBuffer = window.innerHeight * .25;
-    const sectionIndex = ApplicationTabs
+    const sectionIndex = applicationTabs
       .map((_tab, index) => document.getElementsByClassName('step-container')[index]?.offsetTop)
       .findIndex(scrollTop => scrollTop > scrollPos + scrollBuffer);
 
@@ -270,7 +272,6 @@ const DataAccessRequestApplication = (props) => {
   const init = useCallback(async () => {
     const { dataRequestId, collectionId } = props.match.params;
     let formData = {};
-    setIsLoading(false);
 
     if (!isNil(collectionId)) {
       // Review existing DAR application - retrieves all datasets in the collection
@@ -306,12 +307,14 @@ const DataAccessRequestApplication = (props) => {
 
     batchFormFieldChange(formData);
     window.addEventListener('scroll', onScroll); // eslint-disable-line -- codacy says event listeners are dangerous
+    setIsLoading(false);
   }, [onScroll, props.match.params, researcher]);
 
   useEffect(() => {
     if (props.readOnlyMode) {
       let appTabs = []
       if(props.createProgressReport){
+        // if we are creating a new progress report, we need to add another tab for the application
         appTabs = [{ name: 'DAR Update ' + reverseOrderedDARs.length, showStep: false}]
       }
       setApplicationTabs([...appTabs,
@@ -535,6 +538,13 @@ const DataAccessRequestApplication = (props) => {
   const { dataRequestId } = props.match.params;
   const eRACommonsDestination = isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
 
+  if (isLoading) {
+    return <SpinnerComponent
+        show={true}
+        name="loadingSpinner"
+        loadingImage={loadingImage}
+    />;
+  }
   return (
     <div>
       <div className={props.readOnlyMode ? 'application-information-page' : 'container'} style={{ padding: props.readOnlyMode ? '2% 3%' : '0 0 2%', backgroundColor: props.readOnlyMode ? 'white' : '' }}>
@@ -649,7 +659,7 @@ const DataAccessRequestApplication = (props) => {
 
             <div className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {props.readOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
-              <div className='step-container'>
+              <div className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
                 <ConditionalAccordian
                     condition={props.readOnlyMode}
                     title="Step 1: Researcher Information">
@@ -676,48 +686,48 @@ const DataAccessRequestApplication = (props) => {
                   </ConditionalAccordian>
               </div>
 
-              <div className='step-container'>
+              <div className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
                 <ConditionalAccordian
                     condition={props.readOnlyMode}
                     title="Step 2: Data Access Request">
                   <DataAccessRequest
-                    formData={formData}
-                    readOnlyMode={props.readOnlyMode || isAttested}
-                    includeInstructions={!props.readOnlyMode}
-                    datasets={datasets}
-                    validation={formValidation.darErrors}
-                    formValidationChange={(val) => formValidationChange('darErrors', val)}
-                    dataUseTranslations={dataUseTranslations}
-                    formFieldChange={formFieldChange}
-                    batchFormFieldChange={batchFormFieldChange}
-                    uploadedCollaborationLetter={uploadedCollaborationLetter}
-                    updateCollaborationLetter={updateCollaborationLetter}
-                    uploadedIrbDocument={uploadedIrbDocument}
-                    updateUploadedIrbDocument={updateIrbDocument}
-                    setDatasets={setDatasets}
-                    setSelectedDatasets={setSelectedDatasets}
-                    draftDar={props.draftDar}
+                      formData={formData}
+                      readOnlyMode={props.readOnlyMode || isAttested}
+                      includeInstructions={!props.readOnlyMode}
+                      datasets={datasets}
+                      validation={formValidation.darErrors}
+                      formValidationChange={(val) => formValidationChange('darErrors', val)}
+                      dataUseTranslations={dataUseTranslations}
+                      formFieldChange={formFieldChange}
+                      batchFormFieldChange={batchFormFieldChange}
+                      uploadedCollaborationLetter={uploadedCollaborationLetter}
+                      updateCollaborationLetter={updateCollaborationLetter}
+                      uploadedIrbDocument={uploadedIrbDocument}
+                      updateUploadedIrbDocument={updateIrbDocument}
+                      setDatasets={setDatasets}
+                      setSelectedDatasets={setSelectedDatasets}
+                      draftDar={props.draftDar}
                   />
                 </ConditionalAccordian>
               </div>
 
-              <div className='step-container'>
+              <div className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
                 <ConditionalAccordian
                     condition={props.readOnlyMode}
                     title="Step 3: Research Purpose Statement">
                   <ResearchPurposeStatement
-                    darCode={formData.darCode}
-                    readOnlyMode={props.readOnlyMode || isAttested}
-                    validation={formValidation.rusErrors}
-                    formValidationChange={(val) => formValidationChange('rusErrors', val)}
-                    formFieldChange={formFieldChange}
-                    formData={formData}
+                      darCode={formData.darCode}
+                      readOnlyMode={props.readOnlyMode || isAttested}
+                      validation={formValidation.rusErrors}
+                      formValidationChange={(val) => formValidationChange('rusErrors', val)}
+                      formFieldChange={formFieldChange}
+                      formData={formData}
                   />
                 </ConditionalAccordian>
               </div>
 
               {!props.readOnlyMode ?
-                <div className='step-container'>
+                  <div className='step-container'>
                   {DAAUtils.isEnabled() ?
                     <DataAccessAgreements
                       datasets={selectedDatasets}
