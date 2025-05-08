@@ -51,7 +51,7 @@ export const ScrollableTabs = ({ applicationTabs, formSelectedTabId }: Scrollabl
         }
     };
 
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll);  // eslint-disable-line -- codacy says event listeners are dangerous
 
     return (
         <div className='multi-step-buttons-container'>

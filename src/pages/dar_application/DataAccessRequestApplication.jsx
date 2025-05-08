@@ -304,7 +304,7 @@ const DataAccessRequestApplication = (props) => {
             return {name: itemLabel, id: `${DAR_UPDATE_TAB_ID_PREFIX}${whichPRIsThis}`, showStep: false};
           })]);
     }
-  }, [reverseOrderedDARs]);
+  }, [formData?.darCode, props.createProgressReport, props.readOnlyMode, reverseOrderedDARs]);
 
   useEffect(() => {
     init();
