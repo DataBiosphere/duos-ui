@@ -1,13 +1,17 @@
 import * as React from 'react';
 import { isEmpty, capitalize, isUndefined } from 'lodash';
-import {DatasetTerm} from 'src/types/model';
+import { DatasetTerm } from 'src/types/model';
 import SimpleTable from '../SimpleTable';
-import {Styles} from '../../libs/theme';
+import { Styles } from '../../libs/theme';
 import {
   type CellData,
   DatasetSearchTableTab,
 } from './DatasetSearchTableConstants';
-import {SnapshotSummaryModel} from '../../types/tdrModel';
+import { SnapshotSummaryModel } from '../../types/tdrModel';
+import { Storage } from '../../libs/storage';
+
+// Storage key for persisting sort preferences
+const storageDatasetSearchSort = 'storageDatasetSearchSort';
 
 const styles = {
   baseStyle: {
@@ -40,8 +44,7 @@ const styles = {
   containerOverride: {}
 };
 
-
-interface DatasetSearchTableDisplayProps{
+interface DatasetSearchTableDisplayProps {
   onSelect: (newSelectedIds: number[]) => void;
   filteredData: DatasetTerm[];
   selected: number[];
@@ -61,11 +64,25 @@ const isMissingValue = (value: CellData['value']): boolean => {
     value === '--'
 };
 
+// Get the sort configuration for the active tab
+const getSortForTab = (tabKey: string): Sort => {
+  const storageKey = `${storageDatasetSearchSort}_${tabKey}`;
+  const savedSort = Storage.getCurrentUserSettings(storageKey);
+
+  if (savedSort) {
+    return {
+      colIndex: savedSort.colIndex,
+      dir: savedSort.dir
+    };
+  }
+
+  return { colIndex: -1, dir: 1 };
+};
+
 export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps) => {
   const { onSelect, exportableDatasets, filteredData, selected, tab } = props;
-  const [sort, setSort] = React.useState<Sort>({ colIndex: -1, dir: 1 });
+  const [sort, setSort] = React.useState<Sort>(getSortForTab(tab.key));
   const headers = tab.makeHeaders(filteredData, selected, onSelect, exportableDatasets);
-
 
   const sortData = React.useCallback((data: CellData[][], sortState: Sort) => {
     if (sortState.colIndex < 0) return data;
@@ -81,7 +98,6 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
       const bValue = b[colIndex]?.value;
 
       // Always sort empty values to the bottom regardless of sort direction
-      // This includes undefined, empty strings, and placeholder values like "--"
       const aIsEmpty = isMissingValue(aValue);
       const bIsEmpty = isMissingValue(bValue);
 
@@ -106,14 +122,18 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     });
   }, [headers]);
 
-
   const rowData = React.useMemo(() => {
     const baseData = tab.makeRows(filteredData, headers);
     return sortData(baseData, sort);
   }, [filteredData, headers, sort, sortData, tab]);
 
-  const handleSort = (sort: Sort) => {
-    setSort(sort);
+  const handleSort = (newSort: Sort) => {
+    const storageKey = `${storageDatasetSearchSort}_${tab.key}`;
+    Storage.setCurrentUserSettings(storageKey, {
+      colIndex: newSort.colIndex,
+      dir: newSort.dir
+    });
+    setSort(newSort);
   };
 
   return <>
@@ -125,7 +145,7 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
     </div>
     {
       isEmpty(filteredData) ?
-        <div style={{fontWeight: 600, marginTop: '0.5rem'}}>There are no {tab.plural} that fit these criteria.</div> :
+        <div style={{ fontWeight: 600, marginTop: '0.5rem' }}>There are no {tab.plural} that fit these criteria.</div> :
         <SimpleTable
           rowData={rowData}
           columnHeaders={headers}
