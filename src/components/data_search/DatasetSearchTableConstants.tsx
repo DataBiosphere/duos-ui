@@ -38,7 +38,7 @@ const makeRowStyle = (width: string | number): React.CSSProperties => ({
 
 const trimNewlineCharacters = (str: string): string => str?.replace( /[\r\n]+/gm, '');
 
-interface CellData{
+export interface CellData{
   data: string | React.ReactElement;
   value: string | React.ReactElement;
   id: string;
