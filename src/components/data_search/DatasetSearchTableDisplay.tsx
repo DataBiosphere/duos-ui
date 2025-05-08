@@ -55,7 +55,7 @@ interface Sort {
 }
 
 // Helper function to check if a value should be treated as empty/undefined
-const isEffectivelyEmpty = (value: CellData['value']): boolean => {
+const isMissingValue = (value: CellData['value']): boolean => {
   return isUndefined(value) ||
     isEmpty(value) ||
     value === '--'
@@ -82,16 +82,14 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
 
       // Always sort empty values to the bottom regardless of sort direction
       // This includes undefined, empty strings, and placeholder values like "--"
-      const aIsEmpty = isEffectivelyEmpty(aValue);
-      const bIsEmpty = isEffectivelyEmpty(bValue);
+      const aIsEmpty = isMissingValue(aValue);
+      const bIsEmpty = isMissingValue(bValue);
 
       if (aIsEmpty && bIsEmpty) return 0;
       if (aIsEmpty) return 1; // Move 'a' to the bottom when it's empty
       if (bIsEmpty) return -1; // Move 'b' to the bottom when it's empty
 
-      // For normal values, apply sort direction based on value type
       if (isNumericColumn) {
-        // Numeric comparison for participant columns
         const numA = Number(aValue);
         const numB = Number(bValue);
 
@@ -99,7 +97,6 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
         if (isNaN(numA) && isNaN(numB)) return 0;
         if (isNaN(numA)) return 1; // Treat NaN like undefined, to the bottom
         if (isNaN(numB)) return -1; // Treat NaN like undefined, to the bottom
-
 
         return (numA - numB) * sortState.dir;
       }
