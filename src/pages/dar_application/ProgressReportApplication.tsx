@@ -7,7 +7,7 @@ type ProgressReportApplicationProps = {
 };
 export const ProgressReportApplication = ({dar, readOnlyMode=true}: ProgressReportApplicationProps) => {
     return (
-        <div className={readOnlyMode ? 'accordian-step-container' : 'step-container'}>
+        <div className={readOnlyMode ? 'accordion-step-container' : 'step-container'}>
             {!readOnlyMode && <h3>Submit a progress report</h3>}
                 {/*TODO we'll want each of these to be components that accept a 'readOnly' flag*/}
                 <div>

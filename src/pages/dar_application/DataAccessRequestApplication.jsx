@@ -33,7 +33,7 @@ import eventList from '../../libs/events';
 import ReactMarkdown from 'react-markdown';
 import {SpinnerComponent} from "../../components/SpinnerComponent.jsx";
 import loadingImage from "../../images/loading-indicator.svg";
-import {ConditionalAccordian} from "../../components/forms/ConditionalAccordian";
+import {ConditionalAccordion} from "../../components/forms/ConditionalAccordion.js";
 import {ProgressReportApplication} from "./ProgressReportApplication";
 import {ScrollableTabs} from "./ScrollableTabs";
 
@@ -568,11 +568,11 @@ const DataAccessRequestApplication = (props) => {
 
             {props.createProgressReport && (
                 <div id={PROGRESS_REPORT_APPLICATION_TAB_ID} className='dar-steps'>
-                  <ConditionalAccordian
+                  <ConditionalAccordion
                       condition={false}
                       title={`DAR Report ${reverseOrderedDARs.length}`}>
                     <ProgressReportApplication readOnlyMode={false}/>
-                  </ConditionalAccordian>
+                  </ConditionalAccordion>
                 </div>
             )}
             {props.readOnlyMode && reverseOrderedDARs.length > 1  && (
@@ -582,13 +582,13 @@ const DataAccessRequestApplication = (props) => {
                     if ((index + 1 !== reverseOrderedDARs.length)) {
                       return (
                           <div key={`dar-${index}`} id={`${DAR_UPDATE_TAB_ID_PREFIX}${reverseOrderedDARs.length - index - 1}`}>
-                            <ConditionalAccordian
+                            <ConditionalAccordion
                                 key={`dar-${index}`}
                                 condition={true}
                                 title={`DAR Report ${reverseOrderedDARs.length - index - 1}`}
                                 defaultExpanded={index === 0}>
                               <ProgressReportApplication readOnlyMode={true} dar={dar?.data}  />
-                            </ConditionalAccordian>
+                            </ConditionalAccordion>
                           </div>);
                     }
                   })
@@ -598,8 +598,8 @@ const DataAccessRequestApplication = (props) => {
 
             <div id={`${DAR_UPDATE_TAB_ID_PREFIX}-0`} className={props.readOnlyMode ? 'dar-summary' : 'dar-steps'}>
               {props.readOnlyMode && (<h3>{formData.darCode} Summary</h3>)}
-              <div id={RESEARCHER_INFO_TAB_ID} className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
-                <ConditionalAccordian
+              <div id={RESEARCHER_INFO_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
                     condition={props.readOnlyMode}
                     title="Step 1: Researcher Information"
                     defaultExpanded={reverseOrderedDARs.length === 1}>
@@ -623,11 +623,11 @@ const DataAccessRequestApplication = (props) => {
                   setInternalCollaboratorsCompleted={setInternalCollaboratorsCompleted}
                   setExternalCollaboratorsCompleted={setExternalCollaboratorsCompleted}
                 />
-                  </ConditionalAccordian>
+                  </ConditionalAccordion>
               </div>
 
-              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
-                <ConditionalAccordian
+              <div id={DATA_ACCESS_REQUEST_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
                     condition={props.readOnlyMode}
                     title="Step 2: Data Access Request">
                   <DataAccessRequest
@@ -648,11 +648,11 @@ const DataAccessRequestApplication = (props) => {
                       setSelectedDatasets={setSelectedDatasets}
                       draftDar={props.draftDar}
                   />
-                </ConditionalAccordian>
+                </ConditionalAccordion>
               </div>
 
-              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={props.readOnlyMode ? 'accordian-step-container' : 'step-container'}>
-                <ConditionalAccordian
+              <div id={RESEARCH_PURPOSE_STATEMENT_TAB_ID} className={props.readOnlyMode ? 'accordion-step-container' : 'step-container'}>
+                <ConditionalAccordion
                     condition={props.readOnlyMode}
                     title="Step 3: Research Purpose Statement">
                   <ResearchPurposeStatement
@@ -663,7 +663,7 @@ const DataAccessRequestApplication = (props) => {
                       formFieldChange={formFieldChange}
                       formData={formData}
                   />
-                </ConditionalAccordian>
+                </ConditionalAccordion>
               </div>
 
               {!props.readOnlyMode ?

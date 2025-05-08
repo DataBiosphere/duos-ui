@@ -62,7 +62,7 @@ export default function ResearchPurposeStatement(props) {
   };
 
   return (
-    <div className={readOnlyMode ? 'dar-accordian-step-card' : 'dar-step-card'}>
+    <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
       <fieldset disabled={!isEmpty(darCode)}>
 
         <div className="form-group">

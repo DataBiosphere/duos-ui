@@ -2,13 +2,13 @@ import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import React from "react";
 
-type ConditionalAccordianProps = {
+type ConditionalAccordionProps = {
     condition: boolean,
     title: string,
     defaultExpanded?: boolean,
     children: React.ReactNode
 };
-export const ConditionalAccordian = ({ condition, title, defaultExpanded=false, children }: ConditionalAccordianProps) => (
+export const ConditionalAccordion = ({ condition, title, defaultExpanded=false, children }: ConditionalAccordionProps) => (
     condition ? (
         <Accordion
             sx={{ 'backgroundColor': '#b8cdd326', 'margin': '16px 0' }}

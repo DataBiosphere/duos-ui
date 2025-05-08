@@ -63,7 +63,7 @@ export default function ResearcherInfo(props) {
 
   return (
     <div data-cy='researcher-info'>
-      <div className={readOnlyMode ? 'dar-accordian-step-card' : 'dar-step-card'}>
+      <div className={readOnlyMode ? 'dar-accordion-step-card' : 'dar-step-card'}>
         {(completed === false || libraryCardReqSatisfied === false) && (
           <div data-cy='researcher-info-profile-submitted'>
             {!readOnlyMode && (
