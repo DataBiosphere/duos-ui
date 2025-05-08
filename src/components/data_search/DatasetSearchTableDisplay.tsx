@@ -55,9 +55,9 @@ interface Sort {
 }
 
 // Helper function to check if a value should be treated as empty/undefined
-const isEffectivelyEmpty = (value: any): boolean => {
+const isEffectivelyEmpty = (value: CellData['value']): boolean => {
   return isUndefined(value) ||
-    value === '' ||
+    isEmpty(value) ||
     value === '--'
 };
 
@@ -68,6 +68,8 @@ export const DatasetSearchTableDisplay = (props: DatasetSearchTableDisplayProps)
 
 
   const sortData = React.useCallback((data: CellData[][], sortState: Sort) => {
+    if (sortState.colIndex < 0) return data;
+
     const colIndex = sortState.colIndex;
     const columnLabel = headers[colIndex]?.label;
 
