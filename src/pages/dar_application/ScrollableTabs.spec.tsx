@@ -33,12 +33,6 @@ describe('ScrollableTabs Component - Tests', () => {
     });
 
     it('Case 2 - Auto-scroll to section on scroll', () => {
-        cy.get('.Mui-selected').contains('Researcher Information').should('exist');
-        cy.get('.Mui-selected').contains('Data Access Request').should('not.exist');
-        cy.window().then(($window) => {
-            expect($window.scrollY).to.be.closeTo(0, 10);
-        });
-
         cy.scrollTo(0, 2000);
         cy.get('.Mui-selected').contains('Research Purpose Statement').should('exist');
         cy.window().then(($window) => {
@@ -47,19 +41,20 @@ describe('ScrollableTabs Component - Tests', () => {
 
     });
 
-    it('Case 3 - Auto-scroll to section on selecting a new tab', () => {
+    it('Case 3 - Start at top of page', () => {
         cy.get('.Mui-selected').contains('Researcher Information').should('exist');
         cy.get('.Mui-selected').contains('Research Purpose Statement').should('not.exist');
         cy.window().then(($window) => {
             expect($window.scrollY).to.be.closeTo(0, 10);
         });
+    });
 
+    it('Case 3 - Auto-scroll to section on selecting a new tab', () => {
         cy.get('button').contains('Research Purpose Statement').click();
         cy.get('.Mui-selected').contains('Research Purpose Statement').should('exist');
         cy.window().then(($window) => {
             expect($window.scrollY).to.be.closeTo(2000, 500);
         });
-
     });
 
     it('Case 3 - First tab selected by default and can click and select another tab', () => {
