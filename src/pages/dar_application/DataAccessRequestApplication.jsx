@@ -136,7 +136,7 @@ const DataAccessRequestApplication = (props) => {
   const [showDialogSave, setShowDialogSave] = useState(false);
   const [showDialogSubmit, setShowDialogSubmit] = useState(false);
 
-  const [step, setStep] = useState(undefined);
+  const [tab, setTab] = useState(undefined);
   const [notificationData, setNotificationData] = useState(undefined);
 
   const [researcher, setResearcher] = useState({});
@@ -334,13 +334,13 @@ const DataAccessRequestApplication = (props) => {
 
   const scrollToFormErrors = (validation, eraCommonsIdValid, hasLibraryCard) => {
     if (!isEmpty(validation.researcherInfoErrors) || !eraCommonsIdValid || !hasLibraryCard) {
-      setStep(RESEARCHER_INFO_TAB_ID);
+      setTab(RESEARCHER_INFO_TAB_ID);
     } else if (!isEmpty(validation.darErrors)) {
-      setStep(DATA_ACCESS_REQUEST_TAB_ID);
+      setTab(DATA_ACCESS_REQUEST_TAB_ID);
     } else if (!isEmpty(validation.rusErrors)) {
-      setStep(RESEARCH_PURPOSE_STATEMENT_TAB_ID);
+      setTab(RESEARCH_PURPOSE_STATEMENT_TAB_ID);
     } else {
-      setStep(RESEARCHER_INFO_TAB_ID);
+      setTab(RESEARCHER_INFO_TAB_ID);
     }
   };
 
@@ -354,9 +354,9 @@ const DataAccessRequestApplication = (props) => {
 
   const goToDucAddendum = useCallback(async () => {
     if (isAttested) {
-      setStep(ADDENDUM_TAB_ID);
+      setTab(ADDENDUM_TAB_ID);
     }
-  }, [setStep, isAttested]);
+  }, [setTab, isAttested]);
 
   const attemptSubmit = async () => {
     const validation = validateDARFormData({
@@ -546,7 +546,7 @@ const DataAccessRequestApplication = (props) => {
 
         <div style={{ clear: 'both' }} />
         <form name='form' noValidate={true} className='forms-v2'>
-            <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={step}/>
+            <ScrollableTabs applicationTabs={applicationTabs} formSelectedTabId={tab}/>
 
           <div id='form-views'>
             <ConfirmationDialog
